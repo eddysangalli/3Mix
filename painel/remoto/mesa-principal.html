@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3Mix · Mesa principal</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#202020;color:#ededed;font:14px 'Segoe UI',sans-serif;display:grid;place-items:center;min-height:100vh;padding:24px}main{max-width:560px;padding:28px;border:1px solid #494949;border-radius:6px;background:#262626}h1{font-size:22px;margin:0 0 12px}p{color:#bbb;line-height:1.6}button{color:#fff;background:#414141;border:1px solid #777;border-radius:4px;padding:10px 18px;font:inherit;cursor:pointer}button:hover{background:#555}
+</style>
+</head>
+<body><main><h1>3Mix · Uma única mesa</h1><p>A mesa de corte está na janela principal do 3Mix. Esta antiga demonstração foi retirada do fluxo de operação para não abrir uma segunda mesa.</p><button type="button" onclick="FreeMixClosePanel()">Voltar à mesa principal</button><p>Áudio, Replay e Configurações são módulos dessa mesma produção.</p></main><script src="fechar-janela.js"></script><script>if(new URLSearchParams(location.search).get('returnToDesk')==='1')FreeMixClosePanel();</script></body>
+</html>

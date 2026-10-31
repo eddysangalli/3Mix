@@ -1,1 +1,219 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FreeMix · Atalhos e controladores</title><link rel="stylesheet" href="controle.css"><link rel="stylesheet" href="studio-dialog.css"><style>main{max-width:none}.workspace{display:grid;grid-template-columns:280px 1fr;gap:10px}section{border-radius:0}table{background:white;color:#111;border-collapse:collapse;width:100%}td,th{padding:8px;text-align:left;border-bottom:1px solid #ddd}.fields{display:flex;gap:8px;flex-wrap:wrap;align-items:end}#status{white-space:pre-wrap}@media(max-width:800px){.workspace{grid-template-columns:1fr}}.workspace>*{min-width:0}input,select,textarea{min-width:0;max-width:100%}td,th{overflow-wrap:anywhere}table{table-layout:fixed}.fields>label{min-width:0;flex:1 1 140px}.fields>label>input,.fields>label>select,.fields>label>textarea{width:100%}pre{overflow-wrap:anywhere}#parameters-field{flex-basis:100%}#parameters{width:100%}button{max-width:100%;white-space:normal}@media(max-width:1000px){.workspace{grid-template-columns:1fr}}</style></head><body><header><a href="/">FreeMix</a><h1>Atalhos e controladores</h1><span id="connection">Conectando…</span></header><main><div class="workspace"><section><h2>Adicionar controle</h2><label>Nome<input id="name" maxlength="80" placeholder="Preparar câmera 2"></label><label>Tipo<select id="type"><option value="keyboard">Teclado</option><option value="midi">MIDI</option></select></label><div id="keyboard"><button id="learn-key">Aprender tecla</button><label><input id="global" type="checkbox"> Global (funciona sem foco no FreeMix)</label><p id="global-status"></p><input id="key" readonly placeholder="Clique Aprender e pressione a tecla"></div><div id="midi" hidden><button id="connect-midi">Conectar MIDI</button><button id="learn-midi">Aprender nota / controle</button><p id="devices"></p><label><input id="continuous" type="checkbox"> Controlador contínuo de volume</label></div><p id="learned"></p><label>Ação<select id="action"><option value="preview">Preparar Preview</option><option value="cut">Cut</option><option value="fade">Fade</option><option value="active">Programa direto</option><option value="overlay">Overlay</option><option value="audio_mute">Áudio ligado/desligado</option><option value="audio_volume">Volume</option><option value="audio_bus">Barramento</option><option value="media">Mídia</option><option value="macro_run">Executar macro</option><option value="talkback">Talkback — segurar para falar</option></select></label><label id="input-field">Entrada<select id="input"></select></label><label id="macro-field" hidden>Macro<select id="macro"></select></label><label id="value-field">Valor<input id="value" type="number" value="500"></label><label id="bus-field" hidden>Barramento<select id="bus"><option>M</option><option>A</option><option>B</option></select></label><label id="toggle-field" hidden>Estado<select id="toggle"><option value="true">Ligado</option><option value="false">Desligado</option></select></label><label id="command-field" hidden>Mídia<select id="command"><option>PLAY</option><option>PAUSE</option><option>STOP</option><option>RESTART</option><option>NEXT</option><option>PREVIOUS</option></select></label><label><input id="feedback-midi" type="checkbox"> Enviar feedback para saída MIDI</label><fieldset id="feedback-fields" hidden><legend>Estado confirmado → dispositivo MIDI</legend><button id="connect-midi-feedback">Conectar portas MIDI</button><label>Saída MIDI<select id="midi-output"></select></label><label>Mensagem<select id="midi-feedback-message"><option value="note">Nota / LED</option><option value="cc">CC / fader</option></select></label><label>Canal<input id="midi-feedback-channel" type="number" min="1" max="16" value="1"></label><label>Número<input id="midi-feedback-number" type="number" min="0" max="127" value="0"></label><label>Valor confirmado<select id="midi-feedback-value"><option value="active">Ação ativa / inativa</option><option value="volume">Volume confirmado (0–127)</option></select></label><label>Valor ativo<input id="midi-feedback-on" type="number" min="0" max="127" value="127"></label><label>Valor inativo<input id="midi-feedback-off" type="number" min="0" max="127" value="0"></label></fieldset><label><input id="enabled" type="checkbox" checked> Ativado</label><button id="save" class="on">Salvar atalho</button><button id="new">Novo</button><p id="status" role="status"></p></section><section><h2>Controles desta produção</h2><details><summary>OSC local bidirecional</summary><label>Porta UDP localhost<input id="osc-port" type="number" min="1024" max="65535" value="19120"></label><button id="osc-configure">Salvar porta OSC</button><button id="osc-start">Iniciar OSC</button><button id="osc-stop">Parar OSC</button><pre id="osc-status" style="white-space:pre-wrap"></pre><p>OSC só escuta 127.0.0.1 e não inicia automaticamente. /freemix/fire recebe ID salvo, down/up e valor opcional 0–127; /freemix/subscribe recebe 1 para feedback, 0 para parar. /freemix/read recebe ID opcional. Subscribe precisa ser renovado em até 10 segundos. Talkback usa up ao soltar e /freemix/hold sem argumentos a cada 350 ms. Sem bundles nem comandos arbitrários.</p></details><button id="http-recipe">Configurar integração HTTP</button><pre id="http-recipe-output" style="white-space:pre-wrap"></pre><table><thead><tr><th>Nome</th><th>Tecla / MIDI</th><th>Ação</th><th>Estado real</th><th></th></tr></thead><tbody id="items"></tbody></table><p>Teclado funciona com a mesa ou esta janela focada. Campos de texto não acionam atalhos. Talkback precisa do mic e retorno preparados em Calls; soltar a tecla, mudar de janela ou perder o heartbeat fecha o mic privado.</p><p>Feedback mostra o estado confirmado pelo motor. MIDI Learn e retorno MIDI exigem Web MIDI, contexto seguro (HTTPS ou localhost), permissão, portas conectadas e janela focada. O CEF integrado pode não disponibilizar a API ou a permissão; nesse caso use esta tela em um navegador compatível. O retorno é mapeado explicitamente; não usa SysEx. LED/CC e fader físicos ainda precisam de homologação do dispositivo. Controladores externos podem usar /api/control com controller_fire e ID salvo; isso não constitui um plugin oficial Stream Deck/Companion.</p></section></div></main><script src="controle.js"></script><script src="midi-feedback.js"></script><script src="atalhos-engine.js"></script><script src="atalhos.js"></script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Atalhos e Controladores</title>
+<link rel="stylesheet" href="3mix-tipografia.css">
+<link rel="stylesheet" href="vmix-dialogo.css">
+<style>
+/* Escala 3Mix para esta janela. O seletor tem data-page para que o mesmo
+   vmix-dialogo.css continue intacto em Configurações e Replay, que têm
+   agentes e escala próprios. Tokens em 3mix-tipografia.css. */
+body.vd[data-page="atalhos"] .vd-status table { width: 100%; border-collapse: collapse; }
+body.vd[data-page="atalhos"] .vd-status th,
+body.vd[data-page="atalhos"] .vd-status td { padding: 8px 10px; border: 1px solid #39444d; text-align: left; font-size: 12.5px; line-height: 1.4; }
+body.vd[data-page="atalhos"] .vd-status th { background: #26303a; font-weight: 700; position: sticky; top: 0; z-index: 1; font-size: 11.5px; }
+body.vd[data-page="atalhos"] .vd-status td button { height: 30px; font-size: 12px; padding: 0 7px; min-width: 50px; margin-right: 4px; }
+body.vd[data-page="atalhos"] details summary { cursor: pointer; font-weight: 700; color: #fff; padding: 6px 0; outline: none; font-size: 13.5px; }
+body.vd[data-page="atalhos"] details summary:hover { color: #1e7fd6; }
+body.vd[data-page="atalhos"] fieldset { border: 1px solid #39444d; padding: 10px 12px; margin: 6px 0; background: #12171b; }
+body.vd[data-page="atalhos"] fieldset legend { font-weight: 700; font-size: 12px; color: #9aa6b0; padding: 0 6px; }
+
+body.vd[data-page="atalhos"] { font-size: var(--fs-body); }
+body.vd[data-page="atalhos"] .vd-title { font-size: 17px; }
+body.vd[data-page="atalhos"] .vd-body { padding: 14px 16px; gap: 14px; }
+body.vd[data-page="atalhos"] .vd-row { grid-template-columns: 150px minmax(0, 1fr) auto; min-height: 36px; }
+body.vd[data-page="atalhos"] .vd-row > span:first-child { font-size: 13px; }
+body.vd[data-page="atalhos"] .vd-inline { gap: 10px; }
+body.vd[data-page="atalhos"] input[type=text],
+body.vd[data-page="atalhos"] input[type=number],
+body.vd[data-page="atalhos"] input:not([type]),
+body.vd[data-page="atalhos"] select { height: 36px; padding: 0 10px; font-size: 13px; }
+body.vd[data-page="atalhos"] button { height: 36px; min-width: 84px; padding: 0 14px; font-size: 13px; }
+body.vd[data-page="atalhos"] .vd-bar { padding: 10px 16px; }
+body.vd[data-page="atalhos"] .vd-bar button { height: 40px; min-width: 130px; font-size: 13px; }
+body.vd[data-page="atalhos"] .vd-check { font-size: 13px; gap: 8px; }
+body.vd[data-page="atalhos"] .vd-note,
+body.vd[data-page="atalhos"] .vd-msg { font-size: 12px; line-height: 1.45; }
+body.vd[data-page="atalhos"] pre { font-size: 11.5px !important; line-height: 1.45; }
+body.vd[data-page="atalhos"] .vd-status { border-radius: 6px; }
+</style>
+</head>
+<body data-page="atalhos" class="vd" data-tipografia="3mix">
+<div class="vd-window vd-fill">
+  <div class="vd-strip">
+    <span class="vd-title">Atalhos</span>
+    <span class="vd-flex"></span>
+    <span id="connection" class="vd-note">Conectando…</span>
+  </div>
+
+  <div class="vd-status vd-grow" style="margin: 6px 12px; min-height: 180px; overflow: auto;">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:18%">Nome</th>
+          <th style="width:24%">Tecla / MIDI</th>
+          <th style="width:24%">Ação / Função</th>
+          <th style="width:16%">Estado Real</th>
+          <th style="width:18%">Comandos</th>
+        </tr>
+      </thead>
+      <tbody id="items"></tbody>
+    </table>
+  </div>
+
+  <div class="vd-body" style="padding-top:2px">
+    <div class="vd-row">
+      <span>Editar Atalho</span>
+      <div class="vd-inline" style="flex:1">
+        <input id="name" maxlength="80" placeholder="Nome do atalho (ex: Preparar Câmera 2)" spellcheck="false" style="max-width:260px">
+        <select id="type" class="vd-short" style="width:110px">
+          <option value="keyboard">Teclado</option>
+          <option value="midi">MIDI</option>
+        </select>
+        <label class="vd-check"><input id="enabled" type="checkbox" checked> Ativado</label>
+      </div>
+    </div>
+
+    <!-- Seção Teclado -->
+    <div id="keyboard" class="vd-row">
+      <span>Tecla</span>
+      <div class="vd-inline" style="flex:1">
+        <button id="learn-key">Aprender Tecla</button>
+        <input id="key" readonly placeholder="Clique Aprender e pressione a tecla" style="max-width:240px">
+        <label class="vd-check"><input id="global" type="checkbox"> Global (fora do foco)</label>
+        <span id="global-status" class="vd-note"></span>
+      </div>
+    </div>
+
+    <!-- Seção MIDI -->
+    <div id="midi" class="vd-row" hidden>
+      <span>MIDI</span>
+      <div class="vd-inline" style="flex:1">
+        <button id="connect-midi">Conectar MIDI</button>
+        <button id="learn-midi">Aprender Nota/CC</button>
+        <label class="vd-check"><input id="continuous" type="checkbox"> Fader Contínuo (Volume)</label>
+        <span id="devices" class="vd-note"></span>
+      </div>
+    </div>
+
+    <div class="vd-row">
+      <span>Gatilho</span>
+      <div class="vd-inline">
+        <span id="learned" class="vd-note" style="font-weight:700;color:#7fe08f">Não aprendido</span>
+      </div>
+    </div>
+
+    <div class="vd-row">
+      <span>Função</span>
+      <div class="vd-inline" style="flex-wrap:wrap;gap:6px">
+        <select id="action" class="vd-short" style="width:170px">
+          <option value="preview">Preparar Preview</option>
+          <option value="cut">Corte Direto (Cut)</option>
+          <option value="fade">Transição Suave (Fade)</option>
+          <option value="active">Programa Direto</option>
+          <option value="overlay">Canal de Overlay</option>
+          <option value="audio_mute">Mute de Áudio</option>
+          <option value="audio_volume">Volume de Áudio</option>
+          <option value="audio_bus">Barramento de Áudio</option>
+          <option value="media">Controle de Mídia</option>
+          <option value="macro_run">Executar Macro</option>
+          <option value="talkback">Talkback (Segurar)</option>
+        </select>
+
+        <label id="input-field" class="vd-inline" style="gap:4px">
+          <span style="font-weight:700">Entrada:</span>
+          <select id="input" style="max-width:200px"></select>
+        </label>
+
+        <label id="macro-field" class="vd-inline" style="gap:4px" hidden>
+          <span style="font-weight:700">Macro:</span>
+          <select id="macro" style="max-width:180px"></select>
+        </label>
+
+        <label id="value-field" class="vd-inline" style="gap:4px">
+          <span style="font-weight:700">Valor/Duração:</span>
+          <input id="value" type="number" value="500" style="width:65px">
+        </label>
+
+        <label id="bus-field" class="vd-inline" style="gap:4px" hidden>
+          <span style="font-weight:700">Bus:</span>
+          <select id="bus" style="width:60px"><option>M</option><option>A</option><option>B</option></select>
+        </label>
+
+        <label id="toggle-field" class="vd-inline" style="gap:4px" hidden>
+          <span style="font-weight:700">Estado:</span>
+          <select id="toggle" style="width:90px"><option value="true">Ligado</option><option value="false">Desligado</option></select>
+        </label>
+
+        <label id="command-field" class="vd-inline" style="gap:4px" hidden>
+          <span style="font-weight:700">Comando:</span>
+          <select id="command" style="width:100px">
+            <option>PLAY</option>
+            <option>PAUSE</option>
+            <option>STOP</option>
+            <option>RESTART</option>
+            <option>NEXT</option>
+            <option>PREVIOUS</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <!-- Feedback MIDI & Integrações Avançadas -->
+    <details class="vd-advanced" style="margin-top:6px">
+      <summary>Feedback MIDI / Tally LED e Protocolo OSC</summary>
+      <div class="vd-row">
+        <span>Feedback MIDI</span>
+        <div class="vd-inline">
+          <label class="vd-check"><input id="feedback-midi" type="checkbox"> Enviar feedback/tally para LED ou fader motorizado</label>
+          <button id="connect-midi-feedback">Conectar Portas</button>
+        </div>
+      </div>
+
+      <fieldset id="feedback-fields" hidden>
+        <legend>Mapeamento de Saída MIDI</legend>
+        <div class="vd-inline" style="flex-wrap:wrap;gap:8px">
+          <label class="vd-inline" style="gap:4px">Porta: <select id="midi-output" style="max-width:160px"></select></label>
+          <label class="vd-inline" style="gap:4px">Tipo: <select id="midi-feedback-message"><option value="note">Nota / LED</option><option value="cc">CC / Fader</option></select></label>
+          <label class="vd-inline" style="gap:4px">Canal: <input id="midi-feedback-channel" type="number" min="1" max="16" value="1" style="width:45px"></label>
+          <label class="vd-inline" style="gap:4px">Número: <input id="midi-feedback-number" type="number" min="0" max="127" value="0" style="width:45px"></label>
+          <label class="vd-inline" style="gap:4px">Valor: <select id="midi-feedback-value"><option value="active">Ativo / Inativo</option><option value="volume">Volume (0-127)</option></select></label>
+          <label class="vd-inline" style="gap:4px">On: <input id="midi-feedback-on" type="number" min="0" max="127" value="127" style="width:45px"></label>
+          <label class="vd-inline" style="gap:4px">Off: <input id="midi-feedback-off" type="number" min="0" max="127" value="0" style="width:45px"></label>
+        </div>
+      </fieldset>
+
+      <div class="vd-row" style="margin-top:6px">
+        <span>Protocolo OSC</span>
+        <div class="vd-inline">
+          Porta UDP: <input id="osc-port" type="number" min="1024" max="65535" value="19120" style="width:70px">
+          <button id="osc-configure">Salvar Porta</button>
+          <button id="osc-start">Iniciar OSC</button>
+          <button id="osc-stop">Parar OSC</button>
+          <button id="http-recipe">Receita HTTP</button>
+        </div>
+      </div>
+      <pre id="osc-status" style="white-space:pre-wrap;margin:6px 0" hidden></pre>
+      <pre id="http-recipe-output" style="white-space:pre-wrap;margin:6px 0" hidden></pre>
+    </details>
+
+    <p id="status" class="vd-msg" role="status"></p>
+  </div>
+
+  <div class="vd-bar">
+    <button id="new">Novo Atalho</button>
+    <button id="save" class="vd-on">Salvar Atalho</button>
+    <span class="vd-flex"></span>
+    <button id="close-btn" onclick="window.FreeMixClosePanel ? window.FreeMixClosePanel() : window.close()">Fechar</button>
+  </div>
+</div>
+
+<script src="controle.js"></script>
+<script src="fechar-janela.js"></script>
+<script src="midi-feedback.js"></script>
+<script src="atalhos-engine.js"></script>
+<script src="atalhos.js"></script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+/* Componentes compartilhados das janelas operacionais — mesma paleta e tipografia da central de Configurações. */
+:root {
+  --jg-panel: #252525;
+  --jg-panel-2: #232323;
+  --jg-border: #414141;
+  --jg-border-soft: #353535;
+  --jg-field: #1d1d1d;
+  --jg-text: #ededed;
+  --jg-muted: #b0b0b0;
+  --jg-dim: #8d8d8d;
+  --jg-amber: #dca900;
+  --jg-green: #34d17b;
+  --jg-red: #ef5350;
+}
+html body.vd { background: #202020; color: var(--jg-text); font: 13px/1.45 "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; }
+.vd .vd-window, .vd .vd-body { background: var(--jg-panel); border-color: var(--jg-border); }
+.vd .vd-strip, .vd .vd-bar { background: #1c1c1c; border-color: var(--jg-border); }
+.vd .vd-title { font-size: 14px; font-weight: 800; letter-spacing: -.2px; }
+.vd .vd-row > span:first-child { font-size: 11.5px; font-weight: 700; color: #cfcfcf; }
+.vd button { height: 30px; background: linear-gradient(#3c3c3c, #2b2b2b); border: 1px solid #555; border-radius: 4px; color: #eee; font-weight: 600; }
+.vd button:hover:not(:disabled) { background: linear-gradient(#484848, #363636); border-color: #777; color: #fff; }
+.vd button:disabled { background: #242424; border-color: #3d3d3d; color: #777; }
+.vd .vd-bar button { height: 34px; }
+.vd input:not([type=checkbox]):not([type=range]), .vd select, .vd textarea { height: 32px; padding: 4px 9px; }
+.vd input:focus, .vd select:focus { border-color: #9a9a9a; box-shadow: 0 0 0 2px rgba(255, 255, 255, .07); }
+.vd .vd-note { color: #9a9a9a; }
+.vd .vd-msg { color: #c4c4c4; }
+.vd .vd-msg.vd-error { color: #ff9c92; }
+.vd .vd-msg.vd-ok { color: #8ee6b4; }
+.vd-card, .iso-card, .settings-card { background: var(--jg-panel); border-color: var(--jg-border); }
+.vd button.vd-on { background: linear-gradient(135deg, #2f6d40, #245732); border-color: #4f9a63; color: #fff; box-shadow: none; }
+.vd button.vd-on:hover:not(:disabled) { background: linear-gradient(135deg, #377f4b, #2b663b); border-color: #63b57a; }
+.vd button.vd-air { background: linear-gradient(135deg, #8a2b27, #6f211e); border-color: #c0504a; color: #fff; box-shadow: none; }
+.vd button.vd-air:hover:not(:disabled) { background: linear-gradient(135deg, #a0342f, #822824); border-color: #d9645c; }
+.vd button.vd-warn { background: linear-gradient(135deg, #7a5a12, #5f460d); border-color: #b98d22; color: #fff; }

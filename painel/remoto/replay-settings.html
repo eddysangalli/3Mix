@@ -5,180 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Configurações do Instant Replay</title>
   <link rel="stylesheet" href="vmix-dialogo.css">
-  <style>
-    /* Complementos de layout específicos para a casca com sidebar vMix */
-    html, body.vd {
-      margin: 0;
-      height: 100%;
-      overflow: hidden;
-    }
-    .vd-app-window {
-      width: 700px;
-      height: 540px;
-      display: flex;
-      flex-direction: column;
-      background: #1d2227;
-      color: #fff;
-      font: 12px/1.25 "Segoe UI", Tahoma, sans-serif;
-      box-sizing: border-box;
-      border: 1px solid #44515c;
-    }
-    .vd-main-layout {
-      flex: 1;
-      display: flex;
-      min-height: 0;
-      overflow: hidden;
-    }
-    .vd-sidebar {
-      width: 140px;
-      background: #0f1317;
-      border-right: 1px solid #333c44;
-      display: flex;
-      flex-direction: column;
-      padding: 0;
-      user-select: none;
-    }
-    .vd-sidebar-header {
-      padding: 8px 10px;
-      font-weight: 700;
-      font-size: 11px;
-      color: #9aa6b0;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      border-bottom: 1px solid #232a30;
-      background: #12171b;
-    }
-    .vd-tab-btn {
-      height: 38px;
-      border: none;
-      border-bottom: 1px solid #1a2228;
-      background: transparent;
-      color: #c9d1d8;
-      text-align: left;
-      padding: 0 12px;
-      font: 700 12px "Segoe UI", Tahoma, sans-serif;
-      cursor: default;
-      display: flex;
-      align-items: center;
-      transition: background 0.1s;
-    }
-    .vd-tab-btn:hover:not(.active) {
-      background: #182026;
-      color: #fff;
-    }
-    .vd-tab-btn.active {
-      background: #0b6f1a !important;
-      color: #fff !important;
-      border-left: 4px solid #2aa13e;
-      font-weight: 800;
-    }
-    .vd-content-area {
-      flex: 1;
-      padding: 12px 16px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      background: #1d2227;
-    }
-    .tab-panel {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .tab-panel[hidden] {
-      display: none !important;
-    }
-    /* Estilos dos slots de câmeras estilo vMix Session */
-    .cams-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px 12px;
-      background: #161a1e;
-      padding: 10px;
-      border: 1px solid #333c44;
-    }
-    .cam-slot-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .cam-badge {
-      width: 20px;
-      height: 20px;
-      background: #1f6feb;
-      color: #fff;
-      font-weight: 800;
-      font-size: 11px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 2px;
-      flex-shrink: 0;
-    }
-    .vd-banner-bar {
-      padding: 6px 10px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-radius: 2px;
-      font-size: 12px;
-    }
-    .vd-banner-idle {
-      background: #232a30;
-      color: #9aa6b0;
-      border: 1px solid #39444d;
-    }
-    .vd-banner-rec {
-      background: #b3140c;
-      color: #fff;
-      border: 1px solid #ff5a4f;
-    }
-    .vd-footer {
-      height: 46px;
-      background: #0d1115;
-      border-top: 1px solid #333c44;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 12px;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-    .vd-footer-left {
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .vd-footer-right {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-    }
-    .vd-link-nav {
-      color: #58a6ff;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 11px;
-      padding: 4px 8px;
-      border: 1px solid #30363d;
-      background: #161b22;
-      border-radius: 2px;
-    }
-    .vd-link-nav:hover {
-      background: #21262d;
-      text-decoration: underline;
-    }
-    .vd-field-hint {
-      font-size: 11px;
-      color: #8b949e;
-      margin-top: 2px;
-    }
-  </style>
+  <link rel="stylesheet" href="replay-settings-grafite.css">
 </head>
 <body class="vd" data-page="replay-settings">
   <div class="vd-app-window" role="dialog" aria-labelledby="dialog-title">
@@ -199,14 +26,14 @@
             <span>Pasta da Sessão</span>
             <input id="session-dir" type="text" readonly title="A pasta é determinada pela configuração de gravação do FreeMix">
           </div>
-          <div class="vd-field-hint" style="margin-left: 147px;">Subpasta fixa sob a pasta de gravação do motor (FreeMix / replay).</div>
+          <div class="vd-field-hint vd-indent">Subpasta fixa sob a pasta de gravação do motor (FreeMix / replay).</div>
 
           <div id="rec-banner" class="vd-banner-bar vd-banner-idle">
             <span id="rec-status-text">Gravação SSD Parada</span>
             <span id="rec-timer-text">00:00:00</span>
           </div>
 
-          <div class="vd-title" style="margin-top: 4px;">Câmeras da Gravação (1 a 8)</div>
+          <div class="vd-title">Câmeras da Gravação (1 a 8)</div>
           <div class="cams-grid" id="cams-grid">
             <div class="cam-slot-row">
               <span class="cam-badge">1</span>
@@ -243,8 +70,8 @@
           </div>
           <div class="vd-field-hint">Selecione até 8 entradas de vídeo com o REC parado. Com a gravação ativa, a lista reflete a sessão em disco.</div>
 
-          <div style="margin-top: 8px;">
-            <button id="btn-toggle-rec" type="button" style="height: 32px; min-width: 170px;">Iniciar gravação SSD</button>
+          <div class="vd-mt">
+            <button id="btn-toggle-rec" type="button">Iniciar gravação SSD</button>
           </div>
         </section>
 
@@ -261,18 +88,18 @@
           <div class="vd-row">
             <span>Janela (minutos)</span>
             <div class="vd-inline">
-              <input id="retention-minutes" type="number" min="2" max="1440" step="1" value="30" style="width: 90px;">
+              <input id="retention-minutes" type="number" min="2" max="1440" step="1" value="30">
               <span class="vd-note">minutos (2 a 1440)</span>
             </div>
           </div>
 
-          <div class="vd-msg" style="margin-left: 147px; color: #9aa6b0;">
+          <div class="vd-msg vd-indent">
             Os clipes salvos na lista de eventos são mantidos permanentemente no disco. Segmentos que contêm um ponto IN aberto na gravação ao vivo são protegidos da limpeza.
           </div>
 
-          <div style="margin-top: 10px; margin-left: 147px;">
+          <div class="vd-indent vd-mt">
             <button id="btn-save-retention" type="button">Aplicar Retenção</button>
-            <span class="vd-field-hint" style="display: block; margin-top: 4px;">A alteração de retenção exige REC parado.</span>
+            <div class="vd-field-hint">A alteração de retenção exige REC parado.</div>
           </div>
         </section>
 
@@ -286,7 +113,7 @@
             </div>
           </div>
 
-          <div class="vd-row" style="margin-top: 8px;">
+          <div class="vd-row">
             <span>Câmera</span>
             <select id="audio-cam-select" class="vd-short"></select>
           </div>
@@ -300,12 +127,12 @@
               <option value="bus-b">Bus B</option>
             </select>
           </div>
-          <div class="vd-field-hint" style="margin-left: 147px;">A escolha do áudio gravado exige REC parado.</div>
+          <div class="vd-field-hint vd-indent">A escolha do áudio gravado exige REC parado.</div>
 
           <div class="vd-row">
             <span>Volume (dB)</span>
             <div class="vd-inline">
-              <input id="audio-gain" type="number" min="-60" max="12" step="1" value="0" style="width: 80px;">
+              <input id="audio-gain" type="number" min="-60" max="12" step="1" value="0">
               <span class="vd-note">dB (-60 a +12)</span>
             </div>
           </div>
@@ -321,16 +148,16 @@
           <div class="vd-row">
             <span>Offset (quadros)</span>
             <div class="vd-inline">
-              <input id="camera-offset" type="number" min="-3600" max="3600" step="1" value="0" style="width: 80px;">
+              <input id="camera-offset" type="number" min="-3600" max="3600" step="1" value="0">
               <span class="vd-note">quadros (-3600 a +3600)</span>
             </div>
           </div>
 
-          <div style="margin-left: 147px; margin-top: 4px;">
+          <div class="vd-indent vd-mt-sm">
             <button id="btn-save-cam-audio" type="button">Aplicar Câmera</button>
           </div>
 
-          <div class="vd-advanced" style="margin-top: 10px;">
+          <div class="vd-advanced">
             <div class="vd-title">Alinhamento Automático</div>
             <div class="vd-inline">
               <button id="btn-auto-align" type="button">Alinhar pelo áudio comum</button>
@@ -347,7 +174,7 @@
     <!-- Rodapé Fixo -->
     <footer class="vd-footer">
       <div class="vd-footer-left">
-        <a href="/replay" class="vd-link-nav" title="Voltar ao console com timelines e players">← Operar Replay</a>
+        <a href="replay.html" class="vd-link-nav" title="Voltar ao console com timelines e players">← Operar Replay</a>
         <div id="status-msg" class="vd-msg" role="status">Conectando ao motor…</div>
       </div>
       <div class="vd-footer-right">
@@ -357,7 +184,7 @@
     </footer>
   </div>
 
-  <script src="/fechar-janela.js"></script>
-  <script src="/replay-settings.js"></script>
+  <script src="fechar-janela.js"></script>
+  <script src="replay-settings.js"></script>
 </body>
 </html>

@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3Mix Pro · Caixa-Preta de Incidentes (Blackbox)</title>
+<link rel="stylesheet" href="3mix-tipografia.css">
+<link rel="stylesheet" href="blackbox.css">
+</head>
+<body class="blackbox-body" data-tipografia="3mix">
+
+<header class="bb-top">
+  <div class="bb-brand"><img class="brand-logo" src="/img/3mix-logo.png" alt="3Mix" title="3Mix · Caixa-Preta"></div>
+  <nav class="bb-mods" aria-label="Módulo atual">
+    <span class="bb-mod active" aria-current="page">Caixa-Preta</span>
+  </nav>
+  <span class="bb-project" title="Projeto em uso">
+    Projeto: <b id="project-name">—</b><span class="bb-caret" aria-hidden="true">▾</span>
+  </span>
+  <div class="bb-top-right">
+    <div class="bb-win" aria-label="Controles da janela">
+      <button type="button" class="bb-wb" disabled title="Controle da janela pelo Windows">–</button>
+      <button type="button" class="bb-wb" disabled title="Controle da janela pelo Windows">□</button>
+      <button type="button" class="bb-wb close" id="win-close" title="Fechar janela" aria-label="Fechar janela"
+        onclick="window.FreeMixClosePanel ? window.FreeMixClosePanel() : (window.close ? window.close() : null)">×</button>
+    </div>
+  </div>
+</header>
+
+<main class="bb-main">
+  <section class="bb-pagehead">
+    <div>
+      <h1>CAIXA-PRETA DE INCIDENTES (BLACKBOX)
+        <span class="bb-ring-badge">RING BUFFER CIRCULAR 60s ATIVO</span>
+      </h1>
+      <p class="bb-sub">Gravação contínua de telemetria em ring buffer · snapshot instantâneo dos últimos 60 segundos</p>
+    </div>
+    <button type="button" class="bb-btn" id="btn-refresh" onclick="fetchBlackbox()"
+      aria-label="Atualizar os dados da caixa-preta">⟳ Atualizar</button>
+  </section>
+
+  <section class="bb-panel">
+    <h2>Telemetria do Ring Buffer Contínuo</h2>
+    <div class="bb-metrics">
+      <div class="bb-metric-box">
+        <div class="bb-metric-label">Buffer de Retenção</div>
+        <div class="bb-metric-val" id="val-buffer">60s</div>
+      </div>
+      <div class="bb-metric-box">
+        <div class="bb-metric-label">Amostras Registradas</div>
+        <div class="bb-metric-val" id="val-samples">-</div>
+      </div>
+      <div class="bb-metric-box">
+        <div class="bb-metric-label">Status da Gravação</div>
+        <div class="bb-metric-val" data-tone="ok">CIRCULAR</div>
+      </div>
+      <div class="bb-metric-box">
+        <div class="bb-metric-label">Snapshots Salvos</div>
+        <div class="bb-metric-val" id="val-snapshots">-</div>
+      </div>
+    </div>
+
+    <label class="bb-metric-label" for="incident-note">Anotação do operador</label>
+    <input type="text" id="incident-note" class="bb-note-input"
+      placeholder="Motivo / Anotação do incidente (Ex.: Áudio da CAM 2 cortou durante o VT; travamento no SRT)">
+    <button class="btn-panic" id="btn-trigger-snapshot">
+      ⚠ REGISTRAR INCIDENTE AGORA (SALVAR ÚLTIMOS 60 SEGUNDOS)
+    </button>
+    <p class="bb-status" id="bb-status" role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="bb-panel">
+    <h2>Histórico de Incidentes Salvos em Disco</h2>
+    <div class="bb-table-wrap">
+      <table class="bb-table">
+        <thead>
+          <tr>
+            <th style="width: 150px">Data / Hora</th>
+            <th style="width: 235px">ID</th>
+            <th style="width: 170px">Gatilho</th>
+            <th>Anotação do Operador</th>
+            <th style="width: 110px">Status</th>
+          </tr>
+        </thead>
+        <tbody id="incidents-body">
+          <tr>
+            <td colspan="5" class="bb-empty">Carregando histórico…</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<footer class="bb-footer">
+  <span class="bb-foot-brand">3Mix <small>Blackbox</small></span>
+  <span class="bb-foot-sep" aria-hidden="true"></span>
+  <span class="bb-foot-item">Ring buffer: <b id="foot-buffer">60s</b></span>
+  <span class="bb-foot-sep" aria-hidden="true"></span>
+  <span class="bb-foot-item">Amostras: <b id="foot-samples">—</b></span>
+  <span class="bb-foot-sep" aria-hidden="true"></span>
+  <span class="bb-foot-item">Snapshots: <b id="foot-snapshots">—</b></span>
+  <button type="button" id="close-btn" class="bb-close"
+    onclick="window.FreeMixClosePanel ? window.FreeMixClosePanel() : (window.close ? window.close() : null)">Fechar</button>
+</footer>
+
+<script src="fechar-janela.js"></script>
+<script src="blackbox.js"></script>
+</body>
+</html>

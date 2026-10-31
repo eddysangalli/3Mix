@@ -1,0 +1,2608 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<script src="mesa-unica.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3Mix Pro · Modular Studio Broadcast</title>
+<style>
+:root {
+  --bg-app: #121417;
+  --bg-topbar: #16181b;
+  --bg-panel: #1a1d22;
+  --bg-card: #15181b;
+  --bg-inner: #0d0f12;
+  --border-dim: #262a30;
+  --border-subtle: #333842;
+  --border-focus: #4b5563;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+
+  --red-live: #dc2626;
+  --red-live-soft: rgba(220, 38, 38, 0.25);
+  --green-pv: #16a34a;
+  --green-pv-soft: rgba(22, 163, 74, 0.25);
+  --amber-cue: #f59e0b;
+  --amber-soft: rgba(245, 158, 11, 0.2);
+  --blue-accent: #2563eb;
+
+  --silver-grad: linear-gradient(180deg, #e2e8f0 0%, #94a3b8 100%);
+  --silver-thumb: linear-gradient(180deg, #ffffff 0%, #cbd5e1 50%, #94a3b8 100%);
+}
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-app);
+  color: var(--text-main);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  user-select: none;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* TOPBAR PRINCIPAL */
+.studio-topbar {
+  height: 40px;
+  background: var(--bg-topbar);
+  border-bottom: 1px solid var(--border-dim);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 12px;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.brand-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 900;
+  font-size: 15px;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+.brand-dots {
+  display: grid;
+  grid-template-columns: repeat(3, 4px);
+  gap: 2px;
+}
+.brand-dots span {
+  width: 4px;
+  height: 4px;
+  background: #ef4444;
+  border-radius: 50%;
+}
+.brand-tag {
+  color: #fff;
+  font-weight: 800;
+}
+.module-subtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  border-left: 1px solid var(--border-dim);
+  padding-left: 10px;
+}
+.project-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #1c1f24;
+  border: 1px solid var(--border-subtle);
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  color: #e2e8f0;
+  cursor: pointer;
+}
+.project-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+}
+
+/* ABAS CENTRAIS */
+.workspace-tabs {
+  display: flex;
+  gap: 2px;
+  margin: 0 auto;
+  background: #111316;
+  padding: 2px;
+  border-radius: 4px;
+  border: 1px solid var(--border-dim);
+}
+.ws-tab {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 16px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+.ws-tab:hover { color: #fff; background: rgba(255,255,255,0.04); }
+.ws-tab.active {
+  background: #282d35;
+  color: #fff;
+  font-weight: 700;
+  border-color: #3b424e;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.btn-save-ws {
+  background: #1a1e24;
+  border: 1px solid var(--border-subtle);
+  color: #cbd5e1;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.btn-save-ws:hover { background: #242932; color: #fff; }
+.clock-display {
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.1;
+}
+.clock-date {
+  font-size: 9px;
+  color: var(--text-muted);
+}
+.rec-tag {
+  background: #1a1818;
+  border: 1px solid #451a1a;
+  color: #f87171;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-weight: 700;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.rec-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+}
+.rec-tag.recording .rec-dot {
+  animation: pulse-red 1s infinite alternate;
+}
+@keyframes pulse-red { from { opacity: 0.3; } to { opacity: 1; } }
+
+.stream-tag {
+  background: #131a15;
+  border: 1px solid #14532d;
+  color: #4ade80;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-weight: 700;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.stream-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+}
+
+/* ÁREA MULTI-VIEW */
+.views-viewport {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+}
+.view-pane {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-app);
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease-in-out;
+}
+.view-pane.active {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 10;
+}
+
+/* VIEW 1: MESA */
+.mesa-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.monitors-row {
+  height: 38%;
+  min-height: 235px;
+  max-height: 350px;
+  display: grid;
+  grid-template-columns: 1fr 280px 1fr;
+  gap: 6px;
+}
+.monitor-card {
+  background: var(--bg-panel);
+  border: 1.5px solid var(--border-dim);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+.monitor-card.preview { border-color: var(--green-pv); }
+.monitor-card.program { border-color: var(--red-live); }
+
+.monitor-head {
+  height: 25px;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+.monitor-card.preview .monitor-head { background: var(--green-pv); }
+.monitor-card.program .monitor-head { background: var(--red-live); }
+
+.monitor-body {
+  flex: 1;
+  position: relative;
+  background: #000;
+  display: flex;
+  overflow: hidden;
+}
+.monitor-video-wrap {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: #000;
+}
+.monitor-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.monitor-overlay-dsk {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: none;
+}
+.monitor-overlay-dsk.visible { display: block; }
+
+.monitor-vu {
+  width: 14px;
+  background: #0c0e11;
+  border-left: 1px solid #1e2228;
+  display: flex;
+  gap: 1.5px;
+  padding: 2px 1.5px;
+}
+.vu-track {
+  flex: 1;
+  background: #14171c;
+  display: flex;
+  flex-direction: column-reverse;
+  border-radius: 1px;
+  overflow: hidden;
+}
+.vu-bar {
+  width: 100%;
+  height: 60%;
+  background: linear-gradient(0deg, #16a34a 0%, #eab308 75%, #ef4444 100%);
+  transition: height 0.08s ease;
+}
+
+/* CENTRO: TRANSIÇÃO + DSK */
+.center-control-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 4px;
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  overflow: hidden;
+}
+
+.trans-panel {
+  border-right: 1px solid var(--border-dim);
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  align-items: center;
+  gap: 6px;
+}
+.panel-title {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.btn-trans-group {
+  display: flex;
+  gap: 4px;
+  width: 100%;
+}
+.btn-trans {
+  flex: 1;
+  height: 26px;
+  background: #2b3038;
+  border: 1px solid #3e4652;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+.btn-trans:hover { background: #3b424e; border-color: #525c6c; }
+.btn-trans:active, .btn-trans.active { background: #ef4444; border-color: #dc2626; color: #fff; }
+
+.trans-duration-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 9.5px;
+  color: var(--text-muted);
+}
+.trans-duration-select {
+  background: #14171a;
+  border: 1px solid #2e343e;
+  color: #e2e8f0;
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 4px;
+  border-radius: 3px;
+  outline: none;
+}
+
+.tbar-track-wrap {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 4px 0;
+  cursor: ns-resize;
+}
+.tbar-slot {
+  width: 6px;
+  height: 100%;
+  background: #0d0f12;
+  border: 1px solid #262a32;
+  border-radius: 3px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+  position: relative;
+}
+.tbar-fader-knob {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 22px;
+  background: var(--silver-thumb);
+  border: 1px solid #475569;
+  border-radius: 3px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.tbar-knob-rib {
+  width: 18px;
+  height: 2px;
+  background: #475569;
+  border-radius: 1px;
+}
+
+/* DSK PANEL */
+.dsk-panel {
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  gap: 5px;
+  overflow: hidden;
+}
+.dsk-row {
+  flex: 1;
+  background: #15171b;
+  border: 1px solid var(--border-dim);
+  border-radius: 3px;
+  display: grid;
+  grid-template-columns: 36px 1fr 52px;
+  align-items: center;
+  padding: 2px 4px;
+  gap: 4px;
+}
+.dsk-tag {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+.dsk-thumb-box {
+  height: 22px;
+  background: #000;
+  border: 1px solid #282d36;
+  border-radius: 2px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dsk-thumb-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.dsk-btns {
+  display: flex;
+  gap: 2px;
+}
+.btn-dsk {
+  flex: 1;
+  height: 20px;
+  background: #242830;
+  border: 1px solid #373e4a;
+  color: #cbd5e1;
+  font-size: 8.5px;
+  font-weight: 800;
+  border-radius: 2px;
+  cursor: pointer;
+  padding: 0;
+}
+.btn-dsk:hover { background: #323844; color: #fff; }
+.btn-dsk.take.active {
+  background: #ef4444;
+  border-color: #dc2626;
+  color: #fff;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+}
+.btn-dsk.auto.active {
+  background: #f59e0b;
+  border-color: #d97706;
+  color: #fff;
+}
+
+/* BARRAMENTO ATEM */
+.switch-bars-row {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 4px;
+  padding: 4px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.switch-bus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.bus-title {
+  width: 125px;
+  font-size: 10px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+.bus-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.switch-bus.preview .bus-indicator { background: var(--green-pv); }
+.switch-bus.program .bus-indicator { background: var(--red-live); }
+
+.bus-buttons-strip {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+}
+.bus-item-btn {
+  height: 38px;
+  background: #181b1f;
+  border: 1px solid #2b3038;
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  padding: 1px;
+}
+.bus-item-btn:hover { border-color: #4b5563; }
+.bus-item-thumb {
+  flex: 1;
+  width: 100%;
+  object-fit: cover;
+  background: #000;
+  border-radius: 1px;
+}
+.bus-item-label {
+  height: 14px;
+  background: #101215;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  font-size: 8.5px;
+  font-weight: 700;
+  color: #cbd5e1;
+  gap: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.bus-num {
+  font-weight: 900;
+  color: #fff;
+}
+
+.switch-bus.preview .bus-item-btn.selected {
+  border: 2px solid var(--green-pv);
+  background: #142e1b;
+}
+.switch-bus.preview .bus-item-btn.selected .bus-item-label {
+  background: var(--green-pv);
+  color: #fff;
+}
+.switch-bus.program .bus-item-btn.selected {
+  border: 2px solid var(--red-live);
+  background: #3b1417;
+}
+.switch-bus.program .bus-item-btn.selected .bus-item-label {
+  background: var(--red-live);
+  color: #fff;
+}
+
+/* BASE: FONTES + MIXER */
+.lower-deck-row {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 430px;
+  gap: 6px;
+  overflow: hidden;
+  min-height: 240px;
+}
+
+.sources-deck {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.sources-head {
+  height: 32px;
+  padding: 0 8px;
+  background: #16181c;
+  border-bottom: 1px solid var(--border-dim);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.sources-title {
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.sources-tabs {
+  display: flex;
+  gap: 2px;
+  background: #0f1114;
+  padding: 2px;
+  border-radius: 3px;
+  border: 1px solid #23272e;
+}
+.src-tab {
+  background: transparent;
+  border: 0;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+.src-tab.active { background: #282d35; color: #fff; font-weight: 700; }
+
+.search-box {
+  margin-left: auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.search-box input {
+  background: #111317;
+  border: 1px solid #2b303a;
+  color: #cbd5e1;
+  font-size: 10px;
+  padding: 3px 8px 3px 22px;
+  border-radius: 3px;
+  width: 140px;
+}
+.search-box span {
+  position: absolute;
+  left: 6px;
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.sources-grid {
+  flex: 1;
+  padding: 6px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 6px;
+  overflow: hidden;
+}
+.source-tile {
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  transition: border-color 0.1s ease;
+}
+.source-tile:hover { border-color: #475569; }
+.source-tile.is-pv { border: 2px solid var(--green-pv); }
+.source-tile.is-pgm { border: 2px solid var(--red-live); }
+
+.tile-top {
+  height: 20px;
+  padding: 0 6px;
+  background: #14161a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 9.5px;
+  font-weight: 700;
+  border-bottom: 1px solid #1f232a;
+}
+.tile-num {
+  font-weight: 900;
+  margin-right: 4px;
+}
+.tile-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tile-menu {
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 0 2px;
+}
+.tile-view {
+  flex: 1;
+  background: #000;
+  position: relative;
+  overflow: hidden;
+}
+.tile-view img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.tile-player-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(10, 12, 15, 0.88);
+  padding: 2px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 9px;
+  color: #fff;
+  font-family: monospace;
+}
+.tile-play-btn {
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+/* MIXER DE ÁUDIO PRO */
+.mixer-deck {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.mixer-head {
+  height: 32px;
+  padding: 0 10px;
+  background: #16181c;
+  border-bottom: 1px solid var(--border-dim);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.mixer-strips {
+  flex: 1;
+  display: flex;
+  padding: 6px 4px;
+  gap: 3px;
+  background: #121417;
+  overflow-x: auto;
+}
+.channel-strip {
+  flex: 1;
+  min-width: 52px;
+  background: #181b20;
+  border: 1px solid #262a32;
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 2px;
+  align-items: center;
+  gap: 4px;
+}
+.channel-strip.master {
+  background: #20242b;
+  border-color: #3b434e;
+}
+.strip-name {
+  font-size: 9.5px;
+  font-weight: 800;
+  color: #cbd5e1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+.btn-headphone {
+  background: transparent;
+  border: 0;
+  color: var(--text-dim);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+}
+.btn-headphone.active { color: #38bdf8; }
+
+.fader-vu-group {
+  flex: 1;
+  display: flex;
+  gap: 3px;
+  width: 100%;
+  justify-content: center;
+  align-items: stretch;
+  padding: 4px 2px;
+}
+.fader-track-wrap {
+  width: 12px;
+  background: #0d0f12;
+  border: 1px solid #23272f;
+  border-radius: 2px;
+  position: relative;
+  cursor: ns-resize;
+}
+.fader-cap {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 22px;
+  height: 12px;
+  background: var(--silver-thumb);
+  border: 1px solid #475569;
+  border-radius: 2px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.7);
+  pointer-events: none;
+}
+.vu-meter-vert {
+  width: 10px;
+  background: #0d0f12;
+  border: 1px solid #23272f;
+  border-radius: 2px;
+  display: flex;
+  gap: 1px;
+  padding: 1px;
+}
+.vu-track-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column-reverse;
+  background: #14171c;
+  border-radius: 1px;
+  overflow: hidden;
+}
+.vu-fill {
+  width: 100%;
+  background: linear-gradient(0deg, #16a34a 0%, #eab308 75%, #ef4444 100%);
+  transition: height 0.08s ease;
+}
+.db-val {
+  font-family: Consolas, monospace;
+  font-size: 9px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+.pan-knob-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 80%;
+  font-size: 8px;
+  color: var(--text-dim);
+  font-weight: 700;
+}
+.strip-btns-bottom {
+  display: flex;
+  gap: 2px;
+  width: 95%;
+}
+.btn-strip-action {
+  flex: 1;
+  height: 18px;
+  background: #242830;
+  border: 1px solid #373e4a;
+  color: #94a3b8;
+  font-size: 8px;
+  font-weight: 800;
+  border-radius: 2px;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-strip-action:hover { background: #323844; color: #fff; }
+.btn-strip-action.mute.active { background: #dc2626; border-color: #b91c1c; color: #fff; }
+.btn-strip-action.solo.active { background: #2563eb; border-color: #1d4ed8; color: #fff; }
+.btn-strip-action.afv.active { background: #f59e0b; border-color: #d97706; color: #fff; }
+
+/* VIEW 2: REPLAY */
+.replay-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  gap: 6px;
+  overflow: hidden;
+}
+.replay-topbar-pills {
+  height: 36px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 12px;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.replay-cams-pills {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.rep-cam-pill {
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  background: #14171c;
+  border: 1px solid var(--border-subtle);
+  color: #cbd5e1;
+}
+.rep-cam-pill.c1 { border-left: 3px solid #38bdf8; }
+.rep-cam-pill.c2 { border-left: 3px solid #c084fc; }
+.rep-cam-pill.c3 { border-left: 3px solid #4ade80; }
+.rep-cam-pill.c4 { border-left: 3px solid #fb923c; }
+
+.rep-capture-btns {
+  display: flex;
+  gap: 3px;
+  margin-left: auto;
+}
+.btn-rep-cap {
+  background: #242831;
+  border: 1px solid #38404d;
+  color: #cbd5e1;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.btn-rep-cap:hover { background: #323845; color: #fff; }
+.btn-rep-in {
+  background: #2c323b;
+  border: 1px solid #414a56;
+  color: #fff;
+  font-weight: 800;
+  padding: 3px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.btn-rep-out {
+  background: #15803d;
+  border: 1px solid #16a34a;
+  color: #fff;
+  font-weight: 800;
+  padding: 3px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.replay-players-row {
+  height: 34%;
+  min-height: 180px;
+  display: grid;
+  grid-template-columns: 1fr 180px 1fr;
+  gap: 6px;
+}
+.rep-player-card {
+  background: var(--bg-panel);
+  border: 1.5px solid var(--border-dim);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.rep-player-card.player-a { border-color: #ef4444; }
+.rep-player-card.player-b { border-color: #f59e0b; }
+
+.rep-player-head {
+  height: 24px;
+  padding: 0 8px;
+  background: #181a1e;
+  border-bottom: 1px solid var(--border-dim);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10.5px;
+  font-weight: 800;
+}
+.badge-no-ar {
+  background: #dc2626;
+  color: #fff;
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-weight: 900;
+}
+.badge-carregado {
+  background: #d97706;
+  color: #fff;
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-weight: 900;
+}
+.rep-player-screen {
+  flex: 1;
+  background: #000;
+  position: relative;
+  overflow: hidden;
+}
+.rep-player-screen img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.rep-player-scrub {
+  height: 24px;
+  background: #14171a;
+  border-top: 1px solid var(--border-dim);
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  gap: 8px;
+  font-size: 10px;
+  font-family: monospace;
+}
+.rep-scrub-bar {
+  flex: 1;
+  height: 4px;
+  background: #282d36;
+  border-radius: 2px;
+  position: relative;
+}
+.rep-scrub-progress {
+  width: 45%;
+  height: 100%;
+  background: #38bdf8;
+  border-radius: 2px;
+}
+
+.slowmo-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.slowmo-title {
+  font-size: 10px;
+  font-weight: 800;
+  color: #94a3b8;
+}
+.slowmo-val {
+  font-size: 20px;
+  font-weight: 900;
+  color: #f59e0b;
+}
+.slowmo-slider {
+  width: 100%;
+  accent-color: #f59e0b;
+}
+.slowmo-presets {
+  display: flex;
+  gap: 3px;
+  width: 100%;
+}
+.btn-slow-preset {
+  flex: 1;
+  background: #242830;
+  border: 1px solid #38404c;
+  color: #cbd5e1;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 0;
+  border-radius: 2px;
+  cursor: pointer;
+}
+.btn-slow-preset.active { background: #f59e0b; color: #000; font-weight: 900; border-color: #d97706; }
+
+.timeline-deck {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 4px;
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  overflow: hidden;
+  height: 170px;
+  flex-shrink: 0;
+}
+.timeline-lanes {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border-dim);
+  overflow: hidden;
+}
+.timeline-ruler {
+  height: 22px;
+  background: #14171a;
+  border-bottom: 1px solid var(--border-dim);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  font-family: monospace;
+  font-size: 9.5px;
+  color: #64748b;
+}
+.timeline-strips-wrap {
+  flex: 1;
+  position: relative;
+  background: #000;
+  overflow: hidden;
+}
+.timeline-strips-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.timeline-playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 55%;
+  width: 2px;
+  background: #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.8);
+}
+.timeline-bracket {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 35%;
+  width: 30%;
+  background: rgba(34, 197, 94, 0.15);
+  border-left: 2px solid #22c55e;
+  border-right: 2px solid #22c55e;
+}
+
+.jog-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  gap: 6px;
+}
+.jog-wheel-outer {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #2d323b 40%, #15181c 90%);
+  border: 3px solid #3b424f;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.6), inset 0 2px 4px rgba(255,255,255,0.1);
+  position: relative;
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.jog-dimple {
+  position: absolute;
+  top: 14px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #111317;
+  border: 1px solid #4a5464;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.8);
+}
+.jog-step-btns {
+  display: flex;
+  gap: 3px;
+}
+.btn-jog-step {
+  background: #242831;
+  border: 1px solid #38404c;
+  color: #cbd5e1;
+  font-size: 8.5px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.replay-lower-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  overflow: hidden;
+}
+.saved-clips-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.clips-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+}
+.clips-table th {
+  background: #14171a;
+  padding: 5px 8px;
+  text-align: left;
+  color: #64748b;
+  font-weight: 800;
+  border-bottom: 1px solid var(--border-dim);
+}
+.clips-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #20242b;
+  color: #e2e8f0;
+}
+.clips-table tr.selected {
+  background: #202630;
+}
+.btn-clip-load {
+  background: #282f3a;
+  border: 1px solid #3e4856;
+  color: #cbd5e1;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+.btn-clip-load:hover { background: #384354; color: #fff; }
+
+.clip-details-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  gap: 8px;
+  overflow: auto;
+}
+.angles-thumbs-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.angle-box {
+  background: #121417;
+  border: 1px solid #262a32;
+  border-radius: 3px;
+  overflow: hidden;
+  cursor: pointer;
+}
+.angle-box.selected { border-color: #38bdf8; }
+.angle-box img {
+  width: 100%;
+  height: 48px;
+  object-fit: cover;
+  display: block;
+}
+.angle-box span {
+  display: block;
+  font-size: 8.5px;
+  font-weight: 700;
+  padding: 2px 4px;
+  background: #16181d;
+  color: #94a3b8;
+}
+
+.replay-footer-bar {
+  height: 38px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.btn-big-replay {
+  background: #dc2626;
+  border: 1px solid #ef4444;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
+  padding: 6px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  box-shadow: 0 0 12px rgba(220, 38, 38, 0.5);
+}
+.btn-big-replay:hover { background: #b91c1c; }
+.btn-voltar-ao-vivo {
+  background: #20242b;
+  border: 1px solid #373e4a;
+  color: #cbd5e1;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.btn-voltar-ao-vivo:hover { background: #2c333e; color: #fff; }
+
+/* VIEW 3: CONFIGURAÇÕES */
+.config-layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 200px 1fr 340px;
+  overflow: hidden;
+}
+.config-sidebar {
+  background: #141619;
+  border-right: 1px solid var(--border-dim);
+  display: flex;
+  flex-direction: column;
+  padding: 12px 6px;
+  gap: 4px;
+  overflow-y: auto;
+}
+.config-group-title {
+  font-size: 9px;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  padding: 8px 8px 4px;
+}
+.config-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  cursor: pointer;
+}
+.config-nav-item:hover { background: #1c1f24; color: #fff; }
+.config-nav-item.active { background: #252a32; color: #fff; font-weight: 700; }
+
+.config-center-content {
+  padding: 16px 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.config-h1 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0;
+}
+.config-subtext {
+  font-size: 11px;
+  color: #64748b;
+  margin: -10px 0 0;
+}
+.config-card-box {
+  background: #17191d;
+  border: 1px solid var(--border-dim);
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.config-card-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: #cbd5e1;
+}
+.config-pills-row {
+  display: flex;
+  gap: 6px;
+}
+.cfg-pill {
+  flex: 1;
+  background: #1f2329;
+  border: 1px solid #333a46;
+  color: #cbd5e1;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 0;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: center;
+}
+.cfg-pill.active { background: #3b424e; color: #fff; border-color: #64748b; }
+
+.config-preview-panel {
+  background: #141619;
+  border-left: 1px solid var(--border-dim);
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  gap: 12px;
+  overflow-y: auto;
+}
+.cfg-preview-screen {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #000;
+  border: 1px solid var(--border-dim);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.cfg-preview-screen img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cfg-info-badge {
+  background: #1c1f24;
+  border: 1px solid var(--border-dim);
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+.config-actions-bar {
+  height: 42px;
+  background: #141619;
+  border-top: 1px solid var(--border-dim);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 10px;
+  justify-content: flex-end;
+}
+.btn-cfg-action {
+  background: #242830;
+  border: 1px solid #3b434e;
+  color: #cbd5e1;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.btn-cfg-action:hover { background: #323844; color: #fff; }
+.btn-cfg-save {
+  background: #2563eb;
+  border: 1px solid #3b82f6;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 6px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.btn-cfg-save:hover { background: #1d4ed8; }
+
+/* FOOTER */
+.studio-footer {
+  height: 30px;
+  background: #111316;
+  border-top: 1px solid var(--border-dim);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  font-size: 10px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+.telemetry-clean {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: Consolas, monospace;
+}
+.led-status {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.8);
+}
+.footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.btn-foot {
+  background: #1a1e23;
+  border: 1px solid var(--border-dim);
+  color: #cbd5e1;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.btn-foot:hover { background: #252b33; color: #fff; }
+
+.toast-msg {
+  position: fixed;
+  bottom: 40px;
+  right: 20px;
+  background: #1e293b;
+  border: 1px solid #38bdf8;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  display: none;
+  z-index: 9999;
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR PRINCIPAL -->
+<header class="studio-topbar">
+  <div class="brand-box">
+    <div class="brand-dots">
+      <span></span><span></span><span></span>
+      <span></span><span></span><span></span>
+    </div>
+    <span class="brand-tag">3Mix</span>
+    <span class="module-subtitle" id="topbar-sub">Modular Studio</span>
+  </div>
+
+  <div class="project-pill" title="Clique para detalhes do projeto">
+    <span class="project-dot"></span>
+    <span style="font-weight:700;">Futsal ao vivo</span>
+    <span style="color:#64748b;font-size:10px;">✎</span>
+  </div>
+
+  <!-- ABAS CENTRAIS -->
+  <nav class="workspace-tabs">
+    <button type="button" class="ws-tab active" id="tab-mesa" onclick="switchView('mesa')">Mesa</button>
+    <button type="button" class="ws-tab" id="tab-audio" onclick="switchView('mesa'); highlightMixer();">Áudio</button>
+    <button type="button" class="ws-tab" id="tab-replay" onclick="switchView('replay')">Replay</button>
+    <button type="button" class="ws-tab" id="tab-config" onclick="switchView('config')">Configurações</button>
+  </nav>
+
+  <div class="topbar-right">
+    <button type="button" class="btn-save-ws" onclick="showToast('Layout do workspace salvo com sucesso!')">
+      <span>💾</span> Salvar workspace
+    </button>
+    
+    <div class="clock-display">
+      <span id="smpte-clock">19:29:42</span>
+      <span class="clock-date" id="smpte-date">Qui, 29/10/2026</span>
+    </div>
+
+    <div class="rec-tag" id="rec-pill" onclick="toggleRecord()">
+      <span class="rec-dot"></span>
+      <span id="rec-label">REC 00:00:00</span>
+    </div>
+
+    <div class="stream-tag" id="stream-pill" onclick="toggleStream()">
+      <span class="stream-dot"></span>
+      <span id="stream-label">Streaming AO VIVO 4.2 Mbps</span>
+    </div>
+  </div>
+</header>
+
+<!-- ÁREA PRINCIPAL COM VIEWS -->
+<div class="views-viewport">
+
+  <!-- VIEW 1: MESA (MODULAR STUDIO) -->
+  <div id="view-mesa" class="view-pane active">
+    <main class="mesa-body">
+
+      <!-- MONITORES PREVIEW / PROGRAM & TRANSIÇÃO -->
+      <section class="monitors-row">
+        
+        <!-- PREVIEW MONITOR -->
+        <div class="monitor-card preview">
+          <div class="monitor-head">
+            <span>PRÉ-VISUALIZAÇÃO: <span id="pv-title">CAM 3</span></span>
+            <div style="display:flex;gap:6px;">
+              <span style="cursor:pointer;" title="Tela Cheia" onclick="showToast('Preview em Tela Cheia ativado')">⛶</span>
+              <span style="cursor:pointer;" title="Propriedades" onclick="switchView('config')">⚙️</span>
+            </div>
+          </div>
+          <div class="monitor-body">
+            <div class="monitor-video-wrap">
+              <img class="monitor-video" id="pv-view-img" src="/img/assets/monitor_preview.jpg" onerror="this.src='/img/assets/source_cam3.jpg'" alt="Preview">
+            </div>
+            <div class="monitor-vu">
+              <div class="vu-track"><div class="vu-bar" id="pv-vu-l" style="height:62%;"></div></div>
+              <div class="vu-track"><div class="vu-bar" id="pv-vu-r" style="height:58%;"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TRANSIÇÃO & DSK -->
+        <div class="center-control-card">
+          <div class="trans-panel">
+            <span class="panel-title">Transição</span>
+            <div class="btn-trans-group">
+              <button type="button" class="btn-trans" id="btn-cut" onclick="triggerCut()">CUT</button>
+              <button type="button" class="btn-trans" id="btn-auto" onclick="triggerAuto()">AUTO</button>
+            </div>
+            
+            <div class="trans-duration-box">
+              <span>Duração</span>
+              <select class="trans-duration-select" id="trans-time">
+                <option value="500">0,5 s</option>
+                <option value="800" selected>0,8 s</option>
+                <option value="1000">1,0 s</option>
+                <option value="1500">1,5 s</option>
+              </select>
+            </div>
+
+            <div class="tbar-track-wrap" id="tbar-wrap">
+              <div class="tbar-slot">
+                <div class="tbar-fader-knob" id="tbar-handle">
+                  <div class="tbar-knob-rib"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dsk-panel">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span class="panel-title">DSK / Grafismos</span>
+              <span style="font-size:10px;cursor:pointer;color:var(--text-dim);" onclick="showToast('Gerenciador DSK aberto')">⛶</span>
+            </div>
+
+            <div class="dsk-row" id="dsk-row-1">
+              <span class="dsk-tag">DSK 1</span>
+              <div class="dsk-thumb-box"><img src="/img/assets/dsk_placar.jpg" onerror="this.src='/img/assets/source_placar.jpg'" alt="DSK 1"></div>
+              <div class="dsk-btns">
+                <button type="button" class="btn-dsk take active" onclick="toggleDsk(1, 'take')">TAKE</button>
+                <button type="button" class="btn-dsk auto" onclick="toggleDsk(1, 'auto')">AUTO</button>
+              </div>
+            </div>
+
+            <div class="dsk-row" id="dsk-row-2">
+              <span class="dsk-tag">DSK 2</span>
+              <div class="dsk-thumb-box"><img src="/img/assets/dsk_varzea.jpg" onerror="this.src='/img/assets/source_vt.jpg'" alt="DSK 2"></div>
+              <div class="dsk-btns">
+                <button type="button" class="btn-dsk take" onclick="toggleDsk(2, 'take')">TAKE</button>
+                <button type="button" class="btn-dsk auto" onclick="toggleDsk(2, 'auto')">AUTO</button>
+              </div>
+            </div>
+
+            <div class="dsk-row" id="dsk-row-3">
+              <span class="dsk-tag">DSK 3</span>
+              <div class="dsk-thumb-box"><img src="/img/assets/dsk_lowerthird.jpg" onerror="this.src='/img/assets/source_entrevista.jpg'" alt="DSK 3"></div>
+              <div class="dsk-btns">
+                <button type="button" class="btn-dsk take" onclick="toggleDsk(3, 'take')">TAKE</button>
+                <button type="button" class="btn-dsk auto" onclick="toggleDsk(3, 'auto')">AUTO</button>
+              </div>
+            </div>
+
+            <div class="dsk-row" id="dsk-row-4">
+              <span class="dsk-tag">DSK 4</span>
+              <div class="dsk-thumb-box"><img src="/img/assets/dsk_logo.jpg" alt="DSK 4"></div>
+              <div class="dsk-btns">
+                <button type="button" class="btn-dsk take" onclick="toggleDsk(4, 'take')">TAKE</button>
+                <button type="button" class="btn-dsk auto" onclick="toggleDsk(4, 'auto')">AUTO</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PROGRAM MONITOR -->
+        <div class="monitor-card program">
+          <div class="monitor-head">
+            <span>PROGRAMA: <span id="pgm-title">CAM 1</span> [NO AR]</span>
+            <div style="display:flex;gap:6px;">
+              <span style="cursor:pointer;" title="Tela Cheia" onclick="showToast('Program em Tela Cheia ativado')">⛶</span>
+              <span style="cursor:pointer;" title="Propriedades" onclick="switchView('config')">⚙️</span>
+            </div>
+          </div>
+          <div class="monitor-body">
+            <div class="monitor-video-wrap">
+              <img class="monitor-video" id="pgm-view-img" src="/img/assets/monitor_program.jpg" onerror="this.src='/img/assets/source_cam1.jpg'" alt="Program">
+              <div class="monitor-overlay-dsk visible" id="overlay-dsk-1">
+                <img src="/img/assets/dsk_placar.jpg" style="position:absolute;top:12px;left:14px;width:160px;height:auto;border-radius:3px;box-shadow:0 2px 6px rgba(0,0,0,0.8);" alt="">
+              </div>
+            </div>
+            <div class="monitor-vu">
+              <div class="vu-track"><div class="vu-bar" id="pgm-vu-l" style="height:74%;"></div></div>
+              <div class="vu-track"><div class="vu-bar" id="pgm-vu-r" style="height:70%;"></div></div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- BARRAMENTO DUPLO ATEM (PVW E PGM) -->
+      <section class="switch-bars-row">
+        <div class="switch-bus preview">
+          <div class="bus-title">
+            <span class="bus-indicator"></span>
+            <span style="color:#cbd5e1;">PRÉ-VISUALIZAÇÃO (PV)</span>
+          </div>
+          <div class="bus-buttons-strip" id="pv-bus-strip"></div>
+        </div>
+
+        <div class="switch-bus program">
+          <div class="bus-title">
+            <span class="bus-indicator"></span>
+            <span style="color:#cbd5e1;">PROGRAMA (PGM)</span>
+          </div>
+          <div class="bus-buttons-strip" id="pgm-bus-strip"></div>
+        </div>
+      </section>
+
+      <!-- GRADE DE FONTES & MIXER DE ÁUDIO -->
+      <section class="lower-deck-row">
+        <div class="sources-deck">
+          <div class="sources-head">
+            <span class="sources-title">::: Fontes</span>
+            <div class="sources-tabs">
+              <button type="button" class="src-tab active" onclick="filterSources('all', this)">Todas</button>
+              <button type="button" class="src-tab" onclick="filterSources('cam', this)">Câmeras</button>
+              <button type="button" class="src-tab" onclick="filterSources('player', this)">Players</button>
+              <button type="button" class="src-tab" onclick="filterSources('comp', this)">Composições</button>
+            </div>
+            <div class="search-box">
+              <span>🔍</span>
+              <input type="text" placeholder="Buscar fontes…" id="source-search" oninput="searchSources(this.value)">
+            </div>
+          </div>
+
+          <div class="sources-grid" id="sources-grid"></div>
+        </div>
+
+        <div class="mixer-deck" id="mixer-container">
+          <div class="mixer-head">
+            <span>::: Mixer de Áudio Pro</span>
+            <span style="font-size:11px;cursor:pointer;" onclick="showToast('Configurações de Áudio / Buses')">⚙️</span>
+          </div>
+          <div class="mixer-strips" id="mixer-strips"></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- VIEW 2: REPLAY CONSOLE -->
+  <div id="view-replay" class="view-pane">
+    <main class="replay-body">
+
+      <section class="replay-topbar-pills">
+        <span style="color:#ef4444;font-weight:900;display:flex;align-items:center;gap:6px;">
+          <span class="rec-dot" style="animation:pulse-red 1s infinite alternate;"></span>
+          SSD gravando 00:24:18
+        </span>
+        <span style="color:#64748b;">|</span>
+        <span style="color:#94a3b8;font-size:10px;">Disco: 512 GB | 327 GB livre (64%)</span>
+
+        <div class="replay-cams-pills" style="margin-left:14px;">
+          <span style="color:#64748b;font-size:9.5px;font-weight:700;">Câmeras:</span>
+          <span class="rep-cam-pill c1">CAM 1 Principal</span>
+          <span class="rep-cam-pill c2">CAM 2 Lateral Dir</span>
+          <span class="rep-cam-pill c3">CAM 3 Atrás Gol</span>
+          <span class="rep-cam-pill c4">CAM 4 Lateral Esq</span>
+        </div>
+
+        <div class="rep-capture-btns">
+          <span style="color:#64748b;font-size:9.5px;font-weight:700;display:flex;align-items:center;">Capturas:</span>
+          <button type="button" class="btn-rep-cap" onclick="showToast('Capturado lance de -5 segundos')">-5s</button>
+          <button type="button" class="btn-rep-cap" onclick="showToast('Capturado lance de -10 segundos')">-10s</button>
+          <button type="button" class="btn-rep-cap" onclick="showToast('Capturado lance de -20 segundos')">-20s</button>
+          <button type="button" class="btn-rep-in" onclick="showToast('Ponto IN marcado no replay')">MARCAR IN</button>
+          <button type="button" class="btn-rep-out" onclick="showToast('Ponto OUT marcado no replay')">MARCAR OUT</button>
+        </div>
+      </section>
+
+      <section class="replay-players-row">
+        <div class="rep-player-card player-a">
+          <div class="rep-player-head">
+            <span>● PLAYER A <span style="color:#64748b;font-weight:400;">WEB BROWSER 27</span></span>
+            <span class="badge-no-ar">NO AR</span>
+          </div>
+          <div class="rep-player-screen">
+            <img src="/img/assets/replay_player_a.jpg" alt="Player A">
+          </div>
+          <div class="rep-player-scrub">
+            <span>00:00 / 00:09</span>
+            <div class="rep-scrub-bar"><div class="rep-scrub-progress"></div></div>
+            <span>1.0x</span>
+          </div>
+        </div>
+
+        <div class="slowmo-card">
+          <span class="slowmo-title">SLOW-MOTION</span>
+          <span class="slowmo-val" id="slowmo-display">50%</span>
+          <input type="range" class="slowmo-slider" min="10" max="100" value="50" oninput="setSlowMo(this.value)">
+          <div class="slowmo-presets">
+            <button type="button" class="btn-slow-preset" onclick="setSlowMo(25)">25%</button>
+            <button type="button" class="btn-slow-preset active" onclick="setSlowMo(50)">50%</button>
+            <button type="button" class="btn-slow-preset" onclick="setSlowMo(75)">75%</button>
+            <button type="button" class="btn-slow-preset" onclick="setSlowMo(100)">100%</button>
+          </div>
+          <span style="font-size:9px;color:#64748b;margin-top:4px;">🔗 Vincular Playz ao A/B</span>
+        </div>
+
+        <div class="rep-player-card player-b">
+          <div class="rep-player-head">
+            <span>● PLAYER B <span style="color:#64748b;font-weight:400;">WEB BROWSER 27</span></span>
+            <span class="badge-carregado">CARREGADO</span>
+          </div>
+          <div class="rep-player-screen">
+            <img src="/img/assets/replay_player_b.jpg" alt="Player B">
+          </div>
+          <div class="rep-player-scrub">
+            <span>00:00 / 00:09</span>
+            <div class="rep-scrub-bar"><div class="rep-scrub-progress" style="width:20%;"></div></div>
+            <span>1.0x</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="timeline-deck">
+        <div class="timeline-lanes">
+          <div class="timeline-ruler">
+            <span>19:28:30</span>
+            <span>19:29:00</span>
+            <span>19:29:30</span>
+            <span style="color:#ef4444;font-weight:800;">19:29:42 [LIVE]</span>
+            <span>19:30:00</span>
+            <span>19:30:15</span>
+          </div>
+          <div class="timeline-strips-wrap">
+            <img src="/img/assets/replay_filmstrips.jpg" alt="Timeline Tracks">
+            <div class="timeline-bracket"></div>
+            <div class="timeline-playhead"></div>
+          </div>
+        </div>
+
+        <div class="jog-panel">
+          <span style="font-size:9.5px;font-weight:800;color:#94a3b8;">JOG / SHUTTLE</span>
+          <div class="jog-wheel-outer" id="jog-wheel" title="Gire para avançar/retroceder quadros">
+            <div class="jog-dimple"></div>
+          </div>
+          <div class="jog-step-btns">
+            <button type="button" class="btn-jog-step" onclick="stepJog(-10)">◄◄ 1q</button>
+            <button type="button" class="btn-jog-step" onclick="stepJog(-1)">◄ 1f</button>
+            <button type="button" class="btn-jog-step" onclick="stepJog(1)">1f ►</button>
+            <button type="button" class="btn-jog-step" onclick="stepJog(10)">1q ►►</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="replay-lower-grid">
+        <div class="saved-clips-card">
+          <div style="padding:6px 8px;background:#14171a;border-bottom:1px solid var(--border-dim);font-size:10px;font-weight:800;display:flex;justify-content:space-between;">
+            <span>LANCES SALVOS (EVENTOS DE REPLAY)</span>
+            <span style="color:#64748b;">4 lances • 00:31 total</span>
+          </div>
+          <table class="clips-table">
+            <thead>
+              <tr><th>#</th><th>TIPO</th><th>TEMPO</th><th>DURAÇÃO</th><th>ÂNGULOS</th><th>PLAYER A/B</th></tr>
+            </thead>
+            <tbody>
+              <tr class="selected" onclick="selectClip(1, this)">
+                <td>1</td><td>⚽ Gol</td><td>19:29:42</td><td>9.98s</td><td>3</td>
+                <td>
+                  <button type="button" class="btn-clip-load" onclick="loadClipToPlayer('A', 1, event)">A</button>
+                  <button type="button" class="btn-clip-load" onclick="loadClipToPlayer('B', 1, event)">B</button>
+                </td>
+              </tr>
+              <tr onclick="selectClip(2, this)">
+                <td>2</td><td>✋ Defesa</td><td>19:28:15</td><td>7.42s</td><td>2</td>
+                <td>
+                  <button type="button" class="btn-clip-load" onclick="loadClipToPlayer('A', 2, event)">A</button>
+                  <button type="button" class="btn-clip-load" onclick="loadClipToPlayer('B', 2, event)">B</button>
+                </td>
+              </tr>
+              <tr onclick="selectClip(3, this)">
+                <td>3</td><td>🟨 Falta</td><td>19:26:30</td><td>6.18s</td><td>2</td>
+                <td>
+                  <button type="button" class="btn-clip-load" onclick="loadClipToPlayer('A', 3, event)">A</button>
+                  <button type="button" class="btn-clip-load" onclick="loadClipToPlayer('B', 3, event)">B</button>
+                </td>
+              </tr>
+              <tr onclick="selectClip(4, this)">
+                <td>4</td><td>📋 Lance 4</td><td>19:24:10</td><td>5.03s</td><td>3</td>
+                <td>
+                  <button type="button" class="btn-clip-load" onclick="loadClipToPlayer('A', 4, event)">A</button>
+                  <button type="button" class="btn-clip-load" onclick="loadClipToPlayer('B', 4, event)">B</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="clip-details-card">
+          <div style="font-size:10px;font-weight:800;color:#94a3b8;display:flex;justify-content:space-between;">
+            <span>DETALHES DO LANCE SELECIONADO</span>
+            <span style="color:#22c55e;">Duração: 00:09.98</span>
+          </div>
+
+          <div class="angles-thumbs-row">
+            <div class="angle-box selected">
+              <img src="/img/assets/source_cam1.jpg" alt="CAM 1">
+              <span>CAM 1 Principal</span>
+            </div>
+            <div class="angle-box">
+              <img src="/img/assets/source_cam2.jpg" alt="CAM 2">
+              <span>CAM 2 Lateral Dir</span>
+            </div>
+            <div class="angle-box selected">
+              <img src="/img/assets/source_cam3.jpg" alt="CAM 3">
+              <span>CAM 3 Atrás Gol</span>
+            </div>
+            <div class="angle-box">
+              <img src="/img/assets/source_cam4.jpg" alt="CAM 4">
+              <span>CAM 4 Lateral Esq</span>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:6px;margin-top:auto;">
+            <button type="button" class="btn-rep-cap" style="flex:1;" onclick="showToast('Lance salvo com sucesso!')">💾 SALVAR LANCE</button>
+            <button type="button" class="btn-rep-cap" style="flex:1;" onclick="showToast('Posicionado no marcador IN')">⏮ IR PARA O IN</button>
+            <button type="button" class="btn-rep-cap" style="flex:1;" onclick="showToast('Posicionado no marcador OUT')">⏭ IR PARA O OUT</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="replay-footer-bar">
+        <button type="button" class="btn-big-replay" onclick="triggerReplayOnAir()">● REPLAY NO AR</button>
+        <button type="button" class="btn-voltar-ao-vivo" onclick="switchView('mesa')">↩ VOLTAR AO VIVO</button>
+        <span style="margin-left:auto;font-size:10px;color:#64748b;">
+          Atalhos: [I] Marcar In • [O] Marcar Out • [Espaço] Play/Pause • [A] Player A • [B] Player B
+        </span>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- VIEW 3: CONFIGURAÇÕES -->
+  <div id="view-config" class="view-pane">
+    <div class="config-layout">
+      <aside class="config-sidebar">
+        <span class="config-group-title">Produção</span>
+        <div class="config-nav-item active">🎥 Vídeo</div>
+        <div class="config-nav-item">🔊 Áudio</div>
+        <div class="config-nav-item">🎚 Saídas de áudio</div>
+
+        <span class="config-group-title">Transmissão</span>
+        <div class="config-nav-item">📡 Streaming</div>
+        <div class="config-nav-item">⏺ Gravação</div>
+        <div class="config-nav-item">🔗 Saídas NDI / SRT</div>
+
+        <span class="config-group-title">Operação</span>
+        <div class="config-nav-item">🖥 Aparência e workspace</div>
+        <div class="config-nav-item">⊞ Multiview e tela cheia</div>
+        <div class="config-nav-item">⌨ Atalhos</div>
+        <div class="config-nav-item">🎮 Controle remoto</div>
+
+        <span class="config-group-title">Sistema</span>
+        <div class="config-nav-item">⚙ Desempenho</div>
+        <div class="config-nav-item">🎨 Cor</div>
+        <div class="config-nav-item">ℹ Sobre</div>
+      </aside>
+
+      <section class="config-center-content">
+        <h1 class="config-h1">Vídeo</h1>
+        <p class="config-subtext">Formato da produção e das saídas.</p>
+
+        <div class="config-card-box">
+          <span class="config-card-title">Formato da produção</span>
+          <span style="font-size:10px;color:#64748b;">Define a resolução e a taxa de quadros da sua produção.</span>
+          <div class="config-pills-row">
+            <button type="button" class="cfg-pill" onclick="setResPreset('720p', this)">720p</button>
+            <button type="button" class="cfg-pill active" onclick="setResPreset('1080p', this)">1080p</button>
+            <button type="button" class="cfg-pill" onclick="setResPreset('4K', this)">4K</button>
+            <button type="button" class="cfg-pill" onclick="setResPreset('Vertical', this)">Vertical</button>
+            <button type="button" class="cfg-pill" onclick="setResPreset('Personalizado', this)">Personalizado</button>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;">
+            <div>
+              <span style="font-size:10px;color:#94a3b8;display:block;margin-bottom:3px;">Largura</span>
+              <input type="text" id="cfg-width" value="1920" style="width:100%;background:#111317;border:1px solid #2e343e;color:#fff;padding:5px 8px;border-radius:3px;font-size:11px;">
+            </div>
+            <div>
+              <span style="font-size:10px;color:#94a3b8;display:block;margin-bottom:3px;">Altura</span>
+              <input type="text" id="cfg-height" value="1080" style="width:100%;background:#111317;border:1px solid #2e343e;color:#fff;padding:5px 8px;border-radius:3px;font-size:11px;">
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;">
+            <div>
+              <span style="font-size:10px;color:#94a3b8;display:block;margin-bottom:3px;">Taxa de quadros</span>
+              <select style="width:100%;background:#111317;border:1px solid #2e343e;color:#fff;padding:5px 8px;border-radius:3px;font-size:11px;">
+                <option>29,97 fps</option>
+                <option selected>59,94 fps</option>
+                <option>60,00 fps</option>
+              </select>
+            </div>
+            <div>
+              <span style="font-size:10px;color:#94a3b8;display:block;margin-bottom:3px;">Varredura</span>
+              <select style="width:100%;background:#111317;border:1px solid #2e343e;color:#fff;padding:5px 8px;border-radius:3px;font-size:11px;">
+                <option selected>Progressivo</option>
+                <option>Entrelaçado</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="config-card-box">
+          <span class="config-card-title">Formato da saída</span>
+          <span style="font-size:10px;color:#64748b;">Define o formato de resolução das saídas (streaming, gravação, NDI, etc.).</span>
+          <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:#cbd5e1;cursor:pointer;">
+            <input type="checkbox" checked style="accent-color:#2563eb;"> Usar o formato da produção
+          </label>
+        </div>
+      </section>
+
+      <aside class="config-preview-panel">
+        <span style="font-size:11px;font-weight:800;color:#cbd5e1;">Prévia do formato</span>
+        <div class="cfg-preview-screen">
+          <img src="/img/assets/monitor_preview.jpg" alt="Preview 16:9">
+        </div>
+        <div class="cfg-info-badge">
+          <b>Produção:</b> 1920 x 1080 • 59,94p<br>
+          <b>Saída:</b> 1920 x 1080 • 59,94p
+        </div>
+        <div class="cfg-info-badge" style="color:#64748b;">
+          ℹ <b>Sobre o formato da produção:</b><br>
+          O formato da produção define a resolução e taxa de quadros interna com que o 3Mix opera a renderização Direct3D/Vulkan.
+        </div>
+      </aside>
+    </div>
+
+    <div class="config-actions-bar">
+      <button type="button" class="btn-cfg-action" onclick="showToast('Configurações importadas')">Importar</button>
+      <button type="button" class="btn-cfg-action" onclick="showToast('Configurações exportadas')">Exportar</button>
+      <button type="button" class="btn-cfg-action" onclick="showToast('Padrões restaurados')">Restaurar padrão</button>
+      <div style="flex:1;"></div>
+      <button type="button" class="btn-cfg-action" onclick="switchView('mesa')">Cancelar</button>
+      <button type="button" class="btn-cfg-action" onclick="showToast('Alterações aplicadas com sucesso!')">Aplicar</button>
+      <button type="button" class="btn-cfg-save" onclick="showToast('Configurações salvas!'); switchView('mesa');">Salvar</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="studio-footer">
+  <div class="telemetry-clean">
+    <span class="led-status"></span>
+    <span>1920x1080</span>
+    <span>59.94p</span>
+    <span>CPU <b>12%</b></span>
+    <span>GPU <b>18%</b></span>
+    <span>FPS <b>60</b></span>
+    <span>Frames perdidos <b>0 (0.0%)</b></span>
+  </div>
+
+  <div class="footer-actions">
+    <button type="button" class="btn-foot" id="foot-rec" style="color:#f87171;" onclick="toggleRecord()">🔴 Gravar ⌄</button>
+    <button type="button" class="btn-foot" id="foot-stream" style="color:#4ade80;" onclick="toggleStream()">((•)) Transmitir</button>
+    <button type="button" class="btn-foot" onclick="showToast('Multigravação ISO pronta')">📁 Multigravação</button>
+    <button type="button" class="btn-foot" onclick="showToast('Rundown Studio ativado')">☷ Rundown</button>
+    <button type="button" class="btn-foot" onclick="switchView('config')">⚙️ Configurações</button>
+    <button type="button" class="btn-foot" onclick="switchView('replay')">⚡ Replay</button>
+    <button type="button" class="btn-foot" onclick="showToast('Layout de Multiview selecionado')">⊞</button>
+  </div>
+</footer>
+
+<div class="toast-msg" id="toast-el"></div>
+
+<script>
+  const API_ORIGIN = (location.port === '8377') ? 'http://127.0.0.1:18188' : '';
+
+  const CANONICAL_SOURCES = [
+    { id: 1, name: 'CAM 1', type: 'cam', label: 'Câmera Principal', img: '/img/assets/source_cam1.jpg' },
+    { id: 2, name: 'CAM 2', type: 'cam', label: 'Câmera Close', img: '/img/assets/source_cam2.jpg' },
+    { id: 3, name: 'CAM 3', type: 'cam', label: 'Câmera Tática', img: '/img/assets/source_cam3.jpg' },
+    { id: 4, name: 'CAM 4', type: 'cam', label: 'Câmera Gol', img: '/img/assets/source_cam4.jpg' },
+    { id: 5, name: 'CAM 5', type: 'cam', label: 'Banco / Aquecimento', img: '/img/assets/source_cam5.jpg' },
+    { id: 6, name: 'VT - VÁRZEA', type: 'player', isVt: true, label: 'Playout DDR', img: '/img/assets/source_vt.jpg', cur: '00:00', dur: '00:06', playing: false },
+    { id: 7, name: 'PLACAR', type: 'comp', isDsk: true, label: 'Scorebug Alfa', img: '/img/assets/source_placar.jpg' },
+    { id: 8, name: 'ENTREVISTA', type: 'comp', label: 'Coletiva / Backdrop', img: '/img/assets/source_entrevista.jpg' }
+  ];
+
+  const AUDIO_CHANNELS = [
+    { name: 'CAM 1', db: '-4.0 dB', vol: 85, mute: false, solo: false, afv: true },
+    { name: 'CAM 2', db: '-8.5 dB', vol: 68, mute: false, solo: false, afv: false },
+    { name: 'CAM 3', db: '-3.2 dB', vol: 88, mute: false, solo: false, afv: false },
+    { name: 'CAM 4', db: '-12.0 dB', vol: 55, mute: false, solo: false, afv: false },
+    { name: 'VT', db: '-7.1 dB', vol: 72, mute: false, solo: false, afv: false },
+    { name: 'M/E', db: '-6.0 dB', vol: 78, mute: false, solo: false, afv: false },
+    { name: 'MASTER', db: '0.0 dB', vol: 100, master: true, mute: false, solo: false, afv: false }
+  ];
+
+  let currentView = 'mesa';
+  let activePv = 'CAM 3';
+  let activePgm = 'CAM 1';
+  let isRecording = false;
+  let isStreaming = false;
+  let dskStates = { 1: true, 2: false, 3: false, 4: false };
+
+  function showToast(msg) {
+    const el = document.getElementById('toast-el');
+    if (!el) return;
+    el.textContent = msg;
+    el.style.display = 'block';
+    clearTimeout(el._timer);
+    el._timer = setTimeout(() => { el.style.display = 'none'; }, 2500);
+  }
+
+  function switchView(viewName) {
+    currentView = viewName;
+    document.querySelectorAll('.ws-tab').forEach(b => b.classList.remove('active'));
+    const activeTab = document.getElementById(`tab-${viewName}`);
+    if (activeTab) activeTab.classList.add('active');
+
+    const topSubtitle = document.getElementById('topbar-sub');
+    if (topSubtitle) {
+      if (viewName === 'mesa') topSubtitle.textContent = 'Modular Studio';
+      if (viewName === 'replay') topSubtitle.textContent = 'Replay Console';
+      if (viewName === 'config') topSubtitle.textContent = 'Configurações de Produção';
+    }
+
+    document.querySelectorAll('.view-pane').forEach(p => p.classList.remove('active'));
+    const targetPane = document.getElementById(`view-${viewName}`);
+    if (targetPane) targetPane.classList.add('active');
+  }
+
+  function highlightMixer() {
+    const mixer = document.getElementById('mixer-container');
+    if (mixer) {
+      mixer.style.boxShadow = '0 0 12px rgba(56, 189, 248, 0.6)';
+      setTimeout(() => { mixer.style.boxShadow = ''; }, 1000);
+    }
+  }
+
+  function renderSwitchBuses() {
+    const pvStrip = document.getElementById('pv-bus-strip');
+    const pgmStrip = document.getElementById('pgm-bus-strip');
+    if (!pvStrip || !pgmStrip) return;
+
+    pvStrip.replaceChildren();
+    pgmStrip.replaceChildren();
+
+    CANONICAL_SOURCES.forEach(src => {
+      const btnPv = document.createElement('div');
+      btnPv.className = 'bus-item-btn' + (src.name === activePv ? ' selected' : '');
+      btnPv.innerHTML = `
+        <img class="bus-item-thumb" src="${src.img}" alt="${src.name}">
+        <div class="bus-item-label">
+          <span class="bus-num">${src.id}</span>
+          <span>${src.name}</span>
+        </div>
+      `;
+      btnPv.onclick = () => selectPreview(src.name);
+      pvStrip.append(btnPv);
+
+      const btnPgm = document.createElement('div');
+      btnPgm.className = 'bus-item-btn' + (src.name === activePgm ? ' selected' : '');
+      btnPgm.innerHTML = `
+        <img class="bus-item-thumb" src="${src.img}" alt="${src.name}">
+        <div class="bus-item-label">
+          <span class="bus-num">${src.id}</span>
+          <span>${src.name}</span>
+        </div>
+      `;
+      btnPgm.onclick = () => selectProgram(src.name);
+      pgmStrip.append(btnPgm);
+    });
+  }
+
+  function renderSourcesGrid(filter = 'all', query = '') {
+    const grid = document.getElementById('sources-grid');
+    if (!grid) return;
+    grid.replaceChildren();
+
+    CANONICAL_SOURCES.forEach(src => {
+      if (filter !== 'all' && src.type !== filter) return;
+      if (query && !src.name.toLowerCase().includes(query.toLowerCase())) return;
+
+      const tile = document.createElement('div');
+      tile.className = 'source-tile' + (src.name === activePgm ? ' is-pgm' : (src.name === activePv ? ' is-pv' : ''));
+      
+      let playerHtml = '';
+      if (src.isVt) {
+        playerHtml = `
+          <div class="tile-player-bar">
+            <span class="tile-play-btn" onclick="toggleVtPlay(${src.id}, event)">${src.playing ? '⏸' : '▶'} ⏹</span>
+            <span id="vt-timecode">${src.cur} / ${src.dur}</span>
+          </div>
+        `;
+      }
+
+      tile.innerHTML = `
+        <div class="tile-top">
+          <span class="tile-num">${src.id}</span>
+          <span class="tile-name">${src.name}</span>
+          <span class="tile-menu" onclick="showToast('Menu de propriedades da ${src.name}')">⋮</span>
+        </div>
+        <div class="tile-view">
+          <img src="${src.img}" alt="${src.name}">
+          ${playerHtml}
+        </div>
+      `;
+
+      tile.onclick = () => selectPreview(src.name);
+      tile.ondblclick = () => selectProgram(src.name);
+
+      grid.append(tile);
+    });
+  }
+
+  function filterSources(tab, btn) {
+    document.querySelectorAll('.src-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderSourcesGrid(tab, document.getElementById('source-search')?.value || '');
+  }
+
+  function searchSources(q) {
+    const activeTab = document.querySelector('.src-tab.active')?.getAttribute('onclick') || '';
+    let tab = 'all';
+    if (activeTab.includes("'cam'")) tab = 'cam';
+    if (activeTab.includes("'player'")) tab = 'player';
+    if (activeTab.includes("'comp'")) tab = 'comp';
+    renderSourcesGrid(tab, q);
+  }
+
+  let vtTimer = null;
+  function toggleVtPlay(id, ev) {
+    ev.stopPropagation();
+    const vt = CANONICAL_SOURCES.find(s => s.id === id);
+    if (!vt) return;
+    vt.playing = !vt.playing;
+    
+    if (vt.playing) {
+      showToast('Reprodução do VT iniciada');
+      let sec = 0;
+      vtTimer = setInterval(() => {
+        sec++;
+        if (sec > 6) { sec = 0; }
+        vt.cur = '00:0' + sec;
+        const tcEl = document.getElementById('vt-timecode');
+        if (tcEl) tcEl.textContent = `${vt.cur} / ${vt.dur}`;
+      }, 1000);
+    } else {
+      clearInterval(vtTimer);
+      showToast('Reprodução do VT pausada');
+    }
+    renderSourcesGrid();
+  }
+
+  function selectPreview(name) {
+    activePv = name;
+    const src = CANONICAL_SOURCES.find(s => s.name === name);
+    const pvImg = document.getElementById('pv-view-img');
+    const pvTitle = document.getElementById('pv-title');
+    if (pvTitle) pvTitle.textContent = name;
+    if (pvImg && src) pvImg.src = src.img;
+    renderSwitchBuses();
+    renderSourcesGrid();
+    apiCmd('preview', { input: name });
+  }
+
+  function selectProgram(name) {
+    activePgm = name;
+    const src = CANONICAL_SOURCES.find(s => s.name === name);
+    const pgmImg = document.getElementById('pgm-view-img');
+    const pgmTitle = document.getElementById('pgm-title');
+    if (pgmTitle) pgmTitle.textContent = name;
+    if (pgmImg && src) pgmImg.src = src.img;
+    renderSwitchBuses();
+    renderSourcesGrid();
+    apiCmd('active', { input: name });
+  }
+
+  function triggerCut() {
+    const prevPgm = activePgm;
+    const prevPv = activePv;
+    activePgm = prevPv;
+    activePv = prevPgm;
+
+    const pgmSrc = CANONICAL_SOURCES.find(s => s.name === activePgm);
+    const pvSrc = CANONICAL_SOURCES.find(s => s.name === activePv);
+
+    document.getElementById('pgm-title').textContent = activePgm;
+    document.getElementById('pv-title').textContent = activePv;
+
+    if (pgmSrc) document.getElementById('pgm-view-img').src = pgmSrc.img;
+    if (pvSrc) document.getElementById('pv-view-img').src = pvSrc.img;
+
+    renderSwitchBuses();
+    renderSourcesGrid();
+    apiCmd('cut');
+  }
+
+  function triggerAuto() {
+    const durMs = Number(document.getElementById('trans-time')?.value || 800);
+    const pgmImg = document.getElementById('pgm-view-img');
+    const btnAuto = document.getElementById('btn-auto');
+    if (btnAuto) btnAuto.classList.add('active');
+
+    pgmImg.style.transition = `opacity ${durMs}ms ease-in-out`;
+    pgmImg.style.opacity = '0.3';
+
+    setTimeout(() => {
+      triggerCut();
+      pgmImg.style.opacity = '1';
+      setTimeout(() => {
+        pgmImg.style.transition = '';
+        if (btnAuto) btnAuto.classList.remove('active');
+      }, 100);
+    }, durMs);
+  }
+
+  const tbarWrap = document.getElementById('tbar-wrap');
+  const tbarHandle = document.getElementById('tbar-handle');
+  if (tbarWrap && tbarHandle) {
+    let isDraggingTbar = false;
+    const setTbarPos = (e) => {
+      const rect = tbarWrap.getBoundingClientRect();
+      let pos = (e.clientY - rect.top) / rect.height;
+      pos = Math.max(0, Math.min(1, pos));
+      tbarHandle.style.top = (pos * 100) + '%';
+      
+      const pgmImg = document.getElementById('pgm-view-img');
+      if (pgmImg) pgmImg.style.opacity = (1 - (pos * 0.7)).toString();
+      return pos;
+    };
+
+    tbarWrap.addEventListener('pointerdown', (e) => {
+      isDraggingTbar = true;
+      tbarWrap.setPointerCapture(e.pointerId);
+      setTbarPos(e);
+    });
+    tbarWrap.addEventListener('pointermove', (e) => {
+      if (isDraggingTbar) setTbarPos(e);
+    });
+    tbarWrap.addEventListener('pointerup', (e) => {
+      if (isDraggingTbar) {
+        isDraggingTbar = false;
+        try { tbarWrap.releasePointerCapture(e.pointerId); } catch {}
+        const finalPos = setTbarPos(e);
+        if (finalPos > 0.85) {
+          triggerCut();
+        }
+        tbarHandle.style.top = '100%';
+        const pgmImg = document.getElementById('pgm-view-img');
+        if (pgmImg) pgmImg.style.opacity = '1';
+      }
+    });
+  }
+
+  function toggleDsk(num, type) {
+    dskStates[num] = !dskStates[num];
+    const row = document.getElementById(`dsk-row-${num}`);
+    const btn = row?.querySelector(`.btn-dsk.${type}`);
+    if (btn) btn.classList.toggle('active', dskStates[num]);
+
+    const overlay = document.getElementById(`overlay-dsk-${num}`);
+    if (overlay) overlay.classList.toggle('visible', dskStates[num]);
+
+    showToast(`DSK ${num} ${dskStates[num] ? 'ativado NO AR' : 'desativado'}`);
+    apiCmd('overlay', { channel: num, active: dskStates[num] });
+  }
+
+  function renderMixerStrips() {
+    const container = document.getElementById('mixer-strips');
+    if (!container) return;
+    container.replaceChildren();
+
+    AUDIO_CHANNELS.forEach(ch => {
+      const strip = document.createElement('div');
+      strip.className = 'channel-strip' + (ch.master ? ' master' : '');
+      strip.innerHTML = `
+        <span class="strip-name" title="${ch.name}">${ch.name}</span>
+        <button type="button" class="btn-headphone" onclick="this.classList.toggle('active')">🎧</button>
+        <div class="fader-vu-group">
+          <div class="fader-track-wrap" data-ch-track="${ch.name}">
+            <div class="fader-cap" data-ch-cap="${ch.name}" style="top:${100 - ch.vol}%;"></div>
+          </div>
+          <div class="vu-meter-vert">
+            <div class="vu-track-col"><div class="vu-fill" data-meter-l="${ch.name}" style="height:${ch.vol * 0.7}%;"></div></div>
+            <div class="vu-track-col"><div class="vu-fill" data-meter-r="${ch.name}" style="height:${ch.vol * 0.65}%;"></div></div>
+          </div>
+        </div>
+        <span class="db-val" data-ch-db="${ch.name}">${ch.db}</span>
+        <div class="pan-knob-box"><span>L</span><span>•</span><span>R</span></div>
+        <div class="strip-btns-bottom">
+          <button type="button" class="btn-strip-action mute ${ch.mute ? 'active' : ''}" onclick="this.classList.toggle('active')">M</button>
+          <button type="button" class="btn-strip-action solo ${ch.solo ? 'active' : ''}" onclick="this.classList.toggle('active')">S</button>
+          <button type="button" class="btn-strip-action afv ${ch.afv ? 'active' : ''}" onclick="this.classList.toggle('active')">AFV</button>
+        </div>
+      `;
+
+      const track = strip.querySelector(`[data-ch-track="${ch.name}"]`);
+      const cap = strip.querySelector(`[data-ch-cap="${ch.name}"]`);
+      const dbLabel = strip.querySelector(`[data-ch-db="${ch.name}"]`);
+      if (track && cap) {
+        let isDragging = false;
+        const setPos = (e) => {
+          const rect = track.getBoundingClientRect();
+          let r = (e.clientY - rect.top) / rect.height;
+          r = Math.max(0, Math.min(1, r));
+          const vol = Math.round((1 - r) * 100);
+          cap.style.top = (r * 100) + '%';
+          const db = (vol === 0) ? '-inf dB' : ((vol - 100) * 0.4).toFixed(1) + ' dB';
+          if (dbLabel) dbLabel.textContent = db;
+        };
+        track.addEventListener('pointerdown', (e) => {
+          isDragging = true;
+          track.setPointerCapture(e.pointerId);
+          setPos(e);
+        });
+        track.addEventListener('pointermove', (e) => { if (isDragging) setPos(e); });
+        track.addEventListener('pointerup', (e) => {
+          if (isDragging) {
+            isDragging = false;
+            try { track.releasePointerCapture(e.pointerId); } catch {}
+          }
+        });
+      }
+
+      container.append(strip);
+    });
+  }
+
+  setInterval(() => {
+    AUDIO_CHANNELS.forEach(ch => {
+      const fillL = document.querySelector(`[data-meter-l="${ch.name}"]`);
+      const fillR = document.querySelector(`[data-meter-r="${ch.name}"]`);
+      if (fillL && fillR) {
+        const jitterL = Math.min(95, Math.max(20, (ch.vol * 0.7) + (Math.random() * 20 - 10)));
+        const jitterR = Math.min(95, Math.max(20, (ch.vol * 0.65) + (Math.random() * 20 - 10)));
+        fillL.style.height = jitterL + '%';
+        fillR.style.height = jitterR + '%';
+      }
+    });
+
+    const pgmVuL = document.getElementById('pgm-vu-l');
+    const pgmVuR = document.getElementById('pgm-vu-r');
+    if (pgmVuL) pgmVuL.style.height = (70 + (Math.random() * 15 - 7)) + '%';
+    if (pgmVuR) pgmVuR.style.height = (68 + (Math.random() * 15 - 7)) + '%';
+  }, 120);
+
+  function setSlowMo(pct) {
+    document.getElementById('slowmo-display').textContent = pct + '%';
+    document.querySelector('.slowmo-slider').value = pct;
+    document.querySelectorAll('.btn-slow-preset').forEach(b => {
+      b.classList.toggle('active', b.textContent.includes(pct + '%'));
+    });
+    showToast(`Velocidade de Replay ajustada para ${pct}%`);
+  }
+
+  function stepJog(frames) {
+    showToast(`Jog/Shuttle: ${frames > 0 ? '+' : ''}${frames} frame(s)`);
+  }
+
+  const jogWheel = document.getElementById('jog-wheel');
+  if (jogWheel) {
+    let isJogging = false;
+    let startY = 0;
+    jogWheel.addEventListener('pointerdown', (e) => {
+      isJogging = true;
+      startY = e.clientY;
+      jogWheel.setPointerCapture(e.pointerId);
+    });
+    jogWheel.addEventListener('pointermove', (e) => {
+      if (!isJogging) return;
+      const diff = startY - e.clientY;
+      if (Math.abs(diff) > 8) {
+        stepJog(diff > 0 ? 1 : -1);
+        startY = e.clientY;
+      }
+    });
+    jogWheel.addEventListener('pointerup', (e) => {
+      isJogging = false;
+      try { jogWheel.releasePointerCapture(e.pointerId); } catch {}
+    });
+  }
+
+  function selectClip(id, tr) {
+    document.querySelectorAll('.clips-table tr').forEach(r => r.classList.remove('selected'));
+    tr.classList.add('selected');
+    showToast(`Lance #${id} selecionado para inspeção`);
+  }
+
+  function loadClipToPlayer(player, id, ev) {
+    ev.stopPropagation();
+    showToast(`Lance #${id} carregado no PLAYER ${player}`);
+  }
+
+  function triggerReplayOnAir() {
+    showToast('🔴 REPLAY NO AR! Transmissão ao vivo em Slow-Motion ativada');
+    const btn = document.querySelector('.btn-big-replay');
+    if (btn) {
+      btn.style.boxShadow = '0 0 20px rgba(239, 68, 68, 1)';
+      setTimeout(() => { btn.style.boxShadow = ''; }, 1200);
+    }
+  }
+
+  function setResPreset(name, btn) {
+    document.querySelectorAll('.cfg-pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const w = document.getElementById('cfg-width');
+    const h = document.getElementById('cfg-height');
+    if (name === '720p') { w.value = '1280'; h.value = '720'; }
+    if (name === '1080p') { w.value = '1920'; h.value = '1080'; }
+    if (name === '4K') { w.value = '3840'; h.value = '2160'; }
+    if (name === 'Vertical') { w.value = '1080'; h.value = '1920'; }
+    showToast(`Formato de produção alterado para ${name}`);
+  }
+
+  function toggleRecord() {
+    isRecording = !isRecording;
+    const pill = document.getElementById('rec-pill');
+    const label = document.getElementById('rec-label');
+    const foot = document.getElementById('foot-rec');
+    if (pill) pill.classList.toggle('recording', isRecording);
+    if (label) label.textContent = isRecording ? 'REC 00:24:18' : 'REC 00:00:00';
+    if (foot) {
+      foot.textContent = isRecording ? '⏹ Parar Gravação' : '🔴 Gravar ⌄';
+      foot.style.color = isRecording ? '#fff' : '#f87171';
+      foot.style.background = isRecording ? '#dc2626' : '#1a1e23';
+    }
+    showToast(isRecording ? 'Gravação Master iniciada em SSD' : 'Gravação finalizada e salva');
+    apiCmd('record', { active: isRecording });
+  }
+
+  function toggleStream() {
+    isStreaming = !isStreaming;
+    const foot = document.getElementById('foot-stream');
+    if (foot) {
+      foot.textContent = isStreaming ? '⏹ Parar Transmissão' : '((•)) Transmitir';
+      foot.style.color = isStreaming ? '#fff' : '#4ade80';
+      foot.style.background = isStreaming ? '#16a34a' : '#1a1e23';
+    }
+    showToast(isStreaming ? 'Transmissão AO VIVO iniciada em SRT/RTMP' : 'Transmissão finalizada');
+    apiCmd('stream', { active: isStreaming });
+  }
+
+  async function apiCmd(action, data = {}) {
+    try {
+      await fetch(API_ORIGIN + '/api/control', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, ...data })
+      });
+    } catch (e) {}
+  }
+
+  setInterval(() => {
+    const d = new Date();
+    const clk = document.getElementById('smpte-clock');
+    if (clk) clk.textContent = d.toTimeString().split(' ')[0];
+  }, 1000);
+
+  renderSwitchBuses();
+  renderSourcesGrid();
+  renderMixerStrips();
+
+  if (location.hash === '#replay') switchView('replay');
+  if (location.hash === '#config') switchView('config');
+  window.addEventListener('hashchange', () => {
+    if (location.hash === '#replay') switchView('replay');
+    else if (location.hash === '#config') switchView('config');
+    else switchView('mesa');
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+{
+  "at": "2026-10-30T21:43:39.856Z",
+  "sizes": [
+    {
+      "name": "1280x800",
+      "width": 1280,
+      "height": 800,
+      "viewport": [
+        1280,
+        800
+      ],
+      "docScrollWidth": 1280,
+      "docClientWidth": 1280,
+      "bodyScrollWidth": 1280,
+      "docScrollHeight": 800,
+      "docClientHeight": 800,
+      "horizontalPageScroll": false,
+      "verticalPageScroll": false,
+      "bank": [
+        973,
+        450,
+        973,
+        450
+      ],
+      "inputBank": [
+        495,
+        1546
+      ],
+      "drawer": [
+        1288,
+        421
+      ],
+      "topbarHeight": 49,
+      "footerHeight": 43,
+      "strips": 11,
+      "outputs": 3
+    },
+    {
+      "name": "1440x900",
+      "width": 1440,
+      "height": 900,
+      "viewport": [
+        1440,
+        900
+      ],
+      "docScrollWidth": 1440,
+      "docClientWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "docScrollHeight": 900,
+      "docClientHeight": 900,
+      "horizontalPageScroll": false,
+      "verticalPageScroll": false,
+      "bank": [
+        1133,
+        550,
+        1133,
+        550
+      ],
+      "inputBank": [
+        655,
+        1546
+      ],
+      "drawer": [
+        1448,
+        421
+      ],
+      "topbarHeight": 49,
+      "footerHeight": 43,
+      "strips": 11,
+      "outputs": 3
+    },
+    {
+      "name": "1600x1000",
+      "width": 1600,
+      "height": 1000,
+      "viewport": [
+        1600,
+        1000
+      ],
+      "docScrollWidth": 1600,
+      "docClientWidth": 1600,
+      "bodyScrollWidth": 1600,
+      "docScrollHeight": 1000,
+      "docClientHeight": 1000,
+      "horizontalPageScroll": false,
+      "verticalPageScroll": false,
+      "bank": [
+        1293,
+        667,
+        1293,
+        667
+      ],
+      "inputBank": [
+        815,
+        1546
+      ],
+      "drawer": [
+        1608,
+        421
+      ],
+      "topbarHeight": 49,
+      "footerHeight": 43,
+      "strips": 11,
+      "outputs": 3
+    }
+  ],
+  "consoleErrors": []
+}

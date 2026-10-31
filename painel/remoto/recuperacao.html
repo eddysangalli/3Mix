@@ -1,1 +1,146 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FreeMix · Recuperação</title><link rel="stylesheet" href="controle.css"><style>main{max-width:none}section{border-radius:0}table{width:100%;background:white;color:#111;border-collapse:collapse}td,th{padding:10px;border-bottom:1px solid #ddd;text-align:left}.workspace{display:grid;grid-template-columns:280px 1fr;gap:8px}#report,#session-status{white-space:pre-wrap}#candidate{padding:10px;border:1px solid #d4a400;background:#3b321b}@media(max-width:750px){.workspace{grid-template-columns:1fr}}</style><link rel="stylesheet" href="studio-dialog.css"></head><body data-page="recuperacao"><header><a href="/">FreeMix</a><h1>Recuperação de projetos</h1><span id="connection">Conectando…</span></header><main><p id="error" hidden role="alert"></p><div id="candidate" hidden><strong id="candidate-title"></strong><p id="candidate-detail"></p><button id="candidate-select">Selecionar sessão para recuperar</button><button id="candidate-dismiss">Dispensar aviso</button></div><div class="workspace"><section><h2>Produção atual</h2><p id="current"></p><label><input id="include-media" type="checkbox"> Incluir mídia e dependências locais (até 2 GB / 1000 arquivos)</label><label><input id="materialize-remote" type="checkbox"> Materializar URLs remotas explicitamente neste backup manual</label><label>URLs HTTPS (uma por linha, sem senhas/tokens)<textarea id="remote-urls" rows="4" placeholder="https://servidor/conteudo.html&#10;https://servidor/dados.json"></textarea></label><p>Captura até 64 arquivos, 10 MB por arquivo, 50 MB total e quatro níveis de dependências estáticas da mesma origem. Dados dinâmicos precisam de URLs explícitas. Não executa JavaScript. Na cópia restaurada, o HTML funciona sem scripts, conexões ou frames; fontes remotas sem cópia ficam desativadas. Não recompõe serviços, streams ao vivo ou logins.</p><button id="backup" class="on">Criar cópia de segurança</button><p>Copia cenas, fontes, composição, áudio, overlays, macros/gatilhos e metadados FreeMix. Arquiva também o perfil. Dependências de pastas e referências estáticas transitivas HTML/CSS/JavaScript e fontes locais ficam incluídas mantendo caminhos relativos.</p><p>Plugins, dispositivos e fontes instaladas ainda precisam existir no computador de destino. Expressões dinâmicas, import maps e bundlers exigem conferência em execução; o diagnóstico indica referências estáticas remotas/dinâmicas e recursos externos da internet.</p><hr><h2>Salvar sessão automaticamente</h2><label><input id="autosave-enabled" type="checkbox" checked> Ativado</label><label>A cada (segundos)<input id="autosave-interval" type="number" min="30" max="3600" value="60"></label><label>Versões por produção<input id="autosave-retention" type="number" min="3" max="100" value="20"></label><button id="autosave-save">Aplicar</button><button id="checkpoint">Salvar versão agora</button><p id="session-status"></p><p>Snapshots periódicos não duplicam mídia. Estados após criação, imagem nova e configurações incluem mídia local para preservar a edição; entram na retenção de versões. Cópias manuais são mantidas. Um aviso de crash exige relatório; reinício da API aparece como sessão interrompida.</p></section><section><div class="project-import"><h2>Importar projeto de outra instalação</h2><p>Escolha uma pasta UUID.fmx criada pela Recuperação do FreeMix. Conferir mostra mídia, dependências e plugins antes de importar. A importação cria uma produção e perfil novos; credenciais são removidas e saídas/automações ficam desligadas.</p><label>Caminho da pasta .fmx<input id="import-project-path" type="text" placeholder="C:\Projetos\UUID.fmx" autocomplete="off"></label><label>Nome novo para a produção<input id="import-project-name" type="text" maxlength="80" placeholder="Meu programa importado"></label><div class="row"><button id="import-project-preview">Conferir projeto</button><button id="import-project-apply" disabled>Importar como produção nova</button></div><p id="import-project-report" role="status"></p><p>A origem fica intacta. Plugins, dispositivos e fontes não são instalados automaticamente. Pare as saídas e Calls antes de confirmar.</p></div><h2>Cópias locais</h2><button id="refresh">Atualizar lista</button><table><thead><tr><th></th><th>Produção / tipo</th><th>Data</th><th>Arquivos</th></tr></thead><tbody id="backups"></tbody></table><label>Novo nome da produção recuperada<input id="name" maxlength="80" placeholder="Programa recuperado"></label><label><input id="restore-profile" type="checkbox" checked> Recuperar também o perfil de vídeo, gravação e transmissão</label><button id="diagnose">Conferir plugins, dispositivos e dependências</button><button id="journal-plan">Conferir ações após snapshot</button><label><input id="replay-journal" type="checkbox"> Reaplicar ações operacionais posteriores registradas (somente na cópia nova)</label><p>Preview/Programa, overlays, áudio, mídia, edição de slots/composição, GC e AFV registrados podem ser reaplicados. Criações, variantes, títulos e imagens locais confirmados recebem estados posteriores íntegros. A recuperação mantém UUID e remapeia mídias da cópia. Configurações de saídas vão para perfil novo, desligadas. Edições nativas fora da API e ações externas ainda geram lacunas; Calls e start de saídas não são reexecutados.</p><label>Mapear dependências ausentes (opcional)<textarea id="dependency-map" rows="3" placeholder='{"D:\\antigo\\imagem.png":"D:\\novo\\imagem.png"}'></textarea></label><p>Somente caminhos locais já referenciados pela cópia. Estados posteriores de saídas são recuperados em perfil separado, com início automático desligado.</p><button id="restore">Recuperar como nova produção</button><p>Pare gravações, transmissões, câmera virtual, retornos dos Calls e macros antes de recuperar. A produção original permanece disponível; filtros de gravação automática são desativados na cópia.</p><p id="report" role="status"></p></section></div></main><script src="controle.js"></script><script src="recuperacao.js"></script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Recuperação e Backup de Projetos</title>
+<link rel="stylesheet" href="vmix-dialogo.css">
+<style>
+.vd-status table { width: 100%; border-collapse: collapse; }
+.vd-status th, .vd-status td { padding: 4px 8px; border: 1px solid #39444d; text-align: left; font-size: 11px; }
+.vd-status th { background: #26303a; font-weight: 700; position: sticky; top: 0; z-index: 1; }
+.vd-status td input[type=radio] { margin: 0; vertical-align: middle; }
+#candidate { padding: 8px 12px; border: 1px solid #d4a400; background: #3b321b; margin-bottom: 8px; }
+details summary { cursor: pointer; font-weight: 700; color: #fff; padding: 4px 0; outline: none; }
+details summary:hover { color: #1e7fd6; }
+pre#report, pre#import-project-report { white-space: pre-wrap; word-break: break-all; max-height: 120px; overflow-y: auto; background: #12171b; border: 1px solid #39444d; padding: 6px; font: 11px Consolas, monospace; }
+</style>
+</head>
+<body data-page="recuperacao" class="vd">
+<div class="vd-window vd-fill">
+  <div class="vd-strip">
+    <span class="vd-title">Recuperação e Segurança</span>
+    <span class="vd-flex"></span>
+    <span id="current" class="vd-note" style="font-size:11px">Aguardando motor...</span>
+    <span id="connection" hidden></span>
+  </div>
+
+  <p id="error" class="vd-msg vd-error" hidden role="alert" style="margin:4px 12px"></p>
+
+  <div id="candidate" hidden>
+    <div id="candidate-title" style="font-weight:700;color:#fadb14"></div>
+    <p id="candidate-detail" style="margin:4px 0;font-size:11px"></p>
+    <div class="vd-inline" style="gap:6px">
+      <button id="candidate-select" class="vd-warn">Selecionar Sessão para Recuperar</button>
+      <button id="candidate-dismiss">Dispensar Aviso</button>
+    </div>
+  </div>
+
+  <div class="vd-body" style="padding-bottom:0">
+    <div class="vd-row">
+      <span>Cópias Salvas</span>
+      <div class="vd-inline" style="flex:1">
+        <button id="refresh">Atualizar Lista</button>
+        <span class="vd-note" style="font-size:11px">Selecione uma versão abaixo para inspecionar ou restaurar:</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="vd-status vd-grow" style="margin: 4px 12px; min-height: 140px; overflow: auto;">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:30px"></th>
+          <th style="width:50%">Produção / Tipo</th>
+          <th style="width:30%">Data do Registro</th>
+          <th style="width:15%">Arquivos</th>
+        </tr>
+      </thead>
+      <tbody id="backups"></tbody>
+    </table>
+  </div>
+
+  <div class="vd-body" style="padding-top:4px">
+    <div class="vd-row">
+      <span>Restaurar Cópia</span>
+      <div class="vd-inline" style="flex-wrap:wrap;gap:6px">
+        <input id="name" maxlength="80" placeholder="Nome para a produção recuperada" spellcheck="false" style="max-width:260px">
+        <label class="vd-check"><input id="restore-profile" type="checkbox" checked> Perfil de vídeo/saídas</label>
+        <label class="vd-check"><input id="replay-journal" type="checkbox"> Reaplicar ações operacionais</label>
+      </div>
+    </div>
+
+    <div class="vd-row">
+      <span>Ações na Cópia</span>
+      <div class="vd-inline" style="gap:6px">
+        <button id="diagnose">Conferir Dependências</button>
+        <button id="journal-plan">Conferir Histórico de Ações</button>
+        <button id="restore" class="vd-on">Recuperar como Nova Produção</button>
+      </div>
+    </div>
+
+    <textarea id="dependency-map" rows="1" placeholder='Mapear caminhos alterados (opcional): {"D:\\antigo":"D:\\novo"}' style="width:100%;height:24px;font:11px Consolas,monospace;background:#e9eaeb;color:#000;border:1px solid #6f757b;padding:2px;margin:2px 0" hidden></textarea>
+
+    <pre id="report" role="status" style="margin:4px 0"></pre>
+
+    <!-- Seções Avançadas: Backup Manual e Salvamento Automático -->
+    <details class="vd-advanced" style="margin-top:4px">
+      <summary>Criar Cópia Manual e Configurar Autosave Periódico</summary>
+      <div class="vd-row">
+        <span>Cópia Manual</span>
+        <div class="vd-inline" style="flex-wrap:wrap;gap:6px">
+          <label class="vd-check"><input id="include-media" type="checkbox"> Mídia local (até 2GB)</label>
+          <label class="vd-check"><input id="materialize-remote" type="checkbox"> Materializar URLs</label>
+          <button id="backup" class="vd-on">Criar Cópia de Segurança Agora</button>
+        </div>
+      </div>
+      <div class="vd-row">
+        <span>URLs Remotas</span>
+        <textarea id="remote-urls" rows="2" placeholder="https://servidor/conteudo.html (uma por linha)" style="width:100%;font:11px Consolas,monospace;background:#e9eaeb;color:#000;border:1px solid #6f757b;padding:2px"></textarea>
+      </div>
+
+      <div class="vd-row" style="margin-top:6px">
+        <span>Autosave</span>
+        <div class="vd-inline" style="flex-wrap:wrap;gap:8px">
+          <label class="vd-check"><input id="autosave-enabled" type="checkbox" checked> Ativado</label>
+          <label class="vd-check">A cada <input id="autosave-interval" type="number" min="30" max="3600" value="60" style="width:50px"> s</label>
+          <label class="vd-check">Retenção <input id="autosave-retention" type="number" min="3" max="100" value="20" style="width:45px"> versões</label>
+          <button id="autosave-save">Aplicar Configuração</button>
+          <button id="checkpoint">Salvar Versão Agora</button>
+          <span id="session-status" class="vd-note" style="font-size:11px"></span>
+        </div>
+      </div>
+    </details>
+
+    <!-- Importar projeto .fmx de outra máquina -->
+    <details class="vd-advanced" style="margin-top:4px">
+      <summary>Importar Pacote UUID.fmx de Outra Máquina</summary>
+      <div class="vd-row">
+        <span>Pasta .fmx</span>
+        <div class="vd-inline" style="flex:1">
+          <input id="import-project-path" type="text" placeholder="C:\Projetos\UUID.fmx" spellcheck="false" autocomplete="off">
+          <input id="import-project-name" type="text" maxlength="80" placeholder="Nome da produção importada" spellcheck="false" style="max-width:200px">
+        </div>
+      </div>
+      <div class="vd-row">
+        <span></span>
+        <div class="vd-inline" style="gap:6px">
+          <button id="import-project-preview">Conferir Pacote</button>
+          <button id="import-project-apply" class="vd-on" disabled>Importar Produção</button>
+        </div>
+      </div>
+      <pre id="import-project-report" role="status" style="margin:4px 0"></pre>
+    </details>
+  </div>
+
+  <div class="vd-bar">
+    <span class="vd-flex"></span>
+    <button id="close-btn" onclick="window.FreeMixClosePanel ? window.FreeMixClosePanel() : window.close()">Fechar</button>
+  </div>
+</div>
+
+<script src="fechar-janela.js"></script>
+<script src="controle.js"></script>
+<script src="recuperacao.js"></script>
+</body>
+</html>

@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>3Mix Pro · MultiGravação ISO Master</title>
+  <link rel="stylesheet" href="controle.css">
+  <link rel="stylesheet" href="studio-dialog.css">
+</head>
+<body data-page="iso" class="iso-body">
+
+  <!-- TOPBAR MASTER BROADCAST -->
+  <header class="iso-header">
+    <div class="iso-header-left">
+      <a href="/" class="brand-link" title="Voltar ao Hub Principal">
+        <span class="brand-badge">3MIX PRO</span>
+      </a>
+      <div class="header-titles">
+        <h1>MultiGravação ISO · MultiCorder Master</h1>
+        <span class="sub-label">Gravação independente canal por canal com sincronismo de timecode</span>
+      </div>
+    </div>
+
+    <div class="iso-header-right">
+      <div class="engine-pill" id="connection-pill">
+        <span class="led-dot" id="led-indicator"></span>
+        <span id="connection">Conectando ao Motor…</span>
+      </div>
+      <div class="rec-banner-pill" id="iso-status-wrap">
+        <span class="tally-rec-dot" id="tally-rec-dot"></span>
+        <h2 id="iso-status">ISO Parado</h2>
+      </div>
+    </div>
+  </header>
+
+  <!-- CORPO PRINCIPAL -->
+  <main class="iso-main">
+    <div id="message" role="status" aria-live="polite"></div>
+
+    <!-- WORKSPACE SUPERIOR: 2 COLUNAS HARMONIOSAS (GLOBAIS + OVERRIDES) -->
+    <div class="iso-workspace">
+      
+      <!-- CARD 1: CONFIGURAÇÕES GLOBAIS DA MULTIGRAVAÇÃO -->
+      <section id="iso-options" class="iso-card iso-global-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h3>⚙️ Padrões Globais de Gravação ISO</h3>
+            <p>Configurações herdadas por todas as entradas e câmeras da mesa</p>
+          </div>
+          <span class="badge-tag">Padrão da Mesa</span>
+        </div>
+
+        <!-- Seletor de Formato Broadcast -->
+        <div class="format-selector-group">
+          <span class="group-label">Formato do Contêiner Broadcast:</span>
+          <nav class="iso-format-tabs" aria-label="Formato de Gravação">
+            <button type="button" data-iso-format="mpegts" class="format-btn selected" title="Recomendado: Resiliente contra quedas de energia">
+              <span class="fmt-icon">🎞️</span>
+              <span class="fmt-name">MPEG-2 TS</span>
+              <span class="fmt-desc">Anti-corrupção</span>
+            </button>
+            <button type="button" data-iso-format="mkv" class="format-btn" title="Ideal para multi-trilhas de áudio">
+              <span class="fmt-icon">📦</span>
+              <span class="fmt-name">MKV</span>
+              <span class="fmt-desc">Multi-trilhas</span>
+            </button>
+            <button type="button" data-iso-format="mp4_safe" class="format-btn" title="Grava em MKV seguro e converte para MP4 ao parar">
+              <span class="fmt-icon">🎬</span>
+              <span class="fmt-name">MP4 Seguro</span>
+              <span class="fmt-desc">MKV + Remux</span>
+            </button>
+          </nav>
+          <select id="iso-format" hidden>
+            <option value="mpegts">MPEG-2 TS</option>
+            <option value="mkv">MKV</option>
+            <option value="mp4_safe">MP4 seguro (MKV + remux)</option>
+          </select>
+        </div>
+
+        <!-- Grid de Campos de Configuração -->
+        <div class="form-grid">
+          <div class="field-col">
+            <label for="iso-encoder" class="form-label">Codificador de Vídeo</label>
+            <select id="iso-encoder" class="form-control">
+              <option value="default">H.264 / CPU (Padrão)</option>
+              <option value="obs_x264">H.264 x264 / CPU</option>
+            </select>
+            <small class="field-hint">Aceleração de hardware detectada automaticamente</small>
+          </div>
+
+          <div class="field-col">
+            <label for="iso-crf" class="form-label">Qualidade CRF / QP (0 a 51)</label>
+            <div class="input-with-badge">
+              <input id="iso-crf" type="number" min="0" max="51" value="23" class="form-control mono">
+              <span class="quality-badge" title="23 = Equilíbrio / 18 = Alta Broadcast / 14 = Master">CRF 23 (Padrão)</span>
+            </div>
+            <small class="field-hint">Menor valor = maior qualidade e maior arquivo</small>
+          </div>
+
+          <div class="field-col">
+            <label for="iso-audio" class="form-label">Roteamento de Áudio Global</label>
+            <select id="iso-audio" class="form-control">
+              <option value="input">Áudio da Própria Entrada (Direto)</option>
+              <option value="master">Master PGM (Trilha 1)</option>
+              <option value="bus-a">Bus A (Trilha 2)</option>
+              <option value="bus-b">Bus B (Trilha 3)</option>
+              <option value="all-tracks">Todas as 6 Trilhas ISO</option>
+              <option value="source">Fonte Pública Dedicada…</option>
+            </select>
+          </div>
+
+          <div class="field-col">
+            <label for="iso-audio-source" class="form-label">Fonte de Áudio Pública</label>
+            <select id="iso-audio-source" class="form-control">
+              <option value="">Selecione a fonte pública…</option>
+            </select>
+            <small class="field-hint">Aplicável apenas quando 'Fonte Pública' for selecionada</small>
+          </div>
+
+          <div class="field-col">
+            <label for="iso-split" class="form-label">Novo Arquivo a Cada (Divisão)</label>
+            <div class="input-group">
+              <input id="iso-split" type="number" min="0" max="1440" step="1" value="0" class="form-control mono">
+              <span class="input-addon">minutos</span>
+            </div>
+            <small class="field-hint">0 = Gravação contínua sem quebra de arquivo</small>
+          </div>
+
+          <div class="field-col">
+            <label for="iso-prefix" class="form-label">Prefixo dos Nomes de Arquivo</label>
+            <input id="iso-prefix" value="cam" maxlength="40" class="form-control mono" placeholder="ex: cam">
+            <small class="field-hint">Gera nomes como [prefixo]_[Entrada]_[Data].ts</small>
+          </div>
+
+          <div class="field-col full-width">
+            <label for="iso-directory" class="form-label">Pasta Base de Gravação ISO</label>
+            <div class="input-group">
+              <input id="iso-directory" maxlength="500" class="form-control" placeholder="Vazio: pasta padrão do perfil atual">
+            </div>
+            <small class="field-hint">Cada sessão ISO cria uma subpasta automática com carimbo de data/hora</small>
+          </div>
+        </div>
+      </section>
+
+      <!-- CARD 2: QUALIDADE E FORMATO POR ENTRADA (OVERRIDE) -->
+      <section id="iso-extra" class="iso-card iso-extra-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h3>🎛️ Personalização Por Entrada (Override)</h3>
+            <p>Configuração individual de resolução, codec, bitrate e áudio para uma câmera específica</p>
+          </div>
+          <span class="badge-tag accent">Avançado</span>
+        </div>
+
+        <div class="override-selector-bar">
+          <label for="iso-own-input" class="form-label">Selecione a Entrada a Configurar:</label>
+          <select id="iso-own-input" class="form-control highlight-select">
+            <option value="">Carregando entradas da mesa…</option>
+          </select>
+        </div>
+
+        <!-- Subgrid de Parâmetros Específicos -->
+        <div class="form-grid">
+          <div class="field-col">
+            <label for="iso-own-size" class="form-label">Resolução Dedicada</label>
+            <input id="iso-own-size" class="form-control mono" placeholder="Original ou ex: 1280x720">
+            <small class="field-hint">Vazio = resolução nativa da fonte</small>
+          </div>
+
+          <div class="field-col">
+            <label for="iso-own-fps" class="form-label">Taxa de Quadros (FPS)</label>
+            <select id="iso-own-fps" class="form-control">
+              <option value="">Herdar padrão global</option>
+              <option value="1">FPS do Projeto (Total)</option>
+              <option value="2">Metade (1/2 FPS)</option>
+              <option value="3">Um Terço (1/3 FPS)</option>
+              <option value="4">Um Quarto (1/4 FPS)</option>
+            </select>
+          </div>
+
+          <div class="field-col">
+            <label for="iso-own-encoder" class="form-label">Codificador Específico</label>
+            <select id="iso-own-encoder" class="form-control">
+              <option value="">Herdar padrão global</option>
+            </select>
+          </div>
+
+          <div class="field-col">
+            <label for="iso-own-bitrate" class="form-label">Bitrate Dedicado (kbps)</label>
+            <input id="iso-own-bitrate" type="number" min="0" max="50000" class="form-control mono" placeholder="Herdar global; 0 = CRF">
+          </div>
+
+          <div class="field-col">
+            <label for="iso-own-audio" class="form-label">Áudio desta Entrada</label>
+            <select id="iso-own-audio" class="form-control">
+              <option value="input">Áudio da Própria Entrada</option>
+              <option value="master">Master PGM</option>
+              <option value="bus-a">Bus A</option>
+              <option value="bus-b">Bus B</option>
+              <option value="all-tracks">Todas as 6 Trilhas</option>
+              <option value="source">Fonte Pública com Trilha 1</option>
+            </select>
+          </div>
+
+          <div class="field-col">
+            <label for="iso-own-audio-source" class="form-label">Fonte de Áudio Específica</label>
+            <select id="iso-own-audio-source" class="form-control">
+              <option value="">Selecione a fonte pública…</option>
+            </select>
+          </div>
+
+          <div class="field-col full-width">
+            <label for="iso-own-dir" class="form-label">Pasta Exclusiva desta Entrada</label>
+            <input id="iso-own-dir" maxlength="500" class="form-control" placeholder="Vazio: usar pasta global configurada ao lado">
+          </div>
+
+          <!-- Campos Ocultos para compatibilidade com script legado -->
+          <input id="iso-width" type="hidden" value="0">
+          <input id="iso-height" type="hidden" value="0">
+          <select id="iso-fps" hidden><option value="1">1</option></select>
+          <input id="iso-bitrate" type="hidden" value="0">
+        </div>
+
+        <!-- Botões de Ação do Override -->
+        <div class="override-actions-bar">
+          <button type="button" id="iso-own-set" class="btn btn-primary">
+            <span>✓</span> Usar Opções Próprias nesta Entrada
+          </button>
+          <button type="button" id="iso-own-clear" class="btn btn-secondary">
+            <span>↺</span> Voltar às Opções Globais
+          </button>
+        </div>
+
+        <!-- Status de Overrides Ativos -->
+        <div class="active-overrides-box">
+          <span class="box-lbl">Status de Personalização:</span>
+          <p id="iso-own-list" class="override-summary-text">Todas as entradas usam as opções globais</p>
+        </div>
+
+        <div class="recover-action-bar">
+          <button type="button" id="iso-recover" class="btn btn-outline" title="Converte MKVs de sessões anteriores que não foram finalizadas">
+            <span>🔄</span> Finalizar MP4 de Sessão Interrompida
+          </button>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- SEÇÃO CENTRAL: MONITOR E LISTA DE CÂMERAS ISO -->
+    <section class="iso-card iso-channels-card">
+      <div class="card-header">
+        <div class="card-title-group">
+          <h3>📹 Entradas Selecionadas para Gravação ISO (MultiCorder)</h3>
+          <p>Marque as câmeras e canais que devem ser gravados em arquivos independentes</p>
+        </div>
+        <div class="header-right-tools">
+          <span class="note-pill">Limite de segurança: até 8 canais simultâneos</span>
+        </div>
+      </div>
+
+      <div class="iso-table-wrap">
+        <table class="iso-table" aria-label="Entradas da MultiGravação">
+          <thead>
+            <tr>
+              <th style="width: 280px;">Entrada / Câmera</th>
+              <th style="width: 140px;">Tempo Gravado</th>
+              <th style="width: 140px;">Estado</th>
+              <th>Arquivo de Saída / Destino</th>
+            </tr>
+          </thead>
+          <tbody id="iso-inputs">
+            <tr>
+              <td colspan="4" class="empty-state-cell">
+                <div class="empty-state">
+                  <span class="empty-icon">⏳</span>
+                  <p>Conectando ao motor 3Mix Pro e listando as entradas ativas da mesa…</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- BARRA MASTER DE CONTROLE E DISPARO BROADCAST -->
+    <section class="iso-control-dock">
+      <div class="dock-left">
+        <div class="notes-panel">
+          <p id="iso-source-note" class="tech-note">
+            Grava cada entrada com suas camadas e processamentos. Fonte direta exige áudio público com trilha 1 habilitada.
+          </p>
+          <p id="iso-source-hint" class="hint-note" role="status"></p>
+        </div>
+      </div>
+
+      <div class="dock-actions">
+        <button type="button" id="iso-save" class="btn btn-save" title="Salva os parâmetros no motor">
+          <span>💾</span> Salvar Opções
+        </button>
+
+        <div class="rec-buttons-pair">
+          <button type="button" id="iso-start" class="btn btn-rec-start" title="Inicia a gravação independente das entradas marcadas">
+            <span class="rec-circle"></span> Iniciar MultiGravação
+          </button>
+          <button type="button" id="iso-stop" class="btn btn-rec-stop" disabled title="Para e fecha com segurança todos os arquivos ISO">
+            <span class="stop-square"></span> Parar Gravação
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ARQUIVOS GRAVADOS DA SESSÃO -->
+    <details class="iso-files-details">
+      <summary class="files-summary">
+        <span>📁 Arquivos Gravados na Sessão Atual</span>
+        <small>(Clique para expandir o histórico de arquivos)</small>
+      </summary>
+      <div class="files-content">
+        <ul id="iso-files" class="files-list">
+          <li class="empty-files">Nenhuma sessão gravada no momento.</li>
+        </ul>
+      </div>
+    </details>
+
+  </main>
+
+  <script src="controle.js"></script>
+  <script src="iso-avancado.js"></script>
+</body>
+</html>

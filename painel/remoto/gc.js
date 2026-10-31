@@ -1,12 +1,49 @@
 import {models,model,defaults,normalizeData} from '/gc/biblioteca/modelos.js';import {renderGraphic} from '/gc/biblioteca/render.js';
 const el=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));let id=null,template=models[0].id,state={},fingerprint='',dirty=false;
-const styleKeys=['accent','background','foreground','opacity','fontSize','offsetX','offsetY','scale','fontFamily','fontAsset','imageAsset','imageX','imageY','imageWidth','imageHeight','imageOpacity','animation','animationInMs','animationOutMs','animationEasing'];
+const styleKeys=['accent','secondary','background','foreground','designStyle','opacity','fontSize','offsetX','offsetY','scale','fontFamily','fontAsset','imageAsset','imageX','imageY','imageWidth','imageHeight','imageOpacity','animation','animationInMs','animationOutMs','animationEasing'];
+const PRESET_PALETTES=[
+  {name:'🔴 TV Notícias Pro',accent:'#e11d48',secondary:'#fb7185',background:'#111622',foreground:'#ffffff',designStyle:'classic_tv',animation:'slide'},
+  {name:'🔵 Royal Broadcast',accent:'#0284c7',secondary:'#38bdf8',background:'#0d1726',foreground:'#ffffff',designStyle:'classic_tv',animation:'slide'},
+  {name:'🟡 Esportes Arena Ouro',accent:'#facc15',secondary:'#10b981',background:'#0c2b20',foreground:'#ffffff',designStyle:'modern_internet',animation:'zoom'},
+  {name:'🟢 Agro & Economia',accent:'#10b981',secondary:'#34d399',background:'#0a2618',foreground:'#ffffff',designStyle:'classic_tv',animation:'slide'},
+  {name:'🟣 Podcast Velvet Host',accent:'#a855f7',secondary:'#ec4899',background:'#18181b',foreground:'#ffffff',designStyle:'modern_internet',animation:'fade'},
+  {name:'⚡ Cyber Esports Neon',accent:'#00f0ff',secondary:'#ff007f',background:'#09090b',foreground:'#ffffff',designStyle:'esports_neon',animation:'rotate'},
+  {name:'📐 Suíço Retrô Quadrado',accent:'#f59e0b',secondary:'#d97706',background:'#000000',foreground:'#ffffff',designStyle:'swiss_square',animation:'slide'},
+  {name:'🏢 Corporativo Glass',accent:'#38bdf8',secondary:'#64748b',background:'#182230',foreground:'#ffffff',designStyle:'corporate_glass',animation:'blur_fade'},
+  {name:'🟧 Plantão Urgente Breaking',accent:'#f97316',secondary:'#ef4444',background:'#1a1614',foreground:'#ffffff',designStyle:'classic_tv',animation:'slide'},
+  {name:'🛍️ Live Commerce Oferta',accent:'#f43f5e',secondary:'#fb923c',background:'#1c1517',foreground:'#ffffff',designStyle:'modern_internet',animation:'zoom'},
+  {name:'📱 Mobile Social TikTok',accent:'#06b6d4',secondary:'#ec4899',background:'#111827',foreground:'#ffffff',designStyle:'modern_internet',animation:'slide'},
+  {name:'⚽ Copa dos Campeões',accent:'#fbbf24',secondary:'#22c55e',background:'#092317',foreground:'#ffffff',designStyle:'modern_internet',animation:'zoom'},
+  {name:'🏛️ Apuração / Eleições',accent:'#eab308',secondary:'#3b82f6',background:'#101726',foreground:'#ffffff',designStyle:'classic_tv',animation:'slide'},
+  {name:'📺 Noticiário 24h Clean',accent:'#94a3b8',secondary:'#cbd5e1',background:'#0f141c',foreground:'#ffffff',designStyle:'corporate_glass',animation:'fade'},
+  {name:'⛪ Sacro & Louvor',accent:'#f59e0b',secondary:'#d97706',background:'#1c1324',foreground:'#ffffff',designStyle:'classic_tv',animation:'fade'},
+  {name:'🌦️ Previsão & Clima',accent:'#38bdf8',secondary:'#facc15',background:'#0a192f',foreground:'#ffffff',designStyle:'modern_internet',animation:'slide'},
+  {name:'📈 Mercado Financeiro B3',accent:'#10b981',secondary:'#06b6d4',background:'#0b151b',foreground:'#ffffff',designStyle:'corporate_glass',animation:'blur_fade'},
+  {name:'🎙️ Talk Show Late Night',accent:'#c084fc',secondary:'#f43f5e',background:'#120d1c',foreground:'#ffffff',designStyle:'esports_neon',animation:'zoom'},
+  {name:'🎮 Retrô 8-Bit Arcade',accent:'#22c55e',secondary:'#ec4899',background:'#050a06',foreground:'#ffffff',designStyle:'swiss_square',animation:'rotate'},
+  {name:'🏁 Automobilismo F1',accent:'#ef4444',secondary:'#f97316',background:'#141416',foreground:'#ffffff',designStyle:'modern_internet',animation:'slide'}
+];
+function renderPalettes(){
+  const box=el('palette-presets');if(!box)return;
+  box.innerHTML=PRESET_PALETTES.map((p,i)=>`<button type="button" data-preset="${i}" style="border-left:4px solid ${p.accent};border-right:4px solid ${p.secondary};background:${p.background};color:${p.foreground};padding:4px 8px;font-size:11px;font-weight:600;cursor:pointer;border-radius:2px;margin:2px 0;">${p.name}</button>`).join('');
+  box.onclick=e=>{
+    const b=e.target.closest('[data-preset]');if(!b)return;
+    const p=PRESET_PALETTES[Number(b.dataset.preset)];
+    if(el('f-accent'))el('f-accent').value=p.accent;
+    if(el('f-secondary'))el('f-secondary').value=p.secondary;
+    if(el('f-background'))el('f-background').value=p.background;
+    if(el('f-foreground'))el('f-foreground').value=p.foreground;
+    if(el('f-designStyle'))el('f-designStyle').value=p.designStyle;
+    if(el('f-animation') && p.animation)el('f-animation').value=p.animation;
+    dirty=true;preview();buttons();
+  };
+}
 const variantButton=document.createElement('button');variantButton.id='variant';variantButton.textContent='Criar / abrir versão H/V vinculada';el('duplicate').after(variantButton);const unlinkButton=document.createElement('button');unlinkButton.id='unlink';unlinkButton.textContent='Desvincular H/V';variantButton.after(unlinkButton);
 const linkHelp=document.createElement('p');linkHelp.id='link-help';linkHelp.className='notice';el('channel').parentElement.before(linkHelp);
 el('channel').innerHTML=Array.from({length:8},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('');
 function read(){return normalizeData(template,Object.fromEntries(model(template).fields.map(f=>[f.key,el('f-'+f.key).value])));}
 function preview(){try{el('preview').innerHTML=renderGraphic(template,read());el('status').textContent=dirty?'Edições ainda não salvas':'';}catch(e){el('status').textContent=e.message;}}
-function fields(data=defaults(template)){el('model-name').textContent=model(template).name;for(const [target,style] of [['fields',false],['style',true]])el(target).innerHTML=model(template).fields.filter(f=>styleKeys.includes(f.key)===style).map(f=>f.type==='asset'?`<label>${esc(f.label)}<input id="f-${f.key}" type="hidden" value="${esc(data[f.key]||'')}"><input data-gc-asset="${f.key}" data-kind="${f.kind}" type="file" accept="${f.kind==='font'?'.ttf,.otf,.woff2':'.png,.jpg,.jpeg,.webp,.bmp'}"><small>${data[f.key]?'Arquivo local importado':'Nenhum arquivo · até 2 MB'}</small><button type="button" data-remove-asset="${f.key}">Remover arquivo do título</button></label>`:`<label>${esc(f.label)}${f.type==='select'?`<select id="f-${f.key}">${f.options.map(v=>`<option ${v===data[f.key]?'selected':''} value="${esc(v)}">${esc(v)}</option>`).join('')}</select>`:f.key==='lines'?`<textarea id="f-${f.key}" maxlength="2000">${esc(data[f.key])}</textarea>`:`<input id="f-${f.key}" type="${f.type==='color'?'color':f.type==='number'?'number':'text'}" value="${esc(data[f.key])}" ${f.type==='number'?`min="${f.min}" max="${f.max}"`:'maxlength="300"'}>`}</label>`).join('');preview();gallery();}
+function fields(data=defaults(template)){el('model-name').textContent=model(template).name;renderPalettes();for(const [target,style] of [['fields',false],['style',true]])el(target).innerHTML=model(template).fields.filter(f=>styleKeys.includes(f.key)===style).map(f=>f.type==='asset'?`<label>${esc(f.label)}<input id="f-${f.key}" type="hidden" value="${esc(data[f.key]||'')}"><input data-gc-asset="${f.key}" data-kind="${f.kind}" type="file" accept="${f.kind==='font'?'.ttf,.otf,.woff2':'.png,.jpg,.jpeg,.webp,.bmp'}"><small>${data[f.key]?'Arquivo local importado':'Nenhum arquivo · até 2 MB'}</small><button type="button" data-remove-asset="${f.key}">Remover arquivo do título</button></label>`:`<label>${esc(f.label)}${f.type==='select'?`<select id="f-${f.key}">${f.options.map(v=>`<option ${v===data[f.key]?'selected':''} value="${esc(v)}">${esc(v)}</option>`).join('')}</select>`:f.key==='lines'?`<textarea id="f-${f.key}" maxlength="2000">${esc(data[f.key])}</textarea>`:`<input id="f-${f.key}" type="${f.type==='color'?'color':f.type==='number'?'number':'text'}" value="${esc(data[f.key])}" ${f.type==='number'?`min="${f.min}" max="${f.max}"`:'maxlength="300"'}>`}</label>`).join('');preview();gallery();}
 function gallery(){const group=el('collection').value,orientation=el('orientation').value;el('gallery').innerHTML=models.filter(m=>(group==='Todas'||m.collection===group)&&m.orientation===orientation).map(m=>`<button class="card ${template===m.id?'selected':''}" data-template="${m.id}"><img src="/gc/${m.thumbnail}" alt="Miniatura de ${esc(m.name)}"><b>${esc(m.name.split(' · ')[0])}</b><small>${esc(m.collection)}</small></button>`).join('');}
 function select(item){id=item?.id||null;template=item?.template||models.find(m=>m.orientation===el('orientation').value).id;el('orientation').value=model(template).orientation;el('name').value=item?.name||model(template).name;el('channel').value=item?.channel||1;dirty=false;fields(item?.data);buttons();}
 function buttons(){for(const key of ['duplicate','prepare','air','off','remove','variant','unlink'])el(key).disabled=!id||dirty;const linked=state.gcLibrary?.items?.find(i=>i.id===id)?.syncGroup;el('unlink').hidden=!linked;linkHelp.textContent=linked?'Versões H/V vinculadas: textos, cores, fontes e imagem sincronizam ao salvar. Posição e tamanho permanecem próprios de cada formato.':'Crie uma versão H/V vinculada para manter os mesmos dados nos dois formatos.';el('save').disabled=!state.connected;}

@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>3Mix Pro · Overlays e Downstream Keyers 1–8</title>
+  <link rel="stylesheet" href="controle.css">
+  <link rel="stylesheet" href="studio-dialog.css">
+  <style>
+    .channel-tabs { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
+    .channel-tabs button { min-width: 90px; text-align: center; }
+    .channel-tabs button.active { background: #006400; border-color: #00e676; font-weight: bold; }
+    .channel-tabs button.on-air { border-left: 4px solid #ff4444; }
+    .badge-on { background: #ff2222; color: #fff; padding: 2px 6px; font-size: 11px; font-weight: bold; border-radius: 2px; }
+    .badge-off { background: #444; color: #aaa; padding: 2px 6px; font-size: 11px; border-radius: 2px; }
+    .dve-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 6px; margin: 8px 0; }
+    .dve-grid button { padding: 6px 8px; font-size: 12px; text-align: center; }
+    .dve-grid button.active { background: linear-gradient(180deg, #006400 0%, #004d00 100%); border-color: #00e676; color: #fff; box-shadow: 0 0 8px rgba(0,230,118,0.35); }
+    .matrix-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    .matrix-table th, .matrix-table td { padding: 8px; text-align: left; border-bottom: 1px solid var(--line); }
+    .matrix-table tr:hover { background: rgba(255,255,255,0.03); }
+    .action-btn-air { background: #006400; font-weight: bold; }
+    .action-btn-off { background: #881111; font-weight: bold; }
+    .kill-all-btn { background: #b82121; font-weight: bold; padding: 8px 16px; margin-left: auto; }
+  </style>
+</head>
+<body data-page="overlays">
+  <header>
+    <a href="/">FreeMix</a>
+    <h1>Overlays · Downstream Keyers (DSK 1–8)</h1>
+    <span id="connection">Conectando…</span>
+  </header>
+  <main>
+    <div id="message" role="status" aria-live="polite"></div>
+
+    <div class="row" style="margin-bottom:14px;justify-content:space-between">
+      <div>
+        <p style="margin:0;font-size:13px;color:var(--muted)">
+          Controle centralizado dos 8 canais broadcast de Downstream Keyer com transições dedicadas, Stingers, PIP DVE e desarmamento automático.
+        </p>
+      </div>
+      <button id="btn-kill-all" class="kill-all-btn" title="Desarma imediatamente todos os canais de overlay no ar">⚡ Desarmar Todos (Kill All)</button>
+    </div>
+
+    <!-- Barra de Seleção de Canal (DSK 1 a 8) -->
+    <div class="channel-tabs" id="channel-tabs">
+      <button data-channel="1" class="active">DSK 1</button>
+      <button data-channel="2">DSK 2</button>
+      <button data-channel="3">DSK 3</button>
+      <button data-channel="4">DSK 4</button>
+      <button data-channel="5">DSK 5</button>
+      <button data-channel="6">DSK 6</button>
+      <button data-channel="7">DSK 7</button>
+      <button data-channel="8">DSK 8</button>
+    </div>
+
+    <!-- Editor do Canal Selecionado -->
+    <section id="channel-editor">
+      <div class="row" style="justify-content:space-between;margin-bottom:12px">
+        <h2 id="channel-heading" style="margin:0">Canal de Overlay 1 (DSK 1)</h2>
+        <div id="channel-status-badge"><span class="badge-off">FORA DO AR</span></div>
+      </div>
+
+      <div class="form">
+        <!-- Entrada / Cena -->
+        <label>
+          Entrada para Overlay
+          <select id="channel-input">
+            <option value="">(Nenhuma / Fora do Ar)</option>
+          </select>
+        </label>
+
+        <!-- Transição -->
+        <label>
+          Transição Dedicada
+          <select id="channel-transition">
+            <option value="Cut">Cut (Corte Seco)</option>
+            <option value="Fade" selected>Fade (Dissolvência)</option>
+            <option value="Zoom">Zoom</option>
+            <option value="Wipe">Wipe</option>
+            <option value="Slide">Slide</option>
+            <option value="Fly">Fly</option>
+            <option value="Stinger 1">Stinger 1</option>
+            <option value="Stinger 2">Stinger 2</option>
+            <option value="Stinger 3">Stinger 3</option>
+            <option value="Stinger 4">Stinger 4</option>
+          </select>
+        </label>
+
+        <!-- Duração da Transição -->
+        <label>
+          Duração da Transição: <b id="val-duration">500 ms</b>
+          <input type="range" id="channel-duration" min="50" max="5000" step="50" value="500">
+        </label>
+
+        <!-- Modo de Transição (Entrada / Saída) -->
+        <label>
+          Aplicação da Transição
+          <select id="channel-trans-type">
+            <option value="match" selected>Match (Igual na Entrada e Saída)</option>
+            <option value="show">Somente na Entrada (Show)</option>
+            <option value="hide">Somente na Saída (Hide)</option>
+          </select>
+        </label>
+
+        <!-- Auto-Off (Esconder após) -->
+        <label>
+          Auto-Off (Retirar do Ar Automaticamente)
+          <select id="channel-hide-after">
+            <option value="0" selected>Manual (Permanecer até desarmar)</option>
+            <option value="3">3 segundos</option>
+            <option value="5">5 segundos</option>
+            <option value="8">8 segundos (Tarja GC padrão)</option>
+            <option value="10">10 segundos</option>
+            <option value="15">15 segundos</option>
+            <option value="30">30 segundos</option>
+          </select>
+        </label>
+
+        <!-- TIE (Acompanha corte de Programa) -->
+        <label style="align-self:center">
+          <input type="checkbox" id="channel-tie">
+          <span><b>TIE</b> (Chaveia junto com o corte principal CUT / TAKE)</span>
+        </label>
+      </div>
+
+      <!-- Configurações Específicas de Stinger -->
+      <fieldset id="stinger-box" style="margin-top:12px" hidden>
+        <legend>Configuração de Stinger</legend>
+        <div class="row">
+          <label>
+            Ponto de Corte (Cut Point): <b id="val-cutpoint">250 ms</b>
+            <input type="range" id="stinger-cutpoint" min="0" max="3000" step="25" value="250">
+          </label>
+          <label class="check">
+            <input type="checkbox" id="stinger-audio" checked>
+            <span>Som do Stinger somente privado (buffer 80ms)</span>
+          </label>
+        </div>
+      </fieldset>
+
+      <!-- Geometria DVE / PIP (Posicionamento do Overlay) -->
+      <fieldset style="margin-top:12px">
+        <legend>Posicionamento DVE &amp; PIP no Quadro</legend>
+        <p style="font-size:12px;color:var(--muted);margin:0 0 6px">
+          Escolha um preset broadcast ou defina as coordenadas livres em pixels.
+        </p>
+        <div class="dve-grid">
+          <button type="button" data-dve="fullscreen" class="active">Tela Cheia (1:1)</button>
+          <button type="button" data-dve="pip-top-right">PIP Topo Direita</button>
+          <button type="button" data-dve="pip-top-left">PIP Topo Esquerda</button>
+          <button type="button" data-dve="pip-bottom-right">PIP Base Direita</button>
+          <button type="button" data-dve="pip-bottom-left">PIP Base Esquerda</button>
+          <button type="button" data-dve="lower-third">Tarja Lower Third</button>
+          <button type="button" data-dve="split-left">Split Esquerda</button>
+          <button type="button" data-dve="split-right">Split Direita</button>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <label>X (px): <input type="number" id="dve-x" value="0" style="width:90px"></label>
+          <label>Y (px): <input type="number" id="dve-y" value="0" style="width:90px"></label>
+          <label>Largura: <input type="number" id="dve-w" value="1920" style="width:90px"></label>
+          <label>Altura: <input type="number" id="dve-h" value="1080" style="width:90px"></label>
+          <label>Opacidade: <input type="number" id="dve-opacity" min="0" max="1" step="0.05" value="1.0" style="width:70px"></label>
+        </div>
+      </fieldset>
+
+      <!-- Ações do Canal -->
+      <div class="row" style="margin-top:14px">
+        <button id="btn-channel-apply" class="on">💾 Salvar Configurações DSK</button>
+        <button id="btn-channel-take" class="action-btn-air">▶ Colocar no Ar (TAKE)</button>
+        <button id="btn-channel-off" class="action-btn-off">■ Retirar do Ar (OFF)</button>
+      </div>
+    </section>
+
+    <!-- Tabela Geral de Monitoramento dos 8 Canais -->
+    <section style="margin-top:16px">
+      <h2>Matriz de Estado dos 8 Canais de Downstream Keyer</h2>
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th style="width:60px">Canal</th>
+            <th style="width:120px">Status</th>
+            <th>Entrada no Ar</th>
+            <th>Transição</th>
+            <th>Duração</th>
+            <th>Auto-Off</th>
+            <th>TIE</th>
+            <th>DVE Layout</th>
+            <th style="text-align:right">Comando</th>
+          </tr>
+        </thead>
+        <tbody id="matrix-tbody">
+          <!-- Preenchido dinamicamente via overlays.js -->
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="controle.js"></script>
+  <script src="overlays.js"></script>
+</body>
+</html>

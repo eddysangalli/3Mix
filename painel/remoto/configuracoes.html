@@ -3,31 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Configurações</title>
+<title>3Mix · Configurações</title>
 <link rel="stylesheet" href="vmix-dialogo.css">
+<link rel="stylesheet" href="3mix-grafite.css">
+<link rel="stylesheet" href="settings-workspace.css">
 </head>
-<body data-page="configuracoes" class="vd">
-<div class="vd-window vd-fill vd-settings">
-  <div class="vd-main">
-    <nav class="vd-side" id="categories" aria-label="Categorias"></nav>
-    <div class="vd-pane">
-      <div class="vd-body" id="content"></div>
-      <p id="msg" class="vd-msg" role="status"></p>
-    </div>
-  </div>
-  <div class="vd-bar">
-    <button id="import" title="Carrega um arquivo desta categoria para o formulário">Importar</button>
-    <button id="export" title="Salva esta categoria num arquivo">Exportar</button>
-    <button id="default" title="Põe no formulário os valores de fábrica desta categoria">Padrão</button>
-    <span class="vd-flex"></span>
-    <button id="ok">OK</button>
-    <button id="cancel">Cancelar</button>
-  </div>
-  <input id="import-file" type="file" accept="application/json,.json" hidden>
-</div>
-<span id="connection" hidden></span><p id="message" hidden></p>
-<script src="controle.js"></script>
+<body data-page="settings" class="settings">
+<script src="settings-workspace-view.js"></script>
 <script src="fechar-janela.js"></script>
-<script src="configuracoes.js"></script>
+<script src="controle.js"></script>
+<script src="settings-help.js"></script>
+<script src="settings-encoders.js"></script>
+<script src="settings.js"></script>
+<script src="settings-workspace-bindings.js"></script>
 </body>
 </html>

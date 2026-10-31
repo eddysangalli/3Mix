@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Saídas externas</title>
+<link rel="stylesheet" href="vmix-dialogo.css">
+</head>
+<body data-page="externo" class="vd">
+<div class="vd-window" style="width:100%;max-width:880px;margin:24px auto;border-radius:8px;box-shadow:0 16px 48px rgba(0,0,0,0.6)">
+  <div class="vd-body">
+    <!-- 1. Botões numerados 1 a 4 no topo -->
+    <div class="vd-row"><span></span>
+      <div class="vd-nums" id="nums" role="tablist" aria-label="Saídas de rede">
+        <button type="button" data-n="0" role="tab">1</button><button type="button" data-n="1" role="tab">2</button><button type="button" data-n="2" role="tab">3</button><button type="button" data-n="3" role="tab">4</button>
+      </div>
+    </div>
+
+    <!-- 2. Linha Tipo: botões NDI e OMT -->
+    <div class="vd-row"><span>Tipo</span>
+      <div class="vd-inline" id="type-box">
+        <button type="button" id="type-ndi" class="vd-on">NDI</button>
+        <button type="button" id="type-omt">OMT</button>
+        <button type="button" id="type-srt" title="Configurar saídas SRT">SRT</button>
+      </div>
+    </div>
+
+    <!-- 3. Configurações da saída escolhida -->
+    <label class="vd-row"><span>Fonte de vídeo</span><select id="video-source"></select></label>
+    <label class="vd-row"><span>Fonte de áudio</span><select id="audio-source"></select></label>
+    <label class="vd-row"><span>Nome na rede</span><input id="net-name" type="text" maxlength="120" spellcheck="false" autocomplete="off"></label>
+    <label class="vd-row" id="groups-row"><span>Grupos</span><input id="net-groups" type="text" maxlength="300" spellcheck="false" autocomplete="off" placeholder="Padrão: público (deixe vazio)"></label>
+    <div class="vd-row" id="alpha-row"><span></span>
+      <label class="vd-check"><input id="net-alpha" type="checkbox"> <span id="alpha-label">Canal alfa</span></label>
+    </div>
+
+    <!-- Opções avançadas -->
+    <div class="vd-row"><span></span>
+      <label class="vd-check"><input id="show-advanced" type="checkbox"> Mostrar opções avançadas</label>
+    </div>
+    <div class="vd-advanced" id="advanced" hidden>
+      <label class="vd-row" id="precision-row"><span>Precisão OMT</span>
+        <select id="net-precision" class="vd-short">
+          <option value="8">BGRA 8 bits</option>
+          <option value="16">PA16 · RGBA16F</option>
+        </select>
+      </label>
+      <div class="vd-row" id="fillkey-row"><span></span>
+        <label class="vd-check"><input id="net-fillkey" type="checkbox"> Par Fill + Key (SDR 8 bits)</label>
+      </div>
+      <label class="vd-row" id="keyname-row"><span>Nome do Key</span>
+        <input id="net-keyname" type="text" maxlength="120" spellcheck="false" autocomplete="off" placeholder="Nome do sender + Key">
+      </label>
+    </div>
+
+    <div class="vd-gap"></div>
+
+    <!-- 4. Câmera virtual e Tela cheia -->
+    <div class="vd-row"><span>Câmera virtual</span>
+      <div class="vd-inline">
+        <span id="virtual-status" class="vd-note">Consultando…</span>
+        <button type="button" id="virtual-toggle">Ligar</button>
+      </div>
+    </div>
+    <div class="vd-row"><span>Tela cheia</span>
+      <div class="vd-inline" style="gap:6px;flex-wrap:wrap">
+        <button type="button" id="fs-program">Saída</button>
+        <button type="button" id="fs-preview">Preview</button>
+        <button type="button" id="fs-multiview">Multiview</button>
+        <select id="fs-input" style="width:140px"></select>
+        <button type="button" id="fs-open-input">Abrir entrada</button>
+      </div>
+    </div>
+
+    <p id="msg" class="vd-msg" role="status"></p>
+  </div>
+
+  <!-- 5. Tabela Ver Status -->
+  <div class="vd-status" id="status" hidden>
+    <table>
+      <thead><tr><th>#</th><th>Tipo</th><th>Nome</th><th>Fonte</th><th>Estado</th></tr></thead>
+      <tbody id="status-rows"></tbody>
+    </table>
+  </div>
+
+  <!-- 6. Barra de baixo -->
+  <div class="vd-bar">
+    <button type="button" id="start-all">Iniciar tudo</button>
+    <button type="button" id="start-one">Começar 1</button>
+    <button type="button" id="view-status">Ver Status</button>
+    <span class="vd-flex"></span>
+    <button type="button" id="advanced-btn" title="Abre o editor completo de saídas">Avançado</button>
+    <button type="button" id="save-close">Salvar e Fechar</button>
+  </div>
+</div>
+<span id="connection" hidden></span><p id="message" hidden></p>
+<script src="controle.js"></script>
+<script src="fechar-janela.js"></script>
+<script src="externo.js"></script>
+</body>
+</html>

@@ -4,6 +4,16 @@
 (() => {
   let first = location.href;
   try { first = sessionStorage.getItem('freemix.panel.url') || first; sessionStorage.setItem('freemix.panel.url', first); } catch { /* storage may be off */ }
+  window.FreeMixSetPanelTitle = async (title) => {
+    document.title = String(title).slice(0, 100) + ' · 3Mix';
+    try {
+      await fetch('/api/panel-title', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: first, title: String(title).slice(0, 100) }),
+        signal: AbortSignal.timeout(4000)
+      });
+    } catch { /* browser tab: the document title is enough */ }
+  };
   window.FreeMixClosePanel = async () => {
     if (parent !== window) { parent.postMessage({ freemixCloseSettings: true }, location.origin); return; }
     // The engine refuses for a moment while another window is still being closed: ask again a few times.

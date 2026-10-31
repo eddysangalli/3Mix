@@ -1,1 +1,243 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FreeMix · Playout de VT e Listas</title><link rel="stylesheet" href="/controle.css"><link rel="stylesheet" href="/studio-dialog.css"><style>.queue-editor{display:grid;grid-template-columns:1fr 64px 1.2fr 48px;gap:8px}.queue-editor>label{display:flex;flex-direction:column;align-items:stretch;gap:10px;min-width:0}.queue-editor select{height:280px;width:100%;box-sizing:border-box}.queue-editor ol{width:100%;box-sizing:border-box}.queue-editor{margin:16px 0}.queue-editor small{margin-left:16px;color:#59616b}.queue-editor li.selected small{color:white}@media(max-width:720px){.queue-editor{grid-template-columns:minmax(0,1fr) 42px minmax(0,1fr) 36px}}.queue-editor ol{height:280px;margin:0;padding:0;list-style:none;background:white;color:#111;overflow:auto;border:1px solid #a9afb5}.queue-editor li{padding:8px;cursor:pointer}.queue-editor li.selected{background:#006400;color:white}.queue-editor small{float:right}.queue-buttons{display:flex;flex-direction:column;justify-content:center;gap:6px}</style></head><body data-page="playout"><header><a href="/">FreeMix</a><h1>Playout de VT e Listas</h1><span id="connection">Conectando…</span></header><main><div id="message" role="status" aria-live="polite"></div><section><div class="row"><button id="queue-new">Nova playlist</button><button id="queue-delete">Excluir playlist</button><input id="queue-name" value="Playlist" aria-label="Nome da playlist"><select id="queue-list" aria-label="Playlist"></select><button id="queue-save">Salvar</button></div><div class="queue-editor"><label>Entradas disponíveis<select id="queue-available" size="12"></select></label><div class="queue-buttons"><button id="queue-add">&gt;</button><button id="queue-remove">&lt;</button></div><label>Playlist<ol id="queue-items"></ol></label><div class="queue-buttons"><button id="queue-up">▲</button><button id="queue-down">▼</button></div></div><div class="row"><label>Duração do item (segundos, 0 = duração do vídeo)<input id="queue-duration" type="number" min="0" max="86400" value="0"></label><label><input id="queue-loop" type="checkbox">Loop</label><label><input id="queue-auto" type="checkbox" checked>Auto-advance</label><label>Transição<select id="queue-transition"><option value="cut">Cut</option><option value="fade">Fade</option></select></label></div><p id="queue-total"></p><p id="queue-status"></p><div class="row"><button id="queue-start">Começar no selecionado</button><button id="queue-preload">Preparar no Preview</button><button id="queue-next">Próximo no ar</button><button id="queue-hold">Hold / continuar</button><button id="queue-stop">Parar playlist</button></div></section><details><summary>Controles de mídia da entrada</summary><section><label>Fonte de mídia<select id="media-select"></select></label><p id="media-state"></p><p class="big" id="time">--:--</p><label>Posição<input id="seek" type="range" min="0" max="0" value="0"></label><div class="row"><button data-media="PREVIOUS">Anterior</button><button data-media="PLAY">Reproduzir</button><button data-media="PAUSE">Pausar</button><button data-media="STOP">Parar</button><button data-media="RESTART">Reiniciar</button><button data-media="NEXT">Próximo</button></div></section><section class="row"><label>Velocidade (%)<select id="speed"><option>10</option><option>25</option><option>50</option><option>75</option><option>100</option><option>125</option><option>150</option><option>200</option></select></label><label><input type="checkbox" id="loop">Loop</label><label><input type="checkbox" id="autonext">Auto-Next</label></section><section><h2>Arquivos na fonte</h2><ol id="items"></ol><small>Os arquivos são os configurados na entrada da mesa. Próximo/anterior requer uma fonte de playlist; velocidade requer uma fonte de vídeo compatível.</small></section></details></main><script src="/controle.js"></script><script src="/fila.js"></script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3Mix · Media &amp; Playout</title>
+<link rel="stylesheet" href="vmix-dialogo.css">
+<link rel="stylesheet" href="3mix-grafite.css">
+<link rel="stylesheet" href="3mix-janelas.css">
+<style>
+  .vd-window { width: 100%; max-width: 100%; min-height: 100vh; height: 100%; margin: 0; border: none; border-radius: 0; display: flex; flex-direction: column; }
+  .playout-grid { display: grid; grid-template-rows: auto auto auto 1fr; gap: 10px; flex: 1; min-height: 0; padding: 10px 16px; }
+
+  /* DUAL MONITOR A/B */
+  .dual-players { display: grid; grid-template-columns: minmax(0, 1fr) 208px minmax(0, 1fr); gap: 12px; background: #202020; border: 1px solid #414141; padding: 12px; border-radius: 6px; }
+  .player-box { display: flex; flex-direction: column; gap: 6px; background: #252525; border: 1px solid #454545; padding: 8px; border-radius: 6px; min-width: 0; }
+  .player-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #414141; padding-bottom: 6px; gap: 8px; }
+  .player-title { font-weight: 700; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.6px; color: #ddd; }
+  .badge-pv { color: #bfe3ff; background: #173247; border: 1px solid #3d7ea6; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; }
+  .badge-pgm { color: #bbb; background: #2b2b2b; border: 1px solid #555; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; }
+  .badge-pgm.on-air { color: #ffd4cf; background: #4a1414; border-color: #c0392b; }
+
+  .screen-mock { height: clamp(120px, 17vh, 180px); background: #000; border: 1px solid #333; border-radius: 4px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; overflow: hidden; }
+  .screen-mock img { width: 100%; height: 100%; object-fit: contain; }
+  .screen-title { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.82); color: #fff; padding: 3px 8px; font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* TIME DISPLAY */
+  .time-display { display: flex; justify-content: space-between; align-items: baseline; font-family: Consolas, monospace; margin: 4px 0; }
+  .time-current { font-size: 17px; font-weight: 700; color: #7fe3a5; }
+  .time-remaining { font-size: 17px; font-weight: 700; color: #ff9b92; }
+  .time-sub { font-size: 11.5px; color: #a5a5a5; }
+
+  /* PROGRESS BAR */
+  .progress-wrap { height: 9px; background: #141414; border: 1px solid #3e3e3e; position: relative; cursor: pointer; border-radius: 2px; }
+  .progress-bar { height: 100%; background: #58a6ff; width: 0%; transition: width 0.1s linear; }
+  .progress-bar.pgm { background: #d84a45; }
+
+  /* TAKE COLUMN */
+  .take-col { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; padding: 0 4px; min-width: 0; }
+  .take-btn { height: 62px; width: 100%; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; letter-spacing: .2px; background: linear-gradient(180deg, #2f7d3a, #205a29); border: 1px solid #3f9c4c; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border-radius: 6px; cursor: pointer; white-space: normal; line-height: 1.15; padding: 5px 8px; }
+  .take-btn:hover { background: linear-gradient(180deg, #3a9a47, #286f33); }
+  .take-btn:active { background: #1b4d22; box-shadow: inset 0 2px 4px rgba(0,0,0,0.6); }
+  .take-next-btn { min-height: 38px; width: 100%; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; background: #2b2b2b; border: 1px solid #565656; color: #f1f1f1; border-radius: 4px; cursor: pointer; white-space: normal; line-height: 1.2; padding: 5px 7px; }
+  .take-next-btn:hover { background: #3d3d3d; color: #fff; }
+  .take-next-btn small, .take-btn small { display: block; font-size: 9px; font-weight: 600; opacity: .8; letter-spacing: .1px; line-height: 1.25; white-space: normal; }
+
+  /* PLAYLIST TABLE */
+  .playlist-panel { display: flex; flex-direction: column; min-height: 0; background: #232323; border: 1px solid #414141; border-radius: 6px; overflow: hidden; }
+  .playlist-toolbar { display: flex; gap: 8px; align-items: center; padding: 8px 12px; background: #2a2a2a; border-bottom: 1px solid #414141; flex-wrap: wrap; }
+  .playlist-toolbar button { height: 28px; min-width: 0; padding: 0 12px; font-size: 11.5px; border-radius: 4px; }
+  .pl-note { background: #302511; border: 1px solid #6b5320; border-left: 3px solid #dca900; color: #f0d9a5; font-size: 11px; padding: 7px 10px; border-radius: 3px; margin: 0 12px 8px; }
+  .pl-note b { color: #fff; }
+
+  .table-wrap { flex: 1; overflow: auto; background: #1c1c1c; }
+  .pl-table { width: 100%; min-width: 940px; border-collapse: collapse; font-size: 11.5px; color: #d2d2d2; text-align: left; }
+  .pl-table th { position: sticky; top: 0; background: #262626; color: #9d9d9d; padding: 7px 10px; border-bottom: 1px solid #414141; font-weight: 700; white-space: nowrap; z-index: 2; font-size: 10.5px; text-transform: uppercase; letter-spacing: .3px; }
+  .pl-table td { padding: 5px 10px; border-bottom: 1px solid #303030; white-space: nowrap; vertical-align: middle; }
+  .pl-table tr:hover { background: #292929; cursor: pointer; }
+  .pl-table tr.selected { background: #333; color: #fff; }
+  .pl-table tr.is-on-air { background: #4a1414; color: #ffc9c2; font-weight: 700; }
+  .pl-table tr.is-preview { background: #173247; color: #d6ecff; }
+
+  .badge-chain { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9.5px; font-weight: 800; background: #3d2a55; color: #e6d8ff; border: 1px solid #7c5ab5; margin-right: 4px; }
+  .badge-state { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9.5px; font-weight: 700; text-transform: uppercase; }
+  .badge-state.ready { background: #1c3a2a; color: #a9e8c4; border: 1px solid #2f7d55; }
+  .badge-state.playing { background: #4a1414; color: #ffc9c2; border: 1px solid #c0392b; }
+  .badge-state.frozen { background: #1e2f4a; color: #c7ddff; border: 1px solid #3d6ea6; }
+  .badge-state.idle { background: #2b2b2b; color: #a5a5a5; border: 1px solid #444; }
+
+  .transport-btns { display: flex; gap: 5px; align-items: center; }
+  .transport-btns button { height: 26px; min-width: 28px; width: 28px; padding: 0; font-size: 11.5px; font-weight: 600; border-radius: 3px; }
+  .pl-select { height: 24px; background: #1d1d1d; border: 1px solid #4a4a4a; color: #eee; border-radius: 3px; font-size: 11px; padding: 0 4px; }
+  .tc-input { width: 108px; height: 22px; background: #171717; border: 1px solid #444; color: #e8e8e8; border-radius: 3px; font: 11px Consolas, monospace; padding: 0 5px; }
+  .gain-input { width: 54px; height: 22px; background: #171717; border: 1px solid #444; color: #cfe6ff; border-radius: 3px; font-size: 11px; text-align: right; padding: 0 4px; }
+  .end-select { height: 24px; background: #1d1d1d; border: 1px solid #4a4a4a; color: #eee; border-radius: 3px; font-size: 11px; padding: 0 4px; }
+  .tc-cell { font-family: Consolas, monospace; font-size: 11px; color: #c9c9c9; }
+  @media (max-width: 900px) { .dual-players { grid-template-columns: 1fr; } .take-col { flex-direction: row; } }
+  .vd-window button:disabled { opacity: .55; filter: saturate(.25); }
+</style>
+</head>
+<body data-page="playout" class="vd">
+<div class="vd-window vd-fill">
+  <div class="vd-strip">
+    <span class="vd-title">3Mix · Media &amp; Playout</span>
+    <span class="vd-flex"></span>
+    <span id="connection" class="vd-note">Conectando ao motor…</span>
+  </div>
+
+  <div class="playout-grid">
+    <!-- PLAYLIST -->
+    <div class="vd-row" style="margin: 0; padding: 4px 0; background: transparent; border: 0;">
+      <span>Playlist</span>
+      <div class="vd-inline" style="flex: 1;">
+        <select id="pl-select" style="width: 190px; flex: none;"></select>
+        <input id="pl-name" type="text" placeholder="Nome da playlist" style="width: 160px;">
+        <button id="pl-save" type="button" class="vd-on">Salvar</button>
+        <button id="pl-new" type="button">+ Nova</button>
+        <button id="pl-duplicate" type="button">Duplicar</button>
+        <button id="pl-delete" type="button" class="vd-warn">Excluir</button>
+        <span class="vd-flex"></span>
+        <button id="btn-remote-monitor" type="button" title="Abrir monitor de exibição na rede local">📺 Monitor</button>
+      </div>
+    </div>
+
+    <div id="rundown-note" class="pl-note" hidden></div>
+
+    <!-- DUAL PLAYERS -->
+    <div class="dual-players">
+      <div class="player-box">
+        <div class="player-header">
+          <span class="player-title">PREVIEW · preparado</span>
+          <span id="pv-badge" class="badge-pv">STANDBY</span>
+        </div>
+        <div class="screen-mock" id="pv-screen">
+          <span id="pv-placeholder" style="color: #8d8d8d; font-size: 11px;">Nenhum clipe preparado</span>
+          <img id="pv-thumb" hidden alt="Preview">
+          <div id="pv-title" class="screen-title" hidden></div>
+        </div>
+        <div class="time-display">
+          <span id="pv-cur" class="time-current">00:00:00.000</span>
+          <span id="pv-dur" class="time-sub">Duração: 00:00:00.000</span>
+        </div>
+        <div class="progress-wrap" id="pv-seek-wrap"><div class="progress-bar" id="pv-progress"></div></div>
+        <div class="vd-inline" style="margin-top: 4px; justify-content: space-between; gap: 8px;">
+          <div class="vd-inline" style="gap: 6px;">
+            <label class="vd-check" title="Ponto de entrada (hh:mm:ss.mmm)"><span style="font-size:10px;">IN</span><input id="pv-in" class="tc-input" type="text" inputmode="decimal" placeholder="00:00:00.000"></label>
+            <label class="vd-check" title="Ponto de saída (hh:mm:ss.mmm)"><span style="font-size:10px;">OUT</span><input id="pv-out" class="tc-input" type="text" inputmode="decimal" placeholder="00:00:00.000"></label>
+          </div>
+          <span id="pv-preload-time" class="vd-note" style="font-size: 10px;">Preload: 0ms</span>
+        </div>
+        <p class="vd-note" style="margin:0;font-size:10px">TC de entrada e saída do clipe preparado. Enter confirma.</p>
+      </div>
+
+      <div class="take-col">
+        <button id="btn-load-selected" class="take-next-btn" type="button" title="Armar o clipe selecionado na lista no Preview, sem colocar no ar">Carregar selecionado<small>só arma no Preview</small></button>
+        <button id="btn-take" class="take-btn" type="button" title="Executa o clipe preparado no Preview e entra no ar com a transição escolhida">Reproduzir<small>entra no ar com a transição</small></button>
+        <div class="vd-inline" style="gap: 4px; width: 100%;">
+          <select id="take-trans" style="width: 100%; height: 24px; font-weight: 700; font-size: 11px;">
+            <option value="cut">CUT</option>
+            <option value="fade" selected>FADE</option>
+          </select>
+        </div>
+        <div class="vd-inline" style="gap: 2px;">
+          <input id="take-ms" class="tc-input" type="number" min="50" max="5000" step="50" value="500" style="width: 62px; text-align:right;"> <span style="font-size: 10px; color:#9a9a9a;">ms</span>
+        </div>
+        <button id="btn-take-next" class="take-next-btn" type="button" title="Executa o próximo clipe da playlist, sem usar o Preview">Executar próximo<small>pega o próximo da lista</small></button>
+        <span id="pl-hint" class="vd-note" style="font-size:10px;text-align:center;min-height:14px"></span>
+      </div>
+
+      <div class="player-box">
+        <div class="player-header">
+          <span class="player-title">PROGRAM</span>
+          <span id="pgm-badge" class="badge-pgm">PARADO</span>
+        </div>
+        <div class="screen-mock" id="pgm-screen">
+          <span id="pgm-placeholder" style="color: #8d8d8d; font-size: 11px;">Nenhum clipe no ar</span>
+          <img id="pgm-thumb" hidden alt="Program">
+          <div id="pgm-title" class="screen-title" hidden></div>
+        </div>
+        <div class="time-display">
+          <span id="pgm-cur" class="time-current" style="color:#ff9b92;">00:00:00.000</span>
+          <span id="pgm-rem" class="time-remaining">-00:00:00.000</span>
+        </div>
+        <div class="progress-wrap" id="pgm-seek-wrap"><div class="progress-bar pgm" id="pgm-progress"></div></div>
+        <div class="vd-inline" style="margin-top: 4px; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+          <div class="transport-btns">
+            <button id="pgm-restart" type="button" title="Reiniciar do IN">⏮</button>
+            <button id="pgm-play" type="button" class="vd-on" title="Retomar a reprodução do clipe no ar">▶</button>
+            <button id="pgm-pause" type="button" title="Pausar">⏸</button>
+            <button id="pgm-stop" type="button" title="Parar o player">⏹</button>
+          </div>
+          <label class="vd-check" title="O que o clipe faz ao terminar. Vale por clipe, na lista e aqui.">Ao terminar
+            <select id="pgm-end" class="end-select">
+              <option value="play_next">Avançar</option>
+              <option value="loop">Repetir</option>
+              <option value="freeze">Congelar</option>
+              <option value="hold">Manter</option>
+              <option value="stop">Parar</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLAYLIST TABLE -->
+    <div class="playlist-panel">
+      <div class="playlist-toolbar">
+        <button id="btn-add-file" type="button" class="vd-on">+ Adicionar vídeo</button>
+        <button id="btn-link-chain" type="button" title="Vincular selecionados em cadeia">🔗 Vincular cadeia</button>
+        <button id="btn-unlink-chain" type="button">Desvincular</button>
+        <span style="border-left: 1px solid #4a4a4a; height: 16px; margin: 0 4px;"></span>
+        <button id="btn-move-up" type="button">▲ Subir</button>
+        <button id="btn-move-down" type="button">▼ Descer</button>
+        <button id="btn-dup-item" type="button">Duplicar</button>
+        <button id="btn-rem-item" type="button" class="vd-warn">Remover</button>
+        <span class="vd-flex"></span>
+        <span class="vd-note" id="pl-mode-note">Avanço, repetição e congelamento ficam em “Ao terminar” de cada clipe.</span>
+      </div>
+
+      <div class="table-wrap">
+        <table class="pl-table">
+          <thead>
+            <tr>
+              <th style="width: 32px; text-align: center;">#</th>
+              <th style="width: 72px;">Status</th>
+              <th style="width: 96px;">Cadeia</th>
+              <th>Título / arquivo</th>
+              <th style="width: 104px;">IN</th>
+              <th style="width: 104px;">OUT</th>
+              <th style="width: 96px;">Duração</th>
+              <th style="width: 96px;">Transição</th>
+              <th style="width: 128px;">Ao terminar</th>
+              <th style="width: 68px;">Ganho</th>
+            </tr>
+          </thead>
+          <tbody id="pl-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="vd-bar">
+    <span id="pl-total-info" class="vd-note" style="font-weight: 700;">0 itens · Total: 00:00:00.000</span>
+    <span class="vd-flex"></span>
+    <button type="button" id="btn-close">Fechar</button>
+  </div>
+</div>
+
+<div id="legacy-compat-queue" hidden style="display:none;">
+  <span id="connection"></span><span id="message"></span><span id="queue-status"></span>
+  <button id="queue-new"></button><button id="queue-delete"></button><input id="queue-name"><select id="queue-list"></select>
+  <button id="queue-save"></button><select id="queue-available"></select><button id="queue-add"></button><button id="queue-remove"></button>
+  <div id="queue-items"></div><button id="queue-up"></button><button id="queue-down"></button><span id="queue-duration"></span>
+  <input id="queue-loop" type="checkbox"><input id="queue-auto" type="checkbox"><select id="queue-transition"></select><span id="queue-total"></span>
+  <button id="queue-start"></button><button id="queue-preload"></button><button id="queue-next"></button><button id="queue-hold"></button><button id="queue-stop"></button>
+  <select id="media-select"></select><span id="media-state"></span><span id="time"></span><input id="seek" type="range"><input id="speed" type="range">
+  <input id="loop" type="checkbox"><input id="autonext" type="checkbox"><div id="items"></div>
+</div>
+
+<script src="fechar-janela.js"></script>
+<script src="playout.js"></script>
+</body>
+</html>

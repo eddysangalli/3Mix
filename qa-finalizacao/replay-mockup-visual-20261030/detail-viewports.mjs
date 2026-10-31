@@ -1,0 +1,23 @@
+import { chromium } from 'playwright-core';
+import path from 'node:path';
+const base = process.argv[2] || 'http://127.0.0.1:8795';
+const out = path.resolve(import.meta.dirname, 'after');
+const browser = await chromium.launch({ channel: 'chrome', headless: true });
+const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+await page.goto(base + '/replay', { waitUntil: 'networkidle' });
+await page.waitForSelector('body.replay-operational-ready');
+await page.waitForTimeout(1800);
+await page.click('#events-list [data-event="e1"]');
+await page.waitForTimeout(500);
+await page.screenshot({ path: path.join(out, 'replay-detalhe-1280x800.png') });
+const metrics = await page.evaluate(() => {
+  const card = document.querySelector('.details-card');
+  const detail = document.querySelector('#replay-event-detail');
+  const r = (n) => { if (!n) return null; const b = n.getBoundingClientRect(); return { y: Math.round(b.y), h: Math.round(b.height), sh: n.scrollHeight, ch: n.clientHeight }; };
+  return { card: r(card), detail: r(detail), angles: [...document.querySelectorAll('.detail-angle')].map(r) };
+});
+console.log(JSON.stringify(metrics, null, 2));
+await page.setViewportSize({ width: 1600, height: 1000 });
+await page.waitForTimeout(300);
+await page.screenshot({ path: path.join(out, 'replay-detalhe-1600x1000.png') });
+await browser.close();

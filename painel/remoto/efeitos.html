@@ -1,1 +1,282 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FreeMix · Qualidade e legendas</title><link rel="stylesheet" href="controle.css"><link rel="stylesheet" href="studio-dialog.css"><style>main{max-width:1000px;margin:auto}header a{margin-right:12px}nav{padding:12px 0}nav a{color:#b9e4ff}nav a:hover,nav a:focus-visible{color:white;text-decoration:underline}#quality{margin:12px 0}#quality-status{min-height:1.5em}.effect-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}section{padding:12px;border:1px solid #404b56}label{display:block;margin:7px 0}label input,label select{width:100%}.check{display:flex;align-items:center;gap:6px}.check input{width:auto}.fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}#status{min-height:1.5em}#preview{display:block;max-width:100%;margin:8px auto;background:#1d2328}#error{color:#ffb6b6}p{font-size:12px}@media(max-width:700px){.effect-grid{grid-template-columns:1fr}}[hidden]{display:none!important}.effect-grid{display:block}.effects-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.effects-tabs [role="tab"]{color:#d5edff;background:#253441;border:1px solid #63798b;padding:10px 14px;border-radius:6px}.effects-tabs [role="tab"][aria-selected="true"]{color:white;background:#096b80;border-color:#66d7ec}.effects-tabs [role="tab"]:focus-visible,.effects-tabs-panel:focus-visible{outline:3px solid #a7eaff;outline-offset:3px}</style></head><body><header><a href="/">FreeMix</a><h1>Qualidade e legendas</h1><a href="/audio">Áudio</a></header><main><p id="status" role="status">Conectando…</p><p id="effects-gate-status" role="status"></p><button id="effects-reconcile">Conferir operação pendente e estado</button><nav class="effects-tabs" role="tablist" aria-label="Ajustes da entrada"><button type="button" role="tab" id="tab-quality" aria-controls="quality" aria-selected="true" tabindex="0" data-effects-tab="quality">Qualidade</button><button type="button" role="tab" id="tab-local-captions" aria-controls="local-captions" aria-selected="false" tabindex="-1" data-effects-tab="local-captions">Legendas</button><button type="button" role="tab" id="tab-creative-effects" aria-controls="creative-effects" aria-selected="false" tabindex="-1" data-effects-tab="creative-effects">Efeitos criativos</button><button type="button" role="tab" id="tab-ptz-effects" aria-controls="ptz-effects" aria-selected="false" tabindex="-1" data-effects-tab="ptz-effects">PTZ</button></nav><section id="quality" class="effects-tabs-panel" role="tabpanel" aria-labelledby="tab-quality" tabindex="0"><h2>Qualidade da entrada</h2><p>Selecione uma entrada pública própria. Os filtros começam desligados e não colocam a entrada no ar. Master, retornos e mic privado são protegidos.</p><label>Entrada<select id="quality-input"></select></label><label>Ajuste<select id="quality-type"><optgroup label="Imagem"><option value="color">Cor e luz</option><option value="sharpness">Nitidez</option><option value="chroma">Fundo verde</option><option value="nvBackground">Remover fundo · NVIDIA</option><option value="nvBlur">Desfocar fundo · NVIDIA</option></optgroup><optgroup label="Som"><option value="rnnoise">Ruído da fala · RNNoise</option><option value="nvDenoise">Ruído da fala · NVIDIA</option><option value="speech">Preset de voz suave</option></optgroup></select></label><p id="quality-reason"></p><div id="quality-fields" class="fields"></div><div id="quality-preset-review" hidden><p>Usa os filtros de áudio existentes: gate abre−32/fecha−38dB; compressor2:1 em−18dB, ganho0; limiter−3dB. Não muda mute, AFV, barramentos ou N−1. Aplicação de3filtros pode falhar parcialmente: confira os filtros se houver erro.</p><label class="check"><input id="quality-confirm-preset" type="checkbox">Revisei e quero aplicar estes ajustes de voz</label></div><label class="check"><input id="quality-enabled" type="checkbox">Filtro ativo</label><button id="quality-apply" disabled>Aplicar e confirmar</button><button id="quality-remove" disabled>Remover este filtro</button><button id="quality-refresh">Conferir estado</button><p id="quality-status" role="status">Verificando disponibilidade…</p><details><summary>Limites e recursos indisponíveis</summary><p>NVIDIA exige filtros registrados e SDK com impressão digital homologada. Nenhum SDK/modelo é instalado automaticamente. Tradução genérica e cloud permanecem desligadas.</p></details></section><div class="effect-grid"><section id="creative-effects" class="effects-tabs-panel" role="tabpanel" aria-labelledby="tab-creative-effects" tabindex="0" hidden><h2>Efeitos criativos da entrada</h2><label>Entrada visual<select id="input"></select></label><label>Efeito<select id="type"><option value="blur">Blur avançado</option><option value="transform3d">Transformação 3D · XYZ e perspectiva</option><option value="panel3d">Painel 3D</option><option value="tracker">Tracking facial</option></select></label><p id="capability"></p><div id="fields" class="fields"></div><label class="check"><input id="enabled" type="checkbox">Efeito ativo</label><button id="apply">Aplicar efeito</button><button id="remove">Remover este efeito</button><p id="error"></p><button id="refresh-preview">Conferir quadro da entrada</button><img id="preview" alt="Quadro real do motor após efeito" hidden><p>Ajusta a entrada selecionada. A fonte de câmera compartilhada continua sem filtro direto. Blur e perspectiva exigem Shaderfilter; tracking usa o detector local do Face Tracker.</p></section><section id="local-captions" class="effects-tabs-panel" role="tabpanel" aria-labelledby="tab-local-captions" tabindex="0" hidden><h2>Legendas locais</h2><p>Whisper tiny multilíngue roda nesta máquina. O texto só vai à fonte escolhida; aplicar não coloca a legenda no Programa.</p><label>Áudio público<select id="caption-input"></select></label><label>Fonte de texto<select id="caption-output"></select></label><label>Nome de nova entrada<input id="caption-name" value="Legendas locais" maxlength="60"></label><button id="create-caption">Criar entrada de legendas</button><label>Idioma<select id="language"><option value="pt">Português</option><option value="en">English</option><option value="es">Español</option><option value="fr">Français</option><option value="de">Deutsch</option><option value="it">Italiano</option></select></label><label>Modo local<select id="caption-mode"><option value="transcribe">Transcrever no idioma da fala</option id="caption-mode-english" value="english" disabled>Traduzir fala para inglês · contrato pendente</option></select></label><p id="caption-mode-state" role="status"></p><label class="check"><input id="caption-enabled" type="checkbox">Reconhecimento local ativo</label><label class="check"><input id="caption-buffered" type="checkbox">Exibir aos poucos, como digitação</label><p>Desmarcado: apresenta o trecho reconhecido de uma vez. Marcado: distribui o texto em duas linhas enquanto é exibido.</p><button id="apply-caption">Aplicar legendas locais</button><p id="caption-capability"></p><p>Mic privado e retornos de Calls são excluídos. A qualidade e o atraso dependem da fala e do CPU. Tradução cloud, arquivos e captions de stream permanecem desligados.</p></section><section id="ptz-effects" class="effects-tabs-panel" role="tabpanel" aria-labelledby="tab-ptz-effects" tabindex="0" hidden><h2>Câmera PTZ · seguir rosto</h2><p>Face Tracker envia VISCA TCP à câmera local. Escolha a fonte de vídeo dessa câmera. Iniciar pode movimentá-la; parar remove o filtro e encerra a conexão. Não liga no Programa.</p><label>Fonte da câmera<select id="ptz-input"></select></label><label>IPv4 da câmera<input id="ptz-address" placeholder="192.168.1.100"></label><label>Porta VISCA TCP<input id="ptz-port" type="number" min="1" max="65535" value="1259"></label><div class="fields"><label>Tamanho do rosto<input id="ptz-z" type="number" min=".1" max="1" step=".05" value=".25"></label><label>Centro horizontal<input id="ptz-x" type="number" min="-.5" max=".5" step=".05" value="0"></label><label>Centro vertical<input id="ptz-y" type="number" min="-.5" max=".5" step=".05" value="0"></label></div><button id="ptz-start">Iniciar tracking da câmera</button><button id="ptz-stop">Parar tracking PTZ</button><p id="ptz-status">Verificando plugin…</p><p>Pan, tilt e zoom dependem de câmera compatível. Ao perder o rosto, a integração não chama memórias nem faz zoom-out automático.</p></section></div></main><script src="efeitos-abas.js"></script><script src="efeitos-gate.js"></script><script src="efeitos.js"></script><script src="qualidade.js" defer></script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3Mix Pro · Qualidade e legendas</title>
+<link rel="stylesheet" href="vmix-dialogo.css">
+<style>
+.vd-window { width: 100%; max-width: 980px; margin: 20px auto; border-radius: 8px; box-shadow: 0 16px 48px rgba(0,0,0,0.6); }
+.fields, #quality-fields, #fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin: 8px 0; }
+.fields label, #quality-fields label, #fields label { display: flex; flex-direction: column; gap: 4px; font-weight: 700; font-size: 12px; color: #cbd5e1; }
+.fields label input, #quality-fields label input, #fields label input,
+.fields label select, #quality-fields label select, #fields label select {
+  height: 28px; padding: 4px 10px; border: 1px solid #283340; border-radius: 4px; background: #0c0f14; color: #f8fafc; font: 12.5px "Segoe UI", -apple-system, sans-serif; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.fields label input:focus, #quality-fields label input:focus, #fields label input:focus,
+.fields label select:focus, #quality-fields label select:focus, #fields label select:focus {
+  border-color: #38bdf8; background: #141922; box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+.vd-preview-frame { max-width: 100%; max-height: 260px; border: 1px solid #283340; border-radius: 4px; background: #000; margin: 10px auto; display: block; object-fit: contain; }
+.vd-note-box { background: #0c0f14; border: 1px solid #202936; border-radius: 6px; padding: 10px 14px; font-size: 12px; color: #94a3b8; line-height: 1.5; margin: 8px 0; }
+.vd-nums button { height: 32px; padding: 0 14px; font-size: 12px; }
+.vd-nums button[aria-selected="true"] { background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); border-color: #38bdf8; color: #fff; font-weight: 700; box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); }
+.ai-preset-btn { height: 28px; padding: 0 12px; font-size: 12px; font-weight: 600; background: #161c24; border: 1px solid #283340; color: #cbd5e1; border-radius: 4px; cursor: pointer; transition: all 0.15s ease; }
+.ai-preset-btn:hover { background: #202834; border-color: #384659; color: #fff; }
+.ai-preset-btn.active { background: linear-gradient(135deg, #059669 0%, #047857 100%); border-color: #00e676; color: #fff; box-shadow: 0 0 10px rgba(0, 230, 118, 0.3); }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body data-page="efeitos" class="vd">
+<div class="vd-window">
+  <div class="vd-strip">
+    <nav class="vd-nums vd-words" role="tablist" aria-label="Ajustes da entrada">
+      <button type="button" role="tab" id="tab-quality" aria-controls="quality" aria-selected="true" tabindex="0" data-effects-tab="quality">Qualidade</button>
+      <button type="button" role="tab" id="tab-local-captions" aria-controls="local-captions" aria-selected="false" tabindex="-1" data-effects-tab="local-captions">Legendas</button>
+      <button type="button" role="tab" id="tab-creative-effects" aria-controls="creative-effects" aria-selected="false" tabindex="-1" data-effects-tab="creative-effects">Efeitos criativos</button>
+      <button type="button" role="tab" id="tab-ptz-effects" aria-controls="ptz-effects" aria-selected="false" tabindex="-1" data-effects-tab="ptz-effects">PTZ</button>
+    </nav>
+    <span class="vd-flex"></span>
+    <button id="effects-reconcile" class="vd-cog" title="Conferir operação pendente e estado">⚙</button>
+  </div>
+
+  <div style="padding: 4px 12px 0;">
+    <div id="status" class="vd-msg" role="status">Conectando…</div>
+    <div id="effects-gate-status" class="vd-msg" role="status" style="margin-left: 0;"></div>
+  </div>
+
+  <!-- ABA: QUALIDADE -->
+  <section id="quality" class="vd-body effects-tabs-panel" role="tabpanel" aria-labelledby="tab-quality" tabindex="0">
+    <div class="vd-note-box">
+      Selecione uma entrada pública própria. Os filtros começam desligados e não colocam a entrada no ar. Master, retornos e microfone privado são protegidos.
+    </div>
+
+    <label class="vd-row"><span>Entrada</span>
+      <select id="quality-input"></select>
+    </label>
+
+    <label class="vd-row"><span>Ajuste</span>
+      <select id="quality-type">
+        <optgroup label="Imagem">
+          <option value="color">Cor e luz</option>
+          <option value="sharpness">Nitidez</option>
+          <option value="chroma">Fundo verde</option>
+          <option value="nvBackground">Remover fundo · NVIDIA</option>
+          <option value="nvBlur">Desfocar fundo · NVIDIA</option>
+        </optgroup>
+        <optgroup label="Som">
+          <option value="rnnoise">Ruído da fala · RNNoise</option>
+          <option value="nvDenoise">Ruído da fala · NVIDIA</option>
+          <option value="speech">Preset de voz suave</option>
+        </optgroup>
+      </select>
+    </label>
+
+    <div class="vd-row"><span></span><span id="quality-reason" class="vd-note"></span></div>
+
+    <div id="quality-color-presets" class="vd-row" style="grid-template-columns:100px minmax(0,1fr)" hidden>
+      <span>Looks de Cor</span>
+      <div class="vd-inline" style="flex-wrap:wrap;gap:4px">
+        <button type="button" class="ai-preset-btn" id="color-preset-rec709" title="Rec.709 Legal Broadcast">🎥 Rec.709</button>
+        <button type="button" class="ai-preset-btn" id="color-preset-warm" title="Estúdio Quente / Warm Skin">☀️ Quente</button>
+        <button type="button" class="ai-preset-btn" id="color-preset-cinema" title="Cinema / Drama">🎬 Cinema</button>
+        <button type="button" class="ai-preset-btn" id="color-preset-cold" title="Jornalismo Frio">❄️ Frio</button>
+        <button type="button" class="ai-preset-btn" id="color-preset-reset" title="Restaurar padrão 1:1">↺ Neutro</button>
+      </div>
+    </div>
+
+    <div id="quality-fields" class="fields"></div>
+
+    <div id="quality-preset-review" class="vd-note-box" hidden>
+      <p style="margin: 0 0 6px;">Usa os filtros de áudio existentes: gate abre −32 / fecha −38 dB; compressor 2:1 em −18 dB, ganho 0; limiter −3 dB. Não altera mute, AFV, barramentos ou N−1.</p>
+      <label class="vd-check"><input id="quality-confirm-preset" type="checkbox"> Revisei e confirmo aplicação do preset de voz</label>
+    </div>
+
+    <div class="vd-row"><span>Estado</span>
+      <div class="vd-inline">
+        <label class="vd-check"><input id="quality-enabled" type="checkbox"> Filtro ativo</label>
+      </div>
+    </div>
+
+    <div class="vd-row"><span></span>
+      <div class="vd-inline">
+        <button id="quality-apply" disabled class="vd-on">Aplicar e confirmar</button>
+        <button id="quality-remove" disabled>Remover filtro</button>
+        <button id="quality-refresh">Conferir estado</button>
+      </div>
+    </div>
+
+    <p id="quality-status" class="vd-msg" role="status">Verificando disponibilidade…</p>
+
+    <!-- PAINEL DE PROCESSAMENTO NEURAL E IA PARA VÍDEO -->
+    <div id="video-ai-broadcast-panel" class="vd-note-box" style="margin-top:10px;background:#14181c;border:1px solid #2e3742;border-radius:2px;padding:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <span style="font-weight:700;color:#00e676;font-size:11px;">🧠 Suíte de IA para Vídeo & Efeitos Broadcast</span>
+        <span id="video-ai-status-badge" style="font-size:10px;padding:2px 8px;border-radius:2px;background:#242c35;border:1px solid #44515e;color:#00e676;font-weight:700;">GPU Pronta</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;color:#8c9ba8;">
+        <div style="background:#181d23;padding:6px;border:1px solid #28323d;border-radius:2px;">
+          <b style="color:#ffffff;">🤖 Virtual Green Screen (IA)</b>
+          <p style="margin:2px 0 0;font-size:10px;color:#8c9ba8;">Recorte neural sem pano verde físico (NVIDIA Maxine / AI Segmentation).</p>
+        </div>
+        <div style="background:#181d23;padding:6px;border:1px solid #28323d;border-radius:2px;">
+          <b style="color:#ffffff;">🎬 AI Bokeh / Blur Neural</b>
+          <p style="margin:2px 0 0;font-size:10px;color:#8c9ba8;">Profundidade de campo cinematográfica com isolamento de silhueta e desfoque suave.</p>
+        </div>
+        <div style="background:#181d23;padding:6px;border:1px solid #28323d;border-radius:2px;">
+          <b style="color:#ffffff;">🎯 Auto-Framing / Face Tracking</b>
+          <p style="margin:2px 0 0;font-size:10px;color:#8c9ba8;">Enquadramento inteligente que acompanha o apresentador pelo estúdio sem solavancos.</p>
+        </div>
+        <div style="background:#181d23;padding:6px;border:1px solid #28323d;border-radius:2px;">
+          <b style="color:#ffffff;">✨ DVE 3D & Transformação XYZ</b>
+          <p style="margin:2px 0 0;font-size:10px;color:#8c9ba8;">Rotação tridimensional, perspectiva cônica/ortográfica, cantos arredondados e luz linear.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABA: LEGENDAS LOCAIS -->
+  <section id="local-captions" class="vd-body effects-tabs-panel" role="tabpanel" aria-labelledby="tab-local-captions" tabindex="0" hidden>
+    <div class="vd-note-box">
+      Whisper tiny multilíngue roda localmente nesta máquina. O texto só é direcionado à fonte escolhida; aplicar não coloca a legenda no Programa.
+    </div>
+
+    <label class="vd-row"><span>Áudio público</span>
+      <select id="caption-input"></select>
+    </label>
+
+    <label class="vd-row"><span>Fonte de texto</span>
+      <select id="caption-output"></select>
+    </label>
+
+    <div class="vd-row"><span>Nova entrada</span>
+      <div class="vd-inline" style="flex: 1;">
+        <input id="caption-name" type="text" value="Legendas locais" maxlength="60">
+        <button id="create-caption" type="button">Criar</button>
+      </div>
+    </div>
+
+    <label class="vd-row"><span>Idioma</span>
+      <select id="language" class="vd-short">
+        <option value="pt">Português</option>
+        <option value="en">English</option>
+        <option value="es">Español</option>
+        <option value="fr">Français</option>
+        <option value="de">Deutsch</option>
+        <option value="it">Italiano</option>
+      </select>
+    </label>
+
+    <label class="vd-row"><span>Modo local</span>
+      <select id="caption-mode">
+        <option value="transcribe">Transcrever no idioma da fala</option>
+        <option id="caption-mode-english" value="english" disabled>Traduzir fala para inglês · contrato pendente</option>
+      </select>
+    </label>
+
+    <div class="vd-row"><span></span><span id="caption-mode-state" class="vd-note" role="status"></span></div>
+
+    <div class="vd-row"><span>Opções</span>
+      <div class="vd-inline">
+        <label class="vd-check"><input id="caption-enabled" type="checkbox"> Reconhecimento ativo</label>
+        <label class="vd-check"><input id="caption-buffered" type="checkbox"> Exibir aos poucos (digitação)</label>
+      </div>
+    </div>
+
+    <div class="vd-row"><span></span>
+      <div class="vd-inline">
+        <button id="apply-caption" class="vd-on">Aplicar legendas locais</button>
+      </div>
+    </div>
+
+    <p id="caption-capability" class="vd-msg"></p>
+  </section>
+
+  <!-- ABA: EFEITOS CRIATIVOS -->
+  <section id="creative-effects" class="vd-body effects-tabs-panel" role="tabpanel" aria-labelledby="tab-creative-effects" tabindex="0" hidden>
+    <div class="vd-note-box">
+      Ajusta a entrada visual selecionada. A fonte de câmera compartilhada continua sem filtro direto. Blur e perspectiva utilizam Shaderfilter; tracking facial utiliza Face Tracker.
+    </div>
+
+    <label class="vd-row"><span>Entrada visual</span>
+      <select id="input"></select>
+    </label>
+
+    <label class="vd-row"><span>Efeito</span>
+      <select id="type">
+        <option value="blur">Blur avançado</option>
+        <option value="transform3d">Transformação 3D · XYZ e perspectiva</option>
+        <option value="panel3d">Painel 3D</option>
+        <option value="tracker">Tracking facial</option>
+      </select>
+    </label>
+
+    <div class="vd-row"><span></span><span id="capability" class="vd-note"></span></div>
+
+    <div id="fields" class="fields"></div>
+
+    <div class="vd-row"><span>Estado</span>
+      <div class="vd-inline">
+        <label class="vd-check"><input id="enabled" type="checkbox"> Efeito ativo</label>
+      </div>
+    </div>
+
+    <div class="vd-row"><span></span>
+      <div class="vd-inline">
+        <button id="apply" class="vd-on">Aplicar efeito</button>
+        <button id="remove">Remover efeito</button>
+        <button id="refresh-preview">Conferir quadro</button>
+      </div>
+    </div>
+
+    <p id="error" class="vd-msg vd-error"></p>
+    <img id="preview" class="vd-preview-frame" alt="Quadro real do motor após efeito" hidden>
+  </section>
+
+  <!-- ABA: CÂMERA PTZ -->
+  <section id="ptz-effects" class="vd-body effects-tabs-panel" role="tabpanel" aria-labelledby="tab-ptz-effects" tabindex="0" hidden>
+    <div class="vd-note-box">
+      Face Tracker envia VISCA TCP à câmera local. Escolha a fonte de vídeo. Iniciar pode movimentá-la; parar encerra a conexão. Não altera Programa.
+    </div>
+
+    <label class="vd-row"><span>Fonte da câmera</span>
+      <select id="ptz-input"></select>
+    </label>
+
+    <label class="vd-row"><span>IPv4 da câmera</span>
+      <input id="ptz-address" type="text" placeholder="192.168.1.100">
+    </label>
+
+    <label class="vd-row"><span>Porta VISCA TCP</span>
+      <input id="ptz-port" type="number" min="1" max="65535" value="1259" class="vd-short">
+    </label>
+
+    <div class="fields">
+      <label>Tamanho do rosto<input id="ptz-z" type="number" min=".1" max="1" step=".05" value=".25"></label>
+      <label>Centro horizontal<input id="ptz-x" type="number" min="-.5" max=".5" step=".05" value="0"></label>
+      <label>Centro vertical<input id="ptz-y" type="number" min="-.5" max=".5" step=".05" value="0"></label>
+    </div>
+
+    <div class="vd-row"><span></span>
+      <div class="vd-inline">
+        <button id="ptz-start" class="vd-on">Iniciar tracking</button>
+        <button id="ptz-stop">Parar tracking</button>
+      </div>
+    </div>
+
+    <p id="ptz-status" class="vd-msg">Verificando plugin…</p>
+  </section>
+
+  <div class="vd-bar">
+    <span class="vd-flex"></span>
+    <button onclick="window.FreeMixClosePanel ? window.FreeMixClosePanel() : window.close()" title="Fechar diálogo">Fechar</button>
+  </div>
+</div>
+
+<script src="fechar-janela.js"></script>
+<script src="efeitos-abas.js"></script>
+<script src="efeitos-gate.js"></script>
+<script src="efeitos.js"></script>
+<script src="qualidade.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+/* ==========================================================================
+   3Mix · Escala tipográfica e densidade global das telas web
+   --------------------------------------------------------------------------
+   Este arquivo é a fonte única dos tokens de texto, espaçamento e altura de
+   campo usados no painel HTML/CSS/JS (CEF). Telas cobertas nesta rodada:
+   Mesa, Áudio, Multiview e Atalhos. Configurações e Replay têm escala própria
+   e não carregam este arquivo.
+
+   Qt × CEF (leia antes de alterar qualquer número)
+   ------------------------------------------------
+   · O 3Mix não é Electron, WPF nem WinUI. É C++/Qt nativo (fork do OBS) para
+     janelas, docks e diálogos nativos, CEF/HTML/CSS/JS para os painéis e
+     Node.js para a API/WebSocket.
+   · O Qt trata o DPI do Windows (QFont em point size, QSS em px lógicos,
+     AA_EnableHighDpiScaling). O CEF recebe o mesmo scale factor do sistema e
+     converte 1 px de CSS em 1 DIP: no Windows a 150%, 14 px de CSS ocupam
+     21 pixels físicos sem nenhuma conta da nossa parte.
+   · Por isso aqui só existe px de CSS (DIP) e rem relativo ao root. Nunca
+     use zoom, transform:scale() ou multiplicação manual por 1.25/1.5 — isso
+     duplicaria a escala do CEF. O que precisa mudar entre 100/125/150% é o
+     layout (larguras mínimas, quebras, altura de linha), não a fonte.
+   · Fontes em px (e não pt) porque o CEF já aplica o DPI: pt somaria a
+     conversão de 96 dpi por cima e cresceria duas vezes no Windows a 150%.
+   ========================================================================== */
+
+:root {
+  /* Tipografia ------------------------------------------------------------ */
+  --font-ui: "Segoe UI Variable Display", "Segoe UI Variable Text", "Segoe UI",
+             system-ui, -apple-system, Roboto, Arial, sans-serif;
+  --font-num: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --font-mono: Consolas, "Cascadia Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Título de página/janela: 22/24 */
+  --fs-page: 22px;
+  --lh-page: 24px;
+  /* Título de seção ou de painel: 16/18 */
+  --fs-section: 16px;
+  --lh-section: 18px;
+  /* Rótulo de campo, nome de canal, cabeçalho de coluna: 13/14 */
+  --fs-label: 13px;
+  --lh-label: 14px;
+  /* Texto corrido e valores: 14 */
+  --fs-body: 14px;
+  --lh-body: 20px;
+  /* Botão: 13/14 */
+  --fs-button: 13px;
+  --lh-button: 14px;
+  /* Descrição auxiliar (uma linha abaixo do rótulo): 12/13 */
+  --fs-desc: 12px;
+  --lh-desc: 13px;
+  /* Metadado (unidade, contador, versão, atalho): 12 */
+  --fs-meta: 12px;
+  --lh-meta: 16px;
+  /* Estado/tally/legenda curta: 12/13 */
+  --fs-status: 12px;
+  --lh-status: 13px;
+
+  /* Entrelinha do texto corrido; 1.45 mantém 14 px legível em 100% e 125%. */
+  --line-body: 1.45;
+
+  /* Espaçamento: 4 / 8 / 12 / 16 / 24 ------------------------------------ */
+  --sp-1: 4px;   /* respiro interno mínimo */
+  --sp-2: 8px;   /* entre ícone e texto, entre chips */
+  --sp-3: 12px;  /* padding padrão de painel */
+  --sp-4: 16px;  /* separação entre blocos */
+  --sp-6: 24px;  /* margem de página */
+  --gap-xs: var(--sp-1);
+  --gap-sm: var(--sp-2);
+  --gap-md: var(--sp-3);
+  --gap-lg: var(--sp-4);
+  --gap-xl: var(--sp-6);
+
+  /* Campos e botões ------------------------------------------------------ */
+  --field-h: 36px;      /* input/select padrão */
+  --field-h-lg: 40px;   /* campo de destaque, busca, barra de comando */
+  --field-h-sm: 32px;   /* campo denso dentro de tabela/rack */
+  --btn-h: 36px;
+  --btn-h-lg: 40px;     /* ação primária da janela */
+  --btn-h-sm: 30px;     /* botão de linha de tabela */
+  --row-h: 36px;        /* altura mínima de uma linha de formulário */
+  --field-px: 10px;     /* padding horizontal do campo */
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+
+  /* Larguras que não podem encolher abaixo do texto em 150% ------------- */
+  --hit-min: 32px;       /* alvo de clique mínimo (WCAG 2.2 / 24 px + folga) */
+  --icon-btn: 32px;
+  --sidebar-min: 240px;
+}
+
+/* Base opt-in: só vale na página que declara data-tipografia="3mix" e que
+   carrega este arquivo. Configurações/Replay não são afetadas. */
+body[data-tipografia="3mix"] {
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  line-height: var(--line-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body[data-tipografia="3mix"] :where(button, input, select, textarea) {
+  font-family: inherit;
+}
+
+/* Classes utilitárias: use quando o componente não tem classe semântica.
+   Não substituem os estilos de componente; só fixam tamanho e entrelinha. */
+.t3-page   { font-size: var(--fs-page);    line-height: var(--lh-page);    font-weight: 700; }
+.t3-section{ font-size: var(--fs-section); line-height: var(--lh-section); font-weight: 700; }
+.t3-label  { font-size: var(--fs-label);   line-height: var(--lh-label);   font-weight: 600; }
+.t3-body   { font-size: var(--fs-body);    line-height: var(--lh-body); }
+.t3-btn    { font-size: var(--fs-button);  line-height: var(--lh-button);  font-weight: 600; }
+.t3-desc   { font-size: var(--fs-desc);    line-height: var(--lh-desc); }
+.t3-meta   { font-size: var(--fs-meta);    line-height: var(--lh-meta); }
+.t3-status { font-size: var(--fs-status);  line-height: var(--lh-status);  font-weight: 600; }
+
+/* Números alinhados (timecode, dB, contadores). A fonte monoespaçada fica
+   reservada a valores que precisam de largura fixa. */
+.t3-num {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.t3-field { height: var(--field-h); }
+.t3-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: var(--row-h);
+}
+
+/* Alvo de clique confortável sem inflar o layout. */
+.t3-hit { min-width: var(--hit-min); min-height: var(--hit-min); }
+
+/* Em janelas baixas (segundo monitor 720p a 150%) o texto não encolhe:
+   apenas o respiro vertical cede. */
+@media (max-height: 620px) {
+  :root {
+    --sp-6: 16px;
+    --sp-4: 12px;
+  }
+}

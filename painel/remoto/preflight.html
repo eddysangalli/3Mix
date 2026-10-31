@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3Mix Pro · Pre-Flight · Checklist de segurança</title>
+<link rel="stylesheet" href="3mix-tipografia.css">
+<link rel="stylesheet" href="preflight.css">
+</head>
+<body class="pf-window" data-tipografia="3mix">
+
+<header class="pf-top">
+  <div class="pf-brand"><img class="brand-logo" src="/img/3mix-logo.png" alt="3Mix" title="3Mix · Pre-Flight"></div>
+  <nav class="pf-mods" aria-label="Módulo atual">
+    <span class="pf-mod active" aria-current="page">Pre-Flight</span>
+  </nav>
+  <span class="pf-project" title="Projeto em uso">
+    Projeto: <b id="project-name">—</b><span class="pf-caret" aria-hidden="true">▾</span>
+  </span>
+  <div class="pf-top-right">
+    <div class="pf-conn" title="Estado da conexão com a API 3Mix">
+      <span class="pf-led" id="status-led" data-tone="off"></span>
+      <span id="connection">Conectando…</span>
+    </div>
+    <div class="pf-win" aria-label="Controles da janela">
+      <button type="button" class="pf-wb" disabled title="Controle da janela pelo Windows">–</button>
+      <button type="button" class="pf-wb" disabled title="Controle da janela pelo Windows">□</button>
+      <button type="button" class="pf-wb close" id="win-close" title="Fechar janela" aria-label="Fechar janela"
+        onclick="window.FreeMixClosePanel ? window.FreeMixClosePanel() : (window.close ? window.close() : null)">×</button>
+    </div>
+  </div>
+</header>
+
+<main class="pf-main">
+  <section class="pf-pagehead">
+    <div>
+      <h1>PRE-FLIGHT · CHECKLIST DE SEGURANÇA</h1>
+      <p class="pf-sub">Última análise: <b id="last-run" class="t3-num">—</b></p>
+    </div>
+    <button type="button" class="pf-btn pf-btn-run" id="btn-run"
+      aria-label="Rodar a análise Pre-Flight novamente">↻ Rodar novamente</button>
+  </section>
+
+  <section class="pf-verdict" id="verdict-banner" data-tone="idle" role="status" aria-live="polite">
+    <span class="pf-verdict-icon" id="verdict-icon" aria-hidden="true">●</span>
+    <div class="pf-verdict-text">
+      <strong id="verdict-label">AGUARDANDO ANÁLISE</strong>
+      <span class="pf-verdict-counts" id="verdict-counts">—</span>
+      <p class="pf-verdict-note">Isto não bloqueia a transmissão.</p>
+      <p class="pf-verdict-summary" id="verdict-summary"></p>
+    </div>
+  </section>
+
+  <section class="pf-panel">
+    <h2>Verificações</h2>
+    <div id="checks-list" class="pf-checks">
+      <p class="pf-empty" id="checks-empty">Carregando verificações…</p>
+    </div>
+  </section>
+
+  <section class="pf-panel" id="issues-section" hidden>
+    <h2>Alertas</h2>
+    <div id="issues-list" class="pf-issues"></div>
+  </section>
+</main>
+
+<footer class="pf-footer">
+  <span class="pf-foot-brand">3Mix <small>Pre-Flight</small></span>
+  <span class="pf-foot-sep" aria-hidden="true"></span>
+  <span class="pf-foot-item">Última análise: <b id="foot-run" class="t3-num">—</b></span>
+  <span class="pf-foot-sep" aria-hidden="true"></span>
+  <span class="pf-foot-item">Veredito: <b id="foot-verdict">—</b></span>
+  <button type="button" id="close-btn" class="pf-close"
+    onclick="window.FreeMixClosePanel ? window.FreeMixClosePanel() : (window.close ? window.close() : null)">Fechar</button>
+</footer>
+
+<script src="fechar-janela.js"></script>
+<script src="preflight.js"></script>
+</body>
+</html>

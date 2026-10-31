@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3Mix Pro · Monitor Remoto de Playout</title>
+<link rel="stylesheet" href="vmix-dialogo.css">
+<style>
+body {
+  margin: 0;
+  padding: 12px;
+  background: #090c0f;
+  color: #e1e7ef;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+.mon-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #1f2730;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+.mon-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.badge-readonly {
+  font-size: 10px;
+  background: #242c35;
+  border: 1px solid #44515e;
+  color: #8c9ba8;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 700;
+}
+.mon-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+}
+.mon-main {
+  display: flex;
+  flex-direction: column;
+  background: #11161b;
+  border: 1px solid #28333e;
+  border-radius: 4px;
+  padding: 16px;
+  justify-content: space-between;
+}
+.mon-screen {
+  background: #000;
+  border: 1px solid #1f2730;
+  border-radius: 4px;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  min-height: 240px;
+}
+.mon-screen img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.badge-on-air {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: #dc2626;
+  color: #fff;
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: 1px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+}
+.badge-state {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(0,0,0,0.8);
+  border: 1px solid #4b5563;
+  color: #e5e7eb;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 3px;
+}
+.mon-timer-block {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  background: #0a0e12;
+  border: 1px solid #1f2937;
+  padding: 12px 16px;
+  border-radius: 4px;
+}
+.time-num {
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 38px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+.time-rem {
+  color: #ef4444;
+}
+.time-cur {
+  color: #10b981;
+}
+.progress-wrap {
+  height: 10px;
+  background: #000;
+  border: 1px solid #374151;
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  background: #dc2626;
+  width: 0%;
+}
+.clip-info {
+  margin-top: 12px;
+}
+.clip-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.clip-file {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* SIDEBAR NEXT & PLAYLIST */
+.mon-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+.next-box {
+  background: #11161b;
+  border: 1px solid #00e676;
+  border-radius: 4px;
+  padding: 12px;
+}
+.next-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #00e676;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.next-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.next-dur {
+  font-size: 12px;
+  color: #94a3b8;
+  font-family: Consolas, monospace;
+  margin-top: 2px;
+}
+.list-box {
+  flex: 1;
+  background: #11161b;
+  border: 1px solid #28333e;
+  border-radius: 4px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.list-scroll {
+  flex: 1;
+  overflow-y: auto;
+  margin-top: 8px;
+}
+.list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-bottom: 1px solid #242b32;
+  font-size: 11px;
+}
+.list-item.is-pgm {
+  background: #450a0a;
+  border-left: 3px solid #ff3b30;
+  color: #fca5a5;
+  font-weight: 700;
+}
+.list-item.is-pv {
+  background: #004d00;
+  border-left: 3px solid #00e676;
+  color: #a7f3d0;
+  font-weight: 700;
+}
+</style>
+</head>
+<body>
+<div class="mon-header">
+  <div class="mon-title">
+    <span>3Mix Pro · Playout Remote Monitor</span>
+    <span class="badge-readonly">SOMENTE LEITURA</span>
+  </div>
+  <div style="font-size: 12px; color: #94a3b8;">
+    <span id="conn-stat">Conectando…</span> · <span id="clock">00:00:00</span>
+  </div>
+</div>
+
+<div class="mon-grid">
+  <!-- ÁREA PROGRAM / ON AIR -->
+  <div class="mon-main">
+    <div class="mon-screen">
+      <span class="badge-on-air">ON AIR</span>
+      <span id="state-badge" class="badge-state">STOPPED</span>
+      <span id="screen-placeholder" style="color: #64748b; font-size: 13px;">Nenhum vídeo em reprodução</span>
+      <img id="screen-img" hidden alt="On Air Thumbnail">
+    </div>
+
+    <div class="clip-info">
+      <div id="clip-title" class="clip-title">Sem reprodução</div>
+      <div id="clip-file" class="clip-file">Standby</div>
+    </div>
+
+    <div class="progress-wrap">
+      <div id="progress-bar" class="progress-bar"></div>
+    </div>
+
+    <div class="mon-timer-block">
+      <div>
+        <div style="font-size: 10px; color: #94a3b8; font-weight: 700;">DECORRIDO</div>
+        <div id="timer-cur" class="time-num time-cur">00:00:00</div>
+      </div>
+      <div style="text-align: right;">
+        <div style="font-size: 10px; color: #94a3b8; font-weight: 700;">TEMPO RESTANTE</div>
+        <div id="timer-rem" class="time-num time-rem">-00:00:00</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LATERAL: PRÓXIMO E PLAYLIST -->
+  <div class="mon-side">
+    <div class="next-box">
+      <div class="next-label">Próximo na Sequência (PREVIEW)</div>
+      <div id="next-title" class="next-title">Nenhum preparado</div>
+      <div id="next-dur" class="next-dur">--:--:--</div>
+    </div>
+
+    <div class="list-box">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-weight: 700; font-size: 12px; color:#cbd5e1;">Playlist Atual</span>
+        <span id="list-name" style="font-size: 11px; color:#00e676; font-weight:700;">--</span>
+      </div>
+      <div id="list-scroll" class="list-scroll">
+        <!-- Itens da lista -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  let state = null;
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function formatTime(ms) {
+    if (!ms || isNaN(ms) || ms < 0) ms = 0;
+    const sec = Math.floor(ms / 1000);
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    return h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+  }
+
+  function updateClock() {
+    const d = new Date();
+    document.getElementById('clock').textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  async function fetchMonitor() {
+    try {
+      const resp = await fetch('/api/playout');
+      if (resp.ok) {
+        state = await resp.json();
+        document.getElementById('conn-stat').textContent = 'Ao Vivo';
+        document.getElementById('conn-stat').style.color = '#34d399';
+        render();
+      }
+    } catch {
+      document.getElementById('conn-stat').textContent = 'Sem Sinal';
+      document.getElementById('conn-stat').style.color = '#f87171';
+    }
+  }
+
+  function render() {
+    if (!state) return;
+    const pgm = state.program;
+    const pv = state.preview;
+
+    // Atualiza On Air
+    if (pgm && pgm.item && pgm.status !== 'stopped') {
+      document.getElementById('clip-title').textContent = pgm.item.title || pgm.item.file;
+      document.getElementById('clip-file').textContent = pgm.item.file || '';
+      document.getElementById('screen-placeholder').hidden = true;
+      if (pgm.item.thumbnail) {
+        document.getElementById('screen-img').src = pgm.item.thumbnail;
+        document.getElementById('screen-img').hidden = false;
+      } else {
+        document.getElementById('screen-img').hidden = true;
+      }
+      document.getElementById('state-badge').textContent = (pgm.status || 'PLAYING').toUpperCase();
+    } else {
+      document.getElementById('clip-title').textContent = 'Sem reprodução';
+      document.getElementById('clip-file').textContent = 'Standby';
+      document.getElementById('screen-placeholder').hidden = false;
+      document.getElementById('screen-img').hidden = true;
+      document.getElementById('state-badge').textContent = 'STOPPED';
+    }
+
+    // Próximo
+    if (pv && pv.item) {
+      document.getElementById('next-title').textContent = pv.item.title || pv.item.file;
+      const dur = (pv.item.outMs && pv.item.outMs > pv.item.inMs) ? (pv.item.outMs - pv.item.inMs) : (pv.item.durationMs || 0);
+      document.getElementById('next-dur').textContent = `Duração: ${formatTime(dur)}`;
+    } else {
+      document.getElementById('next-title').textContent = 'Nenhum preparado';
+      document.getElementById('next-dur').textContent = '--:--:--';
+    }
+
+    // Playlist
+    if (state.activeList) {
+      document.getElementById('list-name').textContent = state.activeList.name;
+      const scroll = document.getElementById('list-scroll');
+      scroll.innerHTML = '';
+      (state.activeList.items || []).forEach((it, idx) => {
+        const div = document.createElement('div');
+        div.className = 'list-item';
+        if (state.program?.item?.id === it.id) div.classList.add('is-pgm');
+        else if (state.preview?.item?.id === it.id) div.classList.add('is-pv');
+
+        div.innerHTML = `<span><b>${idx + 1}.</b> ${it.title}</span> <span style="font-family: Consolas;">${formatTime(it.durationMs)}</span>`;
+        scroll.appendChild(div);
+      });
+    }
+
+    updateTimers();
+  }
+
+  function updateTimers() {
+    if (!state || !state.program || !state.program.item) {
+      document.getElementById('timer-cur').textContent = '00:00:00';
+      document.getElementById('timer-rem').textContent = '-00:00:00';
+      document.getElementById('progress-bar').style.width = '0%';
+      return;
+    }
+
+    const pgm = state.program;
+    let pos = pgm.positionMs || 0;
+    const dur = pgm.durationMs || 0;
+    if (pgm.status === 'playing' && pgm.startedAt) {
+      const elapsed = Date.now() - pgm.startedAt;
+      pos = Math.min(dur, (pgm.positionMs || 0) + elapsed);
+    }
+    const rem = Math.max(0, dur - pos);
+    document.getElementById('timer-cur').textContent = formatTime(pos);
+    document.getElementById('timer-rem').textContent = `-${formatTime(rem)}`;
+
+    const pct = dur > 0 ? Math.min(100, Math.max(0, (pos / dur) * 100)) : 0;
+    document.getElementById('progress-bar').style.width = `${pct}%`;
+  }
+
+  setInterval(fetchMonitor, 1000);
+  setInterval(updateTimers, 100);
+  fetchMonitor();
+})();
+</script>
+</body>
+</html>

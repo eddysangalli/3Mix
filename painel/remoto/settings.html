@@ -1,1 +1,661 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FreeMix · Configurações</title><link rel="stylesheet" href="controle.css"><style>.settings{display:grid;grid-template-columns:210px 1fr;gap:24px}nav{display:grid;align-content:start;gap:5px}nav button{text-align:left}nav button.selected{background:#315d86}label{display:grid;gap:8px;margin:12px 0}input,select{max-width:500px;width:100%}.settings section{min-height:430px}.foot{display:flex;justify-content:flex-end;gap:10px;padding:15px 0}.metrics{display:grid;grid-template-columns:1fr 1fr;gap:15px}@media(max-width:650px){.settings{grid-template-columns:1fr}nav{grid-template-columns:repeat(2,1fr)}}.native-check{display:flex;align-items:center;gap:8px}.native-check input{width:auto}a{color:#87c7ff}.field-help{display:block;max-width:650px;font-size:12px;color:#495660;margin:-4px 0 14px}#description{line-height:1.45}.settings-editor{width:100%;height:70vh;min-height:450px;border:0}button[hidden]{display:none}</style><link rel="stylesheet" href="studio-dialog.css"><link rel="stylesheet" href="menus-tarefas-ui.css"></head><body data-page="settings"><header><a href="/">FreeMix</a><h1 id="window-title">Configurações gerais</h1><button id="native-open" title="Abrir editor completo do FreeMix">Editor completo</button><span id="connection">Conectando…</span></header><main><p id="message" role="status"></p><div class="settings"><aside class="settings-nav"><input id="settings-search" type="search" placeholder="Buscar opções…" aria-label="Buscar configurações"><nav id="categories"></nav></aside><section><h2 id="title">Lendo configurações…</h2><p id="description"></p><div class="row"><button id="defaults">Padrões desta categoria</button><button id="export">Exportar categoria</button><button id="import">Importar categoria</button><input id="import-file" type="file" accept=".json,application/json" hidden></div><p id="transfer-note">Vídeo, Gravação e Transmissão: arquivo local sem credenciais. Importar e Padrões preparam campos; somente Aplicar altera o perfil.</p><div id="settings-task-links" class="task-nav" hidden><a href="/audio">Áudio das entradas e saídas</a><a href="/calls">Retorno e talkback das Calls</a></div><div id="content"></div></section></div><footer class="foot"><button id="cancel">Cancelar alterações</button><button id="apply">Aplicar</button><button id="ok">OK</button></footer></main><script src="controle.js"></script><script src="settings-encoders.js"></script><script src="settings-help.js"></script><script src="settings.js"></script><script src="menus-tarefas-ui.js"></script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<script src="settings-alias.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3Mix · Configurações</title>
+<link rel="stylesheet" href="vmix-dialogo.css">
+<style>
+:root {
+  --bg-app: #181a1d;
+  --bg-panel: #202327;
+  --bg-card: #1c1e22;
+  --border-dim: #2e3238;
+  --border-focus: #444b54;
+  --text-main: #e6ebf0;
+  --text-muted: #8a94a0;
+  --text-dim: #5c6672;
+  --accent-amber: #d97706;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+html, body {
+  width: 100%;
+  height: 100%;
+  background: var(--bg-app);
+  color: var(--text-main);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* TOPBAR */
+.settings-topbar {
+  height: 38px;
+  background: #141618;
+  border-bottom: 1px solid var(--border-dim);
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 12px;
+  font-size: 11px;
+}
+.brand-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.project-sel-box {
+  background: #1e2126;
+  border: 1px solid var(--border-dim);
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  color: #cbd5e1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.search-settings {
+  margin-left: auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.search-settings input {
+  background: #121417;
+  border: 1px solid #2e343d;
+  color: #cbd5e1;
+  font-size: 10.5px;
+  padding: 3px 8px 3px 24px;
+  border-radius: 3px;
+  width: 170px;
+}
+.search-settings span {
+  position: absolute;
+  left: 7px;
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+/* CORPO PRINCIPAL EM 3 COLUNAS */
+.settings-layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 210px 1fr 340px;
+  overflow: hidden;
+}
+
+/* 1. NAVEGAÇÃO LATERAL */
+.settings-nav {
+  background: #16181b;
+  border-right: 1px solid var(--border-dim);
+  display: flex;
+  flex-direction: column;
+  padding: 10px 6px;
+  overflow-y: auto;
+  gap: 12px;
+}
+.nav-group-title {
+  font-size: 9.5px;
+  font-weight: 800;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0 8px;
+  margin-bottom: 2px;
+}
+.nav-group-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.nav-item-btn {
+  background: transparent;
+  border: 0;
+  color: #94a3b8;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 6px 8px;
+  border-radius: 3px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.12s ease;
+}
+.nav-item-btn:hover { background: #1e2227; color: #fff; }
+.nav-item-btn.selected {
+  background: #282c33;
+  color: #fff;
+  font-weight: 700;
+}
+.nav-icon { font-size: 12px; width: 14px; text-align: center; }
+
+/* 2. ÁREA CENTRAL DE FORMULÁRIO */
+.settings-content {
+  background: var(--bg-app);
+  padding: 18px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.content-header h1 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 2px;
+}
+.content-header p {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.settings-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 4px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.card-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #fff;
+}
+.card-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.preset-sizes-row {
+  display: flex;
+  gap: 4px;
+}
+.btn-size-preset {
+  background: #181b1f;
+  border: 1px solid var(--border-dim);
+  color: #cbd5e1;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.btn-size-preset:hover { background: #252a32; color: #fff; }
+.btn-size-preset.selected {
+  background: #343a44;
+  border-color: #4a5568;
+  color: #fff;
+  font-weight: 700;
+}
+
+.form-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.field-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.field-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+.field-input, .field-select {
+  background: #14161a;
+  border: 1px solid #2e343d;
+  color: #fff;
+  font-size: 11px;
+  padding: 5px 8px;
+  border-radius: 3px;
+}
+
+.toggle-switch-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.switch-slider {
+  width: 32px;
+  height: 18px;
+  background: #333a44;
+  border-radius: 9px;
+  position: relative;
+  cursor: pointer;
+}
+.switch-slider.active { background: #2563eb; }
+.switch-knob {
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.15s ease;
+}
+.switch-slider.active .switch-knob { transform: translateX(14px); }
+
+.box-highlight {
+  background: #14171a;
+  border: 1px solid #282d35;
+  border-radius: 3px;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: #cbd5e1;
+}
+
+/* 3. COLUNA DIREITA: PRÉVIA DO FORMATO */
+.settings-preview-col {
+  background: #16181b;
+  border-left: 1px solid var(--border-dim);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+.preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #fff;
+}
+.preview-badge {
+  background: #20242b;
+  border: 1px solid #323842;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+
+.safe-area-preview-box {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border: 1px solid #2e343d;
+  border-radius: 3px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.safe-area-preview-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.85;
+}
+.safe-area-action {
+  position: absolute;
+  top: 5%;
+  bottom: 5%;
+  left: 5%;
+  right: 5%;
+  border: 1px dashed rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+}
+.safe-area-title {
+  position: absolute;
+  top: 10%;
+  bottom: 10%;
+  left: 10%;
+  right: 10%;
+  border: 1px dashed rgba(56, 189, 248, 0.45);
+  pointer-events: none;
+}
+
+.summary-cards-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.sum-card {
+  background: #1c2025;
+  border: 1px solid #2a3038;
+  border-radius: 3px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sum-label { font-size: 9.5px; color: var(--text-dim); text-transform: uppercase; font-weight: 700; }
+.sum-val { font-size: 11px; font-weight: 700; color: #fff; }
+
+.info-note-card {
+  background: #14171a;
+  border: 1px solid #232830;
+  border-radius: 3px;
+  padding: 10px;
+  font-size: 10.5px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+/* RODAPÉ */
+.settings-footer {
+  height: 42px;
+  background: #141618;
+  border-top: 1px solid var(--border-dim);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  font-size: 11px;
+}
+.btn-foot-sec {
+  background: #1c2026;
+  border: 1px solid #2e353f;
+  color: #cbd5e1;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.btn-foot-sec:hover { background: #252b33; color: #fff; }
+
+.footer-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.unsaved-dot-msg {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  color: var(--amber-cue);
+  font-weight: 700;
+}
+.unsaved-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--amber-cue);
+}
+
+.btn-primary-save {
+  background: #e2e8f0;
+  border: 1px solid #fff;
+  color: #0f172a;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 5px 16px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.btn-primary-save:hover { background: #fff; }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="settings-topbar">
+  <div class="brand-title">
+    <span>3Mix</span>
+    <span style="color:var(--text-dim);">/</span>
+    <span>Configurações</span>
+  </div>
+  <div class="project-sel-box">
+    <span>Projeto: <b>Futsal ao vivo</b></span>
+    <span style="font-size:9px;color:var(--text-dim);">⌄</span>
+  </div>
+
+  <div class="search-settings">
+    <span>🔍</span>
+    <input type="text" placeholder="Buscar configuração…">
+  </div>
+</header>
+
+<!-- CORPO EM 3 COLUNAS -->
+<main class="settings-layout">
+
+  <!-- 1. NAVEGAÇÃO LATERAL -->
+  <aside class="settings-nav">
+    <!-- PRODUÇÃO -->
+    <div class="nav-group-title">Produção</div>
+    <div class="nav-group-items">
+      <button type="button" class="nav-item-btn selected" data-cat="video"><span class="nav-icon">📹</span> Vídeo</button>
+      <button type="button" class="nav-item-btn" data-cat="audio"><span class="nav-icon">🎙️</span> Áudio</button>
+      <button type="button" class="nav-item-btn" data-cat="audio-outs"><span class="nav-icon">🔊</span> Saídas de áudio</button>
+    </div>
+
+    <!-- TRANSMISSÃO -->
+    <div class="nav-group-title">Transmissão</div>
+    <div class="nav-group-items">
+      <button type="button" class="nav-item-btn" data-cat="streaming"><span class="nav-icon">📡</span> Streaming</button>
+      <button type="button" class="nav-item-btn" data-cat="recording"><span class="nav-icon">⏺️</span> Gravação</button>
+      <button type="button" class="nav-item-btn" data-cat="ndi-srt"><span class="nav-icon">🌐</span> Saídas NDI / SRT</button>
+    </div>
+
+    <!-- OPERAÇÃO -->
+    <div class="nav-group-title">Operação</div>
+    <div class="nav-group-items">
+      <button type="button" class="nav-item-btn" data-cat="appearance"><span class="nav-icon">🖥️</span> Aparência e workspace</button>
+      <button type="button" class="nav-item-btn" data-cat="multiview"><span class="nav-icon">⊞</span> Multiview e tela cheia</button>
+      <button type="button" class="nav-item-btn" data-cat="shortcuts"><span class="nav-icon">⌨️</span> Atalhos</button>
+      <button type="button" class="nav-item-btn" data-cat="remote"><span class="nav-icon">🎮</span> Controle remoto</button>
+    </div>
+
+    <!-- SISTEMA -->
+    <div class="nav-group-title">Sistema</div>
+    <div class="nav-group-items">
+      <button type="button" class="nav-item-btn" data-cat="performance"><span class="nav-icon">⚙️</span> Desempenho</button>
+      <button type="button" class="nav-item-btn" data-cat="color"><span class="nav-icon">🎨</span> Cor</button>
+      <button type="button" class="nav-item-btn" data-cat="about"><span class="nav-icon">ⓘ</span> Sobre</button>
+    </div>
+  </aside>
+
+  <!-- 2. ÁREA CENTRAL -->
+  <section class="settings-content">
+    <div class="content-header">
+      <h1>Vídeo</h1>
+      <p>Formato da produção e das saídas.</p>
+    </div>
+
+    <!-- CARD 1: FORMATO DA PRODUÇÃO -->
+    <div class="settings-card">
+      <div class="card-title">Formato da produção</div>
+      <div class="card-desc">Define a resolução e a taxa de quadros da sua produção.</div>
+
+      <div class="preset-sizes-row">
+        <button type="button" class="btn-size-preset" data-w="1280" data-h="720">720p</button>
+        <button type="button" class="btn-size-preset selected" data-w="1920" data-h="1080">1080p</button>
+        <button type="button" class="btn-size-preset" data-w="3840" data-h="2160">4K</button>
+        <button type="button" class="btn-size-preset" data-w="1080" data-h="1920">Vertical</button>
+        <button type="button" class="btn-size-preset" data-w="custom">Personalizado</button>
+      </div>
+
+      <div class="form-fields-grid">
+        <div class="field-box">
+          <label class="field-label">Largura</label>
+          <input type="number" class="field-input" value="1920" id="base-w">
+        </div>
+        <div class="field-box">
+          <label class="field-label">Altura</label>
+          <input type="number" class="field-input" value="1080" id="base-h">
+        </div>
+        <div class="field-box">
+          <label class="field-label">Taxa de quadros</label>
+          <select class="field-select" id="fps-select">
+            <option value="29.97" selected>29,97 fps</option>
+            <option value="59.94">59,94 fps</option>
+            <option value="60">60 fps</option>
+            <option value="30">30 fps</option>
+          </select>
+        </div>
+        <div class="field-box">
+          <label class="field-label">Varredura</label>
+          <select class="field-select">
+            <option selected>Progressivo</option>
+            <option>Entrelaçado</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 2: FORMATO DA SAÍDA -->
+    <div class="settings-card">
+      <div class="card-title">Formato da saída</div>
+      <div class="card-desc">Define o formato de resolução das saídas (streaming, gravação, NDI, etc.).</div>
+
+      <div class="toggle-switch-row">
+        <div class="switch-slider active" id="toggle-same-format">
+          <div class="switch-knob"></div>
+        </div>
+        <div>
+          <b style="font-size:11px;color:#fff;">Usar o formato da produção</b>
+          <div style="font-size:10px;color:var(--text-muted);">As saídas utilizarão a mesma resolução e taxa de quadros da produção.</div>
+        </div>
+      </div>
+
+      <div class="box-highlight">
+        <span>Formato da saída atual:</span>
+        <b style="color:#fff;margin-left:4px;" id="out-format-str">1920 × 1080 • 29,97p</b>
+      </div>
+    </div>
+
+    <!-- CARD 3: AJUSTE DAS ENTRADAS -->
+    <div class="settings-card">
+      <div class="card-title">Ajuste das entradas</div>
+      <div class="card-desc">Define como as fontes de vídeo são ajustadas quando a resolução da produção é alterada.</div>
+
+      <label style="display:flex;align-items:center;gap:6px;font-size:11px;cursor:pointer;">
+        <input type="checkbox" checked id="chk-reflow">
+        <b style="color:#fff;">Reenquadrar entradas ao alterar resolução</b>
+      </label>
+      <div style="font-size:10px;color:var(--text-muted);margin-left:20px;margin-top:-6px;">
+        Redimensiona e posiciona automaticamente as entradas no novo formato.
+      </div>
+
+      <div style="display:flex;align-items:center;gap:12px;margin-top:6px;">
+        <span class="field-label" style="width:110px;">Modo de ajuste:</span>
+        <select class="field-select" style="flex:1;">
+          <option selected>Manter proporção</option>
+          <option>Ajustar à tela (esticar)</option>
+          <option>Preencher tela (cortar)</option>
+        </select>
+      </div>
+
+      <div style="font-size:10px;color:var(--text-dim);line-height:1.4;">
+        ⓘ As entradas serão ajustadas mantendo a proporção original, evitando distorções na imagem.
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. PRÉVIA DO FORMATO -->
+  <aside class="settings-preview-col">
+    <div class="preview-head">
+      <span>Prévia do formato</span>
+      <span class="preview-badge" id="preview-aspect">1920 x 1080 (16:9)</span>
+    </div>
+
+    <div class="safe-area-preview-box">
+      <img src="/api/preview?source=CAM%201" alt="Formato Safe Area">
+      <div class="safe-area-action" title="Action Safe (90%)"></div>
+      <div class="safe-area-title" title="Title Safe (80%)"></div>
+    </div>
+
+    <div class="summary-cards-row">
+      <div class="sum-card">
+        <span class="sum-label">Produção</span>
+        <span class="sum-val" id="sum-prod">1920 × 1080 · 29,97p</span>
+      </div>
+      <div class="sum-card">
+        <span class="sum-label">Saída</span>
+        <span class="sum-val" id="sum-out">1920 × 1080 · 29,97p</span>
+      </div>
+    </div>
+
+    <div class="info-note-card">
+      <div style="font-weight:700;color:#fff;margin-bottom:4px;display:flex;align-items:center;gap:4px;">
+        <span>ⓘ</span> Sobre o formato da produção e da saída
+      </div>
+      O formato da produção define a resolução e a taxa de quadros com que o 3Mix trabalha internamente. O formato da saída define a resolução das saídas (streaming, gravação, NDI, etc.). Quando ativado, as saídas utilizam o mesmo formato da produção.
+    </div>
+  </aside>
+
+</main>
+
+<!-- RODAPÉ -->
+<footer class="settings-footer">
+  <div style="display:flex;gap:6px;">
+    <button type="button" class="btn-foot-sec">📥 Importar</button>
+    <button type="button" class="btn-foot-sec">📤 Exportar</button>
+    <button type="button" class="btn-foot-sec">↺ Restaurar padrão</button>
+  </div>
+
+  <div class="footer-actions-right">
+    <div class="unsaved-dot-msg">
+      <span class="unsaved-dot"></span>
+      <span>Alterações não salvas</span>
+    </div>
+    <button type="button" class="btn-foot-sec" onclick="window.close ? window.close() : null">Cancelar</button>
+    <button type="button" class="btn-foot-sec" id="btn-apply">Aplicar</button>
+    <button type="button" class="btn-primary-save" id="btn-save">Salvar</button>
+  </div>
+</footer>
+
+<script>
+// Presets de resolução
+document.querySelectorAll('.btn-size-preset').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.btn-size-preset').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    const w = btn.dataset.w;
+    const h = btn.dataset.h;
+    if (w && h && w !== 'custom') {
+      document.getElementById('base-w').value = w;
+      document.getElementById('base-h').value = h;
+      document.getElementById('sum-prod').textContent = `${w} × ${h} · 29,97p`;
+      document.getElementById('sum-out').textContent = `${w} × ${h} · 29,97p`;
+      document.getElementById('out-format-str').textContent = `${w} × ${h} • 29,97p`;
+      document.getElementById('preview-aspect').textContent = `${w} x ${h} (${w==='1080'?'9:16':'16:9'})`;
+    }
+  });
+});
+
+// Ações de Salvar e Aplicar
+document.getElementById('btn-apply')?.addEventListener('click', () => {
+  const w = Number(document.getElementById('base-w').value);
+  const h = Number(document.getElementById('base-h').value);
+  fetch('/api/control', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'set_video_format', baseWidth: w, baseHeight: h, outputWidth: w, outputHeight: h })
+  }).then(() => {
+    alert('Configurações aplicadas com sucesso no motor 3Mix!');
+  }).catch(() => {});
+});
+
+document.getElementById('btn-save')?.addEventListener('click', () => {
+  document.getElementById('btn-apply')?.click();
+  setTimeout(() => { if (window.close) window.close(); }, 300);
+});
+</script>
+<script src="fechar-janela.js"></script>
+</body>
+</html>

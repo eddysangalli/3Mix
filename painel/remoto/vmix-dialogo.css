@@ -1,102 +1,459 @@
-/* Dialog look shared by the settings windows that follow the reference switcher: small, dense, flat, dark body with
-   light fields, labels right-aligned in one column, buttons in a darker bar at the bottom. Colour carries meaning
-   only: green = selected/active, red = on air, amber = attention. No gradients, shadows, glows or round corners. */
+/* ==========================================================================
+   FREEMIX BROADCAST STUDIO · DESIGN SYSTEM RESPONSIVO DE DIÁLOGOS E MESA
+   Padrão Studio Broadcast Tier 1 (vMix Pro / Blackmagic Design / Grass Valley)
+   100% Dark Studio (#090c10 / #11151c / #161b24) · Fluido e Responsivo
+   ========================================================================== */
+
+/* 3Mix graphite identity, shared by the existing operational dialogs. */
+html body.vd{background:#202020;color:#ededed}
+.vd .vd-window,.vd .vd-body{background:#252525;border-color:#484848}
+.vd .vd-bar,.vd .vd-status{background:#292929;border-color:#484848}
+.vd input:not([type=checkbox]):not([type=range]),.vd select,.vd textarea{background:#202020!important;color:#ededed!important;border-color:#555!important}
+.vd button{border-radius:4px}.vd .vd-note,.vd .vd-msg{color:#b9b9b9}
 .vd, .vd * { box-sizing: border-box; }
-html, body.vd { margin: 0; height: 100%; }
-body.vd { background: #1d2227; color: #fff; font: 12px/1.25 "Segoe UI", Tahoma, sans-serif; overflow: auto; }
-.vd-window { min-width: 560px; max-width: 760px; min-height: 100%; display: flex; flex-direction: column; background: #1d2227; }
+html, body.vd {
+  margin: 0;
+  height: 100%;
+  min-height: 100vh;
+}
 
-.vd-strip, .vd-bar { background: #0d1115; padding: 6px 12px; display: flex; align-items: center; gap: 6px; }
-.vd-bar { padding: 8px 10px; margin-top: auto; position: sticky; bottom: 0; }   /* stays in reach when the body scrolls */
+body.vd {
+  background: #090c10;
+  color: #f0f4f8;
+  font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* JANELA RESPONSIVA: Modais compactas centralizadas com borda e sombra; Telas cheias (vd-fill) com expansão total */
+.vd-window {
+  width: calc(100% - 32px);
+  max-width: 860px;
+  margin: 24px auto;
+  min-height: auto;
+  display: flex;
+  flex-direction: column;
+  background: #0e1217;
+  border: 1px solid #1f2732;
+  border-radius: 8px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.75);
+  overflow: hidden;
+}
+
+.vd-window.vd-fill {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  min-height: 100vh;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+}
+
+/* TOPBAR E BARRA DE CONTROLE */
+.vd-strip, .vd-bar {
+  background: #090c10;
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #1f2732;
+  flex-shrink: 0;
+}
+
+.vd-strip .vd-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vd-bar {
+  padding: 10px 18px;
+  margin-top: auto;
+  position: sticky;
+  bottom: 0;
+  background: #090c10;
+  border-top: 1px solid #1f2732;
+  border-bottom: none;
+  z-index: 100;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.5);
+}
+
 .vd-bar .vd-flex { flex: 1; }
-.vd-body { padding: 8px 12px 10px; display: grid; gap: 7px; align-content: start; }
 
-/* One row = right-aligned bold label in a fixed column + the field(s). */
-.vd-row { display: grid; grid-template-columns: 138px minmax(0, 1fr) auto; align-items: center; column-gap: 9px; margin: 0; min-height: 22px; }
-.vd-row > span:first-child { text-align: right; font-weight: 700; white-space: nowrap; }
-.vd-strip .vd-row { flex: 1; grid-template-columns: 126px minmax(0, 1fr); }
-.vd-gap { height: 26px; }
-.vd-right { display: flex; justify-content: flex-end; gap: 6px; }
-.vd-inline { display: flex; align-items: center; gap: 14px; min-width: 0; }
-
-.vd input[type=text], .vd input[type=password], .vd input[type=number], .vd select {
-  height: 21px; padding: 1px 4px; border: 1px solid #6f757b; border-radius: 0; background: #e9eaeb; color: #000;
-  font: 12px "Segoe UI", Tahoma, sans-serif; width: 100%; min-width: 0; outline: none;
+.vd-body {
+  padding: 16px 20px;
+  display: grid;
+  gap: 12px;
+  align-content: start;
 }
-.vd input:focus, .vd select:focus { border: 1px solid #1e7fd6; box-shadow: inset 0 0 0 1px #1e7fd6; background: #fff; }
-.vd input:disabled, .vd select:disabled { background: #9a9ea2; color: #33383c; }
-.vd select.vd-short { width: 150px; }
 
+/* ESTRUTURA DE LINHAS (ROWS) RESPONSIVA */
+.vd-row {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 12px;
+  margin: 0;
+  min-height: 28px;
+}
+
+.vd-row > span:first-child {
+  text-align: right;
+  font-weight: 700;
+  font-size: 12px;
+  color: #cbd5e1;
+  white-space: nowrap;
+}
+
+.vd-strip .vd-row {
+  flex: 1;
+  grid-template-columns: 140px minmax(0, 1fr);
+}
+
+.vd-gap { height: 16px; }
+.vd-right { display: flex; justify-content: flex-end; gap: 8px; }
+.vd-inline { display: flex; align-items: center; gap: 10px; min-width: 0; flex-wrap: wrap; }
+
+/* INPUTS E CONTROLES EM ESTILO DARK STUDIO BROADCAST */
+.vd input[type=text],
+.vd input[type=password],
+.vd input[type=number],
+.vd select {
+  height: 28px;
+  padding: 4px 10px;
+  border: 1px solid #2e3846;
+  border-radius: 4px;
+  background: #131720;
+  color: #f0f4f8;
+  font: 12.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  width: 100%;
+  min-width: 0;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.vd input:focus,
+.vd select:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+  background: #18202c;
+}
+
+.vd input:disabled,
+.vd select:disabled {
+  background: #0c0f14;
+  color: #64748b;
+  border-color: #202733;
+  cursor: not-allowed;
+}
+
+.vd select.vd-short {
+  width: 180px;
+  max-width: 100%;
+}
+
+/* BOTÕES BROADCAST TIER 1 */
 .vd button {
-  height: 26px; min-width: 62px; padding: 0 12px; border: 1px solid #44515c; border-radius: 0; background: #2a333b; color: #fff;
-  font: 700 12px "Segoe UI", Tahoma, sans-serif; cursor: default; white-space: nowrap;
+  height: 28px;
+  min-width: 72px;
+  padding: 0 14px;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  background: #1e2632;
+  color: #f0f4f8;
+  font: 700 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
-.vd button:hover:not(:disabled) { background: #35414b; border-color: #5b6b78; }
-.vd button:active:not(:disabled) { background: #20282f; }
-.vd button:focus-visible { outline: 1px solid #fff; outline-offset: -3px; }
-.vd button:disabled { color: #7c868e; background: #232a30; border-color: #333c44; }
-.vd button.vd-on { background: #0b6f1a; border-color: #2aa13e; }           /* selected / active */
-.vd button.vd-air { background: #b3140c; border-color: #ff5a4f; }           /* on air */
-.vd button.vd-warn { background: #8a5a00; border-color: #d39a2a; }          /* attention */
-/* A coloured button keeps its colour under the pointer: after "Start" is clicked the pointer is still on it. */
-.vd button.vd-on:hover:not(:disabled), .vd button.vd-on:active:not(:disabled) { background: #0e8a21; border-color: #3fc257; }
-.vd button.vd-air:hover:not(:disabled), .vd button.vd-air:active:not(:disabled) { background: #d01a10; border-color: #ff7a70; }
-.vd button.vd-warn:hover:not(:disabled), .vd button.vd-warn:active:not(:disabled) { background: #a56c00; border-color: #e5ae3f; }
-.vd-bar button { height: 32px; min-width: 126px; }
-.vd button.vd-cog { min-width: 26px; width: 26px; padding: 0; font-size: 15px; line-height: 1; }
 
-/* Numbered selectors (destinations, outputs…). */
-.vd-nums { display: flex; gap: 6px; }
-.vd-nums button { width: 46px; min-width: 46px; height: 28px; position: relative; }
-.vd-nums.vd-words button { width: auto; min-width: 62px; padding: 0 14px; }   /* same selectors with words (file formats, tabs) */
-.vd-nums button.vd-live::after { content: ""; position: absolute; right: 3px; top: 3px; width: 7px; height: 7px; background: #ff3b30; }
+.vd button:hover:not(:disabled) {
+  background: #283344;
+  border-color: #475569;
+  color: #ffffff;
+}
 
-.vd-check { display: inline-flex; align-items: center; gap: 6px; font-weight: 400; white-space: nowrap; }
-.vd-check input { width: 13px; height: 13px; margin: 0; accent-color: #1e7fd6; }
+.vd button:active:not(:disabled) {
+  background: #18202a;
+}
 
-.vd-msg { margin: 2px 0 0 147px; min-height: 16px; color: #c9d1d8; }
-.vd-msg.vd-error { color: #ff8078; font-weight: 700; }
-.vd-msg.vd-ok { color: #7fe08f; }
-.vd-note { color: #9aa6b0; font-weight: 400; }
+.vd button:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 1px;
+}
 
-/* Status list (what "Ver Status" shows). */
-.vd-status { margin: 0 12px 10px; border: 1px solid #39444d; background: #12171b; }
-.vd-status table { width: 100%; border-collapse: collapse; }
-.vd-status th, .vd-status td { padding: 2px 8px; text-align: left; border-bottom: 1px solid #252e35; font-weight: 400; white-space: nowrap; }
-.vd-window.vd-with-status .vd-gap { display: none; }                        /* the list takes the room of the spacer */
-.vd-window.vd-with-status .vd-status { margin-bottom: 6px; }
-.vd-status th { background: #26303a; font-weight: 700; }
-.vd-status td.vd-url { max-width: 240px; overflow: hidden; text-overflow: ellipsis; }
-.vd-status tr.vd-sel td { background: #7a4a00; }                            /* selected row */
-.vd-status .vd-air-text { color: #ff5a4f; font-weight: 700; }
-.vd-status .vd-ok-text { color: #63d977; font-weight: 700; }
+.vd button:disabled {
+  color: #64748b;
+  background: #141820;
+  border-color: #232b36;
+  cursor: not-allowed;
+}
+
+.vd button.vd-on {
+  background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+  border-color: #00e676;
+  color: #ffffff;
+  box-shadow: 0 0 8px rgba(0, 230, 118, 0.25);
+}
+
+.vd button.vd-air {
+  background: linear-gradient(135deg, #991b1b 0%, #b91c1c 100%);
+  border-color: #ef4444;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.35);
+}
+
+.vd button.vd-warn {
+  background: linear-gradient(135deg, #854d0e 0%, #a16207 100%);
+  border-color: #facc15;
+  color: #ffffff;
+}
+
+.vd button.vd-on:hover:not(:disabled) { background: #059669; border-color: #00e676; }
+.vd button.vd-air:hover:not(:disabled) { background: #dc2626; border-color: #ef4444; }
+.vd button.vd-warn:hover:not(:disabled) { background: #ca8a04; border-color: #fde047; }
+
+.vd-bar button {
+  height: 34px;
+  min-width: 130px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.vd button.vd-cog {
+  min-width: 28px;
+  width: 28px;
+  padding: 0;
+  font-size: 15px;
+}
+
+/* SELETORES NUMERADOS / TABS */
+.vd-nums {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.vd-nums button {
+  width: 48px;
+  min-width: 48px;
+  height: 30px;
+  position: relative;
+  border-radius: 4px;
+}
+
+.vd-nums.vd-words button {
+  width: auto;
+  min-width: 80px;
+  padding: 0 14px;
+}
+
+.vd-nums button.vd-live::after {
+  content: "";
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 6px #ef4444;
+}
+
+.vd-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 12.5px;
+  color: #cbd5e1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.vd-check input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: #00e676;
+  cursor: pointer;
+}
+
+.vd-msg {
+  margin: 4px 0 0 152px;
+  min-height: 18px;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.vd-msg.vd-error { color: #f87171; font-weight: 700; }
+.vd-msg.vd-ok { color: #00e676; font-weight: 700; }
+.vd-note { color: #8b99a8; font-weight: 500; font-size: 11.5px; }
+
+/* LISTAS DE STATUS E TABELAS BROADCAST */
+.vd-status {
+  margin: 0 16px 12px;
+  border: 1px solid #28323d;
+  background: #0b0e13;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.vd-status table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.vd-status th, .vd-status td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid #1c242c;
+  font-size: 12.5px;
+}
+
+.vd-window.vd-with-status .vd-gap { display: none; }
+.vd-window.vd-with-status .vd-status { margin-bottom: 8px; }
+
+.vd-status th {
+  background: #161b24;
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #283342;
+}
+
+.vd-status td.vd-url {
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vd-status tr.vd-sel td { background: #3b2707; }
+.vd-status tr:hover td { background: #141922; }
+
+.vd-status .vd-air-text {
+  color: #ef4444;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.vd-status .vd-ok-text {
+  color: #00e676;
+  font-weight: 700;
+}
+
 .vd-status tr[data-i] td { cursor: default; }
-.vd-mono { font-family: Consolas, "Cascadia Mono", monospace; }
+.vd-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
 
-/* Section title inside the body, a wrapping list of checkboxes, a one-line selectable address, a dimmed button that
-   still answers a press (it says why it cannot act), and the indented block of advanced options. */
-.vd-title { font-weight: 700; }
-.vd-checks { display: flex; flex-wrap: wrap; gap: 4px 14px; }
-.vd-link { user-select: all; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #c9d1d8; }
-.vd button.vd-dim { color: #7c868e; }
-.vd-advanced { display: grid; gap: 7px; padding: 7px 0; border-top: 1px solid #39444d; border-bottom: 1px solid #39444d; }
-.vd input[readonly] { background: #c9cccf; }
+.vd-title { font-weight: 800; color: #ffffff; letter-spacing: -0.2px; }
+.vd-checks { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.vd-link { user-select: all; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #38bdf8; }
+.vd button.vd-dim { color: #64748b; }
+.vd-advanced {
+  display: grid;
+  gap: 10px;
+  padding: 12px 0;
+  border-top: 1px solid #232b36;
+  border-bottom: 1px solid #232b36;
+}
+
+.vd input[readonly] { background: #161b22; color: #94a3b8; }
 [hidden] { display: none !important; }
 
-/* A window whose list takes all the room left (inputs to record, sources…): the list scrolls, the bar stays. */
-.vd-window.vd-fill { height: 100%; }
-.vd-status.vd-grow { flex: 1 1 0; min-height: 60px; overflow: auto; }
-.vd-status.vd-grow th { position: sticky; top: 0; }
-.vd-status input[type=checkbox] { width: 13px; height: 13px; margin: 0; vertical-align: middle; accent-color: #1e7fd6; }
+/* JANELA EXPANSÍVEL (FILL) */
+.vd-window.vd-fill { height: 100%; min-height: 100vh; }
+.vd-status.vd-grow {
+  flex: 1 1 0;
+  min-height: 120px;
+  overflow: auto;
+}
+.vd-status.vd-grow th { position: sticky; top: 0; z-index: 2; }
+.vd-status input[type=checkbox] { width: 16px; height: 16px; margin: 0; vertical-align: middle; accent-color: #00e676; }
 
-/* A window with a list of categories on the left and the fields of the chosen one on the right (Settings). */
-.vd-main { flex: 1 1 0; min-height: 0; display: flex; }
-.vd-side { width: 176px; flex: none; background: #0d1115; border-right: 1px solid #39444d; overflow-y: auto; display: flex; flex-direction: column; }
-.vd .vd-side button { height: 27px; min-height: 27px; min-width: 0; border: 0; border-bottom: 1px solid #1a2228; background: transparent; text-align: left; padding: 0 10px; overflow: hidden; text-overflow: ellipsis; }
-.vd .vd-side button:hover:not(:disabled) { background: #1b242b; border-color: #1a2228; }
-.vd .vd-side button.vd-on, .vd .vd-side button.vd-on:hover:not(:disabled) { background: #0b6f1a; }
-.vd-pane { flex: 1 1 0; min-width: 0; overflow-x: hidden; overflow-y: auto; display: flex; flex-direction: column; }
-.vd-pane .vd-body { flex: 1 0 auto; }
-.vd-pane .vd-msg { margin: 0 12px 8px; }
-.vd-settings .vd-row { grid-template-columns: 236px minmax(0, 1fr) auto; }
-.vd-settings .vd-row.vd-row-check { display: block; padding-left: 22px; }   /* a list of tick boxes reads from the left, as in the reference */
+/* ESTRUTURA MASTER/DETAIL RESPONSIVA (VD-MAIN, VD-SIDE, VD-PANE) */
+.vd-main {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  background: #090c10;
+}
+
+.vd-side {
+  width: 240px;
+  flex: none;
+  background: #0d1117;
+  border-right: 1px solid #1f2732;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.vd .vd-side button {
+  height: 32px;
+  min-height: 32px;
+  min-width: 0;
+  border: 0;
+  border-bottom: 1px solid #19202a;
+  background: transparent;
+  text-align: left;
+  padding: 0 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12.5px;
+  color: #cbd5e1;
+  border-radius: 0;
+}
+
+.vd .vd-side button:hover:not(:disabled) {
+  background: #18202c;
+  color: #ffffff;
+}
+
+.vd .vd-side button.vd-on,
+.vd .vd-side button.vd-on:hover:not(:disabled) {
+  background: linear-gradient(90deg, #065f46 0%, #047857 100%);
+  color: #ffffff;
+  font-weight: 700;
+  border-left: 3px solid #00e676;
+}
+
+.vd-pane {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  background: #090c10;
+}
+
+.vd-pane .vd-body {
+  flex: 1 0 auto;
+  padding: 18px 24px;
+}
+
+.vd-pane .vd-msg { margin: 0 16px 10px; }
+
+.vd-settings .vd-row { grid-template-columns: 240px minmax(0, 1fr) auto; }
+.vd-settings .vd-row.vd-row-check { display: block; padding-left: 24px; }
+
+/* MEDIA QUERIES RESPONSIVAS */
+@media (max-width: 900px) {
+  .vd-main { flex-direction: column; }
+  .vd-side { width: 100%; max-height: 180px; border-right: none; border-bottom: 1px solid #1f2732; }
+  .vd-row { grid-template-columns: 1fr; gap: 4px; }
+  .vd-row > span:first-child { text-align: left; }
+  .vd-msg { margin-left: 0; }
+}

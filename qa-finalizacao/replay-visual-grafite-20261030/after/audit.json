@@ -1,0 +1,1423 @@
+{
+  "audit": {
+    "viewport": [
+      1440,
+      900
+    ],
+    "bodyFont": "\"Segoe UI Variable Display\", \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, -apple-system, Roboto, Arial, sans-serif",
+    "bodySize": 14,
+    "docScroll": [
+      1440,
+      900
+    ],
+    "main": {
+      "x": 0,
+      "y": 104,
+      "w": 1440,
+      "h": 736,
+      "scrollH": 736,
+      "clientH": 736,
+      "scrollW": 1440,
+      "clientW": 1440
+    },
+    "title": {
+      "sel": ".workspace-brand",
+      "text": "3Mix",
+      "font": 22,
+      "weight": "800",
+      "color": "rgb(255, 255, 255)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "w": 49,
+      "h": 22,
+      "x": 12,
+      "y": 13
+    },
+    "nav": {
+      "sel": ".ws-tab",
+      "text": "← Mesa",
+      "font": 13,
+      "weight": "600",
+      "color": "rgb(181, 181, 181)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "w": 74,
+      "h": 34,
+      "x": 78,
+      "y": 7
+    },
+    "section": {
+      "sel": ".panel-heading strong",
+      "text": "LANCES SALVOS",
+      "font": 16,
+      "weight": "800",
+      "color": "rgb(255, 255, 255)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "w": 128,
+      "h": 23,
+      "x": 19,
+      "y": 650
+    },
+    "label": {
+      "sel": ".history-head label",
+      "text": "Ângulo em destaque CAM 1 PrincipalCAM 2 Lateral DirCAM 3 Atrás GolCAM ",
+      "font": 13,
+      "weight": "400",
+      "color": "rgb(176, 176, 176)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "w": 266,
+      "h": 36,
+      "x": 959,
+      "y": 495
+    },
+    "body14": {
+      "sel": ".events-table",
+      "text": "TítuloHorárioDuraçãoÂngulosDisponibilidadeCarregarGol de empate · 2º t",
+      "font": 14,
+      "weight": "400",
+      "color": "rgb(237, 237, 237)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "w": 798,
+      "h": 178,
+      "x": 9,
+      "y": 682
+    },
+    "button": {
+      "sel": "#take-replay",
+      "text": "Colocar Player A no ar",
+      "font": 14,
+      "weight": "800",
+      "color": "rgb(199, 164, 161)",
+      "bg": "rgb(58, 27, 26)",
+      "w": 176,
+      "h": 40,
+      "x": 939,
+      "y": 850
+    },
+    "small": {
+      "sel": "#replay-shortcuts",
+      "text": "I: IN · O: OUT · J/K/L: −5/10/20 s · A/B: player · Espaço: Play/Pause",
+      "font": 12,
+      "weight": "400",
+      "color": "rgb(141, 141, 141)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "w": 735,
+      "h": 17,
+      "x": 12,
+      "y": 873
+    },
+    "status": {
+      "sel": "#quad-status",
+      "text": "Quadro confirmado · 4/4 ângulos · 18:02:49 · 599.400 s",
+      "font": 12,
+      "weight": "400",
+      "color": "rgb(176, 176, 176)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "w": 321,
+      "h": 17,
+      "x": 955,
+      "y": 434
+    },
+    "deck": {
+      "sel": ".player-deck",
+      "text": "● PLAYER AGol de empate · 2º tempo · CAM 1 Principal — NO ARNO AR\n    ",
+      "font": 14,
+      "weight": "400",
+      "color": "rgb(237, 237, 237)",
+      "bg": "rgb(37, 37, 37)",
+      "w": 460,
+      "h": 368,
+      "x": 8,
+      "y": 112
+    },
+    "quad": {
+      "sel": ".quad-card",
+      "text": "QUADVIEW HISTÓRICO00:09:59:11\n        \n          Aguardando históricoC",
+      "font": 14,
+      "weight": "400",
+      "color": "rgb(237, 237, 237)",
+      "bg": "rgb(37, 37, 37)",
+      "w": 488,
+      "h": 347,
+      "x": 944,
+      "y": 112
+    },
+    "history": {
+      "sel": ".history-nav",
+      "text": "NAVEGAÇÃO DO HISTÓRICO00:09:59:11Histórico disponível · 4 câmera(s) · ",
+      "font": 14,
+      "weight": "400",
+      "color": "rgb(237, 237, 237)",
+      "bg": "rgb(37, 37, 37)",
+      "w": 1424,
+      "h": 145,
+      "x": 8,
+      "y": 488
+    },
+    "detail": {
+      "sel": ".details-card",
+      "text": "DETALHES DO LANCENenhum lance selecionado\n        Selecione um lance s",
+      "font": 14,
+      "weight": "400",
+      "color": "rgb(237, 237, 237)",
+      "bg": "rgb(37, 37, 37)",
+      "w": 616,
+      "h": 191,
+      "x": 816,
+      "y": 641
+    },
+    "events": {
+      "cardH": 191,
+      "wrapH": 149,
+      "tableScrollH": 178,
+      "rowH": 37,
+      "visibleRows": 3,
+      "totalRows": 4
+    },
+    "contrast": [
+      {
+        "sel": ".panel-heading strong",
+        "ratio": 14.16,
+        "fg": "rgb(255, 255, 255)",
+        "bg": "rgb(43, 43, 43)"
+      },
+      {
+        "sel": ".events-table td",
+        "ratio": 13.09,
+        "fg": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)"
+      },
+      {
+        "sel": ".ev-category",
+        "ratio": 4.62,
+        "fg": "rgb(141, 141, 141)",
+        "bg": "rgb(37, 37, 37)"
+      },
+      {
+        "sel": "#quad-status",
+        "ratio": 7.07,
+        "fg": "rgb(176, 176, 176)",
+        "bg": "rgb(37, 37, 37)"
+      },
+      {
+        "sel": "#history-status",
+        "ratio": 7.07,
+        "fg": "rgb(176, 176, 176)",
+        "bg": "rgb(37, 37, 37)"
+      },
+      {
+        "sel": "#message",
+        "ratio": 14.56,
+        "fg": "rgb(237, 237, 237)",
+        "bg": "rgb(28, 28, 28)"
+      },
+      {
+        "sel": "#replay-shortcuts",
+        "ratio": 5.13,
+        "fg": "rgb(141, 141, 141)",
+        "bg": "rgb(28, 28, 28)"
+      },
+      {
+        "sel": ".player-source",
+        "ratio": 8.35,
+        "fg": "rgb(255, 180, 174)",
+        "bg": "rgb(43, 43, 43)"
+      },
+      {
+        "sel": ".deck-state",
+        "ratio": 10.01,
+        "fg": "rgb(255, 180, 174)",
+        "bg": "rgb(43, 23, 23)"
+      }
+    ],
+    "horizontalOverflow": false,
+    "counts": {
+      "buttons": 69,
+      "ids": 7
+    },
+    "disabledCommands": 12,
+    "viewport_1600x1000": {
+      "viewport": [
+        1600,
+        1000
+      ],
+      "bodyFont": "\"Segoe UI Variable Display\", \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, -apple-system, Roboto, Arial, sans-serif",
+      "bodySize": 14,
+      "docScroll": [
+        1600,
+        1000
+      ],
+      "main": {
+        "x": 0,
+        "y": 104,
+        "w": 1600,
+        "h": 836,
+        "scrollH": 836,
+        "clientH": 836,
+        "scrollW": 1600,
+        "clientW": 1600
+      },
+      "title": {
+        "sel": ".workspace-brand",
+        "text": "3Mix",
+        "font": 22,
+        "weight": "800",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 49,
+        "h": 22,
+        "x": 12,
+        "y": 13
+      },
+      "nav": {
+        "sel": ".ws-tab",
+        "text": "← Mesa",
+        "font": 13,
+        "weight": "600",
+        "color": "rgb(181, 181, 181)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 74,
+        "h": 34,
+        "x": 78,
+        "y": 7
+      },
+      "section": {
+        "sel": ".panel-heading strong",
+        "text": "LANCES SALVOS",
+        "font": 16,
+        "weight": "800",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 128,
+        "h": 23,
+        "x": 19,
+        "y": 679
+      },
+      "label": {
+        "sel": ".history-head label",
+        "text": "Ângulo em destaque CAM 1 PrincipalCAM 2 Lateral DirCAM 3 Atrás GolCAM ",
+        "font": 13,
+        "weight": "400",
+        "color": "rgb(176, 176, 176)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 266,
+        "h": 36,
+        "x": 1119,
+        "y": 524
+      },
+      "body14": {
+        "sel": ".events-table",
+        "text": "TítuloHorárioDuraçãoÂngulosDisponibilidadeCarregarGol de empate · 2º t",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 889,
+        "h": 178,
+        "x": 9,
+        "y": 712
+      },
+      "button": {
+        "sel": "#take-replay",
+        "text": "Colocar Player A no ar",
+        "font": 14,
+        "weight": "800",
+        "color": "rgb(199, 164, 161)",
+        "bg": "rgb(58, 27, 26)",
+        "w": 176,
+        "h": 40,
+        "x": 1099,
+        "y": 950
+      },
+      "small": {
+        "sel": "#replay-shortcuts",
+        "text": "I: IN · O: OUT · J/K/L: −5/10/20 s · A/B: player · Espaço: Play/Pause",
+        "font": 12,
+        "weight": "400",
+        "color": "rgb(141, 141, 141)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 895,
+        "h": 17,
+        "x": 12,
+        "y": 973
+      },
+      "status": {
+        "sel": "#quad-status",
+        "text": "Quadro confirmado · 4/4 ângulos · 18:02:49 · 599.400 s",
+        "font": 12,
+        "weight": "400",
+        "color": "rgb(176, 176, 176)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 376,
+        "h": 17,
+        "x": 1060,
+        "y": 465
+      },
+      "deck": {
+        "sel": ".player-deck",
+        "text": "● PLAYER AGol de empate · 2º tempo · CAM 1 Principal — NO ARNO AR\n    ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)",
+        "w": 512,
+        "h": 397,
+        "x": 8,
+        "y": 112
+      },
+      "quad": {
+        "sel": ".quad-card",
+        "text": "QUADVIEW HISTÓRICO00:09:59:11\n        \n          Aguardando históricoC",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)",
+        "w": 543,
+        "h": 378,
+        "x": 1049,
+        "y": 112
+      },
+      "history": {
+        "sel": ".history-nav",
+        "text": "NAVEGAÇÃO DO HISTÓRICO00:09:59:11Histórico disponível · 4 câmera(s) · ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)",
+        "w": 1584,
+        "h": 145,
+        "x": 8,
+        "y": 517
+      },
+      "detail": {
+        "sel": ".details-card",
+        "text": "DETALHES DO LANCENenhum lance selecionado\n        Selecione um lance s",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)",
+        "w": 685,
+        "h": 262,
+        "x": 907,
+        "y": 671
+      },
+      "events": {
+        "cardH": 262,
+        "wrapH": 220,
+        "tableScrollH": 220,
+        "rowH": 37,
+        "visibleRows": 4,
+        "totalRows": 4
+      },
+      "contrast": [
+        {
+          "sel": ".panel-heading strong",
+          "ratio": 14.16,
+          "fg": "rgb(255, 255, 255)",
+          "bg": "rgb(43, 43, 43)"
+        },
+        {
+          "sel": ".events-table td",
+          "ratio": 13.09,
+          "fg": "rgb(237, 237, 237)",
+          "bg": "rgb(37, 37, 37)"
+        },
+        {
+          "sel": ".ev-category",
+          "ratio": 4.62,
+          "fg": "rgb(141, 141, 141)",
+          "bg": "rgb(37, 37, 37)"
+        },
+        {
+          "sel": "#quad-status",
+          "ratio": 7.07,
+          "fg": "rgb(176, 176, 176)",
+          "bg": "rgb(37, 37, 37)"
+        },
+        {
+          "sel": "#history-status",
+          "ratio": 7.07,
+          "fg": "rgb(176, 176, 176)",
+          "bg": "rgb(37, 37, 37)"
+        },
+        {
+          "sel": "#message",
+          "ratio": 14.56,
+          "fg": "rgb(237, 237, 237)",
+          "bg": "rgb(28, 28, 28)"
+        },
+        {
+          "sel": "#replay-shortcuts",
+          "ratio": 5.13,
+          "fg": "rgb(141, 141, 141)",
+          "bg": "rgb(28, 28, 28)"
+        },
+        {
+          "sel": ".player-source",
+          "ratio": 8.35,
+          "fg": "rgb(255, 180, 174)",
+          "bg": "rgb(43, 43, 43)"
+        },
+        {
+          "sel": ".deck-state",
+          "ratio": 10.01,
+          "fg": "rgb(255, 180, 174)",
+          "bg": "rgb(43, 23, 23)"
+        }
+      ],
+      "horizontalOverflow": false,
+      "counts": {
+        "buttons": 69,
+        "ids": 7
+      },
+      "disabledCommands": 12
+    },
+    "viewport_1280x800": {
+      "viewport": [
+        1280,
+        800
+      ],
+      "bodyFont": "\"Segoe UI Variable Display\", \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, -apple-system, Roboto, Arial, sans-serif",
+      "bodySize": 14,
+      "docScroll": [
+        1280,
+        800
+      ],
+      "main": {
+        "x": 0,
+        "y": 104,
+        "w": 1280,
+        "h": 636,
+        "scrollH": 666,
+        "clientH": 636,
+        "scrollW": 1280,
+        "clientW": 1280
+      },
+      "title": {
+        "sel": ".workspace-brand",
+        "text": "3Mix",
+        "font": 22,
+        "weight": "800",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 49,
+        "h": 22,
+        "x": 12,
+        "y": 13
+      },
+      "nav": {
+        "sel": ".ws-tab",
+        "text": "← Mesa",
+        "font": 13,
+        "weight": "600",
+        "color": "rgb(181, 181, 181)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 74,
+        "h": 34,
+        "x": 78,
+        "y": 7
+      },
+      "section": {
+        "sel": ".panel-heading strong",
+        "text": "LANCES SALVOS",
+        "font": 16,
+        "weight": "800",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 128,
+        "h": 23,
+        "x": 19,
+        "y": 621
+      },
+      "label": {
+        "sel": ".history-head label",
+        "text": "Ângulo em destaque CAM 1 PrincipalCAM 2 Lateral DirCAM 3 Atrás GolCAM ",
+        "font": 13,
+        "weight": "400",
+        "color": "rgb(176, 176, 176)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 266,
+        "h": 36,
+        "x": 799,
+        "y": 465
+      },
+      "body14": {
+        "sel": ".events-table",
+        "text": "TítuloHorárioDuraçãoÂngulosDisponibilidadeCarregarGol de empate · 2º t",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 708,
+        "h": 178,
+        "x": 9,
+        "y": 653
+      },
+      "button": {
+        "sel": "#take-replay",
+        "text": "Colocar Player A no ar",
+        "font": 14,
+        "weight": "800",
+        "color": "rgb(199, 164, 161)",
+        "bg": "rgb(58, 27, 26)",
+        "w": 176,
+        "h": 40,
+        "x": 779,
+        "y": 750
+      },
+      "small": {
+        "sel": "#replay-shortcuts",
+        "text": "I: IN · O: OUT · J/K/L: −5/10/20 s · A/B: player · Espaço: Play/Pause",
+        "font": 12,
+        "weight": "400",
+        "color": "rgb(141, 141, 141)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 575,
+        "h": 17,
+        "x": 12,
+        "y": 773
+      },
+      "status": {
+        "sel": "#quad-status",
+        "text": "Quadro confirmado · 4/4 ângulos · 18:02:49 · 599.400 s",
+        "font": 12,
+        "weight": "400",
+        "color": "rgb(176, 176, 176)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 265,
+        "h": 17,
+        "x": 851,
+        "y": 402
+      },
+      "deck": {
+        "sel": ".player-deck",
+        "text": "● PLAYER AGol de empate · 2º tempo · CAM 1 Principal — NO ARNO AR\n    ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)",
+        "w": 408,
+        "h": 338,
+        "x": 8,
+        "y": 112
+      },
+      "quad": {
+        "sel": ".quad-card",
+        "text": "QUADVIEW HISTÓRICO00:09:59:11\n        \n          Aguardando históricoC",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)",
+        "w": 432,
+        "h": 316,
+        "x": 840,
+        "y": 112
+      },
+      "history": {
+        "sel": ".history-nav",
+        "text": "NAVEGAÇÃO DO HISTÓRICO00:09:59:11Histórico disponível · 4 câmera(s) · ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)",
+        "w": 1264,
+        "h": 145,
+        "x": 8,
+        "y": 458
+      },
+      "detail": {
+        "sel": ".details-card",
+        "text": "DETALHES DO LANCENenhum lance selecionado\n        Selecione um lance s",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)",
+        "w": 546,
+        "h": 150,
+        "x": 726,
+        "y": 612
+      },
+      "events": {
+        "cardH": 150,
+        "wrapH": 108,
+        "tableScrollH": 178,
+        "rowH": 37,
+        "visibleRows": 2,
+        "totalRows": 4
+      },
+      "contrast": [
+        {
+          "sel": ".panel-heading strong",
+          "ratio": 14.16,
+          "fg": "rgb(255, 255, 255)",
+          "bg": "rgb(43, 43, 43)"
+        },
+        {
+          "sel": ".events-table td",
+          "ratio": 13.09,
+          "fg": "rgb(237, 237, 237)",
+          "bg": "rgb(37, 37, 37)"
+        },
+        {
+          "sel": ".ev-category",
+          "ratio": 4.62,
+          "fg": "rgb(141, 141, 141)",
+          "bg": "rgb(37, 37, 37)"
+        },
+        {
+          "sel": "#quad-status",
+          "ratio": 7.07,
+          "fg": "rgb(176, 176, 176)",
+          "bg": "rgb(37, 37, 37)"
+        },
+        {
+          "sel": "#history-status",
+          "ratio": 7.07,
+          "fg": "rgb(176, 176, 176)",
+          "bg": "rgb(37, 37, 37)"
+        },
+        {
+          "sel": "#message",
+          "ratio": 14.56,
+          "fg": "rgb(237, 237, 237)",
+          "bg": "rgb(28, 28, 28)"
+        },
+        {
+          "sel": "#replay-shortcuts",
+          "ratio": 5.13,
+          "fg": "rgb(141, 141, 141)",
+          "bg": "rgb(28, 28, 28)"
+        },
+        {
+          "sel": ".player-source",
+          "ratio": 8.35,
+          "fg": "rgb(255, 180, 174)",
+          "bg": "rgb(43, 43, 43)"
+        },
+        {
+          "sel": ".deck-state",
+          "ratio": 10.01,
+          "fg": "rgb(255, 180, 174)",
+          "bg": "rgb(43, 23, 23)"
+        }
+      ],
+      "horizontalOverflow": false,
+      "counts": {
+        "buttons": 69,
+        "ids": 7
+      },
+      "disabledCommands": 12
+    },
+    "viewport_1152x720": {
+      "viewport": [
+        1152,
+        720
+      ],
+      "bodyFont": "\"Segoe UI Variable Display\", \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, -apple-system, Roboto, Arial, sans-serif",
+      "bodySize": 14,
+      "docScroll": [
+        1152,
+        720
+      ],
+      "main": {
+        "x": 0,
+        "y": 93,
+        "w": 1152,
+        "h": 573,
+        "scrollH": 678,
+        "clientH": 573,
+        "scrollW": 1152,
+        "clientW": 1152
+      },
+      "title": {
+        "sel": ".workspace-brand",
+        "text": "3Mix",
+        "font": 22,
+        "weight": "800",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 49,
+        "h": 22,
+        "x": 12,
+        "y": 11
+      },
+      "nav": {
+        "sel": ".ws-tab",
+        "text": "← Mesa",
+        "font": 13,
+        "weight": "600",
+        "color": "rgb(181, 181, 181)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 66,
+        "h": 34,
+        "x": 74,
+        "y": 5
+      },
+      "section": {
+        "sel": ".panel-heading strong",
+        "text": "LANCES SALVOS",
+        "font": 16,
+        "weight": "800",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 128,
+        "h": 23,
+        "x": 17,
+        "y": 624
+      },
+      "label": {
+        "sel": ".history-head label",
+        "text": "Ângulo em destaque CAM 1 PrincipalCAM 2 Lateral DirCAM 3 Atrás GolCAM ",
+        "font": 13,
+        "weight": "400",
+        "color": "rgb(176, 176, 176)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 266,
+        "h": 36,
+        "x": 673,
+        "y": 428
+      },
+      "body14": {
+        "sel": ".events-table",
+        "text": "TítuloHorárioDuraçãoÂngulosDisponibilidadeCarregarGol de empate · 2º t",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 603,
+        "h": 178,
+        "x": 7,
+        "y": 656
+      },
+      "button": {
+        "sel": "#take-replay",
+        "text": "Colocar Player A no ar",
+        "font": 14,
+        "weight": "800",
+        "color": "rgb(199, 164, 161)",
+        "bg": "rgb(58, 27, 26)",
+        "w": 176,
+        "h": 40,
+        "x": 653,
+        "y": 673
+      },
+      "small": {
+        "sel": "#replay-shortcuts",
+        "text": "I: IN · O: OUT · J/K/L: −5/10/20 s · A/B: player · Espaço: Play/Pause",
+        "font": 12,
+        "weight": "400",
+        "color": "rgb(141, 141, 141)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 0,
+        "h": 0,
+        "x": 0,
+        "y": 0
+      },
+      "status": {
+        "sel": "#quad-status",
+        "text": "Quadro confirmado · 4/4 ângulos · 18:02:49 · 599.400 s",
+        "font": 12,
+        "weight": "400",
+        "color": "rgb(176, 176, 176)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 224,
+        "h": 17,
+        "x": 766,
+        "y": 366
+      },
+      "deck": {
+        "sel": ".player-deck",
+        "text": "● PLAYER AGol de empate · 2º tempo · CAM 1 Principal — NO ARNO AR\n    ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)",
+        "w": 369,
+        "h": 316,
+        "x": 6,
+        "y": 99
+      },
+      "quad": {
+        "sel": ".quad-card",
+        "text": "QUADVIEW HISTÓRICO00:09:59:11\n        \n          Aguardando históricoC",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)",
+        "w": 391,
+        "h": 293,
+        "x": 755,
+        "y": 99
+      },
+      "history": {
+        "sel": ".history-nav",
+        "text": "NAVEGAÇÃO DO HISTÓRICO00:09:59:11Histórico disponível · 4 câmera(s) · ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)",
+        "w": 1140,
+        "h": 187,
+        "x": 6,
+        "y": 421
+      },
+      "detail": {
+        "sel": ".details-card",
+        "text": "DETALHES DO LANCENenhum lance selecionado\n        Selecione um lance s",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)",
+        "w": 527,
+        "h": 150,
+        "x": 619,
+        "y": 615
+      },
+      "events": {
+        "cardH": 150,
+        "wrapH": 108,
+        "tableScrollH": 178,
+        "rowH": 37,
+        "visibleRows": 2,
+        "totalRows": 4
+      },
+      "contrast": [
+        {
+          "sel": ".panel-heading strong",
+          "ratio": 14.16,
+          "fg": "rgb(255, 255, 255)",
+          "bg": "rgb(43, 43, 43)"
+        },
+        {
+          "sel": ".events-table td",
+          "ratio": 13.09,
+          "fg": "rgb(237, 237, 237)",
+          "bg": "rgb(37, 37, 37)"
+        },
+        {
+          "sel": ".ev-category",
+          "ratio": 4.62,
+          "fg": "rgb(141, 141, 141)",
+          "bg": "rgb(37, 37, 37)"
+        },
+        {
+          "sel": "#quad-status",
+          "ratio": 7.07,
+          "fg": "rgb(176, 176, 176)",
+          "bg": "rgb(37, 37, 37)"
+        },
+        {
+          "sel": "#history-status",
+          "ratio": 7.07,
+          "fg": "rgb(176, 176, 176)",
+          "bg": "rgb(37, 37, 37)"
+        },
+        {
+          "sel": "#message",
+          "ratio": 14.56,
+          "fg": "rgb(237, 237, 237)",
+          "bg": "rgb(28, 28, 28)"
+        },
+        {
+          "sel": "#replay-shortcuts",
+          "ratio": 5.13,
+          "fg": "rgb(141, 141, 141)",
+          "bg": "rgb(28, 28, 28)"
+        },
+        {
+          "sel": ".player-source",
+          "ratio": 8.35,
+          "fg": "rgb(255, 180, 174)",
+          "bg": "rgb(43, 43, 43)"
+        },
+        {
+          "sel": ".deck-state",
+          "ratio": 10.01,
+          "fg": "rgb(255, 180, 174)",
+          "bg": "rgb(43, 23, 23)"
+        }
+      ],
+      "horizontalOverflow": false,
+      "counts": {
+        "buttons": 69,
+        "ids": 7
+      },
+      "disabledCommands": 12
+    },
+    "viewport_1067x667": {
+      "viewport": [
+        1067,
+        667
+      ],
+      "bodyFont": "\"Segoe UI Variable Display\", \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, -apple-system, Roboto, Arial, sans-serif",
+      "bodySize": 14,
+      "docScroll": [
+        1067,
+        667
+      ],
+      "main": {
+        "x": 0,
+        "y": 137,
+        "w": 1067,
+        "h": 476,
+        "scrollH": 662,
+        "clientH": 476,
+        "scrollW": 1067,
+        "clientW": 1067
+      },
+      "title": {
+        "sel": ".workspace-brand",
+        "text": "3Mix",
+        "font": 22,
+        "weight": "800",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 49,
+        "h": 22,
+        "x": 12,
+        "y": 11
+      },
+      "nav": {
+        "sel": ".ws-tab",
+        "text": "← Mesa",
+        "font": 13,
+        "weight": "600",
+        "color": "rgb(181, 181, 181)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 66,
+        "h": 34,
+        "x": 74,
+        "y": 5
+      },
+      "section": {
+        "sel": ".panel-heading strong",
+        "text": "LANCES SALVOS",
+        "font": 16,
+        "weight": "800",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 128,
+        "h": 23,
+        "x": 17,
+        "y": 652
+      },
+      "label": {
+        "sel": ".history-head label",
+        "text": "Ângulo em destaque CAM 1 PrincipalCAM 2 Lateral DirCAM 3 Atrás GolCAM ",
+        "font": 13,
+        "weight": "400",
+        "color": "rgb(176, 176, 176)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 266,
+        "h": 36,
+        "x": 588,
+        "y": 457
+      },
+      "body14": {
+        "sel": ".events-table",
+        "text": "TítuloHorárioDuraçãoÂngulosDisponibilidadeCarregarGol de empate · 2º t",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 558,
+        "h": 178,
+        "x": 7,
+        "y": 684
+      },
+      "button": {
+        "sel": "#take-replay",
+        "text": "Colocar Player A no ar",
+        "font": 14,
+        "weight": "800",
+        "color": "rgb(199, 164, 161)",
+        "bg": "rgb(58, 27, 26)",
+        "w": 176,
+        "h": 40,
+        "x": 568,
+        "y": 620
+      },
+      "small": {
+        "sel": "#replay-shortcuts",
+        "text": "I: IN · O: OUT · J/K/L: −5/10/20 s · A/B: player · Espaço: Play/Pause",
+        "font": 12,
+        "weight": "400",
+        "color": "rgb(141, 141, 141)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 0,
+        "h": 0,
+        "x": 0,
+        "y": 0
+      },
+      "status": {
+        "sel": "#quad-status",
+        "text": "Quadro confirmado · 4/4 ângulos · 18:02:49 · 599.400 s",
+        "font": 12,
+        "weight": "400",
+        "color": "rgb(176, 176, 176)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 194,
+        "h": 17,
+        "x": 711,
+        "y": 393
+      },
+      "deck": {
+        "sel": ".player-deck",
+        "text": "● PLAYER AGol de empate · 2º tempo · CAM 1 Principal — NO ARNO AR\n    ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)",
+        "w": 341,
+        "h": 301,
+        "x": 6,
+        "y": 143
+      },
+      "quad": {
+        "sel": ".quad-card",
+        "text": "QUADVIEW HISTÓRICO00:09:59:11\n        \n          Aguardando históricoC",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)",
+        "w": 361,
+        "h": 276,
+        "x": 700,
+        "y": 143
+      },
+      "history": {
+        "sel": ".history-nav",
+        "text": "NAVEGAÇÃO DO HISTÓRICO00:09:59:11Histórico disponível · 4 câmera(s) · ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)",
+        "w": 1055,
+        "h": 187,
+        "x": 6,
+        "y": 450
+      },
+      "detail": {
+        "sel": ".details-card",
+        "text": "DETALHES DO LANCENenhum lance selecionado\n        Selecione um lance s",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)",
+        "w": 487,
+        "h": 150,
+        "x": 574,
+        "y": 643
+      },
+      "events": {
+        "cardH": 150,
+        "wrapH": 108,
+        "tableScrollH": 178,
+        "rowH": 37,
+        "visibleRows": 2,
+        "totalRows": 4
+      },
+      "contrast": [
+        {
+          "sel": ".panel-heading strong",
+          "ratio": 14.16,
+          "fg": "rgb(255, 255, 255)",
+          "bg": "rgb(43, 43, 43)"
+        },
+        {
+          "sel": ".events-table td",
+          "ratio": 13.09,
+          "fg": "rgb(237, 237, 237)",
+          "bg": "rgb(37, 37, 37)"
+        },
+        {
+          "sel": ".ev-category",
+          "ratio": 4.62,
+          "fg": "rgb(141, 141, 141)",
+          "bg": "rgb(37, 37, 37)"
+        },
+        {
+          "sel": "#quad-status",
+          "ratio": 7.07,
+          "fg": "rgb(176, 176, 176)",
+          "bg": "rgb(37, 37, 37)"
+        },
+        {
+          "sel": "#history-status",
+          "ratio": 7.07,
+          "fg": "rgb(176, 176, 176)",
+          "bg": "rgb(37, 37, 37)"
+        },
+        {
+          "sel": "#message",
+          "ratio": 14.56,
+          "fg": "rgb(237, 237, 237)",
+          "bg": "rgb(28, 28, 28)"
+        },
+        {
+          "sel": "#replay-shortcuts",
+          "ratio": 5.13,
+          "fg": "rgb(141, 141, 141)",
+          "bg": "rgb(28, 28, 28)"
+        },
+        {
+          "sel": ".player-source",
+          "ratio": 8.35,
+          "fg": "rgb(255, 180, 174)",
+          "bg": "rgb(43, 43, 43)"
+        },
+        {
+          "sel": ".deck-state",
+          "ratio": 10.01,
+          "fg": "rgb(255, 180, 174)",
+          "bg": "rgb(43, 23, 23)"
+        }
+      ],
+      "horizontalOverflow": false,
+      "counts": {
+        "buttons": 69,
+        "ids": 7
+      },
+      "disabledCommands": 12
+    },
+    "viewport_960x600": {
+      "viewport": [
+        960,
+        600
+      ],
+      "bodyFont": "\"Segoe UI Variable Display\", \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, -apple-system, Roboto, Arial, sans-serif",
+      "bodySize": 14,
+      "docScroll": [
+        960,
+        600
+      ],
+      "main": {
+        "x": 0,
+        "y": 137,
+        "w": 960,
+        "h": 383,
+        "scrollH": 1025,
+        "clientH": 383,
+        "scrollW": 960,
+        "clientW": 960
+      },
+      "title": {
+        "sel": ".workspace-brand",
+        "text": "3Mix",
+        "font": 22,
+        "weight": "800",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 49,
+        "h": 22,
+        "x": 12,
+        "y": 11
+      },
+      "nav": {
+        "sel": ".ws-tab",
+        "text": "← Mesa",
+        "font": 13,
+        "weight": "600",
+        "color": "rgb(181, 181, 181)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 66,
+        "h": 34,
+        "x": 74,
+        "y": 5
+      },
+      "section": {
+        "sel": ".panel-heading strong",
+        "text": "LANCES SALVOS",
+        "font": 16,
+        "weight": "800",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 128,
+        "h": 23,
+        "x": 17,
+        "y": 657
+      },
+      "label": {
+        "sel": ".history-head label",
+        "text": "Ângulo em destaque CAM 1 PrincipalCAM 2 Lateral DirCAM 3 Atrás GolCAM ",
+        "font": 13,
+        "weight": "400",
+        "color": "rgb(176, 176, 176)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 266,
+        "h": 36,
+        "x": 481,
+        "y": 437
+      },
+      "body14": {
+        "sel": ".events-table",
+        "text": "TítuloHorárioDuraçãoÂngulosDisponibilidadeCarregarGol de empate · 2º t",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 946,
+        "h": 178,
+        "x": 7,
+        "y": 689
+      },
+      "button": {
+        "sel": "#take-replay",
+        "text": "Colocar Player A no ar",
+        "font": 14,
+        "weight": "800",
+        "color": "rgb(199, 164, 161)",
+        "bg": "rgb(58, 27, 26)",
+        "w": 176,
+        "h": 40,
+        "x": 190,
+        "y": 554
+      },
+      "small": {
+        "sel": "#replay-shortcuts",
+        "text": "I: IN · O: OUT · J/K/L: −5/10/20 s · A/B: player · Espaço: Play/Pause",
+        "font": 12,
+        "weight": "400",
+        "color": "rgb(141, 141, 141)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 0,
+        "h": 0,
+        "x": 0,
+        "y": 0
+      },
+      "status": {
+        "sel": "#quad-status",
+        "text": "Quadro confirmado · 4/4 ângulos · 18:02:49 · 599.400 s",
+        "font": 12,
+        "weight": "400",
+        "color": "rgb(176, 176, 176)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "w": 157,
+        "h": 17,
+        "x": 641,
+        "y": 373
+      },
+      "deck": {
+        "sel": ".player-deck",
+        "text": "● PLAYER AGol de empate · 2º tempo · CAM 1 Principal — NO ARNO AR\n    ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)",
+        "w": 306,
+        "h": 281,
+        "x": 6,
+        "y": 143
+      },
+      "quad": {
+        "sel": ".quad-card",
+        "text": "QUADVIEW HISTÓRICO00:09:59:11\n        \n          Aguardando históricoC",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)",
+        "w": 324,
+        "h": 255,
+        "x": 630,
+        "y": 143
+      },
+      "history": {
+        "sel": ".history-nav",
+        "text": "NAVEGAÇÃO DO HISTÓRICO00:09:59:11Histórico disponível · 4 câmera(s) · ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)",
+        "w": 948,
+        "h": 212,
+        "x": 6,
+        "y": 430
+      },
+      "detail": {
+        "sel": ".details-card",
+        "text": "DETALHES DO LANCENenhum lance selecionado\n        Selecione um lance s",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)",
+        "w": 948,
+        "h": 260,
+        "x": 6,
+        "y": 896
+      },
+      "events": {
+        "cardH": 240,
+        "wrapH": 198,
+        "tableScrollH": 198,
+        "rowH": 37,
+        "visibleRows": 4,
+        "totalRows": 4
+      },
+      "contrast": [
+        {
+          "sel": ".panel-heading strong",
+          "ratio": 14.16,
+          "fg": "rgb(255, 255, 255)",
+          "bg": "rgb(43, 43, 43)"
+        },
+        {
+          "sel": ".events-table td",
+          "ratio": 13.09,
+          "fg": "rgb(237, 237, 237)",
+          "bg": "rgb(37, 37, 37)"
+        },
+        {
+          "sel": ".ev-category",
+          "ratio": 4.62,
+          "fg": "rgb(141, 141, 141)",
+          "bg": "rgb(37, 37, 37)"
+        },
+        {
+          "sel": "#quad-status",
+          "ratio": 7.07,
+          "fg": "rgb(176, 176, 176)",
+          "bg": "rgb(37, 37, 37)"
+        },
+        {
+          "sel": "#history-status",
+          "ratio": 7.07,
+          "fg": "rgb(176, 176, 176)",
+          "bg": "rgb(37, 37, 37)"
+        },
+        {
+          "sel": "#message",
+          "ratio": 14.56,
+          "fg": "rgb(237, 237, 237)",
+          "bg": "rgb(28, 28, 28)"
+        },
+        {
+          "sel": "#replay-shortcuts",
+          "ratio": 5.13,
+          "fg": "rgb(141, 141, 141)",
+          "bg": "rgb(28, 28, 28)"
+        },
+        {
+          "sel": ".player-source",
+          "ratio": 8.35,
+          "fg": "rgb(255, 180, 174)",
+          "bg": "rgb(43, 43, 43)"
+        },
+        {
+          "sel": ".deck-state",
+          "ratio": 10.01,
+          "fg": "rgb(255, 180, 174)",
+          "bg": "rgb(43, 23, 23)"
+        }
+      ],
+      "horizontalOverflow": false,
+      "counts": {
+        "buttons": 69,
+        "ids": 7
+      },
+      "disabledCommands": 14
+    }
+  },
+  "consoleErrors": [],
+  "pageErrors": [],
+  "failedRequests": [
+    "http://127.0.0.1:8793/api/panel-title net::ERR_ABORTED"
+  ]
+}

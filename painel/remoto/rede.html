@@ -1,1 +1,181 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FreeMix · Rede multipath</title><link rel="stylesheet" href="controle.css"><link rel="stylesheet" href="studio-dialog.css"><style>.fields{display:grid;grid-template-columns:repeat(2,minmax(220px,1fr));gap:12px}label{display:grid}table{width:100%}td input{width:100%}#stats{white-space:pre-wrap}@media(max-width:700px){.fields{grid-template-columns:1fr}}</style></head><body><header><a href="/">FreeMix</a><h1>Rede multipath</h1><span id="connection">Carregando…</span></header><main><p id="message" role="status"></p><section><h2>Transporte multipath experimental</h2><p>Escolha duplicação para enviar a mesma mídia por todos os caminhos, ou agregação para distribuir pacotes uma única vez conforme o peso de cada interface. AES-256-GCM protege mídia e controle; o receptor recompõe a ordem. Agregação e recuperação foram validadas em localhost; velocidade total, estabilidade WAN e redes físicas exigem homologação própria.</p><div class="fields"><label>Papel<select id="role"><option value="both">Emissor e receptor local para teste</option><option value="sender">Emissor</option><option value="receiver">Receptor</option></select></label><label>Modo de transporte<select id="mode"><option value="duplicate">Duplicação / redundância</option><option value="aggregate">Agregação / distribuição ponderada</option></select></label><label>FEC XOR<select id="fecGroup"><option value="0">Desativado</option><option value="2">1 paridade a cada 2 pacotes (50%)</option><option value="4">1 paridade a cada 4 pacotes (25%)</option><option value="8">1 paridade a cada 8 pacotes (12,5%)</option><option value="16">1 paridade a cada 16 pacotes (6,25%)</option></select></label><label>Interface local do receptor<input id="receiverHost" value="127.0.0.1"></label><label>Porta UDP de entrada local (TS)<input id="ingestPort" type="number" min="1024" max="65535"></label><label>Porta do receptor (pacotes protegidos)<input id="receiverPort" type="number" min="1024" max="65535"></label><label>Saída TS do receptor para localhost<input id="outputPort" type="number" min="1024" max="65535"></label><label>Porta SRT local do bridge<input id="bridgePort" type="number" min="1024" max="65535"></label><label>Jitter/buffer (ms)<input id="latencyMs" type="number" min="20" max="2000"></label><label>Limite de mídia (Mbps)<input id="maxMbps" type="number" min="1" max="200"></label><label>Janela máxima de pacotes<input id="window" type="number" min="64" max="8192"></label><label>Chave compartilhada (base64url; vazia mantém a atual)<input id="secret" type="password" autocomplete="off"></label></div><label><input id="retransmit" type="checkbox" checked> Recuperar pacotes perdidos por NACK autenticado</label><p>NACK usa cache limitado e a janela de jitter. Recupera perdas simultâneas se a retransmissão chegar a tempo; ambos os computadores precisam da versão atual. Reserva até 25% do limite de mídia para retransmissões. FEC XOR recupera uma perda de mídia por grupo se a paridade chegar dentro do buffer; duas ou mais perdas dependem de NACK e tempo disponível. A paridade usa chave derivada separada da mídia. Os dois computadores precisam desta versão para FEC.</p><label><input id="adaptive" type="checkbox"> Saúde adaptativa dos caminhos (opcional)</label><label>Timeout sem resposta autenticada (ms)<input id="adaptiveTimeoutMs" type="number" min="1000" max="15000" value="2500"></label><p>Retira caminhos sem resposta ao probe autenticado e exige duas respostas para reentrar. Na agregação, reduz o peso manual conforme RTT, sempre entre 1 e o peso configurado para caminhos saudáveis. Este modo de saúde usa RTT e timeout. As medições de mídia e banda abaixo são opcionais. Todos indisponíveis: interrompe o envio de mídia e continua sondando. Receptor atualizado obrigatório; o padrão continua manual.</p><label><input id="measureMedia" type="checkbox"> Medir perda original de mídia por caminho (receptor atualizado obrigatório)</label><label><input id="measuredAllocation" type="checkbox"> Alocar agregação por banda medida</label><p>A perda conta pacotes originais antes de FEC e retransmissão, com janela para chegadas atrasadas. A banda é goodput recebido durante um teste limitado, não a velocidade anunciada da placa. Na alocação medida, é necessário executar o teste antes de enviar mídia; caminhos sem medição válida ficam fora da distribuição. Usa até 80% do goodput medido, ajustado pela perda recente; a medição vence em 5 minutos.</p><button id="measure" disabled>Medir banda agora (até 64 Mbps, teste limitado)</button><p>O teste envia tráfego explícito ao receptor configurado, por interface, até 5 MB por caminho. Execute antes da produção. Não há teste automático, conexão externa automática ou promessa de banda WAN.</p><label><input id="bridge" type="checkbox"> Iniciar bridge SRT local → TS para o emissor</label><p>Com bridge ativo, configure uma saída FreeMix para o endereço SRT mostrado no diagnóstico. Sem bridge, envie MPEG-TS UDP para a porta local de entrada. O receptor entrega TS em UDP localhost para o decoder. Ele não transmite automaticamente para RTMP.</p><h3>Caminhos de rede</h3><table><thead><tr><th>IPv4 do receptor</th><th>Porta</th><th>IPv4 da interface local</th><th>Peso (1–100)</th><th></th></tr></thead><tbody id="paths"></tbody></table><button id="add">Adicionar caminho</button><p id="interfaces"></p><button id="save">Salvar configuração</button><button id="start">Iniciar transporte</button><button id="stop">Parar transporte</button><button id="export">Preparar pacote privado do receptor</button><p id="receiver-file"></p><p>Copie a pasta privada preparada para o receptor. <code>RECEPTOR.cmd --check</code> valida sem abrir portas; <code>RECEPTOR.cmd --listen=0.0.0.0</code> permite receber de outra máquina, após autorizar só a porta UDP necessária no firewall. Saída TS permanece em localhost. Linux exige Node.js 20 ou posterior e os três módulos do pacote. O JSON contém a chave AES: não publicar nem anexar ao diagnóstico.</p></section><section><h2>Diagnóstico</h2><pre id="stats"></pre></section></main><script src="rede.js"></script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3Mix Pro · Rede multipath</title>
+<link rel="stylesheet" href="vmix-dialogo.css">
+<style>
+.vd-window { min-width: 720px; max-width: 900px; }
+.vd-table-box { border: 1px solid #39444d; background: #12171b; margin: 4px 0 8px; max-height: 180px; overflow-y: auto; }
+.vd-table-box table { width: 100%; border-collapse: collapse; }
+.vd-table-box th, .vd-table-box td { padding: 3px 6px; text-align: left; border-bottom: 1px solid #252e35; font-size: 11px; }
+.vd-table-box th { background: #26303a; font-weight: 700; color: #fff; position: sticky; top: 0; }
+.vd-table-box td input { height: 21px; padding: 1px 4px; border: 1px solid #6f757b; background: #e9eaeb; color: #000; font: 11px "Segoe UI", sans-serif; width: 100%; }
+.vd-table-box td button { height: 21px; min-width: 50px; font-size: 11px; padding: 0 6px; background: #5c1815; border-color: #a82e28; }
+.vd-table-box td button:hover { background: #7d201c; }
+.vd-note-box { background: #151a1e; border: 1px solid #2b353d; padding: 6px 10px; font-size: 11px; color: #b0bac2; line-height: 1.35; margin: 4px 0; }
+.vd-grid-two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; }
+#stats { background: #0d1115; border: 1px solid #2b353d; padding: 6px; font-size: 11px; max-height: 120px; overflow: auto; margin: 4px 0; white-space: pre-wrap; color: #7fe08f; }
+</style>
+</head>
+<body data-page="rede" class="vd">
+<div class="vd-window">
+  <div class="vd-strip">
+    <span class="vd-title">Rede Multipath & Bonding</span>
+    <span class="vd-flex"></span>
+    <span id="connection" class="vd-note">Carregando…</span>
+  </div>
+
+  <div style="padding: 4px 12px 0;">
+    <p id="message" class="vd-msg" role="status" style="margin-left: 0;"></p>
+  </div>
+
+  <div class="vd-body">
+    <div class="vd-note-box">
+      Transporte multipath experimental com criptografia AES-256-GCM. Escolha duplicação para redundância integral ou agregação para distribuição ponderada de banda.
+    </div>
+
+    <!-- SEÇÃO: PARÂMETROS BÁSICOS -->
+    <div class="vd-grid-two">
+      <div>
+        <label class="vd-row"><span>Papel</span>
+          <select id="role">
+            <option value="both">Emissor e receptor local (teste)</option>
+            <option value="sender">Emissor</option>
+            <option value="receiver">Receptor</option>
+          </select>
+        </label>
+
+        <label class="vd-row"><span>Modo transporte</span>
+          <select id="mode">
+            <option value="duplicate">Duplicação / redundância</option>
+            <option value="aggregate">Agregação / ponderada</option>
+          </select>
+        </label>
+
+        <label class="vd-row"><span>FEC XOR</span>
+          <select id="fecGroup">
+            <option value="0">Desativado</option>
+            <option value="2">1 paridade a cada 2 pacotes (50%)</option>
+            <option value="4">1 paridade a cada 4 pacotes (25%)</option>
+            <option value="8">1 paridade a cada 8 pacotes (12,5%)</option>
+            <option value="16">1 paridade a cada 16 pacotes (6,25%)</option>
+          </select>
+        </label>
+
+        <label class="vd-row"><span>Jitter / Buffer</span>
+          <input id="latencyMs" type="number" min="20" max="2000" class="vd-short">
+        </label>
+      </div>
+
+      <div>
+        <label class="vd-row"><span>Limite Mbps</span>
+          <input id="maxMbps" type="number" min="1" max="200" class="vd-short">
+        </label>
+
+        <label class="vd-row"><span>Janela pacotes</span>
+          <input id="window" type="number" min="64" max="8192" class="vd-short">
+        </label>
+
+        <label class="vd-row"><span>Chave AES</span>
+          <input id="secret" type="password" autocomplete="off" placeholder="Vazia mantém a atual">
+        </label>
+
+        <label class="vd-row"><span>Bridge SRT local</span>
+          <input id="bridgePort" type="number" min="1024" max="65535" class="vd-short">
+        </label>
+      </div>
+    </div>
+
+    <!-- SEÇÃO: PORTAS UDP E RECEPTOR -->
+    <div class="vd-grid-two">
+      <div>
+        <label class="vd-row"><span>Host receptor</span>
+          <input id="receiverHost" type="text" value="127.0.0.1">
+        </label>
+
+        <label class="vd-row"><span>Porta entrada TS</span>
+          <input id="ingestPort" type="number" min="1024" max="65535" class="vd-short">
+        </label>
+      </div>
+
+      <div>
+        <label class="vd-row"><span>Porta receptor</span>
+          <input id="receiverPort" type="number" min="1024" max="65535" class="vd-short">
+        </label>
+
+        <label class="vd-row"><span>Saída TS local</span>
+          <input id="outputPort" type="number" min="1024" max="65535" class="vd-short">
+        </label>
+      </div>
+    </div>
+
+    <!-- SEÇÃO: RECUPERAÇÃO E SAÚDE -->
+    <div class="vd-row"><span>Políticas</span>
+      <div class="vd-inline" style="flex-wrap: wrap;">
+        <label class="vd-check"><input id="retransmit" type="checkbox" checked> NACK autenticado</label>
+        <label class="vd-check"><input id="adaptive" type="checkbox"> Saúde adaptativa</label>
+        <label class="vd-check"><input id="measureMedia" type="checkbox"> Medir perda original</label>
+        <label class="vd-check"><input id="measuredAllocation" type="checkbox"> Alocar por banda medida</label>
+        <label class="vd-check"><input id="bridge" type="checkbox"> Bridge SRT local</label>
+      </div>
+    </div>
+
+    <label class="vd-row"><span>Timeout probe</span>
+      <div class="vd-inline">
+        <input id="adaptiveTimeoutMs" type="number" min="1000" max="15000" value="2500" class="vd-short">
+        <span class="vd-note">ms sem resposta autenticada</span>
+      </div>
+    </label>
+
+    <!-- SEÇÃO: CAMINHOS DE REDE -->
+    <div class="vd-row"><span>Caminhos</span>
+      <div class="vd-inline">
+        <button id="add" type="button">Adicionar caminho</button>
+        <span id="interfaces" class="vd-note"></span>
+      </div>
+    </div>
+
+    <div class="vd-table-box">
+      <table>
+        <thead>
+          <tr>
+            <th>IPv4 receptor</th>
+            <th>Porta</th>
+            <th>IPv4 interface local</th>
+            <th>Peso (1–100)</th>
+            <th style="width: 60px;">Ação</th>
+          </tr>
+        </thead>
+        <tbody id="paths"></tbody>
+      </table>
+    </div>
+
+    <div class="vd-row"><span>Pacote privado</span>
+      <span id="receiver-file" class="vd-note"></span>
+    </div>
+
+    <!-- SEÇÃO: DIAGNÓSTICO -->
+    <details>
+      <summary style="font-weight: 700; cursor: pointer; color: #c9d1d8;">Diagnóstico e Telemetria em Tempo Real</summary>
+      <pre id="stats" class="vd-mono"></pre>
+    </details>
+  </div>
+
+  <!-- BARRA DE AÇÕES -->
+  <div class="vd-bar">
+    <button id="measure" type="button" disabled title="Teste de vazão até 64 Mbps">Medir banda</button>
+    <button id="export" type="button" title="Gera pacote ZIP autônomo do receptor">Exportar receptor</button>
+    <span class="vd-flex"></span>
+    <button id="save" type="button">Salvar</button>
+    <button id="start" type="button" class="vd-on">Iniciar transporte</button>
+    <button id="stop" type="button" class="vd-air" disabled>Parar</button>
+    <button type="button" onclick="window.FreeMixClosePanel ? window.FreeMixClosePanel() : window.close()">Fechar</button>
+  </div>
+</div>
+
+<script src="fechar-janela.js"></script>
+<script src="rede.js"></script>
+</body>
+</html>

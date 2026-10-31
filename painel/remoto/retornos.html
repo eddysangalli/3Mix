@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3Mix Pro · Retornos de Externa (Return Feeds & N-1)</title>
+<link rel="stylesheet" href="3mix-tipografia.css">
+<style>
+/* ============================================================
+   3Mix · Retornos de Externa SRT & N-1 — identidade grafite da
+   suíte (mesma línguagem de Áudio/Replay): base #111318/#14171c/
+   #1a1d23, bordas #2a2e35, verde do sistema #2f9e5f. Sem azul ou
+   roxo decorativo. Escala tipográfica em 3mix-tipografia.css.
+   ============================================================ */
+:root {
+  --ret-bg: #111318;
+  --ret-panel: #14171c;
+  --ret-panel-2: #181c22;
+  --ret-field: #1a1d23;
+  --ret-deep: #0e1014;
+  --ret-line: #2a2e35;
+  --ret-line-soft: #22262d;
+  --ret-text: #e8ebef;
+  --ret-dim: #a0a7b2;
+  --ret-mute: #7d8592;
+  --ret-green: #2f9e5f;
+  --ret-green-soft: #223026;
+  --ret-amber: #c9a227;
+  --ret-red: #c05046;
+  --ret-red-soft: #d99a92;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body.ret-window {
+  background: var(--ret-bg);
+  color: var(--ret-text);
+  font-size: var(--fs-body);
+  line-height: var(--line-body);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  user-select: none;
+}
+
+[hidden] { display: none !important; }
+
+button, input, select { font: inherit; color: inherit; }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--ret-deep); }
+::-webkit-scrollbar-thumb { background: #2f343c; border-radius: 5px; border: 2px solid var(--ret-deep); }
+::-webkit-scrollbar-thumb:hover { background: #3d434c; }
+
+/* ---------------------------------------------------------------- topo */
+
+.ret-top {
+  height: 56px;
+  min-height: 56px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #12151a;
+  border-bottom: 1px solid var(--ret-line);
+  z-index: 4;
+}
+
+.ret-brand {
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -.7px;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.ret-mods {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  background: var(--ret-deep);
+  border: 1px solid var(--ret-line);
+  border-radius: 6px;
+}
+
+.ret-mod {
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 4px;
+  background: transparent;
+  color: #9aa2ad;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+}
+
+.ret-mod.active { background: #2a303a; color: #fff; box-shadow: inset 0 -2px var(--ret-text); }
+
+.ret-project {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  max-width: 240px;
+  padding: 0 10px;
+  overflow: hidden;
+  white-space: nowrap;
+  background: var(--ret-field);
+  border: 1px solid var(--ret-line);
+  border-radius: 4px;
+  color: #9aa2ad;
+  font-size: 13px;
+}
+
+.ret-project b { max-width: 140px; overflow: hidden; text-overflow: ellipsis; color: var(--ret-text); font-weight: 600; }
+.ret-caret { color: var(--ret-mute); font-size: 11px; }
+
+.ret-top-right { margin-left: auto; display: flex; align-items: center; gap: 12px; min-width: 0; }
+
+.ret-conn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  max-width: 260px;
+  font-size: 13px;
+  color: var(--ret-dim);
+  white-space: nowrap;
+}
+
+.ret-conn #connection { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.ret-conn #connection.offline { color: var(--ret-red-soft); }
+
+.ret-led {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ret-green);
+  box-shadow: 0 0 6px rgba(79, 157, 99, .65);
+  flex: 0 0 auto;
+  transition: background .2s, box-shadow .2s;
+}
+
+.ret-led.offline { background: var(--ret-red); box-shadow: 0 0 6px rgba(192, 80, 70, .6); }
+
+.ret-win { display: flex; align-items: center; gap: 2px; }
+
+.ret-wb {
+  width: 30px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: #8a919c;
+  font-size: 14px;
+  line-height: 24px;
+  cursor: pointer;
+}
+
+.ret-wb:hover:not(:disabled) { background: #1a1f26; border-color: var(--ret-line); color: #fff; }
+.ret-wb:disabled { opacity: .45; cursor: default; }
+.ret-wb.close:hover { background: #7d2727; border-color: #9e3535; color: #fff; }
+
+/* ----------------------------------------------------------- página */
+
+.ret-pagehead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 16px 10px;
+}
+
+.ret-pagehead h1 {
+  margin: 0;
+  font-size: var(--fs-page);
+  line-height: var(--lh-page);
+  font-weight: 700;
+  letter-spacing: -.2px;
+  color: #fff;
+}
+
+.ret-sub {
+  margin: 4px 0 0;
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  color: var(--ret-mute);
+}
+
+.ret-add {
+  flex: 0 0 auto;
+  height: var(--btn-h);
+  padding: 0 12px;
+  border: 1px solid #3f5f50;
+  border-radius: 4px;
+  background: var(--ret-field);
+  color: #fff;
+  font-size: var(--fs-button);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.ret-add .ret-plus { color: #7fd6a3; font-weight: 800; font-size: 14px; }
+.ret-add:hover:not(:disabled) { background: #20262e; border-color: var(--ret-green); }
+.ret-add:disabled { opacity: .55; cursor: default; }
+
+/* ----------------------------------------------------------------- grid */
+
+.ret-main {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 6px 16px 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 16px;
+  align-content: flex-start;
+}
+
+.ret-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--ret-mute);
+  padding: 40px 16px;
+  font-size: var(--fs-body);
+}
+
+.ret-empty.err { color: var(--ret-red-soft); }
+
+/* ----------------------------------------------------------------- card */
+
+.ret-card {
+  background: var(--ret-panel);
+  border: 1px solid var(--ret-line);
+  border-left: 2px solid var(--ret-line);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.ret-card.live { border-left-color: var(--ret-green); }
+.ret-card.err { border-left-color: var(--ret-red); }
+
+.ret-card-head {
+  padding: 10px 12px;
+  background: var(--ret-panel-2);
+  border-bottom: 1px solid var(--ret-line-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ret-name {
+  margin: 0;
+  font-size: var(--fs-section);
+  line-height: var(--lh-section);
+  font-weight: 700;
+  color: #fff;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ret-state {
+  font-size: var(--fs-status);
+  line-height: var(--lh-status);
+  font-weight: 700;
+  white-space: nowrap;
+  flex: 0 0 auto;
+  color: var(--ret-mute);
+}
+
+.ret-state[data-tone="ok"] { color: var(--ret-green); }
+.ret-state[data-tone="pend"] { color: var(--ret-amber); }
+.ret-state[data-tone="err"] { color: var(--ret-red-soft); }
+
+.ret-card-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.ret-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 28px;
+}
+
+.ret-label { font-size: var(--fs-label); line-height: var(--lh-label); color: var(--ret-dim); flex: 0 0 auto; }
+
+.ret-val {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 15px;
+  color: var(--ret-text);
+  text-align: right;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.ret-val.dim { color: var(--ret-mute); }
+
+.ret-chips { display: flex; justify-content: flex-end; min-width: 0; }
+
+.ret-chip {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 600;
+  letter-spacing: .3px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  border: 1px solid #384049;
+  background: #2b2f36;
+  color: #a7afb9;
+  white-space: nowrap;
+  transition: background .15s, border-color .15s, color .15s;
+}
+
+.ret-chip[data-tone="ok"] {
+  background: var(--ret-green-soft);
+  border-color: #3d5b44;
+  color: #a9cdb0;
+}
+
+.ret-card.live .ret-chip[data-tone="ok"] { color: #9bc3a1; }
+
+.ret-metrics {
+  padding: 6px 12px 10px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  color: var(--ret-mute);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ret-metrics b { font-weight: 600; color: var(--ret-dim); }
+
+.ret-card-foot {
+  margin-top: auto;
+  padding: 10px 12px;
+  background: var(--ret-panel-2);
+  border-top: 1px solid var(--ret-line-soft);
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ret-btn {
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid #3a404a;
+  border-radius: 4px;
+  background: var(--ret-field);
+  color: var(--ret-text);
+  font-size: var(--fs-button);
+  line-height: var(--lh-button);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ret-btn:hover:not(:disabled) { background: #222831; border-color: #4a5260; color: #fff; }
+.ret-btn:disabled { opacity: .5; cursor: default; }
+
+.ret-btn.go {
+  background: linear-gradient(135deg, #2f6d40, #245732);
+  border-color: #4f9a63;
+  color: #fff;
+}
+
+.ret-btn.go:hover:not(:disabled) {
+  background: linear-gradient(135deg, #377f4b, #2b663b);
+  border-color: #63b57a;
+}
+
+.ret-btn.go:disabled { opacity: .55; }
+
+.ret-btn .ret-stop { color: var(--ret-red-soft); font-style: normal; font-size: 12px; }
+
+/* --------------------------------------------------------------- rodapé */
+
+.ret-footer {
+  height: 44px;
+  min-height: 44px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  overflow: hidden;
+  background: #0f1216;
+  border-top: 1px solid var(--ret-line);
+  color: var(--ret-dim);
+  font-size: 13px;
+}
+
+.ret-foot-brand { font-size: 14px; font-weight: 800; color: var(--ret-text); white-space: nowrap; }
+.ret-foot-sep { width: 1px; height: 18px; flex: 0 0 1px; background: var(--ret-line); }
+
+.ret-foot-item { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ret-foot-item[data-tone="err"] { color: var(--ret-red-soft); }
+.ret-foot-flex { flex: 1; }
+
+.ret-close {
+  flex: 0 0 auto;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid #3a404a;
+  border-radius: 4px;
+  background: var(--ret-field);
+  color: var(--ret-text);
+  font-size: 12.5px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ret-close:hover { background: #222831; border-color: #4a5260; }
+
+/* ---------------------------------------------------------------- toast */
+
+.ret-toast {
+  position: fixed;
+  right: 14px;
+  bottom: 52px;
+  z-index: 10;
+  max-width: 420px;
+  padding: 9px 12px;
+  border: 1px solid #3a404a;
+  border-radius: 4px;
+  background: #1c2128;
+  color: var(--ret-text);
+  font-size: var(--fs-body);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .45);
+}
+
+.ret-toast[data-tone="ok"] { border-color: #3d5b44; background: var(--ret-green-soft); color: #cfe3d3; }
+.ret-toast[data-tone="err"] { border-color: #61403c; background: #3a2725; color: #e0b6b0; }
+
+@media (max-width: 1000px) {
+  .ret-project { max-width: 160px; }
+  .ret-conn { max-width: 150px; }
+}
+</style>
+</head>
+<body class="ret-window" data-tipografia="3mix">
+
+<header class="ret-top">
+  <div class="ret-brand">3Mix</div>
+  <nav class="ret-mods" aria-label="Módulos 3Mix">
+    <span class="ret-mod active" aria-current="page">Retornos SRT &amp; N-1</span>
+  </nav>
+  <span class="ret-project" title="Projeto em uso">
+    Projeto: <b id="project-name">—</b><span class="ret-caret" aria-hidden="true">▾</span>
+  </span>
+  <div class="ret-top-right">
+    <div class="ret-conn" title="Estado da conexão com o motor 3Mix">
+      <span class="ret-led" id="status-led"></span>
+      <span id="connection">Conectando…</span>
+    </div>
+    <div class="ret-win" aria-label="Controles da janela">
+      <button type="button" class="ret-wb" disabled title="Controle da janela pelo Windows">–</button>
+      <button type="button" class="ret-wb" disabled title="Controle da janela pelo Windows">□</button>
+      <button type="button" class="ret-wb close" id="win-close" title="Fechar janela" aria-label="Fechar janela"
+        onclick="window.FreeMixClosePanel ? window.FreeMixClosePanel() : (window.close ? window.close() : null)">×</button>
+    </div>
+  </div>
+</header>
+
+<section class="ret-pagehead">
+  <div>
+    <h1>CANAIS DE RETORNO (RETURN FEEDS)</h1>
+    <p class="ret-sub">SRT CALLER/LISTENER + N-1 MIX-MINUS · retorno para repórteres, comentaristas e estúdio B</p>
+  </div>
+  <button type="button" class="ret-add" id="btn-add-feed" title="Cria um novo canal de retorno (SRT listener)">
+    <span class="ret-plus" aria-hidden="true">+</span>Adicionar Canal de Retorno
+  </button>
+</section>
+
+<main class="ret-main" id="feeds-grid">
+  <div class="ret-empty">Carregando canais de retorno de externa…</div>
+</main>
+
+<footer class="ret-footer">
+  <span class="ret-foot-brand">3Mix Retornos</span>
+  <span class="ret-foot-sep" aria-hidden="true"></span>
+  <span class="ret-foot-item" id="transport-state" data-tone="off">Aguardando motor…</span>
+  <span class="ret-foot-flex" aria-hidden="true"></span>
+  <button type="button" id="close-btn" class="ret-close"
+    onclick="window.FreeMixClosePanel ? window.FreeMixClosePanel() : (window.close ? window.close() : null)">Fechar</button>
+</footer>
+
+<div id="ret-toast" class="ret-toast" role="status" aria-live="polite" hidden></div>
+
+<script src="fechar-janela.js"></script>
+<script>
+'use strict';
+
+const E = id => document.getElementById(id);
+let feedsState = [];
+let busy = false;
+
+const EQUIVALENTES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+const esc = value => String(value ?? '').replace(/[&<>"']/g, c => EQUIVALENTES[c]);
+
+/* O motor emite videoSource 'clean'|'program'|'preview'|'input' e audioMode
+   'n-1'|'master'|'bus_a'|'bus_b'. As grafias legadas da tela antiga
+   ('CLEAN_FEED'/'PROGRAM'/'MIX_MINUS_N1'/'MASTER') continuam aceites. */
+const normaVideo = v => { const s = String(v || '').toLowerCase(); return s === 'clean_feed' ? 'clean' : s; };
+const normaAudio = v => { const s = String(v || '').toLowerCase(); return s === 'mix_minus_n1' ? 'n-1' : s; };
+
+const ROTULO_VIDEO = {
+  clean: 'CLEAN FEED (SEM GC)',
+  program: 'PROGRAM COMPLETO',
+  preview: 'PREVIEW',
+  input: 'ENTRADA DIRETA'
+};
+
+const ROTULO_AUDIO = {
+  'n-1': 'N-1 (SEM RETORNO PRÓPRIO)',
+  master: 'MASTER PGM',
+  bus_a: 'BUS A',
+  bus_b: 'BUS B'
+};
+
+const noAr = feed => {
+  const status = String(feed.status || '').toLowerCase();
+  return status === 'running' || status === 'active' || feed.enabled === true;
+};
+
+const emErro = feed => String(feed.status || '').toLowerCase() === 'error';
+
+let toastTimer = null;
+
+function toast(text, tone = 'info') {
+  const box = E('ret-toast');
+  if (!box) return;
+  box.textContent = String(text);
+  box.dataset.tone = { ok: 'ok', erro: 'err', error: 'err' }[tone] || 'info';
+  box.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { box.hidden = true; }, 4200);
+}
+
+function setConnection(connected) {
+  const led = E('status-led');
+  if (led) led.classList.toggle('offline', !connected);
+  const connection = E('connection');
+  if (connection) {
+    connection.classList.toggle('offline', !connected);
+    connection.textContent = connected ? 'Motor 3Mix conectado' : 'Sem conexão com o motor 3Mix';
+  }
+}
+
+function updateTransport(off) {
+  const item = E('transport-state');
+  if (!item) return;
+  item.dataset.tone = off ? 'err' : 'off';
+  item.textContent = off
+    ? 'Motor indisponível'
+    : feedsState.length
+      ? `${feedsState.filter(noAr).length} de ${feedsState.length} canal(is) de retorno ativos`
+      : 'Nenhum canal de retorno configurado';
+}
+
+/* Transporte real: mesma rota que o motor expõe para os retornos. */
+async function fetchFeeds() {
+  try {
+    const res = await fetch('/api/return-feeds');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (data.success === false) throw new Error(data.error || 'Motor recusou a consulta');
+    feedsState = data.feeds || [];
+    setConnection(true);
+    renderFeeds();
+    updateTransport();
+  } catch (err) {
+    setConnection(false);
+    updateTransport(true);
+    renderFeeds(err.message);
+  }
+}
+
+async function postReturnFeeds(payload) {
+  const res = await fetch('/api/return-feeds', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.success === false) throw new Error(data.error || 'Comando não confirmado pelo motor');
+  return data;
+}
+
+function renderFeeds(falha) {
+  const container = E('feeds-grid');
+  if (!container) return;
+
+  if (falha) {
+    container.innerHTML = `<div class="ret-empty err">Falha ao buscar retornos: ${esc(falha)}</div>`;
+    return;
+  }
+
+  if (!feedsState.length) {
+    container.innerHTML = '<div class="ret-empty">Nenhum canal de retorno configurado no momento. Clique em “+ Adicionar Canal de Retorno” acima.</div>';
+    return;
+  }
+
+  container.innerHTML = feedsState.map(feed => {
+    const id = String(feed.id ?? feed.feedId ?? '');
+    const ativo = noAr(feed);
+    const erro = emErro(feed);
+    const video = normaVideo(feed.videoSource);
+    const audio = normaAudio(feed.audioMode);
+    const limpo = video === 'clean';
+    const porta = Number(feed.port ?? feed.srtPort) || 0;
+    const srtMode = feed.srtMode || feed.mode || '';
+    const latencia = Number(feed.latencyMs) || 0;
+    const clientes = Number(feed.connectedClients) || 0;
+    const rtt = Number(feed.stats && feed.stats.rttMs) || 0;
+    const perda = Number(feed.stats && feed.stats.packetLossPercent) || 0;
+    const estado = erro ? '● ERRO' : ativo ? '● ATIVO' : '● PARADO';
+    const exclusao = audio === 'n-1' && feed.nMinusExclude ? `Exclusão do N-1: ${feed.nMinusExclude}` : 'Mixagem sem a fonte do próprio repórter (mix-minus)';
+
+    return `
+      <article class="ret-card ${ativo ? 'live' : ''} ${erro ? 'err' : ''}" data-feed="${esc(id)}">
+        <header class="ret-card-head">
+          <h2 class="ret-name" title="${esc(feed.name || 'Retorno')}">${esc(feed.name || 'Retorno')}</h2>
+          <span class="ret-state" data-tone="${erro ? 'err' : ativo ? 'ok' : 'pend'}">${estado}</span>
+        </header>
+        <div class="ret-card-body">
+          <div class="ret-row">
+            <span class="ret-label">Protocolo / Porta</span>
+            <span class="ret-val" title="Protocolo SRT · porta do cliente ${srtMode ? esc(srtMode) : 'listener'} no motor">SRT :${porta || '—'}${srtMode ? ' · ' + esc(srtMode) : ''}</span>
+          </div>
+          <div class="ret-row">
+            <span class="ret-label">Alvo / Destino</span>
+            <span class="ret-val ${feed.targetHost ? '' : 'dim'}">${feed.targetHost ? esc(`${feed.targetHost}:${feed.targetPort}`) : 'Aguardando Caller Remoto'}</span>
+          </div>
+          <div class="ret-row">
+            <span class="ret-label">Origem de Vídeo</span>
+            <span class="ret-chips"><span class="ret-chip" data-tone="${ativo ? 'ok' : 'off'}">${ROTULO_VIDEO[video] || esc(String(feed.videoSource || '—').toUpperCase())}</span></span>
+          </div>
+          <div class="ret-row">
+            <span class="ret-label">Mixagem de Áudio</span>
+            <span class="ret-chips"><span class="ret-chip" data-tone="${ativo ? 'ok' : 'off'}" title="${esc(exclusao)}">${ROTULO_AUDIO[audio] || esc(String(feed.audioMode || '—').toUpperCase())}</span></span>
+          </div>
+          <div class="ret-row">
+            <span class="ret-label">Latência / Buffer</span>
+            <span class="ret-val ${latencia ? '' : 'dim'}">${latencia ? latencia + ' ms' : '—'}</span>
+          </div>
+        </div>
+        ${ativo ? `<div class="ret-metrics">${clientes ? `<b>${clientes}</b> cliente(s) conectado(s) · ` : ''}${rtt ? `RTT <b>${rtt} ms</b>` : 'RTT aguardando sinal'}${perda ? ` · perda ${perda}%` : ''}</div>` : ''}
+        <footer class="ret-card-foot">
+          <button type="button" class="ret-btn ${ativo ? '' : 'go'}"
+            onclick="toggleFeed('${esc(id)}', ${!ativo})">
+            ${ativo ? '<span class="ret-stop" aria-hidden="true">■</span> Parar Sinal' : '<span aria-hidden="true">▶</span> Ativar Sinal'}
+          </button>
+          <button type="button" class="ret-btn"
+            onclick="toggleCleanFeed('${esc(id)}', '${limpo ? 'PROGRAM' : 'CLEAN_FEED'}')"
+            title="${limpo ? 'Enviar o program completo, com GC e placar' : 'Enviar clean feed: programa sem GC nem placar'}">
+            ${limpo ? 'Alterar para Program Completo' : 'Alterar para Clean Feed'}
+          </button>
+        </footer>
+      </article>
+    `;
+  }).join('');
+}
+
+/* Liga/desliga o sinal do canal no motor (ações reais do ReturnFeedManager). */
+async function toggleFeed(feedId, enable) {
+  if (busy) return;
+  busy = true;
+  try {
+    const data = await postReturnFeeds({
+      action: enable ? 'return_feed_start' : 'return_feed_stop',
+      feedId
+    });
+    const feed = data.result && data.result.feed;
+    if (feed) toast(feed.name ? `${feed.name}: sinal ${enable ? 'ativo' : 'parado'}.` : 'Comando confirmado no motor.', 'ok');
+    if (Array.isArray(data.feeds)) {
+      feedsState = data.feeds;
+      renderFeeds();
+      updateTransport();
+    } else {
+      await fetchFeeds();
+    }
+  } catch (err) {
+    toast('Erro: ' + err.message, 'erro');
+  } finally {
+    busy = false;
+  }
+}
+
+/* Alterna a origem de vídeo entre Program completo e Clean Feed (sem GC). */
+async function toggleCleanFeed(feedId, videoSource) {
+  if (busy) return;
+  const origem = String(videoSource || '').toLowerCase() === 'clean_feed' ? 'clean' : String(videoSource || '').toLowerCase();
+  if (!origem) return;
+  busy = true;
+  try {
+    const data = await postReturnFeeds({
+      action: 'return_feed_configure',
+      feedId,
+      videoSource: origem
+    });
+    toast('Origem de vídeo alterada: ' + (origem === 'clean' ? 'Clean Feed (sem GC)' : 'Program completo') + '.', 'ok');
+    if (Array.isArray(data.feeds)) {
+      feedsState = data.feeds;
+      renderFeeds();
+      updateTransport();
+    } else {
+      await fetchFeeds();
+    }
+  } catch (err) {
+    toast('Erro: ' + err.message, 'erro');
+  } finally {
+    busy = false;
+  }
+}
+
+function proximoFeedId() {
+  const usados = new Set(feedsState.map(feed => String(feed.id ?? feed.feedId ?? '')));
+  let n = feedsState.length + 1;
+  while (usados.has('return-' + n)) n += 1;
+  return 'return-' + n;
+}
+
+/* Nome do projeto (mesma rota usada pela central de Áudio). */
+async function readProject() {
+  try {
+    const res = await fetch('/api/json', { signal: AbortSignal.timeout(6000) });
+    const data = await res.json();
+    const nome = data && data.preset ? String(data.preset) : '';
+    if (nome && E('project-name')) E('project-name').textContent = nome;
+  } catch { /* chip permanece “—” até o motor responder */ }
+}
+
+E('btn-add-feed').addEventListener('click', async () => {
+  if (busy) return;
+  const name = prompt('Nome do canal de retorno (ex: Link Mochilink 2):', 'Retorno Externa ' + (feedsState.length + 1));
+  if (!name) return;
+  const port = prompt('Porta SRT (ex: 9002):', String(9000 + feedsState.length));
+  if (!port) return;
+
+  /* O motor cria o canal no return_feed_configure quando o id é novo
+     (ReturnFeedManager.configureFeed). SRT listener + Clean Feed + N-1,
+     os mesmos padrões de antes. */
+  busy = true;
+  try {
+    await postReturnFeeds({
+      action: 'return_feed_configure',
+      feedId: proximoFeedId(),
+      name,
+      port: Number(port),
+      videoSource: 'clean',
+      audioMode: 'n-1',
+      latencyMs: 120
+    });
+    toast('Canal de retorno criado: ' + name + '.', 'ok');
+    await fetchFeeds();
+  } catch (err) {
+    toast('Erro: ' + err.message, 'erro');
+    await fetchFeeds();
+  } finally {
+    busy = false;
+  }
+});
+
+fetchFeeds();
+setInterval(fetchFeeds, 3000);
+readProject();
+setInterval(readProject, 30000);
+</script>
+</body>
+</html>

@@ -1,1 +1,462 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FreeMix · Biblioteca GC</title><link rel="stylesheet" href="/controle.css"><style>main{max-width:1500px}.workbench{display:grid;grid-template-columns:minmax(340px,1fr) minmax(380px,1.2fr);gap:16px}.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:8px}.card{padding:8px;text-align:left;height:auto}.card img{display:block;width:100%;height:95px;object-fit:contain;background:repeating-conic-gradient(#35424b 0% 25%,#26333b 0% 50%) 50%/16px 16px}.card.selected{outline:2px solid #19c9aa}.card small{display:block}.preview{height:300px;background:repeating-conic-gradient(#35424b 0% 25%,#26333b 0% 50%) 50%/20px 20px;display:flex;align-items:center;justify-content:center;overflow:hidden}.preview svg{max-width:100%;max-height:100%;width:auto;height:auto}textarea{min-height:90px;width:100%;box-sizing:border-box}.fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}.fields label:has(textarea){grid-column:1/-1}#saved{display:flex;flex-wrap:wrap;gap:5px}#status{min-height:24px}.filter{margin-bottom:12px}.notice{font-size:12px;opacity:.8}@media(max-width:800px){.workbench{grid-template-columns:1fr}.fields{grid-template-columns:1fr}.preview{height:250px}}body[data-page="gc-library"] .workbench>section{min-width:0}body[data-page="gc-library"] .fields{grid-template-columns:repeat(2,minmax(0,1fr))}body[data-page="gc-library"] .fields label{min-width:0;display:flex;flex-direction:column;gap:4px}body[data-page="gc-library"] .fields input,body[data-page="gc-library"] .fields select,body[data-page="gc-library"] .fields textarea{min-width:0;max-width:100%;width:100%;box-sizing:border-box}body[data-page="gc-library"] .fields input[type="checkbox"]{width:auto;align-self:flex-start}body[data-page="gc-library"] button{max-width:100%;white-space:normal;overflow-wrap:anywhere}body[data-page="gc-library"] #gt-result{white-space:pre-wrap;overflow-wrap:anywhere}@media(max-width:800px){body[data-page="gc-library"] .fields{grid-template-columns:minmax(0,1fr)}}</style></head><body data-page="gc-library"><header><a href="/">FreeMix</a><h1>Biblioteca GC</h1><span id="connection">Conectando…</span></header><main><div id="message" role="status" aria-live="polite"></div><section><div class="row"><a href="/gc-html">Sincronizar HTML compatível H/V</a><button id="fresh">Novo título</button><button id="export">Exportar biblioteca</button><label>Importar biblioteca JSON<input id="import" type="file" accept="application/json,.json"></label></div><p class="notice">Modelos próprios editáveis. Títulos .gtzip e importados continuam no seletor de títulos da mesa. Nenhum título entra no ar ao salvar ou importar.</p><div id="saved"></div></section><div class="workbench"><section><h2>Galeria</h2><div class="row filter"><label>Grupo<select id="collection"><option>Todas</option><option>Jornalismo</option><option>Esportes</option><option>Eventos</option><option>Marca</option></select></label><label>Formato<select id="orientation"><option value="horizontal">Horizontal · 16:9</option><option value="vertical">Vertical · 9:16</option></select></label></div><div id="gallery" class="gallery"></div></section><section><h2 id="model-name">Editar título</h2><label>Nome na produção<input id="name" maxlength="100"></label><div id="preview" class="preview"></div><p class="notice">Área quadriculada representa transparência. O relógio das versões vinculadas continua ao editar campos. Use Reiniciar relógio H/V para reiniciar as duas versões.</p><div id="fields" class="fields"></div><details><summary>Estilo e posição</summary><div id="style" class="fields"></div><button id="defaults">Repor estilo padrão</button></details><label>Canal de overlay<select id="channel"></select></label><p id="status" role="status"></p><div class="row"><button id="save">Salvar</button><button id="duplicate">Duplicar</button><button id="prepare">Criar entrada na mesa</button><button id="air" class="air">Colocar no ar</button><button id="off">Retirar do ar</button><button id="remove">Remover da biblioteca</button></div></section></div></main><script src="/controle.js"></script><script type="module" src="/gc.js"></script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>3Mix Pro · Biblioteca de Títulos & GC Broadcast</title>
+  <link rel="stylesheet" href="controle.css">
+  <link rel="stylesheet" href="studio-dialog.css">
+  <link rel="stylesheet" href="operacao.css">
+  <style>
+    /* Estilos Autocontidos Resilientes Dark Studio Broadcast Tier 1 */
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #090c10 !important;
+      color: #f1f5f9 !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      background: #05080c;
+      border-bottom: 1px solid #1a222d;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    header a {
+      color: #38bdf8;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: 0.5px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+      color: #f8fafc;
+      flex: 1;
+    }
+    #connection {
+      font-size: 12px;
+      color: #00e676;
+      background: rgba(0, 230, 118, 0.1);
+      padding: 4px 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(0, 230, 118, 0.25);
+    }
+
+    main {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 20px 24px;
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    .toolbar-section {
+      background: #0f131a;
+      border: 1px solid #1f2734;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn-studio, button, .row button {
+      height: 34px;
+      padding: 0 16px;
+      background: #18202c;
+      border: 1px solid #2d3848;
+      border-radius: 4px;
+      color: #e2e8f0;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      box-sizing: border-box;
+    }
+    button:hover, .row button:hover {
+      background: #222c3c;
+      border-color: #3d4d62;
+      color: #ffffff;
+    }
+    button:active {
+      transform: translateY(1px);
+    }
+
+    button#fresh {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      border-color: #38bdf8;
+      color: #ffffff;
+      font-weight: 700;
+    }
+    button#air.air {
+      background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
+      border-color: #ef4444 !important;
+      color: #ffffff !important;
+      font-weight: 800;
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.45);
+    }
+    button#save {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+      border-color: #00e676 !important;
+      color: #ffffff !important;
+      font-weight: 700;
+    }
+    button#prepare {
+      background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+      border-color: #6366f1;
+      color: #ffffff;
+      font-weight: 700;
+    }
+    button#off {
+      background: #27272a;
+      border-color: #3f3f46;
+      color: #a1a1aa;
+    }
+    button#remove {
+      background: #18181b;
+      border-color: #27272a;
+      color: #f87171;
+    }
+
+    .link-sync {
+      color: #38bdf8;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0 8px;
+    }
+    .link-sync:hover {
+      text-decoration: underline;
+    }
+
+    .file-input-wrapper {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #141922;
+      border: 1px dashed #2d3848;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 12.5px;
+      color: #94a3b8;
+      cursor: pointer;
+    }
+    .file-input-wrapper input {
+      display: none;
+    }
+
+    .notice {
+      font-size: 12px;
+      color: #94a3b8;
+      margin: 8px 0 0;
+      line-height: 1.4;
+    }
+
+    .workbench {
+      display: grid;
+      grid-template-columns: minmax(360px, 1fr) minmax(420px, 1.25fr);
+      gap: 20px;
+    }
+
+    .panel-card {
+      background: #0f131a;
+      border: 1px solid #1f2734;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+    }
+
+    h2 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #f8fafc;
+      margin: 0 0 14px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid #1a222d;
+      padding-bottom: 8px;
+    }
+
+    .filter {
+      margin-bottom: 14px;
+      gap: 12px;
+    }
+    .filter label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+
+    select, input[type="text"], input[type="number"], textarea {
+      height: 32px;
+      padding: 4px 10px;
+      background: #080b0f;
+      border: 1px solid #232c3a;
+      border-radius: 4px;
+      color: #f8fafc;
+      font-size: 13px;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    select:focus, input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+      background: #0c1017;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+      max-height: 65vh;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .card {
+      background: #141922;
+      border: 1px solid #202937;
+      border-radius: 6px;
+      padding: 8px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .card:hover {
+      background: #1b2230;
+      border-color: #38bdf8;
+      transform: translateY(-2px);
+    }
+    .card.selected {
+      border-color: #00e676 !important;
+      background: #11261d !important;
+      box-shadow: 0 0 10px rgba(0, 230, 118, 0.3);
+    }
+    .card img {
+      display: block;
+      width: 100%;
+      height: 95px;
+      object-fit: contain;
+      border-radius: 4px;
+      background: repeating-conic-gradient(#1c2330 0% 25%, #111620 0% 50%) 50% / 14px 14px;
+      border: 1px solid #1a222e;
+    }
+    .card strong {
+      font-size: 12px;
+      color: #f1f5f9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card small {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .preview {
+      height: 300px;
+      background: repeating-conic-gradient(#1a202c 0% 25%, #0f131a 0% 50%) 50% / 20px 20px;
+      border: 1px solid #263142;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      margin: 10px 0;
+      position: relative;
+    }
+    .preview svg {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+    }
+
+    .fields {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      margin: 10px 0;
+    }
+    .fields label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+    .fields label:has(textarea) {
+      grid-column: 1 / -1;
+    }
+    textarea {
+      min-height: 80px;
+      width: 100%;
+      font-family: inherit;
+    }
+
+    details {
+      background: #090c10;
+      border: 1px solid #1f2734;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin: 12px 0;
+    }
+    details summary {
+      cursor: pointer;
+      font-weight: 700;
+      color: #38bdf8;
+      font-size: 13px;
+      outline: none;
+    }
+
+    #palette-presets button {
+      height: 24px;
+      padding: 0 8px;
+      font-size: 11px;
+      border-radius: 3px;
+    }
+
+    #status {
+      min-height: 20px;
+      font-size: 12px;
+      color: #00e676;
+      margin: 6px 0;
+    }
+
+    @media (max-width: 900px) {
+      .workbench {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body data-page="gc-library">
+  <header>
+    <a href="/">FreeMix</a>
+    <h1>Biblioteca de Títulos & Gerador de Caracteres (GC)</h1>
+    <span id="connection">Conectando…</span>
+  </header>
+
+  <main>
+    <div id="message" role="status" aria-live="polite"></div>
+
+    <section class="toolbar-section">
+      <div class="row">
+        <a href="gc-html.html" class="link-sync">Sincronizar HTML compatível H/V</a>
+        <button id="fresh" type="button">+ Novo Título</button>
+        <button id="export" type="button">Exportar Biblioteca</button>
+        <label class="file-input-wrapper">
+          📂 Importar biblioteca JSON
+          <input id="import" type="file" accept="application/json,.json">
+        </label>
+      </div>
+      <p class="notice">Modelos próprios editáveis broadcast. Títulos .gtzip e importados integram o seletor da mesa. Nenhum título entra no ar ao salvar ou importar.</p>
+      <div id="saved" style="margin-top:8px;"></div>
+    </section>
+
+    <div class="workbench">
+      <!-- Painel Esquerdo: Galeria -->
+      <section class="panel-card">
+        <h2>Catálogo de Modelos</h2>
+        <div class="row filter">
+          <label>Grupo:
+            <select id="collection">
+              <option>Todas</option>
+              <option>Jornalismo</option>
+              <option>Esportes</option>
+              <option>Eventos</option>
+              <option>Marca</option>
+            </select>
+          </label>
+          <label>Formato:
+            <select id="orientation">
+              <option value="horizontal">Horizontal · 16:9</option>
+              <option value="vertical">Vertical · 9:16</option>
+            </select>
+          </label>
+        </div>
+        <div id="gallery" class="gallery"></div>
+      </section>
+
+      <!-- Painel Direito: Editor -->
+      <section class="panel-card">
+        <h2 id="model-name">Editar Título</h2>
+        <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:#cbd5e1;margin-bottom:8px;">
+          Nome na produção
+          <input id="name" maxlength="100" placeholder="Ex: Apresentador Principal">
+        </label>
+
+        <div id="preview" class="preview"></div>
+        <p class="notice">Área quadriculada representa transparência broadcast real. O relógio das versões vinculadas continua ao editar campos.</p>
+
+        <div id="fields" class="fields"></div>
+
+        <details open>
+          <summary>Estilo, Cores e Geometria</summary>
+          <div style="margin:8px 0;">
+            <small style="display:block;margin-bottom:6px;color:#94a3b8;font-weight:600;">Paletas Rápidas (1-Clique):</small>
+            <div id="palette-presets" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
+          </div>
+          <div id="style" class="fields"></div>
+          <button id="defaults" type="button" style="margin-top:8px;">Repor estilo padrão</button>
+        </details>
+
+        <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:#cbd5e1;margin:10px 0;">
+          Canal de overlay:
+          <select id="channel" style="width:160px;"></select>
+        </label>
+
+        <p id="status" role="status"></p>
+
+        <div class="row" style="margin-top:12px;">
+          <button id="save" type="button">Salvar</button>
+          <button id="duplicate" type="button">Duplicar</button>
+          <button id="prepare" type="button">Criar entrada na mesa</button>
+          <button id="air" class="air" type="button">🔴 Colocar no ar</button>
+          <button id="off" type="button">Retirar do ar</button>
+          <button id="remove" type="button">Remover</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="controle.js"></script>
+  <script type="module" src="gc.js"></script>
+</body>
+</html>

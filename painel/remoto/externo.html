@@ -3,94 +3,164 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Saídas externas</title>
+<title>3Mix · Saídas externas</title>
 <link rel="stylesheet" href="vmix-dialogo.css">
+<link rel="stylesheet" href="3mix-grafite.css">
+<link rel="stylesheet" href="3mix-janelas.css">
+<style>
+  html body.vd.ext-page { overflow: hidden; }
+  .vd-window.ext-window { width: 100%; max-width: none; height: 100vh; min-height: 100vh; margin: 0; border: 0; border-radius: 0; box-shadow: none; display: flex; flex-direction: column; }
+  .ext-window .vd-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-bottom: 18px; }
+  .ext-window .vd-status { margin: 12px 0 0; flex: none; }
+  .ext-strip { display: flex; align-items: center; gap: 10px; }
+  .ext-state { margin-left: auto; padding: 4px 10px; border: 1px solid #4a4a4a; background: #1b1b1b; border-radius: 3px; font-size: 12px; font-weight: 700; color: #e2e2e2; white-space: nowrap; }
+  .ext-state.live { border-color: #ef4444; color: #ffb4ac; background: #2b1414; }
+  .ext-state.error { border-color: #9a5a14; color: #f3c886; background: #2b2114; }
+  .ext-protocol { background: #242424; border: 1px solid #464646; border-radius: 5px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+  .ext-protocol-head { display: flex; align-items: center; gap: 8px; }
+  .ext-protocol-head h2 { margin: 0; font-size: 13px; color: #fff; }
+  .ext-protocol-head span { margin-left: auto; font-size: 11px; color: #9d9d9d; }
+  .ext-sub { margin: 0; font-size: 11px; color: #a9a9a9; line-height: 1.5; }
+  .ext-sub.warn { color: #e8c07a; }
+  details.ext-other { background: #232323; border: 1px solid #444; border-radius: 5px; }
+  details.ext-other > summary { cursor: pointer; padding: 9px 12px; font-size: 12px; font-weight: 700; color: #d8d8d8; list-style: none; display: flex; gap: 8px; align-items: center; }
+  details.ext-other > summary::-webkit-details-marker { display: none; }
+  details.ext-other > summary::before { content: "▸"; color: #9a9a9a; }
+  details.ext-other[open] > summary::before { content: "▾"; }
+  details.ext-other > summary small { margin-left: auto; font-weight: 400; color: #8f8f8f; }
+  .ext-other-body { padding: 0 12px 12px; display: flex; flex-direction: column; gap: 8px; }
+  .ext-bar .vd-note { margin-right: auto; font-size: 11px; color: #a5a5a5; }
+  .ext-bar button { min-width: 0; padding: 0 12px; }
+  .vd-status .ext-sending { color: #ff9b92; font-weight: 800; letter-spacing: .4px; }
+  .ext-window button:disabled { opacity: .55; filter: saturate(.25); }
+  @media (max-width: 900px) {
+    .ext-window .vd-row { grid-template-columns: 132px minmax(0, 1fr) auto; gap: 0 10px; }
+    .ext-window .vd-row > span:first-child { text-align: right; }
+  }
+  @media (max-width: 700px) {
+    /* Rows stack label-above-field as plain block flow. The row's auto height collapsed to its padding (children
+       overflowed and rows overlapped) — visible in narrow windows and inside the settings central. height:fit-content
+       breaks the intrinsic-sizing loop these rows hit as grid items of .vd-body, and .vd-body itself stops being a
+       grid here so the tracks do not use that broken intrinsic height either. */
+    .ext-window .vd-body { display: block; }
+    .ext-window .vd-body > * + * { margin-top: 12px; }
+    .ext-window .vd-gap { display: none; }
+    .ext-window .vd-row { display: block; min-height: 0; height: fit-content; padding: 3px 0; }
+    .ext-window .vd-row > span:first-child { display: block; text-align: left; margin-bottom: 4px; }
+    .ext-window .vd-row .vd-inline, .ext-window .vd-row .vd-nums { width: 100%; }
+    .ext-window .vd-row input:not([type=checkbox]), .ext-window .vd-row select { width: 100%; }
+    .ext-window .vd-row .vd-inline { display: flex; }
+    .ext-bar { flex-wrap: wrap; }
+    .ext-bar .vd-note { flex: 1 1 100%; margin-right: 0; }
+    .ext-bar button { flex: 1 1 auto; }
+  }
+</style>
 </head>
-<body data-page="externo" class="vd">
-<div class="vd-window" style="width:700px;max-width:700px">
+<body data-page="externo" class="vd ext-page">
+<div class="vd-window ext-window">
+  <div class="vd-strip ext-strip">
+    <span class="vd-title">Saídas externas</span>
+    <span id="sender-state" class="ext-state">Saída 1 · NDI · Consultando…</span>
+  </div>
   <div class="vd-body">
-    <!-- 1. Botões numerados 1 a 4 no topo -->
-    <div class="vd-row"><span></span>
+    <!-- 1. Saídas 1 a 4 -->
+    <div class="vd-row"><span>Saída</span>
       <div class="vd-nums" id="nums" role="tablist" aria-label="Saídas de rede">
         <button type="button" data-n="0" role="tab">1</button><button type="button" data-n="1" role="tab">2</button><button type="button" data-n="2" role="tab">3</button><button type="button" data-n="3" role="tab">4</button>
       </div>
     </div>
 
-    <!-- 2. Linha Tipo: botões NDI e OMT -->
-    <div class="vd-row"><span>Tipo</span>
+    <!-- 2. Tipo de protocolo -->
+    <div class="vd-row"><span>Protocolo</span>
       <div class="vd-inline" id="type-box">
         <button type="button" id="type-ndi" class="vd-on">NDI</button>
         <button type="button" id="type-omt">OMT</button>
-        <button type="button" id="type-srt" title="Configurar saídas SRT">SRT</button>
+        <button type="button" id="type-srt" title="Abrir as saídas SRT">SRT ↗</button>
       </div>
     </div>
 
-    <!-- 3. Configurações da saída escolhida -->
-    <label class="vd-row"><span>Fonte de vídeo</span><select id="video-source"></select></label>
-    <label class="vd-row"><span>Fonte de áudio</span><select id="audio-source"></select></label>
-    <label class="vd-row"><span>Nome na rede</span><input id="net-name" type="text" maxlength="120" spellcheck="false" autocomplete="off"></label>
-    <label class="vd-row" id="groups-row"><span>Grupos</span><input id="net-groups" type="text" maxlength="300" spellcheck="false" autocomplete="off" placeholder="Padrão: público (deixe vazio)"></label>
-    <div class="vd-row" id="alpha-row"><span></span>
-      <label class="vd-check"><input id="net-alpha" type="checkbox"> <span id="alpha-label">Canal alfa</span></label>
-    </div>
+    <!-- 3. Parâmetros do protocolo escolhido -->
+    <section class="ext-protocol">
+      <div class="ext-protocol-head"><h2 id="protocol-title">NDI</h2><span id="protocol-note">Parâmetros do envio</span></div>
 
-    <!-- Opções avançadas -->
-    <div class="vd-row"><span></span>
-      <label class="vd-check"><input id="show-advanced" type="checkbox"> Mostrar opções avançadas</label>
-    </div>
-    <div class="vd-advanced" id="advanced" hidden>
-      <label class="vd-row" id="precision-row"><span>Precisão OMT</span>
-        <select id="net-precision" class="vd-short">
-          <option value="8">BGRA 8 bits</option>
-          <option value="16">PA16 · RGBA16F</option>
-        </select>
+      <label class="vd-row"><span>Nome na rede</span>
+        <span class="vd-inline" style="flex-wrap:nowrap">
+          <input id="net-name" type="text" maxlength="120" spellcheck="false" autocomplete="off" placeholder="3Mix NDI 1">
+          <button type="button" id="name-default" title="Voltar ao nome padrão desta saída">Padrão</button>
+        </span>
       </label>
-      <div class="vd-row" id="fillkey-row"><span></span>
-        <label class="vd-check"><input id="net-fillkey" type="checkbox"> Par Fill + Key (SDR 8 bits)</label>
-      </div>
-      <label class="vd-row" id="keyname-row"><span>Nome do Key</span>
-        <input id="net-keyname" type="text" maxlength="120" spellcheck="false" autocomplete="off" placeholder="Nome do sender + Key">
-      </label>
-    </div>
+      <label class="vd-row" id="groups-row"><span>Grupos</span><input id="net-groups" type="text" maxlength="300" spellcheck="false" autocomplete="off" placeholder="Padrão: público (deixe vazio)"></label>
 
-    <div class="vd-gap"></div>
+      <label class="vd-row"><span>Fonte de vídeo</span><select id="video-source"></select></label>
+      <label class="vd-row"><span>Fonte de áudio</span><select id="audio-source"></select></label>
 
-    <!-- 4. Câmera virtual e Tela cheia -->
-    <div class="vd-row"><span>Câmera virtual</span>
-      <div class="vd-inline">
-        <span id="virtual-status" class="vd-note">Consultando…</span>
-        <button type="button" id="virtual-toggle">Ligar</button>
+      <div class="vd-row" id="alpha-row"><span></span>
+        <label class="vd-check"><input id="net-alpha" type="checkbox"> <span id="alpha-label">Canal alfa (transparência)</span></label>
       </div>
-    </div>
-    <div class="vd-row"><span>Tela cheia</span>
-      <div class="vd-inline" style="gap:6px;flex-wrap:wrap">
-        <button type="button" id="fs-program">Saída</button>
-        <button type="button" id="fs-preview">Preview</button>
-        <button type="button" id="fs-multiview">Multiview</button>
-        <select id="fs-input" style="width:140px"></select>
-        <button type="button" id="fs-open-input">Abrir entrada</button>
+
+      <div class="vd-row"><span></span>
+        <label class="vd-check"><input id="show-advanced" type="checkbox"> Mostrar opções avançadas do protocolo</label>
       </div>
-    </div>
+      <div class="vd-advanced" id="advanced" hidden>
+        <label class="vd-row" id="precision-row"><span>Precisão OMT</span>
+          <select id="net-precision" class="vd-short">
+            <option value="8">BGRA 8 bits</option>
+            <option value="16">PA16 · RGBA16F</option>
+          </select>
+        </label>
+        <div class="vd-row" id="fillkey-row"><span></span>
+          <label class="vd-check"><input id="net-fillkey" type="checkbox"> Par Fill + Key (SDR 8 bits)</label>
+        </div>
+        <label class="vd-row" id="keyname-row"><span>Nome do Key</span>
+          <input id="net-keyname" type="text" maxlength="120" spellcheck="false" autocomplete="off" placeholder="Nome do sender + Key">
+        </label>
+      </div>
+
+      <p class="ext-sub" id="protocol-help">NDI envia o programa ou uma entrada direta pela rede local, com o nome acima.</p>
+      <p class="ext-sub warn" id="alpha-note" hidden></p>
+    </section>
+
+    <!-- 4. Outras saídas do programa (não são envios de rede) -->
+    <details class="ext-other">
+      <summary>Outras saídas do programa <small>câmera virtual e tela cheia não são envios de rede</small></summary>
+      <div class="ext-other-body">
+        <div class="vd-row"><span>Câmera virtual</span>
+          <div class="vd-inline">
+            <span id="virtual-status" class="vd-note">Consultando…</span>
+            <button type="button" id="virtual-toggle">Ligar</button>
+          </div>
+        </div>
+        <div class="vd-row"><span>Tela cheia</span>
+          <div class="vd-inline" style="gap:6px;flex-wrap:wrap">
+            <button type="button" id="fs-program">Saída</button>
+            <button type="button" id="fs-preview">Preview</button>
+            <button type="button" id="fs-multiview">Multiview</button>
+            <select id="fs-input" style="width:150px"></select>
+            <button type="button" id="fs-open-input">Abrir entrada</button>
+          </div>
+        </div>
+      </div>
+    </details>
 
     <p id="msg" class="vd-msg" role="status"></p>
+
+    <!-- 5. Ver status (dentro do conteúdo: só o corpo rola) -->
+    <div class="vd-status" id="status" hidden>
+      <table>
+        <thead><tr><th>#</th><th>Tipo</th><th>Nome</th><th>Fonte</th><th>Estado</th></tr></thead>
+        <tbody id="status-rows"></tbody>
+      </table>
+    </div>
   </div>
 
-  <!-- 5. Tabela Ver Status -->
-  <div class="vd-status" id="status" hidden>
-    <table>
-      <thead><tr><th>#</th><th>Tipo</th><th>Nome</th><th>Fonte</th><th>Estado</th></tr></thead>
-      <tbody id="status-rows"></tbody>
-    </table>
-  </div>
-
-  <!-- 6. Barra de baixo -->
-  <div class="vd-bar">
-    <button type="button" id="start-all">Iniciar tudo</button>
-    <button type="button" id="start-one">Começar 1</button>
-    <button type="button" id="view-status">Ver Status</button>
-    <span class="vd-flex"></span>
-    <button type="button" id="advanced-btn" title="Abre o editor completo de saídas">Avançado</button>
-    <button type="button" id="save-close">Salvar e Fechar</button>
+  <!-- 6. Rodapé -->
+  <div class="vd-bar ext-bar">
+    <span class="vd-note" id="foot-note">Salvar rascunho guarda o que está na tela neste computador; não inicia nem aplica no motor.</span>
+    <button type="button" id="advanced-btn" title="Abre o editor completo de saídas">Editor completo</button>
+    <button type="button" id="view-status">Ver status</button>
+    <button type="button" id="save-close">Salvar rascunho</button>
+    <button type="button" id="start-all">Iniciar todas</button>
+    <button type="button" id="start-one" class="vd-on">Iniciar saída 1</button>
   </div>
 </div>
 <span id="connection" hidden></span><p id="message" hidden></p>

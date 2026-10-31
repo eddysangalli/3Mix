@@ -1,1 +1,73 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FreeMix · Sinais</title><link rel="stylesheet" href="controle.css"><link rel="stylesheet" href="studio-dialog.css"></head><body data-page="sinais"><header><a href="/">FreeMix</a><h1>Diagnóstico de sinais</h1><span id="connection">Conectando…</span></header><main><p id="error" role="alert" hidden></p><section><h2>Monitorar uma entrada</h2><form id="configure" class="row"><label>Entrada<select id="input"></select></label><label>Tempo sem alterações (segundos)<input id="timeout" type="number" min="5" max="120" value="15"></label><label><input id="motion" type="checkbox">Espero movimento contínuo</label><button type="submit" class="on">Monitorar</button></form><p>As verificações são locais e usam uma imagem reduzida. Uma câmera parada pode mostrar a mesma imagem normalmente. O aviso de movimento serve para conferência; o sistema não troca entradas nem reinicia fontes.</p><p>Até oito entradas. A amostragem é alternada; pode levar até oito segundos por entrada. Ao reiniciar ou trocar projeto, o monitoramento fica desligado.</p></section><section><h2>Entradas monitoradas</h2><div id="monitors"></div></section></main><script src="controle.js"></script><script src="sinais.js"></script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3Mix Pro · Sinais</title>
+<link rel="stylesheet" href="vmix-dialogo.css">
+<style>
+.vd-window { width: 100%; max-width: 860px; margin: 24px auto; border-radius: 8px; box-shadow: 0 16px 48px rgba(0,0,0,0.6); }
+.vd-note-box { background: #0c0f14; border: 1px solid #202936; border-radius: 6px; padding: 12px 14px; font-size: 12px; color: #94a3b8; line-height: 1.5; margin: 8px 0; }
+#monitors .card { background: #141922; border: 1px solid #232c38; border-radius: 6px; padding: 12px 14px; margin: 8px 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+#monitors .card strong { color: #f8fafc; font-size: 13px; }
+#monitors .card p { margin: 4px 0 0; font-size: 12px; color: #94a3b8; }
+#monitors .card button { height: 28px; font-size: 12px; padding: 0 12px; border-radius: 4px; }
+</style>
+</head>
+<body data-page="sinais" class="vd">
+<div class="vd-window">
+  <div class="vd-strip">
+    <span class="vd-title">Diagnóstico de Sinais de Entrada</span>
+    <span class="vd-flex"></span>
+    <span id="connection" class="vd-note">Conectando…</span>
+  </div>
+
+  <div style="padding: 4px 12px 0;">
+    <p id="error" class="vd-msg vd-error" role="alert" hidden></p>
+  </div>
+
+  <div class="vd-body">
+    <div class="vd-note-box">
+      Monitoramento local por amostragem. Detecta perda de sinal, estagnação de imagem ou congelamento de mídia sem interromper o Programa.
+    </div>
+
+    <form id="configure">
+      <label class="vd-row"><span>Entrada</span>
+        <select id="input"></select>
+      </label>
+
+      <label class="vd-row"><span>Tempo limite</span>
+        <div class="vd-inline">
+          <input id="timeout" type="number" min="5" max="120" value="15" class="vd-short">
+          <span class="vd-note">segundos sem alterações</span>
+        </div>
+      </label>
+
+      <div class="vd-row"><span>Condição</span>
+        <div class="vd-inline">
+          <label class="vd-check"><input id="motion" type="checkbox"> Esperar movimento contínuo</label>
+        </div>
+      </div>
+
+      <div class="vd-row"><span></span>
+        <div class="vd-inline">
+          <button type="submit" class="vd-on">Monitorar entrada</button>
+        </div>
+      </div>
+    </form>
+
+    <div class="vd-row" style="margin-top: 12px;"><span>Entradas ativas</span></div>
+    <div id="monitors" style="margin-top: 6px;"></div>
+  </div>
+
+  <div class="vd-bar">
+    <span class="vd-flex"></span>
+    <button type="button" onclick="window.FreeMixClosePanel ? window.FreeMixClosePanel() : window.close()">Fechar</button>
+  </div>
+</div>
+
+<script src="fechar-janela.js"></script>
+<script src="controle.js"></script>
+<script src="sinais.js"></script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+/* ==========================================================================
+   3Mix — layout multimodular da Mesa
+   Botoeiras PV/PGM independentes, entradas e docks que abrem e fecham e um
+   segundo dock para Áudio + Replay juntos. Os controles ficam no rodapé.
+
+   Regra de ouro: no modo normal a grade nativa da mesa manda. A botoeira
+   fechada ocupa zero em vez de sair do fluxo, para não deslocar as linhas.
+   ========================================================================== */
+
+/* Altura da banca acompanha o conteúdo: nada de vazio embaixo dos cartões. */
+body:not(.popup-mode):not(.banks-bottom) .switcher-banks { height: auto; }
+
+/* Botoeira fechada: some sem mudar a ordem das linhas da grade. */
+body.no-banks .switcher-banks { height: 0 !important; min-height: 0; padding: 0; margin: 0; border: 0; overflow: hidden; visibility: hidden; }
+body.no-banks .switcher-banks * { visibility: hidden; }
+
+body.no-pv #bank-pv,
+body.no-pgm #bank-pgm { display: none; }
+body.no-pv #bank-pgm,
+body.no-pgm #bank-pv { grid-column: 1 / -1; }
+
+/* Cabeçalho das botoeiras com fechar e mover. */
+.switcher-bank h2 { display: flex; align-items: center; justify-content: space-between; height: 18px; }
+.bank-tools { display: flex; align-items: center; gap: 2px; }
+.bank-tool { width: 15px; height: 14px; padding: 0; display: grid; place-items: center; font: 700 11px/1 'Segoe UI'; background: #333; border: 1px solid #4a4a4a; border-radius: 2px; color: #a8a8a8; cursor: pointer; }
+.bank-tool:hover { background: #474747; border-color: #777; color: #fff; }
+
+/* Botoeiras embaixo: só neste modo a mesa vira uma coluna flexível. */
+body.banks-bottom:not(.popup-mode) { display: flex; flex-direction: column; }
+body.banks-bottom .mid { order: 1; flex: 1 1 auto; min-height: 0; }
+body.banks-bottom .switcher-banks { order: 2; flex: 0 0 auto; height: auto; }
+body.banks-bottom .bot { order: 3; flex: 0 0 auto; }
+body.banks-bottom .stat { order: 4; flex: 0 0 auto; }
+body.banks-bottom.no-banks .switcher-banks { display: none; }
+
+/* Entradas fechadas: o dock (ou os dois docks) ocupa a área. */
+body.no-inputs #inputs-module,
+body.no-inputs .tiles,
+body.no-inputs .splitter-v { display: none; }
+body.no-inputs #side-panel.on { flex: 1 1 auto; width: auto !important; max-width: none; }
+
+/* Segundo dock. */
+#side-panel-2 { display: none; flex-direction: column; width: 30vw; min-width: 340px; border: 1px solid #414141; border-radius: 4px; }
+#side-panel-2.on { display: flex; }
+body.dock2 #side-panel.on { width: 27vw; min-width: 340px; }
+body.dock2.no-inputs #side-panel.on,
+body.dock2.no-inputs #side-panel-2 { flex: 1 1 50%; width: auto; min-width: 320px; }
+#side-panel-2 .side-panel-header { justify-content: flex-start; gap: 5px; }
+#side-panel-2 .side-tabs { flex: 1; overflow-x: auto; }
+#side-panel-2 .st-tab { height: 24px; padding: 0 7px; font-size: 11px; flex: none; }
+#side-panel-2 .st2 { opacity: .72; }
+#side-panel-2 .st2:hover { opacity: 1; }
+#side-panel-2 .st2.on { opacity: 1; }
+#side-panel-2 .d2-return { width: 24px; padding: 0; text-align: center; color: #d9c08c; border-color: #6a5638; }
+#side-panel-2 .d2-return:hover { color: #ffe6ab; border-color: #a58a4a; }
+#side-panel-2 .st-tab.on { background: #4a4a4a; border-color: #777; color: #fff; }
+#side-panel-2 .st2-close { color: #ffb4b4; border-color: #6b3a3e; }
+
+/* Sem a barra de Fontes, as abas do dock continuam no cabeçalho. */
+body.no-inputs #side-panel .side-tabs { display: flex; overflow-x: auto; }
+body.no-inputs #side-panel .side-tabs .st-tab { height: 24px; padding: 0 7px; font-size: 11px; flex: none; }
+body.no-inputs #side-panel .side-panel-header { gap: 5px; }
+
+/* Tudo fechado: a área não fica escura em silêncio, mostra como reabrir. */
+.mid-empty { display: none; position: absolute; inset: 0; align-items: center; justify-content: center; color: #9a9a9a; font-size: 13px; z-index: 1; }
+body.no-inputs:not(:has(#side-panel.on)) .mid-empty { display: flex; }
+
+/* Rodapé: informações + botões de módulos. */
+.stat { gap: 10px; }
+.stat-info { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; overflow: hidden; }
+.view-toggles { display: flex; align-items: center; gap: 3px; flex: none; }
+.view-toggles .lt { height: 17px; padding: 0 6px; font: 600 10px/15px 'Segoe UI'; background: #242424; border: 1px solid #3d3d3d; border-radius: 3px; color: #8f8f8f; cursor: pointer; }
+.view-toggles .lt:hover { border-color: #777; color: #eee; }
+.view-toggles .lt.on { background: #3a3a3a; border-color: #6a6a6a; color: #f0f0f0; }
+
+/* ===== Dock de Áudio no idioma da janela completa (mockup) =====
+   Mesma paleta por categoria do Áudio (MIC vermelho, CAM verde, VT amarelo,
+   REPLAY roxo, CALL azul, TRILHA laranja, AUX verde-água); fader metálico,
+   chip de dB real e envios MAIN/A/B como chips. */
+#view-mixer #mixer { gap: 5px; padding: 6px; overflow-x: auto !important; overflow-y: hidden; scrollbar-width: thin; scrollbar-color: #4b525b transparent; }
+#view-mixer #mixer::-webkit-scrollbar { height: 8px; }
+#view-mixer #mixer::-webkit-scrollbar-track { background: transparent; }
+#view-mixer #mixer::-webkit-scrollbar-thumb { background: #4b525b; border-radius: 4px; }
+#view-mixer #mixer .strip { min-width: 106px; width: auto; flex: 0 0 106px; display: flex; flex-direction: column; overflow: hidden; background: transparent; border: 1px solid #383838; border-radius: 4px; }
+#view-mixer #mixer .strip .hd { height: 34px; flex: none; display: flex; align-items: center; gap: 5px; padding: 0 7px; color: #eef1f4; border-bottom: 1px solid rgba(0,0,0,.35); background: #242830 !important; }
+#view-mixer #mixer .strip .hd b { width: 20px; height: 15px; flex: none; display: grid; place-items: center; font: 700 8.5px/1 'Segoe UI'; background: rgba(0,0,0,.35); border-radius: 2px; color: #fff; }
+#view-mixer #mixer .strip .hd span { font-size: 10.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#view-mixer #mixer .strip[data-visual="mic"] .hd { background: linear-gradient(180deg, #a33a3a, #7d2929) !important; }
+#view-mixer #mixer .strip[data-visual="cam"] .hd { background: linear-gradient(180deg, #2f7d4f, #22603b) !important; }
+#view-mixer #mixer .strip[data-visual="vt"] .hd { background: linear-gradient(180deg, #b08c1e, #8a6d14) !important; }
+#view-mixer #mixer .strip[data-visual="replay"] .hd { background: linear-gradient(180deg, #6b4fa0, #513a7d) !important; }
+#view-mixer #mixer .strip[data-visual="call"] .hd { background: linear-gradient(180deg, #2f5f9e, #234777) !important; }
+#view-mixer #mixer .strip[data-visual="trilha"] .hd { background: linear-gradient(180deg, #b06a2c, #8a4f1f) !important; }
+#view-mixer #mixer .strip[data-visual="aux"] .hd { background: linear-gradient(180deg, #2f7f72, #226055) !important; }
+#view-mixer #mixer .strip.out[data-visual="main"] .hd { background: linear-gradient(180deg, #2f7d4f, #1f5f3a) !important; }
+#view-mixer #mixer .strip.out[data-visual="a"] .hd { background: linear-gradient(180deg, #2f5f9e, #234777) !important; }
+#view-mixer #mixer .strip.out[data-visual="b"] .hd { background: linear-gradient(180deg, #6b4fa0, #513a7d) !important; }
+#view-mixer #mixer .pan { height: 20px; flex: none; display: grid; place-items: center; background: transparent; border-bottom: 1px solid #303030; }
+#view-mixer #mixer .pan input { -webkit-appearance: none; appearance: none; width: 74%; height: 4px; background: #191919; border: 1px solid #383838; border-radius: 2px; cursor: pointer; padding: 0; }
+#view-mixer #mixer .pan input::-webkit-slider-thumb { -webkit-appearance: none; width: 11px; height: 11px; border-radius: 50%; background: linear-gradient(180deg, #c9d0d7, #8d959c); border: 1px solid #565f68; }
+#view-mixer #mixer .bd { flex: 1; min-height: 118px; display: flex; align-items: stretch; gap: 4px; padding: 4px; background: transparent; }
+#view-mixer #mixer .bd .col { width: 22px; flex: none; display: flex; flex-direction: column; gap: 3px; }
+#view-mixer #mixer .bd .col button { width: 22px; height: 20px; padding: 0; display: grid; place-items: center; font-size: 9px; background: #303030; border: 1px solid #4a4a4a; border-radius: 3px; color: #d5d5d5; cursor: pointer; }
+#view-mixer #mixer .bd .col button.on { background: #243d55; border-color: #3f6f98; color: #eaf2f8; }
+#view-mixer #mixer .bd .col button.muted { background: #6d1f22; border-color: #a33a3a; color: #f3d9d9; }
+#view-mixer #mixer .bd .col .fw { background: #303030; border-color: #4a4a4a; }
+#view-mixer #mixer .bd .col .fw.lit { background: #173242 !important; border-color: #2f6f98 !important; }
+#view-mixer #mixer .fd { width: 26px; flex: none; position: relative; background: #191919; border: 1px solid #383838; border-radius: 3px; cursor: ns-resize; }
+#view-mixer #mixer .fd i { background: linear-gradient(180deg, #dfe4ea, #aab2ba 55%, #828a92); border: 1px solid #565f68; border-radius: 3px; height: 11px; }
+#view-mixer #mixer .mt { flex: 1 1 5px; min-width: 5px; }
+#view-mixer #mixer .dbchip { flex: none; height: 18px; margin: 0 4px 4px; display: flex; align-items: center; justify-content: center; font: 600 10.5px/1 Consolas, monospace; background: #1b1b1b; border: 1px solid #383838; border-radius: 3px; color: #e0e0e0; }
+#view-mixer #mixer .bt { flex: none; display: flex; gap: 3px; padding: 0 4px 4px; }
+#view-mixer #mixer .bt button { flex: 1; min-width: 0; height: 18px; padding: 0; font: 700 9px/1 'Segoe UI'; background: #303030; border: 1px solid #4a4a4a; border-radius: 3px; color: #d5d5d5; cursor: pointer; }
+#view-mixer #mixer .bt button.on { background: rgba(47,158,95,.2); border-color: #2f9e5f; color: #d9ffe3; }
+

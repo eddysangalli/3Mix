@@ -1,1 +1,408 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FreeMix · Áudio</title><link rel="stylesheet" href="controle.css"><link rel="stylesheet" href="studio-dialog.css"><style>main{max-width:1100px;margin:auto}.audio-grid{display:grid;grid-template-columns:minmax(230px,1fr) minmax(320px,2fr);gap:12px}label{display:block;margin:8px 0}label input,select{max-width:100%;width:100%}.check{display:flex;gap:8px;align-items:center}.check input{width:auto}.filter-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}#sources{padding:0;list-style:none;max-height:340px;overflow:auto}#sources li{padding:7px;border-bottom:1px solid #404b56}#sources button{width:100%;text-align:left}.private{opacity:.6}#message{min-height:1.5em}#connection{margin-left:auto}.audio-member{display:grid;grid-template-columns:auto 1fr 80px;gap:8px;align-items:center}.audio-member input[type=checkbox]{width:auto}#bus-members{max-height:250px;overflow:auto}.routing-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}#routing-console{margin-top:16px}#routing-console section{border:1px solid #404b56;padding:12px}@media(max-width:700px){.audio-grid,.filter-fields,.routing-grid{grid-template-columns:1fr}}#asio-output-console{border:1px solid #404b56;padding:14px;margin-top:16px}.asio-output-row{display:grid;grid-template-columns:minmax(160px,2fr) repeat(3,minmax(70px,1fr)) auto;gap:8px;align-items:end}.asio-output-row input{width:100%;min-width:0}@media(max-width:700px){.asio-output-row{grid-template-columns:1fr 1fr}}</style><link rel="stylesheet" href="menus-tarefas-ui.css"></head><body><header><a href="/">FreeMix</a><h1>Áudio</h1><span id="connection">Carregando…</span></header><main><nav class="task-nav" aria-label="Tarefas de áudio"><a href="#audio-fontes">Áudio das entradas</a><a href="#audio-advanced" data-open-details="audio-advanced">Saídas e dispositivos</a><a href="/settings?category=audio">Formato do projeto</a><a href="/calls">Retorno e talkback das Calls</a></nav><p class="task-intro">1. Escolha a entrada. 2. Defina se o áudio acompanha o vídeo. Use as saídas avançadas quando precisar enviar um mix a um dispositivo.</p><p id="message" role="status"></p><div class="audio-grid" id="audio-fontes"><section><h2>Fontes de áudio</h2><ul id="sources"></ul><p>AFV segue as camadas visíveis no Programa e os overlays. Mudar o mute manualmente desliga o AFV daquela fonte.</p><p>Mic privado, retornos de Calls e barramentos são protegidos.</p></section><section id="editor" hidden><h2 id="source-name"></h2><p id="source-state"></p><label class="check"><input type="checkbox" id="afv"> Áudio segue vídeo (AFV)</label><button id="manual">Alterar mute manualmente</button><details class="task-details"><summary>Atraso e processamento desta entrada</summary><h3>Sincronismo</h3><label>Atraso do áudio (ms)<input id="delay" type="number" min="-950" max="20000" step="1" value="0"></label><button id="save-delay">Aplicar atraso</button><hr><h3>Processamento</h3><label>Filtro<select id="filter"><option value="gain">Ganho</option><option value="gate">Gate de ruído</option><option value="compressor">Compressor</option><option value="limiter">Limiter</option></select></label><p id="filter-status"></p><label class="check"><input id="filter-enabled" type="checkbox"> Filtro ativo</label><div id="filter-fields" class="filter-fields"></div><button id="save-filter">Aplicar filtro</button> <button id="remove-filter">Remover este filtro</button><p id="filter-order"></p></details></section></div><details id="audio-advanced" class="task-details"><summary>Roteamento avançado · submix, WASAPI e ASIO</summary><p>O áudio das entradas é ajustado acima. Aqui você cria mixes separados e escolhe por qual dispositivo saem. Só os botões de aplicar ou iniciar alteram o motor.</p><section id="routing-console"><h2>Barramentos e dispositivos</h2><button id="refresh-devices">Atualizar dispositivos</button><p id="routing-capabilities"></p><div class="routing-grid"><section><h3>Submix independente</h3><p>Até oito mixes estéreo. Criar não envia áudio ao Master. Selecione as fontes e depois uma rota de saída.</p><label>Nome<input id="bus-name" maxlength="40" placeholder="C · Música"></label><button id="bus-create">Criar barramento vazio</button><label>Barramento<select id="bus-select"></select></label><div id="bus-members"></div><button id="bus-save-members">Aplicar fontes e ganhos</button><label>Volume dB<input id="bus-volume" type="number" min="-60" max="12" value="0"></label><button id="bus-save-volume">Aplicar volume</button><div id="bus-routes"></div><button id="bus-save-routes">Aplicar rotas M/A/B</button> <button id="bus-remove">Remover barramento</button></section><section><h3>Direct Out · saída direta</h3><label>Fonte ou submix<select id="direct-source"></select></label><label>Dispositivo WASAPI<select id="direct-device"></select></label><label>Nível<input id="direct-volume" type="number" min="0" max="100" value="80"></label><label>Atraso ms<input id="direct-delay" type="number" min="0" max="2000" value="0"></label><label class="check"><input id="direct-enabled" type="checkbox">Saída direta ativa</label><button id="direct-save">Aplicar saída direta</button><p>A saída física não passa pelo Master. Abra apenas no dispositivo escolhido.</p><hr><h3>Entrada ASIO</h3><label>Driver instalado<select id="asio-device"></select></label><label>Nome da entrada<input id="asio-name" maxlength="40" value="ASIO"></label><label>Canal esquerdo · índice a partir de 0<input id="asio-left" type="number" min="0" max="255" value="0"></label><label>Canal direito · índice a partir de 0<input id="asio-right" type="number" min="0" max="255" value="1"></label><button id="asio-create">Criar captura ASIO</button><p id="asio-status"></p></section></div></section><section id="asio-output-console"><h2>Saída ASIO · canais físicos</h2><p>Escolha uma fonte pública ou um submix independente por par de canais. A saída só abre ao clicar Iniciar. Não envia o mic privado, retorno de Call ou captura de loopback. Os canais começam em 0; dois envios não podem usar o mesmo canal.</p><label>Driver de saída instalado<select id="asio-output-driver"></select></label><label>Buffer em frames · 0 usa o recomendado pelo driver<input id="asio-output-buffer" type="number" min="0" max="8192" value="0"></label><div id="asio-output-routes"></div><button id="asio-output-add">Adicionar rota estéreo</button> <button id="asio-output-configure">Salvar configuração</button> <button id="asio-output-start">Iniciar saída ASIO</button> <button id="asio-output-stop">Parar saída ASIO</button> <button id="asio-output-panel">Painel do driver</button><p id="asio-output-status" role="status"></p><p>A taxa deve ser igual ao áudio do projeto. Mudança de clock, coleção, fonte removida ou buffer inválido para a reprodução com silêncio. ASIO é marca de Steinberg Media Technologies GmbH. Teste físico no seu dispositivo ainda é necessário.</p></section></details></main><script src="audio.js"></script><script src="audio-buses.js"></script><script src="menus-tarefas-ui.js"></script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3Mix Pro · Mixer & Processamento de Áudio Broadcast</title>
+<link rel="stylesheet" href="3mix-tipografia.css">
+<link rel="stylesheet" href="3mix-grafite.css">
+<link rel="stylesheet" href="audio-mixer-workspace.css">
+</head>
+<body class="audio-dialog header-colors" data-tipografia="3mix">
+
+<header class="a-top">
+  <div class="a-brand"><img class="brand-logo" src="/img/3mix-logo.png" alt="3Mix" title="3Mix · Áudio"></div>
+  <nav class="a-modules" aria-label="Módulos 3Mix">
+    <button type="button" class="a-mod" id="nav-mesa" title="Fechar este módulo e voltar à mesa">Mesa</button>
+    <button type="button" class="a-mod active" data-module="audio" aria-current="page">Áudio</button>
+    <button type="button" class="a-mod" data-module="replay" data-route="/replay">Replay</button>
+  </nav>
+  <span class="a-project" id="audio-project" title="Projeto em uso">
+    Projeto: <b id="project-name">Demonstração</b><span class="a-caret" aria-hidden="true">▾</span>
+  </span>
+  <div class="a-top-right">
+    <div class="a-conn" title="Estado da conexão com o motor 3Mix">
+      <span class="engine-status-led" id="status-led"></span>
+      <span id="connection">Motor 3Mix conectado</span>
+    </div>
+    <div class="a-window-btns" aria-label="Controles da janela">
+      <button type="button" class="a-win" disabled title="Controle da janela pelo Windows">–</button>
+      <button type="button" class="a-win" disabled title="Controle da janela pelo Windows">□</button>
+      <button type="button" class="a-win close" id="win-close" title="Fechar janela" aria-label="Fechar janela">×</button>
+    </div>
+  </div>
+</header>
+
+<nav class="a-pagebar" role="tablist" aria-label="Áreas do áudio">
+  <div class="a-page-tabs">
+    <button type="button" class="a-page-tab active" data-view="mixer" role="tab" aria-selected="true">Mixer</button>
+    <button type="button" class="a-page-tab" data-view="routing" role="tab" aria-selected="false">Roteamento</button>
+    <button type="button" class="a-page-tab" data-view="returns" role="tab" aria-selected="false">Retornos / N-1</button>
+    <button type="button" class="a-page-tab" data-view="devices" role="tab" aria-selected="false">Dispositivos</button>
+  </div>
+  <div class="a-page-actions">
+    <span class="pending-count" id="pending-count" hidden>0</span>
+    <span id="apply-hint"></span>
+    <button type="button" id="apply-changes" class="btn-apply" disabled>Aplicar alterações</button>
+    <button type="button" id="discard-changes" class="btn-ghost" hidden>Descartar</button>
+  </div>
+</nav>
+
+<main class="audio-views">
+
+  <!-- ============================= MIXER ============================= -->
+  <section id="view-mixer" class="audio-view selected" role="tabpanel" aria-label="Mixer">
+    <div class="a-mixer">
+      <div class="a-bank-pane">
+        <div class="a-bank-head">
+          <span class="a-bank-title">CANAIS <b id="mixer-input-count">0</b></span>
+          <label class="a-check" title="Liga ou desliga a cor do cabeçalho por categoria">
+            <input type="checkbox" id="header-colors" checked> Cores
+          </label>
+        </div>
+        <div class="a-bank" id="mixer-bank">
+          <div id="audio-input-strips" class="a-strips" aria-label="Canais de entrada"></div>
+        </div>
+      </div>
+
+      <section class="a-outputs" aria-label="Saídas e mestre">
+        <header class="a-outputs-head">
+          <h2>SAÍDAS / MESTRE</h2>
+          <span id="outputs-count">4</span>
+        </header>
+        <div id="audio-output-strips" class="a-outputs-grid"></div>
+      </section>
+
+      <aside id="channel-drawer" class="a-inspector open" aria-hidden="false" aria-label="Inspetor do canal">
+        <header class="a-insp-head">
+          <span id="insp-title">INSPECTOR - —</span>
+          <button type="button" id="drawer-close" class="a-insp-close" title="Fechar inspetor" aria-label="Fechar inspetor">×</button>
+        </header>
+        <div class="a-insp-scroll">
+          <label class="a-field">
+            <span>Nome do canal</span>
+            <input id="insp-name" type="text" readonly title="Nome informado pelo motor; renomear não é exposto pelo painel">
+          </label>
+
+          <label class="a-field">
+            <span>Dispositivo de entrada</span>
+            <div class="a-field-row">
+              <select id="insp-device"></select>
+              <button type="button" id="insp-device-gear" class="a-gear" title="Abrir Dispositivos">⚙</button>
+            </div>
+          </label>
+
+          <div class="a-field">
+            <span>Ganho de entrada</span>
+            <div class="a-knob-line">
+              <div class="a-knob a-knob-lg" data-knob="insp-gain" role="slider" tabindex="0" aria-label="Ganho de entrada" aria-valuemin="-30" aria-valuemax="30" aria-valuenow="0" aria-valuetext="0.0 dB">
+                <span class="a-knob-dial"></span><span class="a-knob-pointer"></span>
+              </div>
+              <input id="insp-gain-value" class="a-chip-input" type="number" min="-30" max="30" step="0.1" value="0" aria-label="Ganho de entrada em dB">
+              <span class="a-unit">dB</span>
+            </div>
+          </div>
+
+          <div class="a-field">
+            <span>Panorama</span>
+            <div class="a-knob-line">
+              <div class="a-knob a-knob-lg" data-knob="insp-pan" role="slider" tabindex="0" aria-label="Panorama" aria-valuemin="-100" aria-valuemax="100" aria-valuenow="0" aria-valuetext="Centro">
+                <span class="a-knob-dial"></span><span class="a-knob-pointer"></span>
+              </div>
+              <button type="button" id="insp-pan-center" class="a-chip-btn">Centro (C)</button>
+            </div>
+          </div>
+
+          <div class="a-field">
+            <span>Delay de entrada</span>
+            <div class="a-knob-line">
+              <div class="a-knob a-knob-lg" data-knob="insp-delay" role="slider" tabindex="0" aria-label="Delay de entrada" aria-valuemin="-950" aria-valuemax="2000" aria-valuenow="0" aria-valuetext="0 ms">
+                <span class="a-knob-dial"></span><span class="a-knob-pointer"></span>
+              </div>
+              <input id="insp-delay-value" class="a-chip-input" type="number" min="-950" max="20000" step="1" value="0" aria-label="Delay de entrada em milissegundos">
+              <button type="button" id="insp-delay-reset" class="a-chip-btn a-commit-btn" title="Zerar o Delay de entrada">0 ms</button>
+            </div>
+          </div>
+
+          <label class="a-field">
+            <span>Destino principal</span>
+            <select id="insp-main">
+              <option value="">Sem destino</option>
+              <option value="M">MAIN</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+            </select>
+          </label>
+
+          <label class="a-field">
+            <span>Notas</span>
+            <textarea id="insp-notes" rows="4" placeholder="Ex: Microfone apresentador"></textarea>
+          </label>
+
+          <details class="a-dsp" id="insp-dsp">
+            <summary>Processamento / DSP</summary>
+            <div class="a-dsp-body">
+              <div class="a-dsp-head"><span>Rack DSP</span><span id="filter-order"></span></div>
+              <div class="a-dsp-row">
+                <select id="filter" class="filter-select">
+                  <option value="eq">EQ 3 bandas (grave/médio/agudo)</option>
+                  <option value="gate">Gate de ruído</option>
+                  <option value="compressor">Compressor</option>
+                  <option value="limiter">Limiter de pico (dBFS)</option>
+                  <option value="rnnoise">Limpeza neural (RNNoise)</option>
+                  <option value="nvidia">Limpeza NVIDIA (RTX / NVAFX)</option>
+                  <option value="expander">Expansor</option>
+                </select>
+                <label class="check-line"><input type="checkbox" id="filter-enabled"><span>Ativo</span></label>
+                <span id="filter-status" class="dsp-status"></span>
+              </div>
+              <div id="filter-fields" class="filter-fields"></div>
+              <div class="dsp-actions">
+                <button type="button" id="open-native-filters" class="btn-hardware" title="Abrir o diálogo nativo de filtros do OBS para este canal (VST 2.x, EQ nativo e outros)">Filtros nativos (VST 2.x)…</button>
+                <button type="button" id="save-filter" class="btn-hardware">Aplicar filtro</button>
+                <button type="button" id="remove-filter" class="btn-hardware danger">Remover filtro</button>
+              </div>
+              <div class="a-presets">
+                <span>Presets</span>
+                <button type="button" class="ai-preset-btn" id="ai-preset-broadcast" title="RNNoise + compressor 3:1 + limiter de proteção">Voz broadcast</button>
+                <button type="button" class="ai-preset-btn" id="ai-preset-rnnoise" title="Redução de ruído neural RNNoise isolada">Limpeza neural</button>
+                <button type="button" class="ai-preset-btn" id="ai-preset-noisy" title="RNNoise + gate para ambientes ruidosos">Ambiente ruidoso</button>
+                <button type="button" class="ai-preset-btn" id="ai-preset-podcast" title="Expansor + compressor suave para voz">Podcast / host</button>
+                <button type="button" class="ai-preset-btn" id="ai-preset-reset" title="Desativar os filtros deste canal">Limpar</button>
+              </div>
+            </div>
+          </details>
+        </div>
+        <p class="a-insp-empty" id="insp-empty" hidden>Selecione um canal no banco para inspecionar.</p>
+      </aside>
+    </div>
+  </section>
+
+  <!-- =========================== ROTEAMENTO =========================== -->
+  <section id="view-routing" class="audio-view sources-hidden" role="tabpanel" aria-label="Roteamento">
+    <section class="panel panel-hero">
+      <header class="panel-head">
+        <h2>Entradas → buses</h2>
+        <span class="panel-status" id="routing-inputs-status">—</span>
+      </header>
+      <p class="panel-note"><b>Para onde vai o áudio de cada canal:</b> M = Master de produção (que alimenta o ar) · A e B = barramentos principais. As marcações ficam pendentes até <b>Aplicar alterações</b>.</p>
+      <div class="table-wrap">
+        <table class="audio-table">
+          <thead>
+            <tr><th>Canal</th><th class="c">M</th><th class="c">A</th><th class="c">B</th><th>Estado</th></tr>
+          </thead>
+          <tbody id="routing-inputs-body"></tbody>
+        </table>
+      </div>
+      <p class="panel-note">Rotas combinadas aparecem como <code>M · B</code> no estado. Desmarque tudo para tirar o canal do ar.</p>
+    </section>
+
+    <details class="a-acc" id="buses-acc">
+      <summary>
+        <span class="a-acc-arrow" aria-hidden="true"></span>
+        <h2>Barramentos independentes</h2>
+        <span class="a-acc-count" id="buses-count">—</span>
+        <span class="a-acc-hint">crie um bus extra só quando precisar de outra mistura</span>
+      </summary>
+      <div class="a-acc-body">
+        <section class="panel panel-buses">
+          <header class="panel-head">
+            <h2>Criar e editar buses</h2>
+            <span class="panel-status" id="bus-status">—</span>
+          </header>
+          <div class="bus-create-row">
+            <input id="bus-name" maxlength="40" placeholder="Ex: Aux C · Tradução" aria-label="Nome do novo barramento">
+            <button type="button" id="bus-create" class="btn-hardware">+ Criar bus</button>
+          </div>
+          <div class="bus-picker">
+            <label>Barramento <select id="bus-select"></select></label>
+            <button type="button" id="bus-remove" class="btn-hardware danger">Excluir</button>
+          </div>
+          <div id="bus-members" class="bus-members" aria-label="Fontes do barramento"></div>
+          <div class="bus-controls">
+            <label class="field">Volume
+              <span class="inline"><input id="bus-volume" type="number" min="-60" max="12" step="0.5" value="0"><span class="field-unit">dB</span></span>
+            </label>
+            <div id="bus-routes" class="bus-routes" aria-label="Rotas do barramento"></div>
+          </div>
+          <p class="panel-note">Membros, volume e rotas são aplicados junto com as demais pendências.</p>
+        </section>
+      </div>
+    </details>
+
+    <section class="panel panel-physical">
+      <header class="panel-head">
+        <h2>Saídas físicas</h2>
+        <div class="panel-head-actions">
+          <span class="panel-status" id="routing-capabilities"></span>
+          <label class="a-check" title="Mostra também as saídas por fonte, sem precisar abrir a lista">
+            <input type="checkbox" id="show-physical-all"> Mostrar todas as saídas
+          </label>
+          <button type="button" id="refresh-devices" class="btn-hardware">Consultar dispositivos</button>
+        </div>
+      </header>
+      <p class="panel-note"><b>Manda uma mistura para o hardware do computador:</b> monitoração no estúdio, duplicação para gravação ou N-1 para o repórter. O Master de produção vai ao ar independente disto.</p>
+      <button type="button" class="acc-bar" id="physical-toggle" aria-expanded="false">
+        <span class="a-acc-arrow" aria-hidden="true"></span>
+        <b>Saídas físicas por fonte <span id="physical-source-count">(0)</span></b>
+        <span class="a-acc-hint">salidas individuais por canal — fechadas por padrão</span>
+      </button>
+      <div class="table-wrap tall">
+        <table class="audio-table">
+          <thead>
+            <tr>
+              <th style="width:210px">Destino</th>
+              <th>Interface física</th>
+              <th style="width:92px">Canal</th>
+              <th style="width:96px">Nível (dB)</th>
+              <th style="width:88px">Atraso (ms)</th>
+              <th class="c" style="width:64px">Ativo</th>
+              <th style="width:150px">Estado</th>
+            </tr>
+          </thead>
+          <tbody id="routing-outputs-body"></tbody>
+        </table>
+      </div>
+      <p class="panel-note">Master de produção alimenta encoder e gravação; uma saída física local é monitoramento/duplicação e não é pré-requisito para o áudio ir ao ar.</p>
+    </section>
+
+    <details class="a-acc" id="asio-acc">
+      <summary>
+        <span class="a-acc-arrow" aria-hidden="true"></span>
+        <h2>ASIO avançado</h2>
+        <span class="a-acc-hint">rotas multicanal e captação por driver ASIO — para placas profissionais</span>
+      </summary>
+      <div class="a-acc-body">
+        <section class="panel panel-asio">
+          <header class="panel-head">
+            <h2>ASIO multicanal</h2>
+            <span class="panel-status" id="asio-output-status">—</span>
+          </header>
+          <div class="asio-grid">
+            <div class="asio-col">
+              <h3>Saída ASIO</h3>
+              <label class="field">Driver <select id="asio-output-driver"></select></label>
+              <label class="field buffer">Buffer
+                <span class="inline"><input id="asio-output-buffer" type="number" min="0" max="8192" step="16" value="0"><span class="field-unit">frames (0 = auto)</span></span>
+              </label>
+              <div id="asio-output-routes" class="asio-routes"></div>
+              <div class="asio-actions">
+                <button type="button" id="asio-output-add" class="btn-hardware">+ Rota estéreo</button>
+                <button type="button" id="asio-output-start" class="btn-hardware success">Iniciar</button>
+                <button type="button" id="asio-output-stop" class="btn-hardware danger">Parar</button>
+                <button type="button" id="asio-output-panel" class="btn-hardware">Painel do driver</button>
+              </div>
+            </div>
+            <div class="asio-col">
+              <h3>Entrada ASIO (captura)</h3>
+              <label class="field">Driver <select id="asio-device"></select></label>
+              <label class="field">Nome <input id="asio-name" maxlength="40" value="ASIO Mic"></label>
+              <label class="field">Canais L / R
+                <span class="inline"><input id="asio-left" type="number" min="0" max="255" value="0"><input id="asio-right" type="number" min="0" max="255" value="1"></span>
+              </label>
+              <div class="asio-actions">
+                <button type="button" id="asio-create" class="btn-hardware">+ Criar entrada ASIO</button>
+              </div>
+              <span id="asio-status" class="asio-status"></span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </details>
+  </section>
+
+  <!-- ========================= RETORNOS / N-1 ======================== -->
+  <section id="view-returns" class="audio-view" role="tabpanel" aria-label="Retornos e N-1">
+    <div class="returns-head">
+      <div>
+        <h2>Retornos e N-1</h2>
+        <p>Mistura enviada ao repórter, com a fonte dele excluída. Edite e confirme em <b>Aplicar alterações</b>.</p>
+        <p class="panel-note">N-1 em hardware: crie um barramento independente em <b>Roteamento</b> com as fontes do PGM exceto o repórter e roteie esse bus em <b>Saídas físicas</b>.</p>
+      </div>
+      <span class="as-flag" id="returns-availability">—</span>
+    </div>
+    <div id="returns-list" class="returns-list"></div>
+    <section class="panel">
+      <header class="panel-head">
+        <h2>Retornos internos do motor</h2>
+        <span class="panel-status" id="returns-internal-count">0</span>
+      </header>
+      <ul id="returns-internal" class="internal-list"></ul>
+      <p class="panel-note">Canais <code>FreeMix N1</code> e <code>FreeMix Retorno</code> são criados pelo motor para as Calls. A mixagem por convidado pertence à central Calls; aqui eles aparecem para conferência, sem controle duplicado.</p>
+    </section>
+  </section>
+
+  <!-- =========================== DISPOSITIVOS ========================= -->
+  <section id="view-devices" class="audio-view" role="tabpanel" aria-label="Dispositivos">
+    <div class="devices-status">
+      <div class="devices-state">
+        <span class="op-led" id="devices-state-led"></span>
+        <div>
+          <strong id="devices-state">Dispositivos ainda não consultados</strong>
+          <span id="devices-time">A consulta abre o inventário WASAPI e ASIO no motor.</span>
+        </div>
+      </div>
+      <button type="button" id="devices-refresh" class="btn-hardware">Consultar dispositivos</button>
+    </div>
+
+    <section class="panel">
+      <header class="panel-head"><h2>Interfaces de reprodução (WASAPI)</h2><span class="panel-status" id="devices-render-count">—</span></header>
+      <div class="table-wrap">
+        <table class="audio-table">
+          <thead>
+            <tr><th>Interface</th><th>Driver</th><th>Canais</th><th>Taxa</th><th>Buffer</th><th>Uso atual</th></tr>
+          </thead>
+          <tbody id="devices-render-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <header class="panel-head"><h2>Drivers ASIO</h2><span class="panel-status" id="devices-asio-count">—</span></header>
+      <div class="table-wrap">
+        <table class="audio-table">
+          <thead>
+            <tr><th>Driver</th><th>Tipo</th><th>Canais</th><th>Taxa</th><th>Buffer</th><th>Disponibilidade</th></tr>
+          </thead>
+          <tbody id="devices-asio-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <header class="panel-head"><h2>Saída ASIO em operação</h2><span class="panel-status" id="devices-asio-state-status">—</span></header>
+      <div id="devices-asio-state" class="devices-asio-state"></div>
+    </section>
+
+    <section class="panel">
+      <header class="panel-head"><h2>Formato do projeto e limitações reais</h2></header>
+      <div id="devices-format" class="devices-format"></div>
+      <ul id="devices-limitations" class="limitations-list"></ul>
+    </section>
+  </section>
+
+</main>
+
+<footer class="a-footer">
+  <span class="a-foot-brand">3Mix Áudio <small>v1.0.0</small></span>
+  <span class="a-foot-sep"></span>
+  <span class="a-foot-item">Projeto: <b id="footer-project">—</b><button type="button" class="a-foot-edit" disabled title="Renomear projeto não é exposto pelo painel">✎</button></span>
+  <span class="a-foot-sep"></span>
+  <span class="a-foot-item">Taxa <b id="footer-rate">—</b></span>
+  <span class="a-foot-sep"></span>
+  <span class="a-foot-item">Buffer: <b id="footer-buffer">—</b></span>
+  <span class="a-foot-sep"></span>
+  <span class="a-foot-device"><span class="op-led" id="operation-led" data-tone="off"></span> Dispositivo de áudio: <b id="footer-device">—</b></span>
+  <span id="message" class="sr-only" aria-live="polite"></span>
+  <button type="button" id="close-btn" class="a-close" onclick="window.FreeMixClosePanel ? window.FreeMixClosePanel() : (window.close ? window.close() : null)">Fechar</button>
+</footer>
+
+<div id="audio-toast" class="audio-toast" role="status" aria-live="polite" hidden></div>
+
+<script src="fechar-janela.js"></script>
+<script src="audio.js"></script>
+<script src="audio-buses.js"></script>
+<script src="workspace-nav.js"></script>
+<script src="audio-mixer-workspace.js"></script>
+</body>
+</html>

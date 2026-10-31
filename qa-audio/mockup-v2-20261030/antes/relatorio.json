@@ -1,0 +1,124 @@
+{
+  "at": "2026-10-30T23:03:42.135Z",
+  "base": "http://127.0.0.1:8791/audio.html",
+  "sizes": [
+    {
+      "name": "1280x800",
+      "width": 1280,
+      "height": 800,
+      "viewport": [
+        1280,
+        800
+      ],
+      "docScrollWidth": 1280,
+      "docClientWidth": 1280,
+      "bank": [
+        562,
+        599
+      ],
+      "outputs": [
+        582,
+        370,
+        634
+      ],
+      "inspector": [
+        962,
+        308,
+        634
+      ],
+      "footerBottom": 800,
+      "strip": [
+        136,
+        581
+      ],
+      "fader": [
+        30,
+        247,
+        606
+      ],
+      "strips": 11,
+      "outs": 4,
+      "inspectorTitle": "INSPECTOR - VT áudio",
+      "colors": true
+    },
+    {
+      "name": "1440x900",
+      "width": 1440,
+      "height": 900,
+      "viewport": [
+        1440,
+        900
+      ],
+      "docScrollWidth": 1440,
+      "docClientWidth": 1440,
+      "bank": [
+        702,
+        699
+      ],
+      "outputs": [
+        722,
+        378,
+        734
+      ],
+      "inspector": [
+        1110,
+        320,
+        734
+      ],
+      "footerBottom": 900,
+      "strip": [
+        142,
+        681
+      ],
+      "fader": [
+        30,
+        347,
+        706
+      ],
+      "strips": 11,
+      "outs": 4,
+      "inspectorTitle": "INSPECTOR - VT áudio",
+      "colors": true
+    },
+    {
+      "name": "1600x1000",
+      "width": 1600,
+      "height": 1000,
+      "viewport": [
+        1600,
+        1000
+      ],
+      "docScrollWidth": 1600,
+      "docClientWidth": 1600,
+      "bank": [
+        830,
+        799
+      ],
+      "outputs": [
+        850,
+        394,
+        834
+      ],
+      "inspector": [
+        1254,
+        336,
+        834
+      ],
+      "footerBottom": 1000,
+      "strip": [
+        146,
+        781
+      ],
+      "fader": [
+        30,
+        447,
+        806
+      ],
+      "strips": 11,
+      "outs": 4,
+      "inspectorTitle": "INSPECTOR - VT áudio",
+      "colors": true
+    }
+  ],
+  "consoleErrors": []
+}

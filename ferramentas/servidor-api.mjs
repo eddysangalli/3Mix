@@ -1,6 +1,7 @@
 import {createProjectHttpDispatcher,readProjectBody,admitProjectNativeEvent,admitProjectSocketMessage} from './projetos/runtime-admission.mjs';
 import {readOutputsSnapshot} from './read-outputs-snapshot.mjs';
 import {handleSettingsRead} from './settings-read-http.mjs';
+import {handleWorkspaceRequest} from './workspace-config.mjs';
 import {TickerAckBroker,readTickerAckRequest} from './gtzip-ticker-ack.mjs';
 // FreeMix control bridge. Commands use confirmed production operations.
 import { createServer } from 'node:http';
@@ -19,6 +20,11 @@ import { OnlineUpdateEngine } from './atualizacao-online.mjs';
 import { DiagnosticCollector } from './diagnostico-producao.mjs';
 import { readDiagnosticZip } from './diagnostico-zip.mjs';
 import {servePreviewMedia} from './midia-preview-http.mjs';
+import { InputHealthEngine } from './telemetria-saude.mjs';
+import { OutputWatchdogEngine } from './saidas-watchdog.mjs';
+import { MultiViewEngine } from './multiview-engine.mjs';
+import { AuxOutputRouter } from './aux-output-router.mjs';
+import { VmixTcpServer } from './vmix-tcp-api.mjs';
 
 const ROOT=process.env.FREEMIX_ROOT||fileURLToPath(new URL('../',import.meta.url));
 const PANEL=process.env.FREEMIX_PANEL_DIR||join(ROOT,'painel'), PORT=Number(process.env.FREEMIX_API_PORT||8088);
@@ -32,15 +38,44 @@ await mkdir(accessDir,{recursive:true});await writeFile(join(accessDir,'acesso.j
 let obs=null,reconnectTimer=null,stopping=false,connecting=false,connectionGeneration=0,connectionReady=false,pollingGeneration=null;
 const connectionErrors={};
 function connectionError(component,error){const message=String(error?.message||error).replace(/(password|key|secret|token)\s*[:=]\s*[^\s,]+/gi,'$1=[omitido]').slice(0,500),previous=connectionErrors[component];connectionErrors[component]={message,at:Date.now()};if(previous?.message!==message||Date.now()-previous.at>30000)console.error(`FreeMix: ${component}: ${message}`);}
+// Errors shown to the operator use the 3Mix page, never the browser's default error screen.
+const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function sendErrorPage(res,status,requestUrl,detail){
+  try{
+    const template=await readFile(join(ROOT,'ferramentas','pagina-erro.html'),'utf8');
+    const page=template.replace(/%%ERROR_URL%%/g,escapeHtml(requestUrl)).replace(/%%ERROR_CODE%%/g,escapeHtml(detail));
+    res.writeHead(status,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});
+    res.end(page);
+  }catch(e){
+    res.writeHead(status,{'Content-Type':'text/plain; charset=utf-8','Cache-Control':'no-store'});
+    res.end('3Mix: '+(detail||'página indisponível')+'\n'+String(requestUrl||''));
+  }
+}
+const wantsHtml=req=>String(req.headers?.accept||'').includes('text/html');
 function scheduleConnection(){if(!stopping&&!reconnectTimer)reconnectTimer=setTimeout(()=>{reconnectTimer=null;startConnection();},2000);}
 const clients=new Set();
-const broadcast=msg=>{const s=JSON.stringify(msg);for(const c of clients)if(c.readyState===WebSocket.OPEN)c.send(s);};
+const broadcast=msg=>{const s=JSON.stringify(msg);for(const c of clients)if(c.readyState===WebSocket.OPEN)c.send(s);if(msg?.type==='state'&&typeof vmixTcp!=='undefined')vmixTcp.notifyTallyChange();};
 const production=new Production({root:ROOT,panel:PANEL,getObs:()=>obs,publish:data=>broadcast({type:'state',data:clean(data)})});
 production.gtTickerAck=new TickerAckBroker({endpoint:'http://127.0.0.1:'+PORT+'/api/ticker-ack'});
 const onlineUpdate=new OnlineUpdateEngine(ROOT);
 const diagnostics=new DiagnosticCollector(ROOT);
 const replay=new DiskReplay({root:ROOT,getObs:()=>obs,onChange:data=>broadcast({type:'replay_state',data})});
 const iso=new DiskReplay({root:ROOT,getObs:()=>obs,filter:'Gravação ISO',namespace:'freemix-iso',recordingFolder:'iso',onChange:data=>broadcast({type:'iso_state',data})});
+const inputHealth=new InputHealthEngine();
+const outputWatchdog=new OutputWatchdogEngine();
+const multiviewEngine=new MultiViewEngine();
+production.inputHealth=inputHealth;
+production.outputWatchdog=outputWatchdog;
+production.multiviewEngine=multiviewEngine;
+const auxOutputRouter=new AuxOutputRouter({root:ROOT});
+await auxOutputRouter.load().catch(()=>{});
+auxOutputRouter.on('aux_source_change',data=>broadcast({type:'aux_source_change',data}));
+auxOutputRouter.on('aux_cut',data=>broadcast({type:'aux_cut',data}));
+auxOutputRouter.on('output_routed',data=>broadcast({type:'output_routed',data}));
+production.auxOutputRouter=auxOutputRouter;
+const TCP_PORT=Number(process.env.FREEMIX_VMIX_TCP_PORT||8099);
+const vmixTcp=new VmixTcpServer({production,vmixHandler:vmix,port:TCP_PORT,host:process.env.FREEMIX_VMIX_TCP_HOST||'0.0.0.0'});
+if(process.env.FREEMIX_ENABLE_VMIX_TCP!=='0'){vmixTcp.start().then(()=>{console.log(`FreeMix: vMix TCP Server ativo na porta ${TCP_PORT}.`);}).catch(err=>{console.warn(`FreeMix: Falha ao iniciar vMix TCP na porta ${TCP_PORT}: ${err.message}`);});}
 const projectBinding=production.installProjectHost({replay,iso,onlineUpdate,diagnostics});
 production.recoveryEngine.guard=()=>!!(replay.state.rec||iso.state.rec||production.callEngine.returns.timer);
 
@@ -51,7 +86,7 @@ function publicOperation(receipt){
   return {id,action,scope,targetKey,targetName,receivedAt,startedAt,engineConfirmedAt,finishedAt,stage,...(receipt.confirmation?{confirmation:receipt.confirmation,reconciledAt:receipt.reconciledAt,originalStage:receipt.originalStage}:{}),...(replayed!==undefined?{replayed}:{}),...(error?{error}: {})};
 }
 
-const clean=(s=production.state)=>({...s,operation:publicOperation(s.operation),operationReceipts:(s.operationReceipts||[]).map(publicOperation).filter(Boolean),replay:replay.state,iso:iso.state,ips:ips()});
+const clean=(s=production.state)=>({...s,operation:publicOperation(s.operation),operationReceipts:(s.operationReceipts||[]).map(publicOperation).filter(Boolean),replay:replay.state,iso:iso.state,ips:ips(),inputHealth:typeof inputHealth?.getSummary==='function'?inputHealth.getSummary():{},outputWatchdog:typeof outputWatchdog?.getSummary==='function'?outputWatchdog.getSummary():{},multiview:typeof multiviewEngine?.getMultiviewSnapshot==='function'?multiviewEngine.getMultiviewSnapshot():{},auxMatrix:typeof auxOutputRouter?.getRoutingMatrix==='function'?auxOutputRouter.getRoutingMatrix():{}});
 function originAllowed(req){
   const o=req.headers.origin;if(!o)return true;if(o==='null')return local(req);
   try{return new URL(o).host===req.headers.host;}catch{return false;}
@@ -67,7 +102,7 @@ async function startConnection(){
   if(stopping||obs||connecting||projectBinding.gate.shouldSkipBackground())return;connecting=true;const generation=++connectionGeneration;let candidate=null;
   try{
     const connected=projectBinding.wrapConnection(await connect({root:ROOT,events:1|2|4|8|16|64|128|256|512|65536,
-      onEvent:(type,data)=>{if(generation!==connectionGeneration)return;if(!projectBinding.gate.acceptNativeEvent(type))return;if(type==='ExitStarted'){production.sessionRecovery.finish('normal').catch(()=>{});return;}if(type==='VendorEvent'&&data.vendorName==='freemix-hotkeys'){if(data.eventType==='hotkey')production.globalHotkeys.event(data.eventData);if(data.eventType==='bindings_reset')production.globalHotkeys.disconnected();return;}production.sessionRecovery.onNativeEvent(type,data);if(type==='CurrentProgramSceneChanged'&&obs)replay.onProgramChanged(data.sceneName)?.catch(e=>connectionError('replay-autoplay',e));if(type==='InputVolumeMeters'){production.onMeters(data.inputs);broadcast({type:'meters',inputs:data.inputs});}},
+      onEvent:(type,data)=>{try{if(generation!==connectionGeneration)return;if(!projectBinding.gate.acceptNativeEvent(type))return;if(type==='ExitStarted'){production.sessionRecovery.finish('normal').catch(()=>{});return;}if(type==='VendorEvent'&&data.vendorName==='freemix-hotkeys'){if(data.eventType==='hotkey')production.globalHotkeys.event(data.eventData);if(data.eventType==='bindings_reset')production.globalHotkeys.disconnected();return;}if(type==='MediaInputPlaybackEnded'){try{production.rundownEngine?.onNativeEvent?.(type,data);}catch(error){console.error('3Mix: rundown-event: '+error.message);}}production.sessionRecovery.onNativeEvent(type,data);if(type==='CurrentProgramSceneChanged'&&obs)replay.onProgramChanged(data.sceneName)?.catch(e=>connectionError('replay-autoplay',e));if(type==='InputVolumeMeters'){production.onMeters(data.inputs);broadcast({type:'meters',inputs:data.inputs});}}catch(e){connectionError('native-event',e);}},
       onClose:()=>{if(generation!==connectionGeneration)return;connectionGeneration++;obs=null;connectionReady=false;production.disconnected();scheduleConnection();}}));
     candidate=connected;if(stopping||generation!==connectionGeneration){connected.close();return;}obs=connected;
     const motor=(await connected.req('CallVendorRequest',{vendorName:'freemix',requestType:'get_interface',requestData:{}})).responseData;
@@ -82,6 +117,13 @@ async function startConnection(){
 async function vmix(fn,p){
   const get=k=>p.get(k)??p.get(k.toLowerCase()),input=get('Input'),value=get('Value'),name=String(fn).toLowerCase();let action,data={input};
   if(['cut','fade','previewinput','activeinput','cutdirect'].includes(name)){action={previewinput:'preview',activeinput:'active',cutdirect:'active'}[name]||name;data.duration=get('Duration')??500;}
+  else if(name==='fadetoblack'){action='ftb';}
+  else if(['playouttake','takenext'].includes(name)){action='playout_take';data={itemId:get('ItemId')||undefined};}
+  else if(name==='playoutnext'){action='playout_next';}
+  else if(['playoutprevious','playoutprev'].includes(name)){action='playout_previous';}
+  else if(['playoutclipgain','adjustgain'].includes(name)){action='playout_item_update';data={itemId:get('ItemId')||production.playoutEngine?.state?.program?.item?.id,audioGainDb:Number(value??get('Gain')??0)};}
+  else if(name==='preflightcheck'){action='preflight_check';}
+  else if(name==='blackboxmark'){action='blackbox_mark';data={note:get('Note')||'Marcação via vMix API'};}
   else if(name==='setvolume'){action='audio_volume';data.volume=value;}
   else if(['audio','audioon','audiooff','masteraudio','setmastervolume'].includes(name)){action=name==='setmastervolume'?'audio_volume':'audio_mute';if(name.startsWith('master')||name==='setmastervolume')data.input='M';if(name==='audioon')data.muted=false;if(name==='audiooff')data.muted=true;data.volume=value;}
   else if(['startrecording','stoprecording','startstreaming','stopstreaming'].includes(name)){action=name.endsWith('recording')?'record':'stream';data.active=name.startsWith('start');}
@@ -97,7 +139,7 @@ async function vmix(fn,p){
   }else throw new Error('Comando não implementado: '+fn);
   await production.run(action,data);
 }
-const routes={'/novo-projeto/':'novo-projeto/index','/':'hub','/hub':'hub','/corte':'corte','/playout':'playout','/gc-html':'gc-html','/gc':'gc','/audio':'audio','/replay':'replay','/iso':'iso','/multicorder':'multicorder','/dados':'dados','/compor':'compor','/settings':'settings','/configuracoes':'configuracoes','/calls':'calls','/macros':'macros','/recuperacao':'recuperacao','/saidas':'saidas','/externo':'externo','/gravar':'gravar','/transmitir':'transmitir','/srt-hdr':'srt-hdr','/rede':'rede','/atalhos':'atalhos','/efeitos':'efeitos','/sinais':'sinais','/atualizacao':'atualizacao','/diagnosticos':'diagnosticos'};
+const routes={'/novo-projeto/':'novo-projeto/index','/':'hub','/hub':'hub','/corte':'corte','/playout':'playout','/playout-monitor':'playout-monitor','/gc-html':'gc-html','/gc':'gc','/audio':'audio','/replay':'replay','/iso':'iso','/multicorder':'multicorder','/dados':'dados','/compor':'compor','/settings':'settings','/configuracoes':'configuracoes','/calls':'calls','/macros':'macros','/recuperacao':'recuperacao','/saidas':'saidas','/externo':'externo','/gravar':'gravar','/transmitir':'transmitir','/srt-hdr':'srt-hdr','/rede':'rede','/atalhos':'atalhos','/efeitos':'efeitos','/sinais':'sinais','/atualizacao':'atualizacao','/diagnosticos':'diagnosticos','/overlays':'overlays','/multiview':'multiview','/aux':'aux','/rundown':'rundown','/retornos':'retornos','/blackbox':'blackbox','/preflight':'preflight','/modular':'modular'};
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.gif':'image/gif','.jpg':'image/jpeg','.webp':'image/webp','.bmp':'image/bmp','.woff2':'font/woff2','.woff':'font/woff','.ttf':'font/ttf','.otf':'font/otf','.json':'application/json'};
 
 function controlReceipt(request){
@@ -118,7 +160,7 @@ async function handleHttp(req,res){
     if(originAllowed(req)&&req.headers.origin){res.setHeader('Access-Control-Allow-Origin',req.headers.origin);res.setHeader('Vary','Origin');res.setHeader('Access-Control-Allow-Headers','Content-Type, Authorization');res.setHeader('Access-Control-Allow-Methods','GET, POST, OPTIONS');}
     if(path==='/api/health'){
       if(!local(req)||!originAllowed(req))return json(res,403,{success:false});
-      return json(res,200,{success:true,app:'FreeMix',protocol:1,installationId,pid:process.pid,connected:!!obs&&connectionReady&&production.state.connected===true,projectTransaction:projectBinding.gate.status(),transportConnected:!!obs,connectionErrors,port:PORT});
+      return json(res,200,{success:true,app:'FreeMix',brand:'3Mix',appName:'3Mix',protocol:1,installationId,pid:process.pid,connected:!!obs&&connectionReady&&production.state.connected===true,projectTransaction:projectBinding.gate.status(),transportConnected:!!obs,connectionErrors,port:PORT});
     }
     if(req.method==='OPTIONS'){res.writeHead(originAllowed(req)?204:403).end();return;}
     if(path==='/api/pair'&&req.method==='POST'){
@@ -135,6 +177,7 @@ async function handleHttp(req,res){
     }
     if(path.startsWith('/api/')||path==='/api'||path==='/ws'){
       if(!authorized(req))return json(res,401,{success:false,error:'Autorize este dispositivo com o código do computador FreeMix'});
+      if(await handleWorkspaceRequest({path,req,res,root:ROOT,local,body,json,production}))return;
       if(path.startsWith('/api/replay-preview/')){
         if(!local(req))return json(res,403,{success:false,error:'Prévia do histórico disponível somente neste computador'});
         if(!['GET','HEAD'].includes(req.method)){res.setHeader('Allow','GET, HEAD');return json(res,405,{success:false,error:'Método inválido'});}
@@ -191,11 +234,153 @@ async function handleHttp(req,res){
       if(path==='/api/network'&&req.method==='GET'){if(!local(req))return json(res,403,{success:false,error:'Rede disponível somente neste computador'});return json(res,200,await production.networkEngine.read());}
       if(path==='/api/gc-compatible'&&req.method==='GET'){if(!local(req))return json(res,403,{success:false,error:'Editor HTML apenas local'});return json(res,200,{success:true,gcCompatible:await production.gcCompatible.summary()});}
       if((path==='/gc-html'||path==='/gc-html.html')&&!local(req))return json(res,403,{success:false,error:'Editor HTML apenas local'});
-      if(path==='/api/control'&&req.method==='POST'){const d=await body(req);if(String(d.action).startsWith('update_')){if(!local(req))return json(res,403,{success:false,error:'Atualização disponível somente neste computador'});await onlineUpdate.execute(d.action,d);return json(res,200,{success:true,state:clean(),update:onlineUpdate.last});}if((String(d.action).startsWith('gc_html_')||d.action==='data_file'||['gc_library_save','gc_library_duplicate','gc_library_remove','gc_library_import','gc_library_export','gc_library_asset','gc_library_variant','gc_library_unlink','gc_library_clock_restart'].includes(d.action)||String(d.action).startsWith('settings_')||String(d.action).startsWith('call_')||String(d.action).startsWith('recovery_')||(String(d.action).startsWith('macro_')&&!['macro_run','macro_cancel'].includes(d.action))||String(d.action).startsWith('outputs_')||String(d.action).startsWith('network_')||String(d.action).startsWith('audio_routing_')||String(d.action).startsWith('effects_')||d.action==='signal_configure'||['controller_save','controller_remove','controller_enable','controller_osc_configure','controller_osc_start','controller_osc_stop'].includes(d.action))&&!local(req))return json(res,403,{success:false,error:'Configuração local só no computador do FreeMix'});controlOperation={id:d.operationId,scope:d.expectedScope};const state=await production.run(d.action,d);return json(res,200,{success:true,state:clean(state),...(String(d.action).startsWith('effects_')?{effects:production.effectsResult}:{}),...(String(d.action).startsWith('signal_')?{signals:production.signalEngine.last}:{}),...(String(d.action).startsWith('call_')?{call:production.callResult}:{}),...(String(d.action).startsWith('gc_html_')?{gcCompatible:{last:production.gcCompatible.last}}:{}),...(String(d.action).startsWith('gc_library_')?{gcLibrary:production.gcLibrary.last}:{}),...(String(d.action).startsWith('audio_routing_')?{audioRouting:production.audioRoutingEngine.last}: {}),...(String(d.action).startsWith('settings_')?{settings:production.settingsEngine.last}: {}),...(String(d.action).startsWith('recovery_')?{recovery:production.recoveryResult}: {}),...(String(d.action).startsWith('outputs_')?{outputs:production.outputEngine.last}: {}),...(String(d.action).startsWith('network_')?{network:production.networkEngine.last}: {}),...(String(d.action).startsWith('controller_')?{controllers:production.controllerEngine.last}: {})});}
+      if(path==='/api/control'&&req.method==='POST'){const d=await body(req);if(String(d.action).startsWith('update_')){if(!local(req))return json(res,403,{success:false,error:'Atualização disponível somente neste computador'});await onlineUpdate.execute(d.action,d);return json(res,200,{success:true,state:clean(),update:onlineUpdate.last});}if((String(d.action).startsWith('gc_html_')||d.action==='data_file'||['gc_library_save','gc_library_duplicate','gc_library_remove','gc_library_import','gc_library_export','gc_library_asset','gc_library_variant','gc_library_unlink','gc_library_clock_restart'].includes(d.action)||String(d.action).startsWith('settings_')||String(d.action).startsWith('call_')||String(d.action).startsWith('recovery_')||(String(d.action).startsWith('macro_')&&!['macro_run','macro_cancel'].includes(d.action))||String(d.action).startsWith('outputs_')||String(d.action).startsWith('network_')||String(d.action).startsWith('audio_routing_')||String(d.action).startsWith('effects_')||d.action==='signal_configure'||['controller_save','controller_remove','controller_enable','controller_osc_configure','controller_osc_start','controller_osc_stop'].includes(d.action))&&!local(req))return json(res,403,{success:false,error:'Configuração local só no computador do FreeMix'});controlOperation={id:d.operationId,scope:d.expectedScope};const state=await production.run(d.action,d);return json(res,200,{success:true,state:clean(state),...(String(d.action).startsWith('effects_')?{effects:production.effectsResult}:{}),...(String(d.action).startsWith('signal_')?{signals:production.signalEngine.last}:{}),...(String(d.action).startsWith('call_')?{call:production.callResult}:{}),...(String(d.action).startsWith('gc_html_')?{gcCompatible:{last:production.gcCompatible.last}}:{}),...(String(d.action).startsWith('gc_library_')?{gcLibrary:production.gcLibrary.last}:{}),...(String(d.action).startsWith('audio_routing_')?{audioRouting:production.audioRoutingEngine.last}: {}),...(String(d.action).startsWith('settings_')?{settings:production.settingsEngine.last}: {}),...(String(d.action).startsWith('recovery_')?{recovery:production.recoveryResult}: {}),...(String(d.action).startsWith('outputs_')?{outputs:production.outputEngine.last}: {}),...(String(d.action).startsWith('network_')?{network:production.networkEngine.last}: {}),...(String(d.action).startsWith('controller_')?{controllers:production.controllerEngine.last}: {}),...(String(d.action).startsWith('overlay_')?{overlays:production.overlayResult||production.overlayEngine.summary()}:{})});}
+      if(path==='/api/overlays'){if(req.method==='GET')return json(res,200,{success:true,...production.overlayEngine.summary(),inputs:production.state.inputs.map(i=>i.name)});if(req.method==='POST'){const d=await body(req);const result=await production.overlayEngine.execute(d.action,d);return json(res,200,{success:true,result,...production.overlayEngine.summary()});}return json(res,405,{success:false});}
       if(path==='/api/replay'){if(!['GET','POST'].includes(req.method))return json(res,405,{success:false});const d=req.method==='POST'?await body(req):{};const result=await replay.command(req.method==='GET'?'status':d.action,d);return json(res,200,{success:true,replay:result});}
+      if(path==='/api/playout'){if(!['GET','POST'].includes(req.method))return json(res,405,{success:false});const d=req.method==='POST'?await body(req):{};if(req.method==='POST'&&!local(req))return json(res,403,{success:false,error:'Controle de playout só no computador do FreeMix'});const result=req.method==='GET'?production.playoutEngine.summary():await production.playoutEngine.execute(d.action||'playout_take',d);return json(res,200,{success:true,playout:result});}
       // A page shown in a window of the program asks for that window to be closed (it cannot close itself).
-    if(path==='/api/panel-open'){if(req.method!=='POST')return json(res,405,{success:false});if(!local(req))return json(res,403,{success:false,error:'Só no computador do FreeMix'});const d=await body(req),known={'/transmitir':['Configurações de streaming',700,445],'/gravar':['Configuração de gravação',700,300],'/externo':['Saídas externas',700,540],'/multicorder':['MultiGravação',700,540],'/calls':['Chamada de Vídeo',700,540],'/replay?view=settings#replay-config':['Configurações do Replay',700,540],'/configuracoes':['Configurações',760,540],'/audio':['Áudio · AFV e filtros'],'/atalhos':['Atalhos'],'/':['FreeMix']}[String(d.route)];if(!known)return json(res,400,{success:false,error:'Janela desconhecida'});const [title,width,height]=known;const r=await production.optional('CallVendorRequest',{vendorName:'freemix',requestType:'open_panel',requestData:{url:'http://127.0.0.1:'+PORT+d.route,title,...(width?{width,height}:{})}});return json(res,200,{success:r?.responseData?.success===true});}
-    if(path==='/api/panel-close'){if(req.method!=='POST')return json(res,405,{success:false});if(!local(req))return json(res,403,{success:false,error:'Só no computador do FreeMix'});const d=await body(req),url=String(d.url||'');if(url.length>600||!/^http:\/\/(127\.0\.0\.1|localhost):\d{2,5}\//.test(url))return json(res,400,{success:false,error:'Janela inválida'});const r=await production.optional('CallVendorRequest',{vendorName:'freemix',requestType:'close_panel',requestData:{url}});return json(res,200,{success:r?.responseData?.success===true});}
+    if(path==='/api/panel-open'){if(req.method!=='POST')return json(res,405,{success:false});if(!local(req))return json(res,403,{success:false,error:'Só no computador do FreeMix'});const d=await body(req);const known = {
+    '/transmitir': ['Configurações de streaming', 700, 445],
+    '/gravar': ['Configuração de gravação', 760, 560],
+    '/externo': ['Saídas externas', 900, 620],
+    '/multicorder': ['MultiGravação', 1040, 680],
+    '/iso': ['MultiGravação', 1040, 680],
+    '/calls': ['Chamada de Vídeo', 700, 540],
+    '/replay': ['Replay', 1440, 900],
+    '/settings': ['Configurações', 1280, 800],
+    '/configuracoes': ['Configurações', 1280, 800],
+    '/audio': ['Áudio · Mixer e processamento', 1360, 850],
+    '/atalhos': ['Atalhos', 700, 500],
+    '/playout': ['Media & Playout Engine', 1200, 760],
+    '/playout-monitor': ['Playout Monitor', 900, 500],
+    '/overlays': ['Controle de Overlays (DSK 1 a 8)', 920, 620],
+    '/multiview': ['MultiView Broadcast', 1280, 720],
+    '/rundown': ['Roteiro de Produção (Rundown)', 1100, 720],
+    '/retornos': ['Retornos de Externa SRT & N-1', 900, 600],
+    '/blackbox': ['Caixa-Preta de Incidentes (Blackbox)', 1160, 820],
+    '/preflight': ['Pre-Flight ? Checklist de seguran?a', 1120, 820],
+    '/modular': ['3Mix Modular Studio', 1280, 800],
+    '/novo-projeto/': ['Novo Projeto 3Mix', 800, 600],
+    '/dados': ['Fontes de Dados & GC', 850, 600],
+    '/compor': ['Composições e Multi-Box', 900, 640],
+    '/macros': ['Automações e Macros', 850, 600],
+    '/recuperacao': ['Recuperação de Sessão', 800, 500],
+    '/diagnosticos': ['Diagnósticos e Relatórios', 900, 650],
+    '/saidas': ['Central de Saídas Broadcast', 950, 650],
+    '/hub': ['Hub de Produção 3Mix', 1050, 700],
+    '/': ['3Mix Pro']
+  }[String(d.route).split(/[?#]/)[0]];if(!known||String(d.route).length>600)return json(res,400,{success:false,error:'Janela desconhecida'});const [title,width,height]=known;const rundownWindow=String(d.route).split(/[?#]/)[0]==='/rundown';const nativeUrl='http://127.0.0.1:'+PORT+d.route+(rundownWindow?(String(d.route).includes('?')?'&':'?')+'janela=3mix':'');const r=await production.optional('CallVendorRequest',{vendorName:'freemix',requestType:'open_panel',requestData:{url:nativeUrl,title,...(width?{width,height}:{})}});return json(res,200,{success:r?.responseData?.success===true});}
+    if(path==='/api/panel-title'){
+      if(req.method!=='POST')return json(res,405,{success:false});
+      if(!local(req))return json(res,403,{success:false,error:'Só no computador do 3Mix'});
+      const d=await body(req),url=String(d.url||''),title=String(d.title||'').trim();
+      if(url.length>600||!/^http:\/\/(127\.0\.0\.1|localhost):\d{2,5}\//.test(url))return json(res,400,{success:false,error:'Janela inválida'});
+      if(!title||title.length>100||/[\x00-\x1f]/.test(title))return json(res,400,{success:false,error:'Título inválido'});
+      const result=await production.optional('CallVendorRequest',{vendorName:'freemix',requestType:'set_panel_title',requestData:{url,title}});
+      return json(res,200,{success:result?.responseData?.success===true});
+    }
+    if(path==='/api/panel-close'){if(req.method!=='POST')return json(res,405,{success:false});if(!local(req))return json(res,403,{success:false,error:'Só no computador do FreeMix'});const d=await body(req),url=String(d.url||'');if(url.length>600||!/^http:\/\/(127\.0\.0\.1|localhost):\d{2,5}\//.test(url))return json(res,400,{success:false,error:'Janela inválida'});let success=false;for(let attempt=0;attempt<5;attempt++){const r=await production.optional('CallVendorRequest',{vendorName:'freemix',requestType:'close_panel',requestData:{url}});if(r?.responseData?.success===true){success=true;break;}await new Promise(done=>setTimeout(done,200));}return json(res,200,{success});}
+      if(path==='/api/inputs-health'){
+        if(req.method==='GET')return json(res,200,{success:true,summary:inputHealth.getSummary(),inputs:inputHealth.getSnapshot(),logs:inputHealth.getLogs(20)});
+        if(req.method==='POST'){
+          if(!local(req))return json(res,403,{success:false,error:'Telemetria local'});
+          const d=await body(req);
+          if(d.action==='register')return json(res,200,{success:true,input:inputHealth.registerInput(d.uuid,d.name,d.type)});
+          if(d.action==='unregister')return json(res,200,{success:inputHealth.unregisterInput(d.uuid)});
+          if(d.action==='frame')return json(res,200,{success:true,input:inputHealth.updateFrameTelemetry(d.uuid,d)});
+          if(d.action==='audio')return json(res,200,{success:true,input:inputHealth.updateAudioTelemetry(d.uuid,d)});
+          if(d.action==='tally')return json(res,200,{success:true,inputs:inputHealth.setTally(d.programUuid,d.previewUuid,d.overlays)});
+          return json(res,400,{success:false,error:'Ação de telemetria inválida'});
+        }
+        return json(res,405,{success:false});
+      }
+      if(path==='/api/multiview'){
+        if(req.method==='GET')return json(res,200,multiviewEngine.syncWithProduction(clean(),inputHealth.getSummary()));
+        if(req.method==='POST'){
+          if(!local(req))return json(res,403,{success:false,error:'MultiView local'});
+          const d=await body(req);
+          if(d.action==='set_layout')return json(res,200,{success:true,snapshot:multiviewEngine.setLayout(d.layoutId,d)});
+          if(d.action==='safe_zones')return json(res,200,{success:true,safeZones:multiviewEngine.configureSafeZones(d)});
+          if(d.action==='assign_slot')return json(res,200,{success:true,slot:multiviewEngine.assignSlot(d.slotIndex,d)});
+          if(d.action==='clear_slot')return json(res,200,{success:multiviewEngine.clearSlot(d.slotIndex)});
+          return json(res,400,{success:false,error:'Ação de multiview inválida'});
+        }
+        return json(res,405,{success:false});
+      }
+      if(path==='/api/aux-routing'){
+        if(req.method==='GET')return json(res,200,{success:true,matrix:auxOutputRouter.getRoutingMatrix(),logs:auxOutputRouter.getLogs(20)});
+        if(req.method==='POST'){
+          if(!local(req))return json(res,403,{success:false,error:'Roteamento AUX local'});
+          const d=await body(req);
+          if(d.action==='configure'){const resAux=auxOutputRouter.setAuxBusConfig(d.auxId,d);await auxOutputRouter.save().catch(()=>{});return json(res,200,{success:true,bus:resAux,matrix:auxOutputRouter.getRoutingMatrix()});}
+          if(d.action==='cut'){const resCut=auxOutputRouter.quickCut(d.auxId,d);await auxOutputRouter.save().catch(()=>{});return json(res,200,{success:true,cut:resCut,matrix:auxOutputRouter.getRoutingMatrix()});}
+          if(d.action==='route'){const resRoute=auxOutputRouter.routeOutput(d.targetId,d);await auxOutputRouter.save().catch(()=>{});return json(res,200,{success:true,binding:resRoute,matrix:auxOutputRouter.getRoutingMatrix()});}
+          if(d.action==='reset'){auxOutputRouter.initDefaults();await auxOutputRouter.save().catch(()=>{});return json(res,200,{success:true,matrix:auxOutputRouter.getRoutingMatrix()});}
+          return json(res,400,{success:false,error:'Ação de roteamento AUX inválida'});
+        }
+        return json(res,405,{success:false});
+      }
+      if(path==='/api/outputs-watchdog'){
+        if(req.method==='GET')return json(res,200,{success:true,summary:outputWatchdog.getSummary(),outputs:outputWatchdog.getSnapshot(),logs:outputWatchdog.getLogs(20)});
+        if(req.method==='POST'){
+          if(!local(req))return json(res,403,{success:false,error:'Watchdog local'});
+          const d=await body(req);
+          if(d.action==='register')return json(res,200,{success:true,output:outputWatchdog.registerOutput(d.id,d)});
+          if(d.action==='start')return json(res,200,{success:true,output:outputWatchdog.onStreamStarted(d.id)});
+          if(d.action==='stop')return json(res,200,{success:true,output:outputWatchdog.onStreamStopped(d.id,d)});
+          if(d.action==='drop')return json(res,200,{success:true,output:outputWatchdog.onStreamDrop(d.id,d)});
+          if(d.action==='telemetry')return json(res,200,{success:true,output:outputWatchdog.updateTelemetry(d.id,d)});
+          if(d.action==='reset')return json(res,200,{success:true,output:outputWatchdog.resetCircuit(d.id)});
+          return json(res,400,{success:false,error:'Ação de watchdog inválida'});
+        }
+        return json(res,405,{success:false});
+      }
+      if(path==='/api/preflight'){
+        if(req.method==='GET'){
+          const result = production.preflightEngine ? await production.preflightEngine.runCheck() : { verdict: 'READY', checks: [{ name: 'Sistema', status: 'PASS', value: '3Mix Engine Online' }] };
+          return json(res, 200, { success: true, verdict: result.verdict, ...result, preflight: result });
+        }
+        return json(res, 405, { success: false });
+      }
+      if(path==='/api/blackbox'){
+        if(req.method==='GET')return json(res,200,{success:true,...production.blackboxEngine.summary()});
+        if(req.method==='POST'){const d=await body(req);const result=await production.blackboxEngine.execute(d.action||'blackbox_mark',d);return json(res,200,{success:true,result,...production.blackboxEngine.summary()});}
+        return json(res,405,{success:false});
+      }
+      if(path==='/api/delay'){
+        if(req.method==='GET')return json(res,200,{success:true,...production.broadcastDelayEngine.summary()});
+        if(req.method==='POST'){const d=await body(req);const result=await production.broadcastDelayEngine.execute(d.action||'dump',d);return json(res,200,{success:true,result,...production.broadcastDelayEngine.summary()});}
+        return json(res,405,{success:false});
+      }
+      if(path==='/api/return-feeds'){
+        if(req.method==='GET')return json(res,200,{success:true,...production.returnFeedManager.summary()});
+        if(req.method==='POST'){const d=await body(req);const result=await production.returnFeedManager.execute(d.action,d);return json(res,200,{success:true,result,...production.returnFeedManager.summary()});}
+        return json(res,405,{success:false});
+      }
+      if(path==='/api/rundown'){
+        const rundownSummary=()=>{try{return production.rundownEngine?.summary?.()||{success:false,error:'Motor de Rundown indisponível nesta instalação'};}catch(error){return {success:false,error:error.message};}};
+        if(req.method==='GET')return json(res,200,{success:true,...rundownSummary()});
+        if(req.method==='POST'){
+          const d=await body(req),action=String(d.action||'rundown_summary');
+          const liveActions=new Set(['rundown_prepare','rundown_execute','rundown_auto_advance','rundown_skip','rundown_arm','rundown_suspend','rundown_end','rundown_reopen']);
+          try{
+            if(typeof production.rundownEngine?.execute!=='function')throw Error('Motor de Rundown indisponível nesta instalação');
+            const dispatched=liveActions.has(action)&&typeof production.runRundown==='function'?await production.runRundown(action,d):await production.rundownEngine.execute(action,d);
+            const result=dispatched&&typeof dispatched==='object'&&'result'in dispatched&&'state'in dispatched?dispatched.result:dispatched;
+            return json(res,200,{success:true,result,...(dispatched?.refreshError?{warning:'Comando confirmado; a atualização visual falhou: '+dispatched.refreshError}:{}),...rundownSummary()});
+          }catch(error){
+            const summary=rundownSummary();
+            const code=error.code==='RUNDOWN_CONFLICT'?409:error.code==='RUNDOWN_PARTIAL'?409:400;
+            return json(res,code,{success:false,error:error.message,code:error.code||null,result:error.result||null,validation:error.validation||null,summary});
+          }
+        }
+        return json(res,405,{success:false});
+      }
+      if(path==='/api/ducking'){
+        if(req.method==='GET')return json(res,200,{success:true,...production.audioDuckingEngine.summary()});
+        if(req.method==='POST'){const d=await body(req);const result=await production.audioDuckingEngine.execute(d.action,d);return json(res,200,{success:true,result,...production.audioDuckingEngine.summary()});}
+        return json(res,405,{success:false});
+      }
     if(path==='/api/iso'){if(!['GET','POST'].includes(req.method))return json(res,405,{success:false});const d=req.method==='POST'?await body(req):{};const action=req.method==='GET'?'status':d.action;if(!['status','start','stop','configure'].includes(action))throw new Error('Ação ISO inválida');if((action==='configure'||d.options)&&!local(req))return json(res,403,{success:false,error:'Opções de gravação só no computador do FreeMix'});return json(res,200,{success:true,iso:await iso.command(action,d)});}
       if(['/api','/api/','/api/json'].includes(path)){
         const fn=u.searchParams.get('Function')||u.searchParams.get('function');
@@ -213,9 +398,9 @@ async function handleHttp(req,res){
       if(/(^|\/)(local\.js|.*\.ini|.*\.salvo|.*\.bak)$/i.test(rel)&&!local(req))return json(res,403,{success:false,error:'Arquivo privado'});
       file=[resolve(PANEL,'remoto',rel),target].find(f=>!relative(PANEL,f).startsWith('..')&&['.html','.js','.css','.png','.gif','.jpg','.webp','.bmp','.svg','.woff2','.woff','.ttf','.otf'].includes(extname(f))&&existsSync(f));
     }
-    if(!file){res.writeHead(404).end('Não encontrado');return;}
-    try{const data=await readFile(file);res.writeHead(200,{'Content-Type':mime[extname(file)]||'application/octet-stream'});res.end(data);}catch(e){if(e.code==='ENOENT'){res.writeHead(404).end('Não encontrado');}else throw e;}
-  }catch(e){const operation=controlReceipt(controlOperation);json(res,400,{success:false,error:e.message,...(operation?{operation}: {})});}
+    if(!file){if(wantsHtml(req))return sendErrorPage(res,404,req.url,'HTTP 404 · página não encontrada nesta instalação');res.writeHead(404).end('Não encontrado');return;}
+    try{const data=await readFile(file);res.writeHead(200,{'Content-Type':mime[extname(file)]||'application/octet-stream'});res.end(data);}catch(e){if(e.code==='ENOENT'){if(wantsHtml(req))return sendErrorPage(res,404,req.url,'HTTP 404 · arquivo da página ausente');res.writeHead(404).end('Não encontrado');}else throw e;}
+  }catch(e){const operation=controlReceipt(controlOperation);if(wantsHtml(req)&&!res.headersSent)return sendErrorPage(res,req.method==='GET'||req.method==='HEAD'?500:400,req.url,e.message);json(res,400,{success:false,error:e.message,...(operation?{operation}: {})});}
 }
 const server=createServer(createProjectHttpDispatcher({binding:projectBinding,handler:handleHttp,local,authorized,originAllowed,readBody:readProjectBody,json}));
 const wss=new WebSocketServer({noServer:true,maxPayload:32768});
@@ -234,5 +419,9 @@ const ticker=setInterval(async()=>{if(!obs||connecting||pollingGeneration!==null
  finally{if(pollingGeneration===generation)pollingGeneration=null;}
 },1000);
 server.listen(PORT,process.env.FREEMIX_API_HOST||'127.0.0.1',()=>{console.log(`FreeMix: API e consoles na porta ${PORT}.`);startConnection();});
-function stop(){if(stopping)return;stopping=true;production.gtTickerAck.dispose();connectionGeneration++;connectionReady=false;production.sessionRecovery.finish('api-restart').catch(()=>{});clearInterval(ticker);clearTimeout(reconnectTimer);for(const c of clients)c.close();production.callEngine.returns.stop().catch(()=>{});production.networkEngine.stop().catch(()=>{});replay.dispose().catch(e=>connectionError('replay-preview-close',e));iso.dispose().catch(e=>connectionError('iso-preview-close',e));obs?.close();wss.close();callWss.close();server.close();}
+function stop(){if(stopping)return;stopping=true;production.gtTickerAck.dispose();connectionGeneration++;connectionReady=false;production.sessionRecovery.finish('api-restart').catch(()=>{});clearInterval(ticker);clearTimeout(reconnectTimer);for(const c of clients)c.close();vmixTcp?.stop().catch(()=>{});production.callEngine.returns.stop().catch(()=>{});production.networkEngine.stop().catch(()=>{});replay.dispose().catch(e=>connectionError('replay-preview-close',e));iso.dispose().catch(e=>connectionError('iso-preview-close',e));obs?.close();wss.close();callWss.close();server.close();}
 process.on('SIGTERM',stop);process.on('SIGINT',stop);
+// One bad native event or panel request must not take every open window offline.
+// The failure is recorded in api-error.log and the control API keeps serving.
+process.on('uncaughtException',error=>connectionError('uncaught',error));
+process.on('unhandledRejection',error=>connectionError('unhandled-rejection',error));

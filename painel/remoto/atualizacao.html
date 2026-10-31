@@ -1,1 +1,57 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FreeMix · Atualizações</title><link rel="stylesheet" href="controle.css"><link rel="stylesheet" href="studio-dialog.css"><style>main{max-width:900px;margin:auto;padding:16px}label{display:grid;gap:8px}input{width:100%}.row{display:flex;gap:6px;margin:14px 0;flex-wrap:wrap}pre{white-space:pre-wrap;overflow-wrap:anywhere}</style></head><body><header><a href="/settings?category=update">Configurações</a><h1>Atualizações assinadas</h1></header><main><p>Informe o feed HTTPS do responsável pela distribuição. Nenhum servidor está predefinido. As consultas e downloads acontecem somente ao clicar.</p><label>Endereço do feed<input id="feed" type="url" placeholder="https://endereço-do-distribuidor/feed.json" autocomplete="off"></label><p>Use um endereço sem senha, chave ou token. Manifesto, assinatura e arquivos devem estar na mesma origem HTTPS.</p><div class="row"><button id="configure">Salvar endereço</button><button id="disable">Desativar feed</button><button id="check">Consultar atualização</button><button id="download" disabled>Baixar pacote verificado</button></div><p id="status" role="status">Lendo configuração…</p><pre id="details"></pre><p>O download verifica assinatura Ed25519, versão, tamanho e SHA256 de cada arquivo. Este painel não aplica a atualização. Feche o FreeMix e seu ajudante antes de aplicar o pacote pelo atualizador local; a instalação atual e os projetos são preservados durante o download.</p></main><script src="atualizacao.js"></script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3Mix Pro · Atualizações</title>
+<link rel="stylesheet" href="vmix-dialogo.css">
+<style>
+.vd-window { min-width: 580px; max-width: 760px; }
+.vd-note-box { background: #151a1e; border: 1px solid #2b353d; padding: 6px 10px; font-size: 11px; color: #b0bac2; line-height: 1.35; margin: 4px 0; }
+#details { background: #0d1115; border: 1px solid #2b353d; padding: 8px 10px; font-size: 11px; color: #7fe08f; white-space: pre-wrap; margin: 6px 0; min-height: 60px; }
+</style>
+</head>
+<body data-page="atualizacao" class="vd">
+<div class="vd-window">
+  <div class="vd-strip">
+    <span class="vd-title">Atualizações Assinadas (Ed25519)</span>
+    <span class="vd-flex"></span>
+    <span class="vd-note">Canal Oficial 3Mix Pro</span>
+  </div>
+
+  <div class="vd-body">
+    <div class="vd-note-box">
+      Informe o feed HTTPS de distribuição. As consultas e downloads acontecem exclusivamente mediante solicitação manual. Manifesto, hashes e arquivos são validados com criptografia de chave pública.
+    </div>
+
+    <label class="vd-row"><span>Endereço do feed</span>
+      <input id="feed" type="url" placeholder="https://servidor/feed.json" autocomplete="off" spellcheck="false">
+    </label>
+
+    <div class="vd-row"><span></span>
+      <span class="vd-note">Use uma URL HTTPS pública sem credenciais. O download não altera o motor em execução.</span>
+    </div>
+
+    <div class="vd-row"><span>Status</span>
+      <p id="status" class="vd-msg" role="status" style="margin-left: 0;">Lendo configuração…</p>
+    </div>
+
+    <div class="vd-row"><span>Detalhes</span>
+      <pre id="details" class="vd-mono"></pre>
+    </div>
+  </div>
+
+  <div class="vd-bar">
+    <button id="configure" type="button">Salvar endereço</button>
+    <button id="disable" type="button">Desativar feed</button>
+    <span class="vd-flex"></span>
+    <button id="check" type="button">Consultar</button>
+    <button id="download" type="button" class="vd-on" disabled>Baixar pacote</button>
+    <button type="button" onclick="window.FreeMixClosePanel ? window.FreeMixClosePanel() : window.close()">Fechar</button>
+  </div>
+</div>
+
+<script src="fechar-janela.js"></script>
+<script src="atualizacao.js"></script>
+</body>
+</html>

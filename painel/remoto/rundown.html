@@ -1,0 +1,1365 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3Mix · Roteiro de Produção</title>
+<link rel="stylesheet" href="3mix-grafite.css">
+<style>
+  :root{
+    color-scheme:dark;
+    --rd-bg:#202020; --rd-bar:#191919; --rd-panel:#252525; --rd-panel2:#2a2a2a;
+    --rd-line:#414141; --rd-line2:#505050; --rd-text:#ededed; --rd-mut:#b0b0b0; --rd-dim:#8a8a8a;
+    --rd-green:#16752c; --rd-green2:#39d349; --rd-red:#ed181d; --rd-red2:#ff5b60;
+    --rd-amber:#d6a321; --rd-amber2:#ffd324; --rd-blue:#3e78ad; --rd-blue2:#72a9d4;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--rd-bg);color:var(--rd-text);font:12px/1.35 "Segoe UI",Tahoma,Arial,sans-serif;overflow:hidden;user-select:none}
+  button,input,select,textarea{font:inherit}
+  input,textarea{user-select:text}
+  button{cursor:pointer}
+  button:disabled{cursor:default;opacity:.42}
+  input,select,textarea{background:#1d1d1d;border:1px solid #555;color:var(--rd-text);border-radius:3px;padding:4px 6px;min-width:0}
+  input:focus,select:focus,textarea:focus{outline:1px solid #c8c8c8;outline-offset:-1px;border-color:#888}
+  textarea{resize:vertical;min-height:54px}
+  .b{height:27px;padding:0 9px;border:1px solid #555;border-radius:3px;background:linear-gradient(#373737,#292929);color:#eee;font-weight:600}
+  .b:hover:not(:disabled){background:#414141;border-color:#777}
+  .b.primary{background:linear-gradient(#24733a,#175325);border-color:#3d9b55;color:#fff}
+  .b.primary:hover:not(:disabled){background:#2b8747}
+  .b.danger{background:linear-gradient(#8f181d,#651014);border-color:#b8494d;color:#fff}
+  .b.amber{background:linear-gradient(#6d5718,#4e3d0e);border-color:#a38628;color:#ffe8a0}
+  .b.mini{height:23px;padding:0 7px;font-size:10.5px}
+  .b.icon{width:24px;padding:0;font-size:14px;line-height:1}
+  .hidden{display:none!important}
+  #full{height:100%;display:grid;grid-template-rows:44px auto minmax(0,1fr) 24px;overflow:hidden}
+  .rd-head{display:flex;align-items:center;gap:10px;padding:0 10px;background:#1b1b1b;border-bottom:1px solid var(--rd-line);min-width:0}
+  .brand{display:flex;align-items:baseline;gap:8px;min-width:0;white-space:nowrap}
+  .brand .logo{font-size:16px;font-weight:900;letter-spacing:-.6px;color:#fff}
+  .brand strong{font-size:13px;color:#e8e8e8;font-weight:700}
+  .brand .meta{font-size:10px;color:var(--rd-dim);overflow:hidden;text-overflow:ellipsis}
+  .head-badges{display:flex;align-items:center;gap:4px;min-width:0;overflow:hidden}
+  .badge{display:inline-flex;align-items:center;height:19px;padding:0 7px;border:1px solid #4c4c4c;border-radius:999px;background:#2b2b2b;color:#bbb;font-size:9.5px;font-weight:700;letter-spacing:.25px;white-space:nowrap}
+  .badge.ok{border-color:#3f7a4c;background:#1c3a23;color:#9be5a8}
+  .badge.bad{border-color:#8f3438;background:#401a1c;color:#ffb3b5}
+  .badge.armed{border-color:#3f7a4c;background:#1c3a23;color:#9be5a8}
+  .badge.susp{border-color:#8a6d1f;background:#3a2f12;color:#ffe08a}
+  .badge.cur{border-color:#8f3438;background:#3f1a1c;color:#ffc0c2}
+  .badge.off{border-color:#4c4c4c;background:#2b2b2b;color:#aaa}
+  .head-spacer{flex:1}
+  .tabs{display:flex;align-items:center;gap:2px;background:#242424;border:1px solid #444;border-radius:4px;padding:2px}
+  .tabs button{height:26px;padding:0 14px;border:0;border-radius:3px;background:transparent;color:#b5b5b5;font-weight:700}
+  .tabs button:hover{background:#343434;color:#fff}
+  .tabs button.on{background:#4a4a4a;color:#fff;box-shadow:inset 0 -2px #ddd}
+  .rd-banner{display:flex;flex-direction:column;gap:3px;padding:0 10px;background:#202020;border-bottom:1px solid transparent;max-height:132px;overflow:auto}
+  .rd-banner:empty{display:none}
+  .notice{display:flex;align-items:flex-start;gap:8px;padding:5px 8px;border:1px solid #4b4b4b;border-left:3px solid #777;background:#282828;color:#ddd;font-size:11px;border-radius:3px}
+  .notice.error{border-left-color:var(--rd-red);background:#301c1d;color:#ffd0d1}
+  .notice.warn{border-left-color:var(--rd-amber);background:#302b1b;color:#ffe9ae}
+  .notice.info{border-left-color:#6b8fae;background:#202a32;color:#cfe5f4}
+  .notice .grow{flex:1;min-width:0}
+  .notice button{height:20px;padding:0 6px;font-size:10px;border:1px solid #6a6a6a;border-radius:2px;background:#333;color:#eee}
+  .rd-main{display:grid;grid-template-columns:minmax(0,1fr) 378px;min-height:0;background:#202020}
+  .rd-table-pane{display:flex;flex-direction:column;min-width:0;min-height:0;border-right:1px solid var(--rd-line)}
+  .rd-toolbar{display:flex;align-items:center;gap:8px;padding:6px 9px;background:#232323;border-bottom:1px solid var(--rd-line);flex-wrap:wrap;min-height:37px}
+  .rd-toolbar .sum{color:#cfcfcf;font-size:11px;white-space:nowrap}
+  .rd-toolbar .sum b{color:#fff;font-variant-numeric:tabular-nums}
+  .rd-toolbar .sum .ok{color:#9be5a8}.rd-toolbar .sum .err{color:#ff9b9e}
+  .rd-toolbar .dirty{font-size:10px;font-weight:700;color:#ffe08a;letter-spacing:.2px}
+  .rd-toolbar .dirty.clean{color:#8fbf9a}
+  .rd-toolbar .spacer{flex:1}
+  .rd-scroll{flex:1;min-height:0;overflow:auto;scrollbar-width:thin;scrollbar-color:#666 #1b1b1b}
+  .rd-table{min-width:860px;padding:7px 5px 16px}
+  .rd-grid{display:grid;grid-template-columns:108px 34px minmax(170px,1.5fr) 82px minmax(120px,1fr) 74px 92px minmax(110px,1fr) 24px;gap:0;align-items:center}
+  .rd-col-head{position:sticky;top:0;z-index:2;background:#1b1b1b;border:1px solid #3c3c3c;border-bottom-color:#4c4c4c;border-radius:3px 3px 0 0;padding:4px 0;color:#9fa9b2;font-size:9.5px;font-weight:700;letter-spacing:.35px;text-transform:uppercase}
+  .rd-col-head>div{padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rd-block{margin-top:7px;border:1px solid #3d3d3d;border-radius:3px;overflow:hidden;background:#232323}
+  .rd-block-head{display:flex;align-items:center;gap:6px;min-height:30px;padding:3px 6px;background:#2b2b2b;border-bottom:1px solid #3d3d3d;font-size:11px}
+  .rd-block-head .caret{width:16px;text-align:center;color:#bbb;font-size:13px}
+  .rd-block-head input.block-title{flex:1;min-width:80px;height:24px;background:#232323;border-color:#3f3f3f;color:#fff;font-weight:700}
+  .rd-block-head input.block-title:hover{border-color:#5a5a5a;background:#262626}
+  .rd-block-head .bcount{color:#9a9a9a;font-size:10px;white-space:nowrap}
+  .rd-block-head .btotal{color:#cfcfcf;font-size:10px;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .rd-block-head .b{flex:none}
+  .rd-steps{}
+  .rd-row{min-height:30px;border-bottom:1px solid #353535;background:#252525;cursor:pointer;color:#d8d8d8}
+  .rd-row:last-child{border-bottom:0}
+  .rd-row:hover{background:#2d2d2d}
+  .rd-row.selected{background:#30343a;box-shadow:inset 3px 0 #9aa7b4}
+  .rd-row.current{background:#332022;box-shadow:inset 3px 0 var(--rd-red)}
+  .rd-row.current.selected{box-shadow:inset 3px 0 var(--rd-red),inset 0 0 0 1px #7b5b5d}
+  .rd-row.failed{background:#3a1d1e;box-shadow:inset 3px 0 var(--rd-red2)}
+  .rd-row.prepared{box-shadow:inset 3px 0 #3f7a4c}
+  .rd-row.next{background:#2d2a20}
+  .rd-row>div{padding:4px 6px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rd-row .num{color:#8f8f8f;font-variant-numeric:tabular-nums;text-align:right}
+  .rd-row .title{white-space:normal;line-height:1.25}
+  .rd-row .title b{color:#fff;font-weight:600}
+  .rd-row .type{color:#b9c7d3;font-size:10.5px}
+  .rd-row .dur{font-variant-numeric:tabular-nums;color:#d7d7d7}
+  .rd-row .val{text-align:center;font-weight:900}
+  .rd-row .val.ok{color:#6b9f77}.rd-row .val.warn{color:var(--rd-amber2)}.rd-row .val.err{color:var(--rd-red2)}
+  .pill{display:inline-flex;align-items:center;height:18px;padding:0 6px;border-radius:2px;border:1px solid #555;background:#333;color:#ccc;font-size:9px;font-weight:800;letter-spacing:.25px;white-space:nowrap}
+  .pill.current{border-color:#a63b3f;background:#5a191c;color:#ffd1d2}
+  .pill.failed{border-color:#d04a4f;background:#67181b;color:#fff}
+  .pill.prepared{border-color:#3e7c4c;background:#1c4226;color:#b8efc2}
+  .pill.done{border-color:#4c6f57;background:#263a2d;color:#a9c9b5}
+  .pill.skipped{border-color:#5c5c5c;background:#303030;color:#b9b9b9}
+  .pill.pending{border-color:#4f4f4f;background:#2c2c2c;color:#aaa}
+  .pill.executing{border-color:#b38624;background:#4b3a12;color:#ffe08a}
+  .mini-tag{display:inline-flex;align-items:center;height:16px;padding:0 4px;border-radius:2px;background:#3a3a3a;border:1px solid #555;color:#ddd;font-size:9px;font-weight:700;margin-left:4px}
+  .mini-tag.prep{border-color:#3f7a4c;background:#1e3824;color:#b7e8c0}
+  .mini-tag.stale{border-color:#8a6d1f;background:#3a2f12;color:#ffe08a}
+  .mini-tag.lock{border-color:#666;background:#2c2c2c;color:#bbb}
+  .empty{padding:26px;text-align:center;color:#9a9a9a;line-height:1.6}
+  .empty b{color:#ddd;display:block;margin-bottom:6px}
+  .rd-side{min-width:0;min-height:0;overflow:auto;background:#222;padding:8px;scrollbar-width:thin;scrollbar-color:#666 #1b1b1b}
+  .side-head{display:flex;align-items:flex-start;gap:8px;padding:2px 2px 8px;border-bottom:1px solid #3c3c3c;margin-bottom:8px}
+  .side-head .grow{flex:1;min-width:0}
+  .side-head .kicker{font-size:9.5px;color:#9a9a9a;text-transform:uppercase;letter-spacing:.35px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .side-head h2{margin:1px 0 0;font-size:14px;color:#fff;font-weight:700}
+  .side-head .sub{font-size:10.5px;color:#aaa;margin-top:2px}
+  .side-note{padding:6px 8px;margin:0 0 8px;border:1px solid #4b4b4b;border-left:3px solid #777;background:#292929;color:#cfcfcf;font-size:10.5px;border-radius:3px}
+  .side-note.warn{border-left-color:var(--rd-amber);background:#302b1b;color:#ffe9ae}
+  .side-note.error{border-left-color:var(--rd-red);background:#301c1d;color:#ffd0d1}
+  .side-note.ok{border-left-color:#3f7a4c;background:#1d2d21;color:#bce8c4}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .form-grid label{display:flex;flex-direction:column;gap:3px;color:#bdbdbd;font-size:10px;min-width:0}
+  .form-grid label.wide{grid-column:1/-1}
+  .form-grid label.check{flex-direction:row;align-items:center;gap:6px;grid-column:1/-1;color:#ccc;font-size:11px}
+  .form-grid label.check input{width:auto;flex:none;accent-color:#39d349}
+  .form-grid input,.form-grid select,.form-grid textarea{width:100%}
+  .form-grid .hint{font-size:9.5px;color:#8f8f8f;margin-top:1px}
+  .sub{margin-top:10px;border-top:1px solid #3a3a3a;padding-top:7px}
+  .sub h3{margin:0 0 5px;font-size:10px;letter-spacing:.35px;text-transform:uppercase;color:#aeb8c1;display:flex;align-items:center;gap:6px}
+  .sub h3 .grow{flex:1}
+  .action-row{display:grid;grid-template-columns:54px 82px minmax(0,1fr) 24px;gap:4px;align-items:center;margin-bottom:4px}
+  .action-row.audio{grid-template-columns:minmax(0,1fr) 82px 54px 24px}
+  .action-row select,.action-row input{height:25px;width:100%;font-size:10.5px}
+  .action-row .b.icon{height:25px;width:24px}
+  .side-actions{display:flex;gap:6px;margin-top:10px;padding-top:8px;border-top:1px solid #3a3a3a}
+  .side-actions .b{height:26px}
+  .panel{border:1px solid #3d3d3d;border-radius:3px;background:#252525;margin-bottom:7px;overflow:hidden}
+  .panel-head{display:flex;align-items:center;gap:6px;padding:5px 7px;background:#2b2b2b;border-bottom:1px solid #3d3d3d}
+  .panel-head h3{margin:0;font-size:10.5px;color:#c9d2da;letter-spacing:.25px;text-transform:uppercase;flex:1}
+  .panel-body{padding:7px}
+  .panel-body .title{font-size:13px;color:#fff;font-weight:700;line-height:1.25}
+  .panel-body .meta{font-size:10.5px;color:#9d9d9d;margin-top:2px}
+  .panel-body .notes{margin-top:6px;color:#c6c6c6;font-size:11px;white-space:pre-wrap}
+  .kv{display:flex;justify-content:space-between;gap:8px;padding:2px 0;font-size:10.5px;color:#b7b7b7}
+  .kv b{color:#e8e8e8;font-weight:600;text-align:right}
+  .list{display:flex;flex-direction:column;gap:3px;margin-top:5px}
+  .list-row{display:flex;align-items:center;gap:6px;padding:3px 5px;border:1px solid #3a3a3a;border-radius:2px;background:#2a2a2a;font-size:10.5px;min-width:0}
+  .list-row .grow{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .list-row .ok{color:#9be5a8}.list-row .bad{color:#ff9b9e}.list-row .run{color:#ffe08a}
+  .history-row{border-left:2px solid #555;padding-left:6px;margin-bottom:4px;font-size:10.5px;color:#bfbfbf}
+  .history-row .h{display:flex;gap:6px;align-items:baseline}
+  .history-row .h b{color:#e6e6e6;font-weight:600}
+  .history-row .h span{color:#8f8f8f;font-size:9.5px}
+  .history-row.partial{border-left-color:var(--rd-red)}
+  .history-row.confirmed{border-left-color:#3f7a4c}
+  .history-row.rejected{border-left-color:var(--rd-amber)}
+  .draft{border:1px solid #7b6522;border-radius:3px;background:#2f2a1a;margin-bottom:8px;overflow:hidden}
+  .draft-head{padding:5px 7px;background:#3a321c;border-bottom:1px solid #65541c;color:#ffe08a;font-size:10px;font-weight:800;letter-spacing:.3px;text-transform:uppercase}
+  .draft-body{padding:7px;display:flex;flex-direction:column;gap:6px}
+  .draft-body label{display:flex;flex-direction:column;gap:3px;color:#cfc6a8;font-size:10px}
+  .draft-actions{display:flex;gap:6px}
+  .op-strip{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
+  .op-time{font-size:10px;color:#a9a9a9;letter-spacing:.2px;white-space:nowrap}
+  .op-time b{font-size:15px;color:#fff;font-variant-numeric:tabular-nums;margin-left:3px}
+  .op-time.remain b{color:#ffe08a}
+  .overdue{font-size:10px;font-weight:800;color:#ffb36b;white-space:nowrap}
+  .op-total{font-size:10px;color:#9a9a9a;white-space:nowrap}
+  .op-total b{color:#ddd;font-variant-numeric:tabular-nums}
+  .op-target{font-size:10px;color:#9a9a9a;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .op-target b{color:#e8e8e8}
+  .cmdbar{display:flex;align-items:center;gap:5px;flex-wrap:wrap;width:100%}
+  .cmdbar .b{height:30px;padding:0 11px;font-size:11px;font-weight:700}
+  .cmdbar .b.primary{min-width:94px}
+  .hintline{font-size:10px;color:#8f8f8f;width:100%;white-space:normal}
+  .rd-foot{display:flex;align-items:center;gap:12px;padding:0 9px;background:#191919;border-top:1px solid #363636;color:#a9a9a9;font-size:10px;overflow:hidden;white-space:nowrap}
+  .rd-foot .grow{flex:1;overflow:hidden;text-overflow:ellipsis}
+  .toast{position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(20px);max-width:min(680px,calc(100vw - 30px));padding:8px 12px;border:1px solid #777;border-radius:4px;background:#303030;color:#fff;font-size:11.5px;box-shadow:0 8px 30px #0009;opacity:0;pointer-events:none;transition:.16s;z-index:9000;white-space:pre-wrap}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast.err{border-color:#9c383c;background:#3b1d1f;color:#ffd0d1}
+  body.dock{background:#202020;overflow:auto}
+  body.dock #full{display:none}
+  #dock{display:none;min-height:100%;padding:7px;background:#202020;font-size:11px}
+  body.dock #dock{display:block}
+  .dock-head{display:flex;align-items:center;gap:6px;padding-bottom:6px;border-bottom:1px solid #414141}
+  .dock-head b{font-size:12px;letter-spacing:.2px}
+  .dock-head .ver{font-size:9.5px;color:#8f8f8f}
+  .dock-head .grow{flex:1}
+  .dock-head .b{height:22px;padding:0 7px;font-size:10px}
+  .dock-current{margin-top:6px;border:1px solid #3e3e3e;border-left:3px solid #6b6b6b;border-radius:3px;background:#252525;padding:6px 7px}
+  .dock-current.current{border-left-color:var(--rd-red);background:#2b2223}
+  .dock-current.failed{border-left-color:var(--rd-red2);background:#331d1e}
+  .dock-current.ended{border-left-color:#555;background:#232323}
+  .dock-label{font-size:9px;color:#9b9b9b;letter-spacing:.35px;text-transform:uppercase}
+  .dock-title{font-size:13px;color:#fff;font-weight:700;line-height:1.25;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dock-sub{font-size:10px;color:#a9a9a9;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dock-times{display:flex;align-items:baseline;gap:10px;margin-top:5px;flex-wrap:wrap}
+  .dock-times span{font-size:9.5px;color:#9a9a9a;letter-spacing:.2px}
+  .dock-times b{font-size:15px;color:#fff;font-variant-numeric:tabular-nums;margin-left:3px}
+  .dock-times .remain b{color:#ffe08a}
+  .dock-times .overdue{color:#ffb36b;font-size:10px;font-weight:800}
+  .dock-next{display:flex;align-items:baseline;gap:6px;padding:5px 2px;border-bottom:1px solid #383838;margin-top:4px}
+  .dock-next span{font-size:9px;color:#8f8f8f;letter-spacing:.3px}
+  .dock-next b{font-size:10.5px;color:#d8d8d8;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dock-prepared{font-size:10px;color:#a9a9a9;padding:4px 2px;min-height:17px}
+  .dock-prepared .prep{color:#b8efc2}.dock-prepared .stale{color:#ffe08a}
+  .dock-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:5px}
+  .dock-actions .b{height:29px;padding:0 5px;font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dock-actions .wide{grid-column:1/-1}
+  .dock-note{margin-top:5px;font-size:10px;color:#b8b8b8;line-height:1.35;white-space:pre-wrap}
+  .dock-note .err{color:#ff9b9e}.dock-note .warn{color:#ffe08a}.dock-note .ok{color:#9be5a8}
+  @media(max-width:980px){
+    .rd-main{grid-template-columns:minmax(0,1fr) 330px}
+    .brand .meta{display:none}
+  }
+  @media(max-width:760px){
+    #full{grid-template-rows:44px auto minmax(0,1fr) 24px}
+    .rd-main{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) 46%}
+    .rd-side{border-top:1px solid #414141}
+    .rd-table-pane{border-right:0}
+    .head-badges{display:none}
+  }
+</style>
+</head>
+<body>
+<div id="full">
+  <header class="rd-head">
+    <div class="brand">
+      <span class="logo">3MIX</span>
+      <strong>Roteiro de Produção</strong>
+      <span class="meta" id="head-meta"></span>
+    </div>
+    <div class="head-badges" id="head-badges"></div>
+    <span class="head-spacer"></span>
+    <div class="tabs">
+      <button type="button" data-act="tab" data-tab="editar">Editar</button>
+      <button type="button" data-act="tab" data-tab="operar">Operar</button>
+    </div>
+    <button type="button" class="b mini" data-act="refresh" title="Recarregar o roteiro do servidor">Atualizar</button>
+    <button type="button" class="b mini" data-act="capture" title="Fotografa o estado atual em um rascunho; não altera nem executa">Capturar estado</button>
+  </header>
+  <div class="rd-banner" id="banner"></div>
+  <main class="rd-main">
+    <section class="rd-table-pane">
+      <div class="rd-toolbar" id="toolbar"></div>
+      <div class="rd-scroll" id="table-scroll">
+        <div class="rd-table" id="table"></div>
+      </div>
+    </section>
+    <aside class="rd-side" id="side"></aside>
+  </main>
+  <footer class="rd-foot" id="footer">
+    <span class="grow" id="foot-left">Carregando roteiro…</span>
+    <span id="foot-right"></span>
+  </footer>
+</div>
+
+<div id="dock">
+  <div class="dock-head">
+    <b>RUNDOWN</b>
+    <span class="ver" id="d-version"></span>
+    <span class="badge" id="d-auto"></span>
+    <span class="grow"></span>
+    <button type="button" class="b" data-act="expand" title="Abrir o editor/operador completo em uma janela">Expandir</button>
+  </div>
+  <div id="d-banner"></div>
+  <div class="dock-current" id="d-current-box">
+    <div class="dock-label" id="d-label">EM EXECUÇÃO</div>
+    <div class="dock-title" id="d-current">—</div>
+    <div class="dock-sub" id="d-current-sub"></div>
+    <div class="dock-times">
+      <span>DECORRIDO <b id="d-elapsed">—</b></span>
+      <span class="remain">RESTANTE <b id="d-remain">—</b></span>
+      <span class="overdue" id="d-overdue"></span>
+    </div>
+  </div>
+  <div class="dock-next"><span>PRÓXIMO</span><b id="d-next">—</b></div>
+  <div class="dock-prepared" id="d-prep"></div>
+  <div class="dock-actions" id="d-actions"></div>
+  <div class="dock-note" id="d-note"></div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+const query = new URLSearchParams(location.search);
+const compact = query.get('compact') === '1';
+const API = '/api/rundown';
+const TYPES = { camera: 'Câmera', video: 'Vídeo / VT', playlist: 'Playlist', graphics: 'Gráfico / GC', call: 'Chamada', manual: 'Passagem / Manual', note: 'Nota' };
+const REQUIRES_SOURCE = new Set(['camera', 'video', 'playlist', 'graphics', 'call']);
+const MEDIA_TYPES = new Set(['video', 'playlist']);
+const END_LABELS = { wait_operator: 'Manual', after_time: 'Após tempo', media_end: 'Fim da mídia' };
+const DSK_LABELS = { keep: 'Manter', prepare: 'Preparar', enter: 'Entrar', exit: 'Sair' };
+const AUDIO_LABELS = { keep: 'Manter', mute: 'Mute', unmute: 'Abrir', volume: 'Volume' };
+const STATUS_LABELS = { pending: 'EM ESPERA', prepared: 'PREPARADO', current: 'EM EXECUÇÃO', executing: 'CONFIRMANDO', failed: 'FALHA', done: 'CONCLUÍDO', skipped: 'PULADO' };
+const HISTORY_LABELS = { confirmed: 'EXECUTADO', partial: 'FALHA PARCIAL', rejected: 'RECUSADO', skipped: 'PULADO', ended: 'ENCERRADO', reopened: 'REABERTO' };
+
+let summary = null;
+let fetchedAt = 0;
+let activeTab = query.get('tab') === 'editar' ? 'editar' : 'operar';
+let selectedStepId = null;
+let edit = { id: null, name: 'Roteiro Principal', createdAt: null, revision: 1, blocks: [], dirty: false };
+let collapsed = new Set();
+let busy = false;
+let lastError = null;
+let pollError = null;
+let toastTimer = null;
+let pollTimer = null;
+let pendingExecute = null;
+
+const uid = prefix => `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+function fmt(seconds) {
+  if (seconds === null || seconds === undefined || seconds === '' || !Number.isFinite(Number(seconds))) return '—';
+  const total = Math.max(0, Math.round(Number(seconds)));
+  const h = Math.floor(total / 3600), m = Math.floor((total % 3600) / 60), s = total % 60;
+  return h ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` : `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+function fmtDate(value) {
+  if (!value) return '—';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+}
+function typeLabel(type) { return TYPES[type] || type || '—'; }
+function statusPill(status, label) {
+  const cls = ['current', 'failed', 'prepared', 'done', 'skipped', 'pending', 'executing'].includes(status) ? status : 'pending';
+  return `<span class="pill ${cls}">${esc(label || STATUS_LABELS[status] || status)}</span>`;
+}
+function cleanStep(step) {
+  return {
+    id: step.id, title: step.title, type: step.type, notes: step.notes || '',
+    sourceInputKey: step.sourceInputKey || null, sourceName: step.sourceName || null,
+    transition: step.transition === 'fade' ? 'fade' : 'cut', transitionMs: Number(step.transitionMs) || 0,
+    durationMode: step.durationMode, durationSec: step.durationSec === null || step.durationSec === undefined ? null : Number(step.durationSec),
+    endBehavior: step.endBehavior, loadPreview: step.loadPreview !== false,
+    dsk: (step.dsk || []).map(action => ({ channel: Number(action.channel), action: action.action, scene: action.scene || '' })),
+    audio: (step.audio || []).map(action => ({ targetKey: action.targetKey || null, targetName: action.targetName || null, action: action.action, value: action.value === null || action.value === undefined ? null : Number(action.value) })),
+    captured: step.captured === true
+  };
+}
+function cleanBlock(block) { return { id: block.id, title: block.title, notes: block.notes || '', steps: (block.steps || []).map(cleanStep) }; }
+function syncEditFromSummary() {
+  if (!summary) return;
+  edit = {
+    id: summary.id,
+    name: summary.name,
+    createdAt: summary.createdAt,
+    revision: summary.revision,
+    blocks: (summary.blocks || []).map(block => ({ id: block.id, title: block.title, notes: block.notes || '', steps: (block.steps || []).map(cleanStep) })),
+    dirty: false
+  };
+  const all = allEditSteps();
+  if (!selectedStepId || !all.some(entry => entry.step.id === selectedStepId)) {
+    selectedStepId = summary.selectedStepId || summary.preparedStepId || summary.currentStepId || summary.nextStep?.id || all[0]?.step.id || null;
+  }
+}
+function allEditSteps() {
+  const out = [];
+  let index = 0;
+  for (const block of edit.blocks) for (const step of block.steps) out.push({ block, step, index: index++ });
+  return out;
+}
+function findEditStep(stepId) { return allEditSteps().find(entry => entry.step.id === stepId) || null; }
+function allSummarySteps() {
+  const out = [];
+  for (const block of (summary?.blocks || [])) for (const step of (block.steps || [])) out.push({ block, step });
+  return out;
+}
+function findSummaryStep(stepId) { return allSummarySteps().find(entry => entry.step.id === stepId) || null; }
+function summaryStepById(stepId) { return (summary?.steps || []).find(step => step.id === stepId) || null; }
+function sourceForStep(step) {
+  const sources = summary?.availableSources || [];
+  const byKey = step.sourceInputKey ? sources.find(source => source.key === step.sourceInputKey) : null;
+  return byKey || (step.sourceName ? sources.find(source => source.name === step.sourceName) : null) || null;
+}
+function stepDuration(step) {
+  if (step.durationMode === 'fixed') return Number(step.durationSec) > 0 ? Number(step.durationSec) : null;
+  if (step.durationMode === 'media') return Number(sourceForStep(step)?.mediaDurationSec) > 0 ? Number(sourceForStep(step).mediaDurationSec) : null;
+  return null;
+}
+function localTotals() {
+  let total = 0, known = 0, unknown = 0;
+  for (const { step } of allEditSteps()) {
+    const duration = stepDuration(step);
+    if (duration > 0) { total += duration; known++; } else unknown++;
+  }
+  return { total, known, unknown };
+}
+function validateLocal() {
+  const items = [];
+  const byStep = {};
+  const sources = summary?.availableSources || [];
+  const scenes = summary?.availableScenes || [];
+  const audioTargets = summary?.availableAudio || [];
+  const connected = summary?.connected !== false;
+  const add = (step, severity, message, field = '') => {
+    const item = { severity, message, field, stepId: step.id };
+    items.push(item);
+    (byStep[step.id] ||= { errors: [], warnings: [] })[severity === 'error' ? 'errors' : 'warnings'].push(item);
+  };
+  for (const { step } of allEditSteps()) {
+    if (!step.title || !String(step.title).trim()) add(step, 'error', 'Título obrigatório.', 'title');
+    if (!TYPES[step.type]) add(step, 'error', 'Tipo de passo desconhecido.', 'type');
+    const source = sourceForStep(step);
+    if (REQUIRES_SOURCE.has(step.type) && !source) add(step, 'error', 'Fonte/cena obrigatória para este tipo.', 'sourceInputKey');
+    if (step.sourceInputKey && !source) add(step, 'error', 'A fonte por UUID não existe neste projeto.', 'sourceInputKey');
+    if (step.sourceInputKey && source && !sources.some(item => item.key === step.sourceInputKey)) add(step, 'warning', 'UUID não encontrado; a fonte foi resolvida pelo nome. Selecione para fixar o UUID atual.', 'sourceInputKey');
+    if (!step.sourceInputKey && step.sourceName) add(step, 'warning', 'Fonte referenciada por nome; selecione uma opção para fixar o UUID.', 'sourceInputKey');
+    if (source && step.sourceName && source.name !== step.sourceName) add(step, 'warning', `A fonte agora se chama "${source.name}".`, 'sourceInputKey');
+    if (step.transition === 'fade' && (!(Number(step.transitionMs) >= 50) || Number(step.transitionMs) > 20000)) add(step, 'error', 'Fade exige 50 a 20000 ms.', 'transitionMs');
+    if (step.durationMode === 'fixed' && !(Number(step.durationSec) > 0)) add(step, 'error', 'Duração fixa precisa ser maior que zero.', 'durationSec');
+    if (step.durationMode === 'fixed' && Number(step.durationSec) > 86400) add(step, 'error', 'Duração fixa limitada a 24 horas.', 'durationSec');
+    if (step.durationMode === 'media' && !MEDIA_TYPES.has(step.type)) add(step, 'error', 'Duração da mídia exige passo de vídeo ou playlist.', 'durationMode');
+    if (step.endBehavior === 'after_time' && !(stepDuration(step) > 0)) add(step, 'error', 'Avançar após tempo exige duração resolvida.', 'endBehavior');
+    if (step.endBehavior === 'after_time' && stepDuration(step) > 86400) add(step, 'error', 'Avanço automático limitado a 24 horas.', 'endBehavior');
+    if (MEDIA_TYPES.has(step.type) && source && !source.media) add(step, 'error', 'Passo de vídeo/playlist exige uma fonte de mídia com player.', 'sourceInputKey');
+    if (step.endBehavior === 'media_end' && !MEDIA_TYPES.has(step.type)) add(step, 'error', 'Fim de mídia exige passo de vídeo ou playlist.', 'endBehavior');
+    if (step.endBehavior === 'media_end' && source && !source.media) add(step, 'error', 'A fonte não é uma mídia com player.', 'endBehavior');
+    const channels = new Set();
+    for (const action of step.dsk || []) {
+      const channel = Number(action.channel);
+      if (!Number.isInteger(channel) || channel < 1 || channel > 8) add(step, 'error', 'Canal de DSK inválido.', 'dsk');
+      else if (channels.has(channel)) add(step, 'error', `DSK ${channel} duplicado no passo.`, 'dsk');
+      else channels.add(channel);
+      if (!(action.action in DSK_LABELS)) add(step, 'error', 'Ação de DSK inválida.', 'dsk');
+      if (['prepare', 'enter'].includes(action.action) && !action.scene) add(step, 'error', `DSK ${channel}: informe a cena.`, 'dsk');
+      if (['prepare', 'enter'].includes(action.action) && action.scene && connected && scenes.length && !scenes.includes(action.scene)) add(step, 'error', `DSK ${channel}: cena "${action.scene}" não existe.`, 'dsk');
+    }
+    const targets = new Set();
+    for (const action of step.audio || []) {
+      if (!(action.action in AUDIO_LABELS)) add(step, 'error', 'Ação de áudio inválida.', 'audio');
+      if (action.action === 'keep') continue;
+      const target = action.targetKey || action.targetName;
+      if (!target) add(step, 'error', 'Ação de áudio exige destino.', 'audio');
+      else if (targets.has(target)) add(step, 'error', 'Destino de áudio duplicado.', 'audio');
+      else targets.add(target);
+      if (action.action === 'volume' && !(Number(action.value) >= 0 && Number(action.value) <= 100)) add(step, 'error', 'Volume deve ficar entre 0 e 100.', 'audio');
+      if (target && connected && audioTargets.length) {
+        const found = action.targetKey ? audioTargets.find(item => item.key === action.targetKey) : audioTargets.find(item => item.name === action.targetName);
+        if (!found) add(step, 'error', 'Destino de áudio não encontrado neste projeto.', 'audio');
+      }
+    }
+  }
+  return { items, byStep, errors: items.filter(item => item.severity === 'error').length, warnings: items.filter(item => item.severity === 'warning').length };
+}
+function serverValidation() { return summary?.validation || { valid: true, errors: 0, warnings: 0, items: [] }; }
+function preparationReady(step) {
+  if (!step) return false;
+  const known = summaryStepById(step.id) || step;
+  return !!(known.preparation && !known.preparation.consumedAt && summary?.preparedStepId === step.id);
+}
+function preparedReady() { return preparationReady(summary?.preparedStep); }
+function commandTarget() {
+  return findSummaryStep(selectedStepId)?.step || summary?.preparedStep || summary?.nextStep || null;
+}
+function liveTiming() {
+  const current = summary?.currentStep;
+  if (!current || !current.execution?.startedAt) return { elapsed: null, duration: null, remaining: null, overdue: null };
+  const duration = summary?.durationSec ?? current.execution?.planDurationSec ?? null;
+  // O relógio do servidor é a referência; somamos apenas o tempo decorrido
+  // desde a última leitura para não depender do relógio do dispositivo remoto.
+  const baseElapsed = Number(summary?.elapsedSec);
+  const sinceFetch = fetchedAt ? Math.max(0, (Date.now() - fetchedAt) / 1000) : 0;
+  const elapsed = Number.isFinite(baseElapsed)
+    ? Math.max(0, baseElapsed + sinceFetch)
+    : Math.max(0, (Date.now() - current.execution.startedAt) / 1000);
+  return {
+    elapsed,
+    duration,
+    remaining: duration !== null && duration !== undefined ? Math.max(0, duration - elapsed) : null,
+    overdue: duration !== null && duration !== undefined ? Math.max(0, elapsed - duration) : null
+  };
+}
+function statusOf(step) {
+  if (!step) return 'pending';
+  const known = summaryStepById(step.id) || step;
+  if (step.id === summary?.executingStepId) return 'executing';
+  if (step.id === summary?.currentStepId) return known.execution?.partial ? 'failed' : 'current';
+  if (known.status === 'prepared' || preparationReady(step)) return 'prepared';
+  return known.status || 'pending';
+}
+function stepDurationLabel(step) {
+  if (step.durationMode === 'fixed') return fmt(step.durationSec);
+  if (step.durationMode === 'media') {
+    const duration = Number(sourceForStep(step)?.mediaDurationSec);
+    return duration > 0 ? fmt(duration) : 'mídia';
+  }
+  return '—';
+}
+function actionSummary(step) {
+  const parts = [];
+  for (const action of step.dsk || []) if (action.action !== 'keep') parts.push(`DSK${action.channel} ${DSK_LABELS[action.action] || action.action}${action.scene ? ` ${action.scene}` : ''}`);
+  for (const action of step.audio || []) if (action.action !== 'keep') parts.push(`${action.targetName || action.targetKey || 'Áudio'} ${AUDIO_LABELS[action.action] || action.action}${action.action === 'volume' ? ` ${action.value}%` : ''}`);
+  return parts.length ? parts.slice(0, 3).join(' · ') + (parts.length > 3 ? ` +${parts.length - 3}` : '') : '—';
+}
+
+function toast(message, error = false) {
+  const node = $('toast');
+  if (!node) return;
+  node.textContent = message;
+  node.className = `toast on${error ? ' err' : ''}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { node.className = 'toast'; }, error ? 7000 : 3800);
+}
+function adoptSummary(data) {
+  if (data && Array.isArray(data.blocks)) { summary = data; fetchedAt = Date.now(); }
+}
+async function apiGet() {
+  const response = await fetch(API, { cache: 'no-store' });
+  const data = await response.json().catch(() => null);
+  if (!response.ok || !data || data.success === false) throw new Error(data?.error || `Falha HTTP ${response.status}`);
+  return data;
+}
+async function post(action, payload = {}) {
+  const response = await fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, ...payload })
+  });
+  const data = await response.json().catch(() => null);
+  if (data?.summary) adoptSummary(data.summary);
+  else adoptSummary(data);
+  if (!response.ok || !data || data.success === false) {
+    const error = new Error(data?.error || `Falha HTTP ${response.status}`);
+    error.data = data;
+    throw error;
+  }
+  lastError = null;
+  if (data.warning) toast(data.warning, true);
+  return data;
+}
+function handleError(error) {
+  lastError = error?.message || 'Falha inesperada';
+  if (error?.data?.summary) adoptSummary(error.data.summary);
+  toast(lastError, true);
+}
+async function runAction(fn) {
+  if (busy) return;
+  busy = true;
+  render();
+  try { await fn(); }
+  catch (error) { handleError(error); }
+  finally { busy = false; render(); }
+}
+
+function render() {
+  if (!summary) return;
+  if (compact) { renderDock(); return; }
+  const sideScroll = $('side')?.scrollTop || 0;
+  const tableScroll = $('table-scroll')?.scrollTop || 0;
+  renderHeader();
+  renderBanner();
+  if (activeTab === 'editar') {
+    renderEditToolbar();
+    renderEditTable();
+    renderEditorSide();
+  } else {
+    renderOperateToolbar();
+    renderOperateTable();
+    renderOperatorSide();
+  }
+  renderFooter();
+  if ($('side')) $('side').scrollTop = sideScroll;
+  if ($('table-scroll')) $('table-scroll').scrollTop = tableScroll;
+  updateClocks();
+}
+function renderHeader() {
+  if (!summary) return;
+  $('head-meta').textContent = `${summary.version || `v${summary.revision}`} · ${summary.persistence?.project || 'sem projeto'}`;
+  const badges = [];
+  badges.push(`<span class="badge ${summary.connected ? 'ok' : 'bad'}">${summary.connected ? 'MOTOR CONECTADO' : 'SEM MOTOR'}</span>`);
+  const automation = summary.automation || {};
+  if (automation.armed) badges.push('<span class="badge armed">AUTOMAÇÃO ARMADA</span>');
+  else if (automation.suspended) badges.push('<span class="badge susp">AUTOMAÇÃO SUSPENSA</span>');
+  else badges.push('<span class="badge off">AUTOMAÇÃO DESARMADA</span>');
+  if (summary.ended) badges.push('<span class="badge off">ROTEIRO ENCERRADO</span>');
+  else if (summary.currentStep) badges.push('<span class="badge cur">EM EXECUÇÃO</span>');
+  if (summary.divergence?.active) badges.push('<span class="badge susp">DIVERGÊNCIA</span>');
+  $('head-badges').innerHTML = badges.join('');
+  document.querySelectorAll('.tabs [data-tab]').forEach(button => button.classList.toggle('on', button.dataset.tab === activeTab));
+}
+function renderBanner() {
+  const notices = [];
+  if (lastError) notices.push({ kind: 'error', text: lastError, dismiss: true });
+  if (pollError && pollError !== lastError) notices.push({ kind: 'error', text: `Sincronização: ${pollError}`, dismiss: true });
+  if (!summary.connected) notices.push({ kind: 'warn', text: 'Motor desconectado. Preparar e executar ficam bloqueados até a reconexão.' });
+  if (summary.ended) notices.push({ kind: 'info', text: 'Roteiro encerrado. Nada está sendo automatizado; use Reabrir para uma nova passagem.' });
+  if (summary.persistence?.loadError) notices.push({ kind: 'error', text: `Falha ao carregar o roteiro salvo: ${summary.persistence.loadError}` });
+  if (summary.persistence?.saveError) notices.push({ kind: 'error', text: `Falha ao gravar o roteiro: ${summary.persistence.saveError}` });
+  if (summary.persistence?.historyError) notices.push({ kind: 'warn', text: `Histórico de execução não gravado: ${summary.persistence.historyError}` });
+  if (edit.dirty) notices.push({ kind: 'warn', text: 'Há alterações locais não salvas na aba Editar. Elas não afetam a execução até você salvar.' });
+  if (summary.automation?.suspended && summary.automation.suspendedReason) notices.push({ kind: 'warn', text: `Automação suspensa: ${summary.automation.suspendedReason}` });
+  if (summary.divergence?.active) notices.push({ kind: 'warn', text: `Divergência detectada (${summary.divergence.items.length}). A mesa não foi alterada; prepare novamente se desejar.` });
+  if (summary.validation?.errors > 0) notices.push({ kind: 'warn', text: `${summary.validation.errors} erro(s) no roteiro salvo impedem preparar.` });
+  const banner = $('banner');
+  if (!notices.length) { banner.innerHTML = ''; return; }
+  banner.innerHTML = notices.slice(0, 5).map(notice => `<div class="notice ${notice.kind}"><span class="grow">${esc(notice.text)}</span>${notice.dismiss ? '<button type="button" data-act="dismiss-error">Fechar</button>' : ''}</div>`).join('');
+}
+function validationIcon(validation) {
+  const errors = validation?.errors?.length || 0, warnings = validation?.warnings?.length || 0;
+  if (errors) return `<span class="val err" title="${esc(validation.errors[0])}">!</span>`;
+  if (warnings) return `<span class="val warn" title="${esc(validation.warnings[0])}">•</span>`;
+  return '<span class="val ok" title="Sem erros">✓</span>';
+}
+function blockHeader(block, editing, index) {
+  const open = !collapsed.has(block.id);
+  const steps = block.steps || [];
+  const total = steps.reduce((sum, step) => sum + (stepDuration(step) || 0), 0);
+  const label = editing
+    ? `<input class="block-title" data-block-field="title" data-block-id="${esc(block.id)}" value="${esc(block.title)}" aria-label="Título do bloco">`
+    : `<b style="color:#fff">${esc(block.title)}</b>`;
+  return `<div class="rd-block-head">
+    <span class="caret" data-act="toggle-block" data-block-id="${esc(block.id)}" title="${open ? 'Recolher' : 'Expandir'} bloco">${open ? '▾' : '▸'}</span>
+    ${label}
+    <span class="bcount">${steps.length} passo${steps.length === 1 ? '' : 's'}</span>
+    <span class="btotal">${fmt(total)}${steps.some(step => !stepDuration(step)) ? ' + sem duração' : ''}</span>
+    ${editing ? `<button type="button" class="b mini" data-act="add-step" data-block-id="${esc(block.id)}">+ Passo</button><button type="button" class="b mini icon" data-act="delete-block" data-block-id="${esc(block.id)}" title="Remover bloco">×</button>` : ''}
+  </div>`;
+}
+function rowHtml(entry, editing, validation) {
+  const { block, step, index } = entry;
+  const status = statusOf(step);
+  const ready = preparationReady(step);
+  const stale = step.id === summary?.preparedStepId && !ready;
+  const classes = ['rd-row'];
+  if (step.id === selectedStepId) classes.push('selected');
+  if (step.id === summary?.currentStepId) classes.push(step.execution?.partial ? 'failed' : 'current');
+  if (step.id === summary?.nextStep?.id) classes.push('next');
+  if (ready) classes.push('prepared');
+  const current = step.id === summary?.currentStepId || step.id === summary?.executingStepId;
+  const titleTags = `${ready ? '<span class="mini-tag prep">PREPARADO</span>' : ''}${stale ? '<span class="mini-tag stale">PREP. CONSUMIDA</span>' : ''}${current ? '<span class="mini-tag lock">ESTÁVEL</span>' : ''}`;
+  const validationView = validation?.byStep?.[step.id] || { errors: [], warnings: [] };
+  return `<div class="rd-grid ${classes.join(' ')}" data-select-step="${esc(step.id)}" title="Selecionar não executa">
+    <div>${statusPill(status)}</div>
+    <div class="num">${index + 1}</div>
+    <div class="title"><b>${esc(step.title || 'Sem título')}</b>${titleTags}</div>
+    <div class="type">${esc(typeLabel(step.type))}</div>
+    <div>${esc(sourceForStep(step)?.name || step.sourceName || '—')}</div>
+    <div class="dur">${esc(stepDurationLabel(step))}</div>
+    <div>${esc(END_LABELS[step.endBehavior] || step.endBehavior || '—')}</div>
+    <div title="${esc(actionSummary(step))}">${esc(actionSummary(step))}</div>
+    <div>${editing ? validationIcon(validationView) : (ready ? '<span class="val ok" title="Preparado">●</span>' : '<span class="val" style="color:#777">·</span>')}</div>
+  </div>`;
+}
+function tableMarkup(editing) {
+  const blocks = editing ? edit.blocks : (summary?.blocks || []);
+  const validation = editing ? validateLocal() : { byStep: Object.fromEntries((summary?.steps || []).map(step => [step.id, { errors: step.validation?.errors || [], warnings: step.validation?.warnings || [] }])) };
+  if (!blocks.length) {
+    return `<div class="empty"><b>Nenhum passo no roteiro</b>${editing ? 'Crie um bloco e adicione o primeiro passo. Nada será executado até você preparar e confirmar.' : 'Abra a aba Editar para montar o roteiro.'}<br><br>${editing ? '<button type="button" class="b primary" data-act="add-block">Criar primeiro bloco</button>' : '<button type="button" class="b" data-act="tab" data-tab="editar">Ir para Editar</button>'}</div>`;
+  }
+  let index = 0;
+  const sections = blocks.map(block => {
+    const open = !collapsed.has(block.id);
+    const rows = (block.steps || []).map(step => rowHtml({ block, step, index: index++ }, editing, validation)).join('');
+    return `<section class="rd-block">${blockHeader(block, editing)}${open ? `<div class="rd-steps">${rows || '<div class="empty" style="padding:12px">Bloco sem passos.</div>'}</div>` : ''}</section>`;
+  }).join('');
+  return `<div class="rd-grid rd-col-head"><div>Estado</div><div>#</div><div>Título / notas</div><div>Tipo</div><div>Fonte / UUID</div><div>Duração</div><div>Fim</div><div>DSK / áudio</div><div></div></div>${sections}`;
+}
+function renderEditToolbar() {
+  const totals = localTotals();
+  const validation = validateLocal();
+  const toolbar = $('toolbar');
+  toolbar.innerHTML = `<span class="sum">Total planejado <b>${fmt(totals.total)}</b>${totals.unknown ? ` <span class="dirty">(${totals.unknown} sem duração)</span>` : ''}</span>
+    <span class="sum">${validation.errors ? `<b class="err">${validation.errors} erro(s)</b>` : '<b class="ok">Sem erros</b>'} · ${validation.warnings} aviso(s)</span>
+    <span class="dirty ${edit.dirty ? '' : 'clean'}">${edit.dirty ? 'ALTERAÇÕES NÃO SALVAS' : 'SALVO'}</span>
+    <span class="spacer"></span>
+    ${summary?.captureDraft ? '<button type="button" class="b amber mini" data-act="review-draft">Revisar rascunho</button>' : ''}
+    <button type="button" class="b mini" data-act="add-block">+ Bloco</button>
+    <button type="button" class="b mini" data-act="discard" ${edit.dirty ? '' : 'disabled'}>Descartar</button>
+    <button type="button" class="b primary mini" data-act="save" ${edit.dirty ? '' : 'disabled'}>Salvar roteiro</button>
+    <span class="sum">${esc(summary?.version || '')}</span>`;
+}
+function renderEditTable() { $('table').innerHTML = tableMarkup(true); }
+function renderOperateToolbar() {
+  const target = commandTarget();
+  const ready = preparedReady();
+  const timing = liveTiming();
+  const automation = summary.automation || {};
+  const canPrepare = !busy && !summary.ended && summary.connected && !!target;
+  const canExecute = !busy && !summary.ended && summary.connected && ready;
+  const canSkip = !busy && !summary.ended && !!(summary.currentStepId || selectedStepId || summary.nextStep);
+  const canSuspend = !busy && !!automation.armed;
+  const canArm = !busy && !summary.ended && !automation.armed;
+  $('toolbar').innerHTML = `<div class="op-strip">
+      <span class="op-time">DECORRIDO <b id="op-elapsed">${timing.elapsed === null ? '—' : fmt(timing.elapsed)}</b></span>
+      <span class="op-time remain">RESTANTE <b id="op-remain">${timing.remaining === null ? '—' : fmt(timing.remaining)}</b></span>
+      <span class="overdue" id="op-overdue">${timing.overdue > 0.5 ? `ATRASO +${fmt(timing.overdue)}` : ''}</span>
+      <span class="op-total">TOTAL <b id="op-total">${fmt(summary.totalPlannedDurationSec)}</b>${summary.unknownDurationSteps ? ` · ${summary.unknownDurationSteps} sem duração` : ''}</span>
+      <span class="op-target">PREPARAR <b>${esc(target?.title || '—')}</b></span>
+      <span class="op-target">EXECUTAR <b>${esc(ready ? summary.preparedStep?.title || '—' : '—')}</b></span>
+      <span class="badge ${automation.armed ? 'armed' : automation.suspended ? 'susp' : 'off'}">${automation.armed ? 'ARMADA' : automation.suspended ? 'SUSPENSA' : 'DESARMADA'}</span>
+    </div>
+    <div class="cmdbar">
+      <button type="button" class="b" data-act="prepare" ${canPrepare ? '' : 'disabled'} title="Valida e prepara recursos sem mudar Programa, áudio ou DSK no ar">PREPARAR</button>
+      <button type="button" class="b primary" data-act="execute" ${canExecute ? '' : 'disabled'} title="${ready ? 'Aplica somente o passo preparado' : 'Prepare um passo primeiro'}">EXECUTAR</button>
+      <button type="button" class="b" data-act="skip" ${canSkip ? '' : 'disabled'} title="Pula um passo sem alterar o Programa">PULAR</button>
+      <button type="button" class="b" data-act="suspend" ${canSuspend ? '' : 'disabled'} title="Desarma e cancela o avanço automático">SUSPENDER</button>
+      <button type="button" class="b" data-act="arm" ${canArm ? '' : 'disabled'} title="Só com sessão armada o roteiro avança sozinho">ARMAR</button>
+      <button type="button" class="b danger" data-act="end" ${!busy && !summary.ended ? '' : 'disabled'}>ENCERRAR</button>
+      ${summary.ended ? '<button type="button" class="b" data-act="reopen">REABRIR</button>' : ''}
+    </div>
+    <div class="hintline">Selecionar não executa. PREPARAR valida/carrega PVW; EXECUTAR aplica só o passo preparado. Avanço é passo a passo; o tempo vencido no modo manual apenas sinaliza atraso.</div>`;
+}
+function renderOperateTable() { $('table').innerHTML = tableMarkup(false); }
+function renderFooter() {
+  const persistence = summary.persistence || {};
+  $('foot-left').textContent = `${summary.name} · ${summary.version || ''} · ${summary.stepsCount} passo(s) · histórico ${persistence.historyCount || 0} · ${persistence.project || 'sem projeto'}`;
+  const right = activeTab === 'operar'
+    ? 'Espaço: executar o passo preparado (fora de campos) · Esc: limpar seleção'
+    : 'Erros impedem preparar; avisos não bloqueiam · Salve para persistir a versão';
+  $('foot-right').textContent = right;
+}
+function renderEditorSide() {
+  const side = $('side');
+  const found = findEditStep(selectedStepId);
+  const validation = validateLocal();
+  if (!found) {
+    const draft = summary?.captureDraft ? draftCard() : '';
+    side.innerHTML = `${draft}
+      <div class="side-head"><div class="grow"><div class="kicker">Editor lateral</div><h2>Selecione um passo</h2><div class="sub">Clique em uma linha para editar. Selecionar não executa nada.</div></div></div>
+      <div class="side-note">O roteiro tem ${edit.blocks.length} bloco(s) e ${allEditSteps().length} passo(s). ${validation.errors ? `<b>${validation.errors} erro(s)</b> impedem preparar.` : 'Sem erros de validação local.'}</div>
+      ${validationPanel(validation.items)}
+      <div class="side-actions"><button type="button" class="b" data-act="add-block">+ Bloco</button>${edit.blocks.length ? '<button type="button" class="b" data-act="add-step">+ Passo no último bloco</button>' : ''}</div>`;
+    return;
+  }
+  const { block, step, index } = found;
+  const locked = step.id === summary.currentStepId || step.id === summary.executingStepId;
+  const ready = preparationReady(step);
+  const disabled = locked ? 'disabled' : '';
+  const source = sourceForStep(step);
+  const mediaDuration = Number(source?.mediaDurationSec);
+  const validationView = validation.byStep[step.id] || { errors: [], warnings: [] };
+  const dskRows = (step.dsk || []).map((action, i) => `<div class="action-row">
+      <select data-dsk-field="channel" data-index="${i}" ${disabled}>${Array.from({ length: 8 }, (_, n) => `<option value="${n + 1}" ${Number(action.channel) === n + 1 ? 'selected' : ''}>DSK ${n + 1}</option>`).join('')}</select>
+      <select data-dsk-field="action" data-index="${i}" ${disabled}>${Object.entries(DSK_LABELS).map(([value, label]) => `<option value="${value}" ${action.action === value ? 'selected' : ''}>${label}</option>`).join('')}</select>
+      <select data-dsk-field="scene" data-index="${i}" ${disabled || action.action === 'exit' || action.action === 'keep' ? 'disabled' : ''}>${sceneOptions(action.scene)}</select>
+      <button type="button" class="b icon" data-act="remove-dsk" data-index="${i}" ${disabled} title="Remover ação de DSK">×</button>
+    </div>`).join('');
+  const audioRows = (step.audio || []).map((action, i) => `<div class="action-row audio">
+      <select data-audio-field="target" data-index="${i}" ${disabled}>${audioOptions(action)}</select>
+      <select data-audio-field="action" data-index="${i}" ${disabled}>${Object.entries(AUDIO_LABELS).map(([value, label]) => `<option value="${value}" ${action.action === value ? 'selected' : ''}>${label}</option>`).join('')}</select>
+      <input type="number" min="0" max="100" step="1" data-audio-field="value" data-index="${i}" value="${action.value === null || action.value === undefined ? 100 : Number(action.value)}" ${disabled || action.action !== 'volume' ? 'disabled' : ''} title="Volume 0 a 100">
+      <button type="button" class="b icon" data-act="remove-audio" data-index="${i}" ${disabled} title="Remover ação de áudio">×</button>
+    </div>`).join('');
+  side.innerHTML = `<div class="side-head">
+      <div class="grow"><div class="kicker">${esc(block.title)} · passo ${index + 1} de ${allEditSteps().length}</div><h2>${esc(step.title || 'Sem título')}</h2><div class="sub">${esc(typeLabel(step.type))}${step.captured ? ' · capturado' : ''}</div></div>
+      ${statusPill(statusOf(step))}
+    </div>
+    ${locked ? '<div class="side-note warn">Passo em execução: os campos ficam estáveis até você avançar, pular ou encerrar o roteiro.</div>' : ''}
+    ${ready ? '<div class="side-note ok">Preparação válida. Alterar e salvar este passo invalida a preparação.</div>' : ''}
+    ${selectionValidation(validationView)}
+    <div class="form-grid">
+      <label class="wide">Título<input data-step-field="title" value="${esc(step.title)}" ${disabled} maxlength="200"></label>
+      <label>Tipo<select data-step-field="type" ${disabled}>${Object.entries(TYPES).map(([value, label]) => `<option value="${value}" ${step.type === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label>
+      <label>Transição<select data-step-field="transition" ${disabled}><option value="cut" ${step.transition === 'cut' ? 'selected' : ''}>Cut</option><option value="fade" ${step.transition === 'fade' ? 'selected' : ''}>Fade</option></select></label>
+      <label class="wide">Fonte / cena (UUID estável)<select data-step-field="source" ${disabled}>${sourceOptions(step)}</select><span class="hint">${source ? `UUID ${esc(source.key || '—')} · ${esc(typeLabel(source.type))}` : 'Nenhuma fonte resolvida'}</span></label>
+      <label>Duração transição (ms)<input type="number" data-step-field="transitionMs" value="${Number(step.transitionMs) || 0}" min="0" max="20000" step="50" ${disabled || step.transition === 'cut' ? 'disabled' : ''}></label>
+      <label>Duração planejada<select data-step-field="durationMode" ${disabled}><option value="fixed" ${step.durationMode === 'fixed' ? 'selected' : ''}>Fixa</option><option value="media" ${step.durationMode === 'media' ? 'selected' : ''}>Da mídia</option><option value="none" ${step.durationMode === 'none' ? 'selected' : ''}>Sem duração</option></select></label>
+      <label>Duração fixa (s)<input type="number" data-step-field="durationSec" value="${step.durationSec === null || step.durationSec === undefined ? '' : Number(step.durationSec)}" min="1" max="86400" step="1" ${disabled || step.durationMode !== 'fixed' ? 'disabled' : ''}><span class="hint">${step.durationMode === 'media' ? (mediaDuration > 0 ? `Mídia: ${fmt(mediaDuration)}` : 'Duração da mídia desconhecida') : step.durationMode === 'none' ? 'Restante será “—”' : ''}</span></label>
+      <label>Fim do passo<select data-step-field="endBehavior" ${disabled}><option value="wait_operator" ${step.endBehavior === 'wait_operator' ? 'selected' : ''}>Aguardar operador</option><option value="after_time" ${step.endBehavior === 'after_time' ? 'selected' : ''}>Avançar após tempo</option><option value="media_end" ${step.endBehavior === 'media_end' ? 'selected' : ''}>Avançar no fim da mídia</option></select></label>
+      <label class="check"><input type="checkbox" data-step-field="loadPreview" ${step.loadPreview !== false ? 'checked' : ''} ${disabled}> Carregar PVW ao preparar</label>
+      <label class="wide">Notas<textarea data-step-field="notes" ${disabled} maxlength="4000">${esc(step.notes || '')}</textarea></label>
+    </div>
+    <section class="sub"><h3><span>DSK por canal</span><span class="grow"></span><button type="button" class="b mini" data-act="add-dsk" ${disabled}>+ DSK</button></h3><div>${dskRows || '<span class="side-note" style="display:block">Nenhuma ação de DSK. Canais não mencionados permanecem como estão.</span>'}</div></section>
+    <section class="sub"><h3><span>Áudio explícito</span><span class="grow"></span><button type="button" class="b mini" data-act="add-audio" ${disabled}>+ Áudio</button></h3><div>${audioRows || '<span class="side-note" style="display:block">Nenhuma ação de áudio. O áudio permanece como está.</span>'}</div></section>
+    <div class="side-actions"><button type="button" class="b danger" data-act="delete-step" ${disabled}>Excluir passo</button></div>`;
+  const draft = summary?.captureDraft ? draftCard() : '';
+  if (draft) side.insertAdjacentHTML('afterbegin', draft);
+}
+function validationPanel(items) {
+  if (!items.length) return '<div class="side-note ok">Sem erros ou avisos de validação local.</div>';
+  const rows = items.slice(0, 10).map(item => `<div class="list-row"><span class="${item.severity === 'error' ? 'bad' : 'run'}">${item.severity === 'error' ? 'ERRO' : 'AVISO'}</span><span class="grow">${esc(item.message)}</span></div>`).join('');
+  return `<div class="sub" style="border-top:0;padding-top:0"><h3>Validação local</h3><div class="list">${rows}</div>${items.length > 10 ? `<div class="meta" style="color:#8f8f8f;font-size:10px;margin-top:4px">+${items.length - 10} item(ns)</div>` : ''}</div>`;
+}
+function selectionValidation(view) {
+  if (!view || (!view.errors.length && !view.warnings.length)) return '';
+  const items = [...view.errors.map(error => ({ severity: 'error', message: error.message || error })), ...view.warnings.map(warning => ({ severity: 'warning', message: warning.message || warning }))];
+  return `<div class="side-note ${view.errors.length ? 'error' : 'warn'}">${items.slice(0, 4).map(item => `${item.severity === 'error' ? 'Erro' : 'Aviso'}: ${esc(item.message)}`).join('<br>')}${items.length > 4 ? '<br>…' : ''}</div>`;
+}
+function sourceOptions(step) {
+  const sources = summary?.availableSources || [];
+  const selected = step.sourceInputKey || (step.sourceName ? sources.find(source => source.name === step.sourceName)?.key : '') || '';
+  const values = sources.map(source => `<option value="${esc(source.key)}" ${selected === source.key ? 'selected' : ''}>${esc(source.name)}${source.media ? ' · mídia' : ''}</option>`);
+  if (selected && !sources.some(source => source.key === selected)) values.unshift(`<option value="${esc(selected)}" selected>${esc(step.sourceName || selected)} (indisponível)</option>`);
+  return `<option value="">(Selecionar fonte)</option>${values.join('')}`;
+}
+function sceneOptions(scene) {
+  const scenes = summary?.availableScenes || [];
+  const values = scenes.map(name => `<option value="${esc(name)}" ${scene === name ? 'selected' : ''}>${esc(name)}</option>`);
+  if (scene && !scenes.includes(scene)) values.unshift(`<option value="${esc(scene)}" selected>${esc(scene)} (indisponível)</option>`);
+  return `<option value="">(Nenhuma)</option>${values.join('')}`;
+}
+function audioOptions(action) {
+  const targets = summary?.availableAudio || [];
+  const selected = action.targetKey || (action.targetName ? `name:${action.targetName}` : '');
+  const values = targets.map(target => `<option value="${esc(target.key || `name:${target.name}`)}" ${selected === (target.key || `name:${target.name}`) ? 'selected' : ''}>${esc(target.name)}</option>`);
+  if (selected && !targets.some(target => (target.key || `name:${target.name}`) === selected)) values.unshift(`<option value="${esc(selected)}" selected>${esc(action.targetName || selected)} (indisponível)</option>`);
+  return `<option value="">(Destino)</option>${values.join('')}`;
+}
+function draftCard() {
+  const draft = summary?.captureDraft;
+  if (!draft) return '';
+  const blocks = summary?.blocks || [];
+  return `<section class="draft">
+    <div class="draft-head">Rascunho de captura · revise antes de aplicar</div>
+    <div class="draft-body">
+      <div class="side-note" style="margin:0">Capturado de <b>${esc(draft.capturedFrom?.programName || '—')}</b>. Nada foi alterado no roteiro nem executado.</div>
+      <label>Título<input id="draft-title" value="${esc(draft.step?.title || 'Passo capturado')}" maxlength="200"></label>
+      <label>Notas<textarea id="draft-notes" maxlength="4000">${esc(draft.step?.notes || '')}</textarea></label>
+      <label>Bloco<select id="draft-block">${blocks.map(block => `<option value="${esc(block.id)}">${esc(block.title)}</option>`).join('')}</select></label>
+      ${draft.step?.dsk?.length ? `<div class="hint" style="color:#cfc6a8;font-size:10px">DSK no rascunho: ${draft.step.dsk.map(action => `DSK ${action.channel} ${DSK_LABELS[action.action] || action.action}`).join(' · ')}</div>` : ''}
+      ${draft.warnings?.length ? `<div class="side-note warn" style="margin:0">${draft.warnings.map(warning => esc(warning)).join('<br>')}</div>` : ''}
+      <div class="draft-actions"><button type="button" class="b primary mini" data-act="apply-draft">Aplicar ao roteiro</button><button type="button" class="b mini" data-act="discard-draft">Descartar</button></div>
+    </div>
+  </section>`;
+}
+function renderOperatorSide() {
+  const side = $('side');
+  const current = summary.currentStep;
+  const prepared = summary.preparedStep;
+  const next = summary.nextStep;
+  const timing = liveTiming();
+  const automation = summary.automation || {};
+  const divergence = summary.divergence || { active: false, items: [] };
+  const validation = serverValidation();
+  const history = summary.history || [];
+  const actions = current?.execution?.actions || [];
+  side.innerHTML = `${summary.captureDraft ? draftCard() : ''}
+    <section class="panel">
+      <div class="panel-head"><h3>Passo em execução</h3>${current ? statusPill(statusOf(current)) : '<span class="pill pending">SEM PASSO</span>'}</div>
+      <div class="panel-body">
+        ${current ? `<div class="title">${esc(current.title)}</div>
+          <div class="meta">${esc(current.blockTitle || '')} · ${esc(typeLabel(current.type))} · ${esc(sourceForStep(current)?.name || current.sourceName || 'sem fonte')}</div>
+          ${current.notes ? `<div class="notes">${esc(current.notes)}</div>` : ''}
+          <div class="kv"><span>Decorrido</span><b>${timing.elapsed === null ? '—' : fmt(timing.elapsed)}</b></div>
+          <div class="kv"><span>Restante</span><b>${timing.remaining === null ? '—' : fmt(timing.remaining)}</b></div>
+          ${timing.overdue > 0.5 ? `<div class="kv"><span>Atraso</span><b style="color:#ffb36b">+${fmt(timing.overdue)}</b></div>` : ''}
+          <div class="kv"><span>Fim previsto</span><b>${esc(END_LABELS[current.endBehavior] || current.endBehavior || '—')}</b></div>
+          <div class="kv"><span>Mesa agora</span><b>PGM ${esc(summary.program || '—')} · PVW ${esc(summary.preview || '—')}</b></div>
+          ${actions.length ? `<div class="list">${actions.map(action => `<div class="list-row"><span class="${action.status === 'confirmed' ? 'ok' : action.status === 'failed' ? 'bad' : 'run'}">${action.status === 'confirmed' ? '✓' : action.status === 'failed' ? '!' : '…'}</span><span class="grow">${esc(action.label)}</span></div>`).join('')}</div>` : ''}
+          ${current.failure ? `<div class="side-note error" style="margin:6px 0 0">${esc(current.failure.error)}</div>` : ''}`
+          : '<span style="color:#9a9a9a">Nenhum passo executado nesta sessão. Selecione, prepare e execute passo a passo.</span>'}
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><h3>Próximo</h3></div>
+      <div class="panel-body">${next ? `<div class="title">${esc(next.title)}</div><div class="meta">${esc(next.blockTitle || '')} · ${esc(typeLabel(next.type))} · ${esc(stepDurationLabel(next))}</div>` : '<span style="color:#9a9a9a">Sem próximo passo pendente.</span>'}</div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><h3>Preparação</h3>${prepared ? (preparationReady(prepared) ? '<span class="pill prepared">PRONTA</span>' : '<span class="pill pending">CONSUMIDA</span>') : '<span class="pill pending">NENHUMA</span>'}</div>
+      <div class="panel-body">
+        ${prepared ? `<div class="title">${esc(prepared.title)}</div>
+          <div class="meta">${esc(prepared.preparation?.resolved?.sourceName || prepared.sourceName || 'sem fonte')} · ${prepared.preparation?.preview?.loaded ? 'PVW carregado' : 'PVW não carregado'}</div>
+          <div class="kv"><span>Duração preparada</span><b>${prepared.preparation?.planDurationSec === null || prepared.preparation?.planDurationSec === undefined ? '—' : fmt(prepared.preparation.planDurationSec)}</b></div>
+          ${prepared.preparation?.consumedAt ? '<div class="side-note warn" style="margin:6px 0 0">Preparação consumida. Prepare novamente antes de repetir.</div>' : ''}
+          ${prepared.preparation?.warnings?.length ? `<div class="side-note warn" style="margin:6px 0 0">${prepared.preparation.warnings.map(warning => esc(warning)).join('<br>')}</div>` : ''}`
+          : '<span style="color:#9a9a9a">Selecione um passo e clique PREPARAR. A preparação pode carregar o PVW, mas não muda Programa, áudio ou DSK no ar.</span>'}
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><h3>Automação</h3><span class="badge ${automation.armed ? 'armed' : automation.suspended ? 'susp' : 'off'}">${automation.armed ? 'ARMADA' : automation.suspended ? 'SUSPENSA' : 'DESARMADA'}</span></div>
+      <div class="panel-body">
+        <div class="kv"><span>Modo do passo</span><b>${esc(END_LABELS[automation.currentMode] || automation.currentMode || '—')}</b></div>
+        <div class="kv"><span>Avanço automático</span><b>${automation.willAutoAdvance ? 'SIM, na sessão armada' : 'NÃO'}</b></div>
+        ${automation.mediaWatch ? `<div class="kv"><span>Aguardando fim real</span><b>${esc(automation.mediaWatch.mediaName)}</b></div>` : ''}
+        ${automation.warning ? `<div class="side-note warn" style="margin:6px 0 0">${esc(automation.warning)}</div>` : ''}
+        ${automation.suspendedReason ? `<div class="side-note warn" style="margin:6px 0 0">${esc(automation.suspendedReason)}</div>` : ''}
+        <div class="side-note" style="margin:6px 0 0">O padrão é manual. “Após tempo” e “fim da mídia” só avançam com ARMAR explícito; o fim de mídia depende do evento real do player.</div>
+      </div>
+    </section>
+    ${divergence.active ? `<section class="panel"><div class="panel-head"><h3>Divergência da mesa</h3><span class="pill failed">${divergence.items.length}</span></div><div class="panel-body"><div class="list">${divergence.items.map(item => `<div class="list-row"><span class="bad">!</span><span class="grow">${esc(item.message)}</span></div>`).join('')}</div><div class="side-actions"><button type="button" class="b amber mini" data-act="prepare-current">Preparar novamente</button></div></div></section>` : ''}
+    <section class="panel">
+      <div class="panel-head"><h3>Validação do roteiro salvo</h3><span class="pill ${validation.errors ? 'failed' : 'done'}">${validation.errors ? `${validation.errors} erro(s)` : 'OK'}</span></div>
+      <div class="panel-body">${validation.items?.length ? `<div class="list">${validation.items.slice(0, 8).map(item => `<div class="list-row"><span class="${item.severity === 'error' ? 'bad' : 'run'}">${item.severity === 'error' ? 'ERRO' : 'AVISO'}</span><span class="grow">${esc(item.message)}</span></div>`).join('')}</div>${validation.items.length > 8 ? `<div class="meta">+${validation.items.length - 8} item(ns)</div>` : ''}` : '<span style="color:#9a9a9a">Sem erros ou avisos.</span>'}</div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><h3>Histórico de execução</h3><span class="meta" style="color:#8f8f8f;font-size:9.5px">separado do roteiro</span></div>
+      <div class="panel-body">${history.length ? history.slice(0, 8).map(entry => `<div class="history-row ${esc(entry.outcome)}"><div class="h"><b>${esc(HISTORY_LABELS[entry.outcome] || entry.outcome)}</b><span>${esc(fmtDate(entry.at))}</span></div><div>${esc(entry.stepTitle || entry.reason || '—')}${entry.actions?.length ? ` · ${entry.actions.length} ação(ões)` : ''}</div>${entry.error ? `<div style="color:#ff9b9e">${esc(entry.error)}</div>` : ''}</div>`).join('') : '<span style="color:#9a9a9a">Nenhuma execução registrada.</span>'}</div>
+    </section>`;
+}
+function renderDock() {
+  if (!summary) return;
+  const current = summary.currentStep;
+  const next = summary.nextStep;
+  const prepared = summary.preparedStep;
+  const automation = summary.automation || {};
+  const timing = liveTiming();
+  $('d-version').textContent = summary.version || '';
+  const auto = $('d-auto');
+  auto.className = `badge ${automation.armed ? 'armed' : automation.suspended ? 'susp' : 'off'}`;
+  auto.textContent = automation.armed ? 'ARMADA' : automation.suspended ? 'SUSPENSA' : 'DESARMADA';
+  const box = $('d-current-box');
+  box.className = `dock-current ${summary.ended ? 'ended' : current ? (current.execution?.partial ? 'failed' : 'current') : ''}`;
+  $('d-label').textContent = summary.ended ? 'ROTEIRO ENCERRADO' : current ? 'EM EXECUÇÃO' : 'SEM PASSO EM EXECUÇÃO';
+  $('d-current').textContent = summary.ended ? 'Roteiro encerrado' : current?.title || 'Nenhum passo em execução';
+  $('d-current-sub').textContent = current ? `${current.blockTitle || ''} · ${sourceForStep(current)?.name || current.sourceName || 'sem fonte'} · ${END_LABELS[current.endBehavior] || current.endBehavior || ''}` : (next ? 'Prepare e execute o próximo passo quando estiver pronto.' : 'Adicione passos na aba Editar.');
+  $('d-next').textContent = next ? `${next.blockTitle || ''} · ${next.title}` : '—';
+  $('d-prep').innerHTML = prepared
+    ? (preparationReady(prepared)
+      ? `<span class="prep">PREPARADO: ${esc(prepared.title)}</span> · ${esc(prepared.preparation?.resolved?.sourceName || prepared.sourceName || '')}`
+      : `<span class="stale">PREPARAÇÃO CONSUMIDA: ${esc(prepared.title)} — prepare novamente</span>`)
+    : '<span style="color:#8f8f8f">Nenhum passo preparado.</span>';
+  const target = commandTarget();
+  const canPrepare = !busy && !summary.ended && summary.connected && !!target;
+  const ready = preparedReady();
+  const canExecute = !busy && !summary.ended && summary.connected && ready;
+  const canSkip = !busy && !summary.ended && !!(summary.currentStepId || selectedStepId || next);
+  const actions = [];
+  actions.push(`<button type="button" class="b" data-act="prepare" ${canPrepare ? '' : 'disabled'} title="${esc(target ? `Preparar: ${target.title}` : 'Nenhum passo selecionado')}">PREPARAR</button>`);
+  actions.push(`<button type="button" class="b primary" data-act="execute" ${canExecute ? '' : 'disabled'}>EXECUTAR</button>`);
+  actions.push(`<button type="button" class="b" data-act="skip" ${canSkip ? '' : 'disabled'}>PULAR</button>`);
+  if (automation.armed) actions.push(`<button type="button" class="b" data-act="suspend" ${busy ? 'disabled' : ''}>SUSPENDER</button>`);
+  else actions.push(`<button type="button" class="b" data-act="arm" ${!busy && !summary.ended ? '' : 'disabled'}>ARMAR</button>`);
+  actions.push(`<button type="button" class="b" data-act="capture" ${busy ? 'disabled' : ''}>CAPTURAR</button>`);
+  actions.push(summary.ended
+    ? `<button type="button" class="b" data-act="reopen" ${busy ? 'disabled' : ''}>REABRIR</button>`
+    : `<button type="button" class="b danger" data-act="end" ${busy ? 'disabled' : ''}>ENCERRAR</button>`);
+  actions.push(`<button type="button" class="b wide" data-act="expand">ABRIR ROTEIRO COMPLETO</button>`);
+  $('d-actions').innerHTML = actions.join('');
+  const notes = [];
+  if (pollError) notes.push(`<span class="err">Sincronização: ${esc(pollError)}</span>`);
+  if (!summary.connected) notes.push('<span class="err">Motor desconectado; preparar/executar bloqueado.</span>');
+  if (summary.ended) notes.push('<span class="warn">Encerrado. Reabra para nova passagem.</span>');
+  if (automation.suspendedReason) notes.push(`<span class="warn">Automação suspensa: ${esc(automation.suspendedReason)}</span>`);
+  if (summary.divergence?.active) notes.push(`<span class="warn">Divergência na mesa (${summary.divergence.items.length}); nada foi desfeito.</span>`);
+  if (summary.validation?.errors > 0) notes.push(`<span class="err">${summary.validation.errors} erro(s) impedem preparar.</span>`);
+  if (summary.captureDraft) notes.push('<span class="warn">Rascunho de captura aguardando revisão no editor.</span>');
+  if (timing.overdue > 0.5) notes.push(`<span class="warn">Tempo vencido no modo manual: +${fmt(timing.overdue)}. Avance quando decidir.</span>`);
+  $('d-note').innerHTML = notes.join('<br>') || '<span class="ok">Manual por padrão. Selecionar não executa.</span>';
+  const banner = $('d-banner');
+  const dockError = lastError || pollError || summary.persistence?.saveError || null;
+  if (dockError) banner.innerHTML = `<div class="notice error" style="margin-top:5px"><span class="grow">${esc(dockError)}</span></div>`;
+  else banner.innerHTML = '';
+  updateClocks();
+}
+function updateClocks() {
+  if (!summary) return;
+  const timing = liveTiming();
+  const set = (id, value) => { const node = $(id); if (node) node.textContent = value; };
+  set('op-elapsed', timing.elapsed === null ? '—' : fmt(timing.elapsed));
+  set('op-remain', timing.remaining === null ? '—' : fmt(timing.remaining));
+  set('op-total', fmt(summary.totalPlannedDurationSec));
+  set('op-overdue', timing.overdue > 0.5 ? `ATRASO +${fmt(timing.overdue)}` : '');
+  set('d-elapsed', timing.elapsed === null ? '—' : fmt(timing.elapsed));
+  set('d-remain', timing.remaining === null ? '—' : fmt(timing.remaining));
+  set('d-overdue', timing.overdue > 0.5 ? `ATRASO +${fmt(timing.overdue)}` : '');
+}
+function selectStep(stepId) {
+  selectedStepId = stepId;
+  render();
+  fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'rundown_select', stepId })
+  }).then(response => response.json()).then(data => {
+    if (data?.summary) adoptSummary(data.summary);
+    else adoptSummary(data);
+  }).catch(() => {});
+}
+function selectAndEdit(stepId) {
+  activeTab = 'editar';
+  if (!edit.dirty) syncEditFromSummary();
+  selectedStepId = stepId;
+  render();
+}
+function markDirty() {
+  edit.dirty = true;
+  renderEditToolbar();
+  const footer = $('foot-left');
+  if (footer) footer.textContent = `${edit.name} · ${summary?.version || ''} · alterações locais não salvas`;
+}
+function addBlock(title) {
+  const block = { id: uid('bloco'), title: title || `Bloco ${edit.blocks.length + 1}`, notes: '', steps: [] };
+  edit.blocks.push(block);
+  collapsed.delete(block.id);
+  edit.dirty = true;
+  selectedStepId = null;
+  render();
+}
+function addStep(blockId) {
+  let block = edit.blocks.find(item => item.id === blockId) || edit.blocks[edit.blocks.length - 1];
+  if (!block) { addBlock('Bloco 1'); block = edit.blocks[edit.blocks.length - 1]; }
+  const source = (summary?.availableSources || [])[0] || null;
+  const scene = (summary?.availableScenes || [])[0] || '';
+  const step = {
+    id: uid('passo'), title: `Passo ${allEditSteps().length + 1}`, type: source ? (source.type === 'Video' ? 'video' : source.type === 'VideoList' ? 'playlist' : source.type === 'Browser' ? 'graphics' : 'camera') : 'manual',
+    notes: '', sourceInputKey: source?.key || null, sourceName: source?.name || null,
+    transition: 'cut', transitionMs: 500, durationMode: 'fixed', durationSec: 60,
+    endBehavior: 'wait_operator', loadPreview: true, dsk: [], audio: [], captured: false
+  };
+  block.steps.push(step);
+  collapsed.delete(block.id);
+  selectedStepId = step.id;
+  edit.dirty = true;
+  render();
+}
+function deleteStep() {
+  const found = findEditStep(selectedStepId);
+  if (!found) return;
+  const { block, step } = found;
+  if (step.id === summary?.currentStepId) { toast('O passo em execução não pode ser excluído.', true); return; }
+  if (!confirm(`Excluir o passo "${step.title}" do roteiro? Nada será executado.`)) return;
+  block.steps = block.steps.filter(item => item.id !== step.id);
+  selectedStepId = null;
+  edit.dirty = true;
+  render();
+}
+function deleteBlock(blockId) {
+  const block = edit.blocks.find(item => item.id === blockId);
+  if (!block) return;
+  if (block.steps.some(step => step.id === summary?.currentStepId)) { toast('O bloco contém o passo em execução.', true); return; }
+  if (!confirm(`Excluir o bloco "${block.title}" e seus ${block.steps.length} passo(s)?`)) return;
+  edit.blocks = edit.blocks.filter(item => item.id !== blockId);
+  selectedStepId = null;
+  edit.dirty = true;
+  render();
+}
+function addDsk() {
+  const found = findEditStep(selectedStepId);
+  if (!found) return;
+  const used = new Set(found.step.dsk.map(action => Number(action.channel)));
+  const channel = [1, 2, 3, 4, 5, 6, 7, 8].find(value => !used.has(value)) || 1;
+  found.step.dsk.push({ channel, action: 'enter', scene: (summary?.availableScenes || [])[0] || '' });
+  edit.dirty = true;
+  render();
+}
+function addAudio() {
+  const found = findEditStep(selectedStepId);
+  if (!found) return;
+  const target = (summary?.availableAudio || [])[0] || null;
+  found.step.audio.push({ targetKey: target?.key || null, targetName: target?.name || null, action: 'mute', value: 100 });
+  edit.dirty = true;
+  render();
+}
+function applyEditorField(target, structural) {
+  const stepEntry = findEditStep(selectedStepId);
+  if (target.dataset.blockField === 'title') {
+    const block = edit.blocks.find(item => item.id === target.dataset.blockId);
+    if (block) block.title = target.value;
+    edit.dirty = true;
+    renderEditToolbar();
+    return;
+  }
+  if (!stepEntry) return;
+  const step = stepEntry.step;
+  if (target.dataset.stepField) {
+    const field = target.dataset.stepField;
+    if (field === 'title') step.title = target.value;
+    else if (field === 'notes') step.notes = target.value;
+    else if (field === 'durationSec') step.durationSec = target.value === '' ? null : Number(target.value);
+    else if (field === 'transitionMs') step.transitionMs = Number(target.value) || 0;
+    else if (field === 'type') step.type = target.value;
+    else if (field === 'transition') step.transition = target.value;
+    else if (field === 'durationMode') {
+      step.durationMode = target.value;
+      if (step.durationMode === 'fixed' && !(Number(step.durationSec) > 0)) step.durationSec = 60;
+      if (step.durationMode !== 'fixed') step.durationSec = null;
+    } else if (field === 'endBehavior') step.endBehavior = target.value;
+    else if (field === 'loadPreview') step.loadPreview = target.checked;
+    else if (field === 'source') {
+      const source = (summary?.availableSources || []).find(item => item.key === target.value) || null;
+      step.sourceInputKey = source?.key || null;
+      step.sourceName = source?.name || null;
+      if (source && step.type === 'camera') {
+        if (source.type === 'Video') step.type = 'video';
+        else if (source.type === 'VideoList') step.type = 'playlist';
+        else if (source.type === 'Browser') step.type = 'graphics';
+      }
+    }
+  } else if (target.dataset.dskField) {
+    const index = Number(target.dataset.index);
+    const action = step.dsk[index];
+    if (action) {
+      if (target.dataset.dskField === 'channel') action.channel = Number(target.value);
+      if (target.dataset.dskField === 'action') action.action = target.value;
+      if (target.dataset.dskField === 'scene') action.scene = target.value;
+    }
+  } else if (target.dataset.audioField) {
+    const index = Number(target.dataset.index);
+    const action = step.audio[index];
+    if (action) {
+      if (target.dataset.audioField === 'target') {
+        if (target.value.startsWith('name:')) { action.targetKey = null; action.targetName = target.value.slice(5); }
+        else {
+          const found = (summary?.availableAudio || []).find(item => item.key === target.value);
+          action.targetKey = found?.key || null;
+          action.targetName = found?.name || null;
+        }
+      }
+      if (target.dataset.audioField === 'action') action.action = target.value;
+      if (target.dataset.audioField === 'value') action.value = Number(target.value);
+    }
+  }
+  markDirty();
+  if (structural) render();
+  else renderEditTable();
+}
+async function refreshRundown() {
+  if (busy) return;
+  try {
+    const data = await apiGet();
+    adoptSummary(data);
+    pollError = null;
+    if (compact) { renderDock(); return; }
+    if (activeTab === 'editar' && edit.dirty) {
+      renderHeader();
+      renderBanner();
+      renderFooter();
+      return;
+    }
+    if (activeTab === 'editar') syncEditFromSummary();
+    render();
+  } catch (error) {
+    pollError = error.message;
+    if (!summary) { if (compact) $('d-note').innerHTML = `<span class="err">${esc(error.message)}</span>`; else renderBanner(); }
+    else if (compact) renderDock();
+    else { renderHeader(); renderBanner(); }
+  }
+}
+async function doPrepare() {
+  const target = commandTarget();
+  if (!target) { toast('Selecione um passo ou avance o roteiro.', true); return; }
+  await runAction(async () => {
+    await post('rundown_prepare', { stepId: target.id });
+    selectedStepId = target.id;
+    toast(`Preparado sem mudar o Programa: ${target.title}`);
+  });
+}
+async function doExecute() {
+  const stepId = summary?.preparedStepId;
+  if (!stepId || !preparedReady()) { toast('Nenhum passo preparado. Use PREPARAR primeiro.', true); return; }
+  const operationId = pendingExecute && pendingExecute.stepId === stepId && Date.now() - pendingExecute.at < 120000
+    ? pendingExecute.operationId
+    : uid('exec');
+  pendingExecute = { stepId, operationId, at: Date.now() };
+  await runAction(async () => {
+    let data;
+    try {
+      data = await post('rundown_execute', { stepId, operationId });
+    } catch (error) {
+      if (!error.data) data = await post('rundown_execute', { stepId, operationId });
+      else { pendingExecute = null; throw error; }
+    }
+    pendingExecute = null;
+    const outcome = data?.result?.outcome || data?.lastExecution?.outcome || 'confirmed';
+    toast(outcome === 'confirmed' ? 'Execução confirmada pelo motor.' : `Execução retornou ${outcome}. Confira a mesa.`, outcome !== 'confirmed');
+  });
+}
+async function doSkip() {
+  const stepId = summary?.currentStepId || selectedStepId || summary?.nextStep?.id;
+  if (!stepId) { toast('Não há passo para pular.', true); return; }
+  if (summary.currentStepId === stepId && !confirm('Pular o passo em execução? O Programa não será alterado.')) return;
+  await runAction(async () => {
+    await post('rundown_skip', { stepId });
+    if (selectedStepId === stepId) selectedStepId = summary?.nextStep?.id || null;
+    toast('Passo pulado. Nada foi alterado no Programa.');
+  });
+}
+async function doEnd() {
+  if (!confirm('Encerrar o roteiro? A automação será desarmada; o Programa e o áudio não serão alterados.')) return;
+  await runAction(async () => { await post('rundown_end'); toast('Roteiro encerrado. A mesa não foi alterada.'); });
+}
+async function doArm() {
+  await runAction(async () => { await post('rundown_arm'); toast('Automação armada explicitamente. Só os passos automáticos vão avançar.'); });
+}
+async function doSuspend() {
+  await runAction(async () => { await post('rundown_suspend', { reason: 'Suspensão solicitada pelo operador' }); toast('Automação suspensa. Nenhum avanço automático será disparado.'); });
+}
+async function doReopen() {
+  if (!confirm('Reabrir o roteiro para uma nova passagem? Os estados de execução serão limpos, mas o Programa não será alterado.')) return;
+  await runAction(async () => { await post('rundown_reopen'); toast('Roteiro reaberto. Execute passo a passo.'); });
+}
+async function doCapture() {
+  await runAction(async () => {
+    await post('rundown_capture_current');
+    toast('Rascunho criado para revisão. Nada foi alterado nem executado.');
+  });
+}
+async function doApplyDraft() {
+  if (edit.dirty) { toast('Salve ou descarte as alterações locais antes de aplicar a captura.', true); return; }
+  const draft = summary?.captureDraft;
+  if (!draft) return;
+  const title = $('draft-title')?.value || draft.step?.title || 'Passo capturado';
+  const notes = $('draft-notes')?.value ?? draft.step?.notes ?? '';
+  const blockId = $('draft-block')?.value || null;
+  await runAction(async () => {
+    const data = await post('rundown_capture_apply', { step: { ...draft.step, title, notes }, blockId });
+    syncEditFromSummary();
+    selectedStepId = data?.result?.createdStepId || null;
+    toast('Rascunho aplicado ao roteiro. Nada foi executado.');
+  });
+}
+async function doDiscardDraft() {
+  await runAction(async () => { await post('rundown_capture_discard'); toast('Rascunho descartado.'); });
+}
+async function doSave() {
+  if (!edit.dirty) { toast('Nenhuma alteração para salvar.'); return; }
+  await runAction(async () => {
+    const data = await post('rundown_save', {
+      script: { id: edit.id, name: edit.name, createdAt: edit.createdAt, blocks: edit.blocks.map(cleanBlock) },
+      expectedRevision: edit.revision
+    });
+    edit.dirty = false;
+    syncEditFromSummary();
+    const errors = data?.validation?.errors || 0;
+    const persistence = data?.persistence || {};
+    const savedProblem = persistence.saveError || (persistence.project ? null : 'Projeto não identificado; o roteiro ficou apenas em memória.');
+    if (savedProblem) toast(`Roteiro salvo com alerta: ${savedProblem}`, true);
+    else toast(errors ? `Roteiro salvo (${data.version || ''}) com ${errors} erro(s); corrija antes de preparar.` : `Roteiro salvo e persistido (${data.version || ''}).`, errors > 0);
+  });
+}
+function discardEdits() {
+  if (!edit.dirty) return;
+  if (!confirm('Descartar todas as alterações locais e recarregar o roteiro salvo?')) return;
+  edit.dirty = false;
+  refreshRundown();
+}
+async function expandRundown() {
+  // Dentro do programa (janela CEF ou iframe do dock) nunca se abre o
+  // navegador externo do Windows. A janela nativa é pedida à API.
+  const embedded = window.self !== window.top;
+  const nativeWindow = query.get('janela') === '3mix';
+  const insideProgram = embedded
+    || nativeWindow
+    || typeof window.cefQuery === 'function'
+    || !!window.obsstudio
+    || /OBS|CEF/i.test(navigator.userAgent);
+  try {
+    const response = await fetch('/api/panel-open', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ route: '/rundown' }),
+      signal: AbortSignal.timeout(8000)
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !data?.success) throw new Error(data?.error || 'Janela nativa indisponível');
+  } catch (error) {
+    if (insideProgram) {
+      toast(`Não foi possível abrir a janela do roteiro dentro do 3Mix: ${error.message}`, true);
+      return;
+    }
+    // Fora do programa, uma aba comum do navegador é o fallback esperado.
+    window.open('/rundown', '_blank');
+  }
+}
+
+document.addEventListener('click', event => {
+  const actionNode = event.target.closest('[data-act]');
+  if (actionNode) {
+    const action = actionNode.dataset.act;
+    if (action === 'tab') {
+      activeTab = actionNode.dataset.tab;
+      if (activeTab === 'editar' && !edit.dirty) syncEditFromSummary();
+      render();
+      return;
+    }
+    if (action === 'refresh') { refreshRundown(); return; }
+    if (action === 'capture') { doCapture(); return; }
+    if (action === 'add-block') { addBlock(); return; }
+    if (action === 'add-step') { addStep(actionNode.dataset.blockId); return; }
+    if (action === 'delete-block') { deleteBlock(actionNode.dataset.blockId); return; }
+    if (action === 'delete-step') { deleteStep(); return; }
+    if (action === 'add-dsk') { addDsk(); return; }
+    if (action === 'remove-dsk') {
+      const found = findEditStep(selectedStepId);
+      if (found) { found.step.dsk.splice(Number(actionNode.dataset.index), 1); markDirty(); render(); }
+      return;
+    }
+    if (action === 'add-audio') { addAudio(); return; }
+    if (action === 'remove-audio') {
+      const found = findEditStep(selectedStepId);
+      if (found) { found.step.audio.splice(Number(actionNode.dataset.index), 1); markDirty(); render(); }
+      return;
+    }
+    if (action === 'save') { doSave(); return; }
+    if (action === 'discard') { discardEdits(); return; }
+    if (action === 'prepare') { doPrepare(); return; }
+    if (action === 'execute') { doExecute(); return; }
+    if (action === 'skip') { doSkip(); return; }
+    if (action === 'arm') { doArm(); return; }
+    if (action === 'suspend') { doSuspend(); return; }
+    if (action === 'end') { doEnd(); return; }
+    if (action === 'reopen') { doReopen(); return; }
+    if (action === 'review-draft') {
+      activeTab = 'editar';
+      if (!edit.dirty) syncEditFromSummary();
+      selectedStepId = null;
+      render();
+      return;
+    }
+    if (action === 'apply-draft') { doApplyDraft(); return; }
+    if (action === 'discard-draft') { doDiscardDraft(); return; }
+    if (action === 'prepare-current') {
+      selectedStepId = summary?.currentStepId || selectedStepId;
+      doPrepare();
+      return;
+    }
+    if (action === 'toggle-block') {
+      const id = actionNode.dataset.blockId;
+      if (collapsed.has(id)) collapsed.delete(id); else collapsed.add(id);
+      render();
+      return;
+    }
+    if (action === 'dismiss-error') { lastError = null; pollError = null; render(); return; }
+    if (action === 'expand') { expandRundown(); return; }
+  }
+  const row = event.target.closest('[data-select-step]');
+  if (row && !event.target.closest('button,input,select,textarea')) { selectStep(row.dataset.selectStep); }
+});
+document.addEventListener('input', event => {
+  const target = event.target;
+  if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) return;
+  if (target.id === 'draft-title' || target.id === 'draft-notes') return;
+  if (target.dataset.blockField) { applyEditorField(target, false); return; }
+  if (target.dataset.stepField || target.dataset.dskField || target.dataset.audioField) applyEditorField(target, false);
+});
+document.addEventListener('change', event => {
+  const target = event.target;
+  if (target instanceof HTMLSelectElement || target instanceof HTMLInputElement && target.type === 'checkbox') {
+    if (target.dataset.blockField) { applyEditorField(target, true); return; }
+    if (target.dataset.stepField || target.dataset.dskField || target.dataset.audioField) applyEditorField(target, true);
+  }
+});
+document.addEventListener('keydown', event => {
+  if (compact || event.code !== 'Space' || event.repeat || activeTab !== 'operar') return;
+  if (event.ctrlKey || event.altKey || event.metaKey) return;
+  const target = event.target;
+  if (target && target.closest && target.closest('input,textarea,select,button,[contenteditable="true"]')) return;
+  if (!preparedReady()) return;
+  event.preventDefault();
+  doExecute();
+});
+document.addEventListener('keydown', event => {
+  if (compact || event.key !== 'Escape' || activeTab !== 'operar') return;
+  const target = event.target;
+  if (target && target.closest && target.closest('input,textarea,select,[contenteditable="true"]')) return;
+  if (selectedStepId) { selectedStepId = null; render(); }
+});
+
+async function boot() {
+  if (compact) document.body.classList.add('dock');
+  await refreshRundown();
+  if (summary && !compact) {
+    if (activeTab === 'editar' && !edit.dirty) syncEditFromSummary();
+    render();
+  } else if (summary) {
+    renderDock();
+  }
+  setInterval(refreshRundown, compact ? 1500 : 2000);
+  setInterval(updateClocks, 1000);
+}
+boot().catch(error => {
+  lastError = error.message;
+  if (compact) { const note = $('d-note'); if (note) note.innerHTML = `<span class="err">${esc(error.message)}</span>`; }
+  else renderBanner();
+});
+</script>
+</body>
+</html>

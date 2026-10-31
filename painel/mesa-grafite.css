@@ -1,0 +1,358 @@
+/* Mockup 3Mix na mesa real: os displays Preview/Program continuam nativos/GPU. */
+:root {
+  color-scheme: dark;
+  --bg:#202020; --bar:#191919; --btn:#303030; --btn-h:#414141; --bd:#494949;
+  --band:#242424; --row:#252525; --sep:#383838; --tx:#ededed; --mut:#b2b2b2;
+  --dim:#767676; --grn:#16752c; --grn2:#125923; --red:#ed181d; --blu:#292929; --blu2:#393939;
+}
+body { grid-template-rows:32px 32px 152px minmax(0,1fr) 40px 22px; }
+/* O dock Menu é o único cabeçalho da aplicação, acima dos monitores. */
+body:not(.popup-mode) > .studio-topbar { display:none; }
+.b,.bot .b,.vmix-btn { border-radius:4px; border-color:var(--bd); background:linear-gradient(#373737,#292929); box-shadow:inset 0 1px #ffffff08; }
+.b:hover,.bot .b:hover,.vmix-btn:hover { background:#414141; border-color:#666; }
+button:focus-visible,input:focus-visible,select:focus-visible { outline:2px solid #ddd; outline-offset:-2px; }
+.media-row { height:40px; padding:0 6px; background:var(--bg); }
+.media-bar { gap:0; }
+.media-time-row { font-size:11px; line-height:15px; color:#ddd; font-variant-numeric:tabular-nums; }
+.media-ctrl-row,.vmix-track-wrap { height:23px; }
+.vmix-btn { height:23px; font-size:10px; }
+.vmix-btn.pp { width:30px; font-size:13px; }
+.vmix-thumb { height:15px; background:#bebebe; border-color:#777; border-radius:2px; }
+.vmix-progress { background:#888; }
+#media-trans-ctrl { flex-direction:row !important; padding:4px !important; }
+#media-trans-ctrl button { height:30px !important; border:1px solid #555; border-radius:4px; background:linear-gradient(#414141,#2a2a2a); font-size:11px; }
+#dsk-bar-strip { background:#232323 !important; border-color:#3c3c3c !important; padding:3px 6px !important; overflow-x:auto; overflow-y:hidden; }
+#dsk-bar-strip > div { flex-shrink:0; }
+#dsk-bar-strip span,#dsk-bar-strip b { color:#ccc !important; }
+.dsk-slot { background:#282828 !important; border-color:#484848 !important; }
+.dsk-slot.live { border-color:#ed181d !important; }
+.dsk-slot button { background:#393939 !important; border-color:#555 !important; color:#eee !important; }
+.dsk-slot button.on { background:#c01920 !important; border-color:#ff555b !important; }
+.dsk-checker { background-color:#292929 !important; background-image:conic-gradient(#414141 25%,#282828 0 50%,#414141 0 75%,#282828 0) !important; background-size:8px 8px !important; }
+.switcher-banks { display:grid; grid-template-columns:1fr 1fr; gap:5px; padding:2px 5px; min-height:0; }
+.switcher-bank { min-width:0; display:flex; flex-direction:column; border:1px solid #454545; border-radius:4px; background:#242424; overflow:hidden; }
+.switcher-bank h2 { margin:0; height:18px; padding:1px 6px; font-size:9.5px; font-weight:700; color:#65df69; }
+.switcher-bank h2::before { content:''; display:inline-block; width:3px; height:9px; background:currentColor; margin-right:4px; vertical-align:-1px; }
+.switcher-bank.pgm h2 { color:#ff4b50; }
+.switcher-inputs { display:flex; flex:1; gap:4px; overflow-x:auto; overflow-y:hidden; padding:3px 4px 4px; min-height:0; align-items:flex-start; scrollbar-width:thin; scrollbar-color:#777 #1b1b1b; }
+.switcher-inputs::-webkit-scrollbar { height:8px; }
+.switcher-inputs::-webkit-scrollbar-track { background:#1b1b1b; }
+.switcher-inputs::-webkit-scrollbar-thumb { background:#666; border-radius:4px; }
+.switcher-input { flex:0 0 calc((100% - 36px) / 8); min-width:0; max-width:none; display:flex; flex-direction:column; border:1px solid #515151; border-radius:3px; background:#151515; overflow:hidden; text-align:left; }
+.switcher-input img { width:100%; aspect-ratio:16/9; height:auto; object-fit:contain; display:block; opacity:.9; background:#000; flex:none; }
+.switcher-input span { position:static; display:flex; align-items:center; gap:3px; height:17px; padding:1px 3px; font-size:9.5px; line-height:1.05; background:#242424; white-space:nowrap; overflow:hidden; color:#e2e2e2; flex:none; }
+.switcher-input b { flex:none; display:inline-block; padding:0 2px; margin-right:1px; background:#555; border-radius:2px; color:#fff; font-size:9px; }
+.switcher-input em { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-style:normal; }
+.switcher-input.selected { border-color:#49d54d; outline:2px solid #49d54d; outline-offset:-1px; box-shadow:none; }
+.switcher-input.selected span { background:#155b21eb; }
+.pgm .switcher-input.selected { border-color:#ff3038; outline-color:#ff3038; }
+.pgm .switcher-input.selected span { background:#b80e18eb; }
+.switcher-input:hover { border-color:#ddd; }
+.switcher-input.selected:hover { border-color:#49d54d; }
+.pgm .switcher-input.selected:hover { border-color:#ff3038; }
+.tabs { gap:5px; background:#252525; padding:3px 7px; border:1px solid #414141; margin:0 6px; border-radius:4px 4px 0 0; min-width:0; overflow-x:auto; }
+.tabs::before { content:'⠿  Fontes'; font-weight:700; font-size:12px; margin-right:10px; white-space:nowrap; }
+.tabs .c { flex-shrink:0; border-radius:3px; height:25px; }
+.tabs .c.all,.tabs .c.find { background:#303030; }
+.tabs .c.all.on { background:#4b4b4b; outline:1px solid #888; }
+.tabs .st-tab { display:none; }
+.mid,.tiles,.side-panel,.side-panel-body { background:#202020; }
+.mid { padding:0 6px; gap:0; }
+.tiles { gap:6px; padding:6px; align-content:flex-start; border:1px solid #414141; border-top:0; border-radius:0 0 4px 4px; }
+.tile { width:calc((100% - 18px)/4); min-width:140px; background:#252525; border:1px solid #4a4a4a; border-radius:4px; box-shadow:none; contain:layout style; }
+.tile-inner,.tile-main { min-width:0; width:100%; }
+.th { width:100%; height:auto; aspect-ratio:16/9; }
+.tt { height:24px; background:#2a2a2a; }
+.tt .n { background:#414141; }
+.tt.pv,.tt.pv .n { background:#175e27; }
+.tt.out,.tt.out .n { background:#c01820; }
+.tile.is-pv { border-color:#39d349; }
+.tile.is-out { border-color:#f53038; }
+.tile.is-pv .th { outline-color:#39d349; }
+.tile.is-out .th { outline-color:#f53038; }
+.r { background:#272727; border-color:#444; }
+.r button { background:#303030; border-color:#444; height:21px; font-size:9px; }
+.r button:hover { background:#484848; }
+.r button.on { background:#19652a; }
+.r button.na { color:#858585; background:#262626; }
+.tile.has-speed { width:calc((100% - 18px)/4); min-width:188px; }
+.tile.has-speed .tile-main { width:calc(100% - 46px); }
+body.big .tile { width:calc((100% - 6px)/2); }
+body.big .th { height:auto; }
+.splitter-v { background:#181818; border-color:#444; width:6px; }
+.splitter-v:hover,.splitter-v.active { background:#777; }
+.side-panel { width:46vw; min-width:280px; max-width:none; border:1px solid #414141; border-radius:4px; }
+body:not(.popup-mode) .side-panel-header { display:flex; height:32px; padding:3px 6px; background:#262626; border-color:#414141; }
+.side-undock-btn,.st-tab { background:#303030; border-color:#505050; border-radius:3px; }
+.st-tab.on { background:#454545; border-color:#777; box-shadow:none; }
+.side-panel-body,#view-mixer { min-height:0; flex:1; }
+#mixer { width:100%; height:100%; min-height:0; flex-wrap:nowrap; align-items:stretch; align-content:normal; padding:5px; gap:3px; overflow-y:hidden; background:#202020; border:0; max-width:none; }
+#mixer .sec { display:none; }
+#mixer .strip { flex:1 0 75px; width:80px; height:100%; min-height:150px; border:1px solid #424242; border-radius:3px; background:#242424; grid-template-rows:25px 14px minmax(60px,1fr) 25px; }
+.strip .hd,.strip.out.live .hd { background:#2a2a2a; }
+.strip.out .hd { background:#505050 !important; }
+.strip .hd span { color:#eee; align-self:center; text-align:center; font-size:10px; }
+.strip .hd b { background:#393939; }
+.strip .bd { padding:3px 4px; grid-template-columns:22px minmax(18px,1fr) 5px 5px; gap:3px; }
+.strip .col button,.strip .bt button { width:22px; height:21px; background:#363636; border-color:#515151; border-radius:3px; }
+.strip .col .on,.strip .bt .on { background:#285b35; border-color:#4b7855; }
+.strip .col .fw.lit { background:#246699 !important; border-color:#5e9dc9 !important; color:#fff !important; box-shadow:none !important; }
+.strip .fd { background:repeating-linear-gradient(180deg,#777 0 1px,transparent 1px 13px) left center / 5px calc(100% - 12px) no-repeat; }
+.strip .fd::before { background:#0f0f0f; width:3px; }
+.strip .fd i { width:21px; margin-left:-10px; background:linear-gradient(#72a9d4,#3e78ad) !important; border-color:#a9c4dc !important; box-shadow:0 1px 2px #0008 !important; }
+.strip .pan input::-webkit-slider-runnable-track { background:#696969; }
+.strip .bt { justify-content:center; padding:0 2px; }
+#mixer .busoff { height:100%; width:170px; flex-shrink:0; background:#242424; border-color:#444; }
+.bot { padding:3px 7px; gap:5px; overflow-x:auto; overflow-y:hidden; background:#1b1b1b; border-color:#444; }
+.bot .g { flex-shrink:0; }
+.bot .pair { margin-left:5px; }
+.bot .b { height:30px; padding:0 9px; font-weight:600; font-size:11px; }
+.bot .pair .cg { width:25px; border-color:#494949; border-radius:4px 0 0 4px; }
+.bot .b.live { background:#d51720; border-color:#f14850; }
+.stat { background:#191919; border-color:#363636; color:#b5b5b5; gap:12px; }
+.stat .res { color:#d7d7d7; }
+.pop,.pop-header { background:#262626; border-color:#555; }
+.pop input,.pop select { background:#202020; border-color:#555; }
+.toast { background:#303030; border-color:#777; }
+@media(max-width:1300px) {
+  .switcher-input { flex-basis:calc((100% - 20px)/4); }
+}
+@media(max-width:900px) {
+  .switcher-input { flex-basis:calc((100% - 16px)/3); }
+}
+@media(max-width:1200px) {
+  .tile,.tile.has-speed { width:calc((100% - 6px)/2); }
+  .tabs::before { margin-right:3px; }
+}
+@media(max-height:400px) {
+  body:not(.popup-mode) { grid-template-rows:32px 30px 66px 30px minmax(0,1fr) 34px 20px; }
+  .media-row { height:32px; } .media-time-row { display:none; }
+  .switcher-inputs { padding-bottom:2px; }
+}
+@media(max-width:760px) {
+  .side-panel { min-width:230px; } .tile { min-width:120px; } .switcher-input { min-width:60px; }
+}
+body.popup-mode > .switcher-banks,body.popup-mode > #dsk-bar-strip { display:none !important; }
+
+/* Tamanho das miniaturas é independente de fonte, zoom e resolução da interface. */
+.tile,body.big .tile { width:var(--input-card-width,180px); min-width:0; flex:0 0 var(--input-card-width,180px); }
+.tile.has-speed,body.big .tile.has-speed { width:calc(var(--input-card-width,180px) + 46px); flex-basis:calc(var(--input-card-width,180px) + 46px); }
+.tile.has-speed .tile-main { width:var(--input-card-width,180px); }
+.th,body.big .th { height:auto; aspect-ratio:16/9; }
+.input-module { display:flex; flex-direction:column; flex:1 1 0; min-width:0; min-height:0; }
+.input-module .tabs { flex:none; height:34px; margin:0; }
+.input-module .tiles { flex:1 1 0; }
+.tabs::before { content:none; }
+.module-handle { cursor:grab; white-space:nowrap; font-size:12px; font-weight:700; margin-right:5px; }
+.layout-tools { display:flex; align-items:center; gap:5px; flex-shrink:0; margin-left:auto; }
+.layout-tools label { display:flex; align-items:center; gap:4px; font-size:10px; color:#ccc; white-space:nowrap; }
+.layout-tools input { width:76px; accent-color:#9e9e9e; }
+.layout-tools .b { height:24px; padding:0 6px; font-size:10px; }
+.mid.audio-left { flex-direction:row-reverse !important; }
+.mid.stacked { flex-direction:column !important; }
+.mid.stacked.audio-left { flex-direction:column-reverse !important; }
+.mid.stacked .side-panel { width:100% !important; min-width:0; height:45%; flex:0 0 45%; max-height:none !important; }
+.mid.stacked .splitter-v { display:none; }
+.mid.stacked .input-module { width:100%; }
+.side-panel-header[draggable] { cursor:grab; }
+.layout-tools .card-preset.on { background:#4c4c4c; border-color:#aaa; color:#fff; }
+/* Aba DSK / Gráficos do dock inferior: painel compacto, sem rolagem desnecessária */
+.st-tab.dsk-tab.on { background:#5a5a5a; border-color:#888; box-shadow:inset 0 2px 0 #ff4b50; }
+#view-dsk { flex:1; min-height:0; flex-direction:column; }
+.dsk-panel { display:flex; flex-direction:column; gap:5px; padding:6px 8px; min-height:0; height:100%; color:#e8e8e8; font-size:12px; }
+.dsk-panel-head { display:flex; align-items:center; justify-content:space-between; gap:10px; height:20px; flex:none; }
+.dsk-panel-head strong { display:flex; align-items:center; font-size:12px; letter-spacing:.5px; white-space:nowrap; }
+.dsk-panel-head strong::before { content:''; width:3px; height:11px; background:#cfcfcf; margin-right:6px; }
+.dsk-panel-head span { color:#9c9c9c; font-size:10.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dsk-global { display:flex; align-items:center; gap:8px; flex:none; height:30px; padding:0 7px; background:#262626; border:1px solid #3c3c3c; border-radius:4px; }
+.dsk-global label { display:flex; flex-direction:row; align-items:center; gap:5px; color:#b6b6b6; font-size:11px; white-space:nowrap; }
+.dsk-global label i { font-style:normal; color:#8d8d8d; font-size:10.5px; }
+.dsk-global select, .dsk-global input { height:24px; background:#1d1d1d; color:#eee; border:1px solid #4d4d4d; border-radius:3px; padding:0 5px; font-size:11.5px; }
+.dsk-global input { width:58px; }
+.dsk-global .b { margin-left:auto; height:24px; padding:0 10px; font-size:11px; }
+.dsk-rows { display:flex; flex-direction:column; gap:2px; overflow:auto; min-height:0; flex:1; scrollbar-width:thin; scrollbar-color:#6a6a6a #1b1b1b; }
+.dsk-row { display:grid; grid-template-columns:44px minmax(0,1fr) 64px 66px 22px; gap:5px; align-items:center; min-height:32px; padding:2px 5px; border:1px solid #3b3b3b; border-left:4px solid #555; border-radius:3px; background:#242424; }
+.dsk-row.onair { border-left-color:#ed181d; background:#2b2323; }
+.dsk-row.pending { border-left-color:#d6a321; }
+.dsk-row.assigned { border-left-color:#8a8a8a; }
+.dsk-row.unassigned { background:#232323; }
+.dsk-number { font-weight:700; font-size:11px; letter-spacing:.2px; white-space:nowrap; }
+.dsk-source { min-width:0; }
+.dsk-source select { height:24px; width:100%; min-width:0; background:#1d1d1d; color:#eee; border:1px solid #4d4d4d; border-radius:3px; font-size:11.5px; }
+.dsk-state { font-size:10px; letter-spacing:.3px; color:#999; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dsk-state.onair { color:#ff6b70; font-weight:700; }
+.dsk-state.pending { color:#e3b341; font-weight:700; }
+.dsk-state.assigned { color:#c8c8c8; }
+.dsk-state.unassigned { color:#7f7f7f; }
+.dsk-action { height:24px; padding:0 6px; border:1px solid #5b5b5b; border-radius:3px; background:#363636; color:#eee; font:700 10.5px 'Segoe UI'; cursor:pointer; }
+.dsk-action.exit { background:#b3140c; border-color:#e05252; }
+.dsk-action:disabled { opacity:.4; cursor:default; }
+.dsk-menu-btn { width:22px; height:24px; border:1px solid #4e4e4e; border-radius:3px; background:#303030; color:#ddd; cursor:pointer; font-size:14px; line-height:1; padding:0; }
+.dsk-row-menu { grid-column:1/-1; display:flex; align-items:end; gap:6px; flex-wrap:wrap; padding:3px 0 1px; }
+.dsk-row-menu label { display:flex; flex-direction:column; gap:2px; color:#bbb; font-size:10.5px; flex:1; min-width:130px; }
+.dsk-row-menu select { height:26px; background:#1d1d1d; color:#eee; border:1px solid #4d4d4d; border-radius:3px; font-size:11px; }
+.dsk-row-menu .b { height:26px; font-size:11px; }
+.dsk-row-menu .danger { color:#ff9b9b; border-color:#7d3535; }
+.r button.assigned { box-shadow:inset 0 0 0 1px #bdbdbd; color:#fff; }
+.r button.replace-ready { box-shadow:inset 0 0 0 2px #e3b341; color:#ffe08a; }
+.tile.drop-before { box-shadow: inset 4px 0 0 #e6e6e6 !important; border-color:#e6e6e6 !important; }
+.module-drop-target { outline:2px solid #aaa; outline-offset:-2px; }
+.media-row { height:32px; }
+.media-time-row { display:none; }
+.dsk-slot .dsk-checker { width:84px !important; }
+.dsk-slot button { min-width:39px; height:23px !important; }
+.dsk-slot.live { box-shadow:inset 3px 0 #ed181d; }
+.dsk-slot .dsk-checker span { max-width:82px; font-size:9px; }
+body.native-switcher { grid-template-rows:32px 152px minmax(0,1fr) 40px 22px; }
+#dsk-bar-strip { display:none !important; }
+#media-trans-ctrl { visibility:hidden !important; }
+body.native-switcher:not(:has(.media-bar:not(.disabled))) { grid-template-rows:152px minmax(0,1fr) 40px 22px; }
+body.native-switcher:not(:has(.media-bar:not(.disabled))) #media-row { display:none; }
+.replay-quick-dock{display:flex;flex-direction:column;gap:7px;padding:8px;overflow:auto;width:100%;font-size:11px}.replay-quick-dock header,.replay-quick-dock footer,.replay-quick-dock .quick-group{display:flex;align-items:center;gap:5px;flex-wrap:wrap}.replay-quick-dock header{padding-bottom:6px;border-bottom:1px solid #444}.replay-quick-dock header .b{margin-left:auto}.replay-quick-dock .b{height:28px;padding:0 8px}.replay-quick-dock .quick-group{padding-bottom:6px;border-bottom:1px solid #383838}.replay-quick-dock .quick-group>span{color:#aaa;flex:1}.replay-quick-dock .recording{color:#ff555b}.replay-quick-dock label{display:flex;gap:5px;align-items:center}.replay-quick-dock select{max-width:200px;background:#292929;color:#eee;border:1px solid #555;height:27px}.replay-quick-dock footer{margin-top:auto}
+.switcher-bank h2 { font-size:10px; }
+@media(max-height:400px) { body:not(.popup-mode) { grid-template-rows:28px 30px 110px minmax(0,1fr) 34px 20px; } }
+
+/* ==========================================================================
+   Tipografia e densidade — Mesa (mesa.html)
+   Tokens: remoto/3mix-tipografia.css. Este bloco é carregado por último e
+   ajusta tamanho de texto, altura de controle e respiro. Cores, estados e
+   tally continuam definidos nos blocos acima. Não há zoom: o CEF já aplica
+   o scale factor do Windows (100/125/150%).
+   ========================================================================== */
+
+/* A topbar nativa substitui o cabeçalho HTML: a grade tem cinco faixas.
+   (As regras antigas ainda reservavam uma faixa para .studio-topbar, que é
+   display:none fora do popup-mode, e por isso o rodapé recebia o 1fr.) */
+body { grid-template-columns:minmax(0,1fr); grid-template-rows:44px auto minmax(0,1fr) 46px 28px; }
+body.native-switcher { grid-template-columns:minmax(0,1fr); grid-template-rows:44px auto minmax(0,1fr) 46px 28px; }
+body.native-switcher:not(:has(.media-bar:not(.disabled))) { grid-template-columns:minmax(0,1fr); grid-template-rows:auto minmax(0,1fr) 46px 28px; }
+.bot,.stat { min-width:0; }
+
+/* --- barra de mídia abaixo dos monitores --------------------------------- */
+.media-row { height:44px; padding:0 8px; }
+.media-ctrl-row,.vmix-track-wrap { height:28px; }
+.vmix-btn { height:28px; padding:0 8px; font-size:12px; }
+.vmix-btn.pp { width:36px; font-size:15px; }
+.vmix-thumb { width:12px; height:18px; }
+
+/* --- switcher PV / PGM --------------------------------------------------- */
+.switcher-banks { gap:8px; padding:4px 8px; }
+.switcher-bank h2 { height:23px; padding:2px 8px; font-size:12px; }
+.switcher-input span { height:22px; padding:2px 5px; font-size:12px; gap:4px; }
+.switcher-input b { font-size:10px; padding:0 3px; }
+
+/* --- abas de fontes e controles do módulo -------------------------------- */
+.tabs { gap:6px; padding:5px 8px; min-height:40px; }
+.tabs .c { height:30px; min-width:26px; }
+.tabs .c.all,.tabs .mx { padding:0 12px; font-size:12px; }
+.tabs .mx { height:30px; }
+.input-module .tabs { height:40px; }
+.module-handle { font-size:13px; }
+.layout-tools label { font-size:11.5px; }
+.layout-tools .b { height:30px; padding:0 8px; font-size:12px; }
+
+/* --- cards de entrada ---------------------------------------------------- */
+.tt { height:30px; font-size:12px; }
+.tt .n { width:30px; font-size:12px; }
+.tt .badge-warn { font-size:11px; }
+.tt .iso,.pop .iso { font-size:10px; }
+.r button { height:26px; font-size:12px; }
+.r .ic { width:28px; }
+.r .ic svg { width:13px; height:13px; }
+.tile-speed-col { width:52px; }
+.speed-val { width:42px; font-size:11px; }
+.tile.min { width:32px !important; min-width:32px !important; max-width:32px !important; }
+.tile.min .tt.min { height:26px; }
+.tile.min .min-name { font-size:12px; }
+
+/* --- mixer lateral ------------------------------------------------------- */
+#mixer { padding:6px; gap:4px; }
+#mixer .strip { flex:1 0 88px; width:94px; grid-template-rows:30px 18px minmax(60px,1fr) 30px; }
+.strip .hd span { font-size:12px; }
+.strip .hd b { min-width:22px; padding:0 4px; }
+.strip .bd { grid-template-columns:26px minmax(18px,1fr) 6px 6px; gap:3px; padding:3px 4px; }
+.strip .col button,.strip .bt button { width:26px; height:26px; font-size:11px; }
+.strip .col button svg { width:15px; height:15px; }
+.strip .bt { gap:3px; padding:0 2px; }
+.strip .bt small { font-size:10px; }
+.strip .pan input { height:12px; }
+.busoff { width:190px; font-size:12px; }
+
+/* --- barra inferior e linha de status ----------------------------------- */
+.bot { padding:4px 8px; gap:6px; }
+.bot .b { height:36px; padding:0 10px; font-size:12.5px; }
+.bot .b.add-input { height:36px; padding:0 12px; font-size:12.5px; }
+.bot .pair { margin-left:8px; }
+.bot .pair .cg,.bot .cg { width:32px; }
+.bot .ib { width:34px; }
+.bot .ib svg { width:16px; height:16px; }
+.bot .dd { width:20px; font-size:9px; }
+.bot .tc { padding:0 7px; font-size:12.5px; }
+.stat { gap:16px; padding:0 10px; font-size:12px; }
+
+/* --- painel DSK / gráficos ---------------------------------------------- */
+/* A aba DSK é um dock de operação: as medidas compactas ficam no bloco acima.
+   Nada aqui deve voltar a inflar linhas ou criar rolagem no painel inteiro. */
+.dsk-row:hover { border-color:#575757; }
+.dsk-row.onair:hover { border-color:#8c3a3a; }
+
+/* --- popovers, editores e menus ----------------------------------------- */
+.pop { width:360px; padding:12px; font-size:13px; bottom:64px; }
+.pop h3 { font-size:15px; }
+.pop-header { padding:8px 12px; }
+.pop-header h3 { font-size:15px; }
+.pop-body { padding:14px 16px; }
+.pop label { gap:4px; margin-bottom:10px; font-size:12.5px; }
+.pop input,.pop select { height:36px; padding:0 9px; font-size:13px; }
+.pop .menu button { min-height:34px; padding:8px 14px; font-size:13px; }
+.pop.ctx h3 { padding:8px 12px; font-size:13px; }
+.pop-close-btn { width:30px; height:30px; font-size:16px; }
+.pop-detach-btn { height:30px !important; padding:0 10px !important; font-size:12px !important; }
+.pop.wide .row.end .b { min-width:110px; height:36px; font-size:13px; }
+.pop[data-panel="add"] > h3 { padding:12px 16px; font-size:15px; }
+.pop[data-panel="add"] > .add-close { top:10px; width:30px; height:30px; font-size:15px; }
+#pop.input-menu-tasks .input-menu-hint { font-size:13px; }
+#pop.input-menu-tasks .menu button { min-height:40px; padding:9px 12px; font-size:13px; }
+.add .type-title { font-size:11px; }
+.add .types button { min-height:38px; padding:7px 9px; font-size:13px; }
+.add .form p { font-size:12.5px; }
+.add .form label { margin-bottom:9px; font-size:12.5px; }
+.add .form input,.add .form select { height:36px; font-size:13px; }
+.add-preview .ap-head { font-size:13px; }
+.add-preview dl > div { font-size:12px; }
+.add-preview .ap-note,.add .form .add-preview .ap-note { font-size:11.5px; }
+
+/* --- playlist e replay acoplados (dentro da Mesa) ----------------------- */
+.list-dock-top select,.list-dock-top .b { height:32px; font-size:12px; }
+.list-items-table { font-size:12px; }
+.list-items-table td { padding:6px 8px; }
+.list-dock-bot .b { height:32px; font-size:12px; }
+.rp-page-btn { min-width:24px; height:26px; font-size:11px; }
+.rp-tc-display { font-size:17px; }
+.rp-dock-ctrl { font-size:12px; }
+.replay-quick-dock { font-size:12px; }
+.replay-quick-dock .b,.replay-quick-dock select { height:32px; }
+.replay-quick-dock select { font-size:12px; }
+
+/* --- cabeçalho do painel lateral ---------------------------------------- */
+.side-panel-header { height:38px; padding:4px 8px; }
+.st-tab { height:30px; padding:0 10px; font-size:12px; }
+.side-undock-btn { width:30px; height:28px; font-size:13px; }
+
+/* --- avisos ------------------------------------------------------------- */
+.toast { bottom:68px; padding:9px 14px; font-size:12.5px; }
+.empty,.mixer .none { font-size:13px; }
+
+/* --- janelas baixas (segundo monitor 720p a 150%) ----------------------- */
+@media (max-height:560px) {
+  body { grid-template-rows:36px auto minmax(0,1fr) 40px 24px; }
+  .media-row { height:36px; }
+  .media-ctrl-row,.vmix-track-wrap { height:24px; }
+  .vmix-btn { height:24px; font-size:11.5px; }
+  .bot .b { height:32px; font-size:12px; }
+  .stat { font-size:11px; }
+}
+
+/* --- janelas destacadas (popup-mode) ------------------------------------ */
+body.popup-mode .pop { font-size:14px; }
+body.popup-mode .pop input,body.popup-mode .pop select { min-height:36px; }

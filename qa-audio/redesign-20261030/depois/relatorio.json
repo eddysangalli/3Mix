@@ -1,0 +1,108 @@
+{
+  "at": "2026-10-30T22:02:41.200Z",
+  "sizes": [
+    {
+      "name": "1280x800",
+      "width": 1280,
+      "height": 800,
+      "viewport": [
+        1280,
+        800
+      ],
+      "docScrollWidth": 1280,
+      "docClientWidth": 1280,
+      "bodyScrollWidth": 1280,
+      "docScrollHeight": 800,
+      "docClientHeight": 800,
+      "horizontalPageScroll": false,
+      "verticalPageScroll": false,
+      "bank": [
+        976,
+        593,
+        976,
+        593
+      ],
+      "inputBank": [
+        560,
+        1282
+      ],
+      "drawer": [
+        998,
+        282
+      ],
+      "topbarHeight": 52,
+      "footerHeight": 46,
+      "strips": 11,
+      "outputs": 3
+    },
+    {
+      "name": "1440x900",
+      "width": 1440,
+      "height": 900,
+      "viewport": [
+        1440,
+        900
+      ],
+      "docScrollWidth": 1440,
+      "docClientWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "docScrollHeight": 900,
+      "docClientHeight": 900,
+      "horizontalPageScroll": false,
+      "verticalPageScroll": false,
+      "bank": [
+        1118,
+        693,
+        1118,
+        693
+      ],
+      "inputBank": [
+        678,
+        1282
+      ],
+      "drawer": [
+        1140,
+        300
+      ],
+      "topbarHeight": 52,
+      "footerHeight": 46,
+      "strips": 11,
+      "outputs": 3
+    },
+    {
+      "name": "1600x1000",
+      "width": 1600,
+      "height": 1000,
+      "viewport": [
+        1600,
+        1000
+      ],
+      "docScrollWidth": 1600,
+      "docClientWidth": 1600,
+      "bodyScrollWidth": 1600,
+      "docScrollHeight": 1000,
+      "docClientHeight": 1000,
+      "horizontalPageScroll": false,
+      "verticalPageScroll": false,
+      "bank": [
+        1266,
+        793,
+        1266,
+        793
+      ],
+      "inputBank": [
+        826,
+        1282
+      ],
+      "drawer": [
+        1288,
+        312
+      ],
+      "topbarHeight": 52,
+      "footerHeight": 46,
+      "strips": 11,
+      "outputs": 3
+    }
+  ],
+  "consoleErrors": []
+}

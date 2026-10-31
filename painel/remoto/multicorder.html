@@ -2,54 +2,15 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MultiGravação</title>
-<link rel="stylesheet" href="vmix-dialogo.css">
+<title>3Mix · Multigravação</title>
+<script>
+// Compatibility URL: the multigravação window is /iso. The address this window was opened with is kept in the session
+// so fechar-janela.js can ask the program to close the right window after the redirect.
+(() => {
+  try { if (!sessionStorage.getItem('freemix.panel.url')) sessionStorage.setItem('freemix.panel.url', location.href); } catch { /* storage off */ }
+  location.replace('/iso' + location.search + location.hash);
+})();
+</script>
 </head>
-<body data-page="multicorder" class="vd">
-<div class="vd-window vd-fill">
-  <div class="vd-body">
-    <div class="vd-row"><span></span>
-      <div class="vd-nums vd-words" id="formats" role="tablist" aria-label="Formato de arquivo">
-        <button data-format="mpegts" role="tab" title="Recomendado: continua abrindo mesmo se a gravação for interrompida">MPEG-2 TS</button>
-        <button data-format="mkv" role="tab">MKV</button>
-        <button data-format="mp4_safe" role="tab" title="Grava em MKV e gera o MP4 ao parar">MP4</button>
-      </div>
-    </div>
-    <div class="vd-row"><span>Áudio</span>
-      <div class="vd-inline"><select id="audio" class="vd-short">
-        <option value="input">O da própria entrada</option>
-        <option value="master">Master</option>
-        <option value="bus-a">Bus A</option>
-        <option value="bus-b">Bus B</option>
-        <option value="all-tracks">As 6 trilhas</option>
-        <option value="source">Uma fonte de áudio…</option>
-      </select><select id="audio-source" hidden></select></div>
-    </div>
-    <label class="vd-row"><span>Novo arquivo a cada</span><select id="split" class="vd-short">
-      <option value="0">Não dividir</option>
-      <option value="300">5 minutos</option>
-      <option value="600">10 minutos</option>
-      <option value="900">15 minutos</option>
-      <option value="1800">30 minutos</option>
-      <option value="3600">60 minutos</option>
-    </select></label>
-    <label class="vd-row"><span>Pasta de gravação</span><input id="directory" type="text" maxlength="500" spellcheck="false" autocomplete="off" placeholder="A mesma pasta de gravação do programa"></label>
-    <p id="msg" class="vd-msg" role="status"></p>
-  </div>
-  <div class="vd-status vd-grow" id="status">
-    <table><thead><tr><th style="width:26px"></th><th>Entrada</th><th>Duração</th><th>Estado</th><th>Arquivo</th></tr></thead><tbody id="rows"></tbody></table>
-  </div>
-  <div class="vd-bar">
-    <button id="start">Começar</button>
-    <button id="advanced" title="Abre o editor completo: codificador, qualidade, nome dos arquivos">Avançado</button>
-    <span class="vd-flex"></span>
-    <button id="save-close">Salvar e Fechar</button>
-  </div>
-</div>
-<span id="connection" hidden></span><p id="message" hidden></p>
-<script src="controle.js"></script>
-<script src="fechar-janela.js"></script>
-<script src="multicorder.js"></script>
-</body>
+<body style="background:#202020"></body>
 </html>

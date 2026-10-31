@@ -1,0 +1,1036 @@
+{
+  "result": {
+    "standalone1440": {
+      "embed": false,
+      "body": {
+        "sel": "body",
+        "text": "Replay\n        Sessão\n        Armazenamento\n        Áudio e ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(32, 32, 32)",
+        "border": "rgb(237, 237, 237)",
+        "h": 900,
+        "w": 1440
+      },
+      "app": {
+        "sel": ".vd-app-window",
+        "text": "Replay\n        Sessão\n        Armazenamento\n        Áudio e ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)",
+        "border": "rgb(65, 65, 65)",
+        "h": 810,
+        "w": 1020
+      },
+      "sidebar": {
+        "sel": ".vd-sidebar",
+        "text": "Replay\n        Sessão\n        Armazenamento\n        Áudio e ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(30, 30, 30)",
+        "border": "rgb(237, 237, 237) rgb(65, 65, 65) rgb(237, 237, 237) rgb(237, 237, 237)",
+        "h": 752,
+        "w": 176
+      },
+      "header": {
+        "sel": ".vd-sidebar-header",
+        "text": "Replay",
+        "font": 22,
+        "weight": "800",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(37, 37, 37)",
+        "border": "rgb(255, 255, 255) rgb(255, 255, 255) rgb(65, 65, 65)",
+        "h": 53,
+        "w": 175
+      },
+      "activeTab": {
+        "sel": ".vd-tab-btn.active",
+        "text": "Sessão",
+        "font": 13,
+        "weight": "700",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(69, 69, 69)",
+        "border": "rgb(255, 255, 255) rgb(255, 255, 255) rgb(53, 53, 53) rgb(230, 230, 230)",
+        "h": 40,
+        "w": 175
+      },
+      "idleTab": {
+        "sel": ".vd-tab-btn:not(.active)",
+        "text": "Armazenamento",
+        "font": 13,
+        "weight": "600",
+        "color": "rgb(181, 181, 181)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(181, 181, 181) rgb(181, 181, 181) rgb(53, 53, 53) rgba(0, 0, 0, 0)",
+        "h": 40,
+        "w": 175
+      },
+      "rowLabel": {
+        "sel": ".vd-row > span:first-child",
+        "text": "Pasta da Sessão",
+        "font": 13,
+        "weight": "600",
+        "color": "rgb(176, 176, 176)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(176, 176, 176)",
+        "h": 18,
+        "w": 140
+      },
+      "field": {
+        "sel": "#session-dir",
+        "text": "",
+        "font": 13,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(29, 29, 29)",
+        "border": "rgb(85, 85, 85)",
+        "h": 36,
+        "w": 634
+      },
+      "select": {
+        "sel": "#cam-slot-1",
+        "text": "(Nenhuma)CAM 1CAM 2VT 1PLACARREPLAY AFreeMix Barramentos",
+        "font": 13,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(29, 29, 29)",
+        "border": "rgb(85, 85, 85)",
+        "h": 36,
+        "w": 342
+      },
+      "button": {
+        "sel": "#btn-toggle-rec",
+        "text": "Iniciar gravação SSD",
+        "font": 13,
+        "weight": "600",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(58, 58, 58)",
+        "border": "rgb(138, 138, 138)",
+        "h": 36,
+        "w": 190
+      },
+      "note": {
+        "sel": ".vd-field-hint",
+        "text": "Subpasta fixa sob a pasta de gravação do motor (FreeMix / re",
+        "font": 12,
+        "weight": "400",
+        "color": "rgb(141, 141, 141)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(141, 141, 141)",
+        "h": 17,
+        "w": 646
+      },
+      "title": {
+        "sel": ".vd-title",
+        "text": "Câmeras da Gravação (1 a 8)",
+        "font": 16,
+        "weight": "700",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(255, 255, 255)",
+        "h": 20,
+        "w": 798
+      },
+      "banner": {
+        "sel": "#rec-banner",
+        "text": "Gravação SSD Parada\n            00:00:00",
+        "font": 13,
+        "weight": "700",
+        "color": "rgb(176, 176, 176)",
+        "bg": "rgb(42, 42, 42)",
+        "border": "rgb(74, 74, 74)",
+        "h": 40,
+        "w": 798
+      },
+      "footer": {
+        "sel": ".vd-footer",
+        "text": "← Operar Replay\n        Status sincronizado com sucesso.\n   ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(28, 28, 28)",
+        "border": "rgb(65, 65, 65) rgb(237, 237, 237) rgb(237, 237, 237)",
+        "h": 56,
+        "w": 1018
+      },
+      "status": {
+        "sel": "#status-msg",
+        "text": "Status sincronizado com sucesso.",
+        "font": 13,
+        "weight": "400",
+        "color": "rgb(176, 176, 176)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(176, 176, 176)",
+        "h": 18,
+        "w": 656
+      },
+      "badge": {
+        "sel": ".cam-badge",
+        "text": "1",
+        "font": 13,
+        "weight": "800",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(58, 58, 58)",
+        "border": "rgb(85, 85, 85)",
+        "h": 26,
+        "w": 26
+      },
+      "link": {
+        "sel": ".vd-link-nav",
+        "text": "← Operar Replay",
+        "font": 13,
+        "weight": "600",
+        "color": "rgb(220, 220, 220)",
+        "bg": "rgb(42, 42, 42)",
+        "border": "rgb(77, 77, 77)",
+        "h": 32,
+        "w": 120
+      },
+      "appSize": {
+        "w": 1020,
+        "h": 810
+      },
+      "content": {
+        "scrollH": 752,
+        "clientH": 752,
+        "scrollW": 842,
+        "clientW": 842
+      },
+      "tabs": [
+        "Sessão",
+        "Armazenamento",
+        "Áudio e Sincronia"
+      ],
+      "ids": 20
+    },
+    "standalone1280": {
+      "embed": false,
+      "body": {
+        "sel": "body",
+        "text": "Replay\n        Sessão\n        Armazenamento\n        Áudio e ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(32, 32, 32)",
+        "border": "rgb(237, 237, 237)",
+        "h": 800,
+        "w": 1280
+      },
+      "app": {
+        "sel": ".vd-app-window",
+        "text": "Replay\n        Sessão\n        Armazenamento\n        Áudio e ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)",
+        "border": "rgb(65, 65, 65)",
+        "h": 720,
+        "w": 1020
+      },
+      "sidebar": {
+        "sel": ".vd-sidebar",
+        "text": "Replay\n        Sessão\n        Armazenamento\n        Áudio e ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(30, 30, 30)",
+        "border": "rgb(237, 237, 237) rgb(65, 65, 65) rgb(237, 237, 237) rgb(237, 237, 237)",
+        "h": 662,
+        "w": 176
+      },
+      "header": {
+        "sel": ".vd-sidebar-header",
+        "text": "Replay",
+        "font": 22,
+        "weight": "800",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(37, 37, 37)",
+        "border": "rgb(255, 255, 255) rgb(255, 255, 255) rgb(65, 65, 65)",
+        "h": 53,
+        "w": 175
+      },
+      "activeTab": {
+        "sel": ".vd-tab-btn.active",
+        "text": "Sessão",
+        "font": 13,
+        "weight": "700",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(69, 69, 69)",
+        "border": "rgb(255, 255, 255) rgb(255, 255, 255) rgb(53, 53, 53) rgb(230, 230, 230)",
+        "h": 40,
+        "w": 175
+      },
+      "idleTab": {
+        "sel": ".vd-tab-btn:not(.active)",
+        "text": "Armazenamento",
+        "font": 13,
+        "weight": "600",
+        "color": "rgb(181, 181, 181)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(181, 181, 181) rgb(181, 181, 181) rgb(53, 53, 53) rgba(0, 0, 0, 0)",
+        "h": 40,
+        "w": 175
+      },
+      "rowLabel": {
+        "sel": ".vd-row > span:first-child",
+        "text": "Pasta da Sessão",
+        "font": 13,
+        "weight": "600",
+        "color": "rgb(176, 176, 176)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(176, 176, 176)",
+        "h": 18,
+        "w": 140
+      },
+      "field": {
+        "sel": "#session-dir",
+        "text": "",
+        "font": 13,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(29, 29, 29)",
+        "border": "rgb(85, 85, 85)",
+        "h": 36,
+        "w": 634
+      },
+      "select": {
+        "sel": "#cam-slot-1",
+        "text": "(Nenhuma)CAM 1CAM 2VT 1PLACARREPLAY AFreeMix Barramentos",
+        "font": 13,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(29, 29, 29)",
+        "border": "rgb(85, 85, 85)",
+        "h": 36,
+        "w": 342
+      },
+      "button": {
+        "sel": "#btn-toggle-rec",
+        "text": "Iniciar gravação SSD",
+        "font": 13,
+        "weight": "600",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(58, 58, 58)",
+        "border": "rgb(138, 138, 138)",
+        "h": 36,
+        "w": 190
+      },
+      "note": {
+        "sel": ".vd-field-hint",
+        "text": "Subpasta fixa sob a pasta de gravação do motor (FreeMix / re",
+        "font": 12,
+        "weight": "400",
+        "color": "rgb(141, 141, 141)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(141, 141, 141)",
+        "h": 17,
+        "w": 646
+      },
+      "title": {
+        "sel": ".vd-title",
+        "text": "Câmeras da Gravação (1 a 8)",
+        "font": 16,
+        "weight": "700",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(255, 255, 255)",
+        "h": 20,
+        "w": 798
+      },
+      "banner": {
+        "sel": "#rec-banner",
+        "text": "Gravação SSD Parada\n            00:00:00",
+        "font": 13,
+        "weight": "700",
+        "color": "rgb(176, 176, 176)",
+        "bg": "rgb(42, 42, 42)",
+        "border": "rgb(74, 74, 74)",
+        "h": 40,
+        "w": 798
+      },
+      "footer": {
+        "sel": ".vd-footer",
+        "text": "← Operar Replay\n        Status sincronizado com sucesso.\n   ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(28, 28, 28)",
+        "border": "rgb(65, 65, 65) rgb(237, 237, 237) rgb(237, 237, 237)",
+        "h": 56,
+        "w": 1018
+      },
+      "status": {
+        "sel": "#status-msg",
+        "text": "Status sincronizado com sucesso.",
+        "font": 13,
+        "weight": "400",
+        "color": "rgb(176, 176, 176)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(176, 176, 176)",
+        "h": 18,
+        "w": 656
+      },
+      "badge": {
+        "sel": ".cam-badge",
+        "text": "1",
+        "font": 13,
+        "weight": "800",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(58, 58, 58)",
+        "border": "rgb(85, 85, 85)",
+        "h": 26,
+        "w": 26
+      },
+      "link": {
+        "sel": ".vd-link-nav",
+        "text": "← Operar Replay",
+        "font": 13,
+        "weight": "600",
+        "color": "rgb(220, 220, 220)",
+        "bg": "rgb(42, 42, 42)",
+        "border": "rgb(77, 77, 77)",
+        "h": 32,
+        "w": 120
+      },
+      "appSize": {
+        "w": 1020,
+        "h": 720
+      },
+      "content": {
+        "scrollH": 662,
+        "clientH": 662,
+        "scrollW": 842,
+        "clientW": 842
+      },
+      "tabs": [
+        "Sessão",
+        "Armazenamento",
+        "Áudio e Sincronia"
+      ],
+      "ids": 20
+    },
+    "central1440": {
+      "embed": true,
+      "body": {
+        "sel": "body",
+        "text": "Replay\n        Sessão\n        Armazenamento\n        Áudio e ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(32, 32, 32)",
+        "border": "rgb(237, 237, 237)",
+        "h": 625,
+        "w": 828
+      },
+      "app": {
+        "sel": ".vd-app-window",
+        "text": "Replay\n        Sessão\n        Armazenamento\n        Áudio e ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)",
+        "border": "rgb(237, 237, 237)",
+        "h": 625,
+        "w": 828
+      },
+      "sidebar": {
+        "sel": ".vd-sidebar",
+        "text": "Replay\n        Sessão\n        Armazenamento\n        Áudio e ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(30, 30, 30)",
+        "border": "rgb(237, 237, 237) rgb(65, 65, 65) rgb(237, 237, 237) rgb(237, 237, 237)",
+        "h": 591,
+        "w": 176
+      },
+      "header": {
+        "sel": ".vd-sidebar-header",
+        "text": "Replay",
+        "font": 22,
+        "weight": "800",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(37, 37, 37)",
+        "border": "rgb(255, 255, 255) rgb(255, 255, 255) rgb(65, 65, 65)",
+        "h": 0,
+        "w": 0
+      },
+      "activeTab": {
+        "sel": ".vd-tab-btn.active",
+        "text": "Sessão",
+        "font": 13,
+        "weight": "700",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(69, 69, 69)",
+        "border": "rgb(255, 255, 255) rgb(255, 255, 255) rgb(53, 53, 53) rgb(230, 230, 230)",
+        "h": 40,
+        "w": 175
+      },
+      "idleTab": {
+        "sel": ".vd-tab-btn:not(.active)",
+        "text": "Armazenamento",
+        "font": 13,
+        "weight": "600",
+        "color": "rgb(181, 181, 181)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(181, 181, 181) rgb(181, 181, 181) rgb(53, 53, 53) rgba(0, 0, 0, 0)",
+        "h": 40,
+        "w": 175
+      },
+      "rowLabel": {
+        "sel": ".vd-row > span:first-child",
+        "text": "Pasta da Sessão",
+        "font": 13,
+        "weight": "600",
+        "color": "rgb(176, 176, 176)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(176, 176, 176)",
+        "h": 18,
+        "w": 140
+      },
+      "field": {
+        "sel": "#session-dir",
+        "text": "",
+        "font": 13,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(29, 29, 29)",
+        "border": "rgb(85, 85, 85)",
+        "h": 36,
+        "w": 444
+      },
+      "select": {
+        "sel": "#cam-slot-1",
+        "text": "(Nenhuma)CAM 1CAM 2VT 1PLACARREPLAY AFreeMix Barramentos",
+        "font": 13,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(29, 29, 29)",
+        "border": "rgb(85, 85, 85)",
+        "h": 36,
+        "w": 247
+      },
+      "button": {
+        "sel": "#btn-toggle-rec",
+        "text": "Iniciar gravação SSD",
+        "font": 13,
+        "weight": "600",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(58, 58, 58)",
+        "border": "rgb(138, 138, 138)",
+        "h": 36,
+        "w": 190
+      },
+      "note": {
+        "sel": ".vd-field-hint",
+        "text": "Subpasta fixa sob a pasta de gravação do motor (FreeMix / re",
+        "font": 12,
+        "weight": "400",
+        "color": "rgb(141, 141, 141)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(141, 141, 141)",
+        "h": 17,
+        "w": 456
+      },
+      "title": {
+        "sel": ".vd-title",
+        "text": "Câmeras da Gravação (1 a 8)",
+        "font": 16,
+        "weight": "700",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(255, 255, 255)",
+        "h": 20,
+        "w": 608
+      },
+      "banner": {
+        "sel": "#rec-banner",
+        "text": "Gravação SSD Parada\n            00:00:00",
+        "font": 13,
+        "weight": "700",
+        "color": "rgb(176, 176, 176)",
+        "bg": "rgb(42, 42, 42)",
+        "border": "rgb(74, 74, 74)",
+        "h": 40,
+        "w": 608
+      },
+      "footer": {
+        "sel": ".vd-footer",
+        "text": "← Operar Replay\n        Status sincronizado com sucesso.\n   ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(28, 28, 28)",
+        "border": "rgb(65, 65, 65) rgb(237, 237, 237) rgb(237, 237, 237)",
+        "h": 34,
+        "w": 828
+      },
+      "status": {
+        "sel": "#status-msg",
+        "text": "Status sincronizado com sucesso.",
+        "font": 12,
+        "weight": "400",
+        "color": "rgb(176, 176, 176)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(176, 176, 176)",
+        "h": 18,
+        "w": 804
+      },
+      "badge": {
+        "sel": ".cam-badge",
+        "text": "1",
+        "font": 13,
+        "weight": "800",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(58, 58, 58)",
+        "border": "rgb(85, 85, 85)",
+        "h": 26,
+        "w": 26
+      },
+      "link": {
+        "sel": ".vd-link-nav",
+        "text": "← Operar Replay",
+        "font": 13,
+        "weight": "600",
+        "color": "rgb(220, 220, 220)",
+        "bg": "rgb(42, 42, 42)",
+        "border": "rgb(77, 77, 77)",
+        "h": 0,
+        "w": 0
+      },
+      "appSize": {
+        "w": 828,
+        "h": 625
+      },
+      "content": {
+        "scrollH": 591,
+        "clientH": 591,
+        "scrollW": 652,
+        "clientW": 652
+      },
+      "tabs": [
+        "Sessão",
+        "Armazenamento",
+        "Áudio e Sincronia"
+      ],
+      "ids": 20
+    },
+    "central1280": {
+      "embed": true,
+      "body": {
+        "sel": "body",
+        "text": "Replay\n        Sessão\n        Armazenamento\n        Áudio e ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(32, 32, 32)",
+        "border": "rgb(237, 237, 237)",
+        "h": 525,
+        "w": 668
+      },
+      "app": {
+        "sel": ".vd-app-window",
+        "text": "Replay\n        Sessão\n        Armazenamento\n        Áudio e ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)",
+        "border": "rgb(237, 237, 237)",
+        "h": 525,
+        "w": 668
+      },
+      "sidebar": {
+        "sel": ".vd-sidebar",
+        "text": "Replay\n        Sessão\n        Armazenamento\n        Áudio e ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(30, 30, 30)",
+        "border": "rgb(237, 237, 237) rgb(237, 237, 237) rgb(65, 65, 65)",
+        "h": 41,
+        "w": 668
+      },
+      "header": {
+        "sel": ".vd-sidebar-header",
+        "text": "Replay",
+        "font": 22,
+        "weight": "800",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(37, 37, 37)",
+        "border": "rgb(255, 255, 255) rgb(255, 255, 255) rgb(65, 65, 65)",
+        "h": 0,
+        "w": 0
+      },
+      "activeTab": {
+        "sel": ".vd-tab-btn.active",
+        "text": "Sessão",
+        "font": 13,
+        "weight": "700",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(69, 69, 69)",
+        "border": "rgb(255, 255, 255) rgb(53, 53, 53) rgb(230, 230, 230) rgba(0, 0, 0, 0)",
+        "h": 40,
+        "w": 71
+      },
+      "idleTab": {
+        "sel": ".vd-tab-btn:not(.active)",
+        "text": "Armazenamento",
+        "font": 13,
+        "weight": "600",
+        "color": "rgb(181, 181, 181)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(181, 181, 181) rgb(53, 53, 53) rgba(0, 0, 0, 0) rgb(181, 181, 181)",
+        "h": 40,
+        "w": 126
+      },
+      "rowLabel": {
+        "sel": ".vd-row > span:first-child",
+        "text": "Pasta da Sessão",
+        "font": 13,
+        "weight": "600",
+        "color": "rgb(176, 176, 176)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(176, 176, 176)",
+        "h": 18,
+        "w": 636
+      },
+      "field": {
+        "sel": "#session-dir",
+        "text": "",
+        "font": 13,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(29, 29, 29)",
+        "border": "rgb(85, 85, 85)",
+        "h": 36,
+        "w": 636
+      },
+      "select": {
+        "sel": "#cam-slot-1",
+        "text": "(Nenhuma)CAM 1CAM 2VT 1PLACARREPLAY AFreeMix Barramentos",
+        "font": 13,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(29, 29, 29)",
+        "border": "rgb(85, 85, 85)",
+        "h": 36,
+        "w": 261
+      },
+      "button": {
+        "sel": "#btn-toggle-rec",
+        "text": "Iniciar gravação SSD",
+        "font": 13,
+        "weight": "600",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(58, 58, 58)",
+        "border": "rgb(138, 138, 138)",
+        "h": 36,
+        "w": 190
+      },
+      "note": {
+        "sel": ".vd-field-hint",
+        "text": "Subpasta fixa sob a pasta de gravação do motor (FreeMix / re",
+        "font": 12,
+        "weight": "400",
+        "color": "rgb(141, 141, 141)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(141, 141, 141)",
+        "h": 17,
+        "w": 636
+      },
+      "title": {
+        "sel": ".vd-title",
+        "text": "Câmeras da Gravação (1 a 8)",
+        "font": 16,
+        "weight": "700",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(255, 255, 255)",
+        "h": 20,
+        "w": 636
+      },
+      "banner": {
+        "sel": "#rec-banner",
+        "text": "Gravação SSD Parada\n            00:00:00",
+        "font": 13,
+        "weight": "700",
+        "color": "rgb(176, 176, 176)",
+        "bg": "rgb(42, 42, 42)",
+        "border": "rgb(74, 74, 74)",
+        "h": 40,
+        "w": 636
+      },
+      "footer": {
+        "sel": ".vd-footer",
+        "text": "← Operar Replay\n        Status sincronizado com sucesso.\n   ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(28, 28, 28)",
+        "border": "rgb(65, 65, 65) rgb(237, 237, 237) rgb(237, 237, 237)",
+        "h": 34,
+        "w": 668
+      },
+      "status": {
+        "sel": "#status-msg",
+        "text": "Status sincronizado com sucesso.",
+        "font": 12,
+        "weight": "400",
+        "color": "rgb(176, 176, 176)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(176, 176, 176)",
+        "h": 18,
+        "w": 644
+      },
+      "badge": {
+        "sel": ".cam-badge",
+        "text": "1",
+        "font": 13,
+        "weight": "800",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(58, 58, 58)",
+        "border": "rgb(85, 85, 85)",
+        "h": 26,
+        "w": 26
+      },
+      "link": {
+        "sel": ".vd-link-nav",
+        "text": "← Operar Replay",
+        "font": 13,
+        "weight": "600",
+        "color": "rgb(220, 220, 220)",
+        "bg": "rgb(42, 42, 42)",
+        "border": "rgb(77, 77, 77)",
+        "h": 0,
+        "w": 0
+      },
+      "appSize": {
+        "w": 668,
+        "h": 525
+      },
+      "content": {
+        "scrollH": 535,
+        "clientH": 450,
+        "scrollW": 668,
+        "clientW": 668
+      },
+      "tabs": [
+        "Sessão",
+        "Armazenamento",
+        "Áudio e Sincronia"
+      ],
+      "ids": 20
+    },
+    "central1152": {
+      "embed": true,
+      "body": {
+        "sel": "body",
+        "text": "Replay\n        Sessão\n        Armazenamento\n        Áudio e ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(32, 32, 32)",
+        "border": "rgb(237, 237, 237)",
+        "h": 445,
+        "w": 607
+      },
+      "app": {
+        "sel": ".vd-app-window",
+        "text": "Replay\n        Sessão\n        Armazenamento\n        Áudio e ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(37, 37, 37)",
+        "border": "rgb(237, 237, 237)",
+        "h": 445,
+        "w": 607
+      },
+      "sidebar": {
+        "sel": ".vd-sidebar",
+        "text": "Replay\n        Sessão\n        Armazenamento\n        Áudio e ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(30, 30, 30)",
+        "border": "rgb(237, 237, 237) rgb(237, 237, 237) rgb(65, 65, 65)",
+        "h": 41,
+        "w": 607
+      },
+      "header": {
+        "sel": ".vd-sidebar-header",
+        "text": "Replay",
+        "font": 22,
+        "weight": "800",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(37, 37, 37)",
+        "border": "rgb(255, 255, 255) rgb(255, 255, 255) rgb(65, 65, 65)",
+        "h": 0,
+        "w": 0
+      },
+      "activeTab": {
+        "sel": ".vd-tab-btn.active",
+        "text": "Sessão",
+        "font": 13,
+        "weight": "700",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(69, 69, 69)",
+        "border": "rgb(255, 255, 255) rgb(53, 53, 53) rgb(230, 230, 230) rgba(0, 0, 0, 0)",
+        "h": 40,
+        "w": 71
+      },
+      "idleTab": {
+        "sel": ".vd-tab-btn:not(.active)",
+        "text": "Armazenamento",
+        "font": 13,
+        "weight": "600",
+        "color": "rgb(181, 181, 181)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(181, 181, 181) rgb(53, 53, 53) rgba(0, 0, 0, 0) rgb(181, 181, 181)",
+        "h": 40,
+        "w": 126
+      },
+      "rowLabel": {
+        "sel": ".vd-row > span:first-child",
+        "text": "Pasta da Sessão",
+        "font": 13,
+        "weight": "600",
+        "color": "rgb(176, 176, 176)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(176, 176, 176)",
+        "h": 18,
+        "w": 575
+      },
+      "field": {
+        "sel": "#session-dir",
+        "text": "",
+        "font": 13,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(29, 29, 29)",
+        "border": "rgb(85, 85, 85)",
+        "h": 36,
+        "w": 575
+      },
+      "select": {
+        "sel": "#cam-slot-1",
+        "text": "(Nenhuma)CAM 1CAM 2VT 1PLACARREPLAY AFreeMix Barramentos",
+        "font": 13,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(29, 29, 29)",
+        "border": "rgb(85, 85, 85)",
+        "h": 36,
+        "w": 231
+      },
+      "button": {
+        "sel": "#btn-toggle-rec",
+        "text": "Iniciar gravação SSD",
+        "font": 13,
+        "weight": "600",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(58, 58, 58)",
+        "border": "rgb(138, 138, 138)",
+        "h": 36,
+        "w": 190
+      },
+      "note": {
+        "sel": ".vd-field-hint",
+        "text": "Subpasta fixa sob a pasta de gravação do motor (FreeMix / re",
+        "font": 12,
+        "weight": "400",
+        "color": "rgb(141, 141, 141)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(141, 141, 141)",
+        "h": 17,
+        "w": 575
+      },
+      "title": {
+        "sel": ".vd-title",
+        "text": "Câmeras da Gravação (1 a 8)",
+        "font": 16,
+        "weight": "700",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(255, 255, 255)",
+        "h": 20,
+        "w": 575
+      },
+      "banner": {
+        "sel": "#rec-banner",
+        "text": "Gravação SSD Parada\n            00:00:00",
+        "font": 13,
+        "weight": "700",
+        "color": "rgb(176, 176, 176)",
+        "bg": "rgb(42, 42, 42)",
+        "border": "rgb(74, 74, 74)",
+        "h": 40,
+        "w": 575
+      },
+      "footer": {
+        "sel": ".vd-footer",
+        "text": "← Operar Replay\n        Status sincronizado com sucesso.\n   ",
+        "font": 14,
+        "weight": "400",
+        "color": "rgb(237, 237, 237)",
+        "bg": "rgb(28, 28, 28)",
+        "border": "rgb(65, 65, 65) rgb(237, 237, 237) rgb(237, 237, 237)",
+        "h": 34,
+        "w": 607
+      },
+      "status": {
+        "sel": "#status-msg",
+        "text": "Status sincronizado com sucesso.",
+        "font": 12,
+        "weight": "400",
+        "color": "rgb(176, 176, 176)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(176, 176, 176)",
+        "h": 18,
+        "w": 583
+      },
+      "badge": {
+        "sel": ".cam-badge",
+        "text": "1",
+        "font": 13,
+        "weight": "800",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(58, 58, 58)",
+        "border": "rgb(85, 85, 85)",
+        "h": 26,
+        "w": 26
+      },
+      "link": {
+        "sel": ".vd-link-nav",
+        "text": "← Operar Replay",
+        "font": 13,
+        "weight": "600",
+        "color": "rgb(220, 220, 220)",
+        "bg": "rgb(42, 42, 42)",
+        "border": "rgb(77, 77, 77)",
+        "h": 0,
+        "w": 0
+      },
+      "appSize": {
+        "w": 607,
+        "h": 445
+      },
+      "content": {
+        "scrollH": 535,
+        "clientH": 370,
+        "scrollW": 607,
+        "clientW": 607
+      },
+      "tabs": [
+        "Sessão",
+        "Armazenamento",
+        "Áudio e Sincronia"
+      ],
+      "ids": 20
+    }
+  },
+  "consoleErrors": [],
+  "pageErrors": []
+}

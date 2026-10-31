@@ -1,0 +1,32 @@
+/* Paleta compartilhada dos painéis operacionais; não substitui controladores. */
+:root {
+  color-scheme:dark;
+  --bg-app:#202020; --bg-panel:#252525; --bg-subtle:#2d2d2d; --bg-card:#242424;
+  --border-dim:#414141; --border-focus:#737373;
+  --text-main:#ededed; --text-muted:#b0b0b0; --text-dim:#909090;
+  --red-live:#ed181d; --green-pv:#16752c; --amber-cue:#dca900; --amber-light:#ffd324;
+  --bg-surface:#252525; --bg-input:#202020; --border:#494949; --text:#ededed;
+}
+.audio-topbar,.audio-sidebar,.sidebar-header { background:#242424; border-color:#444; }
+/* Shared module header: identical in Áudio, Replay and future windows. */
+.audio-topbar,.replay-topbar { height:44px; min-height:44px; padding:0 12px; display:flex; align-items:center; gap:12px; background:#222; border-bottom:1px solid #414141; }
+.workspace-head { display:flex; align-items:center; gap:10px; min-width:0; }
+.workspace-brand { font-size:20px; font-weight:800; letter-spacing:-.6px; color:#fff; margin-right:2px; white-space:nowrap; }
+.workspace-tabs,.workspace-subtabs { display:flex; align-items:center; gap:2px; background:#242424; border:1px solid #444; border-radius:4px; padding:2px; }
+.workspace-tabs .ws-tab,.workspace-subtabs button { height:28px; padding:0 14px; border:0; border-radius:3px; background:transparent; color:#b5b5b5; font:600 11px 'Segoe UI'; cursor:pointer; display:inline-flex; align-items:center; white-space:nowrap; }
+.workspace-tabs .ws-tab:hover,.workspace-subtabs button:hover { background:#343434; color:#fff; }
+.workspace-tabs .ws-tab.active,.workspace-subtabs button.selected { background:#4a4a4a; color:#fff; box-shadow:inset 0 -2px #ddd; }
+.workspace-tabs .workspace-home { color:#dcdcdc; padding:0 10px; }
+.project-pill { max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.audio-topbar .audio-brand { display:contents; }
+@media(max-width:900px){ .workspace-tabs .ws-tab{padding:0 9px} .project-pill{max-width:130px} }
+.btn-hardware { background:#353535; border-color:#555; color:#eee; }
+.settings-topbar,.replay-topbar { background:#202020; border-color:#444; }
+.settings-nav { background:#222; border-color:#444; }
+.nav-item-btn { color:#ccc; }
+.nav-item-btn.active,.nav-item-btn.selected,.nav-item-btn.on { background:#454545; border-color:#888; color:#fff; }
+.workspace-tabs { background:#242424; border-color:#444; }
+.ws-tab.active { background:#454545; border-color:#777; border-bottom-color:#ddd; }
+.project-pill,.project-sel-box { background:#282828; border-color:#4b4b4b; color:#ddd; }
+.replay-subbar,.settings-footer { background:#222; border-color:#444; }
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible { outline:2px solid #ddd; outline-offset:-2px; }

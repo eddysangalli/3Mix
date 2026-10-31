@@ -1,1 +1,178 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FreeMix · MultiGravação</title><link rel="stylesheet" href="/controle.css"><link rel="stylesheet" href="/studio-dialog.css"></head><body data-page="iso"><header><a href="/">FreeMix</a><h1>MultiGravação</h1><span id="connection">Conectando…</span></header><main><div id="message" role="status" aria-live="polite"></div><div class="iso-top"><section id="iso-options"><nav class="iso-format-tabs" aria-label="Formato"><button data-iso-format="mpegts">TS</button><button data-iso-format="mkv">MKV</button></nav><select id="iso-format" hidden><option value="mpegts">TS</option><option value="mkv">MKV</option></select><div class="form"><label>Codificador<select id="iso-encoder"><option value="default">H.264 / CPU (padrão)</option><option value="obs_x264">H.264 x264 / CPU</option></select></label><label>Qualidade CRF / QP<input id="iso-crf" type="number" min="0" max="51" value="23"></label><label>Áudio<select id="iso-audio"><option value="input">Áudio da entrada</option><option value="master">Master (trilha 1)</option><option value="source">Fonte pública com trilha 1</option></select></label><label>Fonte de áudio<select id="iso-audio-source"><option value="">Selecione fonte pública</option></select></label><label>Novo arquivo a cada<input id="iso-split" type="number" min="0" max="1440" step="1" value="0" title="Minutos; 0 = contínuo"></label><label>Pasta de gravação<input id="iso-directory" maxlength="500" placeholder="Vazio: pasta do perfil"></label><label>Prefixo dos arquivos<input id="iso-prefix" value="cam" maxlength="40"></label></div></section><aside class="iso-actions"><h2 id="iso-status">Aguardando…</h2><button id="iso-start">Começar</button><button id="iso-stop">Parar</button></aside></div><div class="iso-table-wrap"><table aria-label="Entradas da MultiGravação"><thead><tr><th>Entrada</th><th>Duração</th><th>Estado</th><th>Arquivo / pasta</th></tr></thead><tbody id="iso-inputs"></tbody></table></div><div class="iso-footer"><p id="iso-source-note">Grava cada entrada com suas camadas. Fonte direta exige áudio público com trilha 1 já habilitada. Buses isolados: use a rota A/B e selecione Bus A/B. Divisão em minutos; zero grava continuamente.</p><p id="iso-source-hint" role="status"></p><button id="iso-save">Salvar opções de gravação</button></div><details class="iso-files"><summary>Arquivos da sessão</summary><ul id="iso-files"></ul></details><small>TS e MKV disponíveis. Cada sessão cria uma subpasta própria; Replay e gravação principal mantêm suas opções. MP4 seguro finaliza após parar e mantém o MKV de segurança. Codificador, tamanho, FPS reduzido, áudio e pasta por entrada podem ser configurados.</small></main><script src="/controle.js"></script><script src="/iso-avancado.js"></script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3Mix · Multigravação</title>
+<link rel="stylesheet" href="vmix-dialogo.css">
+<link rel="stylesheet" href="3mix-grafite.css">
+<link rel="stylesheet" href="3mix-janelas.css">
+<style>
+  html body.vd.iso { overflow: hidden; }
+  .vd-window.iso-window { width: 100%; max-width: none; height: 100vh; min-height: 100vh; margin: 0; border: 0; border-radius: 0; box-shadow: none; display: flex; flex-direction: column; }
+  .iso-strip { display: flex; align-items: center; gap: 12px; }
+  .iso-strip .vd-title { white-space: nowrap; }
+  .iso-state { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; padding: 4px 10px; border: 1px solid #4a4a4a; background: #1b1b1b; border-radius: 3px; font-size: 12px; font-weight: 700; color: #dcdcdc; }
+  .iso-state.rec { border-color: #ef4444; background: #2a1414; color: #ffb1a8; }
+  .iso-state .dot { width: 8px; height: 8px; border-radius: 50%; background: #7d7d7d; }
+  .iso-state.rec .dot { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+  .iso-body { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 14px 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+  .iso-card { background: #262626; border: 1px solid #454545; border-radius: 5px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .iso-card h2 { margin: 0; font-size: 13px; color: #fff; display: flex; align-items: center; gap: 8px; }
+  .iso-card h2 small { margin-left: auto; font-size: 10.5px; color: #8f8f8f; font-weight: 400; }
+  .iso-global { display: grid; grid-template-columns: repeat(4, minmax(150px, 1fr)); gap: 10px 14px; }
+  @media (max-width: 980px) { .iso-global { grid-template-columns: repeat(2, minmax(140px, 1fr)); } }
+  .iso-field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .iso-field > span { font-size: 10.5px; font-weight: 700; color: #c9c9c9; }
+  .iso-field input, .iso-field select { width: 100%; height: 29px; min-width: 0; background: #1d1d1d; border: 1px solid #555; border-radius: 4px; color: #eee; padding: 0 7px; font-size: 11.5px; }
+  .iso-field input:disabled, .iso-field select:disabled { background: #191919; color: #767676; border-color: #3c3c3c; }
+  .iso-folder { display: flex; gap: 5px; }
+  .iso-folder input { flex: 1; }
+  .iso-folder button { min-width: 78px; height: 29px; background: #333; border: 1px solid #555; border-radius: 4px; color: #eee; font-size: 11px; font-weight: 600; cursor: pointer; }
+  .iso-help { margin: 0; font-size: 10.5px; color: #9a9a9a; line-height: 1.5; }
+  .iso-help.warn { color: #ffb3a9; }
+  .iso-help.ok { color: #8fd6a9; }
+  .iso-toolbar { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+  .iso-toolbar input[type=search] { flex: 1; min-width: 140px; height: 29px; background: #1b1b1b; border: 1px solid #4f4f4f; border-radius: 4px; color: #eee; padding: 0 8px; font-size: 11.5px; }
+  .iso-toolbar button { height: 29px; padding: 0 10px; background: #333; border: 1px solid #555; border-radius: 4px; color: #e6e6e6; font-size: 11px; font-weight: 600; cursor: pointer; }
+  .iso-toolbar button:hover:not(:disabled) { background: #404040; color: #fff; }
+  .iso-toolbar button:disabled { opacity: .45; cursor: default; }
+  .iso-count { font-size: 11px; color: #a5a5a5; font-weight: 700; white-space: nowrap; }
+  .iso-table-wrap { overflow-x: auto; overflow-y: hidden; border: 1px solid #3d3d3d; border-radius: 4px; }
+  table.iso-table { width: 100%; min-width: 940px; border-collapse: collapse; font-size: 11.5px; table-layout: fixed; }
+  .iso-table th:nth-child(1) { width: 30px; }
+  .iso-table th:nth-child(2) { width: 17%; }
+  .iso-table th:nth-child(3) { width: 9%; }
+  .iso-table th:nth-child(4) { width: 12%; }
+  .iso-table th:nth-child(5) { width: 11%; }
+  .iso-table th:nth-child(6) { width: 8%; }
+  .iso-table th:nth-child(7) { width: 27%; }
+  .iso-table th:nth-child(8) { width: 15%; }
+  .iso-table th { position: sticky; top: 0; z-index: 2; background: #1d1d1d; color: #9d9d9d; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .4px; padding: 7px 8px; border-bottom: 1px solid #444; white-space: nowrap; }
+  .iso-table td { padding: 6px 8px; border-bottom: 1px solid #343434; vertical-align: middle; color: #d6d6d6; }
+  .iso-table tr.eligible:hover td { background: #2c2c2c; }
+  .iso-table tr.not-eligible td { color: #777; background: #202020; }
+  .iso-table tr.is-selected td { background: #2b2b2b; }
+  .iso-table tr.has-error td { background: #301a1a; }
+  .iso-table input[type=checkbox] { width: 16px; height: 16px; accent-color: #d6d6d6; }
+  .iso-name { font-weight: 700; color: #f0f0f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .iso-table tr.not-eligible .iso-name { color: #8a8a8a; }
+  .iso-row-select, .iso-row-input { height: 26px; background: #1b1b1b; border: 1px solid #4d4d4d; border-radius: 3px; color: #eee; padding: 0 5px; font-size: 11px; }
+  .iso-table .iso-row-input { width: 100%; min-width: 0; }
+  .iso-table .iso-row-select { width: 100%; min-width: 0; }
+  .iso-file-row { display: flex; gap: 4px; align-items: center; }
+  .iso-table .iso-file-row .iso-row-dir { flex: 1 1 auto; width: auto; min-width: 0; }
+  .iso-table .iso-file-row .iso-row-prefix { flex: 0 0 74px; width: 74px; min-width: 0; }
+  .iso-table td { padding: 5px 8px; }
+  .iso-cell-state { white-space: nowrap; font-size: 11px; }
+  .iso-cell-state .rec { color: #ff9b92; font-weight: 800; }
+  .iso-cell-state .ok { color: #8fd6a9; }
+  .iso-cell-state .err { color: #ffb3a9; }
+  .iso-file { display: block; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #9fa9b4; font-size: 10.5px; }
+  .iso-error { display: flex; align-items: center; gap: 6px; color: #ffb3a9; font-size: 10.5px; }
+  .iso-error button { height: 22px; padding: 0 7px; background: #3a2222; border: 1px solid #7a3a3a; border-radius: 3px; color: #ffc9c2; font-size: 10px; cursor: pointer; white-space: nowrap; }
+  .iso-summary { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 11px; color: #a5a5a5; }
+  .iso-summary b { color: #e8e8e8; }
+  .iso-bar { position: sticky; bottom: 0; }
+  .iso-bar .iso-foot-note { margin-right: auto; font-size: 11px; color: #9d9d9d; }
+  details.iso-advanced { background: #232323; border: 1px solid #414141; border-radius: 5px; }
+  details.iso-advanced > summary { padding: 9px 12px; font-size: 11.5px; font-weight: 700; color: #d5d5d5; cursor: pointer; list-style: none; }
+  details.iso-advanced > summary::-webkit-details-marker { display: none; }
+  details.iso-advanced > summary::before { content: "▸"; margin-right: 8px; color: #8f8f8f; }
+  details.iso-advanced[open] > summary::before { content: "▾"; }
+  .iso-advanced-body { padding: 0 12px 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .iso-advanced-body p { margin: 0; flex-basis: 100%; font-size: 10.5px; color: #9a9a9a; }
+  .iso-files { margin: 0; padding-left: 16px; font-size: 10.5px; color: #a9b0b8; display: flex; flex-direction: column; gap: 3px; }
+  .iso-window button:disabled, .iso-window button.vd-on:disabled, .iso-window button.vd-air:disabled, .iso-window button.vd-warn:disabled { opacity: .5; filter: saturate(.25); box-shadow: none; }
+</style>
+</head>
+<body data-page="iso" class="vd iso">
+<div class="vd-window iso-window">
+  <div class="vd-strip iso-strip">
+    <span class="vd-title">Multigravação · uma entrada por arquivo</span>
+    <span id="iso-state" class="iso-state"><span class="dot"></span><span id="iso-state-text">Consultando…</span></span>
+  </div>
+
+  <div class="iso-body">
+    <section class="iso-card">
+      <h2>Padrões desta sessão <small>herdados por todas as entradas</small></h2>
+      <div class="iso-global">
+        <label class="iso-field"><span>Formato</span>
+          <select id="iso-format">
+            <option value="mpegts">MPEG-TS · tolerante</option>
+            <option value="mkv">MKV · multi-trilhas</option>
+            <option value="mp4_safe">MP4 seguro · MKV + remux</option>
+          </select>
+        </label>
+        <label class="iso-field"><span>Codificador</span><select id="iso-encoder"><option value="default">H.264 CPU (padrão)</option></select></label>
+        <label class="iso-field"><span>Qualidade CRF / QP</span><input id="iso-crf" type="number" min="0" max="51" step="1" value="23"></label>
+        <label class="iso-field"><span>Áudio</span>
+          <select id="iso-audio">
+            <option value="input">Áudio da própria entrada</option>
+            <option value="master">Master (trilha 1)</option>
+            <option value="bus-a">Bus A</option>
+            <option value="bus-b">Bus B</option>
+            <option value="all-tracks">Todas as trilhas</option>
+            <option value="source">Fonte pública escolhida</option>
+          </select>
+        </label>
+        <label class="iso-field"><span>Fonte pública</span><select id="iso-audio-source"><option value="">Selecione…</option></select></label>
+        <label class="iso-field"><span>Novo arquivo a cada (min)</span><input id="iso-split" type="number" min="0" max="1440" step="1" value="0"></label>
+        <label class="iso-field"><span>Prefixo do arquivo</span><input id="iso-prefix" value="cam" maxlength="40"></label>
+        <label class="iso-field"><span>Pasta base</span>
+          <span class="iso-folder"><input id="iso-directory" maxlength="500" placeholder="Vazio: pasta do perfil"><button id="iso-browse" type="button">Procurar…</button></span>
+        </label>
+      </div>
+      <p class="iso-help" id="iso-format-help">MPEG-TS é tolerante a quedas. MKV aceita várias trilhas. MP4 seguro grava em MKV e finaliza em MP4 ao parar.</p>
+      <p class="iso-help" id="iso-audio-help"></p>
+    </section>
+
+    <section class="iso-card">
+      <h2>Entradas <small>marque o que gravar; ajuste áudio, formato, duração e arquivo por entrada</small></h2>
+      <div class="iso-toolbar">
+        <input id="iso-filter" type="search" placeholder="Filtrar entradas por nome…" autocomplete="off">
+        <button id="iso-select-eligible" type="button">Selecionar todas</button>
+        <button id="iso-clear" type="button">Limpar seleção</button>
+        <span class="iso-count" id="iso-count">0 selecionadas</span>
+      </div>
+      <div class="iso-table-wrap">
+        <table class="iso-table" aria-label="Entradas da multigravação">
+          <thead><tr>
+            <th style="width:28px"></th><th>Entrada</th><th>Estado</th><th>Áudio</th><th>Formato</th><th title="Duração de cada arquivo (min)">MIN</th><th>Pasta e arquivo</th><th>Erro / ação</th>
+          </tr></thead>
+          <tbody id="iso-rows"><tr><td colspan="8" class="iso-help">Consultando as entradas do motor…</td></tr></tbody>
+        </table>
+      </div>
+      <p class="iso-help" id="iso-note">Fechar esta janela não interrompe uma gravação em andamento.</p>
+    </section>
+
+    <section class="iso-card" id="iso-session-card" hidden>
+      <h2>Sessão atual <small id="iso-session-dir"></small></h2>
+      <div class="iso-summary" id="iso-session-summary"></div>
+      <ul class="iso-files" id="iso-files"></ul>
+    </section>
+
+    <details class="iso-advanced">
+      <summary>Manutenção</summary>
+      <div class="iso-advanced-body">
+        <p>Finaliza em MP4 os MKV de sessões anteriores que não foram encerradas. Os MKV originais são preservados.</p>
+        <button id="iso-recover" type="button">Finalizar MP4 de sessão interrompida</button>
+      </div>
+    </details>
+
+    <p id="iso-message" class="vd-msg" role="status" style="margin-left:0"></p>
+  </div>
+
+  <div class="vd-bar iso-bar">
+    <span class="iso-foot-note" id="iso-foot-note">Aplicar salva os padrões e as opções por entrada; não inicia gravação.</span>
+    <button id="iso-save" type="button">Aplicar opções</button>
+    <button id="iso-stop" type="button" class="vd-air" disabled>Parar e finalizar</button>
+    <button id="iso-start" type="button" class="vd-on" disabled>Iniciar selecionadas</button>
+    <button id="iso-close" type="button">Fechar</button>
+  </div>
+</div>
+<input id="iso-folder-picker" type="file" webkitdirectory directory multiple hidden>
+<script src="fechar-janela.js"></script>
+<script src="iso-avancado.js"></script>
+</body>
+</html>
