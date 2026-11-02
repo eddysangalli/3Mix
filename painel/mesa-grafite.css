@@ -396,3 +396,5 @@ body.me-on .input-module .me-surface { display:block; flex:1 1 0; min-width:0; m
 .sem-miniatura .switcher-input img { display:none; }
 .sem-miniatura .switcher-input { min-height:26px; }
 .switcher-bank.em-me { outline:1px solid #2f6fed; outline-offset:-1px; }
+.plugin-linha { display:grid; grid-template-columns:1fr auto; gap:4px 8px; align-items:center; padding:6px 0; border-bottom:1px solid #414141; }
+.plugin-linha small { grid-column:1 / -1; color:#a9a9a9; }

@@ -1,8 +1,8 @@
 {
   "upstream": "https://github.com/obsproject/obs-studio.git",
   "base": "ba2f32bdf791005443988a4955e963663e16b1ed",
-  "head": "45a1287fb753d2b5f2b49fa7e0bbc6f5869a8158",
-  "version": "0.1.0-local.20261102172118",
+  "head": "36f44c1f21904ca17153a3d5f03dd162458dd134",
+  "version": "0.1.0-local.20261102174725",
   "patches": [
     {
       "path": "0001-feat-branding-replace-OBS-identity-with-FreeMix-Stud.patch",
@@ -179,11 +179,19 @@
     {
       "path": "0044-feat-Programa-de-cada-M-E-como-entrada-PGM-M-E-N.patch",
       "sha256": "1de606549d0bef0b49402e59311117b20d6d1539f74bf317ac64dd2c07f426f6"
+    },
+    {
+      "path": "0045-feat-abrir-a-janela-de-um-plugin-VST-por-pedido-do-p.patch",
+      "sha256": "0f18686f4840462cb9702c5898cd93347264768e555f1098948dbfd392fd3868"
+    },
+    {
+      "path": "0046-fix-obs-vst-abre-o-editor-em-filtro-criado-fora-da-t.patch",
+      "sha256": "356a6c65d46632073817e2d0568cc64b5294085be10c55dd9abf78b50289142d"
     }
   ],
-  "sourceUpdatedAt": "2026-11-02T20:21:44.142Z",
+  "sourceUpdatedAt": "2026-11-02T20:47:50.140Z",
   "sourceSchema": 2,
-  "tree": "8a6b6158258fdbce14be3010a2b68a8acaa34189",
+  "tree": "5968a3c0ef21e4989d61cceeb872dfcf0270b8cc",
   "submodules": [
     {
       "path": "deps/libdshowcapture/src",

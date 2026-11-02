@@ -318,6 +318,29 @@ E('remove-filter')?.addEventListener('click', () => command('audio_routing_filte
 
 E('open-native-filters')?.addEventListener('click', () => command('audio_routing_open_filters', {}));
 
+// Plugins embutidos. No canal seguem o canal escolhido; o master_me do MAIN independe da seleção.
+const PLUGIN_TYPES = new Set(['master_me', 'pp_track', 'pp_master']);
+const MAIN_BUS = '3Mix Master';
+let masterMeOn = false;
+function paintPlugin() { const b = E('open-plugin'); if (b) b.hidden = !PLUGIN_TYPES.has(E('filter')?.value); }
+E('filter')?.addEventListener('change', paintPlugin);
+paintPlugin();
+E('open-plugin')?.addEventListener('click', () => command('audio_routing_plugin', { type: E('filter').value, op: 'open' }));
+async function pluginNoMain(op) {
+  try { await send('audio_routing_plugin', { key: MAIN_BUS, type: 'master_me', op }); return true; }
+  catch (error) { toast(error.message, 'warn'); return false; }
+}
+E('plugin-master-toggle')?.addEventListener('click', async () => {
+  if (await pluginNoMain(masterMeOn ? 'off' : 'on')) {
+    masterMeOn = !masterMeOn;
+    E('plugin-master-toggle').classList.toggle('on', masterMeOn);
+    toast(masterMeOn ? 'master_me ligado no MAIN' : 'master_me desligado no MAIN');
+  }
+});
+E('plugin-master-open')?.addEventListener('click', async () => {
+  if (await pluginNoMain('open')) { masterMeOn = true; E('plugin-master-toggle').classList.add('on'); }
+});
+
 E('drawer-close')?.addEventListener('click', () => openDrawer(false));
 
 document.addEventListener('keydown', event => {

@@ -14,6 +14,7 @@
 - AUX avisa quando a saída no ar recusou a troca de sinal.
 - Entrada só de áudio mede e entra na mistura sem depender de corte; mic junto de câmera segue a cena dela e entrada criada no ar nasce muda.
 - Fontes do motor passam a ficar em `motor/`, no mesmo repositório.
+- master_me e PodcastPlugins (Track e Master) embutidos: rack DSP, aba Plugins do mixer, inclusive no Master e nos barramentos, com a janela própria de cada um.
 - Pacote alpha em ZIP: projeto inicial "3Mix", instruções para quem testa e logs pelo WhatsApp.
 - `aux.html` e `aux.js` passam a `aux-router`, porque AUX é nome reservado no Windows. O endereço `/aux` não muda.
 

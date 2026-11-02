@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "headers/VSTPlugin.h"
 #include <util/platform.h>
+#include <QCoreApplication>
 
 intptr_t VSTPlugin::hostCallback_static(AEffect *effect, int32_t opcode, int32_t index, intptr_t value, void *ptr,
 					float opt)
@@ -79,7 +80,11 @@ float VSTPlugin::GetSampleRate()
 	return mTimeInfo.sampleRate;
 }
 
-VSTPlugin::VSTPlugin(obs_source_t *sourceContext) : sourceContext{sourceContext} {}
+VSTPlugin::VSTPlugin(obs_source_t *sourceContext) : sourceContext{sourceContext}
+{
+	// Filtro criado pelo websocket nasce numa thread sem fila de eventos do Qt, e openEditor nunca rodaria.
+	moveToThread(QCoreApplication::instance()->thread());
+}
 
 VSTPlugin::~VSTPlugin()
 {

@@ -1,0 +1,3 @@
+trummerschlunk/PodcastPlugins
+Versão 1.0.0, binário oficial da release para Windows x64 (VST2).
+Licença GPL-3.0. Fontes desta versão: podcast-plugins-1.0.0-src.tar.xz nesta pasta e https://github.com/trummerschlunk/PodcastPlugins

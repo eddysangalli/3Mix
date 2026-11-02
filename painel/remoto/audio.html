@@ -151,6 +151,9 @@
                   <option value="rnnoise">Limpeza neural (RNNoise)</option>
                   <option value="nvidia">Limpeza NVIDIA (RTX / NVAFX)</option>
                   <option value="expander">Expansor</option>
+                  <option value="pp_track">PodcastPlugins Track (voz)</option>
+                  <option value="pp_master">PodcastPlugins Master</option>
+                  <option value="master_me">master_me (masterização)</option>
                 </select>
                 <label class="check-line"><input type="checkbox" id="filter-enabled"><span>Ativo</span></label>
                 <span id="filter-status" class="dsp-status"></span>
@@ -158,6 +161,7 @@
               <div id="filter-fields" class="filter-fields"></div>
               <div class="dsp-actions">
                 <button type="button" id="open-native-filters" class="btn-hardware" title="Abrir o diálogo nativo de filtros do OBS para este canal (VST 2.x, EQ nativo e outros)">Filtros nativos (VST 2.x)…</button>
+                <button type="button" id="open-plugin" class="btn-hardware" hidden title="Abrir a janela deste plugin">Abrir plugin</button>
                 <button type="button" id="save-filter" class="btn-hardware">Aplicar filtro</button>
                 <button type="button" id="remove-filter" class="btn-hardware danger">Remover filtro</button>
               </div>
@@ -167,6 +171,8 @@
                 <button type="button" class="ai-preset-btn" id="ai-preset-rnnoise" title="Redução de ruído neural RNNoise isolada">Limpeza neural</button>
                 <button type="button" class="ai-preset-btn" id="ai-preset-noisy" title="RNNoise + gate para ambientes ruidosos">Ambiente ruidoso</button>
                 <button type="button" class="ai-preset-btn" id="ai-preset-podcast" title="Expansor + compressor suave para voz">Podcast / host</button>
+                <button type="button" class="ai-preset-btn" id="plugin-master-toggle" title="Liga ou desliga o master_me no barramento MAIN">master_me no MAIN</button>
+                <button type="button" class="ai-preset-btn" id="plugin-master-open" title="Abre a janela do master_me do barramento MAIN">Abrir master_me</button>
                 <button type="button" class="ai-preset-btn" id="ai-preset-reset" title="Desativar os filtros deste canal">Limpar</button>
               </div>
             </div>

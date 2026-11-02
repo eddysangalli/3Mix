@@ -1,0 +1,54 @@
+From cbb66098fde3c11c9df58c9d2f9ede184cf7a9fd Mon Sep 17 00:00:00 2001
+From: Eddy Sangalli <eddyrodrigues@outlook.com>
+Date: Mon, 2 Nov 2026 17:39:57 -0300
+Subject: [PATCH] feat: abrir a janela de um plugin VST por pedido do painel
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ frontend/widgets/FreeMixMultistream.cpp | 23 +++++++++++++++++++++++
+ 1 file changed, 23 insertions(+)
+
+diff --git a/frontend/widgets/FreeMixMultistream.cpp b/frontend/widgets/FreeMixMultistream.cpp
+index dccfda4..36ea0fc 100644
+--- a/frontend/widgets/FreeMixMultistream.cpp
++++ b/frontend/widgets/FreeMixMultistream.cpp
+@@ -165,6 +165,28 @@ void RequestFinalProgramGate(obs_data_t *request,obs_data_t *response,void *)
+  else if(!QMetaObject::invokeMethod(main.data(),work,Qt::BlockingQueuedConnection))fail();
+ }
+ 
++// Abre a janela de um plugin VST pelo botão do próprio filtro. Só aceita filtro VST; não executa outro botão.
++void RequestOpenVstEditor(obs_data_t *request,obs_data_t *response,void *){
++	const std::string sourceName=obs_data_get_string(request,"sourceName"),filterName=obs_data_get_string(request,"filterName");
++	QMetaObject::invokeMethod(OBSBasic::Get(),[&](){
++		std::string error;
++		if(frontendClosing)error="closing";
++		else{
++			OBSSourceAutoRelease source=obs_get_source_by_name(sourceName.c_str());
++			OBSSourceAutoRelease filter=source?obs_source_get_filter_by_name(source,filterName.c_str()):nullptr;
++			if(!filter||std::string(obs_source_get_id(filter))!="vst_filter")error="VST filter not found";
++			else{
++				obs_properties_t *props=obs_source_properties(filter);
++				obs_property_t *button=props?obs_properties_get(props,"open_vst_settings"):nullptr;
++				if(!button)error="VST filter has no editor";
++				else obs_property_button_clicked(button,filter);
++				obs_properties_destroy(props);
++			}
++		}
++		obs_data_set_bool(response,"success",error.empty());
++		if(!error.empty())obs_data_set_string(response,"error",error.c_str());
++	},Qt::BlockingQueuedConnection);
++}
+ void RequestSdiOutput(obs_data_t *request,obs_data_t *response,void *){QMetaObject::invokeMethod(OBSBasic::Get(),[=](){if(frontendClosing){obs_data_set_bool(response,"success",false);return;}freemix_sdi::Request(request,response,IsPrivateSource);},Qt::BlockingQueuedConnection);}
+ void RequestSrtHdrOutput(obs_data_t *request,obs_data_t *response,void *){
+  auto *main=OBSBasic::Get();if(!main){obs_data_set_bool(response,"success",false);return;}
+@@ -1658,6 +1680,7 @@ void RegisterVendor()
+  obs_websocket_vendor_register_request(vendor, "omt_hdr_output", RequestOmtHdrOutput, nullptr);
+  obs_websocket_vendor_register_request(vendor,"srt_hdr_output",RequestSrtHdrOutput,nullptr);
+  obs_websocket_vendor_register_request(vendor,"sdi_output",RequestSdiOutput,nullptr);
++ obs_websocket_vendor_register_request(vendor,"open_vst_editor",RequestOpenVstEditor,nullptr);
+  obs_websocket_vendor_register_request(vendor, "control_mix", RequestMix, nullptr);
+  obs_websocket_vendor_register_request(vendor, "get_mixes", RequestMix, nullptr);
+ 	obs_websocket_vendor_register_request(vendor, "project_creation_policy", RequestProjectPolicy, nullptr);
+-- 
+2.56.0.windows.1
+

@@ -7,6 +7,15 @@ async function put(file,text){const previous=await read(file);if(previous===text
 async function files(dir,filter){let entries;try{entries=await readdir(dir,{withFileTypes:true});}catch(e){if(e.code==='ENOENT')return [];throw e;}const result=[];for(const e of entries){if(e.isSymbolicLink())continue;const name=join(dir,e.name);if(e.isDirectory())result.push(...await files(name,filter));else if(filter(e.name))result.push(name);}return result;}
 // Cenas, fontes e filtros internos agora se chamam 3Mix. Projetos antigos migram aqui, com o motor fechado; os identificadores de formato não mudam.
 const NOME_ANTIGO=/"FreeMix (?!ICE"|Project Template|Recovery"|Settings"|New Project Plan|multipath)/g;
+// O caminho do plugin embutido é absoluto no projeto: acompanha a pasta atual, mesmo se a instalação mudar de lugar.
+async function reapontarPluginsAudio(root,cfg){
+ const pasta=JSON.stringify(join(root,'plugins-audio')).slice(1,-1);
+ for(const file of await files(join(cfg,'basic/scenes'),name=>/\.json$/.test(name))){
+  const old=await read(file);if(old===null||!old.includes('plugins-audio'))continue;
+  const novo=old.replace(/("plugin_path"\s*:\s*")[^"]*?[\\/]plugins-audio[\\/]+([^"\\/]+-vst\.dll")/g,(_,a,b)=>a+pasta+'\\\\'+b);
+  if(novo!==old)await writeFile(file,novo);
+ }
+}
 async function migrarNomes3Mix(cfg){
  const alvos=[...await files(join(cfg,'basic/scenes'),name=>/\.(json|bak|salvo)$/.test(name)),...await files(join(cfg,'plugin_config'),name=>/\.json$/.test(name))];
  for(const file of alvos){
@@ -24,7 +33,7 @@ export async function preparePortable(root){
  if(!Number.isInteger(apiPort)||apiPort<1||apiPort>65535)throw Error('Porta da API inválida; informe um inteiro entre 1 e 65535.');
  if(!Number.isInteger(ws.server_port)||ws.server_port<1||ws.server_port>65535||ws.server_port===apiPort)throw Error('Portas do motor e da API devem ser válidas e diferentes.');
  const theme=await read(join(root,'painel/tema-padrao.ovt'));if(theme)await put(join(cfg,'themes/Yami_MesaDeCorte.ovt'),theme);
- await migrarNomes3Mix(cfg);
+ await migrarNomes3Mix(cfg);await reapontarPluginsAudio(root,cfg);
  const scenes=await files(join(cfg,'basic/scenes'),name=>/\.(json|bak|salvo)$/.test(name));
  for(const file of scenes){const old=await read(file);await put(file,old.replace(/("hide_after":\s*)[1-9]\d*/g,(_,prefix)=>prefix+'0'));}
   const plugins={advancedSceneSwitcher:existsSync(join(root,'obs-plugins/64bit/advanced-scene-switcher.dll')),cloudCaptions:existsSync(join(root,'obs-plugins/64bit/obs_google_caption_plugin.dll'))};

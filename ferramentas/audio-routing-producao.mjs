@@ -1,6 +1,7 @@
 import {createHash} from 'node:crypto';
 import {readFile,writeFile,mkdir,rename} from 'node:fs/promises';
 import {join} from 'node:path';
+import {existsSync} from 'node:fs';
 import{AudioBusesEngine,BUS_KIND}from'./audio-buses-producao.mjs';
 
 export const AUDIO_FILTERS={
@@ -11,6 +12,9 @@ export const AUDIO_FILTERS={
  limiter:{kind:'limiter_filter',name:'3Mix Audio - Limiter',defaults:{threshold:-6,release_time:60},ranges:{threshold:[-60,0],release_time:[1,1000,true]}},
  rnnoise:{kind:'noise_suppress_filter',name:'3Mix Audio - RNNoise (IA)',defaults:{suppress_method:'rnnoise'},ranges:{}},
  nvidia:{kind:'nvidia_audiofx_filter',name:'3Mix Audio - NVIDIA Denoise',defaults:{intensity:0.5,method:'denoiser'},ranges:{intensity:[0,1]}},
+ master_me:{kind:'vst_filter',name:'3Mix Audio - master_me',vst:'master_me-vst.dll',defaults:{},ranges:{}},
+ pp_track:{kind:'vst_filter',name:'3Mix Audio - PodcastPlugins Track',vst:'pp-track-vst.dll',defaults:{},ranges:{}},
+ pp_master:{kind:'vst_filter',name:'3Mix Audio - PodcastPlugins Master',vst:'pp-master-vst.dll',defaults:{},ranges:{}},
  expander:{kind:'expander_filter',name:'3Mix Audio - Expander',defaults:{ratio:2,threshold:-40,attack_time:10,release_time:50,output_gain:0},ranges:{ratio:[1,32],threshold:[-60,0],attack_time:[1,100,true],release_time:[1,1000,true],output_gain:[-30,30]}}
 };
 export function filterSettings(type,value={},previous={}){
@@ -64,8 +68,9 @@ export class AudioRoutingEngine{
  source(key){const row=this.rows.find(r=>r.key===key);if(!row)throw Error('Fonte de áudio removida ou indisponível');if(row.protected)throw Error('Mic privado, retorno e barramentos não participam deste controle');return row;}
  manualOverride(keys){return this.queue(()=>this.override(keys));}
  async override(keys){let changed=false;for(const key of keys){const row=this.rows.find(r=>r.key===key||r.name===key);if(!row)continue;const entry=this.config.sources[row.key];if(entry?.afv){entry.afv=false;entry.override='Controle manual';this.applied.delete(row.key);changed=true;}}if(changed)await this.save();return this.summary();}
+ pluginPath(spec){return join(this.p.root,'plugins-audio',spec.vst);}
  async inspect(key){const row=this.source(key);if(!this.kinds)this.kinds=new Set((await this.p.req('GetSourceFilterKindList')).sourceFilterKinds);const [offset,list]=await Promise.all([this.p.req('GetInputAudioSyncOffset',{inputUuid:key}),this.p.req('GetSourceFilterList',{sourceUuid:key})]);
-  const filters={};for(const [type,spec]of Object.entries(AUDIO_FILTERS)){const filter=list.filters.find(f=>f.filterName===spec.name);filters[type]={supported:this.kinds.has(spec.kind),exists:!!filter,enabled:filter?.filterEnabled??false,settings:filter?filterSettings(type,{},filter.filterSettings):{...spec.defaults}};}
+  const filters={};for(const [type,spec]of Object.entries(AUDIO_FILTERS)){const filter=list.filters.find(f=>f.filterName===spec.name);filters[type]={supported:this.kinds.has(spec.kind)&&(!spec.vst||existsSync(this.pluginPath(spec))),exists:!!filter,enabled:filter?.filterEnabled??false,settings:filter?filterSettings(type,{},filter.filterSettings):{...spec.defaults}};}
   this.details={key,name:row.name,delayMs:offset.inputAudioSyncOffset,filters,filterOrder:list.filters.map(f=>f.filterName)};return this.details;
  }
  read(key){return this.queue(async()=>{if(key)await this.inspect(key);return this.summary();});}
@@ -74,6 +79,24 @@ export class AudioRoutingEngine{
   if(!this.scope)throw Error('Aguarde a conexão e identificação da produção');
   if(action.startsWith('audio_routing_bus_')||action.startsWith('audio_routing_asio_output_')||['audio_routing_direct','audio_routing_asio_create','audio_routing_devices'].includes(action)){await this.busEngine.command(action,d);this.last=this.summary();return;}
   if(action==='audio_routing_get'){if(d.key)await this.inspect(d.key);this.last=this.summary();return;}
+  if(action==='audio_routing_plugin'){
+   const spec=AUDIO_FILTERS[d.type];if(!spec?.vst)throw Error('Plugin desconhecido');
+   const row=this.rows.find(r=>r.key===d.key||r.name===d.key);if(!row)throw Error('Canal de áudio não encontrado');
+   if(row.protected&&!row.bus&&row.kind!==BUS_KIND&&!/^3Mix (?:Master|Bus [A-Z])$/.test(row.name))throw Error('Este canal não recebe plugins');
+   if(!['on','off','remove','open'].includes(d.op))throw Error('Comando de plugin inválido');
+   const path=this.pluginPath(spec);if(!existsSync(path))throw Error('Plugin não instalado nesta cópia do 3Mix');
+   const existing=(await this.p.req('GetSourceFilterList',{sourceName:row.name})).filters.find(f=>f.filterName===spec.name);
+   if(existing&&existing.filterKind!==spec.kind)throw Error('Nome reservado já pertence a outro filtro');
+   if(d.op==='remove'){if(existing)await this.p.req('RemoveSourceFilter',{sourceName:row.name,filterName:spec.name});}
+   else if(d.op==='off'){if(existing)await this.p.req('SetSourceFilterEnabled',{sourceName:row.name,filterName:spec.name,filterEnabled:false});}
+   else{
+    if(!existing)await this.p.req('CreateSourceFilter',{sourceName:row.name,filterName:spec.name,filterKind:spec.kind,filterSettings:{plugin_path:path}});
+    if(d.op==='on'||!existing)await this.p.req('SetSourceFilterEnabled',{sourceName:row.name,filterName:spec.name,filterEnabled:true});
+    if(d.op==='open')await this.p.vendor('open_vst_editor',{sourceName:row.name,filterName:spec.name},'freemix');
+   }
+   if(!row.protected)await this.inspect(row.key);
+   this.last=this.summary();return;
+  }
   const row=this.source(d.key),entry=this.config.sources[row.key]||{};
   if(action==='audio_routing_afv'){
    if(typeof d.enabled!=='boolean')throw Error('AFV deve ser ligado ou desligado');entry.afv=d.enabled;entry.override=null;this.config.sources[row.key]=entry;this.applied.delete(row.key);await this.save();await this.observe(this.context);
@@ -86,7 +109,7 @@ export class AudioRoutingEngine{
    if(!this.kinds)this.kinds=new Set((await this.p.req('GetSourceFilterKindList')).sourceFilterKinds);if(!this.kinds.has(spec.kind))throw Error('Este motor não oferece o filtro solicitado');
    const list=await this.p.req('GetSourceFilterList',{sourceUuid:row.key}),existing=list.filters.find(f=>f.filterName===spec.name);if(existing&&existing.filterKind!==spec.kind)throw Error('Nome reservado já pertence a outro filtro');
    if(d.remove){if(existing)await this.p.req('RemoveSourceFilter',{sourceUuid:row.key,filterName:spec.name});}
-   else{const settings=filterSettings(d.type,d.settings||{},existing?.filterSettings);if(existing){if(d.settings!==undefined)await this.p.req('SetSourceFilterSettings',{sourceUuid:row.key,filterName:spec.name,filterSettings:settings,overlay:true});}else await this.p.req('CreateSourceFilter',{sourceUuid:row.key,filterName:spec.name,filterKind:spec.kind,filterSettings:settings});await this.p.req('SetSourceFilterEnabled',{sourceUuid:row.key,filterName:spec.name,filterEnabled:d.enabled??true});}
+   else{const settings=spec.vst?{plugin_path:this.pluginPath(spec)}:filterSettings(d.type,d.settings||{},existing?.filterSettings);if(existing){if(d.settings!==undefined&&!spec.vst)await this.p.req('SetSourceFilterSettings',{sourceUuid:row.key,filterName:spec.name,filterSettings:settings,overlay:true});}else await this.p.req('CreateSourceFilter',{sourceUuid:row.key,filterName:spec.name,filterKind:spec.kind,filterSettings:settings});await this.p.req('SetSourceFilterEnabled',{sourceUuid:row.key,filterName:spec.name,filterEnabled:d.enabled??true});}
    await this.inspect(row.key);
   }else if(action==='audio_routing_open_filters'){
    await this.p.req('OpenInputFiltersDialog',{inputName:row.name});

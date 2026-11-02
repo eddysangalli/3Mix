@@ -139,3 +139,7 @@ componentes listados nesse arquivo não têm repositório de origem ou licença 
 (campos ausentes) — eles não foram incluídos nas seções com link de origem acima para não
 inventar uma fonte; se esta lista for usada para distribuição pública, confirme o registro
 completo em componentes.json primeiro.
+
+Plugins de áudio embutidos (plugins-audio/):
+- master_me 1.3.1, https://github.com/trummerschlunk/master_me, GPL-3.0. Fontes em licenses/master_me/.
+- PodcastPlugins 1.0.0 (Track e Master), https://github.com/trummerschlunk/PodcastPlugins, GPL-3.0. Fontes em licenses/podcastplugins/.

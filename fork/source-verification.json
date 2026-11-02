@@ -1,8 +1,8 @@
 {
   "status": "PASS",
   "base": "ba2f32bdf791005443988a4955e963663e16b1ed",
-  "head": "45a1287fb753d2b5f2b49fa7e0bbc6f5869a8158",
-  "resultTree": "8a6b6158258fdbce14be3010a2b68a8acaa34189",
+  "head": "36f44c1f21904ca17153a3d5f03dd162458dd134",
+  "resultTree": "5968a3c0ef21e4989d61cceeb872dfcf0270b8cc",
   "submodules": [
     {
       "path": "deps/libdshowcapture/src",
@@ -312,8 +312,8 @@
     },
     {
       "path": "frontend/widgets/FreeMixMultistream.cpp",
-      "bytes": 112916,
-      "sha256": "4153914e39495ef84016b83041c0a8e6a011e4df561bfd28994b6d2c74b1a71f"
+      "bytes": 114189,
+      "sha256": "f50c7f423c5e49660d211f49f72826bce90667e8ce0c9b8c043377dad449f7b4"
     },
     {
       "path": "frontend/widgets/FreeMixMultistream.hpp",
@@ -1164,6 +1164,11 @@
       "path": "plugins/obs-ffmpeg/obs-ffmpeg-source.c",
       "bytes": 28485,
       "sha256": "411a4c6000e667e3fc9ea1428e4aa44715197b50fc8220baa43c1ac2b82e6919"
+    },
+    {
+      "path": "plugins/obs-vst/VSTPlugin.cpp",
+      "bytes": 11409,
+      "sha256": "dc9d46cc39205d4022dfbcfbf5796356046cb4b8c1ac0d25aefd47b0c67200e3"
     },
     {
       "path": "plugins/rtmp-services/CMakeLists.txt",

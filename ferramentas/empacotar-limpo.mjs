@@ -32,7 +32,7 @@ await prepareNdiRuntime(root,{env:{},writeReceipt:false});
 if(checkOnly){console.log(JSON.stringify({status:'SOURCE_READY',version,nativeCommit,nativePatches:nativeSources.patches.length,runtimeModules:runtimeModules.length,componentOverlays:componentOverlays.length,destinationCreated:false,operatorTouched:false}));process.exit(0);}
 await mkdir(dest,{recursive:true});
 const filter=p=>!p.replaceAll('\\','/').includes('/painel/gc/biblioteca/assets/')&&!p.replaceAll('\\','/').endsWith('/painel/gc/biblioteca/assets')&&!/(?:^|[\\/])(?:originais|gt_titles|ndi-v6|logs|crashes|profiler_data)(?:[\\/]|$)/i.test(p)&&!/(?:^|[\\/])qa-[^\\/]+\.(?:dll|exe)$/i.test(p)&&!/(?:\.pdb|\.ilk|\.log|\.dmp|\.anterior\.exe|\.bak|\.salvo|stdout\.txt|stderr\.txt)$/i.test(p);
-for(const folder of ['bin','data','obs-plugins','assets','painel','node_modules'])await cp(join(root,folder),join(dest,folder),{recursive:true,filter});
+for(const folder of ['bin','data','obs-plugins','plugins-audio','assets','painel','node_modules'])await cp(join(root,folder),join(dest,folder),{recursive:true,filter});
 // Overlay only the NEW package, never the operator installation.
 if(nativeRundir)for(const folder of ['bin','data','obs-plugins'])if(existsSync(join(nativeRundir,folder)))await cp(join(nativeRundir,folder),join(dest,folder),{recursive:true,filter});
 const rebuiltComponents=await copyPackageComponents(dest,componentOverlays);

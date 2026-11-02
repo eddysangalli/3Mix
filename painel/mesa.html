@@ -2367,10 +2367,11 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     solo: (d) => run(productionAction("audio_monitor",{input:d.v,enabled:st.audio.get(d.v).mon === "OBS_MONITORING_TYPE_NONE"})),
     bus: (d) => run(productionAction("audio_bus",{input:d.v,bus:(st.busOn?{'4':'M','5':'A','6':'B'}:{'1':'M','2':'A','3':'B'})[d.k]})),
     asettab: (d) => { st.asetTab = d.v; renderPop(); },
+    audioplugin: (d) => run(productionAction("audio_routing_plugin", { key: st.aset.name, type: d.v, op: "open" }).then(() => A.asetload())),
     asetload: () => run((async () => {
       const name = st.popArg, [fl, off, bal, kinds] = await Promise.all([req("GetSourceFilterList", { sourceName: name }), tryReq("GetInputAudioSyncOffset", { inputName: name }), tryReq("GetInputAudioBalance", { inputName: name }), tryReq("GetSourceFilterKindList")]);
       const f = (key) => fl.filters.find((x) => x.filterName === FX[key].n) || null;
-      st.aset = { name, kinds: kinds?.sourceFilterKinds || [], delay: off?.inputAudioSyncOffset ?? 0, bal: bal?.inputAudioBalance ?? 0.5, gain: f("gain"), eq: f("eq"), comp: f("comp"), gate: f("gate"), lim: f("lim") };
+      st.aset = { name, plugins: Object.fromEntries(AUDIO_PLUGINS.map(([id, n]) => [id, fl.filters.find((x) => x.filterName === n) || null])), kinds: kinds?.sourceFilterKinds || [], delay: off?.inputAudioSyncOffset ?? 0, bal: bal?.inputAudioBalance ?? 0.5, gain: f("gain"), eq: f("eq"), comp: f("comp"), gate: f("gate"), lim: f("lim") };
       if (st.pop === "audioset") renderPop();
     })()),
     // One change at a time: the first move of a slider creates the engine filter, the next ones only update it.
@@ -3988,11 +3989,12 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       const none = (what) => `<p>${what} não está disponível neste motor.</p>`;
       const body = !s ? "<p>Lendo…</p>"
         : tab === "geral" ? sl("Gain", "gain", "db", -30, 30, 0.5, fs("gain").db ?? 0, " dB") + sl("Atraso", "p", "delay", 0, 2000, 10, s.delay, " ms") + sl("Balanço (0 esquerda, 1 direita)", "p", "bal", 0, 1, 0.05, s.bal, "")
+        : tab === "plugins" ? AUDIO_PLUGINS.map(([id, , label, dica]) => `<div class="plugin-linha"><label class="chk"><input type="checkbox" data-plugin-on="${id}"${s.plugins?.[id]?.filterEnabled ? " checked" : ""}> ${label}</label><button class="b" data-a="audioplugin" data-v="${id}">Abrir</button><small>${dica}</small></div>`).join("")
         : tab === "eq" ? (has("eq") ? chk("eq", "Usar o EQ") + sl("Graves", "eq", "low", -20, 20, 0.5, fs("eq").low ?? 0, " dB") + sl("Médios", "eq", "mid", -20, 20, 0.5, fs("eq").mid ?? 0, " dB") + sl("Agudos", "eq", "high", -20, 20, 0.5, fs("eq").high ?? 0, " dB") : none("O EQ"))
         : tab === "comp" ? (has("comp") ? chk("comp", "Usar o compressor") + sl("Razão", "comp", "ratio", 1, 32, 0.5, fs("comp").ratio ?? 10, ":1") + sl("Limiar", "comp", "threshold", -60, 0, 0.5, fs("comp").threshold ?? -18, " dB") + sl("Ataque", "comp", "attack_time", 1, 500, 1, fs("comp").attack_time ?? 6, " ms") + sl("Liberação", "comp", "release_time", 1, 1000, 1, fs("comp").release_time ?? 60, " ms") + sl("Ganho de saída", "comp", "output_gain", -32, 32, 0.5, fs("comp").output_gain ?? 0, " dB") : none("O compressor"))
         : tab === "gate" ? (has("gate") ? chk("gate", "Usar o noise gate") + sl("Fecha abaixo de", "gate", "close_threshold", -96, 0, 1, fs("gate").close_threshold ?? -32, " dB") + sl("Abre acima de", "gate", "open_threshold", -96, 0, 1, fs("gate").open_threshold ?? -26, " dB") : none("O noise gate"))
         : (has("lim") ? chk("lim", "Usar o limitador") + sl("Limiar", "lim", "threshold", -60, 0, 0.5, fs("lim").threshold ?? -6, " dB") + sl("Liberação", "lim", "release_time", 1, 1000, 1, fs("lim").release_time ?? 60, " ms") : none("O limitador"));
-      p.innerHTML = `<h3>Configurações de áudio · ${esc(st.popArg)}</h3><div class="add"><div class="types">${[["geral", "Geral"], ["eq", "EQ"], ["comp", "Compressor"], ["gate", "Noise Gate"], ["lim", "Limitador"]].map(([id, l]) => `<button class="${tab === id ? "on" : ""}" data-a="asettab" data-v="${id}">${l}</button>`).join("")}</div><div class="form">${body}<p>As mudanças valem na hora. Os efeitos são filtros de áudio do motor aplicados a esta entrada.</p></div></div><div class="row end">${st.audio.get(st.popArg)?.bus ? `<button class="b" data-a="busdrop" title="Remove o Master e os barramentos A e B deste preset; as entradas voltam a ir direto para as trilhas do motor. Os efeitos dos barramentos se perdem.">Desligar barramentos</button>` : ""}<button class="b" data-a="close">Fechar</button></div>`; }
+      p.innerHTML = `<h3>Configurações de áudio · ${esc(st.popArg)}</h3><div class="add"><div class="types">${[["geral", "Geral"], ["eq", "EQ"], ["comp", "Compressor"], ["gate", "Noise Gate"], ["lim", "Limitador"], ["plugins", "Plugins"]].map(([id, l]) => `<button class="${tab === id ? "on" : ""}" data-a="asettab" data-v="${id}">${l}</button>`).join("")}</div><div class="form">${body}<p>As mudanças valem na hora. Os efeitos são filtros de áudio do motor aplicados a esta entrada.</p></div></div><div class="row end">${st.audio.get(st.popArg)?.bus ? `<button class="b" data-a="busdrop" title="Remove o Master e os barramentos A e B deste preset; as entradas voltam a ir direto para as trilhas do motor. Os efeitos dos barramentos se perdem.">Desligar barramentos</button>` : ""}<button class="b" data-a="close">Fechar</button></div>`; }
     else if (st.pop === "mainmenu") p.innerHTML = `<h3>Módulos</h3><div class="menu">
   <button data-a="top_audio">Mixer de áudio…</button>
   <button data-a="audiobuses">Barramentos de áudio…</button>
@@ -4189,6 +4191,8 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     }
   });
   document.addEventListener("change", (e) => { const t = e.target; if (t.dataset && t.dataset.o) { st.outsel = st.outsel || {}; st.outsel[t.dataset.o] = { ...(st.outsel[t.dataset.o] || {}), [t.dataset.f]: t.value }; store.set("mesa.outs", st.outsel); } });
+  const AUDIO_PLUGINS = [["pp_track", "3Mix Audio - PodcastPlugins Track", "PodcastPlugins Track", "Voz: limpeza, nivelamento e presença."], ["pp_master", "3Mix Audio - PodcastPlugins Master", "PodcastPlugins Master", "Soma do programa falado."], ["master_me", "3Mix Audio - master_me", "master_me", "Masterização automática do programa."]];
+  document.addEventListener("change", (e) => { const id = e.target?.dataset?.pluginOn; if (id && st.aset) run(productionAction("audio_routing_plugin", { key: st.aset.name, type: id, op: e.target.checked ? "on" : "off" }).then(() => A.asetload())); });
   const FX = { gain: { n: "3Mix Ganho", k: "gain_filter" }, eq: { n: "3Mix EQ", k: "basic_eq_filter" }, comp: { n: "3Mix Compressor", k: "compressor_filter" }, gate: { n: "3Mix Noise Gate", k: "noise_gate_filter" }, lim: { n: "3Mix Limitador", k: "limiter_filter" } };
   document.addEventListener("input", (e) => {
     const t = e.target, d = t.dataset;
