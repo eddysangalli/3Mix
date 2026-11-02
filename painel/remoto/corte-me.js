@@ -26,11 +26,12 @@
   function pintar() {
     if (alvo === 1) return;
     const n = window.ThreeMixCorteME.nomes();
-    E('preview').textContent = n.preview || '—';
-    E('program').textContent = n.program || '—';
+    if (E('preview').textContent !== (n.preview || '—')) E('preview').textContent = n.preview || '—';
+    if (E('program').textContent !== (n.program || '—')) E('program').textContent = n.program || '—';
     for (const b of E('inputs').querySelectorAll('button[data-preview]')) {
-      b.classList.toggle('program', b.dataset.preview === n.program);
-      b.classList.toggle('preview', b.dataset.preview === n.preview && b.dataset.preview !== n.program);
+      const noPgm = b.dataset.preview === n.program, noPv = b.dataset.preview === n.preview && !noPgm;
+      if (b.classList.contains('program') !== noPgm) b.classList.toggle('program', noPgm);
+      if (b.classList.contains('preview') !== noPv) b.classList.toggle('preview', noPv);
     }
   }
 
@@ -68,6 +69,8 @@
       if (alvo !== 1) { await ler().catch(() => {}); pintar(); }
     });
     setInterval(() => { if (alvo !== 1) ler().catch(() => {}); }, 1000);
+    const observador = new MutationObserver(pintar);
+    for (const id of ['preview', 'program', 'inputs']) observador.observe(E(id), { childList: true, characterData: true, subtree: true, attributes: id === 'inputs', attributeFilter: id === 'inputs' ? ['class'] : undefined });
     setInterval(pintar, 250);
   }
   iniciar();
