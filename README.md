@@ -8,20 +8,20 @@ Projeto em desenvolvimento e qualificação. Este repositório contém fontes: u
 
 - Multi-M/E: adaptadores, Patch, áudio por M/E e superfícies de controle; provas e limites estão em [Limites conhecidos](docs/LIMITES-CONHECIDOS.md).
 - Mesa, áudio, replay, composição, gráficos, saídas e operação remota têm escopos de teste distintos. Código presente não significa homologação de todo hardware ou rede.
-- As imagens antigas em  são históricas e não representam a interface atual; não são apresentadas como capturas da entrega atual.
+- As imagens antigas em `screenshots/` são históricas e não representam a interface atual; não são apresentadas como capturas da entrega atual.
 
 ## Abrir no workspace de desenvolvimento
 
-Use  na raiz do workspace 3Mix. Não execute o binário nativo diretamente. O launcher prepara a instalação e conecta os serviços locais.
+Use `INICIAR-3MIX.cmd` na raiz do workspace 3Mix. Não execute o binário nativo diretamente. O launcher prepara a instalação e conecta os serviços locais.
 
 Estrutura canônica do workspace:
 
 | Diretório | Finalidade |
 |---|---|
-|  (este repositório; alias ) | Painel Web, API e ferramentas |
-|  (alias ) | Fontes do motor nativo |
-|  | Instalação portátil do operador |
-|  | Recibos e verificações locais |
+| `3mix-panel/` (este repositório; alias `FreeMix/`) | Painel Web, API e ferramentas |
+| `3mix-engine/` (alias `freemix-app/`) | Fontes do motor nativo |
+| `3mix-runtime/` | Instalação portátil do operador |
+| `qa-beta/` | Recibos e verificações locais |
 
 ## Documentação
 
@@ -35,4 +35,4 @@ Estrutura canônica do workspace:
 
 ## Licenciamento
 
-Consulte  e os avisos dos componentes. O motor baseado em OBS/libobs está sujeito às respectivas obrigações GPL; esta apresentação não concede relicenciamento dos componentes de terceiros. Preço e termos comerciais finais não estão definidos por este README.
+Consulte `LICENSE` e os avisos dos componentes. O motor baseado em OBS/libobs está sujeito às respectivas obrigações GPL; esta apresentação não concede relicenciamento dos componentes de terceiros. Preço e termos comerciais finais não estão definidos por este README.
