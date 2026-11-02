@@ -174,7 +174,8 @@ void RequestOpenVstEditor(obs_data_t *request,obs_data_t *response,void *){
 		else{
 			OBSSourceAutoRelease source=obs_get_source_by_name(sourceName.c_str());
 			OBSSourceAutoRelease filter=source?obs_source_get_filter_by_name(source,filterName.c_str()):nullptr;
-			if(!filter||std::string(obs_source_get_id(filter))!="vst_filter")error="VST filter not found";
+			const std::string filterKind=filter?obs_source_get_id(filter):"";
+			if(filterKind!="vst_filter"&&filterKind!="vst3_filter")error="VST filter not found";
 			else{
 				obs_properties_t *props=obs_source_properties(filter);
 				obs_property_t *button=props?obs_properties_get(props,"open_vst_settings"):nullptr;

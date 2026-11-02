@@ -160,10 +160,18 @@
               </div>
               <div id="filter-fields" class="filter-fields"></div>
               <div class="dsp-actions">
-                <button type="button" id="open-native-filters" class="btn-hardware" title="Abrir o diálogo nativo de filtros do OBS para este canal (VST 2.x, EQ nativo e outros)">Filtros nativos (VST 2.x)…</button>
+                <button type="button" id="open-native-filters" class="btn-hardware" title="Abrir o diálogo nativo de filtros deste canal (VST 2.x, EQ nativo e outros)">Filtros nativos (VST 2.x)…</button>
                 <button type="button" id="open-plugin" class="btn-hardware" hidden title="Abrir a janela deste plugin">Abrir plugin</button>
                 <button type="button" id="save-filter" class="btn-hardware">Aplicar filtro</button>
                 <button type="button" id="remove-filter" class="btn-hardware danger">Remover filtro</button>
+              </div>
+              <div class="a-vst3">
+                <span>VST3</span>
+                <div id="vst3-rows"></div>
+                <div class="a-dsp-row">
+                  <select id="vst3-pick" class="filter-select"></select>
+                  <button type="button" id="vst3-add" class="btn-hardware">Adicionar</button>
+                </div>
               </div>
               <div class="a-presets">
                 <span>Presets</span>

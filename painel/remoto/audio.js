@@ -297,7 +297,40 @@ function filterForm() {
   if (save) save.disabled = !filter.supported;
   const remove = E('remove-filter');
   if (remove) remove.disabled = !filter.exists;
+  paintVst3();
 }
+
+/* Plugins VST3 do canal. A lista só é refeita quando muda, para não atrapalhar o clique durante a atualização periódica. */
+let vst3Painted = '';
+function paintVst3() {
+  const rows = state?.details?.vst3 || [], installed = state?.vst3Installed || [];
+  const mark = JSON.stringify([rows, installed]);
+  if (mark === vst3Painted) return;
+  vst3Painted = mark;
+  const box = E('vst3-rows'), pick = E('vst3-pick');
+  if (!box || !pick) return;
+  box.replaceChildren(...rows.map((row) => {
+    const line = document.createElement('div');
+    line.className = 'a-dsp-row';
+    const label = document.createElement('label');
+    label.className = 'check-line';
+    const on = document.createElement('input');
+    on.type = 'checkbox';
+    on.checked = !!row.enabled;
+    on.addEventListener('change', () => command('audio_routing_vst3', { op: on.checked ? 'on' : 'off', filter: row.filter }));
+    const name = document.createElement('span');
+    name.textContent = row.missing ? row.name + ' (não instalado)' : row.name;
+    label.append(on, name);
+    const button = (text, op) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn-hardware'; b.textContent = text; b.addEventListener('click', () => command('audio_routing_vst3', { op, filter: row.filter })); return b; };
+    line.append(label, button('Abrir', 'open'), button('Remover', 'remove'));
+    return line;
+  }));
+  const chosen = pick.value;
+  pick.replaceChildren(...installed.map((plugin) => { const o = document.createElement('option'); o.value = plugin.path; o.textContent = plugin.name; return o; }));
+  if (installed.some((plugin) => plugin.path === chosen)) pick.value = chosen;
+  E('vst3-add').disabled = !installed.length;
+}
+E('vst3-add')?.addEventListener('click', () => { const path = E('vst3-pick')?.value; if (path) command('audio_routing_vst3', { op: 'add', path }); });
 
 /* ------------------------------------------------------------------ */
 /* Handlers do rack DSP e presets                                      */

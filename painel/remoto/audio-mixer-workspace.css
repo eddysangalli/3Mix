@@ -3041,3 +3041,4 @@ body.header-colors .a-strip[data-visual="aux"] .a-strip-head { background: linea
 
 /* Logo oficial 3Mix no topo, igual ? janela Replay. */
 .a-brand .brand-logo { display: block; height: 26px; width: auto; }
+.a-vst3 { display:flex; flex-direction:column; gap:4px; } .a-vst3 > span { font-size:10px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; color:var(--am-mute); } .a-vst3 .check-line { flex:1; min-width:0; } .a-vst3 .check-line span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }

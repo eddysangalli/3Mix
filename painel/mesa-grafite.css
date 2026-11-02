@@ -398,3 +398,4 @@ body.me-on .input-module .me-surface { display:block; flex:1 1 0; min-width:0; m
 .switcher-bank.em-me { outline:1px solid #2f6fed; outline-offset:-1px; }
 .plugin-linha { display:grid; grid-template-columns:1fr auto; gap:4px 8px; align-items:center; padding:6px 0; border-bottom:1px solid #414141; }
 .plugin-linha small { grid-column:1 / -1; color:#a9a9a9; }
+.plugin-vst3 { padding-top:8px; } .plugin-vst3 > b { display:block; padding-bottom:2px; } .plugin-vst3 .plugin-linha { grid-template-columns:1fr auto auto; } .plugin-vst3 select { grid-column:1 / 3; min-width:0; }

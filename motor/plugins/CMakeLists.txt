@@ -55,6 +55,7 @@ add_obs_plugin(
 )
 # FreeMix: third-party components built in-tree (see each folder's CMakeLists.txt for origin and changes).
 add_obs_plugin(downstream-keyer PLATFORMS WINDOWS)
+add_obs_plugin(3mix-vst3 PLATFORMS WINDOWS)
 add_obs_plugin(obs-color-monitor PLATFORMS WINDOWS)
 add_obs_plugin(
     frontend-tools
