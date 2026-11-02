@@ -73,8 +73,9 @@ function sourceClass(source) {
 }
 
 function isEditableChannel(source) {
-  const kind = sourceClass(source);
-  return kind === 'input' || kind === 'private';
+  // Mic privado (director), retornos e barramentos não têm roteamento editável
+  // nesta API; o servidor responde 400. Só entradas normais entram no inspetor.
+  return sourceClass(source) === 'input';
 }
 
 function categoryOf(source) {
@@ -173,6 +174,10 @@ function openDrawer(open) {
 function selectSource(nextKey) {
   if (!nextKey) return;
   const source = (state?.sources || []).find(item => item.key === nextKey || item.name === nextKey);
+  if (source && !isEditableChannel(source)) {
+    toast('Mic privado, retorno e barramentos não têm roteamento editável aqui.', 'warn');
+    return;
+  }
   key = source?.key || nextKey;
   dirty = false;
   openDrawer(true);
@@ -211,7 +216,7 @@ async function poll(force = false) {
       connection.title = state.scope ? 'Escopo: ' + state.scope : 'Motor 3Mix conectado';
     }
     if (!key && requestedInput) {
-      key = (state.sources || []).find(s => s.key === requestedInput || s.name === requestedInput)?.key || null;
+      key = (state.sources || []).find(s => (s.key === requestedInput || s.name === requestedInput) && isEditableChannel(s))?.key || null;
     }
     if (!key) {
       const first = (state.sources || []).find(s => isEditableChannel(s));

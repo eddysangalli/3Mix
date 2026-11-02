@@ -1,1 +1,284 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>3Mix · Hub de Operadores</title><link rel="stylesheet" href="controle.css"></head><body data-page="hub"><header><a href="/">3Mix</a><h1>Hub de Operadores</h1><span id="connection">Conectando…</span></header><main><div id="message" role="status" aria-live="polite"></div><section><p id="engine-status">Aguardando motor…</p></section><div class="grid"><a class="card" href="/modular" style="border-color:#00a8ff;box-shadow:0 0 10px rgba(0,168,255,0.3)">🎛️ 3Mix Modular Studio</a><a class="card" href="/corte">Mesa de corte</a><a class="card" href="/playout">VT e playlists</a><a class="card" href="/audio">Mixer de áudio</a><a class="card" href="/rundown">Roteiro / Rundown</a><a class="card" href="/retornos">Retornos SRT & N-1</a><a class="card" href="/blackbox">Caixa-Preta / Blackbox</a><a class="card" href="/gc">GC e placar</a><a class="card" href="/overlays">Overlays / DSK</a><a class="card" href="/replay">Replay</a><a class="card" href="/iso">Gravação ISO</a><a class="card" href="/dados">Fontes de dados</a><a class="card" href="/compor">Composições</a><a class="card" href="/multiview">MultiView Broadcast</a><a class="card" href="/aux">Matriz AUX & Saídas</a><a class="card" href="/novo-projeto/">Novo projeto · prévia local</a><a class="card" href="/calls">Calls e talkback</a><a class="card" href="/settings">Configurações</a></div><section id="pairing" hidden><h2>Conectar outro operador</h2><p>Abra o Hub no celular ou tablet usando o QR e digite este código:</p><p class="big" id="pin"></p><small>O código muda quando o servidor é reiniciado. Os dispositivos autorizados recebem uma sessão de até 12 horas.</small><div id="addresses" class="grid"></div></section><section><h2>Centrais da produção</h2><div class="row"><a href="/macros">Automação</a><a href="/rundown">Rundown</a><a href="/retornos">Retornos N-1</a><a href="/blackbox">Blackbox</a><a href="/overlays">Overlays DSK 1 a 8</a><a href="/multiview">MultiView 9:16 / 16:9</a><a href="/aux">Matriz AUX & Saídas</a><a href="/recuperacao">Recuperar projeto</a><a href="/atalhos">Atalhos e MIDI</a><a href="/rede">Transporte redundante</a><a href="/playout">Playlists</a><a href="/efeitos">Efeitos e legendas locais</a><a href="/sinais">Diagnóstico de sinal</a></div></section></main><script src="controle.js"></script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3Mix · Hub de Produção</title>
+<script src="3mix-padrao.js"></script>
+<link rel="stylesheet" href="controle.css?v=20261102a">
+<link rel="stylesheet" href="3mix-grafite.css">
+<link rel="stylesheet" href="3mix-padrao.css">
+<style>
+  /* controle.css continua aqui só pelo diálogo de pareamento (.pair). */
+  body.p3 { background-image: none; }
+  .p3 main.p3-main { max-width: none; margin: 0; }
+  .p3 header.p3-head { padding: 0 16px; }
+  .p3 h2 { text-transform: none; letter-spacing: -.15px; border-left: 0; padding-left: 0; font-size: 17px; }
+  .p3 section { box-shadow: none; margin: 0; }
+  .p3 section:hover { border-color: var(--p3-line); }
+  #engine-status { font-weight: 600; color: var(--p3-muted); }
+  html.embed-3mix #engine-status { display: none; }
+
+  /* ---------- no computador do 3Mix: código, QR e endereço de rede de cada módulo ---------- */
+  .rm.sem-lado { grid-template-columns: minmax(0, 1fr); }
+  .rm { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 16px; align-items: start; }
+  .rm-side { position: sticky; top: 0; padding: 16px; gap: 12px; align-items: center; text-align: center; }
+  html:not(.embed-3mix) .rm-side { top: 66px; }
+  .rm-code { display: flex; flex-direction: column; gap: 0; }
+  .rm-code span { font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--p3-dim); }
+  .rm-code b { font-size: 32px; font-weight: 800; letter-spacing: 3px; color: #fff; font-variant-numeric: tabular-nums; line-height: 1.15; }
+  #rm-qr { display: block; width: 190px; height: 190px; padding: 8px; background: #fff; border-radius: 4px; }
+  #rm-qr-nome { font-size: 14px; font-weight: 700; color: #fff; }
+  .p3 #rm-qr-url { font-size: 12px; word-break: break-all; }
+  .rm-main { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .rm-redes { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .p3 .rm-redes button { height: 32px; padding: 0 10px; font-variant-numeric: tabular-nums; }
+
+  .hub-group { display: flex; flex-direction: column; gap: 6px; }
+  .hub-group h3 { font-size: 11.5px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: #8d8d8d; }
+  .rm-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px; }
+  .mod { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 58px; padding: 8px 10px; background: var(--p3-panel); border: 1px solid var(--p3-line); border-radius: 4px; }
+  .mod:hover { background: #2a2a2a; border-color: #565656; }
+  .mod.sel { border-color: var(--p3-accent); background: #20262f; }
+  .mod > div { min-width: 0; }
+  .mod-ic { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 4px; background: #1b1b1b; border: 1px solid var(--p3-line-soft); color: #cfcfcf; }
+  .mod-ic svg, .hub-links svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .p3 .mod .mod-nome { display: block; color: #fff; font-size: 14px; font-weight: 700; text-decoration: none; }
+  .p3 .mod .mod-nome:hover { text-decoration: underline; }
+  .p3 .mod .mod-url { display: block; color: var(--p3-muted); font-size: 12px; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .mod-acoes { display: flex; gap: 4px; }
+  .p3 .mod button { height: 28px; padding: 0 8px; font-size: 12px; }
+  .p3 .mod button:disabled { opacity: .35; cursor: default; }
+  .rm-aviso { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 12px; background: #2a2622; border: 1px solid #5a4a33; border-radius: 4px; color: #eee; font-size: 13px; }
+  .rm-aviso:empty { display: none; }
+  .p3 .rm-aviso button { height: 28px; padding: 0 10px; }
+  .p3 .rm-redes button small { margin-left: 6px; color: var(--p3-dim); font-weight: 500; }
+  .p3 .rm-redes button.selected small { color: inherit; opacity: .8; }
+  .mod-local { color: var(--p3-dim); font-size: 12px; }
+
+  /* ---------- no celular ou tablet: só os botões ---------- */
+  .hub-links { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+  .p3 .hub-links a { display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 8px 14px; background: var(--p3-panel); border: 1px solid var(--p3-line); border-radius: 4px; color: #ededed; font-size: 14px; font-weight: 600; text-decoration: none; }
+  .p3 .hub-links a:hover { background: #2f3436; border-color: var(--p3-accent); color: #fff; }
+  @media (max-width: 760px) { .rm { grid-template-columns: 1fr; } .rm-side { position: static; } .rm-lista { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body data-page="hub" class="p3">
+<header class="p3-head">
+  <a href="/" title="3Mix" class="brand-logo"><img class="p3-logo" src="/img/3mix-logo.png" alt="3Mix"></a>
+  <h1>Hub de Produção</h1>
+  <span class="p3-flex"></span>
+  <span id="connection">Conectando…</span>
+</header>
+
+<main class="p3-main">
+  <div id="message" role="status" aria-live="polite"></div>
+  <p id="engine-status">Aguardando motor…</p>
+  <div id="pairing" hidden></div><span id="pin" hidden></span>
+  <div id="hub"></div>
+</main>
+
+<script>
+(() => {
+  'use strict';
+  const E = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  // Medido com o servidor real, abrindo cada página pelo IP da rede depois de parear: "rede" são as que funcionam fora do
+  // computador do 3Mix. As demais usam rotas que o servidor só serve localmente. Ver qa-interface/padrao-20261101/testar-rede.mjs.
+  const GRUPOS = [
+    ['Corte e operação', [['Mesa de corte', '/corte'], ['VT e playlists', '/playout'], ['Monitor de VT', '/playout-monitor'], ['Replay', '/replay'], ['Roteiro', '/rundown'], ['DSK', '/overlays'], ['GC e placar', '/gc']]],
+    ['Áudio e chamadas', [['Calls e talkback', '/calls'], ['Retornos SRT e N-1', '/retornos']]],
+    ['Monitoração e saídas', [['Multiview', '/multiview'], ['Matriz AUX', '/aux'], ['Gravação ISO', '/iso'], ['Patch de Sinais', '/patch'], ['Pre-Flight', '/preflight'], ['Caixa-preta', '/blackbox'], ['Diagnóstico de sinal', '/sinais']]],
+    ['Produção', [['Composições', '/compor'], ['Fontes de dados', '/dados'], ['Automação', '/macros'], ['Atalhos', '/atalhos'], ['Recuperação', '/recuperacao'], ['Manual do operador', '/docs/usuario/manual-operador.html']]],
+  ];
+  const SO_LOCAL = [['Mixer de áudio', '/audio'], ['Color Studio', '/color'], ['PTZ', '/ptz'], ['Configurações', '/configuracoes'], ['Transmissão', '/transmitir'], ['Saídas externas', '/externo'], ['Gravação', '/gravar'], ['Efeitos e legendas', '/efeitos'], ['Novo projeto', '/novo-projeto/']];
+
+  const IC = {
+    '/corte': '<rect x="3" y="5" width="8" height="6" rx="1"/><rect x="13" y="5" width="8" height="6" rx="1"/><path d="M7 15v4M12 15v4M17 15v4M4 15h16"/>',
+    '/playout': '<rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M10 9l5 3-5 3z"/>',
+    '/playout-monitor': '<rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4M10.5 8l4 2-4 2z"/>',
+    '/replay': '<path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v4h4"/><path d="M10.5 9.5l4 2.5-4 2.5z"/>',
+    '/rundown': '<path d="M8 6h12M8 12h12M8 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>',
+    '/overlays': '<rect x="3" y="4" width="14" height="11" rx="1"/><rect x="8" y="9" width="13" height="11" rx="1"/>',
+    '/gc': '<rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M6 15h9M6 12h5"/>',
+    '/calls': '<path d="M5 4h4l2 5-3 2a12 12 0 0 0 5 5l2-3 5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>',
+    '/retornos': '<path d="M9 7L4 12l5 5"/><path d="M4 12h11a5 5 0 0 1 5 5v1"/>',
+    '/multiview': '<rect x="3" y="4" width="8" height="7" rx="1"/><rect x="13" y="4" width="8" height="7" rx="1"/><rect x="3" y="13" width="8" height="7" rx="1"/><rect x="13" y="13" width="8" height="7" rx="1"/>',
+    '/aux': '<path d="M4 7h10M4 12h16M4 17h7"/><circle cx="17" cy="7" r="2"/><circle cx="14" cy="17" r="2"/>',
+    '/iso': '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>',
+    '/patch': '<circle cx="6" cy="6" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h5a3 3 0 0 1 3 3v7"/>',
+    '/preflight': '<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/>',
+    '/blackbox': '<rect x="4" y="6" width="16" height="13" rx="1.5"/><path d="M9 6V4h6v2M4 11h16"/>',
+    '/sinais': '<path d="M3 12h4l2-6 4 12 2-6h6"/>',
+    '/compor': '<rect x="3" y="4" width="18" height="16" rx="1"/><path d="M13 4v16M3 13h10"/>',
+    '/dados': '<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>',
+    '/macros': '<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>',
+    '/atalhos': '<rect x="3" y="6" width="18" height="12" rx="1.5"/><path d="M7 10h.01M11 10h.01M15 10h.01M8 14h8"/>',
+    '/recuperacao': '<path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v4h4M12 8v4l3 2"/>',
+    '/docs/usuario/manual-operador.html': '<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>',
+    '/audio': '<path d="M6 4v16M12 4v16M18 4v16"/><rect x="4" y="13" width="4" height="3"/><rect x="10" y="7" width="4" height="3"/><rect x="16" y="11" width="4" height="3"/>',
+    '/color': '<circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h9"/><circle cx="16" cy="9" r="1"/>',
+    '/ptz': '<rect x="3" y="7" width="13" height="10" rx="1.5"/><path d="M16 11l5-3v8l-5-3"/>',
+    '/configuracoes': '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>',
+    '/transmitir': '<circle cx="12" cy="12" r="2"/><path d="M8 8a6 6 0 0 0 0 8M16 8a6 6 0 0 1 0 8M5 5a10 10 0 0 0 0 14M19 5a10 10 0 0 1 0 14"/>',
+    '/externo': '<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
+    '/gravar': '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4" fill="currentColor"/>',
+    padrao: '<rect x="4" y="4" width="16" height="16" rx="2"/>',
+  };
+  const icone = (p) => '<svg viewBox="0 0 24 24" aria-hidden="true">' + (IC[p] || IC.padrao) + '</svg>';
+
+  // Celular, tablet ou computador antes de saber o endereço: botões simples.
+  function desenharRemoto() {
+    E('hub').innerHTML = '<div style="display:flex;flex-direction:column;gap:14px">' + GRUPOS.map(([titulo, itens]) => '<div class="hub-group"><h3>' + esc(titulo) + '</h3><div class="hub-links">' + itens.map(([n, p]) => '<a href="' + esc(p) + '">' + icone(p) + esc(n) + '</a>').join('') + '</div></div>').join('') + '</div>';
+  }
+
+  // ---- no computador do 3Mix ----
+  const CHAVE_REDE = '3mix.remoto.rede';
+  let acesso = null, base = '', alvo = { nome: 'Hub', caminho: '/' }, redeOk = false, modo = 'local', ipPublico = '';
+
+  // O endereço de rede só vale se responder: com o acesso pela rede desligado o servidor escuta apenas neste computador.
+  async function medirRede(alvoRede = base) {
+    try { await fetch(alvoRede + 'img/3mix-logo.png', { mode: 'no-cors', cache: 'no-store', signal: AbortSignal.timeout(1500) }); return true; }
+    catch { return false; }
+  }
+
+  // Rede física primeiro; 172.16–31 costuma ser adaptador virtual.
+  const peso = (u) => { const h = new URL(u).hostname; return /^192\.168\./.test(h) ? 0 : /^10\./.test(h) ? 1 : /^172\.(1[6-9]|2\d|3[01])\./.test(h) ? 3 : 2; };
+  const endereco = (caminho) => base.replace(/\/$/, '') + caminho;
+  const porta = () => location.port || '80';
+  const nomeDaRede = (u) => { const r = (acesso.redes || []).find((x) => x.url === u); return r?.nome || ''; };
+
+  function pintarQr() {
+    if (!E('rm-qr')) return;
+    const url = endereco(alvo.caminho);
+    const img = E('rm-qr');
+    img.src = '/api/qr.svg?address=' + encodeURIComponent(url);
+    E('rm-qr-nome').textContent = alvo.nome;
+    E('rm-qr-url').textContent = url;
+    E('rm-qr-url').href = url;
+    document.querySelectorAll('.mod').forEach((m) => m.classList.toggle('sel', m.dataset.p === alvo.caminho));
+  }
+
+  function linha(nome, caminho, soLocal) {
+    // Neste computador o clique abre sempre pelo endereço local; o de rede é para copiar ou levar pelo QR a outro dispositivo.
+    const local = location.origin + caminho;
+    const url = soLocal || modo === 'local' ? local : endereco(caminho);
+    const usavel = modo === 'local' || (redeOk && !soLocal);
+    const acoes = soLocal && modo !== 'local' ? '' : '<span class="mod-acoes"><button type="button" data-copiar="' + esc(url) + '"' + (usavel ? '' : ' disabled') + '>Copiar</button>'
+      + (modo === 'local' ? '' : '<button type="button" data-qr' + (usavel ? '' : ' disabled') + '>QR</button>') + '</span>';
+    return '<div class="mod" data-p="' + esc(caminho) + '" data-n="' + esc(nome) + '"><span class="mod-ic">' + icone(caminho) + '</span><div>'
+      + '<a class="mod-nome" href="' + esc(caminho) + '" target="_blank" rel="noopener">' + esc(nome) + '</a>'
+      + '<a class="mod-url" href="' + esc(caminho) + '" target="_blank" rel="noopener" title="' + esc(url) + '">' + esc(url) + '</a></div>' + acoes + '</div>';
+  }
+
+  function aviso() {
+    if (modo === 'internet') {
+      if (!ipPublico) return 'Consultando o IP público…';
+      if (ipPublico === 'erro') return 'Não foi possível consultar o IP público.';
+      return 'Só abre de fora com a porta ' + esc(porta()) + ' liberada no roteador e no firewall. Sem criptografia: prefira VPN.';
+    }
+    if (modo === 'rede' && !redeOk) return '<span id="rm-rede-estado">Acesso pela rede desligado</span><button type="button" id="rm-ligar" data-ligar>Ligar rede</button>';
+    return '';
+  }
+
+  function desenharLocal() {
+    const comLado = redeOk && modo !== 'local';
+    const lateral = comLado
+      ? '<aside class="p3-card rm-side"><div class="rm-code"><span>Código</span><b>' + esc(acesso.pin) + '</b></div>'
+        + '<img id="rm-qr" alt="QR do endereço escolhido">'
+        + '<div><div id="rm-qr-nome"></div><a id="rm-qr-url" target="_blank" rel="noopener"></a></div></aside>'
+      : '';
+    const aba = (dado, rotulo, detalhe, ligado) => '<button type="button" ' + dado + ' class="' + (ligado ? 'selected' : '') + '">' + esc(rotulo) + (detalhe ? '<small>' + esc(detalhe) + '</small>' : '') + '</button>';
+    const redes = '<div class="rm-redes" role="group" aria-label="Endereço">'
+      + aba('data-local', 'Este computador', '', modo === 'local')
+      + acesso.urls.map((u) => aba('data-rede="' + esc(u) + '"', nomeDaRede(u) || 'Rede', new URL(u).hostname, modo === 'rede' && u === base)).join('')
+      + aba('data-internet', 'Internet', ipPublico && ipPublico !== 'erro' ? ipPublico : '', modo === 'internet')
+      + (comLado ? '<span class="p3-flex"></span><button type="button" data-hub>QR do Hub</button>' : '') + '</div>';
+    E('hub').innerHTML = '<div class="rm' + (comLado ? '' : ' sem-lado') + '">' + lateral + '<div class="rm-main">' + redes
+      + '<div class="rm-aviso" role="status">' + aviso() + '</div>'
+      + GRUPOS.map(([titulo, itens]) => '<div class="hub-group"><h3>' + esc(titulo) + '</h3><div class="rm-lista">' + itens.map(([n, p]) => linha(n, p)).join('') + '</div></div>').join('')
+      + '<div class="hub-group"><h3>Só neste computador</h3><div class="rm-lista">' + SO_LOCAL.map(([n, p]) => linha(n, p, true)).join('') + '</div></div>'
+      + '</div></div>';
+    if (comLado) pintarQr();
+  }
+
+  async function escolherRede(u) {
+    modo = 'rede'; base = u; redeOk = false;
+    try { localStorage.setItem(CHAVE_REDE, u); } catch { /* sem armazenamento */ }
+    desenharLocal();
+    const ok = await medirRede(u);
+    if (modo === 'rede' && base === u) { redeOk = ok; desenharLocal(); }
+  }
+
+  // Só consulta um serviço de fora quando o operador pede o endereço da internet.
+  async function escolherInternet() {
+    modo = 'internet'; redeOk = false;
+    desenharLocal();
+    if (!ipPublico || ipPublico === 'erro') {
+      ipPublico = '';
+      try { ipPublico = (await (await fetch('https://api.ipify.org?format=json', { cache: 'no-store', signal: AbortSignal.timeout(5000) })).json()).ip || 'erro'; }
+      catch { ipPublico = 'erro'; }
+    }
+    if (modo !== 'internet') return;
+    if (ipPublico !== 'erro') { base = 'http://' + ipPublico + ':' + porta() + '/'; redeOk = true; }
+    desenharLocal();
+  }
+
+  async function copiar(texto, botao) {
+    try { await navigator.clipboard.writeText(texto); }
+    catch {
+      const t = document.createElement('textarea');
+      t.value = texto; document.body.append(t); t.select();
+      document.execCommand('copy'); t.remove();
+    }
+    const antes = botao.textContent;
+    botao.textContent = 'Copiado';
+    setTimeout(() => { botao.textContent = antes; }, 1200);
+  }
+
+  async function ligarRede(botao) {
+    const estado = E('rm-rede-estado');
+    botao.disabled = true;
+    estado.textContent = 'Confirme no aviso do Windows…';
+    try {
+      const r = await fetch('/api/network-enable', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+      const d = await r.json().catch(() => ({}));
+      if (r.status === 404 && !d.error) throw Error('Feche e abra o 3Mix uma vez e tente de novo');
+      if (!r.ok || !d.success) throw Error(d.error || 'A rede não foi ligada');
+      estado.textContent = 'Rede ligada. Feche e abra o 3Mix para valer.';
+      botao.hidden = true;
+    } catch (erro) {
+      estado.textContent = erro.message;
+      botao.disabled = false;
+    }
+  }
+
+  E('hub').addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    if ('ligar' in b.dataset) return ligarRede(b);
+    if (b.dataset.copiar) return copiar(b.dataset.copiar, b);
+    if (b.dataset.rede) return escolherRede(b.dataset.rede);
+    if ('local' in b.dataset) { modo = 'local'; try { localStorage.removeItem(CHAVE_REDE); } catch { /* sem armazenamento */ } return desenharLocal(); }
+    if ('internet' in b.dataset) return escolherInternet();
+    if ('hub' in b.dataset) { alvo = { nome: 'Hub', caminho: '/' }; return pintarQr(); }
+    if ('qr' in b.dataset) { const m = b.closest('.mod'); alvo = { nome: m.dataset.n, caminho: m.dataset.p }; pintarQr(); }
+  });
+
+  desenharRemoto();
+  window.addEventListener('3mix-acesso', (e) => {
+    acesso = e.detail;
+    if (!acesso?.urls?.length) return;
+    acesso.urls.sort((a, b) => peso(a) - peso(b));
+    let guardada = '';
+    try { guardada = localStorage.getItem(CHAVE_REDE) || ''; } catch { /* sem armazenamento */ }
+    modo = 'local';
+    desenharLocal();
+    if (acesso.urls.includes(guardada)) escolherRede(guardada);
+  });
+})();
+</script>
+<script src="controle.js?v=20261102a"></script>
+</body>
+</html>

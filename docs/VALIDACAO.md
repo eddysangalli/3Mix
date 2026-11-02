@@ -1,4 +1,4 @@
-# Validação local FreeMix — 08/10/2026
+# Validação local 3Mix — 08/10/2026
 
 Leia docs/CONTINUAR.md e docs/PENDENCIAS.md para versão, recursos e limites atuais. Histórico anterior em archived/documentos/antes-integracao-final-20261008/.
 

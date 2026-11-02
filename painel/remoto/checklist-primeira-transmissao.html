@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3Mix · Checklist de Primeira Transmissão</title>
+<link rel="stylesheet" href="vmix-dialogo.css">
+<link rel="stylesheet" href="3mix-grafite.css">
+<style>
+  .vd-window { width: 100%; max-width: 820px; margin: 24px auto; border-radius: 8px; box-shadow: 0 16px 48px rgba(0,0,0,0.6); }
+  .ck-note { margin: 0 0 16px; font-size: 12px; color: #a9a9a9; line-height: 1.5; }
+  .ck-grupo { border: 1px solid #414141; border-radius: 6px; background: #1a1a1a; margin-bottom: 14px; overflow: hidden; }
+  .ck-grupo h3 { margin: 0; padding: 10px 14px; font-size: 13px; color: #ededed; background: #242424; border-bottom: 1px solid #353535; }
+  .ck-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 12.5px; color: #d6d6d6; }
+  .ck-item:last-child { border-bottom: none; }
+  .ck-item input[type="checkbox"] { margin-top: 2px; flex: none; width: 15px; height: 15px; accent-color: #2f6fed; }
+  .ck-item label { cursor: pointer; }
+  .ck-item b { color: #ededed; }
+  .ck-auto { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 700; background: #142b1c; color: #6fd79a; border: 1px solid #1f7233; }
+  .ck-manual { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 700; background: #2b1414; color: #ff9b92; border: 1px solid #b02a1f; }
+  .ck-actions { display: flex; gap: 8px; padding: 12px 14px; background: #1a1a1a; border: 1px solid #414141; border-radius: 6px; align-items: center; }
+  .ck-progresso { font-size: 12px; color: #a9a9a9; margin-left: auto; }
+</style>
+</head>
+<body data-page="checklist-primeira-transmissao" class="vd">
+<div class="vd-window">
+  <div class="vd-strip">
+    <span class="vd-title">Checklist de Primeira Transmissão</span>
+    <span class="vd-flex"></span>
+  </div>
+
+  <div class="vd-body">
+    <p class="ck-note">Siga esta lista antes de ir ao ar pela primeira vez. Itens marcados <span class="ck-auto">AUTO</span> são verificados de verdade pelo <b>Pre-Flight</b> da mesa (clique no botão abaixo); itens <span class="ck-manual">MANUAL</span> precisam da sua confirmação, o 3Mix não consegue verificá-los sozinho. O estado de cada caixa fica salvo neste computador — reabrir esta página mantém o que você já confirmou.</p>
+
+    <div class="ck-actions">
+      <button type="button" id="ck-abrir-preflight" class="vd-on">Abrir Pre-Flight real</button>
+      <button type="button" id="ck-limpar">Reiniciar checklist</button>
+      <span class="ck-progresso" id="ck-progresso">0 de 0 confirmados</span>
+    </div>
+
+    <div class="ck-grupo">
+      <h3>1. Instalação e conexão</h3>
+      <div class="ck-item"><input type="checkbox" id="ck-1" data-ck><label for="ck-1">O 3Mix foi aberto pelo atalho/ícone oficial (ou <code>INICIAR-3MIX.cmd</code> em ambiente de desenvolvimento) — nunca executando o motor sozinho. <span class="ck-manual">MANUAL</span></label></div>
+      <div class="ck-item"><input type="checkbox" id="ck-2" data-ck><label for="ck-2">A mesa abriu e mostra <b>"Motor conectado"</b> (indicador verde), não "sem conexão com o motor". <span class="ck-manual">MANUAL</span></label></div>
+    </div>
+
+    <div class="ck-grupo">
+      <h3>2. Fontes e composição (verificado pelo Pre-Flight)</h3>
+      <div class="ck-item"><input type="checkbox" id="ck-3" data-ck><label for="ck-3"><b>Program</b> tem um input selecionado (nunca vazio — saída preta). <span class="ck-auto">AUTO</span></label></div>
+      <div class="ck-item"><input type="checkbox" id="ck-4" data-ck><label for="ck-4"><b>Preview</b> tem um input selecionado (recomendado, não obrigatório). <span class="ck-auto">AUTO</span></label></div>
+      <div class="ck-item"><input type="checkbox" id="ck-5" data-ck><label for="ck-5"><b>Fade to Black</b> está desligado (se estivesse ativo, qualquer sinal ao ar seria cortado para preto). <span class="ck-auto">AUTO</span></label></div>
+      <div class="ck-item"><input type="checkbox" id="ck-6" data-ck><label for="ck-6">Todas as entradas de vídeo que você vai usar estão com sinal ativo (sem "sinal perdido"). <span class="ck-auto">AUTO</span></label></div>
+    </div>
+
+    <div class="ck-grupo">
+      <h3>3. Áudio</h3>
+      <div class="ck-item"><input type="checkbox" id="ck-7" data-ck><label for="ck-7">O barramento <b>Áudio Master</b> não está mudado. <span class="ck-auto">AUTO</span></label></div>
+      <div class="ck-item"><input type="checkbox" id="ck-8" data-ck><label for="ck-8">Você ouviu um teste de áudio de cada fonte que vai ao ar (câmera, mídia, microfone) no módulo de Áudio. <span class="ck-manual">MANUAL</span></label></div>
+    </div>
+
+    <div class="ck-grupo">
+      <h3>4. Armazenamento e gravação</h3>
+      <div class="ck-item"><input type="checkbox" id="ck-9" data-ck><label for="ck-9">Espaço em disco suficiente para a duração planejada (o Pre-Flight calcula horas restantes de gravação). <span class="ck-auto">AUTO</span></label></div>
+      <div class="ck-item"><input type="checkbox" id="ck-10" data-ck><label for="ck-10">Fez um teste de gravação curto e conferiu que o arquivo gerado abre normalmente antes da transmissão real. <span class="ck-manual">MANUAL</span></label></div>
+    </div>
+
+    <div class="ck-grupo">
+      <h3>5. Antes do primeiro CUT ao vivo</h3>
+      <div class="ck-item"><input type="checkbox" id="ck-11" data-ck><label for="ck-11">Rodou o <b>Pre-Flight</b> (botão acima) uma última vez e o veredito é <b>READY</b>, sem itens críticos pendentes. <span class="ck-manual">MANUAL</span> (confirma o resultado do AUTO)</label></div>
+      <div class="ck-item"><input type="checkbox" id="ck-12" data-ck><label for="ck-12">Se a transmissão for pública/ao vivo para terceiros: confirmou os destinos de saída (RTMP/SRT) com uma transmissão de teste curta antes do evento real. <span class="ck-manual">MANUAL</span></label></div>
+    </div>
+
+    <p class="ck-note">Problema não listado aqui? Veja <a href="LIMITES-CONHECIDOS.md" style="color:#7fb3e8">limites conhecidos desta beta</a> ou gere um diagnóstico em <b>Solicitar Suporte</b>.</p>
+  </div>
+
+  <div class="vd-bar">
+    <span class="vd-flex"></span>
+    <button type="button" onclick="window.FreeMixClosePanel ? window.FreeMixClosePanel() : window.close()">Fechar</button>
+  </div>
+</div>
+
+<script src="fechar-janela.js"></script>
+<script src="checklist-primeira-transmissao.js"></script>
+</body>
+</html>
+

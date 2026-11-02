@@ -1,14 +1,15 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
+<script src="remoto/registro-erros.js"></script>
 <meta charset="utf-8">
 <title>3Mix Pro</title>
 <style>
-  /* FreeMix Pro - Interface de Controle Broadcast estilo vMix */
+  /* 3Mix Pro - Interface de Controle Broadcast estilo vMix */
   :root {
-    --bg: #1e2328; --bar: #0a0f14; --btn: #293038; --btn-h: #404b56; --bd: #607081; --band: #1e2328; --row: #1e2328; --sep: #3e4854;
+    --bg: #232323; --bar: #0f0f0f; --btn: #303030; --btn-h: #4b4b4b; --bd: #607081; --band: #232323; --row: #232323; --sep: #494949;
     --tx: #e6ebf2; --mut: #96a1b0; --dim: #5e6878;
-    --org: #f7931e; --org2: #d97a00; --grn: #006400; --grn2: #006400; --blu: #293038; --blu2: #293038; --red: #ff0000;
+    --org: #f7931e; --org2: #d97a00; --grn: #006400; --grn2: #006400; --blu: #303030; --blu2: #303030; --red: #ff0000;
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
@@ -20,12 +21,12 @@
   input, select { font: inherit; }
   .b { height: 25px; padding: 0 11px; background: var(--btn); border: 1px solid var(--bd); color: var(--tx); white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-weight: 600; border-radius: 2px; }
   .b:hover { background: var(--btn-h); border-color: #55667e; color: #fff; }
-  .b.na, .b:disabled { color: var(--dim); background: #1a1f26; border-color: #2b3340; cursor: default; }
+  .b.na, .b:disabled { color: var(--dim); background: #202020; border-color: #353535; cursor: default; }
   .b.live { background: var(--red); border-color: #dc2626; color: #fff; font-weight: 700; box-shadow: 0 0 6px rgba(185,28,28,0.35); }
   .b.on { background: #15803d; border-color: #16a34a; color: #fff; font-weight: 700; box-shadow: 0 0 6px rgba(22,163,74,0.35); }
   svg { width: 13px; height: 13px; fill: currentColor; flex: none; }
-  ::-webkit-scrollbar { width: 8px; height: 8px; } ::-webkit-scrollbar-track { background: #0c0f14; } ::-webkit-scrollbar-corner { background: #0c0f14; }
-  ::-webkit-scrollbar-thumb { background: #2f3847; border-radius: 4px; } ::-webkit-scrollbar-thumb:hover { background: #445166; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; } ::-webkit-scrollbar-track { background: #101010; } ::-webkit-scrollbar-corner { background: #101010; }
+  ::-webkit-scrollbar-thumb { background: #3a3a3a; border-radius: 4px; } ::-webkit-scrollbar-thumb:hover { background: #445166; }
 
   /* media controls row under preview/output - vMix 29 Broadcast Style */
   .media-row {
@@ -62,7 +63,7 @@
     flex: 1; position: relative; height: 34px; margin: 0 12px; display: flex; align-items: center; cursor: pointer;
   }
   .vmix-track {
-    width: 100%; height: 3px; background: #404b56; border: 0;
+    width: 100%; height: 3px; background: #4b4b4b; border: 0;
     border-radius: 0; box-shadow: none; position: relative;
   }
   .vmix-progress {
@@ -72,49 +73,49 @@
   .vmix-thumb {
     position: absolute; top: 50%; left: 0%; transform: translate(-50%, -50%);
     width: 11px; height: 22px;
-    background: #404b56;
+    background: #4b4b4b;
     border: 1px solid #fff; border-radius: 0;
     box-shadow: none;
     cursor: ew-resize; display: flex; align-items: center; justify-content: center;
   }
   .vmix-thumb::after {
-    content: ""; width: 2px; height: 10px; background: #444f5e;
+    content: ""; width: 2px; height: 10px; background: #505050;
     border-right: 1px solid rgba(255,255,255,0.4);
   }
   .vmix-btn {
     height: 34px; font-size: 11px; font-weight: 600; color: #d0d7e2;
-    background: linear-gradient(180deg, #374150 0%, #252c37 100%);
+    background: linear-gradient(180deg, #434343 0%, #2d2d2d 100%);
     border: 1px solid #4a576a; border-radius: 2px;
     box-shadow: 0 1px 2px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
     cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
     white-space: nowrap; user-select: none;
   }
   .vmix-btn:hover {
-    background: linear-gradient(180deg, #445163 0%, #2c3542 100%); color: #fff; border-color: #5d6d84;
+    background: linear-gradient(180deg, #445163 0%, #363636 100%); color: #fff; border-color: #5d6d84;
   }
   .vmix-btn:active {
-    background: #1c222b; box-shadow: inset 0 1px 2px rgba(0,0,0,0.6);
+    background: #232323; box-shadow: inset 0 1px 2px rgba(0,0,0,0.6);
   }
   .vmix-btn.restart { padding: 0 8px; font-size: 10.5px; }
   .vmix-btn.pp { width: 40px; font-size: 16px; }
 
   /* category tabs & brand */
-  .tabs { display: flex; align-items: center; gap: 2px; padding: 0 6px; background: var(--band); border-bottom: 1px solid #161a22; }
-  .fm-brand { display: flex; align-items: center; gap: 5px; font-weight: 800; font-size: 13px; color: #fff; padding-right: 8px; margin-right: 4px; border-right: 1px solid #364254; letter-spacing: 0.5px; }
+  .tabs { display: flex; align-items: center; gap: 2px; padding: 0 6px; background: var(--band); border-bottom: 1px solid #1b1b1b; }
+  .fm-brand { display: flex; align-items: center; gap: 5px; font-weight: 800; font-size: 13px; color: #fff; padding-right: 8px; margin-right: 4px; border-right: 1px solid #444444; letter-spacing: 0.5px; }
   .fm-brand b { color: #00b4d8; }
   .fm-brand .dot { width: 7px; height: 7px; border-radius: 50%; background: #00e676; display: inline-block; box-shadow: 0 0 8px #00e676; }
   .tabs .c { width: 22px; height: 18px; border: 1px solid rgba(0, 0, 0, .4); border-radius: 2px; }
   .tabs .c.all { width: auto; padding: 0 10px; background: var(--btn); font-weight: 700; font-size: 11px; }
   .tabs .c.on { outline: 1.5px solid #fff; outline-offset: -1px; }
   .tabs .sp { flex: 1; }
-  .tabs .mx { height: 20px; padding: 0 10px; display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 11px; background: #1c232d; border: 1px solid var(--bd); border-radius: 2px; color: var(--tx); }
+  .tabs .mx { height: 20px; padding: 0 10px; display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 11px; background: #242424; border: 1px solid var(--bd); border-radius: 2px; color: var(--tx); }
   .tabs .mx:hover { background: var(--btn-h); }
   .tabs .mx.on { background: #26432b; border-color: #3ea853; color: #7cf795; }
 
   /* inputs + audio mixer */
-  .mid { display: flex; min-height: 0; background: #11141a; }
+  .mid { display: flex; min-height: 0; background: #151515; }
   .tiles { flex: 1; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 6px; padding: 6px 8px; overflow: auto; min-width: 0; }
-  .tile { width: 172px; background: #161b22; border: 1px solid #2b3340; border-radius: 3px; box-shadow: 0 3px 8px rgba(0,0,0,0.45); overflow: hidden; display: flex; flex-direction: column; }
+  .tile { width: 172px; background: #1c1c1c; border: 1px solid #353535; border-radius: 3px; box-shadow: 0 3px 8px rgba(0,0,0,0.45); overflow: hidden; display: flex; flex-direction: column; }
   .tile.is-out { border-color: #b91c1c; box-shadow: 0 0 8px rgba(185, 28, 28, 0.35); }
   .tile.is-pv { border-color: #16a34a; box-shadow: 0 0 8px rgba(22, 163, 74, 0.35); }
   .tt { height: 22px; display: flex; align-items: center; color: #fff; overflow: hidden; background: var(--blu); font-size: 11px; }
@@ -133,45 +134,45 @@
   .tile.is-pv .th { outline: 2px solid #16a34a; outline-offset: -2px; }
   .tile.is-out .th { outline: 2px solid #b91c1c; outline-offset: -2px; }
   .r { display: flex; background: var(--row); border-top: 1px solid var(--sep); }
-  .r button { flex: 1; height: 20px; font-size: 10.5px; font-weight: 600; color: #b2bcc9; border-right: 1px solid var(--sep); white-space: nowrap; display: grid; place-items: center; background: #222832; }
-  .r button:last-child { border-right: 0; } .r button:hover { background: #323b49; color: #fff; }
-  .r button.na { color: #505966; cursor: default; background: #1c2129; } .r button.na:hover { background: #1c2129; color: #505966; }
+  .r button { flex: 1; height: 20px; font-size: 10.5px; font-weight: 600; color: #b2bcc9; border-right: 1px solid var(--sep); white-space: nowrap; display: grid; place-items: center; background: #292929; }
+  .r button:last-child { border-right: 0; } .r button:hover { background: #3d3d3d; color: #fff; }
+  .r button.na { color: #505966; cursor: default; background: #222222; } .r button.na:hover { background: #222222; color: #505966; }
   .r button.on { background: var(--grn); color: #fff; font-weight: 700; }
   .r .w2 { flex: 2; }
   .empty { color: var(--mut); padding: 18px; line-height: 1.5; max-width: 520px; }
-  .mixer { flex: none; display: none; gap: 4px; padding: 6px 8px; background: #181d24; border-left: 1px solid var(--sep); overflow-x: auto; max-width: 46vw; min-width: 160px; }
+  .mixer { flex: none; display: none; gap: 4px; padding: 6px 8px; background: #1e1e1e; border-left: 1px solid var(--sep); overflow-x: auto; max-width: 46vw; min-width: 160px; }
   .mixer.on { display: flex; }
   .mixer .none { color: var(--mut); width: 190px; padding: 8px; line-height: 1.5; }
   .strip { width: 64px; display: flex; flex-direction: column; align-items: center; gap: 4px; background: var(--row); border: 1px solid var(--sep); padding: 5px 3px; min-height: 0; border-radius: 2px; }
   .strip .nm { width: 100%; text-align: center; font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #e1e7ef; }
   .strip .bd { flex: 1; min-height: 52px; display: flex; gap: 3px; align-items: stretch; }
-  .mt { width: 6px; background: #080a0d; position: relative; border-radius: 1px; }
+  .mt { width: 6px; background: #0a0a0a; position: relative; border-radius: 1px; }
   .mt::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, #2fd13a 0 70%, #e8d21d 70% 88%, #e0352b 88%); clip-path: inset(calc((1 - var(--l, 0)) * 100%) 0 0 0); }
   .fd { width: 18px; position: relative; touch-action: none; cursor: ns-resize; }
   .fd::before { content: ""; position: absolute; left: 50%; top: 4px; bottom: 4px; width: 2px; margin-left: -1px; background: #505966; }
-  .fd i { position: absolute; left: 0; right: 0; height: 10px; bottom: calc(var(--v, 0) * (100% - 10px)); background: linear-gradient(180deg, #d8e0ea, #9ea8b5); border: 1px solid #1c222a; border-radius: 1px; }
+  .fd i { position: absolute; left: 0; right: 0; height: 10px; bottom: calc(var(--v, 0) * (100% - 10px)); background: linear-gradient(180deg, #d8e0ea, #9ea8b5); border: 1px solid #232323; border-radius: 1px; }
   .strip .db { font-size: 10px; color: var(--mut); font-variant-numeric: tabular-nums; font-family: Consolas, monospace; }
   .strip .bt button { width: 26px; height: 17px; font-size: 10px; font-weight: 800; background: var(--btn); border: 1px solid var(--bd); display: grid; place-items: center; border-radius: 2px; }
   .strip .bt .muted { background: var(--red); border-color: #ef5a4f; color: #fff; }
 
   /* bottom bar + status */
-  .bot { display: flex; align-items: center; justify-content: space-between; padding: 0 8px; background: var(--bar); gap: 6px; border-top: 1px solid #28313d; }
+  .bot { display: flex; align-items: center; justify-content: space-between; padding: 0 8px; background: var(--bar); gap: 6px; border-top: 1px solid #323232; }
   .bot .g { display: flex; align-items: center; gap: 3px; } .bot .gear { width: 26px; padding: 0; }
   .bot .tc { font: 700 12px Consolas, monospace; padding: 0 6px; color: #ffad99; background: #261715; border-radius: 2px; margin-left: 2px; }
   .b.add-input { background: linear-gradient(180deg, #1d4e28, #13391d); border-color: #2e8243; color: #8ef5ab; font-weight: 700; height: 26px; padding: 0 14px; font-size: 12px; }
   .b.add-input:hover { background: linear-gradient(180deg, #276b37, #1b4d27); border-color: #3ec75e; color: #fff; }
-  .stat { display: flex; align-items: center; gap: 14px; padding: 0 10px; background: #0e1116; font-size: 11px; white-space: nowrap; overflow: hidden; border-top: 1px solid #1b2029; }
+  .stat { display: flex; align-items: center; gap: 14px; padding: 0 10px; background: #121212; font-size: 11px; white-space: nowrap; overflow: hidden; border-top: 1px solid #212121; }
   .stat b { font-weight: 700; } .stat .res { color: #00e676; font-weight: 700; font-family: Consolas, monospace; } .stat .sp { flex: 1; }
   .stat .ok { color: #00e676; } .stat .bad { color: #ff5252; }
   .stat .clock { font-family: Consolas, monospace; color: #c0cad8; font-weight: 600; }
 
   /* popovers */
   /* popovers */
-  .pop { position: fixed; z-index: 20; left: 8px; bottom: 58px; background: #1c222b; border: 1px solid #4a576b; padding: 10px; width: 330px; box-shadow: 0 14px 40px rgba(0, 0, 0, .75); display: none; border-radius: 4px; }
+  .pop { position: fixed; z-index: 20; left: 8px; bottom: 58px; background: #232323; border: 1px solid #4a576b; padding: 10px; width: 330px; box-shadow: 0 14px 40px rgba(0, 0, 0, .75); display: none; border-radius: 4px; }
   .pop.on { display: block; } .pop.right { left: auto; right: 8px; }
   .pop h3 { margin: 0 0 8px; font-size: 13px; font-weight: 700; color: #fff; }
   .pop label { display: grid; gap: 3px; margin-bottom: 8px; color: var(--mut); }
-  .pop input, .pop select { height: 25px; background: #10141a; border: 1px solid var(--bd); color: var(--tx); padding: 0 6px; border-radius: 2px; }
+  .pop input, .pop select { height: 25px; background: #151515; border: 1px solid var(--bd); color: var(--tx); padding: 0 6px; border-radius: 2px; }
   .pop .row { display: flex; gap: 6px; align-items: center; margin-top: 4px; flex-wrap: wrap; }
   .pop p { margin: 0 0 8px; color: var(--mut); line-height: 1.45; }
   .pop table { border-collapse: collapse; width: 100%; } .pop td { padding: 4px 6px 4px 0; border-top: 1px solid var(--sep); }
@@ -189,11 +190,11 @@
   .pop[data-panel="add"] > .add .types { overflow-y: auto; }
   .pop[data-panel="add"] > .add .form { overflow-y: auto; }
   .pop[data-panel="add"] > .row.end { margin: 0; padding: 9px 14px; background: #171717; border-top: 1px solid #3d3d3d; flex: none; }
-  .pop-header { display: flex; align-items: center; justify-content: space-between; padding: 7px 12px; background: #11151c; border-bottom: 1px solid #2d3847; flex: none; }
+  .pop-header { display: flex; align-items: center; justify-content: space-between; padding: 7px 12px; background: #161616; border-bottom: 1px solid #393939; flex: none; }
   .pop-header h3 { margin: 0; font-size: 13px; font-weight: 700; color: #eaf0f8; display: flex; align-items: center; gap: 8px; }
   .pop-header-actions { display: flex; align-items: center; gap: 6px; }
-  .pop-detach-btn { height: 22px !important; font-size: 11px !important; padding: 0 8px !important; background: #222b37 !important; border: 1px solid #3d4c60 !important; color: #cbd6e2 !important; font-weight: 600; cursor: pointer; border-radius: 3px; display: inline-flex; align-items: center; gap: 4px; }
-  .pop-detach-btn:hover { background: #323f52 !important; border-color: #556a88 !important; color: #fff !important; }
+  .pop-detach-btn { height: 22px !important; font-size: 11px !important; padding: 0 8px !important; background: #2c2c2c !important; border: 1px solid #3d4c60 !important; color: #cbd6e2 !important; font-weight: 600; cursor: pointer; border-radius: 3px; display: inline-flex; align-items: center; gap: 4px; }
+  .pop-detach-btn:hover { background: #414141 !important; border-color: #556a88 !important; color: #fff !important; }
   .pop-close-btn { width: 22px; height: 22px; font-size: 13px; font-weight: 700; color: #8d9baa; background: transparent; border: 1px solid transparent; border-radius: 3px; display: grid; place-items: center; cursor: pointer; line-height: 1; }
   .pop-close-btn:hover { background: #d92418; border-color: #ff5247; color: #fff; }
   .pop-body { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 14px; }
@@ -244,11 +245,11 @@
   .add-preview .ap-note { margin: 0; order: 0; padding: 0; background: transparent; border: 0; color: #9a9a9a; font-size: 10.5px; line-height: 1.45; }
   .add .form .add-preview .ap-note { order: 0; margin: 0; padding: 0; background: transparent; border: 0; color: #9a9a9a; font-size: 10.5px; line-height: 1.45; }
   .add .form .add-preview .ap-note.warn { color: #ffb3a9; }
-  .pop.wide .row.end { margin: 0; padding: 8px 12px; background: var(--bar); gap: 8px; border-top: 1px solid #2a3340; flex: none; }
+  .pop.wide .row.end { margin: 0; padding: 8px 12px; background: var(--bar); gap: 8px; border-top: 1px solid #343434; flex: none; }
   .pop.wide .row.end .b { min-width: 96px; height: 26px; font-weight: 700; }
   .r .ic { flex: none; width: 22px; } .r .ic svg { width: 12px; height: 12px; }
   .tri { width: 0; height: 0; border-left: 7px solid currentColor; border-top: 4px solid transparent; border-bottom: 4px solid transparent; }
-  .toast { position: fixed; left: 50%; bottom: 60px; transform: translateX(-50%); background: #20262e; border: 1px solid #5a636e; padding: 7px 12px; z-index: 30; display: none; max-width: 80vw; border-radius: 3px; box-shadow: 0 4px 14px rgba(0,0,0,0.6); }
+  .toast { position: fixed; left: 50%; bottom: 60px; transform: translateX(-50%); background: #272727; border: 1px solid #5a636e; padding: 7px 12px; z-index: 30; display: none; max-width: 80vw; border-radius: 3px; box-shadow: 0 4px 14px rgba(0,0,0,0.6); }
   .toast.on { display: block; } .toast.err { border-color: #ef5a4f; color: #ffc4bf; }
   .tt.pv { background: linear-gradient(180deg, #12a31a, #0a7a10); color: #fff; } .tt.pv .n { background: #07590b; color: #fff; }
   .tt.out { background: linear-gradient(180deg, #e0281c, #b3160d); color: #fff; } .tt.out .n { background: #8a0f08; color: #fff; }
@@ -261,14 +262,14 @@
   .outs table { width: 100%; border-collapse: collapse; } .outs th { text-align: left; color: var(--mut); font-size: 10px; text-transform: uppercase; padding: 4px 8px 6px 0; }
   .outs td { padding: 4px 8px 4px 0; border-top: 1px solid var(--sep); vertical-align: middle; white-space: nowrap; } .outs td small { display: block; color: var(--mut); font-size: 9px; }
   .outs td { max-width: 330px; overflow: hidden; text-overflow: ellipsis; }
-  .outs select { height: 22px; background: #12161b; border: 1px solid var(--bd); color: var(--tx); max-width: 200px; }
+  .outs select { height: 22px; background: #161616; border: 1px solid var(--bd); color: var(--tx); max-width: 200px; }
   .outs .b { height: 22px; } .outs .cg { margin-left: 4px; width: 24px; padding: 0; }
   .bdg { display: inline-block; padding: 1px 7px; font-size: 10px; font-weight: 700; border: 1px solid var(--bd); color: var(--mut); } .bdg.on { background: var(--red); border-color: #ef5a4f; color: #fff; } .bdg.na { border-style: dashed; }
   body.basic .tile .r, body.basic .mixer { display: none !important; }
-  .bot { background: #0d1013; justify-content: space-between; padding: 0 4px; gap: 0; }
-  .bot .b { height: 24px; background: #2a3540; border: 1px solid #4b5967; color: #f2f5f8; font-weight: 700; font-size: 11px; padding: 0 12px; border-radius: 0; }
-  .bot .b:hover { background: #364452; } .bot .b.live { background: var(--red); border-color: #ef5a4f; } .bot .b.on { background: var(--grn); border-color: #2fb02c; }
-  .bot .b:disabled { color: #6b7480; background: #1b2229; border-color: #2c353e; }
+  .bot { background: #101010; justify-content: space-between; padding: 0 4px; gap: 0; }
+  .bot .b { height: 24px; background: #353535; border: 1px solid #4b5967; color: #f2f5f8; font-weight: 700; font-size: 11px; padding: 0 12px; border-radius: 0; }
+  .bot .b:hover { background: #444444; } .bot .b.live { background: var(--red); border-color: #ef5a4f; } .bot .b.on { background: var(--grn); border-color: #2fb02c; }
+  .bot .b:disabled { color: #6b7480; background: #222222; border-color: #353535; }
   .bot .g.l { display: flex; align-items: center; gap: 0; } .bot .g.r { display: flex; align-items: center; gap: 3px; }
   .bot .pair { display: inline-flex; align-items: center; margin-left: 28px; } .bot .pair .cg { width: 38px; padding: 0; margin: 0 1px 0 0; border-right: 1px solid #4b5967; }
   .bot .dd { width: 16px; padding: 0; margin-left: -1px; font-size: 7px; } .bot .ib { width: 28px; padding: 0; } .bot .ib svg { width: 14px; height: 14px; }
@@ -278,11 +279,11 @@
   /* Visual GC & GT Title Gallery */
   .gc-picker-wrap { margin-bottom: 10px; width: 100%; }
   .gc-cat-bar { display: flex; gap: 4px; margin-bottom: 6px; overflow-x: auto; padding-bottom: 2px; }
-  .gc-cat-btn { padding: 3px 8px; font-size: 11px; font-weight: 600; background: #202733; color: #b0bac8; border: 1px solid #364254; border-radius: 2px; cursor: pointer; white-space: nowrap; }
-  .gc-cat-btn:hover { background: #2d384a; color: #fff; }
+  .gc-cat-btn { padding: 3px 8px; font-size: 11px; font-weight: 600; background: #292929; color: #b0bac8; border: 1px solid #444444; border-radius: 2px; cursor: pointer; white-space: nowrap; }
+  .gc-cat-btn:hover { background: #3a3a3a; color: #fff; }
   .gc-cat-btn.on { background: #0078d4; border-color: #2b88d8; color: #fff; font-weight: 700; }
-  .gc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(136px, 1fr)); gap: 6px; max-height: 180px; overflow-y: auto; padding: 4px; background: #0e1217; border: 1px solid #2b3340; border-radius: 2px; }
-  .gc-card { display: flex; flex-direction: column; background: #161c24; border: 1px solid #313c4c; border-radius: 2px; cursor: pointer; overflow: hidden; transition: all 0.12s; text-align: left; }
+  .gc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(136px, 1fr)); gap: 6px; max-height: 180px; overflow-y: auto; padding: 4px; background: #121212; border: 1px solid #353535; border-radius: 2px; }
+  .gc-card { display: flex; flex-direction: column; background: #1d1d1d; border: 1px solid #3e3e3e; border-radius: 2px; cursor: pointer; overflow: hidden; transition: all 0.12s; text-align: left; }
   .gc-card:hover { border-color: #556880; transform: translateY(-1px); }
   .gc-card.on { border-color: #00e676; box-shadow: 0 0 7px rgba(0, 230, 118, 0.45); background: #1a2520; }
   .gc-card-thumb { height: 70px; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
@@ -303,23 +304,29 @@
   .strip .col .on, .strip .bt .on { background: var(--grn); border-color: #2fb02c; color: #fff; } .strip .col .muted { background: var(--red); border-color: #ef5a4f; color: #fff; }
   .add .form input[type="range"] { padding: 0; border: 0; background: transparent; }
   /* Painel Lateral Acoplado (Mixer, Replay, List) - Estilo vMix Broadcast Pro */
-  .side-panel { display: none; flex-direction: column; width: 44vw; min-width: 420px; max-width: 820px; background: #0f131a; border-left: 1px solid var(--sep); overflow: hidden; flex: none; height: 100%; box-sizing: border-box; }
+  .side-panel { display: none; flex-direction: column; width: 44vw; min-width: 260px; max-width: 960px; background: #141414; border-left: 1px solid var(--sep); overflow: hidden; flex: none; height: 100%; box-sizing: border-box; }
   .side-panel.on { display: flex; }
   @media (min-width: 1600px) { .side-panel { width: 46vw; max-width: 960px; } }
-  .side-panel-header { height: 26px; background: #0b0e14; border-bottom: 1px solid #232b38; display: flex; align-items: center; justify-content: space-between; padding: 0 4px; user-select: none; flex: none; }
-  .side-undock-btn { width: 22px; height: 20px; font-size: 11px; background: #1a222c; border: 1px solid #334052; border-radius: 2px; color: #cbd5e1; display: grid; place-items: center; cursor: pointer; line-height: 1; }
+  .side-panel-header { height: 26px; background: #0f0f0f; border-bottom: 1px solid #2d2d2d; display: flex; align-items: center; justify-content: space-between; padding: 0 4px; user-select: none; flex: none; }
+  .side-undock-btn { width: 22px; height: 20px; font-size: 11px; background: #232323; border: 1px solid #424242; border-radius: 2px; color: #cbd5e1; display: grid; place-items: center; cursor: pointer; line-height: 1; }
   .side-undock-btn:hover { background: #0078d4; color: #fff; border-color: #2b88d8; }
   .side-tabs { display: flex; align-items: center; gap: 3px; }
-  .st-tab { height: 21px; padding: 0 9px; font-size: 11px; font-weight: 700; color: #94a3b8; background: #141922; border: 1px solid #2b3543; border-bottom: 0; border-radius: 3px 3px 0 0; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; transition: all 0.1s; }
-  .st-tab:hover { color: #fff; background: #1e2633; }
-  .st-tab.on { color: #fff; background: #242e3d; border-color: #425268; box-shadow: inset 0 2px 0 #0078d4; }
+  .st-tab { height: 21px; padding: 0 9px; font-size: 11px; font-weight: 700; color: #94a3b8; background: #1a1a1a; border: 1px solid #363636; border-bottom: 0; border-radius: 3px 3px 0 0; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; transition: all 0.1s; }
+  .st-tab:hover { color: #fff; background: #282828; }
+  .st-tab.on { color: #fff; background: #303030; border-color: #425268; box-shadow: inset 0 2px 0 #0078d4; }
   .st-tab.rp-tab.on, .st-tab.rp-tab.live { background: #991414; border-color: #bd1a1a; color: #fff; box-shadow: inset 0 2px 0 #ff3b30; }
   .st-tab.pl-tab.on { background: #0d5294; border-color: #1a6cb8; color: #fff; box-shadow: inset 0 2px 0 #00a2ff; }
   .rp-badge { background: #fff; color: #990000; font-weight: 900; font-size: 9px; padding: 0 4px; border-radius: 2px; line-height: 12px; }
   .st-tab.rp-tab.on .rp-badge { background: #ffcccc; color: #990000; }
   .pl-badge { font-size: 9px; }
-  .side-panel-body { flex: 1; min-height: 0; position: relative; background: #0e1117; overflow: hidden; }
+  .side-panel-body { flex: 1; min-height: 0; position: relative; background: #121212; overflow: hidden; }
   .side-view { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; }
+  /* PTZ: painel com altura do conteúdo, mas SÓ quando a view PTZ está realmente visível.
+     Se o seletor olhasse apenas .ptzc, ele casaria com a view escondida e colapsaria
+     a altura do dock, deixando Playlist/Mixer/etc. vazios. */
+  .side-panel:has(#view-ptz[style*="display: flex"]) { height: auto; align-self: flex-start; max-height: 100%; }
+  .side-panel:has(#view-ptz[style*="display: flex"]) .side-panel-body { flex: 0 0 auto; min-height: 0; }
+  .side-panel:has(#view-ptz[style*="display: flex"]) #view-ptz { position: relative; inset: auto; height: auto; max-height: calc(100vh - 220px); }
   .side-view .mixer { width: 100% !important; max-width: 100% !important; border-left: 0 !important; height: 100%; box-sizing: border-box; }
 
   /* List Editor Acoplado (Playlist): mesmo padrão grafite do dock */
@@ -348,31 +355,31 @@
   /* Replay Controller Acoplado */
   .rp-dock-ctrl { display: flex; flex-direction: column; height: 100%; padding: 6px 8px; box-sizing: border-box; }
   .rp-pages-bar { display: flex; gap: 2px; margin-bottom: 4px; overflow-x: auto; padding-bottom: 2px; }
-  .rp-page-btn { min-width: 20px; height: 19px; padding: 0 4px; font-size: 10px; font-weight: 700; background: #1a222d; color: #8e9cae; border: 1px solid #2e3b4c; border-radius: 2px; cursor: pointer; }
-  .rp-page-btn:hover { background: #273445; color: #fff; }
+  .rp-page-btn { min-width: 20px; height: 19px; padding: 0 4px; font-size: 10px; font-weight: 700; background: #232323; color: #8e9cae; border: 1px solid #3c3c3c; border-radius: 2px; cursor: pointer; }
+  .rp-page-btn:hover { background: #353535; color: #fff; }
   .rp-page-btn.on { background: #0078d4; border-color: #2b88d8; color: #fff; }
-  .rp-dock-events-wrap { flex: 1; min-height: 0; overflow-y: auto; background: #090c10; border: 1px solid #232b38; margin-bottom: 6px; }
+  .rp-dock-events-wrap { flex: 1; min-height: 0; overflow-y: auto; background: #0c0c0c; border: 1px solid #2d2d2d; margin-bottom: 6px; }
   .rp-dock-actions { display: flex; flex-direction: column; gap: 5px; flex: none; }
   .rp-tc-display { font-family: Consolas, monospace; font-size: 15px; font-weight: 700; color: #fff; letter-spacing: 0.5px; }
-  .rp-timeline-bar { height: 14px; background: #18202b; border: 1px solid #334050; border-radius: 2px; position: relative; overflow: hidden; margin-top: 4px; }
+  .rp-timeline-bar { height: 14px; background: #212121; border: 1px solid #414141; border-radius: 2px; position: relative; overflow: hidden; margin-top: 4px; }
   .rp-timeline-prog { height: 100%; background: linear-gradient(90deg, #0e8a16, #26c934); width: 45%; }
 
   /* Mixer no layout padrão */
   .mixer { flex: none; display: flex; gap: 4px; padding: 6px; overflow-x: auto; overflow-y: auto; flex-wrap: wrap; align-content: flex-start; }
   .mixer .sec { width: 20px; height: 186px; padding: 0; line-height: 20px; }
-  .strip { width: 100px; height: 186px; padding: 0; gap: 0; display: grid; grid-template-rows: 18px 12px minmax(0, 1fr) 27px; align-items: stretch; background: #0b0d11; border: 1px solid #2a313c; border-radius: 0; }
+  .strip { width: 100px; height: 186px; padding: 0; gap: 0; display: grid; grid-template-rows: 18px 12px minmax(0, 1fr) 27px; align-items: stretch; background: #0e0e0e; border: 1px solid #323232; border-radius: 0; }
   .strip .hd { display: flex; min-width: 0; background: #000; font-size: 11px; line-height: 18px; }
-  .strip .hd b { flex: none; min-width: 18px; padding: 0 3px; text-align: center; background: #2b323d; color: #fff; font-weight: 700; }
+  .strip .hd b { flex: none; min-width: 18px; padding: 0 3px; text-align: center; background: #333333; color: #fff; font-weight: 700; }
   .strip .hd span { flex: 1; min-width: 0; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #f3ecc8; }
-  .strip.out .hd { background: #3a4350; } .strip.out .hd span { color: #fff; font-weight: 700; text-align: center; }
+  .strip.out .hd { background: #444444; } .strip.out .hd span { color: #fff; font-weight: 700; text-align: center; }
   .strip .pan { display: grid; place-items: center; }
   .strip .pan input { width: 48px; height: 10px; margin: 0; padding: 0; border: 0; -webkit-appearance: none; appearance: none; background: transparent; cursor: ew-resize; }
   .strip .pan input::-webkit-slider-runnable-track { height: 2px; background: #5b6676; }
-  .strip .pan input::-webkit-slider-thumb { -webkit-appearance: none; width: 5px; height: 10px; margin-top: -4px; background: #e3e8ef; border: 1px solid #10141a; }
+  .strip .pan input::-webkit-slider-thumb { -webkit-appearance: none; width: 5px; height: 10px; margin-top: -4px; background: #e3e8ef; border: 1px solid #151515; }
   .strip .bd { flex: none; min-height: 0; display: grid; grid-template-columns: 26px minmax(0, 1fr) 5px 5px; gap: 2px; padding: 1px 3px 0 4px; }
   .strip .col { gap: 3px; } .strip .col button, .strip .bt button { width: 26px; height: 22px; } .strip .col button svg { width: 14px; height: 14px; }
   .strip .col .fw { cursor: default; } .strip .col .fw svg { opacity: .28; } .strip .col .fw.lit svg { opacity: 1; }
-  .strip .col .na { color: #505966; cursor: default; background: #1c2129; }
+  .strip .col .na { color: #505966; cursor: default; background: #222222; }
   .strip .fd, .strip .fdx { width: auto; background: repeating-linear-gradient(180deg, #7f8a99 0 1px, transparent 1px 12px) left 5px top 5px / 6px calc(100% - 10px) no-repeat, repeating-linear-gradient(180deg, #7f8a99 0 1px, transparent 1px 12px) right 5px top 5px / 6px calc(100% - 10px) no-repeat; }
   .strip .fd i { left: 50%; right: auto; width: 22px; margin-left: -11px; }
   .strip .fdx { position: relative; opacity: .3; } .strip .fdx::before { content: ""; position: absolute; left: 50%; top: 4px; bottom: 4px; width: 2px; margin-left: -1px; background: #505966; }
@@ -380,21 +387,21 @@
   .strip .bt { gap: 3px; padding: 0 4px; align-items: center; } .strip .bt small { font-size: 9px; color: var(--mut); white-space: nowrap; }
   /* Output strips (Master, A, B), the "buses off" notice and the Audio Bus Manager. */
   .strip.out.live .hd { background: var(--grn); } .strip.out.live.off .hd { background: #5a626e; }
-  .busoff { width: 308px; height: 186px; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; justify-content: center; padding: 10px 12px; background: #0b0d11; border: 1px solid #2a313c; color: var(--mut); line-height: 1.4; } .busoff b { color: #e1e7ef; }
+  .busoff { width: 308px; height: 186px; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; justify-content: center; padding: 10px 12px; background: #0e0e0e; border: 1px solid #323232; color: var(--mut); line-height: 1.4; } .busoff b { color: #e1e7ef; }
   .mixer .none.warn { color: #ffb4ae; }
-  .busman { max-height: 56vh; overflow: auto; background: #0b0d11; border: 1px solid var(--sep); padding: 4px 8px; }
+  .busman { max-height: 56vh; overflow: auto; background: #0e0e0e; border: 1px solid var(--sep); padding: 4px 8px; }
   .bmr { display: grid; grid-template-columns: minmax(150px, 1fr) 26px 26px 26px 26px; gap: 3px; align-items: center; padding: 2px 0; }
   .bmr span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .bmr b { text-align: center; }
   .bmr button { width: 26px; height: 22px; background: var(--btn); border: 1px solid var(--bd); display: grid; place-items: center; } .bmr button svg { width: 13px; height: 13px; }
-  .bmr .sq { background: #05070a; } .bmr .sq.on { background: var(--grn); border-color: #2fb02c; }
+  .bmr .sq { background: #070707; } .bmr .sq.on { background: var(--grn); border-color: #2fb02c; }
   /* Layers of an input. */
   .strip .col .fw { cursor: pointer; }
   .layers { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
   .lyr { display: grid; grid-template-columns: 22px minmax(90px, 1fr) 190px 86px 78px; gap: 5px; align-items: center; }
-  .lyr b { text-align: center; background: #2b323d; line-height: 22px; } .lyr span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .lyr select { height: 25px; }
+  .lyr b { text-align: center; background: #333333; line-height: 22px; } .lyr span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .lyr select { height: 25px; }
   /* Small menus: a column of rows, opened where the mouse was (see placePop). */
   .pop.ctx { width: auto; min-width: 240px; max-width: 360px; padding: 0 0 4px; border-radius: 0; border-color: #55647a; }
-  .pop.ctx h3 { margin: 0 0 4px; padding: 6px 12px; font-size: 12px; background: var(--bar); border-bottom: 1px solid #2f3744; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pop.ctx h3 { margin: 0 0 4px; padding: 6px 12px; font-size: 12px; background: var(--bar); border-bottom: 1px solid #393939; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .pop .menu { display: flex; flex-direction: column; }
   .pop .menu button { text-align: left; padding: 6px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--tx); }
   .pop .menu button:hover { background: #0b6bbf; color: #fff; }
@@ -407,31 +414,33 @@
   .tabs { border-bottom-width: 2px; }
   .tabs .c.named { width: auto; min-width: 22px; padding: 0 9px; color: #fff; font-size: 11px; font-weight: 700; text-shadow: 0 1px 1px rgba(0, 0, 0, .55); white-space: nowrap; }
   .tabs .c.find { width: auto; min-width: 24px; padding: 0 6px; background: var(--btn); display: inline-flex; align-items: center; gap: 4px; color: #e6ebf2; font-size: 11px; } .tabs .c.find svg { width: 12px; height: 12px; }
-  .tabs .c.find.on { background: #e6ebf2; color: #10141a; }
+  .tabs .c.find.on { background: #e6ebf2; color: #151515; }
   .catrow { display: grid !important; grid-template-columns: 22px 1fr; align-items: center; gap: 6px; margin-bottom: 4px !important; } .catrow i { width: 22px; height: 22px; border: 1px solid rgba(0, 0, 0, .5); }
   /* Instant Replay Multi-Cam & Players A/B (SSD Broadcast) - Grid Panorâmica */
   .rp-panoramic-grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: 12px; align-items: start; }
   @media (max-width: 900px) { .rp-panoramic-grid { grid-template-columns: 1fr; } }
   .rp-col { display: flex; flex-direction: column; gap: 8px; }
-  .rp-box { background: #13171f; border: 1px solid #2e3947; border-radius: 4px; padding: 10px 12px; margin-bottom: 0; box-shadow: inset 0 1px 0 rgba(255,255,255,0.03); }
+  .rp-box { background: #181818; border: 1px solid #3a3a3a; border-radius: 4px; padding: 10px 12px; margin-bottom: 0; box-shadow: inset 0 1px 0 rgba(255,255,255,0.03); }
   .rp-box h4 { margin: 0 0 7px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #a4b3c6; display: flex; justify-content: space-between; align-items: center; letter-spacing: 0.3px; }
   .rp-cams-grid { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 6px; }
-  .rp-cam-item { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; background: #1a202a; padding: 3px 8px; border: 1px solid #333f50; border-radius: 3px; cursor: pointer; }
-  .rp-cam-item:hover { border-color: #4b5d77; background: #222a38; }
+  .rp-cam-item { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; background: #212121; padding: 3px 8px; border: 1px solid #414141; border-radius: 3px; cursor: pointer; }
+  .rp-cam-item:hover { border-color: #4b5d77; background: #2c2c2c; }
   .rp-events-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-  .rp-events-table th { text-align: left; color: var(--mut); padding: 5px 8px; border-bottom: 1px solid #333f50; font-size: 10px; text-transform: uppercase; }
-  .rp-events-table td { padding: 5px 8px; border-bottom: 1px solid #222935; vertical-align: middle; }
+  .rp-events-table th { text-align: left; color: var(--mut); padding: 5px 8px; border-bottom: 1px solid #414141; font-size: 10px; text-transform: uppercase; }
+  .rp-events-table td { padding: 5px 8px; border-bottom: 1px solid #2b2b2b; vertical-align: middle; }
   .rp-events-table tr:hover td { background: rgba(255,255,255,0.03); }
 
   /* Divisor / Splitter Arrastável Horizontal */
-  .splitter-v { width: 5px; background: #0c0f15; border-left: 1px solid #1c232e; border-right: 1px solid #1c232e; cursor: col-resize; flex: none; transition: background 0.12s; user-select: none; }
+  .splitter-v { width: 5px; background: #101010; border-left: 1px solid #242424; border-right: 1px solid #242424; cursor: col-resize; flex: none; transition: background 0.12s; user-select: none; }
   .splitter-v:hover, .splitter-v.active { background: #0078d4; }
+  .splitter-dock2 { display: none; }
+  body.dock2 .splitter-dock2 { display: flex; }
 
   /* Entrada Minimizada (Tira vertical colapsada - Estilo vMix) */
-  .tile.min { width: 28px !important; min-width: 28px !important; max-width: 28px !important; cursor: pointer; background: #11151c; border: 1px solid #2b3543; padding: 0; }
-  .tile.min .tt.min { height: 22px; background: #161c24; padding: 0; justify-content: center; }
+  .tile.min { width: 28px !important; min-width: 28px !important; max-width: 28px !important; cursor: pointer; background: #161616; border: 1px solid #363636; padding: 0; }
+  .tile.min .tt.min { height: 22px; background: #1d1d1d; padding: 0; justify-content: center; }
   .tile.min .tt.min .n { width: 100%; border-right: 0; text-align: center; }
-  .tile.min .min-bar { flex: 1; min-height: 120px; display: flex; align-items: center; justify-content: center; position: relative; padding: 6px 0; background: #1a222d; }
+  .tile.min .min-bar { flex: 1; min-height: 120px; display: flex; align-items: center; justify-content: center; position: relative; padding: 6px 0; background: #232323; }
   .tile.min .min-name { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 11px; font-weight: 700; color: #fff; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.8); letter-spacing: 0.5px; }
   .tt .min-btn { width: 18px; height: 100%; font-weight: 700; color: #8b99ab; background: none; border: 0; cursor: pointer; display: grid; place-items: center; }
   .tt .min-btn:hover { color: #fff; background: rgba(255,255,255,0.15); }
@@ -439,11 +448,11 @@
   /* Barra Lateral de Velocidade de Exibição no Input (Show/Hide PlayBack Speed) */
   .tile.has-speed { width: 220px; flex-direction: row; flex-wrap: wrap; }
   .tile.has-speed .tile-main { width: 172px; display: flex; flex-direction: column; flex: none; }
-  .tile-speed-col { width: 46px; background: #0a0d13; border-left: 1px solid #222b38; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 4px 2px; box-sizing: border-box; flex: 1; }
+  .tile-speed-col { width: 46px; background: #0e0e0e; border-left: 1px solid #2c2c2c; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 4px 2px; box-sizing: border-box; flex: 1; }
   .speed-ruler { width: 8px; height: 100px; display: flex; flex-direction: column; justify-content: space-between; margin-top: 4px; }
   .speed-ruler i { width: 6px; height: 1px; background: #475569; display: block; }
-  .speed-slider { -webkit-appearance: slider-vertical; writing-mode: bt-lr; width: 16px; height: 100px; margin: 4px 0; cursor: ns-resize; accent-color: #0078d4; }
-  .speed-val { font-family: Consolas, monospace; font-size: 9.5px; font-weight: 700; color: #cbd5e1; background: #161c24; border: 1px solid #2b3543; border-radius: 2px; padding: 1px 2px; width: 38px; text-align: center; }
+  .speed-slider { writing-mode: vertical-lr; direction: rtl; width: 16px; height: 100px; margin: 4px 0; cursor: ns-resize; accent-color: #0078d4; }
+  .speed-val { font-family: Consolas, monospace; font-size: 9.5px; font-weight: 700; color: #cbd5e1; background: #1d1d1d; border: 1px solid #363636; border-radius: 2px; padding: 1px 2px; width: 38px; text-align: center; }
 /* One navigation strip per window. Editors always fill their independent window. */
 body:not(.popup-mode) .side-panel-header { display:none; }
 body.popup-mode #tabs,body.popup-mode .mid { display:none !important; }
@@ -454,7 +463,7 @@ body.popup-mode.side-popup #side-panel { width:100% !important; max-width:none; 
 body.popup-mode.side-popup .pop,body.popup-mode.side-popup #splitter-side,body.popup-mode.side-popup #side-undock-btn { display:none !important; }
 body.popup-mode.side-popup #mixer { display:flex !important; }
 body.popup-mode.side-popup #view-mixer { overflow:auto; }
-.mid,.tiles { background:#1e2328; }
+.mid,.tiles { background:#232323; }
 .tile { border-radius:0; box-shadow:none; }
 .tt[draggable] { cursor:grab; }
 /* Palette sampled from the operator's vMix 29 reference, 08/10/2026. */
@@ -526,6 +535,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     min-width: 0 !important;
     max-height: 40vh !important;
   }
+  .splitter-dock2 { display: none !important; }
   .bot {
     flex-wrap: wrap !important;
     height: auto !important;
@@ -549,8 +559,8 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   
   /* Topbar MotionCaster Pro */
   .studio-topbar {
-    background: #090c10;
-    border-bottom: 2px solid #1a232e;
+    background: #0c0c0c;
+    border-bottom: 2px solid #242424;
     height: 44px;
     display: flex;
     align-items: center;
@@ -571,6 +581,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     letter-spacing: 0.5px;
   }
   .brand-box .brand-title b { color: #00d2d3; }
+  .brand-box .brand-logo { display: block; height: 24px; width: auto; }
   .brand-box .brand-badge {
     background: linear-gradient(135deg, #0984e3, #00cec9);
     color: #000;
@@ -625,14 +636,14 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     display: flex;
     align-items: center;
     gap: 6px;
-    background: #11161d;
-    border: 1px solid #232c37;
+    background: #171717;
+    border: 1px solid #2d2d2d;
     border-radius: 4px;
     padding: 2px 7px;
     cursor: default;
     transition: border-color 0.15s;
   }
-  .gauge-pill:hover { border-color: #3d4d5e; }
+  .gauge-pill:hover { border-color: #4d4d4d; }
   .gauge-svg {
     width: 28px;
     height: 28px;
@@ -640,7 +651,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   }
   .circle-bg {
     fill: none;
-    stroke: #1b232c;
+    stroke: #232323;
     stroke-width: 3.2;
   }
   .circle-val {
@@ -683,8 +694,8 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     padding: 0 9px;
     font-size: 10.5px;
     font-weight: 700;
-    background: #161c24;
-    border: 1px solid #2e3b4a;
+    background: #1d1d1d;
+    border: 1px solid #3c3c3c;
     border-radius: 3px;
     color: #c8d6e5;
     cursor: pointer;
@@ -694,7 +705,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     transition: all 0.15s ease;
     user-select: none;
   }
-  .topbar-pill:hover { background: #222c38; color: #fff; border-color: #485c72; }
+  .topbar-pill:hover { background: #2d2d2d; color: #fff; border-color: #485c72; }
   .topbar-pill.pill-danger { border-color: #8b2520; color: #ff7675; }
   .topbar-pill.pill-danger:hover { background: #451513; color: #fff; border-color: #e74c3c; }
   .topbar-pill.pill-rec { border-color: #843b17; color: #f39c12; }
@@ -709,8 +720,8 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     flex-direction: column;
     justify-content: space-between;
     padding: 3px 5px;
-    background: #11151c;
-    border: 1px solid #222b37;
+    background: #161616;
+    border: 1px solid #2c2c2c;
     border-radius: 3px;
     height: 100%;
     box-sizing: border-box;
@@ -723,8 +734,8 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   .dsk-unit {
     display: flex;
     flex-direction: column;
-    background: #090c10;
-    border: 1px solid #1c2430;
+    background: #0c0c0c;
+    border: 1px solid #252525;
     border-radius: 2px;
     padding: 2px;
     align-items: center;
@@ -752,7 +763,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     width: 5px;
     height: 5px;
     border-radius: 50%;
-    background: #2b3542;
+    background: #363636;
     display: inline-block;
   }
   .dsk-unit.active .dsk-status-dot { background: #f39c12; }
@@ -792,13 +803,13 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     cursor: pointer;
     display: grid;
     place-items: center;
-    border: 1px solid #283444;
-    background: #171f29;
+    border: 1px solid #353535;
+    background: #202020;
     color: #cbd5e1;
     padding: 0;
   }
   .dsk-btn-take:hover, .dsk-btn-auto:hover {
-    background: #253344;
+    background: #343434;
     color: #fff;
   }
   .dsk-btn-take.on {
@@ -840,7 +851,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   .btn-atem-auto {
     flex: 1.2;
     height: 100%;
-    background: linear-gradient(180deg, #1f2b38, #141c25);
+    background: linear-gradient(180deg, #2b2b2b, #1c1c1c);
     border: 1px solid #3d4f63;
     color: #dcdde1;
     font-size: 11px;
@@ -849,14 +860,14 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     cursor: pointer;
   }
   .btn-atem-auto:hover {
-    background: linear-gradient(180deg, #2b3b4d, #1c2734);
+    background: linear-gradient(180deg, #3c3c3c, #282828);
     color: #fff;
   }
   .btn-atem-ftb {
     flex: 0.8;
     height: 100%;
-    background: #0f1217;
-    border: 1px solid #2b3543;
+    background: #131313;
+    border: 1px solid #363636;
     color: #ff7675;
     font-size: 9.5px;
     font-weight: 800;
@@ -877,8 +888,8 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     border-radius: 2px !important;
   }
   .strip .mt {
-    background: #07090d !important;
-    border: 1px solid #161d26 !important;
+    background: #0a0a0a !important;
+    border: 1px solid #1e1e1e !important;
   }
   .strip .mt::after {
     background: linear-gradient(to top, #00e676 0 68%, #ffd32a 68% 86%, #ff3838 86%) !important;
@@ -916,7 +927,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   <header class="studio-topbar" id="studio-topbar">
     <div class="brand-box">
       <span class="dot-live"></span>
-      <span class="brand-title">3Mix <b>PRO</b></span>
+      <img class="brand-logo" src="/img/3mix-logo.png" alt="3Mix Pro">
       <span class="brand-badge">BROADCAST SUITE</span>
     </div>
 
@@ -979,17 +990,14 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       <button class="topbar-pill" data-a="preflight" title="🛡️ Pre-Flight Check: Auditoria em tempo real de hardware, encoders e encoders">
         <span class="pill-icon">🛡️</span> PRE-FLIGHT
       </button>
-      <button class="topbar-pill pill-danger" data-a="dump" title="💥 DUMP (Censura): Descarta delay imediatamente até o próximo keyframe">
+      <button class="topbar-pill pill-danger" data-a="dump" data-modulo="broadcastDelay" title="💥 DUMP (Censura): Descarta delay imediatamente até o próximo keyframe">
         <span class="pill-icon">💥</span> DUMP
       </button>
-      <button class="topbar-pill pill-rec" data-a="blackbox_trigger" title="📦 Incident Blackbox: Despeja últimos 60 segundos gravados em disco">
+      <button class="topbar-pill pill-rec" data-a="blackbox_trigger" data-modulo="blackbox" title="📦 Incident Blackbox: Despeja últimos 60 segundos gravados em disco">
         <span class="pill-icon">📦</span> BLACKBOX
       </button>
       <button class="topbar-pill" data-a="open_io" title="🌐 3Mix I/O: Painel standalone de captura NDI / OMT / SRT">
         <span class="pill-icon">🌐</span> 3MIX I/O
-      </button>
-      <button class="topbar-pill pill-accent" data-a="modular" title="🎛️ Modular Studio: Interface desacoplada multijanela">
-        <span class="pill-icon">🎛️</span> MODULAR
       </button>
     </div>
   </header>
@@ -1089,7 +1097,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
 
     <div style="display:flex; align-items:center; gap:6px;">
       <button class="btn-atem-ftb" data-a="trans_ftb" title="Fade to Black (FTB) de Emergência" style="height:22px; padding:0 10px;">FTB</button>
-      <button class="b" data-a="pop" data-v="overlay" style="height:22px; font-size:10px;" title="Configuração completa de Overlays">Mais...</button>
+      <button class="b" data-a="pop" data-v="overlay" style="height:22px; font-size:10px;" title="Ações rápidas de Overlays; o DSK completo abre pelo botão do dock ou pelo botão desta janela">Mais...</button>
     </div>
   </div>
 
@@ -1103,9 +1111,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     <div class="splitter-v" id="splitter-side" title="Arraste para redimensionar o painel lateral"></div>
     <div class="side-panel on" id="side-panel">
       <div class="side-panel-header" draggable="true" data-module-drag="audio" title="Arraste este cabeçalho sobre Fontes para trocar os módulos de lado">
-        <button class="side-undock-btn" id="side-undock-btn" data-a="undock_side" title="Destacar em janela separada flutuante (📌 Undock para segundo monitor)">📌</button>
-        <button class="side-undock-btn" data-a="dockwin" title="Abrir a janela completa do módulo mostrado (Replay, Áudio, Playlist, DSK, Rundown)" aria-label="Abrir a janela completa">⛶</button>
-        <div class="side-tabs" id="side-tabs"></div>
+        <div class="side-tabs" id="side-tabs"></div><span class="dock-tools"><button class="side-undock-btn" id="side-undock-btn" data-a="undock_side" data-v="0" title="Destacar em outra janela e tirar da mesa" aria-label="Destacar"><svg viewBox="0 0 24 24"><path d="M9 3h6l-1 7 4 4H6l4-4-1-7Z"/><path d="M12 14v7"/></svg></button><button class="side-undock-btn" data-a="dockwin" data-v="0" title="Abrir a janela completa deste módulo" aria-label="Janela completa"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button><button class="side-undock-btn" data-a="dockconfig" data-v="0" title="Escolher as abas desta dock" aria-label="Abas da dock"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></button><button class="side-undock-btn dock-fechar" data-a="dock_close" data-v="0" title="Fechar esta dock" aria-label="Fechar dock"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></span>
       </div>
       <div class="side-panel-body">
         <div class="side-view" id="view-mixer">
@@ -1115,19 +1121,23 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
         <div class="side-view" id="view-replay" style="display:none"></div>
         <div class="side-view" id="view-list" style="display:none"></div>
         <div class="side-view" id="view-rundown" style="display:none"></div>
+        <div class="side-view" id="view-ptz" style="display:none"></div>
+        <div class="dock-empty" id="dock-empty-0" hidden>Nenhuma aba nesta dock.<button class="b" data-a="dockconfig" data-v="0">Escolher abas</button></div>
       </div>
     </div>
+    <div class="splitter-v splitter-dock2" id="splitter-dock2" title="Arraste para dividir as docks. Dois cliques: metade para cada."></div>
     <div class="side-panel" id="side-panel-2" aria-label="Segundo dock de operação">
       <div class="side-panel-header">
-        <button class="side-undock-btn" data-a="dock2_close" title="Fechar o segundo dock">×</button>
-        <div class="side-tabs" id="side-tabs-2"></div>
+        <div class="side-tabs" id="side-tabs-2"></div><span class="dock-tools"><button class="side-undock-btn" data-a="undock_side" data-v="1" title="Destacar em outra janela e tirar da mesa" aria-label="Destacar"><svg viewBox="0 0 24 24"><path d="M9 3h6l-1 7 4 4H6l4-4-1-7Z"/><path d="M12 14v7"/></svg></button><button class="side-undock-btn" data-a="dockwin" data-v="1" title="Abrir a janela completa deste módulo" aria-label="Janela completa"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button><button class="side-undock-btn" data-a="dockconfig" data-v="1" title="Escolher as abas desta dock" aria-label="Abas da dock"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></button><button class="side-undock-btn dock-fechar" data-a="dock_close" data-v="1" title="Fechar esta dock" aria-label="Fechar dock"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></span>
       </div>
-      <div class="side-panel-body" id="side-body-2"></div>
+      <div class="side-panel-body" id="side-body-2">
+        <div class="dock-empty" id="dock-empty-1" hidden>Nenhuma aba nesta dock.<button class="b" data-a="dockconfig" data-v="1">Escolher abas</button></div>
+      </div>
     </div>
-    <div class="mid-empty" id="mid-empty" aria-live="polite">Módulos fechados. Reabra pelo rodapé: Entradas · Dock · +Dock.</div>
+    <div class="mid-empty" id="mid-empty" aria-live="polite"><b>Nada aberto na mesa</b><span><button class="b" data-a="ui_toggle" data-v="inputs">Abrir entradas</button><button class="b" data-a="ui_toggle" data-v="dock">Abrir dock</button><button class="b" data-a="ui_reset">Voltar ao padrão</button></span></div>
   </div>
   <div class="bot" id="bot"></div>
-  <div class="stat" id="stat-bar"><div class="stat-info" id="stat"></div><div class="view-toggles" id="view-toggles" aria-label="Mostrar ou ocultar módulos"></div></div>
+  <div class="stat" id="stat-bar"><div class="stat-info" id="stat"></div><div class="estado-ar" id="estado-ar" role="status" aria-label="O que está no ar"></div><div class="view-toggles" id="view-toggles" aria-label="Mostrar ou ocultar módulos"></div></div>
   <div class="pop" id="pop"></div>
   <div id="operation-status" hidden style="position:fixed;top:4px;left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 24px);box-sizing:border-box;z-index:2000;background:#27313c;color:white;padding:6px;border:1px solid #8aa1b7">Comando aguardando confirmação · <button data-a="operationcheck">Conferir motor</button> <button id="operation-release" data-a="operationrelease" hidden>Liberar controles sem repetir</button></div>
   <div id="input-editor-status" role="status" hidden style="position:fixed;bottom:46px;left:12px;right:12px;z-index:1999;background:#27313c;color:white;padding:8px;border:1px solid #8aa1b7"><span id="input-editor-message"></span> <button data-a="editorcheck">Conferir janela</button> <button data-a="editorrelease">Liberar controle sem repetir</button> <button data-a="editordismiss">Ocultar aviso</button></div>
@@ -1135,6 +1145,8 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
 
 <script src="local.js"></script>
 <script src="remoto/replay-dock.js"></script>
+<script src="remoto/ptz-hold.js?v=20261031f"></script>
+<script src="remoto/ptz-compact.js?v=20261101a"></script>
 <script src="gc/catalogo.js"></script>
 <script src="gc/catalogo-biblioteca.js"></script>
 <script src="remoto/codecs-mesa.js"></script>
@@ -1233,6 +1245,19 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     { id: "ReplayMarkOut", label: "Replay Mark OUT (Ponto final)", needTarget: false },
   ];
 
+  const DOCK_TABS_PADRAO = [["list", "mixer", "dsk", "rundown", "ptz"], ["replay"]];
+  const DOCK_TABS_LEGACY_3_3 = [["list", "mixer", "ptz"], ["replay", "dsk", "rundown"]];
+  function dockTabsIniciais() {
+    const salvo = store.get("mesa.dockTabs", null);
+    if (!salvo) return DOCK_TABS_PADRAO;
+    if (JSON.stringify(salvo) === JSON.stringify(DOCK_TABS_LEGACY_3_3) && !store.get("mesa.dockTabsMigrated", false)) {
+      store.set("mesa.dockTabs", DOCK_TABS_PADRAO);
+      store.set("mesa.dockTabsMigrated", true);
+      return DOCK_TABS_PADRAO;
+    }
+    return salvo;
+  }
+
   const st = {
     on: false, why: "conectando…", studio: true, scenes: [], program: "", preview: "", transitions: [], cur: "",
     rec: false, stream: false, vcam: false, recTc: "", streamTc: "", video: null, stats: null, kinds: [],
@@ -1240,8 +1265,9 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     sideTab: store.get("mesa.sidetab", "mixer"), rpPage: 1, plAutoNext: store.get("mesa.pl_autonext", true), plLoop: store.get("mesa.pl_loop", true),
     uiPv: store.get("mesa.ui_pv", true) !== false, uiPgm: store.get("mesa.ui_pgm", true) !== false,
     uiBanksBottom: store.get("mesa.ui_banks_bottom", false) === true, uiInputs: store.get("mesa.ui_inputs", true) !== false,
-    uiDock2: store.get("mesa.ui_dock2", false) === true, side2Tab: store.get("mesa.side2tab", "replay"),
-    minimized: {}, showSpeed: store.get("mesa.showSpeed", {}), inputSpeed: store.get("mesa.inputSpeed", {}), sideWidth: store.get("mesa.sidewidth", null),
+    uiDock2: store.get("mesa.ui_dock2", false) === true, uiDock1Off: store.get("mesa.ui_dock1_off", false) === true, dockSplit: clamp(Number(store.get("mesa.docksplit", 0.5)) || 0.5, 0.05, 0.95), side2Tab: store.get("mesa.side2tab", "replay"),
+    dockTabs: dockTabsIniciais(),
+    minimized: {}, showSpeed: store.get("mesa.showSpeed", {}), inputSpeed: store.get("mesa.inputSpeed", {}), sideWidth: store.get("mesa.sidewidth", null), side2Width: store.get("mesa.side2width", null),
     dskAssign: store.get("mesa.dskAssign", {}), dskPending: {}, dskReplaceReady: {}, dskMenu: null, dskTransitions: store.get("mesa.dskTransitions", {}), dskTransition: store.get("mesa.dskTransition", { name: "", duration: 500 }),
     shortcuts: store.get("mesa.shortcuts", DEFAULT_SHORTCUTS), capturingShortcut: false, capturedKey: null,
     inputHealth: null, outputWatchdog: null, inputHealthSnapshot: {},
@@ -1289,7 +1315,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   const uncertainRequest = (message, type) => Object.assign(new Error(message), {code:'FREEMIX_WS_UNCERTAIN', uncertain:true, requestType:type});
   const rejectMesaRequests = message => { for (const entry of pending.values()) entry.rej(uncertainRequest(message, entry.type)); };
   const req = (type, data) => new Promise((res, rej) => {
-    if (mesaDisposed || !st.on) return rej(new Error('FreeMix sem conexão com o motor'));
+    if (mesaDisposed || !st.on) return rej(new Error('3Mix sem conexão com o motor'));
     const id = String(++seq);
     let timer = null;
     const finish = (error, value) => {
@@ -1382,6 +1408,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       return result;
     }catch(error){if(operation&&operationalPending)toast('Confirmação pendente. Use Conferir motor; o comando não será repetido.',true);throw error;}
   }
+  window.ThreeMixStripHost={executeMain:(command,input)=>productionAction(command==='take'?'transition':command,{...(input?{input}:{} )}),apiBase:new URL('.',replayUrl).href};
   let replayBusy = false, replayPolling = false;
   function applyReplay(data) {
     const cams = data.rec && data.session ? data.session.cams.map((c) => c.name) : st.rpDisk.cams;
@@ -1409,7 +1436,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       if (!quiet) toast(({ start: "Gravação SSD confirmada", stop: "Gravação SSD parada", capture: "Vídeo do lance salvo", "mark-in": "IN marcado na gravação", "mark-out": "Vídeo do lance salvo", load: "Lance pronto e pausado no Preview", air: "Replay no ar", live: "Retorno ao vivo confirmado", delete: "Lance removido da lista", seek: "Posição aplicada", frame: "Quadro ajustado", speed: "Velocidade aplicada", retention: "Retenção atualizada", audio: "Áudio do replay atualizado", reorder: "Playlist reordenada", link: "Vínculo A/B atualizado", unload: "Player liberado" })[action] || "Replay atualizado");
       return result.replay;
     } catch (e) {
-      const message = e instanceof TypeError ? "Servidor de replay indisponível. Abra pelo atalho FreeMix para iniciar o ajudante." : e.message;
+      const message = e instanceof TypeError ? "Servidor de replay indisponível. Abra pelo atalho 3Mix para iniciar o ajudante." : e.message;
       if (e instanceof TypeError || /indisponível|Failed to fetch|fetch failed|TimeoutError/i.test(message)) {
         st.rpError = message;
         if (dockShows("replay")) renderSideReplay();
@@ -1443,7 +1470,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   });
   setInterval(replayPoll, 1500);
 
-  const setScenes = (list) => { st.sceneKeys=Object.fromEntries(list.map(s=>[s.sceneName,s.sceneUuid]));st.scenes = list.slice().sort((a, b) => b.sceneIndex - a.sceneIndex).map((s) => s.sceneName).filter((n) => n !== BUS_SCENE && !n.startsWith("FreeMix Slot ")); };
+  const setScenes = (list) => { st.sceneKeys=Object.fromEntries(list.map(s=>[s.sceneName,s.sceneUuid]));st.scenes = list.slice().sort((a, b) => b.sceneIndex - a.sceneIndex).map((s) => s.sceneName).filter((n) => n !== BUS_SCENE && !n.startsWith("FreeMix Slot ") && !/^FreeMix Mix \d+ Output$/.test(n)); };
   async function syncScenes() {
     const r = await req("GetSceneList");
     setScenes(r.scenes); st.program = r.currentProgramSceneName || ""; st.preview = r.currentPreviewSceneName || "";
@@ -1475,6 +1502,10 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       if (JSON.stringify(k) !== JSON.stringify(st.keyers)) { st.keyers = k; updateDskDisplay(); renderTiles(); if (st.pop === "overlay") renderPop(); if (dockShows("dsk")) renderSideDsk(); } else { updateDskDisplay(); }
     } catch { if (st.keyers !== null) { st.keyers = null; renderTiles(); } }
   }
+  // Keep the dock DSK in sync when another window (the full /overlays) changes a keyer.
+  setInterval(() => {
+    if (st.on && dockShows("dsk") && !Object.keys(st.dskPending || {}).length && !document.activeElement?.closest?.("#view-dsk")) syncKeyers().catch(() => {});
+  }, 3000);
   // What each entry (scene) holds: media sources for Loop, audio sources for Audio, the recording filter for MultiCorder.
   let itemsReadTask = null, itemsReadAgain = false, itemsReadVersion = 0;
   function syncItems() {
@@ -1548,8 +1579,19 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     await syncKeyers();
     if (st.keyers && st.keyers.length < 8) { for (let n = st.keyers.length + 1; n <= 8; n++) await vendor("add_downstream_keyer", { dsk_name: String(n) }).catch(() => {}); await sleep(800); await syncKeyers(); }
     await syncItems(); st.stats = await tryReq("GetStats"); await busCheck(); await syncRet(); await syncDest();
+    await syncModulos();
     renderAll();
   }
+  // Módulos opcionais em standby: lê uma vez por conexão. Fail-open — qualquer erro de
+  // rede/parse mantém todos os módulos ativos (nunca esconde um botão por falha de rede).
+  async function syncModulos() {
+    try {
+      const r = await fetch(new URL('/api/modulos', replayUrl).href, { cache: 'no-store', signal: AbortSignal.timeout(5000) });
+      const d = await r.json();
+      st.modulos = (r.ok && d.success && d.modulos) ? d.modulos : null;
+    } catch { st.modulos = null; }
+  }
+  const moduloAtivo = (id) => !st.modulos || st.modulos[id] !== false;
   function onEvent(type, d) {
     if(type==='CustomEvent'&&d.freemix?.workspace){receiveMesaWorkspace(d.freemix.workspace);return;}
     if (type === "CustomEvent") { const f = d.freemix; if(f&&new URLSearchParams(location.search).has('pop')&&(f.open||f.do))return; if (f && f.open === "config") openPop('settings'); else if (f && f.open) { st.pop = null; st.popAt = { x: innerWidth, y: 0 }; openPop(f.open, f.arg || undefined); } else if (f && f.do && A["top_" + f.do]) A["top_" + f.do](); return; } // pedido vindo da barra de cima
@@ -1772,7 +1814,12 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   const run = (p) => p?.catch?.((e) => toast(e.message, true));
   let inputEditorController;
   const editorContext=()=>({on:st.on&&!mesaDisposed,scope:st.preset,connection:ws,sceneKeys:st.sceneKeys,items:st.items});
-  const sceneButtonIdentity=d=>window.FreeMixInputEditors?.sceneMatches(editorContext(),{owner:d.v,ownerKey:d.ownerKey,scope:d.scope});
+  const sceneButtonIdentity=d=>window.FreeMixInputEditors?.sceneMatches(editorContext(),{owner:d.owner||d.v,ownerKey:d.ownerKey,scope:d.scope});
+  async function refreshSceneIdentity(d){
+    try{await syncScenes();await syncItems();}catch{}
+    const owner=d.owner||d.v;
+    return {...d,ownerKey:st.sceneKeys[owner]||d.ownerKey||'',scope:st.preset ?? d.scope};
+  }
   const sceneButtonAttrs=n=>`data-owner-key="${esc(st.sceneKeys[n]||'')}" data-scope="${esc(st.preset||'')}"`;
   function editorController(){
     if(inputEditorController)return inputEditorController;
@@ -1782,8 +1829,14 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       region.querySelector('[data-a="editordismiss"]').hidden=s.pending;
     }});return inputEditorController;
   }
-  function openInputEditor(d,kind){
-    const target={kind,key:d.sourceKey,name:d.v,owner:d.owner,ownerKey:d.ownerKey,scope:d.scope};
+  async function openInputEditor(d,kind){
+    let target={kind,key:d.sourceKey,name:d.v,owner:d.owner,ownerKey:d.ownerKey,scope:d.scope};
+    if(!sceneButtonIdentity(target)){
+      target=await refreshSceneIdentity(target);
+      if(!target.key){const row=(st.items.get(d.owner)||[]).find(s=>s.name===d.v);target.key=row?.key||'';}
+    }
+    if(!target.key){toast('A fonte '+d.v+' não tem UUID confirmado no motor. Atualize a mesa e tente de novo.',true);return;}
+    if(!sceneButtonIdentity(target)){toast('A cena '+d.owner+' não está confirmada no motor. Atualize a mesa e tente de novo.',true);return;}
     closePop();run(editorController().open(target));
   }
 
@@ -1819,6 +1872,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
         const target = st.preview || st.scenes[0];
         if (!target) return toast("Nenhuma cena selecionada para o DSK", true);
         await gcEnter(target);
+        await vendor("dsk_add_scene", { dsk_name: st.keyers[k].name, scene: target }).catch(() => {});
         await vendor("dsk_select_scene", { dsk_name: st.keyers[k].name, scene: target });
         toast(`DSK ${k + 1} no ar: ${target}`);
       }
@@ -1827,8 +1881,10 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     })()),
     dsk_auto: (d) => run((async () => {
       const k = +d.k;
-      toast(`DSK ${k + 1}: Transição Auto`);
-      await A.dsk_take(d);
+      if (!st.keyers?.[k]) return;
+      if (!dskOnAir(k) && !dskAssigned(k)) return toast(`DSK ${k + 1} está sem fonte. Escolha uma fonte no dock.`, true);
+      if (dskOnAir(k)) await dskExit(k); else await dskEnter(k);
+      toast(`DSK ${k + 1}: transição aplicada`);
     })()),
     trans_cut: () => run((async () => {
       await productionAction(st.studio?'cut':'active',{input:previewTakeInput()});
@@ -1925,7 +1981,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     ovoff: (d) => run((async () => { await gcLeave(st.keyers[+d.k].scene); await vendor("dsk_select_scene", { dsk_name: st.keyers[+d.k].name, scene: "" }); await sleep(120); await syncKeyers(); })()),
     loop: (d) => run((async () => { for (const i of (st.items.get(d.v) || []).filter((i) => isMedia(i.kind))) await req("SetInputSettings", { inputName: i.name, inputSettings: { [loopKey(i.kind)]: !st.loop.get(i.name) } }); await syncItems(); })()),
     audio: (d) => run(productionAction("audio_mute",{input:d.v})),
-    closeask: (d) => {if(st.locked)return A.lockmsg();if(!sceneButtonIdentity(d))return toast("Esta entrada mudou. Abra a confirmação novamente.",true);st.closeTarget={key:d.ownerKey,name:d.v,scope:d.scope};openPop("close",d.v);},
+    closeask: async (d) => {if(st.locked)return A.lockmsg();let target=d;if(!sceneButtonIdentity(target))target=await refreshSceneIdentity(target);if(!sceneButtonIdentity(target))return toast('A cena '+d.v+' não está confirmada no motor. Atualize a mesa e tente de novo.',true);st.closeTarget={key:target.ownerKey,name:target.v,scope:target.scope};openPop('close',target.v);},
     closego: () => {const target=st.closeTarget;if(!target?.key)return toast("Entrada não identificada. Abra a confirmação novamente.",true);closePop();run(productionAction("input_remove",{input:target.key,expectedScope:target.scope}));},
     isotoggle: (d) => { const sel = new Set(st.isoSel); sel.has(d.v) ? sel.delete(d.v) : sel.add(d.v); st.isoSel = [...sel]; store.set("mesa.iso", st.isoSel); renderPop(); },
     multicorder: () => { if ([...st.iso.values()].some(Boolean)) return A.isostop(); if (!st.isoSel.some((n) => st.scenes.includes(n))) return openPop("iso"); A.isostart(); },
@@ -2059,6 +2115,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       if (!discovered.success || !discovered.settings) throw Error(discovered.error || "Não foi possível descobrir os codificadores do motor");
       st.cfg = { simple, cat, server: sv.streamServiceSettings.server || "", key: sv.streamServiceSettings.key || "", dir: dir.recordDirectory, fmt: fmt || "mkv", fname, quality: quality || "Stream", recEnc: recEnc || "x264", strEnc: strEnc || "x264", vbit: vbit || "2500", abit: abit || "160", res: `${v.baseWidth}x${v.baseHeight}`, fps: `${v.fpsNumerator}/${v.fpsDenominator}` };
       Object.assign(st.cfg, {capabilities: discovered.settings.capabilities, protocol: discovered.settings.protocol === "native" && !st.cfg.server ? "rtmp" : discovered.settings.protocol, enhancedRtmp: false});
+      st.cfgBase = { ...st.cfg };
       if (["recset", "streamset", "config"].includes(st.pop)) renderPop();
     })()),
     cfggrab: () => { const c = st.cfg; if (!c) return; for (const [id, key] of [["cf-dir", "dir"], ["cf-fname", "fname"], ["cf-res", "res"], ["cf-fps", "fps"], ["cf-q", "quality"], ["cf-renc", "recEnc"], ["cf-senc", "strEnc"], ["cf-vbit", "vbit"], ["cf-abit", "abit"], ["cf-server", "server"], ["cf-key", "key"]]) { const el = $(id); if (el) c[key] = el.value; } },
@@ -2080,9 +2137,25 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       if (!c.server.trim()) return toast("Informe a URL do servidor", true);
       if (!c.simple) return toast("Este perfil usa saída avançada; ajuste-o nas configurações completas do OBS", true);
       c.enhancedRtmp = $("cf-enhanced")?.checked === true;
-      const result = await productionAction("settings_apply", window.FreeMixMesaCodecs.streaming(c));
+      const payload = window.FreeMixMesaCodecs.streaming(c), base = st.cfgBase || {};
+      const basePayload = window.FreeMixMesaCodecs.streaming(base);
+      const keyChanged = String(base.key ?? "") !== String(c.key ?? "");
+      const otherChanged = ["protocol", "server", "bitrate", "audioBitrate", "encoder", "enhancedRtmp"].some((k) => String(basePayload[k] ?? "") !== String(payload[k] ?? ""));
+      if (!keyChanged && !otherChanged) { toast("Nada mudou na transmissão."); await finishInputPanel(); return; }
+      const onlyKey = keyChanged && !otherChanged;
+      if (onlyKey && c.key.trim()) {
+        const saved = await productionAction("settings_stream_key", { category: "streaming", key: c.key });
+        if (!saved.success) throw Error(saved.error || "O motor não confirmou a chave");
+        st.cfgBase = { ...c };
+        toast("Chave da transmissão salva. Vale no próximo início.");
+        await finishInputPanel();
+        return;
+      }
+      const result = await productionAction("settings_apply", payload);
       if (!result.success) throw Error(result.error || "O motor não confirmou as configurações");
-      closePop(); toast("Transmissão configurada");
+      st.cfgBase = { ...c };
+      toast("Transmissão configurada");
+      await finishInputPanel();
     })()),
     streamstatus: () => run((async () => { const s = await req("GetStreamStatus"); $("st-status").textContent = s.outputActive ? `No ar há ${s.outputTimecode.slice(0, 8)} · ${(s.outputBytes / 1048576).toFixed(1)} MB enviados · ${s.outputSkippedFrames} de ${s.outputTotalFrames} quadros perdidos${s.outputReconnecting ? " · reconectando" : ""}` : "Transmissão parada."; })()),
     cfgvideo: () => run((async () => { const [w, h] = $("cf-res").value.split("x").map(Number), [n, den] = $("cf-fps").value.split("/").map(Number); await req("SetVideoSettings", { baseWidth: w, baseHeight: h, outputWidth: w, outputHeight: h, fpsNumerator: n, fpsDenominator: den }); st.video = await req("GetVideoSettings"); renderStat(); closePop(); toast("Vídeo configurado"); })()),
@@ -2135,7 +2208,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       const c = await req("GetSceneCollectionList"); st.preset = c.currentSceneCollectionName;
       // Saving makes the preset as it is now the state that "discard changes" goes back to on exit.
       const r = await tryReq("CallVendorRequest", { vendorName: "freemix", requestType: "save_preset", requestData: {} });
-      toast(r?.responseData?.success ? `Preset "${st.preset}" está gravado` : `Preset "${st.preset}" está gravado: o FreeMix grava cada alteração na hora`);
+      toast(r?.responseData?.success ? `Preset "${st.preset}" está gravado` : `Preset "${st.preset}" está gravado: o 3Mix grava cada alteração na hora`);
     })()),
     top_presetlast: () => run((async () => {
       if (st.locked) return A.lockmsg();
@@ -2160,7 +2233,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       const now = (await req("GetSceneList")).scenes.length;
       if (now >= before && now > 1) return toast(`Preset salvo como "${name}"`);
       await req("SetCurrentSceneCollection", { sceneCollectionName: from });
-      toast("A cópia ficou vazia: o ajudante do FreeMix não respondeu. Abra o programa pelo atalho Iniciar Mesa.", true);
+      toast("A cópia ficou vazia: o ajudante do 3Mix não respondeu. Abra o programa pelo atalho Iniciar Mesa.", true);
     })()),
     viewlist: () => { st.listMode = !st.listMode; document.body.classList.toggle("list", st.listMode); store.set("mesa.list", st.listMode); renderBot(); },
     viewsize: () => setInputCardWidth(inputCardWidth >= 260 ? 140 : inputCardWidth + 40),
@@ -2325,45 +2398,61 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     audiobuses: () => run(launchPanel('audiobuses')),
     // The current desk is the workspace. Do not replace the working native desk with the demo page.
     modular: () => run(launchPanel('workspace')),
-    showmodules: () => { st.mixer = true; store.set("mesa.mixer", true); renderTabs(); applyUiLayout(); renderSideDock(); },
+    showmodules: () => { st.mixer = true; st.uiDock1Off = false; store.set("mesa.mixer", true); renderTabs(); applyUiLayout(); renderSideDock(); },
     studio: () => run(req("SetStudioModeEnabled", { studioModeEnabled: !st.studio })),
     tagfilter: (d) => {st.tagFilter=st.tagFilter===d.v?"":d.v;st.filter=-1;renderTabs();renderTiles();},
     filter: (d) => { st.filter = +d.v; st.tagFilter="";renderTabs(); renderTiles(); },
     mixer: () => { st.mixer = !st.mixer; store.set("mesa.mixer", st.mixer); renderTabs(); renderSideDock(); },
+    dockconfig: (d) => openPop("dockconfig", d.v),
+    dockassign: (d) => {
+      enforceDockTabOwnership();
+      if (!DOCK_TAB_DEFS.some(t => t[0] === d.v)) return;
+      st.dockTabs = st.dockTabs.map(tabs => tabs.filter(t => t !== d.v));
+      if (["0", "1"].includes(d.k)) st.dockTabs[Number(d.k)].push(d.v);
+      persistUiLayout(); renderTabs(); applyUiLayout(); renderSideDock(); renderPop();
+    },
+    dockorder: (d) => {
+      enforceDockTabOwnership();
+      const tabs = st.dockTabs[Number(st.popArg)], i = tabs?.indexOf(d.v), next = i + Number(d.k);
+      if (!tabs || i < 0 || next < 0 || next >= tabs.length) return;
+      [tabs[i], tabs[next]] = [tabs[next], tabs[i]];
+      persistUiLayout(); renderTabs(); applyUiLayout(); renderSideDock(); renderPop();
+    },
     sidetab: (d) => {
-      if (document.body.classList.contains('side-popup')) { st.mixer=true;st.sideTab=d.v; persistUiLayout(); renderTabs(); applyUiLayout(); renderSideDock(); return; }
-      if (st.uiDock2) {
-        // cada aba vive em um dock só: a aba do segundo dock não fica no primeiro
-        if (st.side2Tab === d.v) st.mixer = true;
-        else { st.mixer = true; st.sideTab = d.v; }
-      }
-      else if (st.mixer && st.sideTab === d.v) st.mixer = false;
-      else { st.mixer = true; st.sideTab = d.v; }
+      enforceDockTabOwnership();
+      if (!st.dockTabs[0].includes(d.v)) return;
+      st.mixer = true; st.uiDock1Off = false; st.sideTab = d.v;
       persistUiLayout(); renderTabs(); applyUiLayout(); renderSideDock();
+      if (d.v === "dsk") syncKeyers();
     },
     ui_toggle: (d) => {
       if (d.v === 'pv') st.uiPv = !st.uiPv;
       else if (d.v === 'pgm') st.uiPgm = !st.uiPgm;
       else if (d.v === 'inputs') st.uiInputs = !st.uiInputs;
       else if (d.v === 'dock') {
-        st.mixer = !st.mixer;
+        if (st.mixer && !st.uiDock1Off) return A.dock_close({ v: 0 });
+        abrirDock(0);
       }
       else if (d.v === 'dock2') {
-        st.uiDock2 = !st.uiDock2;
-        if (st.uiDock2) {
-          st.mixer = true;
-          const from = st.sideTab || "mixer";
-          st.side2Tab = from;
-          st.sideTab = ["mixer", "list", "dsk", "rundown", "replay"].find((t) => t !== from) || "mixer";
-        }
+        if (st.mixer && st.uiDock2) return A.dock_close({ v: 1 });
+        abrirDock(1);
       }
       else if (d.v === 'bankspos') st.uiBanksBottom = !st.uiBanksBottom;
       persistUiLayout();
       renderTabs(); applyUiLayout(); renderSideDock();
     },
+    dock_close: (d) => {
+      if (Number(d.v) === 1) {
+        st.uiDock2 = false;
+        if (st.uiDock1Off) { st.uiDock1Off = false; st.mixer = false; }
+      } else if (st.uiDock2 && st.mixer && !st.uiDock1Off) st.uiDock1Off = true;
+      else { st.mixer = false; st.uiDock1Off = false; st.uiDock2 = false; }
+      persistUiLayout(); renderTabs(); applyUiLayout(); renderSideDock();
+    },
     ui_reset: () => {
-      st.uiPv = true; st.uiPgm = true; st.uiBanksBottom = false; st.uiInputs = true; st.uiDock2 = false;
-      st.mixer = true; st.sideTab = store.get("mesa.sidetab", "mixer") || "mixer";
+      st.uiPv = true; st.uiPgm = true; st.uiBanksBottom = false; st.uiInputs = true; st.uiDock2 = false; st.uiDock1Off = false;
+      st.dockTabs = [["list", "mixer", "dsk", "rundown", "ptz"], ["replay"]];
+      st.mixer = true; st.sideTab = "mixer"; st.side2Tab = "replay";
       persistUiLayout(); renderTabs(); applyUiLayout(); renderSideDock();
       toast("Layout de módulos de volta ao padrão");
     },
@@ -2373,42 +2462,35 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       persistUiLayout(); applyUiLayout();
     },
     banks_pos: () => { st.uiBanksBottom = !st.uiBanksBottom; persistUiLayout(); applyUiLayout(); },
-    dock2_open: () => {
-      st.mixer = true;
-      if (!st.uiDock2) {
-        const from = st.sideTab || "mixer";
-        st.uiDock2 = true;
-        st.side2Tab = from;
-        st.sideTab = ["mixer", "list", "dsk", "rundown", "replay"].find((t) => t !== from) || "mixer";
-      }
-      persistUiLayout(); renderTabs(); applyUiLayout(); renderSideDock();
-    },
+    dock2_open: () => { abrirDock(1); persistUiLayout(); renderTabs(); applyUiLayout(); renderSideDock(); },
     dock2tab: (d) => {
-      if (!["mixer", "replay", "list", "dsk", "rundown"].includes(d.v)) return;
-      if (st.side2Tab === d.v) return;
-      const back = st.side2Tab;
-      st.side2Tab = d.v; st.sideTab = back;
+      enforceDockTabOwnership();
+      if (!st.dockTabs[1].includes(d.v)) return;
+      st.side2Tab = d.v;
       persistUiLayout(); renderTabs(); applyUiLayout(); renderSideDock();
+      if (d.v === "dsk") syncKeyers();
     },
     dock2_return: () => A.dock2_close(),
-    dock2_close: () => { st.uiDock2 = false; persistUiLayout(); renderTabs(); applyUiLayout(); renderSideDock(); },
-    undock_side: () => run((async () => {
-      const tab = st.sideTab || "mixer";
+    dock2_close: () => A.dock_close({ v: 1 }),
+    undock_side: (d) => run((async () => {
+      const dock = Number(d?.v) === 1 ? 1 : 0;
+      const tab = (dock ? st.side2Tab : st.sideTab) || "mixer";
       await launchPanel(tab);
       if(tab==='replay')return; // Keep its quick controls on the desk while the full console is open.
-      st.mixer = false;store.set('mesa.mixer',false);
-      renderTabs(); renderSideDock();
+      A.dock_close({ v: dock });
     })()),
     dock_undock: () => A.undock_side(),
-    dockwin: () => {
-      const cur = st.sideTab || "mixer";
-      const id = { mixer: "audio", replay: "replay", rundown: "rundown", list: "playlist" }[cur];
+    dockwin: (d) => {
+      const cur = (Number(d?.v) === 1 ? st.side2Tab : st.sideTab) || "mixer";
+      const id = { mixer: "audio", replay: "replay", rundown: "rundown", list: "playlist", dsk: "dsk", ptz: "ptz" }[cur];
       if (!id) return toast("Este módulo não tem janela própria; abra pelas abas de cima.");
       run(launchPanel(id));
     },
-    minimizetoggle: (d) => {
-      if(!sceneButtonIdentity(d))return toast("Esta entrada mudou. Atualize o cartão antes de recolher.",true);
-      st.minimized = st.minimized || {}; st.minimized[d.v] = !st.minimized[d.v];
+    dsk_full: () => run(launchPanel("dsk")),
+    minimizetoggle: async (d) => {
+      let target=d;if(!sceneButtonIdentity(target))target=await refreshSceneIdentity(target);
+      if(!sceneButtonIdentity(target))return toast('A cena '+d.v+' não está confirmada no motor. Atualize a mesa e tente de novo.',true);
+      st.minimized = st.minimized || {}; st.minimized[target.v] = !st.minimized[target.v];
       store.set("mesa.minimized", st.minimized); renderTiles();
       if (st.pop === "menu") renderPop();
       toast(st.minimized[d.v]?"Cartão recolhido. A entrada continua no motor.":"Cartão expandido.");
@@ -2517,9 +2599,10 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       } finally { creatingInput = false; markInputCreating(false); }
     })()); },
     menu: (d) => openPop("menu", d.v),
+    corentrada: (d) => rpDockOpenWindow("/color?input=" + encodeURIComponent(d.v) + "#qualidade"),
     calllink: (d) => run((async () => {
       const id = callIdFromUrl((await req("GetInputSettings", { inputName: d.v })).inputSettings?.url);
-      if (!id) return toast("Esta fonte não é uma chamada FreeMix Call", true);
+      if (!id) return toast("Esta fonte não é uma chamada 3Mix Call", true);
       closePop(); await launchPanel("calls");
     })()),
     copy: (d) => {
@@ -2552,7 +2635,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   let workspaceRevision=0,workspaceLoaded=false,workspaceSaving=false,workspaceSaveTimer=null;
   function receiveMesaWorkspace(value){
     if(!value||!Number.isInteger(value.revision)||value.revision<workspaceRevision||!Number.isInteger(value.cardWidth)||value.cardWidth<120||value.cardWidth>320||typeof value.audioLeft!=='boolean'||typeof value.modulesStacked!=='boolean'||!Number.isInteger(value.sideWidth)||value.sideWidth<0||value.sideWidth>4000)return;
-    workspaceLoaded=false;workspaceRevision=value.revision;setInputCardWidth(value.cardWidth);audioOnLeft=value.audioLeft;modulesStacked=value.modulesStacked;st.sideWidth=value.sideWidth||null;store.set('mesa.sidewidth',st.sideWidth);$('side-panel').style.width=st.sideWidth?st.sideWidth+'px':'';applyModuleLayout();renderSideDock();workspaceLoaded=true;
+    workspaceLoaded=false;if(Array.isArray(value.dockTabs)&&value.dockTabs.length===2){let tabs=value.dockTabs;if(JSON.stringify(tabs)===JSON.stringify(DOCK_TABS_LEGACY_3_3)&&!store.get("mesa.dockTabsMigrated",false)){tabs=DOCK_TABS_PADRAO;store.set("mesa.dockTabs",tabs);store.set("mesa.dockTabsMigrated",true);}st.dockTabs=tabs;enforceDockTabOwnership();store.set("mesa.dockTabs",st.dockTabs);}workspaceRevision=value.revision;setInputCardWidth(value.cardWidth);audioOnLeft=value.audioLeft;modulesStacked=value.modulesStacked;st.sideWidth=value.sideWidth||null;store.set('mesa.sidewidth',st.sideWidth);$('side-panel').style.width=st.sideWidth?st.sideWidth+'px':'';{const sp2=document.getElementById('side-panel-2');if(sp2)sp2.style.width=st.side2Width?st.side2Width+'px':'';}applyModuleLayout();renderSideDock();workspaceLoaded=true;
   }
   async function loadMesaWorkspace(){
     try{const r=await fetch(new URL('/api/workspace',replayUrl),{signal:AbortSignal.timeout(4000)}),v=await r.json();if(!r.ok||!v.success)return;if(v.workspace.exists)receiveMesaWorkspace(v.workspace);else{workspaceRevision=v.workspace.revision;workspaceLoaded=true;}}catch{}
@@ -2561,7 +2644,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     try{
       const current=await fetch(new URL('/api/workspace',replayUrl),{signal:AbortSignal.timeout(4000)}).then(r=>r.json());
       if(!current.success)throw Error(current.error||'Workspace indisponível');
-      const response=await fetch(new URL('/api/workspace',replayUrl),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({expectedRevision:current.workspace.revision,cardWidth:180,audioLeft:false,modulesStacked:false,sideWidth:0}),signal:AbortSignal.timeout(6000)});
+      const response=await fetch(new URL('/api/workspace',replayUrl),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({expectedRevision:current.workspace.revision,cardWidth:180,audioLeft:false,modulesStacked:false,sideWidth:0,dockTabs:[["list","mixer","dsk","rundown","ptz"],["replay"]]}),signal:AbortSignal.timeout(6000)});
       const value=await response.json();if(!response.ok||!value.success)throw Error(value.error||'Layout não confirmado');
       receiveMesaWorkspace(value.workspace);toast('Layout padrão restaurado. Projeto, entradas e áudio preservados.');
     }catch(error){toast(error.message,true);}
@@ -2570,7 +2653,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     if(!workspaceLoaded)return;clearTimeout(workspaceSaveTimer);
     workspaceSaveTimer=setTimeout(async()=>{
       workspaceSaveTimer=null;if(workspaceSaving){queueMesaWorkspaceSave();return;}workspaceSaving=true;
-      const draft={expectedRevision:workspaceRevision,cardWidth:inputCardWidth,audioLeft:audioOnLeft,modulesStacked:modulesStacked,sideWidth:st.sideWidth||0};
+      const draft={expectedRevision:workspaceRevision,cardWidth:inputCardWidth,audioLeft:audioOnLeft,modulesStacked:modulesStacked,sideWidth:st.sideWidth||0,dockTabs:st.dockTabs};
       try{const r=await fetch(new URL('/api/workspace',replayUrl),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(draft),signal:AbortSignal.timeout(5000)}),v=await r.json();if(!r.ok||!v.success){if(Number.isInteger(v.revision))workspaceRevision=v.revision;throw Error(v.error||'Workspace não confirmado');}workspaceRevision=Math.max(workspaceRevision,v.workspace.revision);}
       catch(error){toast(error.message+' A preferência local foi preservada.',true);}finally{workspaceSaving=false;}
     },500);
@@ -2653,9 +2736,9 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       + `<span class="sp"></span>`
       + dockOwned1().map((t) => {
           const on = dockShows(t);
-          const cls = { dsk: "dsk-tab", replay: `rp-tab${st.rpDisk?.rec ? " live" : ""}`, list: "pl-tab", mixer: "mx-tab", rundown: "rd-tab" }[t] || "";
+          const cls = { dsk: "dsk-tab", replay: `rp-tab${st.rpDisk?.rec ? " live" : ""}`, list: "pl-tab", mixer: "mx-tab", rundown: "rd-tab", ptz: "ptz-tab" }[t] || "";
           const badge = t === "replay" ? '<span class="rp-badge">R</span>' : t === "list" ? '<span class="pl-badge">▶</span>' : "";
-          const label = { dsk: "DSK", replay: "Replay", list: "List", mixer: `${SPK} Mixer de áudio`, rundown: "Rundown" }[t];
+          const label = { dsk: "DSK", replay: "Replay", list: "List", mixer: `${SPK} Mixer de áudio`, rundown: "Rundown", ptz: "PTZ" }[t];
           return `<button class="st-tab ${cls}${on ? " on" : ""}" data-a="sidetab" data-v="${t}" title="${DOCK_TAB_DEFS.find((d) => d[0] === t)?.[2] || t}">${badge}${label}</button>`;
         }).join("");
     if(!document.body.classList.contains('popup-mode'))$('tabs').innerHTML+=`<div class="layout-tools"><label>Cards <input id="card-width" type="range" min="120" max="320" step="10" value="${inputCardWidth}" aria-label="Tamanho dos cards de entrada, sem mudar o texto"><span id="card-width-value">${inputCardWidth} px</span></label><button type="button" class="b card-preset${inputCardWidth===140?' on':''}" data-card-size="140">Compacto</button><button type="button" class="b card-preset${inputCardWidth===180?' on':''}" data-card-size="180">Normal</button><button type="button" class="b card-preset${inputCardWidth===240?' on':''}" data-card-size="240">Grande</button><button type="button" class="b" id="swap-modules" title="Trocar Inputs e Áudio de lado">${audioOnLeft?'Áudio ←':'Áudio →'}</button><button type="button" class="b" id="stack-modules" aria-pressed="${modulesStacked}">${modulesStacked?'Lado a lado':'Empilhar'}</button><button type="button" class="b" id="reset-layout" title="Restaurar o layout padrão sem alterar o projeto">Padrão</button></div>`;
@@ -2800,7 +2883,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   }
   const DEST_STATE = { starting: "conectando", live: "NO AR", error: "ERRO" };
   const destTabs = () => [0, 1, 2, 3].map((i) => { const d = st.dest?.[i], n = i + 2;
-    if (!st.dest) return `<button class="off" title="Este executável não tem os destinos extras: instale a compilação atual do FreeMix">${n} · indisponível</button>`;
+    if (!st.dest) return `<button class="off" title="Este executável não tem os destinos extras: instale a compilação atual do 3Mix">${n} · indisponível</button>`;
     const tag = DEST_STATE[d?.state] || (d?.enabled ? "pronto" : d?.server ? "desligado" : "vazio");
     return `<button class="${st.destTab === i + 1 ? "on" : ""}${d?.state === "live" ? " dlive" : d?.state === "error" ? " derr" : ""}" data-a="desttab" data-v="${i + 1}" title="Destino ${n}">${n} · ${esc(d?.name || "Destino " + n)} <small>${tag}</small></button>`; }).join("");
   const destForm = () => { const i = st.destTab - 1, d = st.dest?.[i] || {}, n = i + 2;
@@ -2867,6 +2950,8 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   }
   // Lets the exit animation of the titles of an overlay be seen before the overlay itself is cut.
   const gcLeave = async (scene) => { const names = (st.items.get(scene) || []).filter((i) => st.gcNames.has(i.name)).map((i) => i.name); if (!names.length) return; for (const n of names) await gcEmit("freemix-gc", { name: n, show: false }); await sleep(550); };
+  // Shows the GC titles before the overlay enters, so the first frame is not a blank title.
+  const gcEnter = async (scene) => { const names = (st.items.get(scene) || []).filter((i) => st.gcNames.has(i.name)).map((i) => i.name); if (!names.length) return; for (const n of names) await gcEmit("freemix-gc", { name: n, show: true }); await sleep(300); };
   document.addEventListener("change", (e) => { if (e.target.id === "add-gc") { st.addName = $("add-name")?.dataset.edited ? $("add-name").value : ""; st.gcTpl = e.target.value; renderPop(); } });
   // Categories of inputs: seven colours that may be given names, plus a search by name (filter -2).
   const FIND = `<svg viewBox="0 0 24 24"><path d="M10 3a7 7 0 0 1 5.6 11.2l5 5-1.4 1.4-5-5A7 7 0 1 1 10 3zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10z"/></svg>`;
@@ -2940,37 +3025,47 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   }
 
   function focusDockTab(v) {
-    if (!["mixer", "replay", "list", "dsk", "rundown"].includes(v)) return;
-    st.mixer = true;
-    if (!(st.uiDock2 && st.side2Tab === v)) st.sideTab = v;
+    enforceDockTabOwnership();
+    if (st.dockTabs[0].includes(v)) { st.mixer = true; st.uiDock1Off = false; st.sideTab = v; }
+    else if (st.uiDock2 && st.dockTabs[1].includes(v)) { st.mixer = true; st.side2Tab = v; }
+    else return; // hidden tab: the shortcut has nowhere to show it
     persistUiLayout(); renderTabs(); applyUiLayout(); renderSideDock();
+    if (v === "dsk") syncKeyers();
   }
   function dockShows(tab) {
     if (!st.mixer) return false;
     return st.sideTab === tab || (st.uiDock2 && st.side2Tab === tab);
   }
   function persistUiLayout() {
+    enforceDockTabOwnership();
+    store.set("mesa.dockTabs", st.dockTabs);
     store.set("mesa.ui_pv", st.uiPv);
     store.set("mesa.ui_pgm", st.uiPgm);
     store.set("mesa.ui_banks_bottom", st.uiBanksBottom);
     store.set("mesa.ui_inputs", st.uiInputs);
     store.set("mesa.ui_dock2", st.uiDock2);
+    store.set("mesa.ui_dock1_off", st.uiDock1Off);
     store.set("mesa.side2tab", st.side2Tab);
     store.set("mesa.mixer", st.mixer);
     store.set("mesa.sidetab", st.sideTab);
+    queueMesaWorkspaceSave();
   }
   function placeDockViews() {
     const body1 = document.querySelector("#side-panel .side-panel-body");
     const body2 = $("side-body-2");
     if (!body1 || !body2) return;
-    const views = { mixer: $("view-mixer"), replay: $("view-replay"), list: $("view-list"), dsk: $("view-dsk"), rundown: $("view-rundown") };
+    const views = { mixer: $("view-mixer"), replay: $("view-replay"), list: $("view-list"), dsk: $("view-dsk"), rundown: $("view-rundown"), ptz: $("view-ptz") };
     const t1 = st.sideTab || "mixer";
     const t2 = st.uiDock2 && st.mixer ? st.side2Tab : null;
+    const empty0 = $("dock-empty-0"), empty1 = $("dock-empty-1");
+    if (empty0) empty0.hidden = (st.dockTabs?.[0]?.length || 0) > 0;
+    if (empty1) empty1.hidden = !st.uiDock2 || !st.mixer || (st.dockTabs?.[1]?.length || 0) > 0;
     for (const [tab, view] of Object.entries(views)) {
       if (!view) continue;
-      const target = tab === t2 ? body2 : body1;
+      const target = st.dockTabs?.[1]?.includes(tab) ? body2 : body1;
       if (view.parentElement !== target) target.append(view);
-      view.style.display = tab === t1 || tab === t2 ? "flex" : "none";
+      view.style.display = (st.dockTabs?.[0]?.includes(tab) && tab === t1) || (st.dockTabs?.[1]?.includes(tab) && tab === t2) ? "flex" : "none";
+      if(tab==='ptz'&&(!st.mixer||view.style.display==='none'))ptzCompactSurface?.cancel();
     }
   }
   function renderViewToggles() {
@@ -2980,25 +3075,39 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     box.innerHTML = item(st.uiPv, "ui_toggle", "pv", "PV", "Mostrar ou ocultar a botoeira de Pré-Visualização")
       + item(st.uiPgm, "ui_toggle", "pgm", "PGM", "Mostrar ou ocultar a botoeira de Programa")
       + item(st.uiInputs, "ui_toggle", "inputs", "Entradas", "Mostrar ou ocultar as entradas para o dock ocupar a área")
-      + item(!!st.mixer, "ui_toggle", "dock", "Dock", "Fechar ou abrir o dock de operação (os dois, se o segundo estiver aberto)")
-      + item(!!st.uiDock2 && !!st.mixer, "ui_toggle", "dock2", "+Dock", "Segundo dock: leva a aba atual para ele, o primeiro fica com as restantes")
+      + item(!!st.mixer && !st.uiDock1Off, "ui_toggle", "dock", "Dock 1", "Abrir ou fechar a primeira dock")
+      + item(!!st.uiDock2 && !!st.mixer, "ui_toggle", "dock2", "Dock 2", "Abrir ou fechar a segunda dock")
       + item(st.uiBanksBottom, "ui_toggle", "bankspos", "⇅", "Mover as botoeiras para baixo, antes do rodapé")
       + item(false, "ui_reset", "", "↺", "Voltar ao padrão: botoeiras em cima, entradas visíveis, um só dock");
   }
-  function enforceDockTabOwnership() {
-    const all = ["mixer", "replay", "list", "dsk", "rundown"];
-    if (!["mixer", "replay", "list", "dsk", "rundown"].includes(st.side2Tab)) st.side2Tab = "replay";
-    if (st.uiDock2) {
-      if (st.sideTab === st.side2Tab) {
-        st.sideTab = ["mixer", "list", "dsk", "rundown", "replay"].find((t) => t !== st.side2Tab) || "replay";
-      }
+  // Abre uma dock sem depender da outra. Sem nenhuma aba escolhida, volta às abas padrão: dock aberta nunca fica sem saída.
+  function abrirDock(dock) {
+    enforceDockTabOwnership();
+    if (!st.dockTabs[0].length && !st.dockTabs[1].length) {
+      st.dockTabs = [["list", "mixer", "dsk", "rundown", "ptz"], ["replay"]];
+      st.sideTab = "mixer"; st.side2Tab = "replay";
     }
+    if (dock === 1) {
+      if (!st.mixer) st.uiDock1Off = true;
+      st.mixer = true; st.uiDock2 = true;
+    } else { st.mixer = true; st.uiDock1Off = false; }
+  }
+  function enforceDockTabOwnership() {
+    const all = ["list", "replay", "mixer", "dsk", "rundown", "ptz"];
+    if (!Array.isArray(st.dockTabs) || st.dockTabs.length !== 2) {
+      const second = all.includes(st.side2Tab) ? st.side2Tab : "replay";
+      st.dockTabs = [all.filter(t => t !== second), [second]];
+    }
+    const used = new Set();
+    st.dockTabs = st.dockTabs.map(list => (Array.isArray(list) ? list : []).filter(t => {
+      if (!all.includes(t) || used.has(t)) return false;
+      used.add(t); return true;
+    }));
+    if (!st.dockTabs[0].includes(st.sideTab)) st.sideTab = st.dockTabs[0][0] || "";
+    if (!st.dockTabs[1].includes(st.side2Tab)) st.side2Tab = st.dockTabs[1][0] || "";
     return all;
   }
-  function dockOwned1() {
-    const t2 = st.uiDock2 && st.mixer ? (st.side2Tab || "replay") : null;
-    return ["list", "replay", "mixer", "dsk", "rundown"].filter((t) => t !== t2);
-  }
+  function dockOwned1() { enforceDockTabOwnership(); return st.dockTabs[0]; }
   function applyUiLayout() {
     const body = document.body;
     body.classList.toggle("banks-bottom", !!st.uiBanksBottom);
@@ -3007,6 +3116,8 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     body.classList.toggle("no-banks", !st.uiPv && !st.uiPgm);
     body.classList.toggle("no-inputs", !st.uiInputs);
     body.classList.toggle("dock2", !!st.uiDock2 && !!st.mixer);
+    body.classList.toggle("dock1-off", !!st.uiDock1Off && !!st.mixer);
+    aplicarDivisaoDocks();
     const sp2 = $("side-panel-2");
     if (sp2) sp2.classList.toggle("on", !!st.uiDock2 && !!st.mixer);
     enforceDockTabOwnership();
@@ -3020,41 +3131,50 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     renderViewToggles();
   }
   const DOCK_TAB_DEFS = [
-    ["list", "▶ Playlist", "Playlist / List Editor"],
-    ["replay", "R Replay", "Instant Replay Multi-Câmera Broadcast"],
-    ["mixer", "Mixer de Áudio", "Mixer de Áudio Broadcast"],
-    ["dsk", "DSK / Gráficos", "DSK / Gráficos: oito camadas com fonte, entrar, sair e transição"],
-    ["rundown", "Rundown", "Rundown: roteiro por blocos, preparação e execução confirmada"],
+    ["mixer", "Mixer", "Mixer de áudio"],
+    ["replay", "Replay", "Replay"],
+    ["list", "Playlist", "Playlist"],
+    ["dsk", "DSK", "DSK e gráficos"],
+    ["rundown", "Roteiro", "Roteiro da produção"],
+    ["ptz", "PTZ", "Câmeras PTZ"],
   ];
+  const DOCK_TAB_ICONS = {
+    mixer: '<path d="M6 4v16M12 4v16M18 4v16"/><path d="M4 15h4M10 8h4M16 13h4"/>',
+    replay: '<path d="M4 12a8 8 0 1 0 2.5-5.8L4 8.5"/><path d="M4 4v4.5h4.5"/><path d="m11 9 4 3-4 3V9Z"/>',
+    list: '<path d="M4 6h11M4 12h11M4 18h7"/><path d="m16 15 5 3-5 3v-6Z"/>',
+    dsk: '<rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M6 15h9"/><path d="M6 12h5"/>',
+    rundown: '<rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M9 8h6M9 12h6M9 16h4"/>',
+    ptz: '<rect x="3" y="8" width="13" height="9" rx="1.5"/><path d="m16 11 5-3v9l-5-3"/><path d="M9.5 8V4"/>',
+  };
+  function dockTabHtml(value, on, action, extra = "") {
+    const [, label, title] = DOCK_TAB_DEFS.find((def) => def[0] === value) || [value, value, value];
+    return `<button type="button" class="st-tab${on ? " on" : ""}${extra}" data-a="${action}" data-v="${value}" title="${title}"><svg viewBox="0 0 24 24" aria-hidden="true">${DOCK_TAB_ICONS[value] || ""}</svg><span>${label}</span></button>`;
+  }
   function renderDock1Tabs() {
     const box = $("side-tabs");
     if (!box) return;
     const cur = st.sideTab || "mixer";
-    box.innerHTML = dockOwned1().map((value) => {
-      const [label, title] = DOCK_TAB_DEFS.find((def) => def[0] === value) || [value, value, value];
-      const cls = { list: "pl-tab", replay: "rp-tab", mixer: "mx-tab", dsk: "dsk-tab", rundown: "rd-tab" }[value] || "";
-      const badge = value === "replay" ? '<span class="rp-badge">R</span>' : value === "list" ? '<span class="pl-badge">▶</span>' : "";
-      return `<button type="button" class="st-tab ${cls}${cur === value ? " on" : ""}${value === "replay" && st.rpDisk?.rec ? " live" : ""}" data-a="sidetab" data-v="${value}" title="${title}">${badge}${label}</button>`;
-    }).join("");
+    box.innerHTML = dockOwned1().map((value) => dockTabHtml(value, cur === value, "sidetab", value === "replay" && st.rpDisk?.rec ? " live" : "")).join("");
   }
   function renderDock2Tabs() {
     const box = $("side-tabs-2");
     if (!box) return;
     if (!st.uiDock2 || !st.mixer) { box.innerHTML = ""; return; }
     const owned = DOM_TAB_SAFE(st.side2Tab);
-    box.innerHTML = DOCK_TAB_DEFS.map(([value, label]) => `<button type="button" class="st-tab st2${owned === value ? " on" : ""}" data-a="dock2tab" data-v="${value}" title="${owned === value ? "Aba deste dock" : `Mover ${label} para o segundo dock; a atual volta ao primeiro`}">${label}</button>`).join("")
-      + `<button type="button" class="st-tab st2 d2-return" data-a="dock2_return" title="Devolver a aba ao primeiro dock e fechar o segundo dock">↩</button>`;
+    box.innerHTML = st.dockTabs[1].map((value) => dockTabHtml(value, owned === value, "dock2tab", value === "replay" && st.rpDisk?.rec ? " live" : "")).join("");
   }
-  function DOM_TAB_SAFE(v) { return ["mixer", "replay", "list", "dsk", "rundown"].includes(v) ? v : "replay"; }
+  function DOM_TAB_SAFE(v) { return ["mixer", "replay", "list", "dsk", "rundown", "ptz"].includes(v) ? v : "replay"; }
+  let ptzCompactSurface=null;
   function renderSideDock() {
     const sp = $("side-panel");
     if (!sp) return;
-    sp.classList.toggle("on", !!st.mixer);
+    sp.classList.toggle("on", !!st.mixer && !st.uiDock1Off);
     const sp2 = $("side-panel-2");
     if (sp2) sp2.classList.toggle("on", !!st.uiDock2 && !!st.mixer);
     renderViewToggles();
-    if (!st.mixer) return;
+    if (!st.mixer) { ptzCompactSurface?.cancel(); return; }
     if (st.sideWidth) sp.style.width = st.sideWidth + "px";
+    if (sp2 && st.side2Width) sp2.style.width = st.side2Width + "px";
     const cur = st.sideTab || "mixer";
     const cur2 = st.uiDock2 ? (st.side2Tab || "replay") : null;
 
@@ -3063,11 +3183,18 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       b.classList.toggle("on", isSel);
       if (b.dataset.v === "replay") b.classList.toggle("live", !!st.rpDisk?.rec);
     }
+    renderDock1Tabs();
     renderDock2Tabs();
     placeDockViews();
 
     const vRundown = $("view-rundown");
     const paint = (tab) => {
+      if(tab==='ptz'&&!ptzCompactSurface){
+        ptzCompactSurface=window.mountPTZCompact($('view-ptz'),{
+          base:new URL(replayUrl).origin,
+          inputs:()=>Object.entries(st.sceneKeys||{}).map(([name,key])=>({name,key}))
+        });
+      }
       if (tab === "mixer") renderMixer();
       else if (tab === "replay") renderSideReplay();
       else if (tab === "list") renderSideList();
@@ -3087,22 +3214,25 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   const dskName = (index) => st.keyers?.[index]?.name || String(index + 1);
   const dskAssigned = (index) => st.dskAssign[dskName(index)] || st.keyers?.[index]?.scene || "";
   const dskOnAir = (index) => !!st.keyers?.[index]?.scene;
-  const dskCfg = (index) => st.dskTransitions[dskName(index)] || { effect: st.transitions.find((t) => t.kind === "fade_transition")?.name || "Fade", duration: 500 };
+  const dskCfg = (index) => st.dskTransitions[dskName(index)] || { effect: st.dskTransition?.name || st.transitions.find((t) => t.kind === "fade_transition")?.name || "Fade", duration: Number(st.dskTransition?.duration) || 500 };
   const dskTransition = () => st.dskTransition?.name || st.transitions.find((t) => t.kind === "fade_transition")?.name || "";
   async function dskSetTransition(value) {
     const index = typeof value === "number" ? value : Array.from({ length: 8 }, (_, i) => i).find((i) => dskName(i) === value) ?? 0;
     const cfg = dskCfg(index);
-    await vendor("dsk_set_transition", { dsk_name: dskName(index), transition: cfg.effect, transition_type: "match", transition_duration: Number(cfg.duration) || 500 }).catch(() => {});
+    const effect = cfg.effect || cfg.name || st.dskTransition?.name || st.transitions.find((t) => t.kind === "fade_transition")?.name || "Fade";
+    const duration = Number(cfg.duration ?? st.dskTransition?.duration) || 500;
+    await vendor("dsk_set_transition", { dsk_name: dskName(index), transition: effect, transition_type: "match", transition_duration: duration }).catch(() => {});
   }
   function dskSave() {
-    store.set("mesa.dskAssign", st.dskAssign); store.set("mesa.dskTransitions", st.dskTransitions);
-    tryReq("SetPersistentData", { realm: "OBS_WEBSOCKET_DATA_REALM_GLOBAL", slotName: "3mix_dsk_assignments", slotValue: { assign: st.dskAssign, transitions: st.dskTransitions } });
+    store.set("mesa.dskAssign", st.dskAssign); store.set("mesa.dskTransitions", st.dskTransitions); store.set("mesa.dskTransition", st.dskTransition);
+    tryReq("SetPersistentData", { realm: "OBS_WEBSOCKET_DATA_REALM_GLOBAL", slotName: "3mix_dsk_assignments", slotValue: { assign: st.dskAssign, transitions: st.dskTransitions, transition: st.dskTransition } });
   }
   async function dskLoadShared() {
     const result = await tryReq("GetPersistentData", { realm: "OBS_WEBSOCKET_DATA_REALM_GLOBAL", slotName: "3mix_dsk_assignments" });
     const value = result?.slotValue;
     if (!value || typeof value !== "object") return;
     if (value.assign && typeof value.assign === "object") st.dskAssign = { ...st.dskAssign, ...value.assign };
+    if (value.transitions && typeof value.transitions === "object") st.dskTransitions = { ...st.dskTransitions, ...value.transitions };
     if (value.transition && typeof value.transition === "object") st.dskTransition = { ...st.dskTransition, ...value.transition };
   }
   function dskPending(index, value) { const name = dskName(index); if (value) st.dskPending[name] = value; else delete st.dskPending[name]; renderSideDsk(); }
@@ -3156,14 +3286,16 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     delete st.dskAssign[name]; dskSave(); st.dskMenu = null; renderSideDsk();
   }
   async function dskAllOff() {
+    let maxDuration = 0;
     for (let index = 0; index < 8; index++) {
       if (!dskOnAir(index)) continue;
       const name = dskName(index);
       dskPending(index, "SAINDO");
+      maxDuration = Math.max(maxDuration, Number(dskCfg(index).duration) || 500);
       await dskSetTransition(index);
       await vendor("dsk_select_scene", { dsk_name: name, scene: "" }).catch(() => {});
     }
-    await sleep((Number(dskCfg(index).duration) || 500) + 120);
+    await sleep(maxDuration + 120);
     for (let index = 0; index < 8; index++) dskPending(index, null);
     await syncKeyers();
   }
@@ -3193,7 +3325,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       </div>`;
     }).join("");
     box.innerHTML = `<div class="dsk-panel">
-      <header class="dsk-panel-head" title="Sair do ar mantém a fonte atribuída. Remover fonte limpa a seleção. Cada número 1–8 nos inputs usa esta mesma atribuição."><strong>DSK / GRÁFICOS</strong><span>${st.dskPending && Object.keys(st.dskPending).length ? "Transição em andamento…" : "8 camadas · fonte, entrar/sair e transição"}</span></header>
+      ${st.dskPending && Object.keys(st.dskPending).length ? `<header class="dsk-panel-head"><span>Transição em andamento…</span></header>` : ""}
       <div class="dsk-global"><label>Transição<select id="dsk-transition"${off}>${st.transitions.map((t) => `<option value="${esc(t.name)}"${t.name === dskTransition() ? " selected" : ""}>${esc(t.name)}</option>`).join("")}</select></label><label>Duração<input id="dsk-duration" type="number" min="50" max="2000" step="50" value="${Number(st.dskTransition.duration) || 500}"${off}><i>ms</i></label><button class="b" data-a="dsk_alloff"${off}>Todos fora do ar</button></div>
       <div class="dsk-rows">${rows}</div>
     </div>`;
@@ -3489,8 +3621,8 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
         <span class="pair">${cg("recset", "Configurar a gravação")}<button class="b${st.rec ? " live" : ""}" data-a="record"${off}>Gravar</button>${tc(st.rec, st.recTc)}</span>
         <span class="pair">${cg("ext", "Central de saídas")}<button class="b" data-a="external"${off} title="Abrir saídas externas: SRT, NDI, OMT, monitores e câmera virtual">Externo</button></span>
         <span class="pair">${cg("streamset", "Configurar a transmissão")}<button class="b${st.stream ? " live" : ""}" data-a="stream"${off}>Transmitir</button><button class="b dd" data-a="pop" data-v="streammenu"${off} title="Transmissão">▲</button>${tc(st.stream, st.streamTc)}</span>
-        ${st.hasIso ? `<span class="pair">${cg("iso", "Escolher as entradas da gravação isolada")}<button class="b${[...st.iso.values()].some(Boolean) ? " live" : ""}" data-a="multicorder"${off} title="Grava cada entrada marcada no seu próprio arquivo">MultiGravação</button></span>` : ""}
-        <button class="b" data-a="preflight"${off} title="🛡️ Pre-Flight: verificações disponíveis; não bloqueia a transmissão">🛡️ Pre-Flight</button></div>
+        ${st.hasIso && moduloAtivo('iso') ? `<span class="pair">${cg("iso", "Escolher as entradas da gravação isolada")}<button class="b${[...st.iso.values()].some(Boolean) ? " live" : ""}" data-a="multicorder"${off} title="Grava cada entrada marcada no seu próprio arquivo">MultiGravação</button></span>` : ""}
+        <button class="b" data-a="preflight"${off} title="Verificações antes de ir ao ar">Pre-Flight</button></div>
       <div class="g r">
         ${ib("pop", st.pop === "mainmenu" || st.pop === "busman", "Menu: gerenciador de barramentos de áudio", "M3 5h18v3H3zm0 5.5h18v3H3zM3 16h18v3H3z", true).replace('data-a="pop"', 'data-a="pop" data-v="mainmenu"')}${ib("pop", st.pop === "stats", "Ver estatísticas de desempenho", "M4 20V10h4v10zm6 0V4h4v16zm6 0v-7h4v7z", true).replace('data-a="pop"', 'data-a="pop" data-v="stats"')}${ib("pop", st.pop === "shortcuts", "Exibir os atalhos", "M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 0h7v7h-7z").replace('data-a="pop"', 'data-a="pop" data-v="shortcuts"')}${ib("snapshot", false, "Foto da saída, gravada na pasta de gravação", "M9 4 7.5 6H4v13h16V6h-3.5L15 4zm3 4.5a4 4 0 1 1 0 8 4 4 0 0 1 0-8z", true)}${ib("lock", st.locked, "Bloquear ou desbloquear botões como Fechar e parar a gravação", "M7 10V7a5 5 0 0 1 10 0v3h2v11H5V10zm2 0h6V7a3 3 0 0 0-6 0z").replace(' on"', ' on lockon"')}</div>`;
   }
@@ -3549,7 +3681,9 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   function renderStat() {
     updateStudioTelemetry(st.stats, `${String(new Date().getHours()).padStart(2,"0")}:${String(new Date().getMinutes()).padStart(2,"0")}:${String(new Date().getSeconds()).padStart(2,"0")}`);
     const s = st.stats, v = st.video;
-    const res = v ? `${v.outputHeight}p${(v.fpsNumerator / v.fpsDenominator).toFixed(2).replace(/\.00$/, "")}` : "";
+    const altura = v ? (v.outputHeight || v.baseHeight) : null;
+    const fpsTxt = v && v.fpsNumerator && v.fpsDenominator ? (v.fpsNumerator / v.fpsDenominator).toFixed(2).replace(/\.00$/, "") : "";
+    const res = v ? [altura ? altura + "p" : "", fpsTxt].filter(Boolean).join("") : "";
     const now = new Date();
     const clock = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
     const healthBadge = st.inputHealth ? `<span class="${st.inputHealth.healthy ? "ok" : "bad"}" title="Saúde das Entradas Broadcast">● Entradas: <b>${st.inputHealth.healthy ? "OK" : "Alerta"}</b></span>` : "";
@@ -3625,16 +3759,16 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     }
     else if (st.pop === "call") {
       const u = callUrls(st.popArg), field = (id, label, value) => `<label>${label}<span class="row" style="margin:0;flex-wrap:nowrap"><input id="${id}" readonly value="${esc(value)}" style="flex:1;min-width:0"><button class="b" data-a="copy" data-v="${id}">Copiar</button></span></label>`;
-      p.innerHTML = `<h3>FreeMix Call · ${esc(st.popArg)}</h3>`
+      p.innerHTML = `<h3>3Mix Call · ${esc(st.popArg)}</h3>`
         + field("call-guest-ret", "Link do Convidado com Retorno (Vídeo + Tela do Programa)", u.guestRet)
-        + `<p style="font-size:11px;color:var(--mut)">Ao abrir, o convidado transmite a câmera dele e assiste a saída do FreeMix na mesma tela (celular ou PC).</p>`
+        + `<p style="font-size:11px;color:var(--mut)">Ao abrir, o convidado transmite a câmera dele e assiste a saída do 3Mix na mesma tela (celular ou PC).</p>`
         + (() => { const R = st.ret, mine = R.on && R.id === st.popArg;
           return `<fieldset><legend>Retorno para o convidado</legend><div class="row" style="margin:0 0 6px"><button class="b${mine ? " on" : ""}" data-a="${mine ? "retornooff" : "retornoon"}">${mine ? "Retorno LIGADO" : "Ligar retorno"}</button>${R.on && !mine ? `<span class="bdg">em uso pela chamada ${esc(R.id)}</span>` : ""}</div>`
             + `<p>Vídeo: saída do programa, pela câmera virtual (${st.vcam ? "ligada" : "desligada"}).<br>Áudio: ${mine ? (R.audio ? `barramento B em ${esc(R.cable)}` : "sem áudio, porque não há cabo de áudio virtual instalado nesta máquina") : "barramento B, por um cabo de áudio virtual que já esteja instalado na máquina; sem cabo, o retorno vai só com vídeo"}.<br>Ao ligar, todas as entradas passam a ir para o barramento B, menos as chamadas: o convidado ouve o programa sem ouvir a própria voz.</p></fieldset>`; })()
         + `<div class="row end"><button class="b" data-a="close">Fechar</button></div>`;
     }
     else if (st.pop === "stream") p.innerHTML = `<h3>Iniciar transmissão?</h3><p>Usa o serviço configurado em Configurações › Transmissão.</p><div class="row"><button class="b live" data-a="streamgo">Iniciar</button><button class="b" data-a="close">Cancelar</button></div>`;
-    else if (st.pop === "overlay") p.innerHTML = `<h3>Canais de overlay</h3>` + (st.keyers?.length ? `<table>${st.keyers.slice(0, 8).map((k, i) => `<tr><td><b>${i + 1}</b></td><td>${k.scene ? esc(k.scene) : `<span style="color:var(--mut)">desligado</span>`}</td><td style="text-align:right">${k.scene ? `<button class="b" data-a="ovoff" data-k="${i}">Desligar</button>` : ""}</td></tr>`).join("")}</table><p style="margin-top:8px">Use os botões 1–4 de cada entrada. Transição e tempo de cada canal ficam em Painéis › Downstream Keyer.</p>` : `<p>O plugin Downstream Keyer não respondeu.</p>`) + `<div class="row"><button class="b" data-a="close">Fechar</button></div>`;
+    else if (st.pop === "overlay") p.innerHTML = `<h3>Canais de overlay</h3>` + (st.keyers?.length ? `<table>${st.keyers.slice(0, 8).map((k, i) => `<tr><td><b>${i + 1}</b></td><td>${k.scene ? esc(k.scene) : `<span style="color:var(--mut)">desligado</span>`}</td><td style="text-align:right">${k.scene ? `<button class="b" data-a="ovoff" data-k="${i}">Desligar</button>` : ""}</td></tr>`).join("")}</table><p style="margin-top:8px">Use os botões 1–4 de cada entrada. Transição e tempo de cada canal ficam em Painéis › Downstream Keyer.</p>` : `<p>O plugin Downstream Keyer não respondeu.</p>`) + `<div class="row"><button class="b" data-a="dsk_full">Abrir DSK completo</button><button class="b" data-a="close">Fechar</button></div>`;
     else if (st.pop === "tag") p.innerHTML = `<h3>Cor de "${esc(st.popArg)}"</h3><div class="row">${COLORS.map((c, i) => `<button class="sw" style="background:${c}" data-a="settag" data-c="${i}"></button>`).join("")}<button class="sw x" data-a="settag" data-c="" title="Sem cor">×</button></div>`;
     else if (st.pop === "close") p.innerHTML = `<h3>Excluir "${esc(st.popArg)}" do projeto?</h3><p>Remove a entrada e as fontes que só existem nela. Não dá para desfazer pelo painel.</p><div class="row"><button class="b live" data-a="closego">Excluir entrada</button><button class="b" data-a="close">Cancelar</button></div>`;
     else if (st.pop === "datasources") {p.innerHTML=`<h3>Fontes de dados</h3><iframe title="Fontes de dados" src="${esc(replayUrl.replace(/\/api\/replay$/, "/dados"))}" style="width:100%;height:60vh;border:0"></iframe><button class="b" data-a="close">Fechar</button>`;}
@@ -3701,7 +3835,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     }
     else if (st.pop === "menu") { const name = st.popArg, v = esc(name), ins = window.FreeMixInputEditors.uniqueSources(st.items.get(name) || []);
       const hasMedia = ins.some((i) => isMedia(i.kind));
-      p.innerHTML = `<h3>${v}</h3><div class="menu">` + ins.map((i) => `<button data-a="props" data-v="${esc(i.name)}" data-source-key="${esc(i.key||'')}" data-owner="${v}" ${sceneButtonAttrs(name)}>Configurações de ${esc(i.name)}…</button>${st.gcNames.has(i.name) ? `<button data-a="gcedit" data-v="${esc(i.name)}"><b>Editar título…</b></button>` : ""}<button data-a="filters" data-v="${esc(i.name)}" data-source-key="${esc(i.key||'')}" data-owner="${v}" ${sceneButtonAttrs(name)}>Filtros de ${esc(i.name)}…</button>${i.kind === "browser_source" ? `<button data-a="calllink" data-v="${esc(i.name)}">Link do convidado (FreeMix Call)…</button>` : ""}`).join("")
+      p.innerHTML = `<h3>${v}</h3><div class="menu">` + ins.map((i) => `<button data-a="props" data-v="${esc(i.name)}" data-source-key="${esc(i.key||'')}" data-owner="${v}" ${sceneButtonAttrs(name)}>Configurações de ${esc(i.name)}…</button>${st.gcNames.has(i.name) ? `<button data-a="gcedit" data-v="${esc(i.name)}"><b>Editar título…</b></button>` : ""}<button data-a="filters" data-v="${esc(i.name)}" data-source-key="${esc(i.key||'')}" data-owner="${v}" ${sceneButtonAttrs(name)}>Filtros de ${esc(i.name)}…</button>${i.key ? `<button data-a="corentrada" data-v="${esc(i.key)}">Cor e qualidade de ${esc(i.name)}…</button>` : ""}${i.kind === "browser_source" ? `<button data-a="calllink" data-v="${esc(i.name)}">Link do convidado (3Mix Call)…</button>` : ""}`).join("")
         + `<button data-a="minimizetoggle" data-v="${v}" ${sceneButtonAttrs(name)}>${st.minimized?.[name] ? "Expandir cartão" : "Recolher cartão"}</button>`
         + (hasMedia ? `<button data-a="togglespeed" data-v="${v}">${st.showSpeed?.[name] ? "Ocultar velocidade de exibição" : "Show/Hide PlayBack Speed"}</button>` : "")
         + `<button data-a="layers" data-v="${v}">Camadas: outras entradas por cima…</button><button data-a="audioadd" data-v="${v}">Juntar áudio a esta entrada…</button><button data-a="renameask" data-v="${v}">Renomear…</button><button data-a="tag" data-v="${v}">Cor…</button><button data-a="projector" data-v="${v}">Abrir em janela</button>${name === st.program ? "" : `<button data-a="closeask" data-v="${v}" ${sceneButtonAttrs(name)}>Excluir entrada</button>`}</div>`; }
@@ -3723,10 +3857,10 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       if (!c) p.innerHTML = `<h3>Configurações</h3><p>Lendo as configurações do motor…</p>`;
       else if (st.pop === "streamset") { const ENC = withCur(window.FreeMixMesaCodecs.options(c, "streaming"), c.strEnc), PROTOCOLS = withCur(window.FreeMixMesaCodecs.protocols(c), c.protocol), AB = withCur(["128", "160", "192", "256", "320"].map((b) => [b, b]), c.abit);
         p.innerHTML = `<h3>Configurações de transmissão</h3><div class="add"><div class="types"><button class="${st.destTab ? "" : "on"}${st.stream ? " dlive" : ""}" data-a="desttab" data-v="0" title="Destino 1: a transmissão principal">1 · Principal${st.stream ? " <small>NO AR</small>" : ""}</button>${destTabs()}</div>
-          ${st.destTab ? destForm() : ""}<div class="form"${st.destTab ? ' style="display:none"' : ""}><label>Protocolo<select id="cf-protocol"${c.simple ? "" : " disabled"}>${opt(PROTOCOLS, c.protocol)}</select></label><label>URL<input id="cf-server" value="${esc(c.server)}" placeholder="rtmp://… ou https://… (HLS PUT)"></label><label>Chave de stream<input id="cf-key" type="password" value="${esc(c.key)}" autocomplete="off"></label>
-          ${c.simple ? `<div class="two"><label>Taxa de bits de vídeo (kbps)<input id="cf-vbit" type="number" min="200" step="100" value="${esc(c.vbit)}"></label><label>Taxa de bits de áudio (kbps)<select id="cf-abit">${opt(AB, c.abit)}</select></label></div><label>Codificador<select id="cf-senc">${opt(ENC, c.strEnc)}</select></label>` : `<label>Qualidade<input disabled value="Definida no perfil avançado do motor"></label>`}
-          ${c.simple && ['rtmp','rtmps'].includes(c.protocol) ? `<label class="chk"><input id="cf-enhanced" type="checkbox"${c.enhancedRtmp ? ' checked' : ''}> O servidor aceita Enhanced RTMP (HEVC / AV1)</label>` : ""}
-          <p>Codificadores disponíveis neste motor, compatíveis com o protocolo escolhido. Destino 1 de 5. Tamanho e quadros seguem o vídeo da produção.</p><div id="st-status" style="margin-top:6px;color:#333a42"></div></div></div>
+          ${st.destTab ? destForm() : ""}<div class="form"${st.destTab ? ' style="display:none"' : ""}><label>Protocolo<select id="cf-protocol"${c.simple && !st.stream ? "" : " disabled"}>${opt(PROTOCOLS, c.protocol)}</select></label><label>URL<input id="cf-server" value="${esc(c.server)}" placeholder="rtmp://… ou https://… (HLS PUT)"${st.stream ? " disabled" : ""}></label><label>Chave de stream<input id="cf-key" type="password" value="${esc(c.key)}" autocomplete="off"></label>
+          ${c.simple ? `<div class="two"><label>Taxa de bits de vídeo (kbps)<input id="cf-vbit" type="number" min="200" step="100" value="${esc(c.vbit)}"${st.stream ? " disabled" : ""}></label><label>Taxa de bits de áudio (kbps)<select id="cf-abit"${st.stream ? " disabled" : ""}>${opt(AB, c.abit)}</select></label></div><label>Codificador<select id="cf-senc"${st.stream ? " disabled" : ""}>${opt(ENC, c.strEnc)}</select></label>` : `<label>Qualidade<input disabled value="Definida no perfil avançado do motor"></label>`}
+          ${c.simple && ['rtmp','rtmps'].includes(c.protocol) ? `<label class="chk"><input id="cf-enhanced" type="checkbox"${c.enhancedRtmp ? ' checked' : ''}${st.stream ? " disabled" : ""}> O servidor aceita Enhanced RTMP (HEVC / AV1)</label>` : ""}
+          <p>${st.stream ? "Transmissão no ar: só a chave pode ser alterada. Ela vale no próximo início." : "Codificadores disponíveis neste motor, compatíveis com o protocolo escolhido."} Destino 1 de 5. Tamanho e quadros seguem o vídeo da produção.</p><div id="st-status" style="margin-top:6px;color:#333a42"></div></div></div>
           <div class="row end"><button class="b${st.stream ? " live" : ""}" data-a="stream">${st.stream ? "Parar 1" : "Iniciar 1"}</button><button class="b" data-a="streamstatus">Ver status</button><button class="b" data-a="cfgstream">Salvar e fechar</button><button class="b" data-a="close">Cancelar</button></div>`; }
       else if (st.pop === "recset") { const FM = withCur([["mkv", "MKV"], ["mp4", "MP4"], ["hybrid_mp4", "MP4 híbrido"], ["mov", "MOV"], ["flv", "FLV"], ["ts", "MPEG-TS"]], c.fmt), Q = [["Stream", "Igual à transmissão"], ["Small", "Alta, arquivo médio"], ["HQ", "Indistinguível, arquivo grande"], ["Lossless", "Sem perdas, arquivo enorme"]], ENC = withCur(window.FreeMixMesaCodecs.options(c, "recording"), c.recEnc), AB = withCur(["96", "128", "160", "192", "256", "320"].map((b) => [b, b]), c.abit);
         const safe = { mkv: "tolerante a falhas: se o programa fechar, o arquivo continua válido", hybrid_mp4: "MP4 tolerante a falhas", mp4: "se o programa fechar no meio, o arquivo se perde", mov: "se o programa fechar no meio, o arquivo se perde", flv: "tolerante a falhas, uma trilha de áudio", ts: "tolerante a falhas" }[c.fmt] || "";
@@ -3738,7 +3872,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
           <div class="row end"><button class="b" data-a="cfgrec">OK</button><button class="b" data-a="close">Cancelar</button></div>`; }
       else p.innerHTML = `<h3>Configurar: vídeo da produção</h3><fieldset><legend>Display</legend><label>Tamanho<select id="cf-res">${opt(withCur(RES, c.res), c.res)}</select></label><label>Taxa de quadros<select id="cf-fps">${opt(withCur(FPS, c.fps), c.fps)}</select></label></fieldset><p>Só muda com gravação e transmissão paradas.</p><div class="row"><button class="b on" data-a="cfgvideo">OK</button><button class="b" data-a="close">Cancelar</button></div>`; }
     else if (st.pop === "ext") {
-      const sel = st.outsel || {}, v = st.video, res = v ? `${v.outputWidth}×${v.outputHeight} @ ${(v.fpsNumerator / v.fpsDenominator).toFixed(2).replace(/\.00$/, "")}` : "";
+      const sel = st.outsel || {}, v = st.video, res = v ? `${v.outputWidth || v.baseWidth}×${v.outputHeight || v.baseHeight} @ ${(v.fpsNumerator / v.fpsDenominator).toFixed(2).replace(/\.00$/, "")}` : "";
       const srcs = [["PROGRAM", "Output (programa)"], ["PREVIEW", "Preview"], ["MULTIVIEW", "Multiview"], ...st.scenes.map((n) => ["in:" + n, n])];
       const dsts = [["-1", "Janela flutuante"], ...(st.mon || []).map((m) => [String(m.monitorIndex), `Monitor ${m.monitorIndex + 1} (${m.monitorWidth}×${m.monitorHeight})`])];
       const pick = (id, f, list, def) => `<select data-o="${id}" data-f="${f}">${list.map(([val, l]) => `<option value="${esc(val)}"${(sel[id]?.[f] ?? def) === val ? " selected" : ""}>${esc(l)}</option>`).join("")}</select>`;
@@ -3760,8 +3894,8 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     }
     else if (st.pop === "saveas") p.innerHTML = `<h3>Salvar como</h3><p>Grava uma cópia da produção em uso com outro nome e passa a trabalhar nela.</p><label>Nome do novo preset<input id="sa-name" maxlength="40" value="${esc((st.preset || "Produção") + " 2")}"></label><div class="row"><button class="b on" data-a="saveasgo">Salvar</button><button class="b" data-a="close">Cancelar</button></div>`;
     else if (st.pop === "calls") {p.innerHTML=`<h3>Calls e talkback</h3><iframe title="Calls" src="${esc(replayUrl.replace(/\/api\/replay$/, "/calls"))}" style="width:100%;height:65vh;border:0"></iframe><button class="b" data-a="close">Fechar</button>`;p.style.width="min(1100px,95vw)";}
-    else if (st.pop === "settings") {p.innerHTML=`<h3>Configurações FreeMix</h3><iframe title="Configurações" src="${esc(replayUrl.replace(/\/api\/replay$/, "/settings"))}" style="width:100%;height:65vh;border:0"></iframe><button class="b" data-a="close">Fechar</button>`;p.style.width="min(1100px,95vw)";}
-    else if (st.pop === "cfgmenu") p.innerHTML = `<h3>Configurar</h3><div class="menu"><button data-a="pop" data-v="settings"><b>Configurações FreeMix…</b></button><button data-a="pop" data-v="novo-projeto">Novo projeto · prévia…</button><button data-a="pop" data-v="compositions">Criar composição…</button><button data-a="pop" data-v="overlay">Overlays…</button><button data-a="pop" data-v="macros">Macros…</button><button data-a="pop" data-v="recuperacao">Recuperação de projetos…</button><button data-a="pop" data-v="diagnosticos">Gerar ZIP de diagnóstico…</button><button data-a="pop" data-v="gear">Painel…</button><button data-a="nativecfg">Editor avançado do motor…</button></div><div class="row" style="margin-top:8px"><button class="b" data-a="close">Fechar</button></div>`;
+    else if (st.pop === "settings") {p.innerHTML=`<h3>Configurações 3Mix</h3><iframe title="Configurações" src="${esc(replayUrl.replace(/\/api\/replay$/, "/configuracoes"))}" style="width:100%;height:65vh;border:0"></iframe><button class="b" data-a="close">Fechar</button>`;p.style.width="min(1100px,95vw)";}
+    else if (st.pop === "cfgmenu") p.innerHTML = `<h3>Configurar</h3><div class="menu"><button data-a="pop" data-v="settings"><b>Configurações 3Mix…</b></button><button data-a="pop" data-v="novo-projeto">Novo projeto · prévia…</button><button data-a="pop" data-v="compositions">Criar composição…</button><button data-a="pop" data-v="overlay">Overlays…</button><button data-a="pop" data-v="macros">Macros…</button><button data-a="pop" data-v="recuperacao">Recuperação de projetos…</button><button data-a="pop" data-v="diagnosticos">Relatar problema…</button><button data-a="pop" data-v="gear">Painel…</button><button data-a="nativecfg">Editor avançado do motor…</button></div><div class="row" style="margin-top:8px"><button class="b" data-a="close">Fechar</button></div>`;
     else if (st.pop === "help") p.innerHTML = `<h3>Ajuda</h3><table><tr><td><b>Clique na miniatura</b></td><td>manda a entrada para o Preview</td></tr><tr><td><b>GO / Cut</b></td><td>leva ao ar com a transição atual / em corte seco</td></tr><tr><td><b>1 a 8</b></td><td>liga e desliga a entrada como overlay naquele canal</td></tr><tr><td><b>Engrenagens</b></td><td>abrem a configuração do botão ao lado</td></tr><tr><td><b>Clique direito na entrada</b></td><td>propriedades, filtros, renomear, cor, fechar</td></tr><tr><td><b>Alt + letra</b></td><td>abre os menus do motor (clique antes no Preview)</td></tr></table><div class="row" style="margin-top:8px"><button class="b" data-a="close">Fechar</button></div>`;
     else if (st.pop === "addquick") p.innerHTML = `<h3>Adicionar entrada</h3><div class="menu">${[["camera", "Câmera ou captura"], ["video", "Vídeo"], ["audio", "Áudio"], ["image", "Imagem"], ["title", "Título / GC"], ["web", "Navegador"], ["colour", "Cor"], ["blank", "Vazia"]].map(([id, label]) => `<button data-a="addquickgo" data-v="${id}">${label}</button>`).join("")}<button data-a="addquickgo" data-v="camera"><b>Todos os tipos…</b></button></div>`;
     else if (st.pop === "streammenu") p.innerHTML = `<h3>Transmissão</h3><div class="menu"><button data-a="${st.stream ? 'streamstop' : 'stream'}">${st.stream ? "Parar a transmissão principal" : "Abrir MultiStream…"}</button><button data-a="pop" data-v="streamset">Configurações de transmissão…</button></div><div class="row" style="margin-top:8px"><button class="b" data-a="close">Fechar</button></div>`;
@@ -3791,7 +3925,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
         + `<input id="sc-target" placeholder="Entrada ou valor (ex: 1)" style="height:25px;width:130px">`
         + `<button class="b on" data-a="sc_add" style="height:25px">+ Adicionar</button>`
         + `</div></fieldset>`
-        + `<div class="row end"><button class="b" data-a="sc_reset" title="Restaurar a lista padrão de atalhos do FreeMix">Restaurar Padrões</button><button class="b" data-a="close">Fechar</button></div>`;
+        + `<div class="row end"><button class="b" data-a="sc_reset" title="Restaurar a lista padrão de atalhos do 3Mix">Restaurar Padrões</button><button class="b" data-a="close">Fechar</button></div>`;
     }
     else if (st.pop === "audioset") { const s = st.aset, tab = st.asetTab || "geral";
       const sl = (label, fx, k, min, max, step, val, unit) => `<label>${label}: <b id="v-${fx}-${k}">${val}${unit}</b><input type="range" min="${min}" max="${max}" step="${step}" value="${val}" data-fx="${fx}" data-k="${k}" data-u="${unit}"></label>`;
@@ -3804,15 +3938,16 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
         : tab === "gate" ? (has("gate") ? chk("gate", "Usar o noise gate") + sl("Fecha abaixo de", "gate", "close_threshold", -96, 0, 1, fs("gate").close_threshold ?? -32, " dB") + sl("Abre acima de", "gate", "open_threshold", -96, 0, 1, fs("gate").open_threshold ?? -26, " dB") : none("O noise gate"))
         : (has("lim") ? chk("lim", "Usar o limitador") + sl("Limiar", "lim", "threshold", -60, 0, 0.5, fs("lim").threshold ?? -6, " dB") + sl("Liberação", "lim", "release_time", 1, 1000, 1, fs("lim").release_time ?? 60, " ms") : none("O limitador"));
       p.innerHTML = `<h3>Configurações de áudio · ${esc(st.popArg)}</h3><div class="add"><div class="types">${[["geral", "Geral"], ["eq", "EQ"], ["comp", "Compressor"], ["gate", "Noise Gate"], ["lim", "Limitador"]].map(([id, l]) => `<button class="${tab === id ? "on" : ""}" data-a="asettab" data-v="${id}">${l}</button>`).join("")}</div><div class="form">${body}<p>As mudanças valem na hora. Os efeitos são filtros de áudio do motor aplicados a esta entrada.</p></div></div><div class="row end">${st.audio.get(st.popArg)?.bus ? `<button class="b" data-a="busdrop" title="Remove o Master e os barramentos A e B deste preset; as entradas voltam a ir direto para as trilhas do motor. Os efeitos dos barramentos se perdem.">Desligar barramentos</button>` : ""}<button class="b" data-a="close">Fechar</button></div>`; }
-    else if (st.pop === "mainmenu") p.innerHTML = `<h3>Menu Broadcast · 3Mix Pro</h3><div class="menu">
-  <button data-a="modular">🎛️ 3Mix Modular Studio…</button>
-  <button data-a="pop" data-v="audio">🎙️ Processador & Mixer de Áudio Pro…</button>
-  <button data-a="audiobuses">🎚️ Gerenciador de Barramentos de Áudio…</button>
-  <button data-a="rundown">📋 Roteiro & Rundown Broadcast…</button>
-  <button data-a="retornos">📡 Retornos SRT de Externa & N-1…</button>
-  <button data-a="blackbox">📦 Caixa-Preta de Incidentes (Blackbox)…</button>
-  <button data-a="pop" data-v="playout">🎬 Media & Playout Engine (DDR)…</button>
-  <button data-a="pop" data-v="hub">🌐 Hub Central de Produção…</button>
+    else if (st.pop === "mainmenu") p.innerHTML = `<h3>Módulos</h3><div class="menu">
+  <button data-a="top_audio">Mixer de áudio…</button>
+  <button data-a="audiobuses">Barramentos de áudio…</button>
+  <button data-a="pop" data-v="playout">VT e playlists…</button>
+  ${moduloAtivo('rundown') ? `<button data-a="rundown">Roteiro…</button>` : ""}
+  ${moduloAtivo('calls') ? `<button data-a="retornos">Retornos SRT e N-1…</button>` : ""}
+  ${moduloAtivo('blackbox') ? `<button data-a="blackbox">Caixa-preta…</button>` : ""}
+  <button data-a="pop" data-v="color">Color Studio…</button>
+  <button data-a="pop" data-v="hub">Hub de produção…</button>
+  <button data-a="pop" data-v="diagnosticos">Relatar problema…</button>
 </div><div class="row"><button class="b" data-a="close">Fechar</button></div>`;
     else if (st.pop === "busman") { const TK = busKeys(), rows = [...st.audio].filter(([, a]) => !a.bus).map(([name, a]) => ({ name, a, n: inputNumber(name) })).sort((x, y) => (x.n || 999) - (y.n || 999));
       p.innerHTML = `<h3>Gerenciador de barramentos de áudio</h3><div class="busman"><div class="bmr"><span></span><span></span>${TK.map(([, l]) => `<b>${l}</b>`).join("")}</div>`
@@ -3827,6 +3962,17 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     else if (st.pop === "gcedit") { const { name, cfg } = st.gcEdit, tpl = gcTemplate(cfg.t);
       p.innerHTML = `<h3>Título · ${esc(name)}</h3><p>${esc(tpl.collection)} · ${esc(tpl.name)}</p>` + tpl.fields.map((x) => `<label>${esc(x.label)}<input id="gc-f-${x.key}" type="${gcType(x)}" value="${esc(cfg.d?.[x.key] ?? x.default)}"></label>`).join("")
         + `<p>Aplicar muda o título na hora, mesmo com ele no ar.</p><div class="row end"><button class="b on" data-a="gcapply">Aplicar</button><button class="b" data-a="close">Fechar</button></div>`; }
+    else if (st.pop === "dockconfig") {
+      enforceDockTabOwnership();
+      const dock = Number(st.popArg) === 1 ? 1 : 0;
+      const tabs = st.dockTabs[dock];
+      p.innerHTML = `<h3>Abas · Dock ${dock + 1}</h3><div class="menu">` + DOCK_TAB_DEFS.map(([id, label]) => {
+        const owner = st.dockTabs.findIndex(list => list.includes(id));
+        const index = tabs.indexOf(id);
+        return `<div style="display:flex;align-items:center;gap:4px;padding:4px"><span style="flex:1">${esc(label)}</span>${[0,1,-1].map(n => `<button class="b" data-a="dockassign" data-v="${id}" data-k="${n}" aria-pressed="${owner === n}" style="min-height:26px;padding:3px 6px">${owner === n ? '✓ ' : ''}${n < 0 ? 'Oculta' : 'Dock '+(n+1)}</button>`).join('')}${index >= 0 ? `<button class="b" data-a="dockorder" data-v="${id}" data-k="-1" ${index === 0 ? 'disabled' : ''}>↑</button><button class="b" data-a="dockorder" data-v="${id}" data-k="1" ${index === tabs.length-1 ? 'disabled' : ''}>↓</button>` : ''}</div>`;
+      }).join('') + `</div><button class="b" data-a="close">Fechar</button>`;
+      p.style.width = "min(520px,95vw)";
+    }
     else if (st.pop === "catfind") p.innerHTML = `<h3>Busca de entradas</h3><label>Mostrar só as entradas cujo nome contém<input id="cf-find" maxlength="40" value="${esc(st.find)}" placeholder="Ex.: CAM"></label><div class="row"><button class="b on" data-a="catfindgo">OK</button><button class="b" data-a="close">Cancelar</button></div>`;
     else if (st.pop === "catnames") p.innerHTML = `<h3>Categorias das entradas</h3><p>Dê um nome a cada cor. Sem nome, a aba mostra só a cor.</p>` + COLORS.map((c, i) => `<label class="catrow"><i style="background:${c}"></i><input id="cn-${i}" maxlength="16" value="${esc(st.catNames[i] || "")}" placeholder="sem nome"></label>`).join("") + `<div class="row"><button class="b on" data-a="catnamesgo">OK</button><button class="b" data-a="close">Cancelar</button></div>`;
     else if (st.pop === "clocks") { const C = st.clocks;
@@ -3837,13 +3983,13 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
         + `<p>Evento: antes do início conta em amarelo; durante, em verde; depois do fim, em vermelho.</p><div class="row end"><button class="b on" data-a="clockssave">OK</button><button class="b" data-a="close">Cancelar</button></div>`; }
     else if (st.pop === "gear") p.innerHTML = `<h3>Painel</h3><p>${st.on ? "Conectado a " + esc(LOCAL.url || "") : esc(st.why)}</p><div class="row"><button class="b${st.studio ? " on" : ""}" data-a="studio">Modo estúdio (Preview + Programa)</button></div><p style="margin-top:8px">Cenas, fontes, mixer nativo e controles do OBS continuam no menu Painéis.</p><div class="row"><button class="b" data-a="close">Fechar</button></div>`;
   }
-  const panelPages={'novo-projeto':'/novo-projeto/',audio:'/audio',audiobuses:'/audio?view=routing',datasources:'/dados',compositions:'/compor',calls:'/calls',macros:'/macros',recuperacao:'/recuperacao',diagnosticos:'/diagnosticos',saidas:'/saidas',settings:'/configuracoes',config:'/configuracoes',workspace:'/configuracoes?category=workspace',ext:'/externo',iso:'/multicorder',replay:'/replay',replaysettings:'/replay?view=settings#replay-config',recset:'/gravar',streamset:'/transmitir',playout:'/playout',playlist:'/playout','playout-monitor':'/playout-monitor',rundown:'/rundown',retornos:'/retornos',blackbox:'/blackbox',preflight:'/preflight',modular:'/configuracoes?category=workspace'};
+  const panelPages={hub:'/hub','novo-projeto':'/novo-projeto/',audio:'/audio',audiobuses:'/audio?view=routing',datasources:'/dados',compositions:'/compor',calls:'/calls',macros:'/macros',recuperacao:'/recuperacao',diagnosticos:'/diagnosticos',saidas:'/saidas',settings:'/configuracoes',config:'/configuracoes',workspace:'/configuracoes?category=workspace',ext:'/central-saidas',iso:'/multicorder',replay:'/replay',replaysettings:'/replay?view=settings#replay-config',recset:'/gravar',streamset:'/transmitir',playout:'/playout',playlist:'/playout','playout-monitor':'/playout-monitor',rundown:'/rundown',retornos:'/retornos',blackbox:'/blackbox',preflight:'/preflight',modular:'/configuracoes?category=workspace',dsk:'/overlays',overlays:'/overlays',ptz:'/ptz',color:'/color'};
   // Windows that open at the size of the dialog they copy from the reference, instead of the large default.
-  const panelSizes={replay:[1440,900],audio:[1360,850],audiobuses:[1360,850],settings:[1280,800],config:[1280,800],workspace:[1280,800],streamset:[980,760],calls:[1020,780],ext:[1240,860],recset:[920,660],iso:[1080,860],replaysettings:[1100,780],playout:[1180,820],playlist:[1180,820],'playout-monitor':[1024,600],rundown:[1100,720],retornos:[1160,800],blackbox:[1160,820],preflight:[1120,820],modular:[1280,800]};
-  const independentEditors=new Set(['novo-projeto','datasources','compositions','calls','macros','recuperacao','diagnosticos','saidas','settings','add','layers','audioset','clocks','ext','iso','replay','replaysettings','playlist','playout','shortcuts','busman','recset','streamset','config','gcedit','presets','saveas','replayretention','rundown','retornos','blackbox','modular']);
+  const panelSizes={hub:[1100,760],replay:[1440,900],audio:[1360,850],audiobuses:[1360,850],settings:[1280,800],config:[1280,800],workspace:[1280,800],streamset:[980,760],calls:[1020,780],ext:[1240,860],recset:[920,660],iso:[1080,860],replaysettings:[1100,780],playout:[1180,820],playlist:[1180,820],'playout-monitor':[1024,600],rundown:[1100,720],retornos:[1160,800],blackbox:[1160,820],preflight:[1120,820],modular:[1280,800],dsk:[1280,800],overlays:[1280,800],ptz:[1280,800],color:[1440,900]};
+  const independentEditors=new Set(['hub','novo-projeto','datasources','compositions','calls','macros','recuperacao','diagnosticos','saidas','settings','add','layers','audioset','clocks','ext','iso','replay','replaysettings','playlist','playout','shortcuts','busman','recset','streamset','config','gcedit','presets','saveas','replayretention','rundown','retornos','blackbox','modular','dsk','overlays','ptz','color']);
   
   async function launchPanel(id,arg){
-    const title=({ext:'Saídas externas',streamset:'Configurações de streaming',recset:'Configuração de gravação',iso:'MultiGravação','novo-projeto':'Novo projeto · prévia',datasources:'Fontes de dados',compositions:'Composições',calls:'Chamada de Vídeo',settings:'Configurações',workspace:'Layout da mesa',replay:'Replay',replaysettings:'Configurações do Replay',list:'List',mixer:'Mixer de áudio',audio:'Áudio · Mixer e processamento',audiobuses:'Áudio · Barramentos e roteamento',playout:'Media & Playout Engine',playlist:'Media & Playout Engine','playout-monitor':'Monitor Remoto de Playout',rundown:'Roteiro de Produção (Rundown)',retornos:'Retornos de Externa SRT & N-1',blackbox:'Caixa-Preta de Incidentes',preflight:'Pre-Flight Checklist',modular:'Layout da mesa',hub:'Hub de Produção'})[id]||'3Mix Pro · '+id;
+    const title=({ext:'Saídas externas',streamset:'Configurações de streaming',recset:'Configuração de gravação',iso:'MultiGravação','novo-projeto':'Novo projeto · prévia',datasources:'Fontes de dados',compositions:'Composições',calls:'Chamada de Vídeo',settings:'Configurações',workspace:'Configurações',replay:'Replay',replaysettings:'Configurações do Replay',list:'List',mixer:'Mixer de áudio',audio:'Áudio · Mixer e processamento',audiobuses:'Áudio · Barramentos e roteamento',playout:'Media & Playout Engine',playlist:'Media & Playout Engine','playout-monitor':'Monitor Remoto de Playout',rundown:'Roteiro de Produção (Rundown)',retornos:'Retornos de Externa SRT & N-1',blackbox:'Caixa-Preta de Incidentes',preflight:'Pre-Flight Checklist',modular:'Configurações',dsk:'DSK / Gráficos',overlays:'DSK / Gráficos',hub:'Hub de Produção',ptz:'PTZ',color:'Color Studio'})[id]||'3Mix Pro · '+id;
     const url=panelPages[id]?replayUrl.replace(/\/api\/replay$/,panelPages[id])+(['compositions','audio'].includes(id)?'?input='+encodeURIComponent(arg||''):''):new URL('mesa.html?pop='+encodeURIComponent(id)+(arg?'&arg='+encodeURIComponent(arg):''),location.href).href;
     const width = panelSizes[id]?.[0] || 1100;
     const height = panelSizes[id]?.[1] || 720;
@@ -3864,12 +4010,20 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
 
   const openPop = (id, arg) => { if(independentEditors.has(id)&&new URLSearchParams(location.search).get('pop')!==id){closePop();run(launchPanel(id,arg));return;} if (st.pop === id && st.popArg === arg) return closePop(); st.pop = id; st.popArg = arg; renderPop(); ($("add-name") || $("rn-name") || $("sa-name"))?.select(); if (["recset", "streamset", "config"].includes(id)) { st.cfg = null; renderPop(); A.cfgload(); } if (id === "presets") A.presetload(); if (id === "stats") A.statsload(); if (id === "clocks") { st.clocks = null; A.clocksload(); } if (id === "streamset") { st.destTab = 0; syncDest(); } if (id === "call") syncRet(); if (id === "layers") { st.layers = null; A.layersload(); } if (id === "audioset") { st.aset = null; st.asetTab = "geral"; renderPop(); A.asetload(); } if (id === "ext") A.extload(); };
   const closePop = () => { const p = $("pop"); st.pop = null; p.className = "pop"; p.style.left = p.style.top = p.style.right = p.style.bottom = ""; };
-  const renderAll = () => { renderTabs(); applyUiLayout(); renderTiles(); renderSideDock(); renderBot(); renderStat(); };
+  // Botões estáticos da topbar marcados com data-modulo: escondidos quando o módulo
+  // correspondente está desligado em st.modulos. Nunca bloqueia clique (fail-open já
+  // garantido por moduloAtivo); só não exibe o botão.
+  function renderModulos() {
+    for (const el of document.querySelectorAll('[data-modulo]')) el.style.display = moduloAtivo(el.dataset.modulo) ? "" : "none";
+  }
+  const renderAll = () => { renderTabs(); applyUiLayout(); renderTiles(); renderSideDock(); renderBot(); renderStat(); renderModulos(); };
 
   function initSplitter() {
     const sp = $("side-panel"), splitter = $("splitter-side");
     if (!sp || !splitter) return;
     if (st.sideWidth) sp.style.width = st.sideWidth + "px";
+    const sp2 = $("side-panel-2");
+    if (sp2 && st.side2Width) sp2.style.width = st.side2Width + "px";
     let draggingSplit = false, startX = 0, startW = 0;
     splitter.addEventListener("pointerdown", (e) => {
       draggingSplit = true;
@@ -3881,7 +4035,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     splitter.addEventListener("pointermove", (e) => {
       if (!draggingSplit) return;
       const dx = (startX - e.clientX) * (audioOnLeft ? -1 : 1);
-      const newW = clamp(startW + dx, 340, Math.max(380, innerWidth - 360));
+      const newW = clamp(startW + dx, 260, Math.max(300, innerWidth - 360));
       sp.style.width = newW + "px";
       st.sideWidth = newW;
     });
@@ -3894,6 +4048,51 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     };
     splitter.addEventListener("pointerup", stopSplit);
     splitter.addEventListener("pointercancel", stopSplit);
+  }
+
+  // Sem entradas na mesa, as docks dividem a área por proporção, sem limite na metade.
+  function aplicarDivisaoDocks() {
+    document.body.style.setProperty("--dock1-parte", String(st.dockSplit));
+    document.body.style.setProperty("--dock2-parte", String(1 - st.dockSplit));
+  }
+  function initDock2Splitter() {
+    const sp = $("side-panel"), sp2 = $("side-panel-2"), splitter = $("splitter-dock2");
+    if (!sp || !sp2 || !splitter) return;
+    if (st.side2Width) sp2.style.width = st.side2Width + "px";
+    let dragging = false, startX = 0, start1 = 0, total = 0;
+    splitter.addEventListener("pointerdown", (e) => {
+      if (!st.uiDock2 || !st.mixer) return;
+      dragging = true;
+      startX = e.clientX;
+      start1 = sp.getBoundingClientRect().width;
+      total = start1 + sp2.getBoundingClientRect().width;
+      splitter.setPointerCapture(e.pointerId);
+      splitter.classList.add("active");
+      e.preventDefault();
+    });
+    splitter.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
+      const min = Math.min(200, total / 2);
+      const w1 = clamp(start1 + (e.clientX - startX), min, total - min);
+      const w2 = total - w1;
+      if (!st.uiInputs) { st.dockSplit = w1 / total; aplicarDivisaoDocks(); return; }
+      sp.style.width = Math.round(w1) + "px";
+      sp2.style.width = Math.round(w2) + "px";
+      st.sideWidth = Math.round(w1);
+      st.side2Width = Math.round(w2);
+    });
+    const stop = () => {
+      if (!dragging) return;
+      dragging = false;
+      splitter.classList.remove("active");
+      store.set("mesa.sidewidth", st.sideWidth);
+      store.set("mesa.side2width", st.side2Width);
+      store.set("mesa.docksplit", st.dockSplit);
+      queueMesaWorkspaceSave();
+    };
+    splitter.addEventListener("dblclick", () => { st.dockSplit = 0.5; store.set("mesa.docksplit", 0.5); aplicarDivisaoDocks(); });
+    splitter.addEventListener("pointerup", stop);
+    splitter.addEventListener("pointercancel", stop);
   }
 
   document.addEventListener("click", (e) => {
@@ -4225,7 +4424,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     mesaPaintFrame = null;
     let names = [...mesaPaintQueue]; mesaPaintQueue.clear();
     if (names.includes('tiles')) names = names.filter(name => name !== 'tally');
-    for (const name of names) try { mesaPaintFns[name](); } catch { console.warn('FreeMix: não foi possível atualizar um controle visual.'); }
+    for (const name of names) try { mesaPaintFns[name](); } catch { console.warn('3Mix: não foi possível atualizar um controle visual.'); }
   }
   function scheduleMesaPaint(name) {
     if (mesaDisposed) return;
@@ -4243,7 +4442,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     try { ws?.close(1000); } catch {}
   });
   // END isolated visual integration
-  initializeModuleLayout(); renderAll(); connect(); loadMesaWorkspace(); thumbLoop(); slowLoop(); mediaLoop(); productionMetadataLoop(); initMidi(); initSplitter();
+  initializeModuleLayout(); renderAll(); connect(); loadMesaWorkspace(); thumbLoop(); slowLoop(); mediaLoop(); productionMetadataLoop(); initMidi(); initSplitter(); initDock2Splitter();
 
   // Suporte a janela destacada independente (pop-up para segundo monitor)
   const qParams = new URLSearchParams(location.search);
@@ -4273,7 +4472,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     pendingPanel.className = "pop on";
     const showPendingPanel = () => {
       if (st.on) return;
-      pendingPanel.innerHTML = `<h3>${esc(document.title)}</h3><div class="pop-body"><p>${Date.now() - popupStarted > 10000 ? 'O motor ainda não respondeu. Verifique se o FreeMix está aberto e conectado.' : 'Conectando ao motor do FreeMix…'}</p><p>${esc(st.why || '')}</p><button class="b" type="button" id="retry-panel">Tentar novamente</button></div>`;
+      pendingPanel.innerHTML = `<h3>${esc(document.title)}</h3><div class="pop-body"><p>${Date.now() - popupStarted > 10000 ? 'O motor ainda não respondeu. Verifique se o 3Mix está aberto e conectado.' : 'Conectando ao motor do 3Mix…'}</p><p>${esc(st.why || '')}</p><button class="b" type="button" id="retry-panel">Tentar novamente</button></div>`;
       $("retry-panel").onclick = () => location.reload();
     };
     showPendingPanel();
@@ -4290,5 +4489,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
 <script src="remoto/atalhos-engine.js"></script>
 <script src="remoto/input-editor-feedback.js"></script>
 <script src="remoto/input-menu-ui.js"></script>
+<script type="module" src="remoto/switcher-strip-host.js?v=20261031i"></script>
+<script src="mesa-estado.js"></script>
 </body>
 </html>

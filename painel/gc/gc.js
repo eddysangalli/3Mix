@@ -1,4 +1,4 @@
-// Shared by every FreeMix title template (each one loads it with a <script> line just before </body>).
+// Shared by every 3Mix title template (each one loads it with a <script> line just before </body>).
 // A template only has to define window.GC = { play(data), stop(), update(data) } and start hidden.
 // This file hands the template its field values (kept in the address, after "#"), plays the entrance when the
 // title goes on air and the exit when it leaves, and applies what the operator edits while it is on air.

@@ -1,0 +1,135 @@
+{
+  "pacotes": [
+    {
+      "id": "hard-news-pro",
+      "nome": "Pacote Broadcast Hard News Pro",
+      "categoria": "Jornalismo",
+      "descricao": "Identidade visual para telejornais, plantões, breaking news e coberturas ao vivo com tickers duplos e animação.",
+      "paletas": [
+        {
+          "nome": "Crimson Urgente",
+          "accent": "#e11d48",
+          "bg": "#0f172a",
+          "text": "#ffffff"
+        },
+        {
+          "nome": "Royal Navy",
+          "accent": "#38bdf8",
+          "bg": "#0b1329",
+          "text": "#ffffff"
+        },
+        {
+          "nome": "Slate Gold",
+          "accent": "#fbbf24",
+          "bg": "#1e293b",
+          "text": "#ffffff"
+        }
+      ]
+    },
+    {
+      "id": "sports-arena-pro",
+      "nome": "Pacote Esportes Arena Pro",
+      "categoria": "Esportes",
+      "descricao": "Placares dinâmicos, estatísticas, escalações, relógio progressivo e destaques individuais para jogos e torneios.",
+      "paletas": [
+        {
+          "nome": "Estádio Ouro",
+          "accent": "#facc15",
+          "bg": "#064e3b",
+          "text": "#ffffff"
+        },
+        {
+          "nome": "Neon Cyan",
+          "accent": "#06b6d4",
+          "bg": "#0f172a",
+          "text": "#ffffff"
+        },
+        {
+          "nome": "Scarlet F1",
+          "accent": "#dc2626",
+          "bg": "#171717",
+          "text": "#ffffff"
+        }
+      ]
+    },
+    {
+      "id": "podcast-talk-show",
+      "nome": "Pacote Podcast & Talk Show Ultra",
+      "categoria": "Podcast",
+      "descricao": "Lower thirds elegantes com redes sociais, destaque de superchats/doações via Pix e pautas em discussão.",
+      "paletas": [
+        {
+          "nome": "Velvet Purple",
+          "accent": "#a855f7",
+          "bg": "#18181b",
+          "text": "#ffffff"
+        },
+        {
+          "nome": "Cyber Amber",
+          "accent": "#f59e0b",
+          "bg": "#09090b",
+          "text": "#ffffff"
+        },
+        {
+          "nome": "Emerald Glow",
+          "accent": "#10b981",
+          "bg": "#111827",
+          "text": "#ffffff"
+        }
+      ]
+    },
+    {
+      "id": "corporate-keynote",
+      "nome": "Pacote Corporativo & Conferências",
+      "categoria": "Corporativo",
+      "descricao": "Crachás de palestrantes, agendas de congresso, tópicos de painel e cartelas institucionais limpas.",
+      "paletas": [
+        {
+          "nome": "Enterprise Blue",
+          "accent": "#0ea5e9",
+          "bg": "#1e293b",
+          "text": "#ffffff"
+        },
+        {
+          "nome": "Fintech Emerald",
+          "accent": "#059669",
+          "bg": "#0f172a",
+          "text": "#ffffff"
+        },
+        {
+          "nome": "Monolith Dark",
+          "accent": "#64748b",
+          "bg": "#020617",
+          "text": "#ffffff"
+        }
+      ]
+    },
+    {
+      "id": "live-commerce-sales",
+      "nome": "Pacote Live Commerce & Vendas",
+      "categoria": "Variedades",
+      "descricao": "Cards de produtos com preço De/Por, cronômetro de oferta relâmpago, cupons e destaque de depoimentos.",
+      "paletas": [
+        {
+          "nome": "Sunset Amber",
+          "accent": "#f59e0b",
+          "bg": "#18181b",
+          "text": "#ffffff"
+        },
+        {
+          "nome": "Hot Coral",
+          "accent": "#f43f5e",
+          "bg": "#0f172a",
+          "text": "#ffffff"
+        },
+        {
+          "nome": "Vivid Purple",
+          "accent": "#8b5cf6",
+          "bg": "#09090b",
+          "text": "#ffffff"
+        }
+      ]
+    }
+  ],
+  "total_modelos": 36
+}

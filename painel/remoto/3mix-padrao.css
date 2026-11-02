@@ -1,0 +1,164 @@
+/* ==========================================================================
+   3Mix · padrão único das telas de configuração e operação
+   --------------------------------------------------------------------------
+   Mesma linguagem de Configurações (settings-workspace.css): grafite neutro,
+   azul de fader para seleção e ação principal, verde/vermelho/âmbar só para
+   estado real. Uma página adota o padrão com <body class="p3">; quando
+   aberta dentro de Configurações (?embed=1) perde o próprio cabeçalho e
+   rodapé, sem precisar de CSS injetado de fora.
+   Tudo fica sob .p3 para não atingir páginas que só carregam o arquivo por
+   causa das regras de embutir.
+   ========================================================================== */
+:root {
+  --p3-bg: #202020;
+  --p3-panel: #252525;
+  --p3-sunken: #1b1b1b;
+  --p3-field: #1d1d1d;
+  --p3-line: #414141;
+  --p3-line-soft: #353535;
+  --p3-text: #ededed;
+  --p3-muted: #b0b0b0;
+  --p3-dim: #8d8d8d;
+  --p3-accent: #2f6fed;
+  --p3-accent-strong: #5b8bf3;
+  --p3-accent-soft: rgba(47, 111, 237, .18);
+  --p3-pgm: #b02a1f;
+  --p3-pvw: #1f7233;
+  --p3-ok: #34d17b;
+  --p3-warn: #dca900;
+  --p3-bad: #ef5350;
+}
+
+/* ---------- base ---------- */
+.p3, .p3 * { box-sizing: border-box; }
+html:has(body.p3) { height: 100%; }
+body.p3 {
+  margin: 0; min-height: 100%; background: var(--p3-bg); color: var(--p3-text);
+  font: 14px/1.5 "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  display: flex; flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+.p3 [hidden] { display: none !important; }
+.p3 a { color: #cdd5df; }
+.p3 a:hover { color: #fff; }
+.p3 h1 { margin: 0; font-size: 17px; font-weight: 700; color: #fff; letter-spacing: -.2px; }
+.p3 h2 { margin: 0; font-size: 17px; font-weight: 700; color: #fff; letter-spacing: -.15px; }
+.p3 h3 { margin: 0; font-size: 14px; font-weight: 700; color: #fff; }
+.p3 p { margin: 0; }
+
+/* ---------- janela própria: cabeçalho e área ---------- */
+.p3-head {
+  height: 50px; min-height: 50px; flex: none; display: flex; align-items: center; gap: 12px; padding: 0 16px;
+  background: #1c1c1c; border-bottom: 1px solid var(--p3-line); position: sticky; top: 0; z-index: 40;
+}
+.p3-head .p3-logo { display: block; height: 24px; width: auto; }
+.p3-head .p3-flex, .p3-flex { flex: 1 1 auto; min-width: 0; }
+.p3-main { flex: 1 0 auto; width: 100%; padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+.p3-main > * { flex-shrink: 0; }
+html.embed-3mix body.p3 { overflow-y: auto; }
+.p3-foot {
+  flex: none; display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 10px 16px;
+  background: #1c1c1c; border-top: 1px solid var(--p3-line);
+}
+#connection[data-state] { white-space: nowrap; }
+
+/* ---------- cartão ---------- */
+.p3-card {
+  background: var(--p3-panel); border: 1px solid var(--p3-line); border-radius: 6px; padding: 20px;
+  display: flex; flex-direction: column; gap: 14px; min-width: 0;
+}
+.p3-card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; min-height: 28px; }
+.p3-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.p3-row.end { justify-content: flex-end; }
+.p3-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 14px 20px; }
+
+/* ---------- botões ---------- */
+.p3 button {
+  height: 36px; padding: 0 14px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  background: #2b2b2b; border: 1px solid #4c4c4c; border-radius: 4px; color: #e6e6e6;
+  font: 600 13px/1 inherit; font-family: inherit; cursor: pointer; white-space: nowrap;
+  transition: background .12s, border-color .12s;
+}
+.p3 button:hover:not(:disabled) { background: #3a3a3a; border-color: #6a6a6a; color: #fff; }
+.p3 button:active:not(:disabled) { background: #1f1f1f; }
+.p3 button:disabled { opacity: .42; cursor: default; }
+.p3 button:focus-visible, .p3 a:focus-visible, .p3 input:focus-visible, .p3 select:focus-visible, .p3 textarea:focus-visible { outline: 2px solid var(--p3-accent); outline-offset: 1px; }
+.p3 button.primary { background: var(--p3-accent); border-color: var(--p3-accent); color: #fff; font-weight: 700; }
+.p3 button.primary:hover:not(:disabled) { background: var(--p3-accent-strong); border-color: var(--p3-accent-strong); }
+.p3 button.air { background: var(--p3-pgm); border-color: var(--p3-pgm); color: #fff; font-weight: 700; }
+.p3 button.air:hover:not(:disabled) { background: #c93527; border-color: #c93527; }
+.p3 button.quiet { background: transparent; }
+.p3 button.danger { background: transparent; color: #ffb4a8; border-color: #6d3b35; }
+.p3 button.danger:hover:not(:disabled) { background: #3a2725; border-color: #a14a40; color: #ffd2cb; }
+.p3 button.selected { background: #2f3436; border-color: var(--p3-accent); color: #fff; box-shadow: inset 0 -2px var(--p3-accent); }
+.p3 button.small { height: 30px; padding: 0 10px; font-size: 12.5px; }
+
+/* ---------- campos ---------- */
+.p3 input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]), .p3 select, .p3 textarea {
+  width: 100%; min-width: 0; height: 38px; padding: 6px 10px; background: var(--p3-field); border: 1px solid #555;
+  border-radius: 4px; color: #eee; font: 14px/1.4 inherit; font-family: inherit;
+}
+.p3 textarea { height: auto; min-height: 76px; resize: vertical; }
+.p3 input:focus, .p3 select:focus, .p3 textarea:focus { outline: none; border-color: var(--p3-accent); box-shadow: 0 0 0 3px var(--p3-accent-soft); }
+.p3 input:disabled, .p3 select:disabled, .p3 textarea:disabled { background: #191919; color: #777; border-color: #3a3a3a; }
+.p3 input::placeholder, .p3 textarea::placeholder { color: #777; }
+.p3 input[type=checkbox], .p3 input[type=radio] { width: 18px; height: 18px; margin: 0; flex: none; accent-color: var(--p3-accent); }
+.p3 input[type=range] { width: 100%; height: 22px; margin: 0; accent-color: var(--p3-accent); background: transparent; }
+.p3-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; color: #ddd; font-size: 13.5px; font-weight: 600; }
+.p3-field b { color: #fff; font-weight: 700; }
+.p3-check { display: inline-flex; align-items: center; gap: 8px; color: #ddd; font-size: 13.5px; font-weight: 600; cursor: pointer; }
+.p3-inline { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.p3-inline > .p3-field { flex: 1 1 180px; }
+
+/* ---------- tabela ---------- */
+.p3-table-wrap { border: 1px solid var(--p3-line-soft); border-radius: 4px; overflow: auto; background: var(--p3-sunken); }
+.p3 table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.p3 th { position: sticky; top: 0; z-index: 1; text-align: left; padding: 8px 12px; background: #262626; color: var(--p3-dim); font-size: 11.5px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; border-bottom: 1px solid var(--p3-line-soft); }
+.p3 td { padding: 8px 12px; border-bottom: 1px solid #2c2c2c; color: #dcdcdc; vertical-align: middle; }
+.p3 tr:last-child td { border-bottom: 0; }
+.p3 tbody tr:hover td { background: #242424; }
+.p3 td button { height: 30px; padding: 0 10px; font-size: 12.5px; margin: 0 4px 0 0; }
+.p3-empty, .p3 td[colspan] { padding: 22px 16px; text-align: center !important; color: var(--p3-dim); }
+
+/* ---------- abas ---------- */
+.p3-tabs { display: flex; flex-wrap: wrap; gap: 2px; border-bottom: 1px solid #333; }
+.p3 .p3-tabs button { height: auto; background: transparent; border: 0; border-bottom: 2px solid transparent; border-radius: 0; color: #9aa4af; padding: 8px 12px; }
+.p3 .p3-tabs button:hover:not(:disabled) { color: #fff; background: #2a2a2a; }
+.p3 .p3-tabs button.selected { color: var(--p3-accent-strong); border-bottom-color: var(--p3-accent); background: transparent; box-shadow: none; }
+
+/* ---------- seções recolhíveis ---------- */
+.p3 details { border-top: 1px solid var(--p3-line-soft); padding-top: 12px; }
+.p3 details > summary { cursor: pointer; font-size: 13.5px; font-weight: 700; color: #ddd; list-style-position: outside; }
+.p3 details > summary:hover { color: #fff; }
+.p3 details[open] > summary { margin-bottom: 12px; }
+
+/* ---------- estado ---------- */
+.p3-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 3px; border: 1px solid #4c4c4c; background: #2c2c2c; color: #c9c9c9; font-size: 11.5px; font-weight: 700; letter-spacing: .2px; white-space: nowrap; }
+.p3-badge.air { background: #3a2725; border-color: #7c3a33; color: #ffb4a8; }
+.p3-badge.ok { background: #223026; border-color: #3d5b44; color: #8ee6b4; }
+.p3-badge.warn { background: #302511; border-color: #6b5320; color: #f0d9a5; }
+.p3-note { color: var(--p3-dim); font-size: 12.5px; }
+.p3-relato { display: flex; flex-direction: column; gap: 12px; }
+.p3-relato .p3-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.p3-relato p { margin: 0; }
+.p3-alerta { margin: 0; padding: 8px 12px; background: #3a1d1a; border: 1px solid #b02a1f; border-radius: 4px; color: #fff; font-size: 13px; font-weight: 600; }
+.p3-warn { padding: 10px 12px; background: #302511; border: 1px solid #6b5320; border-left: 3px solid var(--p3-warn); border-radius: 3px; color: #f0d9a5; font-size: 13px; }
+.p3-log { margin: 0; padding: 10px 12px; max-height: 180px; overflow: auto; background: var(--p3-sunken); border: 1px solid var(--p3-line-soft); border-radius: 4px; color: #cfcfcf; font: 12px/1.5 Consolas, ui-monospace, monospace; white-space: pre-wrap; word-break: break-word; }
+.p3-log:empty { display: none; }
+
+/* Mensagem de operação: só ocupa espaço quando há o que dizer. */
+.p3 #message, .p3 #status, .p3 #error { font-size: 13px; }
+.p3 #message:empty, .p3 #status:empty, .p3 #error:empty { display: none; }
+.p3 #message:not(:empty), .p3 #error:not(:empty) { padding: 8px 12px; border-radius: 4px; border: 1px solid var(--p3-line-soft); background: #262626; }
+.p3 #message.error, .p3 #error { color: #ffb4a8; border-color: #6d3b35; background: #2d2120; }
+.p3 #message.ok { color: #8ee6b4; border-color: #3d5b44; background: #1f2b23; }
+.p3 #error.ok { display: none; } /* operação confirmada não precisa de faixa; o resultado aparece na própria tela */
+
+/* ---------- dentro de Configurações ---------- */
+html.embed-3mix body.p3 { background: var(--p3-bg); min-height: 0; }
+html.embed-3mix .p3-head, html.embed-3mix .p3-standalone { display: none !important; }
+html.embed-3mix .p3-main { padding: 2px 2px 12px; }
+
+/* Páginas de módulo que têm cabeçalho próprio em janela: dentro de Configurações o cabeçalho já existe. */
+html.embed-3mix .ret-top, html.embed-3mix .ret-footer, html.embed-3mix .pf-top, html.embed-3mix .pf-footer,
+html.embed-3mix .ret-pagehead h1, html.embed-3mix .pf-pagehead h1 { display: none !important; }

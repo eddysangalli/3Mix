@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3Mix · Sobre e suporte</title>
+<script src="3mix-padrao.js"></script>
+<link rel="stylesheet" href="3mix-grafite.css">
+<link rel="stylesheet" href="3mix-padrao.css">
+<style>
+  .hero { position: relative; display: flex; align-items: center; gap: 28px; flex-wrap: wrap; padding: 30px 32px; background: linear-gradient(120deg, #2a2a2a 0%, #1c1c1c 70%); border: 1px solid var(--p3-line); border-radius: 8px; overflow: hidden; }
+  .hero::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: linear-gradient(90deg, #ed1c24 0 33.3%, #22b14c 33.3% 66.6%, #2f6fed 66.6%); }
+  .hero img { display: block; height: 76px; width: auto; }
+  .hero-txt { flex: 1 1 280px; min-width: 0; }
+  .p3 .hero h1 { font-size: 26px; font-weight: 800; letter-spacing: -.4px; }
+  .hero p { margin-top: 4px; color: var(--p3-muted); font-size: 14px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; }
+  .chip { display: flex; flex-direction: column; gap: 2px; min-width: 150px; padding: 10px 14px; background: rgba(0,0,0,.25); border: 1px solid var(--p3-line-soft); border-radius: 4px; }
+  .chip span { font-size: 11px; font-weight: 700; color: var(--p3-dim); text-transform: uppercase; letter-spacing: .4px; }
+  .chip b { font-size: 14px; color: #fff; font-weight: 700; word-break: break-word; }
+
+  .duas { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; align-items: start; }
+  .novidades { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .novidades li { position: relative; padding-left: 16px; color: #ddd; font-size: 13.5px; }
+  .novidades li::before { content: ""; position: absolute; left: 2px; top: 8px; width: 5px; height: 5px; border-radius: 50%; background: var(--p3-accent-strong); }
+
+  .creditos { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 18px 24px; }
+  .creditos h3 { margin-bottom: 8px; font-size: 11.5px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: var(--p3-dim); }
+  .cred { display: flex; align-items: baseline; gap: 8px; padding: 5px 0; border-bottom: 1px solid #2c2c2c; font-size: 13px; }
+  .cred:last-child { border-bottom: 0; }
+  .p3 .cred a, .cred .n { flex: 1; min-width: 0; color: #e6e6e6; font-weight: 600; text-decoration: none; }
+  .p3 .cred a:hover { color: #fff; text-decoration: underline; }
+  .cred .v { color: var(--p3-dim); font-size: 12px; white-space: nowrap; }
+  .cred .l { color: #a8c3f5; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+  .legal { color: var(--p3-dim); font-size: 12px; line-height: 1.55; }
+</style>
+</head>
+<body class="p3" data-page="sobre">
+<header class="p3-head">
+  <a href="/" title="3Mix"><img class="p3-logo" src="/img/3mix-logo.png" alt="3Mix"></a>
+  <h1>Sobre e suporte</h1>
+</header>
+
+<main class="p3-main">
+  <section class="hero">
+    <img src="/img/3mix-logo.png" alt="3Mix">
+    <div class="hero-txt">
+      <h1>3Mix Studio</h1>
+      <p>Mesa de corte, streaming e produção ao vivo.</p>
+    </div>
+    <div class="chips">
+      <div class="chip"><span>Versão</span><b id="s-versao">—</b></div>
+      <div class="chip"><span>Motor</span><b>OBS Studio 32.2.2</b></div>
+      <div class="chip"><span>Projeto aberto</span><b id="s-projeto">—</b></div>
+    </div>
+  </section>
+
+  <div class="duas">
+    <section class="p3-card">
+      <div class="p3-card-head">
+        <h2>Atualizações</h2>
+        <span id="up-status" class="p3-note" role="status"></span>
+      </div>
+      <pre id="up-details" class="p3-log"></pre>
+      <div class="p3-row">
+        <button type="button" id="up-check" class="primary">Procurar atualização</button>
+        <button type="button" id="up-download" disabled>Baixar pacote</button>
+      </div>
+      <details>
+        <summary>Endereço das atualizações</summary>
+        <label class="p3-field" style="margin-bottom:12px">Endereço HTTPS
+          <input id="up-feed" type="url" placeholder="https://servidor/feed.json" autocomplete="off" spellcheck="false">
+        </label>
+        <div class="p3-row">
+          <button type="button" id="up-configure">Salvar</button>
+          <button type="button" id="up-disable" class="quiet">Remover</button>
+        </div>
+      </details>
+    </section>
+
+    <section class="p3-card">
+      <h2>Relatar problema</h2>
+      <div id="dg-relato"></div>
+      <div class="p3-row">
+        <a href="/docs/usuario/manual-operador.html" target="_blank" rel="noopener">Manual do operador</a>
+      </div>
+    </section>
+  </div>
+
+  <section class="p3-card">
+    <h2>O que mudou</h2>
+    <ul class="novidades" id="s-novidades"></ul>
+  </section>
+
+  <section class="p3-card">
+    <h2>Créditos</h2>
+    <div class="creditos" id="s-creditos"></div>
+    <p class="legal">O 3Mix é construído sobre o motor do OBS Studio e os componentes acima, cada um sob a própria licença; os textos completos ficam na pasta <b>licenses</b> desta instalação. NDI® é marca registrada da Vizrt NDI AB: <a href="https://ndi.video/" target="_blank" rel="noopener">ndi.video</a> · <a href="https://downloads.ndi.tv/SDK/NDI_SDK/NDI%20SDK%20License%20Agreement.pdf" target="_blank" rel="noopener">contrato do SDK NDI</a>.</p>
+  </section>
+</main>
+
+<script src="fechar-janela.js"></script>
+<script src="atualizacao.js?v=20261102a" data-prefixo="up-"></script>
+<script src="diagnosticos.js?v=20261102b" data-prefixo="dg-"></script>
+<script>
+(() => {
+  'use strict';
+  const E = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const gh = (repo) => 'https://github.com/' + repo;
+
+  // Versões e licenças conferidas em componentes.json, licenses/ e node_modules desta instalação.
+  const CREDITOS = [
+    ['Motor e base', [
+      ['OBS Studio', '32.2.2', 'GPL-2.0-or-later', gh('obsproject/obs-studio')],
+      ['FFmpeg', '', 'GPL-3.0-or-later', 'https://ffmpeg.org/'],
+      ['Chromium Embedded Framework', '', 'BSD-3-Clause', 'https://bitbucket.org/chromiumembedded/cef'],
+      ['Qt 6', '', 'LGPL-3.0', 'https://www.qt.io/'],
+      ['Node.js', '24.21', 'MIT', 'https://nodejs.org/'],
+    ]],
+    ['Operação', [
+      ['Downstream Keyer', '0.4.4', 'GPL-2.0', gh('exeldro/obs-downstream-keyer')],
+      ['Replay Source', '1.8.1', 'GPL-2.0', gh('exeldro/obs-replay-source')],
+      ['Source Record', '0.4.8', 'GPL-2.0', gh('exeldro/obs-source-record')],
+      ['Move Transition', '3.2.1', 'GPL-2.0', gh('exeldro/obs-move-transition')],
+      ['Media Playlist Source', '0.1.3', 'GPL-2.0', gh('CodeYan01/media-playlist-source')],
+      ['Source Dock', '0.5.1', 'GPL-2.0', gh('exeldro/obs-source-dock')],
+      ['Advanced Scene Switcher', '1.36.1', 'GPL-2.0', ''],
+      ['Advanced Masks', '1.5.4', 'GPL-2.0', ''],
+    ]],
+    ['Áudio e legendas', [
+      ['Audio Monitor', '0.10.1', 'GPL-2.0', gh('exeldro/obs-audio-monitor')],
+      ['Mix Track to Source', '1.0.2', 'GPL-2.0', gh('semnil/MixTrack2Source')],
+      ['ASIO (obs-asio)', '', 'GPL-3.0', ''],
+      ['LocalVocal', '', 'GPL-2.0', ''],
+      ['Whisper', '', 'MIT', ''],
+      ['Cloud Closed Captions', '0.33', 'GPL-2.0', ''],
+    ]],
+    ['Transporte', [
+      ['DistroAV (NDI)', '6.2.1', 'GPL-2.0-or-later', gh('DistroAV/DistroAV')],
+      ['NDI Runtime', '6.3.2', 'Contrato NDI', 'https://ndi.video/'],
+      ['Open Media Transport', '1.0.0.19', 'MIT', gh('openmediatransport/omtplugin')],
+    ]],
+    ['Imagem e painel', [
+      ['Shader Filter', '', 'GPL-2.0', ''],
+      ['Face Tracker', '', 'GPL-2.0', ''],
+      ['ws', '8.22', 'MIT', gh('websockets/ws')],
+      ['qrcode', '1.5.4', 'MIT', gh('soldair/node-qrcode')],
+      ['ExcelJS', '4.4', 'MIT', gh('exceljs/exceljs')],
+    ]],
+  ];
+  const NOVIDADES = [
+    'Multiview: montagem livre em Configurações, com monitor horizontal ou vertical, posição de cada monitor e relógio de produção.',
+    'Multiview: imagem real do motor em todos os monitores.',
+    'Faixa de estado na mesa: gravação, MultiGravação, Replay, transmissão, saídas, câmera virtual e retornos.',
+    'Remoto: lista de módulos com o endereço de rede de cada um e QR por módulo.',
+    'DSK refeito: a entrada escolhida não some, e o TAKE usa o que está na tela.',
+    'Atalhos e Automação reorganizados, com MIDI e OSC em aba própria.',
+    'Patch de Sinais e Pre-Flight disponíveis em Configurações; Retornos SRT e Matriz AUX em Saídas.',
+    'Padrão visual único em todas as telas de Configurações.',
+  ];
+
+  E('s-novidades').innerHTML = NOVIDADES.map((t) => '<li>' + esc(t) + '</li>').join('');
+  E('s-creditos').innerHTML = CREDITOS.map(([grupo, itens]) => '<div><h3>' + esc(grupo) + '</h3>' + itens.map(([n, v, l, u]) => '<div class="cred">'
+    + (u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(n) + '</a>' : '<span class="n">' + esc(n) + '</span>')
+    + (v ? '<span class="v">' + esc(v) + '</span>' : '') + '<span class="l">' + esc(l) + '</span></div>').join('') + '</div>').join('');
+
+  fetch('/api/update', { cache: 'no-store' }).then((r) => r.json()).then((v) => { if (v.update?.currentVersion) E('s-versao').textContent = v.update.currentVersion; }).catch(() => {});
+  fetch('/api/json', { cache: 'no-store' }).then((r) => r.json()).then((v) => { if (v.preset) E('s-projeto').textContent = v.preset; }).catch(() => {});
+})();
+</script>
+</body>
+</html>

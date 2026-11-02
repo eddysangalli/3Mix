@@ -26,8 +26,7 @@
     <div class="transport-btns" onclick="event.stopPropagation()">
       <button data-rp-command title="Ir para o IN do clipe" onclick="request('seek',{player:'${id}',cursor:0})">|◀ IN</button>
       <button data-rp-command title="Um quadro para trás" onclick="request('frame',{player:'${id}',delta:-1})">◀ 1q</button>
-      <button data-rp-command class="play" title="Reproduzir" onclick="request('transport',{player:'${id}',command:'PLAY'})">▶</button>
-      <button data-rp-command title="Pausar" onclick="request('transport',{player:'${id}',command:'PAUSE'})">Ⅱ</button>
+      <button data-rp-command class="play" id="transport-${id}" title="Reproduzir" onclick="toggleTransport('${id}')">▶</button>
       <button data-rp-command title="Um quadro para frente" onclick="request('frame',{player:'${id}',delta:1})">1q ▶</button>
       <button data-rp-command title="Ir para o OUT do clipe" onclick="request('seek',{player:'${id}',cursor:Number(document.getElementById('seek-${id}').max)||0})">OUT ▶|</button>
     </div>
@@ -36,7 +35,7 @@
   header.innerHTML=window.FreeMixWorkspaceNav.nav('replay','replay-project')
     +`<div class="topbar-right">
         <span id="clock-txt" class="topbar-clock"></span>
-        <button type="button" id="save-project" class="btn-topbar" onclick="saveProjectNotice()" title="Confirmar o projeto em uso nesta produção">Salvar projeto</button>
+        <button type="button" id="save-project" class="btn-topbar" onclick="saveProjectNotice()" title="Confirma o projeto em uso; o OBS salva a cena automaticamente">Confirmar projeto</button>
         <button type="button" id="open-replay-settings" class="btn-topbar" onclick="document.getElementById('replay-settings').showModal()" title="Câmeras, gravação e retenção do Replay">⚙ Configurações</button>
       </div>`;
   const brand=header.querySelector('.workspace-brand');
@@ -59,11 +58,11 @@
     </div>
     <div class="quick-capture-group">
       <span>Capturas</span>
-      <button data-rp-command data-rp-record onclick="quickClip(5)" title="Capturar os últimos 5 segundos">−5 s</button>
-      <button data-rp-command data-rp-record onclick="quickClip(10)" title="Capturar os últimos 10 segundos">−10 s</button>
-      <button data-rp-command data-rp-record onclick="quickClip(20)" title="Capturar os últimos 20 segundos">−20 s</button>
-      <button data-rp-command data-rp-record class="btn-mark-in" onclick="markIn()" title="Marcar o IN do próximo lance">MARCAR IN</button>
-      <button data-rp-command data-rp-record class="btn-mark-out" onclick="markOut()" title="Marcar o OUT e salvar o lance">MARCAR OUT</button>
+      <button data-rp-command data-rp-record onclick="quickClip(5)" title="Capturar os últimos 5 segundos (requer gravação SSD ativa)">−5 s</button>
+      <button data-rp-command data-rp-record onclick="quickClip(10)" title="Capturar os últimos 10 segundos (requer gravação SSD ativa)">−10 s</button>
+      <button data-rp-command data-rp-record onclick="quickClip(20)" title="Capturar os últimos 20 segundos (requer gravação SSD ativa)">−20 s</button>
+      <button data-rp-command data-rp-record class="btn-mark-in" onclick="markIn()" title="Marcar o IN do próximo lance (requer gravação SSD ativa)">MARCAR IN</button>
+      <button data-rp-command data-rp-record class="btn-mark-out" onclick="markOut()" title="Marcar o OUT e salvar o lance (requer gravação SSD ativa)">MARCAR OUT</button>
     </div>`;
 
   document.querySelector('.replay-main').innerHTML=`

@@ -1,8 +1,8 @@
-# Multi-RTMP com WebSocket versus saídas FreeMix
+# Multi-RTMP com WebSocket versus saídas 3Mix
 
-Conferência de fonte em 08/10/2026. O fork tem utilidade como backend opcional para instalações que já usam Multi-RTMP, sobretudo por oferecer destinos dinâmicos e grupos de encoders. Não resolve uma ausência de conteúdo independente no FreeMix: o motor atual já implementa essa seleção, inclusive Mix 2/3/4. Recomendo preservar o backend nativo e avaliar interoperabilidade separadamente.
+Conferência de fonte em 08/10/2026. O fork tem utilidade como backend opcional para instalações que já usam Multi-RTMP, sobretudo por oferecer destinos dinâmicos e grupos de encoders. Não resolve uma ausência de conteúdo independente no 3Mix: o motor atual já implementa essa seleção, inclusive Mix 2/3/4. Recomendo preservar o backend nativo e avaliar interoperabilidade separadamente.
 
-Nenhum binário foi instalado, nenhum perfil do operador foi modificado e nenhuma transmissão foi iniciada nesta avaliação. Compatibilidade binária e funcionamento do fork no FreeMix **não foram testados**.
+Nenhum binário foi instalado, nenhum perfil do operador foi modificado e nenhuma transmissão foi iniciada nesta avaliação. Compatibilidade binária e funcionamento do fork no 3Mix **não foram testados**.
 
 ## Versão e evidência
 
@@ -15,7 +15,7 @@ Nenhum binário foi instalado, nenhum perfil do operador foi modificado e nenhum
 
 ## Comparação verificável
 
-| Área | Fork inspecionado | FreeMix atual, fonte local |
+| Área | Fork inspecionado | 3Mix atual, fonte local |
 |---|---|---|
 | Quantidade | Lista dinâmica de targets, sem teto fixo encontrado nas estruturas auditadas; limitada na prática pelo motor/máquina. | Quatro destinos adicionais, além da saída principal OBS. |
 | Conteúdo | Programa quando compartilha encoder principal; com encoder próprio, cena selecionada **por nome**, via `obs_view_create`. | Programa, Preview, Clean, cena por **UUID**, Mix 2/3/4; seleção de overlays e resolução/orientação por destino. |
@@ -25,7 +25,7 @@ Nenhum binário foi instalado, nenhum perfil do operador foi modificado e nenhum
 | Persistência | `obs-multi-rtmp.json` no perfil OBS; mudança de perfil recarrega o dock. | Destinos/mixes no perfil; presets de destinos sem chaves no namespace da produção. Recuperação restaura configurações em perfil novo, desligadas. |
 | Automação | `syncStart`/`syncStop` acompanham início/fim da saída principal; eventos locais do motor, sem emissão de VendorEvent encontrada. | Comandos por destino, macros/controladores e leitura de estado do motor. Início automático é opção explícita da configuração. |
 
-Fonte upstream: [push-widget.cpp](https://github.com/davidcool/obs-multi-rtmp-websocket-support/blob/d81f40b769c4f1460132d8bc06207027c681e359/src/push-widget.cpp), [output-config.cpp](https://github.com/davidcool/obs-multi-rtmp-websocket-support/blob/d81f40b769c4f1460132d8bc06207027c681e359/src/output-config.cpp), [protocols.cpp](https://github.com/davidcool/obs-multi-rtmp-websocket-support/blob/d81f40b769c4f1460132d8bc06207027c681e359/src/protocols.cpp). Fonte FreeMix: `obs-vmix/ferramentas/saidas-producao.mjs` e `freemix-app/frontend/widgets/FreeMixMultistream.cpp`. A tabela descreve implementação, não homologação de cada protocolo em serviço externo.
+Fonte upstream: [push-widget.cpp](https://github.com/davidcool/obs-multi-rtmp-websocket-support/blob/d81f40b769c4f1460132d8bc06207027c681e359/src/push-widget.cpp), [output-config.cpp](https://github.com/davidcool/obs-multi-rtmp-websocket-support/blob/d81f40b769c4f1460132d8bc06207027c681e359/src/output-config.cpp), [protocols.cpp](https://github.com/davidcool/obs-multi-rtmp-websocket-support/blob/d81f40b769c4f1460132d8bc06207027c681e359/src/protocols.cpp). Fonte 3Mix: `obs-vmix/ferramentas/saidas-producao.mjs` e `freemix-app/frontend/widgets/FreeMixMultistream.cpp`. A tabela descreve implementação, não homologação de cada protocolo em serviço externo.
 
 ## API real e ciclo de vida
 
@@ -61,10 +61,10 @@ Um conector para instalações que **já tenham o fork carregado** pode expor `e
 
 Cada destino usa chave `external:multi-rtmp:<id>` e backend próprio, sem ocupar ou duplicar os quatro slots nativos. A camada normaliza os campos reais, não exporta URL/chave/arquivo de configuração e rejeita `responseData.error`. Start/stop retornam `requested` seguido de leitura por ID com prazo limitado; timeout preserva estado incerto, sem reemitir início automaticamente. `isRunning` significa apenas atividade do motor, nunca confirmação do servidor remoto.
 
-Não incluir inicialmente `toggle`, `*_all`, criação/remoção, edição de chaves/parâmetros ou mudanças de `syncStart`/`syncStop`; não iniciar em boot/recovery. Configuração avançada continua na UI original do plugin. O ganho é compatibilidade com targets existentes e controles externos, não substituição do FreeMix nem alegação de destinos ilimitados. Antes de implementação, a raiz deve aceitar esse contrato e reservar QA com plugin instalado somente no clone.
+Não incluir inicialmente `toggle`, `*_all`, criação/remoção, edição de chaves/parâmetros ou mudanças de `syncStart`/`syncStop`; não iniciar em boot/recovery. Configuração avançada continua na UI original do plugin. O ganho é compatibilidade com targets existentes e controles externos, não substituição do 3Mix nem alegação de destinos ilimitados. Antes de implementação, a raiz deve aceitar esse contrato e reservar QA com plugin instalado somente no clone.
 
 ## Licença e limites da entrega
 
-A [LICENSE](https://github.com/davidcool/obs-multi-rtmp-websocket-support/blob/d81f40b769c4f1460132d8bc06207027c681e359/LICENSE) é GNU GPL versão 2; a API GitHub identifica `GPL-2.0`. Se um binário vier a acompanhar FreeMix, preservar avisos/licença e providenciar a fonte correspondente completa dessa versão/dependências conforme o fluxo de distribuição do projeto. O pequeno recorte de fonte desta auditoria não deve ser apresentado como fonte correspondente completa.
+A [LICENSE](https://github.com/davidcool/obs-multi-rtmp-websocket-support/blob/d81f40b769c4f1460132d8bc06207027c681e359/LICENSE) é GNU GPL versão 2; a API GitHub identifica `GPL-2.0`. Se um binário vier a acompanhar 3Mix, preservar avisos/licença e providenciar a fonte correspondente completa dessa versão/dependências conforme o fluxo de distribuição do projeto. O pequeno recorte de fonte desta auditoria não deve ser apresentado como fonte correspondente completa.
 
-Esta entrega inclui comparação técnica com hashes reproduzíveis e adaptador manual de inspeção com provas de fixture. Permanecem sem ensaio: carregamento do DLL em OBS32.2.2/Qt do FreeMix, descoberta real do vendor, encoder compartilhado em grupos, WHIP, troca de perfil/coleção durante atividades e estabilidade prolongada. Nada disso foi marcado PASS por leitura de código.
+Esta entrega inclui comparação técnica com hashes reproduzíveis e adaptador manual de inspeção com provas de fixture. Permanecem sem ensaio: carregamento do DLL em OBS32.2.2/Qt do 3Mix, descoberta real do vendor, encoder compartilhado em grupos, WHIP, troca de perfil/coleção durante atividades e estabilidade prolongada. Nada disso foi marcado PASS por leitura de código.

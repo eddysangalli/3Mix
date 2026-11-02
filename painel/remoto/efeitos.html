@@ -3,38 +3,38 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>3Mix Pro · Qualidade e legendas</title>
+<title>3Mix · Efeitos e legendas</title>
 <link rel="stylesheet" href="vmix-dialogo.css">
 <style>
 .vd-window { width: 100%; max-width: 980px; margin: 20px auto; border-radius: 8px; box-shadow: 0 16px 48px rgba(0,0,0,0.6); }
 .fields, #quality-fields, #fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin: 8px 0; }
-.fields label, #quality-fields label, #fields label { display: flex; flex-direction: column; gap: 4px; font-weight: 700; font-size: 12px; color: #cbd5e1; }
+.fields label, #quality-fields label, #fields label { display: flex; flex-direction: column; gap: 4px; font-weight: 700; font-size: 12px; color: #b0b0b0; }
 .fields label input, #quality-fields label input, #fields label input,
 .fields label select, #quality-fields label select, #fields label select {
-  height: 28px; padding: 4px 10px; border: 1px solid #283340; border-radius: 4px; background: #0c0f14; color: #f8fafc; font: 12.5px "Segoe UI", -apple-system, sans-serif; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+  height: 28px; padding: 4px 10px; border: 1px solid #414141; border-radius: 4px; background: #1a1a1a; color: #ededed; font: 12.5px "Segoe UI", -apple-system, sans-serif; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
 }
 .fields label input:focus, #quality-fields label input:focus, #fields label input:focus,
 .fields label select:focus, #quality-fields label select:focus, #fields label select:focus {
-  border-color: #38bdf8; background: #141922; box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+  border-color: #2f6fed; background: #2d2d2d; box-shadow: 0 0 0 2px rgba(47, 111, 237, 0.2);
 }
-.vd-preview-frame { max-width: 100%; max-height: 260px; border: 1px solid #283340; border-radius: 4px; background: #000; margin: 10px auto; display: block; object-fit: contain; }
-.vd-note-box { background: #0c0f14; border: 1px solid #202936; border-radius: 6px; padding: 10px 14px; font-size: 12px; color: #94a3b8; line-height: 1.5; margin: 8px 0; }
+.vd-preview-frame { max-width: 100%; max-height: 260px; border: 1px solid #414141; border-radius: 4px; background: #000; margin: 10px auto; display: block; object-fit: contain; }
+.vd-note-box { background: #1a1a1a; border: 1px solid #414141; border-radius: 6px; padding: 10px 14px; font-size: 12px; color: #909090; line-height: 1.5; margin: 8px 0; }
 .vd-nums button { height: 32px; padding: 0 14px; font-size: 12px; }
-.vd-nums button[aria-selected="true"] { background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); border-color: #38bdf8; color: #fff; font-weight: 700; box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); }
-.ai-preset-btn { height: 28px; padding: 0 12px; font-size: 12px; font-weight: 600; background: #161c24; border: 1px solid #283340; color: #cbd5e1; border-radius: 4px; cursor: pointer; transition: all 0.15s ease; }
-.ai-preset-btn:hover { background: #202834; border-color: #384659; color: #fff; }
-.ai-preset-btn.active { background: linear-gradient(135deg, #059669 0%, #047857 100%); border-color: #00e676; color: #fff; box-shadow: 0 0 10px rgba(0, 230, 118, 0.3); }
+.vd-nums button[aria-selected="true"] { background: linear-gradient(135deg, #2f6fed 0%, #255fc7 100%); border-color: #2f6fed; color: #fff; font-weight: 700; box-shadow: 0 0 10px rgba(47, 111, 237, 0.3); }
+.ai-preset-btn { height: 28px; padding: 0 12px; font-size: 12px; font-weight: 600; background: #2d2d2d; border: 1px solid #414141; color: #b0b0b0; border-radius: 4px; cursor: pointer; transition: all 0.15s ease; }
+.ai-preset-btn:hover { background: #353535; border-color: #737373; color: #fff; }
+.ai-preset-btn.active { background: linear-gradient(135deg, #1f7233 0%, #255f30 100%); border-color: #1f7233; color: #fff; box-shadow: 0 0 10px rgba(31, 114, 51, 0.3); }
 [hidden] { display: none !important; }
+  .vd-note-box { display: none; }
 </style>
 </head>
 <body data-page="efeitos" class="vd">
 <div class="vd-window">
   <div class="vd-strip">
     <nav class="vd-nums vd-words" role="tablist" aria-label="Ajustes da entrada">
-      <button type="button" role="tab" id="tab-quality" aria-controls="quality" aria-selected="true" tabindex="0" data-effects-tab="quality">Qualidade</button>
+      <button type="button" role="tab" id="tab-quality" aria-controls="quality" aria-selected="true" tabindex="0" data-effects-tab="quality">Voz</button>
       <button type="button" role="tab" id="tab-local-captions" aria-controls="local-captions" aria-selected="false" tabindex="-1" data-effects-tab="local-captions">Legendas</button>
       <button type="button" role="tab" id="tab-creative-effects" aria-controls="creative-effects" aria-selected="false" tabindex="-1" data-effects-tab="creative-effects">Efeitos criativos</button>
-      <button type="button" role="tab" id="tab-ptz-effects" aria-controls="ptz-effects" aria-selected="false" tabindex="-1" data-effects-tab="ptz-effects">PTZ</button>
     </nav>
     <span class="vd-flex"></span>
     <button id="effects-reconcile" class="vd-cog" title="Conferir operação pendente e estado">⚙</button>
@@ -57,13 +57,7 @@
 
     <label class="vd-row"><span>Ajuste</span>
       <select id="quality-type">
-        <optgroup label="Imagem">
-          <option value="color">Cor e luz</option>
-          <option value="sharpness">Nitidez</option>
-          <option value="chroma">Fundo verde</option>
-          <option value="nvBackground">Remover fundo · NVIDIA</option>
-          <option value="nvBlur">Desfocar fundo · NVIDIA</option>
-        </optgroup>
+
         <optgroup label="Som">
           <option value="rnnoise">Ruído da fala · RNNoise</option>
           <option value="nvDenoise">Ruído da fala · NVIDIA</option>
@@ -74,16 +68,7 @@
 
     <div class="vd-row"><span></span><span id="quality-reason" class="vd-note"></span></div>
 
-    <div id="quality-color-presets" class="vd-row" style="grid-template-columns:100px minmax(0,1fr)" hidden>
-      <span>Looks de Cor</span>
-      <div class="vd-inline" style="flex-wrap:wrap;gap:4px">
-        <button type="button" class="ai-preset-btn" id="color-preset-rec709" title="Rec.709 Legal Broadcast">🎥 Rec.709</button>
-        <button type="button" class="ai-preset-btn" id="color-preset-warm" title="Estúdio Quente / Warm Skin">☀️ Quente</button>
-        <button type="button" class="ai-preset-btn" id="color-preset-cinema" title="Cinema / Drama">🎬 Cinema</button>
-        <button type="button" class="ai-preset-btn" id="color-preset-cold" title="Jornalismo Frio">❄️ Frio</button>
-        <button type="button" class="ai-preset-btn" id="color-preset-reset" title="Restaurar padrão 1:1">↺ Neutro</button>
-      </div>
-    </div>
+
 
     <div id="quality-fields" class="fields"></div>
 
@@ -109,30 +94,6 @@
     <p id="quality-status" class="vd-msg" role="status">Verificando disponibilidade…</p>
 
     <!-- PAINEL DE PROCESSAMENTO NEURAL E IA PARA VÍDEO -->
-    <div id="video-ai-broadcast-panel" class="vd-note-box" style="margin-top:10px;background:#14181c;border:1px solid #2e3742;border-radius:2px;padding:8px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-        <span style="font-weight:700;color:#00e676;font-size:11px;">🧠 Suíte de IA para Vídeo & Efeitos Broadcast</span>
-        <span id="video-ai-status-badge" style="font-size:10px;padding:2px 8px;border-radius:2px;background:#242c35;border:1px solid #44515e;color:#00e676;font-weight:700;">GPU Pronta</span>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;color:#8c9ba8;">
-        <div style="background:#181d23;padding:6px;border:1px solid #28323d;border-radius:2px;">
-          <b style="color:#ffffff;">🤖 Virtual Green Screen (IA)</b>
-          <p style="margin:2px 0 0;font-size:10px;color:#8c9ba8;">Recorte neural sem pano verde físico (NVIDIA Maxine / AI Segmentation).</p>
-        </div>
-        <div style="background:#181d23;padding:6px;border:1px solid #28323d;border-radius:2px;">
-          <b style="color:#ffffff;">🎬 AI Bokeh / Blur Neural</b>
-          <p style="margin:2px 0 0;font-size:10px;color:#8c9ba8;">Profundidade de campo cinematográfica com isolamento de silhueta e desfoque suave.</p>
-        </div>
-        <div style="background:#181d23;padding:6px;border:1px solid #28323d;border-radius:2px;">
-          <b style="color:#ffffff;">🎯 Auto-Framing / Face Tracking</b>
-          <p style="margin:2px 0 0;font-size:10px;color:#8c9ba8;">Enquadramento inteligente que acompanha o apresentador pelo estúdio sem solavancos.</p>
-        </div>
-        <div style="background:#181d23;padding:6px;border:1px solid #28323d;border-radius:2px;">
-          <b style="color:#ffffff;">✨ DVE 3D & Transformação XYZ</b>
-          <p style="margin:2px 0 0;font-size:10px;color:#8c9ba8;">Rotação tridimensional, perspectiva cônica/ortográfica, cantos arredondados e luz linear.</p>
-        </div>
-      </div>
-    </div>
   </section>
 
   <!-- ABA: LEGENDAS LOCAIS -->
@@ -234,38 +195,6 @@
   </section>
 
   <!-- ABA: CÂMERA PTZ -->
-  <section id="ptz-effects" class="vd-body effects-tabs-panel" role="tabpanel" aria-labelledby="tab-ptz-effects" tabindex="0" hidden>
-    <div class="vd-note-box">
-      Face Tracker envia VISCA TCP à câmera local. Escolha a fonte de vídeo. Iniciar pode movimentá-la; parar encerra a conexão. Não altera Programa.
-    </div>
-
-    <label class="vd-row"><span>Fonte da câmera</span>
-      <select id="ptz-input"></select>
-    </label>
-
-    <label class="vd-row"><span>IPv4 da câmera</span>
-      <input id="ptz-address" type="text" placeholder="192.168.1.100">
-    </label>
-
-    <label class="vd-row"><span>Porta VISCA TCP</span>
-      <input id="ptz-port" type="number" min="1" max="65535" value="1259" class="vd-short">
-    </label>
-
-    <div class="fields">
-      <label>Tamanho do rosto<input id="ptz-z" type="number" min=".1" max="1" step=".05" value=".25"></label>
-      <label>Centro horizontal<input id="ptz-x" type="number" min="-.5" max=".5" step=".05" value="0"></label>
-      <label>Centro vertical<input id="ptz-y" type="number" min="-.5" max=".5" step=".05" value="0"></label>
-    </div>
-
-    <div class="vd-row"><span></span>
-      <div class="vd-inline">
-        <button id="ptz-start" class="vd-on">Iniciar tracking</button>
-        <button id="ptz-stop">Parar tracking</button>
-      </div>
-    </div>
-
-    <p id="ptz-status" class="vd-msg">Verificando plugin…</p>
-  </section>
 
   <div class="vd-bar">
     <span class="vd-flex"></span>
@@ -274,9 +203,9 @@
 </div>
 
 <script src="fechar-janela.js"></script>
-<script src="efeitos-abas.js"></script>
+<script src="efeitos-abas.js?v=20261102b"></script>
 <script src="efeitos-gate.js"></script>
-<script src="efeitos.js"></script>
-<script src="qualidade.js" defer></script>
+<script src="efeitos.js?v=20261102b"></script>
+<script src="qualidade.js?v=20261102b" defer></script>
 </body>
 </html>

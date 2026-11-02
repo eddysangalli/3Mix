@@ -1,4 +1,4 @@
-import { statfs } from 'node:fs/promises';
+import { diskReport } from './disco-producao.mjs';
 
 /**
  * PreflightEngine — Mecanismo de Verificação Pré-Voo (Pre-Flight Check) do FreeMix
@@ -103,52 +103,34 @@ export class PreflightEngine {
       value: `${inputs.length - lostSignalsCount}/${inputs.length} entradas ativas`
     });
 
-    // 5. Storage & Disk Capacity Check (Gravação / ISO / Replay)
-    let diskReport = { freeGb: 0, totalGb: 0, estRecordingHours: 0 };
+    // 5. Storage & Disk Capacity Check (Gravação / ISO / Replay) — lógica compartilhada
+    // com a checagem leve de disco em /api/health (disco-producao.mjs), para a primeira
+    // execução e o Pre-Flight operacional concordarem nos mesmos limiares/mensagens.
     try {
-      const targetDir = p.root || process.cwd();
-      if (typeof statfs === 'function') {
-        const stats = await statfs(targetDir).catch(() => null);
-        if (stats) {
-          const freeBytes = Number(stats.bavail) * Number(stats.bsize);
-          const totalBytes = Number(stats.blocks) * Number(stats.bsize);
-          const freeGb = freeBytes / (1024 * 1024 * 1024);
-          const totalGb = totalBytes / (1024 * 1024 * 1024);
-
-          // Estima consumo considerando gravação PGM a ~15 Mbps (aproximadamente 6.75 GB / hora)
-          const bitRateMbps = 15;
-          const bytesPerHour = (bitRateMbps * 1000 * 1000 / 8) * 3600;
-          const estRecordingHours = freeBytes / bytesPerHour;
-
-          diskReport = {
-            freeGb: Number(freeGb.toFixed(1)),
-            totalGb: Number(totalGb.toFixed(1)),
-            estRecordingHours: Number(estRecordingHours.toFixed(1))
-          };
-
-          if (freeGb < 5) {
-            issues.push({
-              severity: 'CRITICAL',
-              code: 'DISK_SPACE_CRITICAL',
-              message: `Espaço em disco crítico: apenas ${diskReport.freeGb} GB livres (< 1h de gravação)`,
-              area: 'storage'
-            });
-            checks.push({ name: 'Espaço em Disco', status: 'FAIL', value: `${diskReport.freeGb} GB` });
-          } else if (freeGb < 20) {
-            issues.push({
-              severity: 'WARN',
-              code: 'DISK_SPACE_LOW',
-              message: `Espaço em disco reduzido: ${diskReport.freeGb} GB livres (~${diskReport.estRecordingHours}h de gravação)`,
-              area: 'storage'
-            });
-            checks.push({ name: 'Espaço em Disco', status: 'WARN', value: `${diskReport.freeGb} GB` });
-          } else {
-            checks.push({
-              name: 'Espaço em Disco',
-              status: 'PASS',
-              value: `${diskReport.freeGb} GB livres (~${diskReport.estRecordingHours}h)`
-            });
-          }
+      const report = await diskReport(p.root || process.cwd());
+      if (report.supported) {
+        if (report.severity === 'CRITICAL') {
+          issues.push({
+            severity: 'CRITICAL',
+            code: 'DISK_SPACE_CRITICAL',
+            message: `Espaço em disco crítico: apenas ${report.freeGb} GB livres (< 1h de gravação)`,
+            area: 'storage'
+          });
+          checks.push({ name: 'Espaço em Disco', status: 'FAIL', value: `${report.freeGb} GB` });
+        } else if (report.severity === 'WARN') {
+          issues.push({
+            severity: 'WARN',
+            code: 'DISK_SPACE_LOW',
+            message: `Espaço em disco reduzido: ${report.freeGb} GB livres (~${report.estRecordingHours}h de gravação)`,
+            area: 'storage'
+          });
+          checks.push({ name: 'Espaço em Disco', status: 'WARN', value: `${report.freeGb} GB` });
+        } else {
+          checks.push({
+            name: 'Espaço em Disco',
+            status: 'PASS',
+            value: `${report.freeGb} GB livres (~${report.estRecordingHours}h)`
+          });
         }
       }
     } catch {

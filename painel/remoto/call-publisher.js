@@ -15,7 +15,7 @@ async function publish(next){
  const destination=ctx.createMediaStreamDestination();worklet.connect(destination);await ctx.resume();
  if((next.video||'program')==='program'){
   const devices=await navigator.mediaDevices.enumerateDevices(),device=devices.find(d=>d.kind==='videoinput'&&/obs|freemix/i.test(d.label));
-  if(!device)throw Error('Câmera virtual FreeMix não encontrada; nenhuma câmera física foi aberta');
+  if(!device)throw Error('Câmera virtual 3Mix não encontrada; nenhuma câmera física foi aberta');
   video=await navigator.mediaDevices.getUserMedia({audio:false,video:{deviceId:{exact:device.deviceId},width:{ideal:1280},height:{ideal:720},frameRate:{ideal:25,max:30}}});
  }else if(next.videoTransport?.mode==='continuous'){
   const m=await videoReady;if(!m?.videoCapabilities().available)throw Error('Transporte contínuo indisponível neste navegador');
@@ -30,7 +30,7 @@ const ice=next.ice;const turns=ice?.iceServers?.filter(s=>s.urls.some(u=>/^turns
  sdk.addEventListener('peerDisconnected',e=>{peers.delete(e.detail?.uuid);status(publishing?'publishing':'connecting');});
  sdk.addEventListener('error',()=>{publishing=false;status('error','Falha de sinalização/WebRTC; reconexão em andamento');schedule();});
  await sdk.connect();if(closed||current!==generation)return;
- await sdk.publish(stream,{streamID:next.stream,label:'FreeMix Retorno',media:{video:{maxBitrate:1500},audio:{maxBitrate:96}}});publishing=true;status('publishing');
+ await sdk.publish(stream,{streamID:next.stream,label:'3Mix Retorno',media:{video:{maxBitrate:1500},audio:{maxBitrate:96}}});publishing=true;status('publishing');
 }
 function schedule(){if(closed||retry)return;retry=setTimeout(()=>{retry=null;reconnects++;connect();},Math.min(10000,500*Math.pow(2,Math.min(reconnects,5))));}
 function connect(){if(closed)return;if(ws){ws.onclose=null;ws.close();}status('connecting');ws=new WebSocket(`${location.protocol==='https:'?'wss':'ws'}://${location.host}/api/calls/audio?key=${encodeURIComponent(key)}&token=${encodeURIComponent(token)}`);ws.binaryType='arraybuffer';

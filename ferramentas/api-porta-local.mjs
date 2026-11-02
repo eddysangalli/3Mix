@@ -11,7 +11,7 @@ export async function selectApiPort({configuredPort,explicit=false,probe}){
  throw Error('O controle local não encontrou uma porta livre entre 18188 e 18198. Nenhum processo foi encerrado.');
 }
 export async function persistApiPort(root,port,health){
- if(!Number.isInteger(port)||port<1||port>65535||health?.app!=='FreeMix'||health.installationId!==installationIdentity(root)||Number(health.port)!==port)throw Error('Não foi confirmada a propriedade da API desta instalação.');
+ if(!Number.isInteger(port)||port<1||port>65535||!['FreeMix','3Mix'].includes(health?.app)||health.installationId!==installationIdentity(root)||Number(health.port)!==port)throw Error('Não foi confirmada a propriedade da API desta instalação.');
  const canonicalRoot=await realpath(root),directory=await realpath(join(root,'painel')),inside=relative(canonicalRoot,directory);
  if(inside==='..'||inside.startsWith('..\\')||inside.startsWith('../')||isAbsolute(inside))throw Error('O painel está fora desta instalação.');
  const path=join(directory,'local.js'),info=await lstat(path);if(!info.isFile()||info.isSymbolicLink())throw Error('Configuração local inválida.');

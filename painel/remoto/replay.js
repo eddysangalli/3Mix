@@ -88,7 +88,7 @@ function renderBase(data) {
 
   const recStatus = el('rec-status');
   if (recStatus) {
-    recStatus.textContent = data.rec ? '● SSD GRAVANDO' : '○ SSD PARADO';
+    recStatus.textContent = data.rec ? '● SSD GRAVANDO' : '○ SSD PARADO · capturas desativadas';
     recStatus.dataset.rec = data.rec ? '1' : '0';
     recStatus.style.cssText = '';
   }
@@ -311,6 +311,13 @@ function render(data) {
         ? 'ARQUIVO AUSENTE · player bloqueado'
         : time(cursor) + ' / ' + time(duration) + (media?.mediaState === 'OBS_MEDIA_STATE_PLAYING' ? ' · reproduzindo' : media?.mediaState === 'OBS_MEDIA_STATE_PAUSED' ? ' · pausado' : '');
     }
+    const transport = el('transport-' + player);
+    if (transport) {
+      const playing = media?.mediaState === 'OBS_MEDIA_STATE_PLAYING';
+      transport.textContent = playing ? 'Ⅱ' : '▶';
+      transport.title = playing ? 'Pausar' : 'Reproduzir';
+      transport.dataset.state = playing ? 'playing' : 'paused';
+    }
   }
 
   const recoverable = !data.rec && data.markIn && data.session && data.markIn.sessionId === data.session.id;
@@ -330,6 +337,13 @@ function render(data) {
 
 function seekPlayer(player, cursor) {
   request('seek', { player, cursor: Number(cursor) });
+}
+
+function toggleTransport(player) {
+  const media = replay?.players?.[player];
+  if (!media || media.available === false) return;
+  const playing = media.mediaState === 'OBS_MEDIA_STATE_PLAYING';
+  request('transport', { player, command: playing ? 'PAUSE' : 'PLAY' });
 }
 
 function historyStep() {
@@ -457,7 +471,7 @@ function saveHistoryRange() {
 
 // PIPELINE DE PRÉVIA DE VÍDEO DO HISTÓRICO VIA MEDIASOURCE
 let historyPlayback = null, historyGeneration = 0, historyRefreshAt = 0, historyRefreshing = false, historyPinAt = 0;
-const historyViewerId = crypto.randomUUID();
+const historyViewerId = typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, '0')).join('');
 
 async function historyApi(action, data = {}, signal) {
   const response = await fetch('/api/replay', {

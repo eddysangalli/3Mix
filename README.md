@@ -1,4 +1,4 @@
-# FreeMix — README /060000
+# 3Mix — README /060000
 
 Estado vigente após aceite Root: **0.1.0-local.20261010060000, Native24/a047860**. Uma instalação própria, dois ciclos cooperativos counter0/crash0, Meter [0,0] preservados, diagnóstico instalado sanitizado e desinstalação conservadora. Operador preservado, não ativado/substituído.
 
@@ -18,9 +18,9 @@ Provas instaladas: qa-finalizacao/setup-060000-qa/report.json SHA 77d835df3da98d
 
 Referências a atual/pendente/próximo abaixo pertencem ao registro original; artefatos selados/recibos não foram reescritos.
 
-# FreeMix Studio
+# 3Mix Studio
 
-Código do FreeMix baseado no OBS Studio 32.2.2, com interface de mesa de produção, saídas independentes, composições, GC, Calls, replay, áudio e automação.
+Código do 3Mix baseado no OBS Studio 32.2.2, com interface de mesa de produção, saídas independentes, composições, GC, Calls, replay, áudio e automação.
 
 Entrega local aprovada: **0.1.0-local.20261010035000**, selecionada em `entregas/INSTALADOR-ATUAL.json`. 060000/Native24 traz correções posteriores de Calls e HDR e aguarda novo pacote/ensaio instalado. 050500 preserva um FAIL do verificador e uma continuação separada de diagnóstico/desinstalação. Retorno custom das Calls permanece limitado a5fps; vídeo contínuo está em implementação isolada. Estado vigente: [docs/CONTINUAR.md](docs/CONTINUAR.md). Pendências e critérios: [docs/PENDENCIAS-REAIS.md](docs/PENDENCIAS-REAIS.md). Instalador: [docs/INSTALACAO.md](docs/INSTALACAO.md). Tarefa de auditoria: [docs/TAREFA-AUDITORIA-PENDENCIAS.md](docs/TAREFA-AUDITORIA-PENDENCIAS.md).
 
@@ -42,7 +42,7 @@ Leia [BUILD-FROM-SOURCE.md](docs/BUILD-FROM-SOURCE.md). Os patches têm manifest
 
 O Git guarda fontes e documentação. A cópia executável gerada antes nesta pasta foi arquivada no workspace; a instalação operacional é `obs-vmix`, e o fork C++ completo é `freemix-app`. Binários, configurações do operador e chaves não fazem parte do checkout. Pacotes assinados: [docs/releases/](docs/releases/).
 
-Na máquina de desenvolvimento original, abra a instalação por `ABRIR-FREEMIX.cmd` na raiz do workspace, após salvar e fechar o FreeMix correspondente. Num portátil extraído, use `FreeMix Studio.cmd`. O launcher inicia motor e API juntos. Um clone deste repositório, sem os componentes compilados, não é um portátil pronto para executar.
+Na máquina de desenvolvimento original, abra a instalação por `INICIAR-3MIX.cmd` na raiz do workspace, após salvar e fechar o 3Mix correspondente (nota de rename de 31/10/2026: o comando citado antes aqui, `ABRIR-FREEMIX.cmd`, não existe mais na raiz do workspace — corrigido para o canônico atual). Num portátil extraído, use `FreeMix Studio.cmd`. O launcher inicia motor e API juntos. Um clone deste repositório, sem os componentes compilados, não é um portátil pronto para executar.
 
 `src/` e `plugins/obs-freemix/` são protótipos anteriores preservados como referência; o motor desta entrega é a série OBS em `fork/`. Documentos antigos de arquitetura/roadmap descrevem também intenções históricas e devem ser lidos junto do estado atual.
 

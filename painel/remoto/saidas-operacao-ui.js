@@ -227,7 +227,7 @@
       byId('srt-connection-use').hidden = true;
       byId('srt-connection-help').hidden = true;
       byId('srt-connection-message').hidden = true;
-      hint.textContent = listener ? 'O receptor se conecta a este FreeMix. Informe a porta que ele deve usar.' : 'No receptor, abra SRT em Listener. Aqui informe o IP dele e a mesma porta. Para teste nesta máquina, use 127.0.0.1.';
+      hint.textContent = listener ? 'O receptor se conecta a este 3Mix. Informe a porta que ele deve usar.' : 'No receptor, abra SRT em Listener. Aqui informe o IP dele e a mesma porta. Para teste nesta máquina, use 127.0.0.1.';
     } else hint.textContent = srt() ? 'Cole a conexão fornecida pelo receptor. Nada é enviado até clicar em Iniciar.' : 'Cole o servidor e a chave fornecidos pelo YouTube, Facebook ou outra plataforma. Cada destino pode iniciar separadamente.';
     labels('input').hidden = get('mode') !== 'source';
     labels('output-mix').hidden = get('mode') !== 'mix';

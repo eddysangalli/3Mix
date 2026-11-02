@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>OGraf 3Mix Lower Third</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 1920px; height: 1080px; overflow: hidden;
+      background: transparent; font-family: "Segoe UI", -apple-system, sans-serif;
+    }
+    #ograf-card {
+      position: absolute; bottom: 80px; left: 100px;
+      display: flex; flex-direction: column; opacity: 0;
+      transform: translateX(-40px); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #ograf-card.active { opacity: 1; transform: translateX(0); }
+    .badge {
+      align-self: flex-start; padding: 4px 14px; background: #e63946; color: #fff;
+      font-size: 14px; font-weight: 800; letter-spacing: 1.5px; border-radius: 4px 4px 0 0;
+    }
+    .main-box {
+      background: rgba(15, 23, 42, 0.92); border-left: 6px solid #e63946;
+      padding: 12px 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .title { color: #f8fafc; font-size: 28px; font-weight: 700; }
+    .subtitle { color: #94a3b8; font-size: 18px; margin-top: 2px; }
+  </style>
+</head>
+<body>
+  <div id="ograf-card">
+    <div class="badge" id="gc-badge">AO VIVO</div>
+    <div class="main-box">
+      <div class="title" id="gc-title">3Mix Broadcast</div>
+      <div class="subtitle" id="gc-subtitle">Suíte de Produção Modular</div>
+    </div>
+  </div>
+
+  <script>
+    window.ograf = {
+      state: 'idle',
+      data: { title: '', subtitle: '', category: 'AO VIVO', badgeColor: '#e63946' },
+
+      load: async function(data) {
+        if (data) this.update(data);
+        this.state = 'loaded';
+        return { success: true, state: this.state };
+      },
+
+      play: function() {
+        document.getElementById('ograf-card').classList.add('active');
+        this.state = 'playing';
+      },
+
+      update: function(data) {
+        if (!data) return;
+        Object.assign(this.data, data);
+        if (data.title) document.getElementById('gc-title').textContent = data.title;
+        if (data.subtitle) document.getElementById('gc-subtitle').textContent = data.subtitle;
+        if (data.category) document.getElementById('gc-badge').textContent = data.category;
+        if (data.badgeColor) {
+          document.getElementById('gc-badge').style.background = data.badgeColor;
+          document.querySelector('.main-box').style.borderLeftColor = data.badgeColor;
+        }
+      },
+
+      stop: function() {
+        document.getElementById('ograf-card').classList.remove('active');
+        this.state = 'stopped';
+      }
+    };
+  </script>
+</body>
+</html>
+

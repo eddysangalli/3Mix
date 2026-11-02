@@ -10,6 +10,11 @@ namespace freemix {
     class AudioBusManager;
     class CanvasMixManager;
     class MultiviewManager;
+    class ProjectManager;
+    class InputManager;
+    class NetworkBondingManager;
+    class GraphicsManager;
+    class StateEngine;
 }
 
 /**
@@ -34,6 +39,7 @@ public:
     freemix::InputManager* inputManager() const { return m_inputManager.get(); }
     freemix::NetworkBondingManager* bondingManager() const { return m_bondingManager.get(); }
     freemix::GraphicsManager* graphicsManager() const { return m_graphicsManager.get(); }
+    freemix::StateEngine* stateEngine() const { return m_stateEngine.get(); }
 
     QString configPath() const { return m_configPath; }
     static FreeMixApp* instance() { return qobject_cast<FreeMixApp*>(QApplication::instance()); }
@@ -55,6 +61,7 @@ private:
     std::unique_ptr<freemix::InputManager> m_inputManager;
     std::unique_ptr<freemix::NetworkBondingManager> m_bondingManager;
     std::unique_ptr<freemix::GraphicsManager> m_graphicsManager;
+    std::unique_ptr<freemix::StateEngine> m_stateEngine;
 
     FreeMixMainWindow* m_mainWindow = nullptr;
     bool m_engineInitialized = false;

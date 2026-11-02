@@ -1,4 +1,4 @@
-/* Shared operator presentation; based on FreeMix studio colors and controls. */
+/* Shared operator presentation; based on 3Mix studio colors and controls. */
 body[data-page=saidas] a { color:#60a5fa; }
 body[data-page=saidas] .content a { color:#60a5fa; }
 .operation-workspace { align-items:start; }
@@ -6,27 +6,27 @@ body[data-page=saidas] .content a { color:#60a5fa; }
 .operation-workspace nav:not(.operation-steps) { gap:8px; }
 .operation-workspace .content label { grid-template-columns:minmax(130px,25%) minmax(0,1fr); margin:12px 0; gap:14px; }
 .operation-workspace .content label input,.operation-workspace .content label select { max-width:none; }
-.operation-steps { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); background:#0a0f14; border:1px solid #242c36; padding:4px; gap:4px; }
-.operation-steps button { min-height:42px; text-align:center; background:#242c36; color:#f0f4f8; border:1px solid #3e4b5c; }
+.operation-steps { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); background:#0f0f0f; border:1px solid #2d2d2d; padding:4px; gap:4px; }
+.operation-steps button { min-height:42px; text-align:center; background:#2d2d2d; color:#f0f4f8; border:1px solid #4c4c4c; }
 .operation-steps button.selected { background:#006400; border-color:#00e676; font-weight:700; }
 .operation-step { max-width:1040px; min-height:280px; }
 .operation-step h2 { font-size:18px; margin:18px 0 12px; color:#f0f4f8; }
 .operation-help { color:#8b99a8; font-size:13px; line-height:1.5; margin:8px 0 14px; max-width:85ch; }
-.operation-step #srt-connection { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; padding:14px; background:#12161c; border:1px solid #2e3744; }
+.operation-step #srt-connection { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; padding:14px; background:#171717; border:1px solid #383838; }
 .operation-step #srt-connection label { display:grid; grid-template-columns:1fr; margin:0; gap:6px; }
 .operation-step #srt-connection legend { padding:0 6px; color:#f0f4f8; }
 .operation-step #srt-connection>p,.operation-step #srt-connection>.row { grid-column:1/-1; }
-.operation-advanced { border-top:1px solid #2e3744; padding:12px 0; margin:6px 0; }
+.operation-advanced { border-top:1px solid #383838; padding:12px 0; margin:6px 0; }
 .operation-advanced>summary { cursor:pointer; font-weight:600; padding:6px 0; color:#f0f4f8; }
 .operation-advanced>summary:focus-visible { outline:2px solid #006400; outline-offset:3px; }
 .operation-overlays { display:flex; flex-wrap:wrap; gap:12px; }
 .operation-workspace .operation-overlays label { display:flex; margin:4px; }
 .operation-overlays input { width:auto!important; }
-.operation-footer { position:sticky; bottom:0; z-index:3; background:#161b22; display:flex; justify-content:space-between; gap:12px; padding:14px 0 4px; margin-top:14px; border-top:1px solid #2e3744; }
-.operation-principal { margin:12px 0; padding:10px; border:1px solid #3d4b56; }
+.operation-footer { position:sticky; bottom:0; z-index:3; background:#1c1c1c; display:flex; justify-content:space-between; gap:12px; padding:14px 0 4px; margin-top:14px; border-top:1px solid #383838; }
+.operation-principal { margin:12px 0; padding:10px; border:1px solid #4a4a4a; }
 .operation-principal>summary { cursor:pointer; font-weight:600; color:#f0f4f8; }
 .operation-primary { background:#006400; min-height:40px; }
-#operation-status { padding:10px 12px; background:#1a212a; color:#f0f4f8; border:1px solid #2e3744; line-height:1.4; margin:14px 0; }
+#operation-status { padding:10px 12px; background:#222222; color:#f0f4f8; border:1px solid #383838; line-height:1.4; margin:14px 0; }
 #operation-status.operation-error { color:#fca5a5; background:#3b1212; border-left:3px solid #ef4444; }
 #operation-summary { display:grid; grid-template-columns:130px minmax(0,1fr); gap:14px; margin:22px 0; }
 #operation-summary dt { color:#8b99a8; }
@@ -54,13 +54,13 @@ body[data-page=saidas] .content a { color:#60a5fa; }
 }
 
 /* Output workflow polish: scoped to this console, with its existing studio palette. */
-body[data-page=saidas] .operation-workspace .content{background:#252d35;color:#edf2f6;color-scheme:dark;border:1px solid #475663;min-height:320px;padding:20px}
+body[data-page=saidas] .operation-workspace .content{background:#2d2d2d;color:#edf2f6;color-scheme:dark;border:1px solid #475663;min-height:320px;padding:20px}
 body[data-page=saidas] .operation-workspace[data-output-selection=empty] .content{min-height:240px}
 body[data-page=saidas] .operation-workspace .content a{color:#a6d5ff}
-body[data-page=saidas] .operation-workspace .content input:not([type=checkbox]),body[data-page=saidas] .operation-workspace .content select{background:#121a22;color:#edf2f6;border-color:#637484;min-height:34px}
+body[data-page=saidas] .operation-workspace .content input:not([type=checkbox]),body[data-page=saidas] .operation-workspace .content select{background:#1a1a1a;color:#edf2f6;border-color:#637484;min-height:34px}
 body[data-page=saidas] .operation-workspace .content input::placeholder{color:#b7c3ce;opacity:1}
-body[data-page=saidas] .operation-steps{background:#182129;border:1px solid #475663;padding:4px}
-body[data-page=saidas] .operation-steps button{background:#293640;color:#edf2f6;border-color:#607484}
+body[data-page=saidas] .operation-steps{background:#212121;border:1px solid #475663;padding:4px}
+body[data-page=saidas] .operation-steps button{background:#353535;color:#edf2f6;border-color:#607484}
 body[data-page=saidas] .operation-steps button.selected{background:#006400;border-color:#65ac73}
 body[data-page=saidas] .operation-help{color:#bac5ce}
 body[data-page=saidas] .operation-empty{padding:4px 0 16px;max-width:72ch}
@@ -74,8 +74,8 @@ body[data-page=saidas] .operation-step{min-height:0}
 body[data-page=saidas] .operation-advanced{border-color:#52616f}
 body[data-page=saidas] .operation-advanced>summary{color:#edf2f6;min-height:36px}
 body[data-page=saidas] .operation-workspace fieldset{border-color:#607484}
-body[data-page=saidas] .operation-footer{background:#252d35;border-color:#52616f;padding:14px 0 8px}
-body[data-page=saidas] #operation-status{background:#182129;color:#d8e3ec;border-left:3px solid #607484}
+body[data-page=saidas] .operation-footer{background:#2d2d2d;border-color:#52616f;padding:14px 0 8px}
+body[data-page=saidas] #operation-status{background:#212121;color:#d8e3ec;border-left:3px solid #607484}
 body[data-page=saidas] #operation-status.operation-error{background:#432728;color:#ffd3d0;border-color:#ef9993}
 body[data-page=saidas] #operation-summary dt{color:#b9c8d5}
 body[data-page=saidas] .operation-step input:focus-visible,body[data-page=saidas] .operation-step select:focus-visible,body[data-page=saidas] .operation-workspace button:focus-visible,body[data-page=saidas] .operation-advanced>summary:focus-visible{outline:2px solid #8dccff;outline-offset:3px}

@@ -48,7 +48,7 @@
       const node=el(id);if(node)node.textContent=value+'%';
     }
   }
-  window.saveProjectNotice=()=>setMessage('Projeto atual confirmado. As alterações do Replay valem para esta produção.');
+  window.saveProjectNotice=()=>setMessage('Projeto atual confirmado. O OBS salva a cena automaticamente; as alterações do Replay valem para esta produção.');
   const recNode=el('rec-status');
   if(recNode)new MutationObserver(()=>{
     const clean=recNode.textContent.replace(/^[●○]\s*/,'');

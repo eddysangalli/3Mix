@@ -1,0 +1,188 @@
+/* ══════════════════════════════════════════════════════════════
+   TELA ÁUDIO — mixer completo, barramentos e master
+   ══════════════════════════════════════════════════════════════ */
+
+.tela-audio {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.audio-topo {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  padding: 10px 12px 8px;
+  border-bottom: 1px solid var(--linha);
+  background: #171a1e;
+}
+.audio-titulo h1 { font-size: 19px; letter-spacing: -.2px; }
+.audio-titulo span { display: block; margin-top: 2px; font-size: 11px; color: var(--txt-3); }
+.audio-acoes { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+.audio-corpo {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 302px;
+  gap: 6px;
+  padding: 6px 8px;
+  min-height: 0;
+}
+
+.audio-mixer {
+  display: flex;
+  gap: 3px;
+  padding: 8px;
+  background: var(--painel);
+  border: 1px solid var(--linha);
+  border-radius: var(--raio-g);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.audio-mixer .canal {
+  padding: 6px 5px;
+  gap: 4px;
+}
+.audio-mixer .canal-nome { font-size: 10px; height: 13px; }
+.audio-mixer .canal-fone { width: 26px; height: 20px; }
+
+.audio-mixer .ganho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3px;
+  padding: 0 1px;
+  font-family: var(--mono);
+  font-size: 7.5px;
+  color: var(--txt-4);
+}
+.audio-mixer .ganho b { color: var(--txt-3); font-weight: 600; font-size: 8px; }
+
+.audio-mixer .fader { width: 30px; }
+.audio-mixer .fader-cabo { width: 24px; height: 11px; }
+.audio-mixer .canal-medidor { width: 15px; }
+.audio-mixer .canal-escala { width: 19px; font-size: 7.5px; }
+.audio-mixer .canal-db { font-size: 10px; }
+.audio-mixer .canal-botoes button { height: 18px; font-size: 8.5px; }
+.audio-mixer .pan-knob { width: 26px; height: 26px; }
+.audio-mixer .pan-knob::after { transform-origin: 50% 10px; height: 8px; }
+
+.audio-mixer .divisor-grupo {
+  width: 1px;
+  align-self: stretch;
+  margin: 4px 5px;
+  background: linear-gradient(to bottom, transparent, #333a42 18%, #333a42 82%, transparent);
+}
+
+/* sidebar */
+
+.audio-lateral {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+}
+
+.barras-lista { display: flex; flex-direction: column; gap: 1px; padding: 6px; }
+.barra-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 90px 46px;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px;
+  border-radius: 3px;
+  font-size: 10.5px;
+}
+.barra-item:nth-child(odd) { background: #191d21; }
+.barra-item .barra-nome { color: var(--txt-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.barra-item .barra-nome b { color: var(--txt); font-weight: 600; }
+.barra-item .barra-nivel { font-family: var(--mono); font-size: 9px; color: var(--txt-3); text-align: right; }
+
+.medidor-h {
+  position: relative;
+  height: 8px;
+  background: #0a0c0e;
+  border: 1px solid #23282e;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.medidor-h i {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 40%;
+  background: linear-gradient(to right, #1f9d47, #35bd52 58%, #c9d03a 78%, #e8a33d 90%, #e0392b 100%);
+  transition: width .07s linear;
+}
+.medidor-h::after {
+  content: "";
+  position: absolute; inset: 0;
+  background-image: repeating-linear-gradient(to right, transparent 0 7px, rgba(0,0,0,.5) 7px 8px);
+}
+
+.master-vu {
+  display: grid;
+  grid-template-columns: 22px 14px 14px 1fr;
+  gap: 5px;
+  padding: 10px;
+  height: 150px;
+}
+.master-vu-par { display: contents; }
+.master-vu-par .rotulo {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--txt-3);
+  align-self: end;
+  padding-bottom: 2px;
+}
+.master-vu-par .trilho {
+  position: relative;
+  background: #0a0c0e;
+  border: 1px solid #23282e;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.master-vu-par .trilho i {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 55%;
+  background: linear-gradient(to top, #1f9d47 0%, #35bd52 60%, #c9d03a 82%, #e8a33d 92%, #e0392b 100%);
+  transition: height .07s linear;
+}
+.master-vu-par .trilho i.pico {
+  height: 2px;
+  background: rgba(255,255,255,.8);
+  bottom: 70%;
+  transition: bottom .12s linear;
+}
+.master-vu-par .trilho::after {
+  content: "";
+  position: absolute; inset: 0;
+  background-image: repeating-linear-gradient(to top, transparent 0 11px, rgba(0,0,0,.55) 11px 12px);
+}
+.master-escala {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 8px;
+  color: var(--txt-4);
+  text-align: right;
+}
+
+.card-dica p {
+  margin: 0;
+  padding: 8px 10px 4px;
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: var(--txt-3);
+}
+.dica-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 10px;
+  font-size: 10px;
+  color: #6fcf8b;
+}
+.dica-status .dot { width: 6px; height: 6px; background: #35c05a; }

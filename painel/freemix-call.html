@@ -2,16 +2,16 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<title>FreeMix Call</title>
+<title>3Mix Call</title>
 <style>
     :root {
-        --bg: #14181f; --panel: #1c222b; --input: #10141a; --border: #3e4a5c; --text: #e6ebf2; --muted: #96a1b0; --success: #00e676; --warning: #ffbf47; --error: #ff5252; --primary: #334052;
-        --button: #29313d; --button-hover: #374252; --button-active: #0e8a16;
+        --bg: #14181c; --panel: #1b2026; --input: #101418; --border: #2e3742; --text: #e2e8f0; --muted: #8c9ba8; --success: #00e676; --warning: #f7931e; --error: #ff3b30; --primary: #242c35;
+        --button: linear-gradient(180deg, #323b45 0%, #242b32 100%); --button-hover: linear-gradient(180deg, #3e4a57 0%, #2b343d 100%); --button-active: #006400;
     }
     * { box-sizing: border-box; }
     html, body { height: 100%; margin: 0; font-family: 'Segoe UI', -apple-system, sans-serif; background: var(--bg); color: var(--text); }
     body { display: grid; grid-template-rows: 60px 1fr 70px; overflow: hidden; }
-    .header { background: var(--panel); border-bottom: 1px solid var(--border); padding: 0 20px; display: flex; align-items: center; justify-content: space-between; }
+    .header { background: #0a0f14; border-bottom: 1px solid #28323d; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; }
     .header h1 { margin: 0; font-size: 18px; font-weight: 600; }
     .header .status { font-size: 14px; color: var(--muted); }
     .main { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px; overflow-y: auto; }
@@ -68,7 +68,7 @@
 <body>
 <div class="header">
     <div>
-        <h1>FreeMix Call</h1>
+        <h1>3Mix Call</h1>
         <div class="subtitle">Participação remota em produções broadcast</div>
     </div>
     <div class="status" id="connectionStatus">Desconectado</div>
@@ -538,7 +538,7 @@ class FreeMixCall {
             const random = Math.random().toString(36).substr(2, 9);
             this.callId = `fm${timestamp}${random}`;
             
-            // In a real implementation, this would connect to the FreeMix server
+            // In a real implementation, this would connect to the 3Mix server
             // For now, we simulate the connection
             await this.simulateConnection();
             
@@ -561,7 +561,7 @@ class FreeMixCall {
         // Simulate receiving return streams
         await this.simulateReturnStreams();
         
-        this.showToast('Conectado à produção FreeMix', 'success');
+        this.showToast('Conectado à produção 3Mix', 'success');
         this.updateUIState();
     }
 

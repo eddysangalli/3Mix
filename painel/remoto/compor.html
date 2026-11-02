@@ -3,101 +3,116 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Composições e MultiView</title>
-<link rel="stylesheet" href="vmix-dialogo.css">
+<title>3Mix · Composições</title>
+<script src="3mix-padrao.js"></script>
+<link rel="stylesheet" href="3mix-grafite.css">
+<link rel="stylesheet" href="3mix-padrao.css">
+<link rel="stylesheet" href="compor.css?v=20261102a">
 <style>
-svg#canvas { width: 100%; max-height: 36vh; background: #0c0f14; border: 1px solid #283340; border-radius: 6px; display: block; margin: 8px 0 12px; }
-svg#canvas rect { fill: #1e293b; stroke: #38bdf8; stroke-width: 2.5; }
-svg#canvas text { fill: white; font: 700 28px "Segoe UI", sans-serif; }
-.slot { border: 1px solid #232c38; border-radius: 6px; background: #11151c; padding: 12px 14px; margin-bottom: 10px; }
-.coords { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; margin: 6px 0; }
-.coords label { display: flex; flex-direction: column; font-size: 12px; font-weight: 700; gap: 4px; color: #cbd5e1; }
-.coords input { width: 80px; height: 28px; padding: 4px 8px; border: 1px solid #283340; border-radius: 4px; background: #0c0f14; color: #f8fafc; font-size: 12.5px; box-sizing: border-box; }
-.coords select { height: 28px; padding: 4px 8px; border: 1px solid #283340; border-radius: 4px; background: #0c0f14; color: #f8fafc; font-size: 12.5px; }
-#new-slots { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
-#new-slots label { display: flex; flex-direction: column; font-size: 12px; font-weight: 700; gap: 4px; color: #cbd5e1; }
-#composition-tools, #composition-tools ~ .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
-#composition-tools button, #composition-tools ~ .row button { height: 28px; font-size: 12px; padding: 0 12px; border-radius: 4px; }
-#composition-tools label, #composition-tools ~ .row label { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; }
-details summary { cursor: pointer; font-weight: 700; color: #38bdf8; padding: 6px 0; outline: none; }
-details summary:hover { color: #7dd3fc; }
+  /* A estrutura .workspace > section é o contrato de compor-galeria.js: ele coloca a galeria antes dela e troca estes títulos. */
+  .workspace { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 16px; align-items: start; }
+  body[data-page="compor"] label { display: flex; flex-direction: column; gap: 6px; font-size: 13.5px; font-weight: 600; color: #ddd; min-width: 0; }
+  svg#canvas { width: 100%; max-height: 42vh; background: #1a1a1a; border: 1px solid #414141; border-radius: 4px; display: block; }
+  svg#canvas rect { fill: #2d2d2d; stroke: #2f6fed; stroke-width: 2.5; }
+  svg#canvas text { fill: #fff; font: 700 28px "Segoe UI", sans-serif; }
+  .slot { border: 1px solid #414141; border-radius: 4px; background: #1d1d1d; padding: 12px 14px; margin-bottom: 10px; }
+  .coords { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; margin: 6px 0; }
+  .p3 .coords input { width: 84px; }
+  .p3 .coords select { width: auto; }
+  #composition-tools, #composition-tools ~ .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .workspace form { display: flex; flex-direction: column; gap: 12px; }
+  .compor-acoes { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
+  .compor-acoes > label { flex: 1 1 240px; }
+  /* Esquerda: escolher o modelo e criar. Direita: a composição aberta, com a imagem no alto. */
+  .p3 main.p3-main { display: grid; grid-template-columns: minmax(380px, 470px) minmax(0, 1fr); gap: 14px; align-items: start; max-width: none; }
+  #error { grid-column: 1 / -1; }
+  .workspace, body[data-page="compor"] .workspace { display: contents; }
+  #preset-library { grid-column: 1; margin: 0; padding: 14px 16px; background: var(--p3-panel); border: 1px solid var(--p3-line); border-radius: 4px; }
+  .library-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+  #preset-total { color: var(--p3-dim); font-size: 12px; }
+  .library-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 10px; }
+  #preset-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); max-height: 46vh; gap: 6px; padding: 0 4px 0 0; }
+  #preset-cards { overflow-x: hidden; }
+  .p3 .preset-card { display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; width: 100%; min-width: 0; height: auto; min-height: 0; padding: 6px; gap: 4px; background: #1d1d1d; border: 1px solid var(--p3-line); border-radius: 4px; color: #eee; white-space: normal; text-align: center; }
+  .p3 .preset-card:hover { background: #2a2a2a; border-color: #5a5a5a; }
+  .p3 .preset-card.selected { padding: 6px; background: #20262f; border: 1px solid var(--p3-accent); }
+  .preset-card canvas { display: block; width: 100%; height: 66px; object-fit: contain; flex: none; }
+  .preset-card strong { font-size: 11.5px; font-weight: 600; line-height: 1.25; }
+  .preset-card span { color: var(--p3-dim); font-size: 10.5px; }
+  #preset-choice:empty { display: none; }
+  .workspace > section:first-child { grid-column: 1; margin: 0; }
+  .workspace > section:nth-child(2) { grid-column: 2; grid-row: 1 / span 3; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+  .workspace > section:nth-child(2) > * { order: 3; margin-top: 0; margin-bottom: 0; }
+  .workspace > section:nth-child(2) > h2 { order: 0; }
+  .workspace > section:nth-child(2) > .compor-acoes:first-of-type { order: 1; }
+  .workspace > section:nth-child(2) > #canvas { order: 2; }
+  svg#canvas { max-height: 62vh; }
+  body[data-page="compor"] label:has(> input[type=checkbox]) { flex-direction: row; align-items: center; gap: 8px; font-weight: 500; }
+  body[data-page="compor"] label:has(> input[type=checkbox]) > input { width: auto; height: auto; }
+  .p3 #composition-frame-refresh { align-self: flex-start; width: auto; }
+  .workspace p:empty { display: none; }
+  .p3 details { border: 1px solid var(--p3-line); border-radius: 4px; padding: 8px 12px; }
+  .p3 details summary { cursor: pointer; font-weight: 600; }
+  .workspace.assigning:not(.created) > section:first-child { grid-column: 2; grid-row: 1 / span 3; }
+  @media (max-width: 1000px) { .p3 main.p3-main { grid-template-columns: 1fr; } #preset-library, .workspace > section:first-child, .workspace > section:nth-child(2), .workspace.assigning:not(.created) > section:first-child { grid-column: 1; grid-row: auto; } }
 </style>
 </head>
-<body data-page="compor" class="vd">
-<div class="vd-window vd-fill">
-  <div class="vd-strip">
-    <span class="vd-title">Composições</span>
-    <div class="vd-inline" style="gap:6px;margin-left:12px">
-      <span style="font-weight:700">Entrada:</span>
-      <select id="composition" class="vd-short" style="width:200px"></select>
-      <button id="preview" class="vd-on">Preparar no Preview</button>
-      <button id="undo">Desfazer Posição</button>
-    </div>
-    <span class="vd-flex"></span>
-    <span id="connection" class="vd-note" style="font-size:11px">Conectando…</span>
-  </div>
+<body data-page="compor" class="p3">
+<header class="p3-head">
+  <a href="/" title="3Mix"><img class="p3-logo" src="/img/3mix-logo.png" alt="3Mix"></a>
+  <h1>Composições</h1>
+  <span class="p3-flex"></span>
+  <span id="connection">Conectando…</span>
+</header>
 
-  <p id="error" class="vd-msg vd-error" hidden role="alert" style="margin:4px 12px"></p>
+<main class="p3-main">
+  <p id="error" role="alert" hidden></p>
 
-  <div class="vd-main">
-    <!-- Barra lateral para criar nova composição -->
-    <nav class="vd-side" aria-label="Criar Composição" style="width:240px;padding:8px">
-      <div style="font-weight:700;font-size:11px;color:#9aa6b0;margin-bottom:6px">NOVA ENTRADA COMPOSTA</div>
+  <div class="workspace">
+    <section class="p3-card">
+      <h2>Criar entrada composta</h2>
       <form id="create">
-        <div class="vd-row" style="grid-template-columns:50px 1fr;margin-bottom:4px">
-          <span>Nome</span><input id="name" maxlength="60" value="Entrevista" spellcheck="false">
-        </div>
-        <div class="vd-row" style="grid-template-columns:50px 1fr;margin-bottom:4px">
-          <span>Layout</span>
+        <label>Nome<input id="name" maxlength="60" value="Entrevista" spellcheck="false"></label>
+        <label>Layout
           <select id="layout">
-            <option value="2box">2 Pessoas (Lado a Lado)</option>
-            <option value="3box">3 Pessoas</option>
-            <option value="4box">4 Pessoas (Grid)</option>
+            <option value="2box">2 pessoas</option>
+            <option value="3box">3 pessoas</option>
+            <option value="4box">4 pessoas</option>
             <option value="vertical2box">Vertical · 2 pessoas</option>
             <option value="verticalpip">Vertical · PiP</option>
             <option value="pip">Picture in Picture</option>
-            <option value="slides">Apresentador + Slides</option>
+            <option value="slides">Apresentador + slides</option>
           </select>
-        </div>
-        <div class="vd-row" style="grid-template-columns:50px 1fr;margin-bottom:4px">
-          <span>Fundo</span>
-          <input id="color" type="color" value="#101820" style="height:22px;padding:1px;width:100%">
-        </div>
+        </label>
+        <label>Cor do fundo<input id="color" type="color" value="#101820"></label>
         <div id="new-slots"></div>
-        <button class="vd-on" type="submit" style="width:100%;margin-top:6px">+ Criar Entrada</button>
-        <p id="create-status" class="vd-msg" role="status" aria-live="polite" style="margin:4px 0 0;font-size:11px"></p>
+        <button class="primary" type="submit">Criar entrada</button>
+        <p id="create-status" class="p3-note" role="status" aria-live="polite"></p>
       </form>
-    </nav>
+    </section>
 
-    <!-- Painel central de edição visual e coordenadas dos slots -->
-    <div class="vd-pane">
-      <div class="vd-body">
-        <svg id="canvas" aria-label="Posições dos participantes"></svg>
-        <div id="slots" style="max-height:38vh;overflow-y:auto;padding-right:4px"></div>
-
-        <div class="vd-row" style="margin-top:6px">
-          <span>Categorias</span>
-          <div class="vd-inline" style="flex:1">
-            <input id="tags" placeholder="Tags separadas por vírgula" spellcheck="false" style="max-width:280px">
-            <button id="save-tags">Salvar Categorias</button>
-          </div>
-        </div>
-
-        <p id="status" class="vd-msg" role="status" style="margin-left:0"></p>
+    <section class="p3-card">
+      <h2>Editar composição</h2>
+      <div class="compor-acoes">
+        <label>Entrada<select id="composition"></select></label>
+        <button type="button" id="preview" class="primary">Preparar no Preview</button>
+        <button type="button" id="undo">Desfazer posição</button>
       </div>
-    </div>
+      <svg id="canvas" aria-label="Posições dos participantes"></svg>
+      <div id="slots"></div>
+      <div class="compor-acoes">
+        <label>Categorias (separadas por vírgula)<input id="tags" spellcheck="false"></label>
+        <button type="button" id="save-tags">Salvar categorias</button>
+      </div>
+      <p id="status" class="p3-note" role="status"></p>
+    </section>
   </div>
-
-  <div class="vd-bar">
-    <span class="vd-flex"></span>
-    <button id="close-btn" onclick="window.FreeMixClosePanel ? window.FreeMixClosePanel() : window.close()">Fechar</button>
-  </div>
-</div>
+</main>
 
 <script src="fechar-janela.js"></script>
-<script src="controle.js"></script>
+<script src="controle.js?v=20261102a"></script>
 <script src="compor.js"></script>
-<script src="compor-avancado.js"></script>
-<script src="compor-galeria.js"></script>
+<script src="compor-avancado.js?v=20261102b"></script>
+<script src="compor-galeria.js?v=20261102b"></script>
 </body>
 </html>

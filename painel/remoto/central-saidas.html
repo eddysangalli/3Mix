@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3Mix · Central de Saídas</title>
+<link rel="stylesheet" href="vmix-dialogo.css">
+<link rel="stylesheet" href="3mix-grafite.css">
+<link rel="stylesheet" href="3mix-janelas.css">
+<style>
+  html body.vd.cs-page { overflow: hidden; }
+  .vd-window.cs-window { width: 100%; max-width: none; height: 100vh; min-height: 100vh; margin: 0; border: 0; border-radius: 0; box-shadow: none; display: flex; flex-direction: column; }
+  .cs-window .vd-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 14px 18px 20px; }
+  /* Matriz inicial: Destino / Origem de vídeo / Origem de áudio, como o dono pediu — a leitura mais simples antes de
+     qualquer detalhe de protocolo. Linhas abrem o avançado correspondente sem trocar de janela. */
+  .cs-matrix { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+  .cs-matrix caption { text-align: left; font-size: 11px; color: #909090; text-transform: uppercase; letter-spacing: .5px; padding-bottom: 6px; }
+  .cs-matrix th, .cs-matrix td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #353535; font-size: 12.5px; vertical-align: middle; }
+  .cs-matrix th { background: #2b2b2b; color: #909090; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; border-bottom: 2px solid #555; position: sticky; top: 0; }
+  .cs-matrix tbody tr:hover td { background: #2d2d2d; }
+  .cs-source { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 3px; font-weight: 700; font-size: 11px; white-space: nowrap; }
+  /* Três origens possíveis de vídeo, cores distintas — nunca confundir M/E (processa/compõe) com AUX (só roteia). */
+  .cs-source.cs-input { background: #2f2f2f; color: #7fb3e8; border: 1px solid #2f4a6b; }
+  .cs-source.cs-me { background: #3a1f10; color: #f0a860; border: 1px solid #6b3f1f; }
+  .cs-source.cs-aux { background: #1f3a2a; color: #6fd79a; border: 1px solid #2f6b47; }
+  .cs-audio { font-size: 11.5px; color: #b0b0b0; }
+  .cs-state { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 700; border: 1px solid #484848; color: #909090; }
+  .cs-state.on { border-color: #b02a1f; color: #ff9b92; background: #2b1414; }
+  .cs-state.ready { border-color: #1f7233; color: #6fd79a; background: #142b1c; }
+  .cs-row-detail { cursor: pointer; }
+  .cs-row-detail td:first-child { font-weight: 700; color: #ededed; }
+  .cs-section { margin: 0 0 14px; border: 1px solid #414141; border-radius: 6px; background: #1a1a1a; overflow: hidden; }
+  .cs-section > summary { cursor: pointer; padding: 10px 14px; font-size: 13px; font-weight: 700; color: #ededed; list-style: none; display: flex; align-items: center; gap: 8px; background: #242424; }
+  .cs-section > summary::-webkit-details-marker { display: none; }
+  .cs-section > summary::before { content: "▸"; color: #909090; font-size: 11px; }
+  .cs-section[open] > summary::before { content: "▾"; }
+  .cs-section > summary small { margin-left: auto; font-weight: 400; color: #909090; }
+  .cs-embed-bar { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: #202020; border-top: 1px solid #353535; border-bottom: 1px solid #353535; font-size: 11.5px; color: #909090; }
+  .cs-embed-bar button { margin-left: auto; }
+  .cs-embed-surface { position: relative; height: 640px; background: #141414; }
+  .cs-embed-surface iframe { width: 100%; height: 100%; border: 0; display: block; }
+  .cs-note { margin: 0 0 14px; font-size: 12px; color: #a9a9a9; line-height: 1.5; }
+  .cs-note.warn { color: #e8c07a; }
+/* menos-texto */ .cs-note:not(.warn), summary small { display: none; }
+</style>
+</head>
+<body data-page="central-saidas" class="vd cs-page">
+<div class="vd-window cs-window">
+  <div class="vd-strip">
+    <span class="vd-title">Central de Saídas</span>
+    <span id="cs-state" class="ext-state" style="margin-left:auto">Consultando…</span>
+  </div>
+  <div class="vd-body">
+    <p class="cs-note">Matriz com todas as saídas: qual é o destino, de onde vem o vídeo (Entrada direta, M/E ou AUX) e de onde vem o áudio. M/E processa e compõe um resultado novo por switching; AUX só encaminha um sinal já existente — os dois nunca são a mesma coisa. Clique numa linha para abrir a configuração completa daquele destino abaixo, sem trocar de janela.</p>
+    <table class="cs-matrix" id="cs-matrix">
+      <caption>Saídas configuradas</caption>
+      <thead><tr><th>Destino</th><th>Origem de vídeo</th><th>Origem de áudio</th><th>Estado</th></tr></thead>
+      <tbody id="cs-matrix-rows"><tr><td colspan="4">Consultando o motor…</td></tr></tbody>
+    </table>
+
+    <details class="cs-section" id="cs-section-saidas" open>
+      <summary>Transmissão, gravação e Mixes independentes (SRT / RTMP / NDI / OMT / SDI / MultiStream) <small>página completa /saidas</small></summary>
+      <div class="cs-embed-bar">
+        <span>Editor completo de saídas e Mixes 2–4</span>
+        <button type="button" data-embed-reload="saidas">Recarregar</button>
+        <button type="button" data-open-window="/saidas">Abrir em janela</button>
+      </div>
+      <div class="cs-embed-surface"><iframe id="cs-frame-saidas" data-embed="saidas" src="/saidas?embed=1" title="Editor de saídas · página do 3Mix" loading="lazy" referrerpolicy="same-origin"></iframe></div>
+    </details>
+
+    <details class="cs-section" id="cs-section-aux">
+      <summary>AUX — roteamento de sinal existente <small>página completa /aux</small></summary>
+      <p class="cs-note warn" style="margin:10px 14px 0">O roteamento AUX abaixo é um plano salvo neste computador: hoje ele ainda não aplica automaticamente o corte a nenhuma saída física do motor. Trate como referência/planejamento até essa ligação existir.</p>
+      <div class="cs-embed-bar">
+        <span>Matriz AUX — cards de corte rápido e binding por saída</span>
+        <button type="button" data-embed-reload="aux">Recarregar</button>
+        <button type="button" data-open-window="/aux">Abrir em janela</button>
+      </div>
+      <div class="cs-embed-surface"><iframe id="cs-frame-aux" data-embed="aux" src="/aux?embed=1" title="Matriz AUX · página do 3Mix" loading="lazy" referrerpolicy="same-origin"></iframe></div>
+    </details>
+
+    <details class="cs-section" id="cs-section-externo">
+      <summary>Saídas de rede (NDI / OMT) — formulário guiado <small>página completa /externo</small></summary>
+      <div class="cs-embed-bar">
+        <span>Formulário guiado de envio de rede por vaga 1–4</span>
+        <button type="button" data-embed-reload="externo">Recarregar</button>
+        <button type="button" data-open-window="/externo">Abrir em janela</button>
+      </div>
+      <div class="cs-embed-surface"><iframe id="cs-frame-externo" data-embed="externo" src="/externo?embed=1" title="Saídas de rede · página do 3Mix" loading="lazy" referrerpolicy="same-origin"></iframe></div>
+    </details>
+  </div>
+</div>
+<span id="connection" hidden></span><p id="message" hidden></p>
+<script src="controle.js"></script>
+<script src="fechar-janela.js"></script>
+<script src="central-saidas.js?v=20261031i"></script>
+</body>
+</html>

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>3Mix Pro · Saídas horizontal e vertical</title>
-  <link rel="stylesheet" href="controle.css">
+  <link rel="stylesheet" href="controle.css?v=20261031j">
   <link rel="stylesheet" href="studio-dialog.css">
   <style>
     main {
@@ -15,14 +15,16 @@
       box-sizing: border-box;
     }
 
+    body[data-transport="monitors"] .output-navigation, body[data-transport="monitors"] #srt-quick-guide, body[data-transport="monitors"] #monitors-panel > p:not(#monitor-status) { display: none; }
+    body[data-transport="monitors"] #monitors-panel { min-height: 0; }
     .output-navigation {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
       margin-bottom: 14px;
-      background: #090c10;
+      background: #0c0c0c;
       padding: 6px;
-      border: 1px solid #1f2732;
+      border: 1px solid #282828;
       border-radius: 6px;
     }
     .output-navigation button {
@@ -31,9 +33,9 @@
       min-width: 130px;
       height: 34px;
       padding: 0 14px;
-      border: 1px solid #283240;
+      border: 1px solid #333333;
       border-radius: 4px;
-      background: #141820;
+      background: #191919;
       color: #94a3b8;
       font-weight: 600;
       font-size: 12.5px;
@@ -41,16 +43,16 @@
       transition: all 0.15s ease;
     }
     .output-navigation button:hover {
-      background: #1e2530;
+      background: #262626;
       color: #f1f5f9;
-      border-color: #3b4758;
+      border-color: #494949;
     }
     .output-navigation button[aria-selected="true"] {
-      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-      border-color: #38bdf8;
+      background: #3a3a3a;
+      border-color: #2f6fed;
       color: #ffffff;
       font-weight: 700;
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+      box-shadow: inset 0 -2px #2f6fed;
     }
 
     .workspace {
@@ -64,10 +66,10 @@
     .workspace nav {
       display: flex;
       flex-direction: column;
-      background: #0d1117;
+      background: #121212;
       padding: 8px;
       gap: 6px;
-      border: 1px solid #1f2732;
+      border: 1px solid #282828;
       border-radius: 6px;
       align-content: start;
     }
@@ -75,9 +77,9 @@
       text-align: left;
       height: 34px;
       padding: 0 12px;
-      border: 1px solid #26313f;
+      border: 1px solid #323232;
       border-radius: 4px;
-      background: #141922;
+      background: #1a1a1a;
       color: #cbd5e1;
       font-weight: 600;
       font-size: 12.5px;
@@ -85,9 +87,9 @@
       transition: all 0.15s ease;
     }
     .workspace nav button:hover {
-      background: #1e2634;
+      background: #282828;
       color: #ffffff;
-      border-color: #384659;
+      border-color: #484848;
     }
     .workspace nav button.selected {
       background: linear-gradient(135deg, #065f46 0%, #047857 100%) !important;
@@ -98,15 +100,15 @@
     }
     .workspace nav hr {
       border: 0;
-      border-top: 1px solid #1f2732;
+      border-top: 1px solid #282828;
       margin: 6px 0;
     }
 
     .content {
-      background: #11151c;
+      background: #161616;
       color: #f0f4f8;
       padding: 20px;
-      border: 1px solid #1f2732;
+      border: 1px solid #282828;
       border-radius: 6px;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
       width: 100%;
@@ -114,10 +116,10 @@
     }
 
     #monitors-panel, #network-panel, #sdi-panel {
-      background: #11151c;
+      background: #161616;
       color: #f0f4f8;
       padding: 20px;
-      border: 1px solid #1f2732;
+      border: 1px solid #282828;
       border-radius: 6px;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
       width: 100%;
@@ -140,9 +142,9 @@
       width: 100%;
       height: 32px;
       padding: 4px 10px;
-      border: 1px solid #283340;
+      border: 1px solid #343434;
       border-radius: 4px;
-      background: #090c10;
+      background: #0c0c0c;
       color: #f8fafc;
       font-size: 13px;
       box-sizing: border-box;
@@ -152,7 +154,7 @@
     label input:focus, label select:focus {
       border-color: #38bdf8;
       box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
-      background: #0f131a;
+      background: #141414;
     }
     label input:disabled, label select:disabled {
       opacity: 0.5;
@@ -180,9 +182,9 @@
     .format-tabs button {
       height: 30px;
       padding: 0 14px;
-      border: 1px solid #283240;
+      border: 1px solid #333333;
       border-radius: 4px;
-      background: #161b22;
+      background: #1c1c1c;
       color: #cbd5e1;
       font-weight: 600;
       font-size: 12px;
@@ -204,9 +206,9 @@
     .row button {
       height: 34px;
       padding: 0 16px;
-      border: 1px solid #334155;
+      border: 1px solid #434343;
       border-radius: 4px;
-      background: #1e293b;
+      background: #2b2b2b;
       color: #f1f5f9;
       font-weight: 600;
       font-size: 12.5px;
@@ -214,7 +216,7 @@
       transition: all 0.15s ease;
     }
     .row button:hover:not(:disabled) {
-      background: #283548;
+      background: #373737;
       color: #ffffff;
       border-color: #475569;
     }
@@ -233,11 +235,11 @@
     }
 
     fieldset {
-      border: 1px solid #283340;
+      border: 1px solid #343434;
       border-radius: 6px;
       padding: 12px 16px;
       margin: 14px 0;
-      background: #0d1117;
+      background: #121212;
     }
     fieldset legend {
       color: #38bdf8;
@@ -248,7 +250,7 @@
 
     .network {
       margin-top: 18px;
-      border-top: 1px solid #232c38;
+      border-top: 1px solid #2d2d2d;
       padding-top: 16px;
     }
     .network label {
@@ -265,7 +267,7 @@
 
     .network-summary {
       padding: 12px 16px;
-      background: #090c10;
+      background: #0c0c0c;
       border-left: 4px solid #3b82f6;
       border-radius: 4px;
       color: #e2e8f0;
@@ -284,9 +286,9 @@
     #network-panel details, #srt-alpha-guide {
       margin: 14px 0;
       padding: 10px 14px;
-      border: 1px solid #232c38;
+      border: 1px solid #2d2d2d;
       border-radius: 6px;
-      background: #090c10;
+      background: #0c0c0c;
     }
     details summary {
       cursor: pointer;
@@ -317,8 +319,9 @@
   <link rel="stylesheet" href="operacao.css">
 </head>
 <body data-page="saidas">
+  <script>document.body.dataset.transport = new URLSearchParams(location.search).get('transport') || '';</script>
   <header>
-    <a href="/">FreeMix</a>
+    <a href="/" class="brand-logo" title="3Mix"><img src="/img/3mix-logo.png" alt="3Mix"></a>
     <h1>Saídas horizontal / vertical</h1>
     <span id="connection">Conectando…</span>
   </header>
@@ -333,7 +336,6 @@
       <button data-panel="omt">OMT · alpha / PA16</button>
       <button data-panel="sdi">SDI / DeckLink</button>
       <button data-panel="destinations">MultiStream</button>
-      <button onclick="window.open('/aux','FreeMix_aux','width=1320,height=800,resizable=yes,scrollbars=yes')" style="color:#38bdf8;border-color:#0284c7;font-weight:700;">Matriz AUX ↗</button>
     </nav>
 
     <section id="monitors-panel" data-output-panel="monitors">
@@ -342,7 +344,8 @@
       <div class="row">
         <button data-projector="PROGRAM">Abrir Programa</button>
         <button data-projector="PREVIEW">Abrir Preview</button>
-        <button data-projector="MULTIVIEW">Abrir multiview</button>
+        <button type="button" id="monitor-montagem">Abrir Multiview</button>
+        <button data-projector="MULTIVIEW" title="Multiview do motor, em vídeo contínuo, sem a montagem">Multiview em vídeo</button>
       </div>
       <label>Entrada para janela própria
         <select id="monitor-source"></select>
@@ -354,13 +357,13 @@
         <button id="virtual-stop">Parar câmera virtual</button>
       </div>
       <p id="monitor-status" role="status">Consultando o motor…</p>
-      <p><a href="/settings?category=projectors">Configurações de projetores e multiview</a> · <a href="/saidas">Configurar transmissão horizontal / vertical</a></p>
+      <p><a href="/configuracoes?category=projectors">Configurações de projetores e multiview</a> · <a href="/saidas">Configurar transmissão horizontal / vertical</a></p>
     </section>
 
-    <p id="srt-quick-guide"><a href="/docs/srt-alpha.html" target="_blank" rel="noopener">Como testar SRT local, ZeroTier e alpha no OBS</a></p>
+    <p id="srt-quick-guide"><a href="/docs/srt-alpha.html" target="_blank" rel="noopener">Como testar SRT</a></p>
     <p id="destination-context-description"></p>
     <p id="principal-stream-access">
-      <a href="/settings?category=streaming&context=streaming" target="_blank" rel="noopener">Configurar transmissão principal</a> · A transmissão principal usa seu próprio perfil OBS.
+      <a href="/configuracoes?category=streaming&context=streaming" target="_blank" rel="noopener">Configurar transmissão principal</a> · A transmissão principal usa seu próprio perfil OBS.
       <button id="principal-start">Iniciar transmissão principal</button>
       <button id="principal-stop">Parar transmissão principal</button>
       <span id="principal-status" role="status"></span>
@@ -488,7 +491,7 @@
             <summary>Receptor e recomposição da transparência</summary>
             <p><strong>vMix · Fill/Key separado:</strong> configure duas saídas SRT com a mesma entrada, resolução, FPS e overlays. Fill leva a cor em uma porta; Key leva a transparência em cinza em outra porta. Exemplo: Fill 18360 e Key 18362, ambos H.264 4:2:0. No vMix receba as duas entradas; na engrenagem da Fill, Colour Key → Key/Fill Input, selecione a Key e silencie o áudio da Key. Não recorte nem dobre a largura. Use latências iguais e confira sincronismo antes de ir ao ar; as conexões não têm genlock.</p>
             <p><strong>SRT único 4:2:0:</strong> a cor e a máscara continuam lado a lado e têm o mesmo timestamp de quadro. O vMix recebe o quadro inteiro; crie versões para separar as metades. Ainda é necessário validar se Key/Fill utiliza o recorte dessas versões ou requer uma etapa Mix de renderização. A cor tem subamostragem 4:2:0; a máscara cinza conserva resolução espacial de luminância.</p>
-            <p>No modo lado a lado, SRT transporta um vídeo H.264 4:2:0 ou 4:4:4 com o dobro da largura: cor à esquerda e alpha em cinza à direita. Isso não é alpha nativo universal em SRT; o receptor FreeMix/FFmpeg precisa separar as metades e recompor a transparência.</p>
+            <p>No modo lado a lado, SRT transporta um vídeo H.264 4:2:0 ou 4:4:4 com o dobro da largura: cor à esquerda e alpha em cinza à direita. Isso não é alpha nativo universal em SRT; o receptor 3Mix/FFmpeg precisa separar as metades e recompor a transparência.</p>
             <p>Use uma composição, GC ou PNG com transparência real; câmera opaca continua opaca. A largura lógica é limitada a 1920 px (transporte até 3840 px). O formato é SDR; não equivale a HDR nem a genlock.</p>
             <p>Em FFmpeg: dividir o vídeo, recortar a metade esquerda como cor, recortar a direita como máscara cinza e usar alphamerge. O receptor deve respeitar a interpretação de RGB/alpha do formato; confira bordas e níveis antes de utilizar no ar. Um player SRT comum exibirá as duas metades.</p>
           </details>
@@ -597,7 +600,7 @@
         </select>
       </label>
       <label>Nome do Key separado<input id="network-key-name" maxlength="120" placeholder="Nome do sender + Key" disabled></label>
-      <label>Nome deste envio<input id="ndi-name" value="FreeMix Programa" maxlength="120"></label>
+      <label>Nome deste envio<input id="ndi-name" value="3Mix Programa" maxlength="120"></label>
       <label>Grupo NDI<input id="ndi-groups" maxlength="300"></label>
       <div class="row">
         <button data-network="NDI" data-command="start">Ligar NDI</button>
@@ -695,5 +698,14 @@
   <script src="saidas-srt-conexao-ui.js"></script>
   <script src="saidas-operacao-ui.js"></script>
   <script src="saidas-srt-hdr-access-ui.js"></script>
+  <script>
+    document.getElementById('monitor-montagem').addEventListener('click', async () => {
+      try {
+        const r = await fetch('/api/panel-open', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ route: '/multiview' }), signal: AbortSignal.timeout(6000) });
+        if ((await r.json()).success === true) return;
+      } catch { /* fora do programa */ }
+      window.open('/multiview', '_blank', 'noopener');
+    });
+  </script>
 </body>
 </html>

@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>3Mix Pro · Matriz de Saídas & Barramentos AUX</title>
+  <link rel="stylesheet" href="controle.css">
+  <style>
+    :root {
+      --bg-dark: #202020;
+      --panel-bg: #252525;
+      --card-bg: #252525;
+      --card-hover: #2d2d2d;
+      --border-color: #414141;
+      --accent-blue: #2f6fed;
+      --accent-cyan: #5b8bf3;
+      --color-pgm: #ef4444;
+      --color-pvw: #10b981;
+      --color-clean: #f59e0b;
+      --color-mv: #8b5cf6;
+      --color-mix: #ec4899;
+      --color-input: #38bdf8;
+    }
+    body {
+      background: var(--bg-dark);
+      color: #ededed;
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+    }
+    header {
+      padding: 10px 20px;
+      background: #1c1c1c;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-title {
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: 0.5px;
+    }
+    .brand-title img { display: block; height: 24px; width: auto; }
+    .badge-tag {
+      background: #2b2b2b;
+      border: 1px solid #334155;
+      color: #38bdf8;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+    .conn-status {
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+    }
+    .dot.connected {
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+    }
+    main {
+      padding: 16px 20px;
+      flex: 1;
+      max-width: 1720px;
+      margin: 0 auto;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .aux-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .aux-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      transition: border-color 0.2s ease;
+    }
+    .aux-card:hover {
+      border-color: #3b82f6;
+    }
+    .aux-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #2b2b2b;
+      padding-bottom: 8px;
+    }
+    .aux-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .aux-source-banner {
+      background: #1b1b1b;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .source-label {
+      font-size: 11px;
+      color: #b0b0b0;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .source-val {
+      font-size: 15px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge-src {
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .badge-src.program { background: var(--color-pgm); color: #fff; }
+    .badge-src.preview { background: var(--color-pvw); color: #000; }
+    .badge-src.clean { background: var(--color-clean); color: #000; }
+    .badge-src.multiview { background: var(--color-mv); color: #fff; }
+    .badge-src.mix { background: var(--color-mix); color: #fff; }
+    .badge-src.input { background: var(--color-input); color: #000; }
+
+    .cut-matrix {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+    .btn-cut {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: #cfcfcf;
+      padding: 8px 4px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+    .btn-cut:hover {
+      background: var(--card-hover);
+      color: #fff;
+      border-color: #475569;
+    }
+    .btn-cut.active {
+      background: #0284c7;
+      border-color: #38bdf8;
+      color: #fff;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+    }
+    .inputs-matrix {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      max-height: 85px;
+      overflow-y: auto;
+      padding: 4px;
+      background: #0b0f14;
+      border-radius: 4px;
+      border: 1px solid #242424;
+    }
+    .btn-input-cut {
+      flex: 1 1 calc(25% - 4px);
+      min-width: 65px;
+      background: #141b24;
+      border: 1px solid #222d3d;
+      color: #b0b0b0;
+      padding: 5px 4px;
+      border-radius: 3px;
+      font-size: 10.5px;
+      font-weight: 600;
+      cursor: pointer;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      text-align: center;
+    }
+    .btn-input-cut:hover {
+      background: #292929;
+      color: #fff;
+    }
+    .btn-input-cut.active {
+      background: #0369a1;
+      border-color: #38bdf8;
+      color: #fff;
+      font-weight: 700;
+    }
+    .aux-meta-row {
+      display: flex;
+      gap: 10px;
+      font-size: 11.5px;
+    }
+    .aux-meta-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .aux-meta-col label {
+      color: #8d8d8d;
+      font-size: 10px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .aux-meta-col select, .aux-meta-col input {
+      background: #0b0f14;
+      border: 1px solid #222d3d;
+      color: #ededed;
+      padding: 5px 8px;
+      border-radius: 4px;
+      font-size: 11.5px;
+    }
+    .bound-outputs-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      min-height: 22px;
+      align-items: center;
+    }
+    .output-chip {
+      background: #2b2b2b;
+      border: 1px solid #334155;
+      color: #b0b0b0;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-weight: 600;
+    }
+
+    .matrix-section {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 14px;
+    }
+    .matrix-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .table-container {
+      overflow-x: auto;
+    }
+    table.matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    table.matrix-table th, table.matrix-table td {
+      padding: 8px 12px;
+      text-align: left;
+      border-bottom: 1px solid #2b2b2b;
+    }
+    table.matrix-table th {
+      background: #0b0f14;
+      color: #b0b0b0;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 10.5px;
+    }
+    table.matrix-table tr:hover td {
+      background: #141b24;
+    }
+    .btn-action {
+      background: #0284c7;
+      border: 1px solid #38bdf8;
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand-group">
+      <div class="brand-title"><img src="/img/3mix-logo.png" alt="3Mix Pro"></div>
+      <div class="badge-tag">AUX Output Router & Matrix</div>
+      <div class="conn-status"><span id="dot" class="dot"></span> <span id="conn-text">Conectando...</span></div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button id="btn-refresh" class="btn-action">Atualizar Matriz</button>
+      <button id="btn-reset" class="btn-cut" style="padding:4px 8px;">Restaurar Padrões</button>
+      <button onclick="window.close()" class="btn-cut" style="padding:4px 8px;">Fechar</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="aux-grid" class="aux-grid">
+      <!-- Cards de AUX 1 a 4 renderizados dinamicamente via aux-router.js -->
+    </div>
+
+    <section class="matrix-section">
+      <div class="matrix-title">
+        <span>Saídas ligadas aos barramentos</span>
+      </div>
+      <div class="table-container">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th>ID do Destino</th>
+              <th>Nome da Saída</th>
+              <th>Tipo de Roteamento</th>
+              <th>Barramento Vinculado</th>
+              <th>Fonte no Ar</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="matrix-tbody">
+            <!-- Linhas de saídas renderizadas dinamicamente -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="aux-router.js?v=20261031i"></script>
+</body>
+</html>

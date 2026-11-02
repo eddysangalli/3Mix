@@ -56,7 +56,7 @@
   .notice{display:flex;align-items:flex-start;gap:8px;padding:5px 8px;border:1px solid #4b4b4b;border-left:3px solid #777;background:#282828;color:#ddd;font-size:11px;border-radius:3px}
   .notice.error{border-left-color:var(--rd-red);background:#301c1d;color:#ffd0d1}
   .notice.warn{border-left-color:var(--rd-amber);background:#302b1b;color:#ffe9ae}
-  .notice.info{border-left-color:#6b8fae;background:#202a32;color:#cfe5f4}
+  .notice.info{border-left-color:#6b8fae;background:#292929;color:#cfe5f4}
   .notice .grow{flex:1;min-width:0}
   .notice button{height:20px;padding:0 6px;font-size:10px;border:1px solid #6a6a6a;border-radius:2px;background:#333;color:#eee}
   .rd-main{display:grid;grid-template-columns:minmax(0,1fr) 378px;min-height:0;background:#202020}
@@ -85,7 +85,7 @@
   .rd-row{min-height:30px;border-bottom:1px solid #353535;background:#252525;cursor:pointer;color:#d8d8d8}
   .rd-row:last-child{border-bottom:0}
   .rd-row:hover{background:#2d2d2d}
-  .rd-row.selected{background:#30343a;box-shadow:inset 3px 0 #9aa7b4}
+  .rd-row.selected{background:#353535;box-shadow:inset 3px 0 #9aa7b4}
   .rd-row.current{background:#332022;box-shadow:inset 3px 0 var(--rd-red)}
   .rd-row.current.selected{box-shadow:inset 3px 0 var(--rd-red),inset 0 0 0 1px #7b5b5d}
   .rd-row.failed{background:#3a1d1e;box-shadow:inset 3px 0 var(--rd-red2)}
@@ -261,11 +261,9 @@
 
 <div id="dock">
   <div class="dock-head">
-    <b>RUNDOWN</b>
     <span class="ver" id="d-version"></span>
     <span class="badge" id="d-auto"></span>
     <span class="grow"></span>
-    <button type="button" class="b" data-act="expand" title="Abrir o editor/operador completo em uma janela">Expandir</button>
   </div>
   <div id="d-banner"></div>
   <div class="dock-current" id="d-current-box">

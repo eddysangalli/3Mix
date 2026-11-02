@@ -2,15 +2,15 @@
 
 **Protótipo abortado em 09/10/2026.** O operador rejeitou o teste com vídeo real no vMix por lentidão, travamentos, avanço/retrocesso aparente e atraso, mesmo localmente. Não utilizar como entrega operacional. O envio de teste e o receptor foram encerrados. As instruções e provas abaixo são registro do experimento; testes sintéticos/Edge não comprovam desempenho aceitável no vMix. Internet não foi testada.
 
-Este receptor recebe **vídeo real**, não recria um título HTML. Uma câmera com chroma key aplicado, um GC, um vídeo ou uma composição com transparência podem alimentar a mesma saída packed-alpha existente do FreeMix.
+Este receptor recebe **vídeo real**, não recria um título HTML. Uma câmera com chroma key aplicado, um GC, um vídeo ou uma composição com transparência podem alimentar a mesma saída packed-alpha existente do 3Mix.
 
 Fluxo: **entrada com alpha → SRT H.264 4:2:0 cor+máscara → FFmpeg remux sem recodificar → MP4 fragmentado/WebSocket → navegador/WebGL → alpha do vMix**. Cor e máscara são extraídas do mesmo quadro. A recomposição ocorre antes de o vMix aplicar enquadramento/overlay.
 
 ## Teste na mesma máquina
 
-1. Abra `ABRIR-RECEPTOR-ALPHA.cmd` na raiz. Não precisa fechar FreeMix/vMix. O receptor é um processo separado; escuta HTTP 18750 e SRT 18460, diferentes da recepção anterior 18360.
+1. Abra `ABRIR-RECEPTOR-ALPHA.cmd` na raiz. Não precisa fechar 3Mix/vMix. O receptor é um processo separado; escuta HTTP 18750 e SRT 18460, diferentes da recepção anterior 18360.
 2. Abra **http://127.0.0.1:18750/**. Essa tela fornece a URL completa de leitura para colar no vMix. A URL inclui uma chave aleatória persistente; só compartilhe com quem deve receber.
-3. No FreeMix, **Externo → SRT**, escolha uma saída livre. Selecione a entrada/composição com alpha real, resolução lógica 1920×1080, x264/H.264, cor 4:2:0, **Cor + máscara lado a lado / quadro único**. Pode usar o botão **Preparar SRT único · 4:2:0 + máscara**.
+3. No 3Mix, **Externo → SRT**, escolha uma saída livre. Selecione a entrada/composição com alpha real, resolução lógica 1920×1080, x264/H.264, cor 4:2:0, **Cor + máscara lado a lado / quadro único**. Pode usar o botão **Preparar SRT único · 4:2:0 + máscara**.
 4. Destino **Caller**, IP **127.0.0.1**, porta **18460**, latência **120 ms**. Salve e inicie essa saída. Ela transmitirá 3840×1080. A mesa de SRT antiga 18360 pode continuar como referência.
    Se reutilizar uma saída que já está ativa, primeiro **Parar**, depois alterar a conexão, **Salvar** e **Iniciar**. Marcar habilitada não inicia nem troca o destino da transmissão ativa.
 5. No vMix, **Adicionar Entrada → Web Browser**. Cole o link da tela do receptor. Configure **1920×1080**, a resolução lógica, e mantenha posição/zoom padrão. A cor e transparência chegam juntas nessa única entrada; não adicione SRT, Virtual Input, máscara, Key/Fill ou Mix para este caminho.
@@ -30,7 +30,7 @@ No repositório Git, `ferramentas/`, `painel/` e `servidor/` estão diretamente 
 
 ## Internet sem plugin nem VPN no receptor
 
-Hospede **este serviço** num servidor com IP público, porta UDP/SRT acessível e HTTPS/WSS. FreeMix envia como Caller ao servidor; o vMix remoto abre apenas a URL HTTPS com Web Browser. Isso evita abrir portas no roteador de quem envia e de quem usa o vMix. O servidor precisa aceitar UDP, ter FFmpeg com SRT e Node com `ws`; hospedagem PHP compartilhada não garante esses requisitos.
+Hospede **este serviço** num servidor com IP público, porta UDP/SRT acessível e HTTPS/WSS. 3Mix envia como Caller ao servidor; o vMix remoto abre apenas a URL HTTPS com Web Browser. Isso evita abrir portas no roteador de quem envia e de quem usa o vMix. O servidor precisa aceitar UDP, ter FFmpeg com SRT e Node com `ws`; hospedagem PHP compartilhada não garante esses requisitos.
 
 Exemplo Linux, com arquivos `ferramentas/`, `painel/alpha-web/` e `package.json` do kit:
 
@@ -43,7 +43,7 @@ Há um exemplo Caddy em `obs-vmix/servidor/alpha-web/Caddyfile.exemplo`. Ajuste 
 
 ## Provas e limites
 
-- `qa-portatil/resultado-alpha-web-video.json`: vídeo em movimento, SRT loopback H.264 4:2:0, alpha medido 0/130/255 para máscara nominal 0/128/255; cliente tardio, queda limpa e reconexão. Nenhuma alteração no FreeMix/vMix do operador.
+- `qa-portatil/resultado-alpha-web-video.json`: vídeo em movimento, SRT loopback H.264 4:2:0, alpha medido 0/130/255 para máscara nominal 0/128/255; cliente tardio, queda limpa e reconexão. Nenhuma alteração no 3Mix/vMix do operador.
 - `qa-portatil/resultado-alpha-web-fullhd.json`: teste separado de resolução lógica 1920×1080 / transporte 3840×1080 no navegador Edge headless. Leia o recibo para o resultado efetivo.
 - Essas provas do navegador não equivalem a homologação do Chromium embutido no vMix nem WAN. O teste manual nessa mesa é o próximo passo.
 - **Sem áudio no protótipo.** H.264 4:2:0 de 8 bits, SDR; sem HDR ou alpha lossless. A compressão pode alterar levemente bordas/opacidades.

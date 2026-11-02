@@ -28,7 +28,8 @@ console.log('Compilando WinForms .NET Framework x64...');
 const uninstaller=join(here,'build/FreeMix-Uninstall.exe');
 const common=['/nologo','/target:winexe','/platform:x64','/optimize+','/utf8output','/reference:System.dll','/reference:System.Core.dll','/reference:System.Drawing.dll','/reference:System.Windows.Forms.dll','/reference:System.Web.Extensions.dll'];
 execFileSync(join(framework,'csc.exe'),[...common,'/out:'+uninstaller,join(here,'Uninstall.cs')],{stdio:'inherit',windowsHide:true});
-execFileSync(join(framework,'csc.exe'),[...common,'/main:FreeMixSetup.Program','/out:'+stub,'/reference:'+join(framework,'System.IO.Compression.dll'),'/resource:'+uninstaller+',FreeMixSetup.Uninstall.exe',join(here,'Setup.cs'),join(here,'Uninstall.cs'),generated],{stdio:'inherit',windowsHide:true});
+const eula=join(here,'../../docs/EULA.txt');
+execFileSync(join(framework,'csc.exe'),[...common,'/main:FreeMixSetup.Program','/out:'+stub,'/reference:'+join(framework,'System.IO.Compression.dll'),'/resource:'+uninstaller+',FreeMixSetup.Uninstall.exe','/resource:'+eula+',FreeMixSetup.EULA.txt',join(here,'Setup.cs'),join(here,'Uninstall.cs'),generated],{stdio:'inherit',windowsHide:true});
 if(options['--stub-only']){console.log(JSON.stringify({stub,uninstaller,payloadSha256:sha,uninstallerIncluded:true,finalReleaseGenerated:false,authenticodeSigned:false}));process.exit(0);}
 const partial=output+'.partial';
 try {

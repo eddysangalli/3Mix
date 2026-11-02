@@ -1,4 +1,4 @@
-# Instalar o FreeMix Studio
+# Instalar o 3Mix Studio
 
 Abra INSTALAR-FREEMIX.cmd na raiz ou envie entregas/FreeMix-Studio-Setup-0.1.0-local.20261010000500.exe para Windows x64. O EXE tem1375709028bytes e contém motor,plugins,Node,FFmpeg eNDI6.3.2. Escolha uma pasta nova/vazia; depois use o atalho FreeMix Studio ou FreeMix Studio.cmd. Não execute apenas o motor.
 

@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <title>Menu</title>
 <style>
-  /* Barra superior do FreeMix, na disposição de uma mesa de produção: Preset à esquerda, Tela Cheia no centro,
+  /* Barra superior do 3Mix Pro, na disposição de uma mesa de produção broadcast: */
      Pausar Entradas / Básico / Configurar / ? à direita. Cada botão executa algo real; as janelas abrem na mesa
      de baixo porque esta barra é baixa demais para mostrá-las. */
-  :root { --bar: #0a0f14; --btn: #293038; --btn-h: #404b56; --bd: #607081; --tx: #f2f5f8; --on: #006400; }
+  :root { --bar: #0f0f0f; --btn: #303030; --btn-h: #4b4b4b; --bd: #607081; --tx: #f2f5f8; --on: #006400; }
   * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
   body { background: var(--bar); color: var(--tx); font: 700 11px/1 "Segoe UI", Tahoma, Arial, sans-serif; user-select: none; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 4px; overflow: hidden; white-space: nowrap; }
@@ -15,8 +15,8 @@
   button { font: inherit; color: inherit; cursor: pointer; }
   .b { height: 22px; min-width: 74px; padding: 0 10px; background: var(--btn); border: 1px solid var(--bd); display: inline-flex; align-items: center; justify-content: center; }
   .b:hover { background: var(--btn-h); } .b.on { background: var(--on); border-color: #2fb02c; }
-  .b:disabled { color: #6b7480; background: #1b2229; border-color: #2c353e; cursor: default; }
-  .b.dd { min-width: 0; width: 15px; padding: 0; margin-left: -5px; border-left-color: #1b2229; font-size: 8px; }
+  .b:disabled { color: #6b7480; background: #222222; border-color: #353535; cursor: default; }
+  .b.dd { min-width: 0; width: 15px; padding: 0; margin-left: -5px; border-left-color: #222222; font-size: 8px; }
   .b.sq { min-width: 0; width: 24px; padding: 0; }
   .clk { display: inline-flex; gap: 10px; margin-left: 10px; padding: 0 10px; height: 22px; align-items: center; background: #000; border: 1px solid #f2f5f8; font: 700 12px Consolas, monospace; } .clk b { color: #5a636e; } .clk b.on { color: #ff5a4f; } .clk b.now { color: #f2f5f8; } .clk b.amber { color: #ffb300; } .clk b.green { color: #3fd145; } .clk b[hidden] { display: none; }
   .lab { padding: 0 14px 0 10px; font-size: 12px; }
@@ -29,33 +29,32 @@ body.clocks-only .clk { position:fixed; top:0; left:0; right:0; height:88px; mar
 body.clocks-only .clk b.now { font-size:22px; }
 .rapid-talk { display:none; }
 body.clocks-only .rapid-talk { display:grid; position:fixed; top:90px; left:0; right:0; height:30px; grid-template-columns:minmax(0,1fr) 22px; gap:2px; }
-.rapid-talk select { width:100%; min-width:0; background:#293038; color:#fff; border:1px solid #607081; font:11px 'Segoe UI',sans-serif; }
-body.clocks-only .rapid-talk button { display:block; width:100%; min-width:0; height:30px; background:#404b56; border:1px solid #607081; color:#fff; font:700 11px 'Segoe UI',sans-serif; padding:0; touch-action:none; }
-.rapid-talk button:disabled { color:#a5acb4; background:#293038; cursor:default; }
+.rapid-talk select { width:100%; min-width:0; background:#303030; color:#fff; border:1px solid #607081; font:11px 'Segoe UI',sans-serif; }
+body.clocks-only .rapid-talk button { display:block; width:100%; min-width:0; height:30px; background:#4b4b4b; border:1px solid #607081; color:#fff; font:700 11px 'Segoe UI',sans-serif; padding:0; touch-action:none; }
+.rapid-talk button:disabled { color:#a5acb4; background:#303030; cursor:default; }
 .rapid-talk button.active { background:#ff0000 !important; color:#fff; }
 .rapid-talk small { white-space:normal; overflow:hidden; font:10px/11px 'Segoe UI',sans-serif; color:#b8c4d0; }
 </style>
+<link rel="stylesheet" href="topbar-grafite.css">
 </head>
 <body>
   <div class="grp">
-    <span class="lab" id="lab" title="Preset em uso">Preset</span>
-    <button class="b" data-open="presets" data-arg="new" title="Criar uma produção nova, vazia">Novo</button>
-    <button class="b" data-open="presets" title="Abrir uma produção salva">Abrir</button><button class="b dd" data-open="presets" title="Produções salvas">▼</button>
-    <button class="b" data-do="presetsave" title="Confirma que a produção em uso está gravada">Salvar</button>
-    <button class="b" data-open="saveas" title="Grava uma cópia da produção com outro nome e passa a usá-la">Salvar como</button><button class="b dd" data-open="saveas" title="Salvar como">▼</button>
-    <button class="b" data-do="presetlast" title="Volta para a produção usada antes desta">Último</button>
+    <span class="brand"><img src="img/3mix-logo.png" alt="3Mix"></span>
+    <span class="project-name" id="lab" title="Projeto em uso">Conectando…</span>
+
   </div>
-  <div class="grp">
-    <button class="b" data-do="fullscreen" title="Output em tela cheia no segundo monitor (em janela, se houver só um)">Tela Cheia</button><button class="b dd" data-open="ext" title="Central de saídas">▼</button>
-    <span class="clk" id="clk" title="Relógios de produção. Duplo clique: escolher o que cada um mostra (relógio, evento, gravação, transmissão, tempo restante)."><b id="k-rec">REC 00:00:00</b><b id="k-str">NO AR 00:00:00</b><b id="k-now" class="now"></b></span>
-  </div>
+  <nav class="grp workspace-tabs" aria-label="Área de trabalho">
+    <button class="b selected" data-do="mesa" title="Mesa de corte com Preview, Programa, entradas e mixer">Mesa</button>
+    <button class="b" data-do="audio" title="Abrir o mixer de áudio completo">Áudio</button>
+    <button class="b" data-open="replay" title="Abrir o Replay A/B desta produção">Replay</button>
+    <button class="b" data-open="color" title="Color Studio: scopes, correção local e shading remoto">Color</button>
+  </nav>
   <div class="grp r">
-    <button class="b" data-open="datasources" title="Tabelas CSV, JSON e Excel vinculadas ao GC">Dados</button>
-    <button class="b" data-open="compositions" title="Criar entrevista, PiP e trocar os participantes por slots">Compor</button><button class="b" data-open="calls" title="Convidados, retorno e mic privado">Calls</button>
-    <button class="b" id="b-pause" data-do="pausethumbs" title="Pausa todas as entradas de vídeo que estão tocando">Pausar Entradas</button>
-    <button class="b" id="b-basic" data-do="basic" title="Mostra ou esconde os botões avançados da janela">Básico</button>
-    <button class="b" data-open="settings" title="Configurações FreeMix">Configurar</button><button class="b dd" data-open="cfgmenu" title="Todas as configurações">▼</button>
-    <button class="b sq" data-open="help" title="Ajuda">?</button>
+    <span class="clk" id="clk" title="Relógios de produção. Duplo clique: escolher o que cada um mostra (relógio, evento, gravação, transmissão, tempo restante)."><b id="k-rec">REC 00:00:00</b><b id="k-str">NO AR 00:00:00</b><b id="k-now" class="now"></b></span>
+    <button class="b save-label" data-do="presetsave" title="Salvar a produção em uso">Salvar projeto</button>
+    <button class="b" data-open="settings" title="Configurações 3Mix">⚙ Configurações</button>
+    <button class="b" data-open="mainmenu" title="Mais ferramentas de produção" aria-label="Mais ferramentas">•••</button>
+    <span class="legacy-toggles"><button class="b" id="b-pause" data-do="pausethumbs">Pausar Entradas</button><button class="b" id="b-basic" data-do="basic">Básico</button></span>
   </div>
 
   <div class="rapid-talk" id="rapid-talk">
@@ -90,12 +89,12 @@ body.clocks-only .rapid-talk button { display:block; width:100%; min-width:0; he
         mine.send(JSON.stringify({ op: 1, d }));
       } else if (m.op === 2) {
         on = true; paint();
-        req("GetSceneCollectionList").then((c) => { $("lab").title = "Preset em uso: " + c.currentSceneCollectionName; }).catch(() => {});
+        req("GetSceneCollectionList").then((c) => { $("lab").textContent = c.currentSceneCollectionName; $("lab").title = "Projeto em uso: " + c.currentSceneCollectionName; }).catch(() => {});
         tell({ do: "state" }).catch(() => {}); // ask the panel which toggles are on
         loadClocks();
       } else if (m.op === 5) {
         const d = m.d.eventData || {};
-        if (m.d.eventType === "CurrentSceneCollectionChanged") $("lab").title = "Preset em uso: " + d.sceneCollectionName;
+        if (m.d.eventType === "CurrentSceneCollectionChanged") { $("lab").textContent = d.sceneCollectionName; $("lab").title = "Projeto em uso: " + d.sceneCollectionName; }
         else if (m.d.eventType === "CustomEvent" && d.freemix && Array.isArray(d.freemix.clocks)) clocks = d.freemix.clocks;
         else if (m.d.eventType === "CustomEvent" && d.freemix && d.freemix.state) { $("b-pause").classList.toggle("on", !!d.freemix.state.paused); $("b-basic").classList.toggle("on", !!d.freemix.state.basic); }
       } else if (m.op === 7) {

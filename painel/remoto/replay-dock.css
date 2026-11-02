@@ -161,7 +161,7 @@
   background: #272727; color: var(--rpd-text);
 }
 .rp-player:hover { background: #303030; border-color: #666; }
-.rp-player.selected { background: #26323c; border-color: #4e6a80; border-left-color: var(--rpd-blue-line); }
+.rp-player.selected { background: #313131; border-color: #4e6a80; border-left-color: var(--rpd-blue-line); }
 .rp-player.onair { background: #3a2224; border-color: #7d3034; border-left-color: var(--rpd-red); }
 .rp-player.missing { border-left-color: var(--rpd-amber); }
 .rp-player-id {
@@ -209,8 +209,8 @@
 .rp-ev-table tbody tr { background: #1f1f1f; cursor: pointer; }
 .rp-ev-table tbody tr:nth-child(even) { background: #222; }
 .rp-ev-table tbody tr:hover { background: #2a2a2a; }
-.rp-ev-table tbody tr.selected { background: #24384a; box-shadow: inset 3px 0 var(--rpd-blue-line); }
-.rp-ev-table tbody tr.selected:hover { background: #294257; }
+.rp-ev-table tbody tr.selected { background: #373737; box-shadow: inset 3px 0 var(--rpd-blue-line); }
+.rp-ev-table tbody tr.selected:hover { background: #414141; }
 .rp-ev-table tbody tr.onair { box-shadow: inset 3px 0 var(--rpd-red); }
 .rp-ev-table tbody tr.selected.onair { box-shadow: inset 3px 0 var(--rpd-red), inset 0 0 0 1px #4e6a80; }
 .rp-ev-name { display: flex; flex-direction: column; gap: 0; min-width: 0; }
@@ -225,7 +225,7 @@
   border: 1px solid #4a4a4a; border-radius: 3px; background: #2a2a2a;
   color: #c8c8c8; font-size: 8.5px; font-weight: 800; letter-spacing: .35px; white-space: nowrap;
 }
-.rp-chip.player-a { color: #b9dcff; border-color: #35678f; background: #1d3548; }
+.rp-chip.player-a { color: #b9dcff; border-color: #35678f; background: #333333; }
 .rp-chip.player-b { color: #ffe1a6; border-color: #79601f; background: #382d13; }
 .rp-chip.air { color: #fff; border-color: #e05259; background: #a7161d; }
 .rp-chip.dim { color: #a8a8a8; font-weight: 600; }
@@ -302,11 +302,11 @@
 .rp-btn:hover:not(:disabled) { background: linear-gradient(#484848, #363636); border-color: #8a8a8a; color: #fff; }
 .rp-btn:active:not(:disabled) { background: #333; }
 .rp-btn:disabled { opacity: .35; }
-.rp-btn.selected { background: #24445f; border-color: var(--rpd-blue-line); color: #fff; box-shadow: inset 0 0 0 1px #2b6a9c; }
+.rp-btn.selected { background: #424242; border-color: var(--rpd-blue-line); color: #fff; box-shadow: inset 0 0 0 1px #2b6a9c; }
 .rp-btn.on { background: #1d5b31; border-color: #3f9e58; color: #effff2; }
 .rp-btn.load-a { color: #b9dcff; border-color: #3d6d92; }
 .rp-btn.load-b { color: #ffe1a6; border-color: #766022; }
-.rp-btn.mark { color: #e9f3ff; border-color: #54758e; background: linear-gradient(#33495a, #263744); }
+.rp-btn.mark { color: #e9f3ff; border-color: #54758e; background: linear-gradient(#474747, #363636); }
 .rp-btn.back { color: #d9e4ec; }
 .rp-btn.ghost { background: transparent; border-color: #4a4a4a; color: #aaa; font-weight: 500; }
 .rp-btn.ghost:hover:not(:disabled) { color: #fff; }
@@ -348,7 +348,7 @@
 .rp-tl-source { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #9fb2c1; font-size: 10.5px; }
 .rp-tl-tc { font-family: var(--rpd-mono); font-size: 12.5px; color: #fff; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .rp-tl-tc i { color: #777; font-style: normal; margin: 0 2px; }
-.rp-tl-speed { padding: 1px 5px; border: 1px solid #4f6170; border-radius: 3px; background: #22303b; color: #cfe6f7; font: 700 10px/1.4 var(--rpd-mono); white-space: nowrap; }
+.rp-tl-speed { padding: 1px 5px; border: 1px solid #4f6170; border-radius: 3px; background: #2f2f2f; color: #cfe6f7; font: 700 10px/1.4 var(--rpd-mono); white-space: nowrap; }
 
 .rp-tl-track {
   position: relative; height: 21px; flex: none; overflow: hidden;
@@ -402,7 +402,7 @@
 }
 .rp-pl-row:nth-child(even) { background: #222; }
 .rp-pl-row:hover { background: #292929; }
-.rp-pl-row.selected { background: #24384a; box-shadow: inset 3px 0 var(--rpd-blue-line); }
+.rp-pl-row.selected { background: #373737; box-shadow: inset 3px 0 var(--rpd-blue-line); }
 .rp-pl-num { color: #8f9aa5; font: 600 11.5px/1 var(--rpd-mono); text-align: center; }
 .rp-pl-name { min-width: 0; padding: 1px 0; border: 0; background: transparent; text-align: left; color: #eee; }
 .rp-pl-name b { display: block; font-size: 12px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

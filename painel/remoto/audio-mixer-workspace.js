@@ -368,7 +368,7 @@
   async function readChannelDetails(force = false) {
     if (detailsReading) return;
     if (!force && performance.now() - detailsAt < 15000) return;
-    const sources = (AUDIO.getState()?.sources || []).filter(source => ['input', 'private'].includes(AUDIO.sourceClass(source)) && source.key);
+    const sources = (AUDIO.getState()?.sources || []).filter(source => AUDIO.sourceClass(source) === 'input' && source.key);
     if (!sources.length) return;
     detailsReading = true;
     try {

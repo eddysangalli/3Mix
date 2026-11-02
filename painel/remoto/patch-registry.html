@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3Mix · Patch de Sinais</title>
+<script src="3mix-padrao.js"></script>
+<link rel="stylesheet" href="3mix-grafite.css">
+<link rel="stylesheet" href="3mix-padrao.css">
+<style>
+  .pr-add { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto; gap: 12px; align-items: end; }
+  .pr-arrow { height: 38px; display: grid; place-items: center; color: var(--p3-dim); font-size: 18px; }
+  .pr-badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 3px; font-weight: 700; font-size: 11.5px; white-space: nowrap; background: #2c2c2c; border: 1px solid #4c4c4c; color: #c9c9c9; }
+  .pr-badge.pr-me { background: #302511; border-color: #6b5320; color: #f0d9a5; }
+  .pr-badge.pr-signal { background: #1f2a3f; border-color: #2f4a7b; color: #a8c3f5; }
+  .p3 .pr-remove { height: 30px; padding: 0 10px; font-size: 12.5px; }
+  #pr-table td:last-child:not([colspan]) { text-align: right; }
+  @media (max-width: 720px) { .pr-add { grid-template-columns: 1fr; } .pr-arrow { display: none; } }
+</style>
+</head>
+<body data-page="patch-registry" class="p3">
+<header class="p3-head">
+  <a href="/" title="3Mix"><img class="p3-logo" src="/img/3mix-logo.png" alt="3Mix"></a>
+  <h1>Patch de Sinais</h1>
+</header>
+
+<main class="p3-main">
+  <p id="error" role="alert" hidden></p>
+
+  <section class="p3-card">
+    <div class="p3-card-head">
+      <h2>Trocar o sinal de uma entrada</h2>
+      <span id="pr-state" class="p3-note">Consultando…</span>
+    </div>
+    <form id="pr-form" class="pr-add">
+      <label class="p3-field">Sinal de origem
+        <select id="pr-signal" required></select>
+      </label>
+      <span class="pr-arrow" aria-hidden="true">→</span>
+      <label class="p3-field">Entrada
+        <select id="pr-input" required></select>
+      </label>
+      <button type="submit" class="primary">Aplicar</button>
+    </form>
+    <div class="p3-table-wrap">
+      <table id="pr-table">
+        <thead><tr><th>Entrada</th><th>Sinal atual</th><th>Aplicado em</th><th></th></tr></thead>
+        <tbody id="pr-rows"><tr><td colspan="4" class="p3-empty">Consultando…</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<span id="connection" hidden></span>
+<script src="fechar-janela.js"></script>
+<script src="patch-registry.js?v=20261101p"></script>
+</body>
+</html>

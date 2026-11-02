@@ -8,4 +8,4 @@ Fontes oficiais: [HDR e diferenças de SDK](https://docs.ndi.video/all/developin
 
 Contrato a implementar depois de fornecido o SDK/licença: view de alta precisão; buffer P216 limitado, ou PA16 se houver alpha; metadados `ndi_color_info` com primárias/matriz BT.2020 e transferência PQ/HLG; timestamp comum de Fill/Key/áudio; conferência em receptor HDR configurado para alta precisão. Recepção em 8 bits não faz mapeamento HDR→SDR automático pelo SDK.
 
-A integração FreeMix atual recusa NDI HDR explicitamente. OMT HDR P216 manual tem implementação e prova próprias; SDI HDR está sendo implementado pelo contrato DeckLink. Não atribuir essas provas ao envio NDI HDR.
+A integração 3Mix atual recusa NDI HDR explicitamente. OMT HDR P216 manual tem implementação e prova próprias; SDI HDR está sendo implementado pelo contrato DeckLink. Não atribuir essas provas ao envio NDI HDR.

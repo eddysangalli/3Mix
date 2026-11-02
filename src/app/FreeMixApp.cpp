@@ -8,6 +8,7 @@
 #include "services/InputManager.h"
 #include "services/NetworkBondingManager.h"
 #include "services/GraphicsManager.h"
+#include "services/StateEngine.h"
 
 #include <obs.h>
 #include <QDir>
@@ -143,6 +144,9 @@ bool FreeMixApp::initializeEngine()
     m_graphicsManager = std::make_unique<freemix::GraphicsManager>();
     m_graphicsManager->initialize(m_appDir + "/assets/graphics");
 
+    // State Engine - central state management
+    m_stateEngine = std::make_unique<freemix::StateEngine>();
+
     m_engineInitialized = true;
     qInfo() << "[FreeMix] Motor libobs e subsistemas inicializados com sucesso!";
     return true;
@@ -197,6 +201,7 @@ void FreeMixApp::shutdownEngine()
     m_projectManager.reset();
     m_bondingManager.reset();
     m_graphicsManager.reset();
+    m_stateEngine.reset();
 
     obs_shutdown();
     m_engineInitialized = false;

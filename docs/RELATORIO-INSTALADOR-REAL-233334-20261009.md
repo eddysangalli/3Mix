@@ -11,7 +11,7 @@ Resultado PASS de `verify → distribution → credentials → report → check`
 - Plano próprio já preparado: `FreeMix-QA-CandidateNext-jao2QX/plan.json`; context anterior PASS não foi repetido.
 - Instalações próprias: `FreeMix-QA-Distribution-Je1G3K/Installed Studio with spaces` e `Opt-in Studio with spaces`, em TEMP marcado e com portas independentes.
 
-O programa FreeMix/Native/CEF não foi aberto nesta frente. O Setup foi invocado em modo silencioso, sem atalhos, lançamento ou aplicação de firewall. As operações de registro foram limitadas às entradas das próprias instalações temporárias, e ambos os desinstaladores confirmaram sua remoção. Não houve operação sobre a mesa do operador, hardware ou pacote selado anterior.
+O programa 3Mix/Native/CEF não foi aberto nesta frente. O Setup foi invocado em modo silencioso, sem atalhos, lançamento ou aplicação de firewall. As operações de registro foram limitadas às entradas das próprias instalações temporárias, e ambos os desinstaladores confirmaram sua remoção. Não houve operação sobre a mesa do operador, hardware ou pacote selado anterior.
 
 ## Provas executadas
 

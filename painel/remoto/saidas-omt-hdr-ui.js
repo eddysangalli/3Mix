@@ -4,7 +4,7 @@
  panel.insertAdjacentHTML('beforeend',`<details id="omt-hdr-panel" hidden><summary>OMT HDR · receptor configurado manualmente</summary>
  <p>Envio HDR separado, sem alpha. A lista mostra fontes que o motor reconhece como HDR, preservando a precisão original. Cenas na mesa SDR não preservam HDR; use diretamente a fonte HDR. O receptor OMT precisa ter a mesma transferência selecionada. PA16 SDR e os envios de alpha acima continuam independentes.</p>
  <label>Envio HDR para editar<select id="omt-hdr-sender"><option value="0">HDR 1</option><option value="1">HDR 2</option><option value="2">HDR 3</option><option value="3">HDR 4</option></select></label>
- <label>Nome deste envio HDR<input id="omt-hdr-name" maxlength="120" value="FreeMix OMT HDR"></label>
+ <label>Nome deste envio HDR<input id="omt-hdr-name" maxlength="120" value="3Mix OMT HDR"></label>
  <label>Fonte HDR própria<select id="omt-hdr-source"></select></label>
  <label>Transferência<select id="omt-hdr-transfer"><option value="pq">PQ · BT.2100 / BT.2020</option><option value="hlg">HLG · BT.2100 / BT.2020</option></select></label>
  <label>Áudio<select id="omt-hdr-audio"></select></label>
@@ -23,7 +23,7 @@
   const state=outputs?.omtHdrSenders?.[senderId]||(senderId===0?outputs?.omtHdr:{} )||{},sources=state.hdrSources||[];
   choices('omt-hdr-source',sources.length?sources.map(s=>[s.uuid,s.name+' · '+s.width+'×'+s.height]):[['','Nenhuma fonte HDR reconhecida; adicione um vídeo PQ/HLG']]);choices('omt-hdr-audio',[['0','Master'],['1','Bus A'],['2','Bus B'],...(outputs?.audioSources||[]).map(s=>['bus:'+s.uuid,'Bus independente · '+s.name])]);
   const config=state.config||{},sig=JSON.stringify(config);
-  if(!dirty&&sig!==signature){signature=sig;E('omt-hdr-name').value=config.name||'FreeMix OMT HDR '+(senderId+1);if(config.sourceUuid)select('omt-hdr-source',config.sourceUuid);E('omt-hdr-transfer').value=config.transfer||'pq';select('omt-hdr-audio',config.audioSourceUuid?'bus:'+config.audioSourceUuid:String(config.audioTrack||0));E('omt-hdr-confirm').checked=config.manualReceiverConfirmed===true;}
+  if(!dirty&&sig!==signature){signature=sig;E('omt-hdr-name').value=config.name||'3Mix OMT HDR '+(senderId+1);if(config.sourceUuid)select('omt-hdr-source',config.sourceUuid);E('omt-hdr-transfer').value=config.transfer||'pq';select('omt-hdr-audio',config.audioSourceUuid?'bus:'+config.audioSourceUuid:String(config.audioTrack||0));E('omt-hdr-confirm').checked=config.manualReceiverConfirmed===true;}
   for(const id of ids)E(id).disabled=!!state.active;
   E('omt-hdr-start').disabled=!state.available||state.active||dirty||!config.sourceUuid;
   E('omt-hdr-stop').disabled=!state.active;

@@ -6,6 +6,12 @@
   --text-main:#ededed; --text-muted:#b0b0b0; --text-dim:#909090;
   --red-live:#ed181d; --green-pv:#16752c; --amber-cue:#dca900; --amber-light:#ffd324;
   --bg-surface:#252525; --bg-input:#202020; --border:#494949; --text:#ededed;
+  /* Identidade 3Mix: o azul de fader marca seleção, foco e ação principal;
+     verde e vermelho continuam sendo exclusivos do tally (Preview/Programa) e
+     o âmbar continua sendo aviso. Um sistema, uma cor de destaque. */
+  --accent:#2f6fed; --accent-ink:#ffffff; --accent-strong:#5b8bf3;
+  --accent-soft:rgba(47,111,237,.18); --accent-line:rgba(47,111,237,.55);
+  --ok:#34d17b; --warn:#dca900; --bad:#e5484d;
 }
 .audio-topbar,.audio-sidebar,.sidebar-header { background:#242424; border-color:#444; }
 /* Shared module header: identical in Áudio, Replay and future windows. */
@@ -15,7 +21,7 @@
 .workspace-tabs,.workspace-subtabs { display:flex; align-items:center; gap:2px; background:#242424; border:1px solid #444; border-radius:4px; padding:2px; }
 .workspace-tabs .ws-tab,.workspace-subtabs button { height:28px; padding:0 14px; border:0; border-radius:3px; background:transparent; color:#b5b5b5; font:600 11px 'Segoe UI'; cursor:pointer; display:inline-flex; align-items:center; white-space:nowrap; }
 .workspace-tabs .ws-tab:hover,.workspace-subtabs button:hover { background:#343434; color:#fff; }
-.workspace-tabs .ws-tab.active,.workspace-subtabs button.selected { background:#4a4a4a; color:#fff; box-shadow:inset 0 -2px #ddd; }
+.workspace-tabs .ws-tab.active,.workspace-subtabs button.selected { background:#4a4a4a; color:#fff; box-shadow:inset 0 -2px var(--accent); }
 .workspace-tabs .workspace-home { color:#dcdcdc; padding:0 10px; }
 .project-pill { max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .audio-topbar .audio-brand { display:contents; }
@@ -24,9 +30,18 @@
 .settings-topbar,.replay-topbar { background:#202020; border-color:#444; }
 .settings-nav { background:#222; border-color:#444; }
 .nav-item-btn { color:#ccc; }
-.nav-item-btn.active,.nav-item-btn.selected,.nav-item-btn.on { background:#454545; border-color:#888; color:#fff; }
+.nav-item-btn.active,.nav-item-btn.selected,.nav-item-btn.on { background:#3f4447; border-color:var(--accent); color:var(--accent); }
 .workspace-tabs { background:#242424; border-color:#444; }
-.ws-tab.active { background:#454545; border-color:#777; border-bottom-color:#ddd; }
+.ws-tab.active { background:#454545; border-color:#777; border-bottom-color:var(--accent); }
 .project-pill,.project-sel-box { background:#282828; border-color:#4b4b4b; color:#ddd; }
 .replay-subbar,.settings-footer { background:#222; border-color:#444; }
-button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible { outline:2px solid #ddd; outline-offset:-2px; }
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+
+/* ---------- estado da conexão com o motor (todas as janelas) ---------- */
+#connection[data-state] { display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:20px; font-size:11.5px; font-weight:700; border:1px solid transparent; }
+#connection[data-state]::before { content:""; width:7px; height:7px; border-radius:50%; background:currentColor; box-shadow:0 0 8px currentColor; }
+#connection[data-state="on"] { color:#8ee6b4; background:rgba(31,114,51,.20); border-color:rgba(52,209,123,.38); }
+#connection[data-state="off"] { color:#ffb4a8; background:rgba(176,42,31,.22); border-color:rgba(229,72,77,.42); }
+#connection[data-state="wait"] { color:#f0d9a5; background:rgba(220,169,0,.16); border-color:rgba(220,169,0,.42); }
+#connection[data-state="wait"]::before { animation:pulse-accent 1.2s ease-in-out infinite; }
+@keyframes pulse-accent { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.35;transform:scale(.8)} }

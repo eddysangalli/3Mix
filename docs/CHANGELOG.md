@@ -1,4 +1,68 @@
 
+## 02/11/2026 — Hub, Mesa de corte, Composições, GC, Rede e reorganização de Efeitos
+
+- Hub/Remoto: cartões com ícone, seletor no alto entre este computador, cada rede (com o nome do adaptador) e internet. O IP público só é consultado (api.ipify.org) quando o operador escolhe Internet.
+- Mesa de corte: Preview e Programa com imagem real e na proporção da produção; entradas com miniatura; DUMP com confirmação em dois cliques; Pre-Flight abre a janela própria.
+- Composições: galeria corrigida (cartões sobrepostos), miniaturas neutras, imagem da composição no alto.
+- GC e placar: redesenhado no padrão; monitor em 16:9 ou 9:16 com transparência quadriculada; o fundo verde era a classe de tally `.preview`.
+- Rede Multipath: tela refeita e nova aba em Configurações › Sistema; saiu do Hub.
+- Qualidade de imagem foi para o Color Studio (aba Qualidade), e o menu de cada entrada abre "Cor e qualidade" naquela entrada. Face Tracker foi para a tela de PTZ. Efeitos fica com Voz, Legendas e Efeitos criativos.
+- Telas `.vd` passam ao padrão pelo `vmix-dialogo.css`: janela inteira, sem caixa flutuante, e a marca no cabeçalho das que têm faixa de título.
+- Corrigido: "Configurar" e "Filtros" no menu da entrada recusavam toda entrada ("cena não confirmada"), porque a checagem lia o nome da fonte em vez do dono.
+- Nova coleção "Demonstracao Compacta": CAM 1 a 4, VT, Replay A e B, Legendas locais.
+
+## 02/11/2026 — Multi-M/E: Fade, Patch e Switcher Strip aplicados ao runtime, todos confirmados reais
+
+- Switcher Strip atualizada (Bank por categoria, Audio Bus por M/E, Tally recursivo) copiada ao runtime do operador — a versão anterior (sem esses recursos) foi substituída, com backup.
+- Fade real em M/E confirmado de ponta a ponta contra o motor do operador: comando aceito (`accepted-in-flight`), transição completa confirmada (`programUuid` atualizado, `transitioning:false` ao final).
+- Patch confirmado de ponta a ponta: um Input recebeu o conteúdo de outro signal de verdade (confirmado pela leitura direta da cena, não só pelo registro de metadado) e o registro persistiu (`GET /api/patch`).
+- Com isso, Preview/Cut/Fade/Patch de M/E 2-4 estão todos confirmados funcionando no motor real. Resta como pendência separada só a decisão sobre o binário com proxy/nesting (não aplicado ao runtime).
+- Detalhe completo: `qa-beta/STATUS-BETA.md`, `FreeMix/docs/LIMITES-CONHECIDOS.md` seção 4.
+
+## 02/11/2026 — Coleta do alpha, Hub e limpeza do nome
+
+- Relatar problema: formulário com o que aconteceu, passos, esperado, impacto, frequência, nome e contato; o pacote agora traz `RELATO.txt`, placa de vídeo e driver, disco, estado no momento, últimas ações da sessão, erros das telas, resumo dos crashes e hash dos binários. Destino configurável em `config/suporte.json`; botão para abrir a pasta do ZIP.
+- Toda tela do painel registra os próprios erros em `logs/painel-erros.ndjson` (`/api/panel-log`). Páginas de GC que vão ao ar ficam de fora.
+- Mesa: aviso **ERRO NA ÚLTIMA SESSÃO** depois de um fechamento com erro ainda não relatado.
+- Hub: corrigido o erro que abria os módulos pelo IP da rede com o acesso pela rede desligado. Neste computador os módulos abrem pelo endereço local; endereço, QR e código só aparecem quando a rede responde; botão **Ligar rede** (`/api/network-enable`, confirmação do Windows, vale ao reabrir).
+- Nome: textos da bandeja e dos menus do motor na instalação, mensagens do servidor, instalador, desinstalador, atalhos, nomes dos `.cmd` do pacote e textos nativos passam a 3Mix. Os textos nativos valem na próxima compilação. Ficam `FreeMix.exe` e os nomes de contrato (fontes de áudio, filtros, formato de arquivo).
+- Sobre e Hub deixam de apontar para o manual técnico interno.
+- Verificação em `qa-interface/alpha-coleta-20261102/` e `qa-interface/nome-3mix-20261102/`.
+
+## 02/11/2026 — Multi-M/E: camada JS integrada ao runtime, Preview/Cut confirmados no motor real
+
+- Rotas `/api/mix-effects`, `/api/signals`, `/api/patch` e `/api/mix-audio` (antes sempre retornavam erro na instalação do operador) agora respondem com sucesso: os 5 módulos JS (`mix-effects-producao.mjs`, `mix-effects-http.mjs`, `registro-sinais-producao.mjs`, `patch-registry-producao.mjs`, `mix-audio-producao.mjs`) e `controle-producao.mjs` foram copiados da fonte ao runtime, com backup e validação de sintaxe/import antes de aplicar.
+- `MixEffectsEngine` unificado: `OutputEngine` e `SignalRegistryEngine` agora compartilham uma única instância (antes cada um criava a sua, divergindo o estado de recibos entre o caminho HTTP e o Signal Registry).
+- Preview e Cut reais confirmados contra o motor do operador (não só em QA isolado): M/E 2 recebeu preview + cut de uma câmera real, M/E 3 teve seu preview corrigido (estava apontando para uma UUID órfã de um teste anterior). Os dois estados **persistiram através de dois reinícios completos do motor**, confirmando que o M/E 2-4 (já existente no motor como código legado do fork, antes desta frente) preserva corretamente program/preview entre restarts.
+- Fade, Patch de ponta a ponta e a Switcher Strip atualizada (ainda na versão antiga no runtime — sem Bank por categoria, Audio Bus ou Tally — cópia pendente de autorização) continuam sem prova funcional completa nesta instalação.
+- O núcleo nativo com proxy/nesting (identidade pública estável por M/E, permitindo usá-lo como fonte) continua só em binário de QA isolado; não foi aplicado ao runtime — decisão separada, ainda pendente.
+- Detalhe completo, recibos e hashes: `qa-beta/STATUS-BETA.md`, `qa-beta/recibos/auditoria-multi-me-20261101.md`, `qa-beta/recibos/watchdog-reabertura-motor-20261102.json`.
+
+## 02/11/2026 — Montagem do Multiview, Sobre e suporte, docks e faixa de estado
+
+- Configurações › Multiview virou a tela de montagem (monitor horizontal ou vertical, posição e conteúdo de cada monitor, relógio, modelos, várias montagens). A janela /multiview só exibe a montagem salva em `config/multiview-montagens.json`, novo módulo `ferramentas/multiview-montagens.mjs`.
+- Última categoria "Sobre e suporte" reúne versão, atualizações, diagnóstico, novidades e créditos; os scripts antigos aceitam prefixo de id.
+- Remoto: lista de módulos com endereço de rede, copiar e QR por módulo. Só entram páginas medidas pelo IP com `testar-rede.mjs`.
+- Servidor: `/api/qr.svg` aceita páginas conhecidas desta máquina; dispositivo sem código que abre um módulo vai ao Hub e volta ao módulo depois de parear (`?next=`, só caminho local).
+- Replay abre fora do computador (sem `crypto.randomUUID` em HTTP).
+- Mesa: faixa de estado no rodapé; docks com divisão livre, fechamento independente, botões e abas iguais, botões de reabrir quando tudo está fechado.
+- Composições: a galeria de layouts tinha parado de carregar porque a página perdeu `.workspace` e `compor.css`; estrutura restaurada.
+- Efeitos: removido o quadro "Suíte de IA", que era só texto sem função.
+- Paleta azul trocada por grafite nas janelas restantes; controles de janela falsos removidos.
+- Verificação em `qa-interface/padrao-20261101/`.
+
+## 01/11/2026 — Padrão único das telas de Configurações e menu da mesa
+
+- Novo `painel/remoto/3mix-padrao.css`: a mesma linguagem de Configurações para DSK, Multiview, Atalhos, Automação, Recuperação, Diagnóstico, Atualizações, Patch, Módulos e Hub. A pintura azul injetada em `settings.js` saiu; o que ainda é injetado ficou neutro.
+- Configurações: categoria com editor próprio não mostra rodapé de Aplicar nem prévia; sumiram a faixa "página embutida", as descrições do topo e a frase genérica sob cada campo (a ajuda específica virou dica ao passar o mouse). Selo do projeto corrigido.
+- Navegação: "Monitores e saídas" virou Monitores; Retornos SRT e N-1 e Matriz AUX entraram em Saídas; Checklist virou Pre-Flight (o endereço antigo continua funcionando).
+- Mesa: menu hambúrguer refeito (Mixer de áudio e Hub não abriam nada); Modular Studio removido do menu, da barra e do Hub.
+- DSK refeito: a entrada escolhida não some mais na atualização da tela; TAKE usa o que está na tela; canal sem entrada não vai ao ar com a primeira da lista.
+- Multiview refeito: imagem real do motor, monitores exatamente 16:9 ou 9:16, escolha de entrada por monitor, medidores corrigidos. É quadro a quadro, não vídeo contínuo.
+- `thumbs-engine.mjs`: rodízio justo; antes só as 2 primeiras entradas recebiam miniatura.
+- Patch de Sinais e Checklist davam 404 porque nunca foram copiados da fonte para `3mix-runtime`.
+- Verificação em `qa-interface/padrao-20261101/`.
+
 ## 12/10/2026 23:51 UTC — Replay ainda fora do pacote; falha TS preservada e QA arquivado
 
 O prazo de teste às19h30 terminou sem entrega do pacote completo ou EXE novo. A prévia entregue era DOM real/API simulada, com JPEG sintético fixo e Native0. Flags por ângulo, ordem da lista, CUT/FADE400, salvar e preparar curva foram exercitados somente no modelo. O servidor R5 encerrou pelo limite de30min; no fim houve128 recusas ao atingir o limite do histórico de requisições. A captura inicial não prova uma sessão inteira saudável. O CMD antigo depende daquela sessão encerrada e não é mais uma entrada utilizável. O novo launcher reabrível ainda está em qualificação: R3 falhou na sintaxe PowerShell antes de iniciar e R4 falhou na substituição do registro no WindowsPowerShell5 antes de iniciar Node; originais preservados.
@@ -188,21 +252,21 @@ Claude CLI voltou e trabalha em revisão de empacotamento/codec. A tentativa com
 
 Ordem direta do dono: compilar/integrar os componentes e bloquear updates independentes do OBS/plugins; autorizou o Root a implementar esta frente sem depender de outros agentes. Native39 `7b77e328ec4741ab734e43f3275d37d9d1dfd22e` passou ALL_BUILD, exportação de 39 patches/três submódulos/snapshots e reconstrução --check. Freeze `qa-finalizacao/native-build-frozen-7b77e32-configured.json`, SHA `3952f3d5935f7cabdca57a30db3944522b7b87f59960e85d21b9892a2bedec4c`, 2085 arquivos. OBS updater manual/periódico bloqueado no fork; catálogo RTMP agora força updates OFF mesmo contra flag/cache ON.
 
-SceneSwitcher recompilado com identidade estável FreeMix e backup de migração automático, atômico e imutável antes de LoadSettings. DistroAV recompilado sem auto/manual checker nem controles/handlers de instalação própria; NDI carrega somente o runtime aprovado app-local, ignora variável externa e recusa conteúdo alterado/links. Verificar Complementos agora faz somente diagnóstico local, sem consultas upstream. Bibliotecas internas continuam DLLs controladas da entrega; não afirmar que todos os terceiros foram reescritos ou estaticamente incorporados ao EXE.
+SceneSwitcher recompilado com identidade estável 3Mix e backup de migração automático, atômico e imutável antes de LoadSettings. DistroAV recompilado sem auto/manual checker nem controles/handlers de instalação própria; NDI carrega somente o runtime aprovado app-local, ignora variável externa e recusa conteúdo alterado/links. Verificar Complementos agora faz somente diagnóstico local, sem consultas upstream. Bibliotecas internas continuam DLLs controladas da entrega; não afirmar que todos os terceiros foram reescritos ou estaticamente incorporados ao EXE.
 
 QA final real Native39: duas aberturas/dois fechamentos cooperativos, Start/Stop da automação, fonte NDI registrada mesmo com ambiente inválido, backup exato sem regravar no reinício, zero leaks nos dois logs e 2085 post-pins. C++/Qt: backup14/14 e NDI8/8; diagnóstico Node7/7 zero fetch. Receita offline e reconstrução dos nove fontes modificados passaram. Prova sanitizada: docs/evidencias/20261011-componentes-gerenciados-root. Falha inicial da fixture fora de modules preservada e fechada cooperativamente; R2/R3 PASS não apagam o FAIL original.
 
-Fontes/licenças/patches/receita integrados no FreeMix; componentes.json registra os novos hashes destinados à próxima entrega. Inputs aprovados locais: D:/FreeMix-QA-PluginGovernance-20261011-2305/delivery-inputs/APPROVED-INPUTS.json. Ainda NÃO há novo instalador completo selado nem atualização armada com estes bytes; mesa145116 intacta. Próximo: empacotar Native39+três DLLs qualificadas+fontes finais, conferir assinatura/hashes/startup e entregar sem instalar plugins avulsos no cliente. Não homologar hardware/WAN/SDKs fechados por estes testes; demais pendências de replay/áudio/calls/codec permanecem.
+Fontes/licenças/patches/receita integrados no 3Mix; componentes.json registra os novos hashes destinados à próxima entrega. Inputs aprovados locais: D:/FreeMix-QA-PluginGovernance-20261011-2305/delivery-inputs/APPROVED-INPUTS.json. Ainda NÃO há novo instalador completo selado nem atualização armada com estes bytes; mesa145116 intacta. Próximo: empacotar Native39+três DLLs qualificadas+fontes finais, conferir assinatura/hashes/startup e entregar sem instalar plugins avulsos no cliente. Não homologar hardware/WAN/SDKs fechados por estes testes; demais pendências de replay/áudio/calls/codec permanecem.
 
 ---
 <!-- sceneswitcher-notice-20261011 -->
 ## 11/10 — aviso do Advanced Scene Switcher: conferência local
 
-O dono identificou o aviso no FreeMix como Advanced Scene Switcher. A tradução instalada contém: “Detectada uma nova versão do Advanced Scene Switcher. Deve ser criado um backup das configurações antigas?” (`AdvSceneSwitcher.askBackup`). A fonte preservada chama `AskForBackup` quando `VersionChanged` compara a versão salva com `g_GIT_SHA1`; esse caminho solicita backup após uma mudança local, sem consultar um servidor de atualizações. O texto exato visto pelo dono ainda não foi confirmado, portanto a identificação deste diálogo como o aviso observado permanece condicionada ao texto.
+O dono identificou o aviso no 3Mix como Advanced Scene Switcher. A tradução instalada contém: “Detectada uma nova versão do Advanced Scene Switcher. Deve ser criado um backup das configurações antigas?” (`AdvSceneSwitcher.askBackup`). A fonte preservada chama `AskForBackup` quando `VersionChanged` compara a versão salva com `g_GIT_SHA1`; esse caminho solicita backup após uma mudança local, sem consultar um servidor de atualizações. O texto exato visto pelo dono ainda não foi confirmado, portanto a identificação deste diálogo como o aviso observado permanece condicionada ao texto.
 
 Os hashes das duas DLLs instaladas coincidem com as DLLs recompiladas e testadas da correção de shutdown: módulo `699b1f15067fd27dd0aca42a5108b4b1be6d1e863085aabec71cbdfaab294cc0`, biblioteca `5b0e93759d1d544d39371ce7bbe3f7e962a39fead1fe1f6b0cb2d3774d91b24f`. O componente foi adaptado/recompilado, mas continua modular; seus subplugins/dependências oficiais foram preservados. Não afirmar que todos os plugins já foram incorporados ao executável ou que seus diálogos foram governados.
 
-Pendência: integrar identidade de versão estável e aviso de migração/backup ao fluxo FreeMix, preservando configurações e proteção de backup, com revisão de fonte, recompilação e QA próprio antes de distribuir. Nenhuma DLL, macro, configuração ou processo do operador foi alterado nesta conferência. Bloquear o updater do OBS não substitui o tratamento dos diálogos de cada componente.
+Pendência: integrar identidade de versão estável e aviso de migração/backup ao fluxo 3Mix, preservando configurações e proteção de backup, com revisão de fonte, recompilação e QA próprio antes de distribuir. Nenhuma DLL, macro, configuração ou processo do operador foi alterado nesta conferência. Bloquear o updater do OBS não substitui o tratamento dos diálogos de cada componente.
 
 Observação somente leitura: `obs-vmix/version.json` agora declara `0.1.0-local.20261011145116`; o estado anterior “incremental ainda não aplicado” ficou histórico. Root não aplicou a atualização. Esta leitura não qualifica todos os recursos da mesa ou substitui os testes pendentes.
 
@@ -217,7 +281,7 @@ A automação existente passa a acompanhar a cada 20 minutos; tentativas de prov
 Pedidos do replay preservados: agulha com visualização durante a busca e IN/OUT preciso, listas sequenciadas com transições e curva de velocidade. Comparar codecs para qualidade, gravação, leitura e busca rápidas com testes próprios; distinguir compressão sem perda de qualidade visualmente próxima. Recursos novos e pacote completo atual continuam pendentes de integração/qualificação.
 
 ---
-# Changelog do FreeMix
+# Changelog do 3Mix
 
 Registro cronológico resumido, só com marcos confirmados. Para estado vigente: CONTINUAR.md e PENDENCIAS-REAIS.md. Arquivo novo; não existia changelog consolidado antes de 11/10/2026. Datas abaixo estão em UTC (horário de São Paulo = UTC-3).
 
@@ -233,7 +297,7 @@ Registro cronológico resumido, só com marcos confirmados. Para estado vigente:
 - Janela “Configurações” (engrenagem geral) implementada a partir das 98 preferências reais do motor; 18/18 testes com o programa real. Pendente: importar arquivo real, baixar Exportar na janela, botão nativo “todas as preferências do programa”.
 - Atualização incremental da mesa **armada**: `0.1.0-local.20261011145116` (Native38 `ed08547` + painel `71f8aa7`) sobre a mesa em `0.1.0-local.20261009153453`. Ensaiada antes de armar numa cópia de fábrica — não testada com a configuração real do operador. Não aplicada até o momento.
 - Prioridade definida pelo dono: estabilidade de transmissão (saídas simultâneas, reconexão, latência sob carga) é P0 atual, separada do endurance específico do Replay; ainda não há pacote completo novo selado com as fontes finais do Native38.
-- Conferido: HEAD do FreeMix (`c4f374268adae2e73a71189400cd1bd26997d59b`) limpo e idêntico ao branch remoto no GitHub (https://github.com/eddysangalli/FreeMix) nesta checagem — código integrado publicado; propostas/bancadas offside permanecem locais. Assinatura + 394 hashes de arquivo e 18 fontes de UI/API/Mesa batem com o pacote armado.
+- Conferido: HEAD do 3Mix (`c4f374268adae2e73a71189400cd1bd26997d59b`) limpo e idêntico ao branch remoto no GitHub (https://github.com/eddysangalli/FreeMix) nesta checagem — código integrado publicado; propostas/bancadas offside permanecem locais. Assinatura + 394 hashes de arquivo e 18 fontes de UI/API/Mesa batem com o pacote armado.
 - O dono aprovou a linha visual geral das telas (cópias do vMix); a prévia de Calls com API própria MOCK (chamadas sintéticas) não é prova de motor Native, microfone ou rede WAN.
 - Preparado, não executado: especificação de QA externo de fontes/preferências nativas do Calls; 3 testes de Configurações Gerais pendentes. Revisões de fonte sobre stream/concorrência/reconexão aguardam confirmação em runtime.
 - AGY: última chamada recebeu HTTP 429 (RESOURCE_EXHAUSTED, resposta 0 bytes); nova tentativa espaçada também 429. Claude retomou e respondeu integralmente depois — cotas interromperam parte das tarefas, mas Claude não está mais bloqueado; o AGY, na última tentativa, continua bloqueado.

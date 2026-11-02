@@ -16,7 +16,7 @@ let configuredHost='127.0.0.1';try{const network=JSON.parse((await readFile(join
 if(!Number.isInteger(port)||port<1||port>65535)throw Error('Porta do controle local inválida.');
 const id=createHash('sha256').update(root.toLowerCase()).digest('hex');
 let releaseLock=async()=>{};
-async function health(candidate=port){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),1200);try{const response=await fetch('http://127.0.0.1:'+candidate+'/api/health',{signal:controller.signal});if(!response.ok)return null;const data=await response.json();return data.app==='FreeMix'&&data.installationId===id&&Number(data.port)===candidate?data:null;}catch{return null;}finally{clearTimeout(timer);}}
+async function health(candidate=port){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),1200);try{const response=await fetch('http://127.0.0.1:'+candidate+'/api/health',{signal:controller.signal});if(!response.ok)return null;const data=await response.json();return ['FreeMix','3Mix'].includes(data.app)&&data.installationId===id&&Number(data.port)===candidate?data:null;}catch{return null;}finally{clearTimeout(timer);}}
 async function occupied(candidate){return new Promise(done=>{const server=net.createServer();server.once('error',()=>done(true));server.listen({host:process.env.FREEMIX_API_HOST||configuredHost,port:candidate},()=>server.close(()=>done(false)));});}
 try{
  const req=createRequire(join(root,'package.json'));
@@ -38,4 +38,4 @@ try{
  await startupRecord(root,'api-spawned',{apiPid:child.pid,apiPort:port,host:process.env.FREEMIX_API_HOST||configuredHost});
  for(let attempt=0;attempt<30;attempt++){if(launchError)throw launchError;current=await health();if(current){const panelUrlChanged=await persistApiPort(root,port,current);await startupRecord(root,'api-ready',{apiPid:child.pid,apiPort:port,portChanged:selection.changed});await releaseLock();console.log(JSON.stringify({...current,reused:false,portChanged:selection.changed,panelUrlChanged,previousPort:selection.previousPort,reopenMesa:panelUrlChanged}));process.exit(0);}await new Promise(r=>setTimeout(r,300));}
  throw Error('O servidor nao respondeu. Confira '+join(logDir,'api-error.log'));
-}catch(error){await startupRecord(root,'api-failed',{error:error.message});console.error('FreeMix: falha ao iniciar as janelas extras. '+error.message);process.exitCode=1;}finally{await releaseLock();}
+}catch(error){await startupRecord(root,'api-failed',{error:error.message});console.error('3Mix: falha ao iniciar as janelas extras. '+error.message);process.exitCode=1;}finally{await releaseLock();}

@@ -20,6 +20,7 @@ export async function executePTZ(engine,d){
  if(!(await engine.discover()).ptz)throw Error('Face Tracker PTZ indisponível');
  const active=await engine.p.req('GetSourceActive',{sourceUuid:target.key});if(!active.videoShowing)throw Error('Coloque a entrada da câmera no Preview ou Programa antes de iniciar tracking PTZ');
  const settings=ptzSettings(d.settings),defaults=(await engine.p.req('GetSourceFilterDefaultSettings',{filterKind:PTZ_KIND})).defaultFilterSettings;
+ engine.p.ptzManager?.assertTrackingAvailable(settings['ptz.visca-over-tcp.address'],settings['ptz.visca-over-tcp.port']);
  await engine.filter(target.key,PTZ_NAME,PTZ_KIND,{...defaults,...settings},true);
  const confirmed=await engine.p.req('GetSourceFilter',{sourceUuid:target.key,filterName:PTZ_NAME});
  if(!confirmed.filterEnabled||confirmed.filterSettings['ptz-type']!=='visca-over-tcp')throw Error('Tracking PTZ não confirmado');

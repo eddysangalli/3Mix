@@ -1,6 +1,6 @@
 # Saída ASIO multicanal — implementação, integração e limites
 
-O FreeMix agora tem host nativo de playback ASIO, separado do plugin de captura. Abre um driver explicitamente escolhido, com até oito fontes/submixes estéreo mapeados para até 16 canais físicos distintos. Abrir configurações ou consultar estado não inicializa driver nem reproduz áudio. Não há autostart.
+O 3Mix agora tem host nativo de playback ASIO, separado do plugin de captura. Abre um driver explicitamente escolhido, com até oito fontes/submixes estéreo mapeados para até 16 canais físicos distintos. Abrir configurações ou consultar estado não inicializa driver nem reproduz áudio. Não há autostart.
 
 ## Allowlist exata
 

@@ -29,7 +29,7 @@ export function inspectNdiBinary(bytes){
 export async function prepareNdiRuntime(root,{env=process.env,requirePinned=true,writeReceipt=true}={}){
  root=resolve(root);const directory=join(root,'runtime/ndi-v6'),path=join(directory,NDI_DLL);let info;
  try{const st=await lstat(path);if(!st.isFile()||st.isSymbolicLink()||st.size>100e6)throw Error('Arquivo NDI inválido');info=inspectNdiBinary(await readFile(path));}
- catch(e){throw Error('O FreeMix não será aberto com NDI incompleto. '+e.message+'. Reaplique a entrega com runtime SDK NDI ou instale pelo endereço oficial https://ndi.link/NDIRedistV6.');}
+ catch(e){throw Error('O 3Mix não será aberto com NDI incompleto. '+e.message+'. Reaplique a entrega com runtime SDK NDI ou instale pelo endereço oficial https://ndi.link/NDIRedistV6.');}
  if(requirePinned&&info.sha256!==NDI_SDK_SHA256)throw Error('O runtime NDI desta entrega foi alterado. Reaplique o pacote assinado antes de abrir.');
  for(const name of['NDI SDK License Agreement.pdf','Processing.NDI.Lib.Licenses.txt','PROVENANCE.json','TERMS.md']){const st=await lstat(join(root,'licenses/ndi-runtime',name)).catch(()=>null);if(!st?.isFile()||st.isSymbolicLink())throw Error('Runtime NDI sem licença/proveniência: '+name);}
  env.NDI_RUNTIME_DIR_V6=directory;

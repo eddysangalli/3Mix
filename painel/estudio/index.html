@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<script src="../remoto/mesa-unica.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>3Mix Studio</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/mesa.css">
+<link rel="stylesheet" href="css/audio.css">
+<link rel="stylesheet" href="css/replay.css">
+<link rel="stylesheet" href="css/config.css">
+</head>
+<body class="app" data-tela="mesa">
+
+<svg class="sprite" aria-hidden="true">
+  <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4Z"/><path d="M14 5l4 4"/></symbol>
+  <symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3M8 21v-6h8v6"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></symbol>
+  <symbol id="i-expand" viewBox="0 0 24 24"><path d="M4 9V4h5M20 15v5h-5M20 9V4h-5M4 15v5h5"/></symbol>
+  <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></symbol>
+  <symbol id="i-headphone" viewBox="0 0 24 24"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="2.5" y="13" width="4.5" height="7" rx="1.6"/><rect x="17" y="13" width="4.5" height="7" rx="1.6"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></symbol>
+  <symbol id="i-record" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></symbol>
+  <symbol id="i-stream" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.5"/><path d="M6.5 17.5a7.8 7.8 0 0 1 0-11M17.5 6.5a7.8 7.8 0 0 1 0 11"/></symbol>
+  <symbol id="i-multi" viewBox="0 0 24 24"><rect x="3" y="4" width="12" height="9" rx="1.5"/><rect x="9" y="11" width="12" height="9" rx="1.5"/></symbol>
+  <symbol id="i-rundown" viewBox="0 0 24 24"><path d="M4 6h10M4 12h16M4 18h7"/><circle cx="18" cy="6" r="1.6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M3 8h11v9H3zM14 11l7-3v10l-7-3z"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M7 4h3v16H7zM14 4h3v16h-3z"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4h9l-1.5 4H20l-2 5 2 5H5"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.4 8-8 9-4.6-1-8-4-8-9V6z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-square" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></symbol>
+  <symbol id="i-restore" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4v5h5"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.6v.01"/></symbol>
+</svg>
+
+<!-- ══════════════ TOPBAR ══════════════ -->
+<header class="topbar">
+  <div class="tb-left">
+    <div class="brand">
+      <span class="brand-dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+      <span class="brand-name">3Mix</span>
+    </div>
+    <span class="tb-divider"></span>
+    <button class="view-pill" id="btn-projeto" title="Projeto atual">
+      <svg><use href="#i-monitor"/></svg>
+      <b id="nome-projeto">Futsal ao vivo</b>
+      <svg class="ico-pencil"><use href="#i-pencil"/></svg>
+    </button>
+  </div>
+
+  <nav class="tabs" id="tabs" role="tablist">
+    <button class="tab is-on" data-tela-destino="mesa" role="tab">Mesa</button>
+    <button class="tab" data-tela-destino="audio" role="tab">Áudio</button>
+    <button class="tab" data-tela-destino="replay" role="tab">Replay</button>
+  </nav>
+
+  <div class="tb-right">
+    <button class="btn-ghost" id="btn-salvar-workspace">
+      <svg><use href="#i-save"/></svg><span>Salvar workspace</span>
+    </button>
+    <div class="clock">
+      <b id="relogio">19:29:42</b>
+      <span id="calendario">Qui, 29/10/2026</span>
+    </div>
+    <div class="pill pill-rec" id="pill-rec" title="Gravação">
+      <span class="dot"></span>
+      <div><em>REC</em><b id="tempo-rec">00:00:00</b></div>
+    </div>
+    <div class="pill pill-live" id="pill-live" title="Transmissão">
+      <span class="dot"></span>
+      <div><em>Streaming</em><b id="taxa-live">AO VIVO 4.2 Mbps</b></div>
+    </div>
+    <button class="btn-ghost btn-cameras" id="btn-cameras" hidden>
+      <svg><use href="#i-camera"/></svg><span>Configurar câmeras</span>
+    </button>
+    <div class="win-controls">
+      <button data-janela="minimizar" title="Minimizar"><svg><use href="#i-minus"/></svg></button>
+      <button data-janela="maximizar" title="Maximizar"><svg><use href="#i-square"/></svg></button>
+      <button data-janela="fechar" class="win-close" title="Fechar"><svg><use href="#i-x"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════ TELAS ══════════════ -->
+<!-- Navegação compacta visível apenas em modo dock (topbar completa escondida) -->
+<nav class="dock-nav" id="dock-nav">
+  <button class="is-on" data-tela-destino="mesa">Mesa</button>
+  <button data-tela-destino="audio">Áudio</button>
+  <button data-tela-destino="replay">Replay</button>
+</nav>
+
+<main class="palco">
+
+  <!-- ─────────── MESA ─────────── -->
+  <section class="tela tela-mesa" data-tela-nome="mesa">
+
+    <div class="linha-monitores">
+      <!-- PV -->
+      <article class="monitor monitor-pv" id="monitor-pv">
+        <header class="monitor-topo">
+          <span class="monitor-rotulo">PRÉ-VISUALIZAÇÃO: <b id="pv-nome">CAM 3</b></span>
+          <div class="monitor-acoes">
+            <button title="Tela cheia"><svg><use href="#i-expand"/></svg></button>
+            <button title="Ajustes do preview"><svg><use href="#i-gear"/></svg></button>
+          </div>
+        </header>
+        <div class="monitor-corpo">
+          <div class="video" id="pv-video"><img id="pv-img" alt="Pré-visualização" draggable="false"></div>
+          <div class="vu-vertical" data-vu="pv">
+            <div class="vu-escala"><span>0</span><span>-10</span><span>-20</span><span>-30</span><span>-40</span><span>-50</span><span>-60</span></div>
+            <div class="vu-trilho"><div class="vu-preenchimento" style="height:62%"></div><div class="vu-pico" style="bottom:70%"></div><div class="vu-marcas"></div></div>
+          </div>
+        </div>
+      </article>
+
+      <!-- CENTRO: TRANSIÇÃO + DSK -->
+      <div class="coluna-centro">
+        <article class="card card-transicao">
+          <header class="card-topo">
+            <h3>TRANSIÇÃO</h3>
+            <button class="ico-btn" title="Ajustes de transição"><svg><use href="#i-gear"/></svg></button>
+          </header>
+          <div class="trans-botoes">
+            <button class="btn-trans" id="btn-cut">CUT</button>
+            <button class="btn-trans" id="btn-auto">AUTO</button>
+          </div>
+          <label class="campo-linha">
+            <span>Duração</span>
+            <div class="select">
+              <select id="sel-duracao">
+                <option value="400">0,4 s</option>
+                <option value="800" selected>0,8 s</option>
+                <option value="1200">1,2 s</option>
+                <option value="2000">2,0 s</option>
+              </select>
+              <svg><use href="#i-chevron"/></svg>
+            </div>
+          </label>
+          <div class="tbar" id="tbar" title="T-Bar — arraste para misturar">
+            <div class="tbar-trilho"><div class="tbar-luz"></div></div>
+            <div class="tbar-cabo" id="tbar-cabo" style="top:50%"><span></span></div>
+          </div>
+        </article>
+
+        <article class="card card-dsk">
+          <header class="card-topo">
+            <h3>DSK / GRAFISMOS</h3>
+            <div class="card-acoes">
+              <button class="ico-btn" title="Expandir"><svg><use href="#i-expand"/></svg></button>
+              <button class="ico-btn" title="Gerenciar grafismos"><svg><use href="#i-plus"/></svg></button>
+            </div>
+          </header>
+          <div class="dsk-lista" id="dsk-lista"></div>
+        </article>
+      </div>
+
+      <!-- PGM -->
+      <article class="monitor monitor-pgm" id="monitor-pgm">
+        <header class="monitor-topo">
+          <span class="monitor-rotulo">PROGRAMA: <b id="pgm-nome">CAM 1</b></span>
+          <div class="monitor-acoes">
+            <span class="ao-vivo-tag"><span class="dot"></span>NO AR</span>
+            <button title="Tela cheia"><svg><use href="#i-expand"/></svg></button>
+            <button title="Ajustes do programa"><svg><use href="#i-gear"/></svg></button>
+          </div>
+        </header>
+        <div class="monitor-corpo">
+          <div class="video" id="pgm-video"><img id="pgm-img" alt="Programa" draggable="false"><div class="pgm-flash" id="pgm-flash"></div></div>
+          <div class="vu-vertical" data-vu="pgm">
+            <div class="vu-escala"><span>0</span><span>-10</span><span>-20</span><span>-30</span><span>-40</span><span>-50</span><span>-60</span></div>
+            <div class="vu-trilho"><div class="vu-preenchimento" style="height:74%"></div><div class="vu-pico" style="bottom:82%"></div><div class="vu-marcas"></div></div>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="linha-buses">
+      <section class="barramento barramento-pv">
+        <header class="barramento-topo"><span>PRÉ-VISUALIZAÇÃO (PV)</span></header>
+        <div class="barramento-trilho" id="barramento-pv"></div>
+      </section>
+      <section class="barramento barramento-pgm">
+        <header class="barramento-topo"><span>PROGRAMA (PGM)</span></header>
+        <div class="barramento-trilho" id="barramento-pgm"></div>
+      </section>
+    </div>
+
+    <div class="linha-operacao">
+      <section class="card painel-fontes">
+        <header class="fontes-topo">
+          <h2><svg><use href="#i-grid"/></svg>Fontes</h2>
+          <div class="filtros" id="filtros-fontes">
+            <button class="filtro is-on" data-filtro="todas">Todas</button>
+            <button class="filtro" data-filtro="camera">Câmeras</button>
+            <button class="filtro" data-filtro="player">Players</button>
+            <button class="filtro" data-filtro="composicao">Composições</button>
+          </div>
+          <div class="campo-busca">
+            <svg><use href="#i-search"/></svg>
+            <input id="busca-fontes" type="text" placeholder="Buscar fontes..." spellcheck="false">
+          </div>
+        </header>
+        <div class="fontes-grade" id="fontes-grade"></div>
+      </section>
+
+      <section class="card painel-mixer">
+        <header class="mixer-topo">
+          <h2><svg><use href="#i-grid"/></svg>Mixer de Áudio</h2>
+          <div class="card-acoes">
+            <button class="ico-btn" title="Expandir mixer"><svg><use href="#i-expand"/></svg></button>
+            <button class="ico-btn" title="Ajustes de áudio"><svg><use href="#i-gear"/></svg></button>
+          </div>
+        </header>
+        <div class="mixer-trilho" id="mixer-trilho"></div>
+      </section>
+    </div>
+  </section>
+
+  <!-- ─────────── ÁUDIO ─────────── -->
+  <section class="tela tela-audio" data-tela-nome="audio" hidden>
+    <header class="audio-topo">
+      <div class="audio-titulo">
+        <h1>Mixer de Áudio</h1>
+        <span>Barramentos, ganho de entrada e roteamento ao vivo — 48 kHz / 24 bits</span>
+      </div>
+      <div class="audio-acoes">
+        <div class="seg" id="seg-barra">
+          <button class="is-on" data-barra="todos">Todos</button>
+          <button data-barra="pgm">PGM</button>
+          <button data-barra="aux">AUX</button>
+          <button data-barra="n1">N-1</button>
+        </div>
+        <button class="btn-secundario" id="btn-reset-faders"><svg><use href="#i-restore"/></svg>Restaurar níveis</button>
+        <button class="btn-secundario"><svg><use href="#i-gear"/></svg>Configurar áudio</button>
+      </div>
+    </header>
+    <div class="audio-corpo">
+      <div class="audio-mixer" id="mixer-completo"></div>
+      <aside class="audio-lateral">
+        <div class="card">
+          <header class="card-topo"><h3>BARRAMENTOS</h3></header>
+          <div class="barras-lista" id="barras-lista"></div>
+        </div>
+        <div class="card">
+          <header class="card-topo"><h3>MEDIDOR MASTER</h3><span class="mini-tag">PEAK HOLD</span></header>
+          <div class="master-vu" id="master-vu">
+            <div class="master-vu-par"><span class="rotulo">L</span><div class="trilho"><i class="pico"></i></div></div>
+            <div class="master-vu-par"><span class="rotulo">R</span><div class="trilho"><i class="pico"></i></div></div>
+            <div class="master-escala"><span>0</span><span>-6</span><span>-12</span><span>-24</span><span>-36</span><span>-48</span><span>-60</span></div>
+          </div>
+        </div>
+        <div class="card card-dica">
+          <header class="card-topo"><h3>N-1 AUTOMÁTICO</h3></header>
+          <p>Cada retorno de convidado recebe o mix completo menos a própria voz, sem criar buses manualmente.</p>
+          <div class="dica-status"><span class="dot"></span>4 retornos ativos</div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ─────────── REPLAY ─────────── -->
+  <section class="tela tela-replay" data-tela-nome="replay" hidden>
+    <header class="replay-topo">
+      <div class="disco">
+        <span class="disco-led"></span>
+        <b>SSD GRAVANDO</b>
+        <em id="replay-rec-time">00:24:18</em>
+      </div>
+      <div class="disco-info">Disco: <b>512 GB</b> · 327 GB livre (64%)</div>
+      <div class="canais">
+        <span class="canais-rotulo">Câmeras:</span>
+        <div class="canal is-on" data-canal="1"><b>CAM 1</b> Principal</div>
+        <div class="canal" data-canal="2"><b>CAM 2</b> Lateral Dir</div>
+        <div class="canal" data-canal="3"><b>CAM 3</b> Atrás Gol</div>
+        <div class="canal" data-canal="4"><b>CAM 4</b> Lateral Esq</div>
+      </div>
+      <div class="replay-marcas">
+        <span class="rotulo">Capturas:</span>
+        <button class="captura" data-captura="5">-5s</button>
+        <button class="captura" data-captura="10">-10s</button>
+        <button class="captura" data-captura="20">-20s</button>
+        <button class="btn-marca in" id="btn-marcar-in"><svg><use href="#i-flag"/></svg>MARCAR IN</button>
+        <button class="btn-marca out" id="btn-marcar-out"><svg><use href="#i-flag"/></svg>MARCAR OUT</button>
+      </div>
+    </header>
+
+    <div class="replay-linha-topo">
+      <article class="player player-a" id="player-a">
+        <header class="player-topo">
+          <span class="player-nome"><span class="pino"></span>PLAYER A · CAM 1 — Principal</span>
+          <span class="player-estado" id="estado-a">PRONTO</span>
+        </header>
+        <div class="player-video"><img src="../img/cena/player-a.jpg" alt="Player A" draggable="false"><div class="player-osd"><span id="a-timecode">00:00 / 00:09</span><svg><use href="#i-expand"/></svg></div></div>
+        <div class="player-transporte">
+          <button title="Ir ao IN" data-transporte="in"><svg><use href="#i-flag"/></svg></button>
+          <button title="-1 quadro" data-transporte="-1"><svg><use href="#i-pause"/></svg></button>
+          <button class="btn-play" data-transporte="play"><svg><use href="#i-play"/></svg>REPRODUZIR</button>
+          <button data-transporte="pause"><svg><use href="#i-pause"/></svg>PAUSAR</button>
+          <button title="+1 quadro" data-transporte="+1"><svg><use href="#i-play"/></svg></button>
+        </div>
+      </article>
+
+      <div class="replay-centro">
+        <div class="slow-motion">
+          <h4>SLOW-MOTION</h4>
+          <div class="slow-valor" id="slow-valor">50%</div>
+          <input type="range" id="slow-range" min="10" max="100" step="5" value="50">
+          <div class="slow-presets">
+            <button data-vel="10">10%</button>
+            <button data-vel="25">25%</button>
+            <button data-vel="33">33%</button>
+            <button data-vel="50" class="is-on">50%</button>
+            <button data-vel="75">75%</button>
+            <button data-vel="100">100%</button>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="vincular-players" checked>
+            <span class="switch-trilho"><i></i></span>
+            <span class="switch-texto">Vincular Players<br><small>A ↔ B</small></span>
+          </label>
+        </div>
+      </div>
+
+      <article class="player player-b" id="player-b">
+        <header class="player-topo">
+          <span class="player-nome"><span class="pino amarelo"></span>PLAYER B · CAM 2 — Lateral Dir</span>
+          <span class="player-estado carregado" id="estado-b">CARREGADO</span>
+        </header>
+        <div class="player-video"><img src="../img/cena/player-b.jpg" alt="Player B" draggable="false"><div class="player-osd"><span id="b-timecode">00:00 / 00:09</span><svg><use href="#i-expand"/></svg></div></div>
+        <div class="player-transporte">
+          <button title="Ir ao IN" data-transporte="in"><svg><use href="#i-flag"/></svg></button>
+          <button title="-1 quadro" data-transporte="-1"><svg><use href="#i-pause"/></svg></button>
+          <button class="btn-play" data-transporte="play"><svg><use href="#i-play"/></svg>REPRODUZIR</button>
+          <button data-transporte="pause"><svg><use href="#i-pause"/></svg>PAUSAR</button>
+          <button title="+1 quadro" data-transporte="+1"><svg><use href="#i-play"/></svg></button>
+        </div>
+      </article>
+    </div>
+
+    <div class="replay-acoes">
+      <button class="btn-acao" id="btn-criar-lance"><svg><use href="#i-plus"/></svg>CRIAR LANCE (CAPTURA RÁPIDA)</button>
+      <button class="btn-acao" data-captura-rapida="5">SALVAR ÚLTIMOS 5 s</button>
+      <button class="btn-acao" data-captura-rapida="10">SALVAR ÚLTIMOS 10 s</button>
+      <button class="btn-acao" data-captura-rapida="20">SALVAR ÚLTIMOS 20 s</button>
+      <span class="acoes-sep"></span>
+      <button class="btn-acao" id="acao-marcar-in"><svg><use href="#i-flag"/></svg>MARCAR IN</button>
+      <button class="btn-acao" id="acao-marcar-out"><svg><use href="#i-flag"/></svg>MARCAR OUT</button>
+      <button class="btn-acao forte" id="acao-salvar-lance"><svg><use href="#i-save"/></svg>SALVAR LANCE</button>
+    </div>
+
+    <div class="replay-linha-baixo">
+      <section class="card painel-lances">
+        <header class="card-topo">
+          <h3>LANCES SALVOS <span class="contagem" id="lances-contagem">(eventos de replay)</span></h3>
+          <span class="mini-tag" id="lances-resumo">4 lances · 00:31 total</span>
+        </header>
+        <table class="tabela-lances">
+          <thead><tr><th>#</th><th>TIPO</th><th>TEMPO</th><th>DURAÇÃO</th><th>ÂNGULOS</th><th>AÇÕES</th><th></th></tr></thead>
+          <tbody id="lances-corpo"></tbody>
+        </table>
+      </section>
+
+      <section class="card painel-historico">
+        <header class="card-topo">
+          <h3>HISTÓRICO — 4 CÂMERAS SINCRONIZADAS</h3>
+          <div class="historico-acoes">
+            <span class="mini-tag" id="historico-hora">19:28:15:12</span>
+            <button class="mini-btn">4 CÂMERAS</button>
+            <button class="mini-btn">CÂMERA SELECIONADA</button>
+            <button class="ico-btn"><svg><use href="#i-expand"/></svg></button>
+          </div>
+        </header>
+        <div class="historico-grade" id="historico-grade"></div>
+        <div class="historico-timeline">
+          <div class="tl-horas"><span>00:00</span><span id="tl-in">IN</span><span id="tl-now">19:28:15:12</span><span id="tl-out">OUT</span><span>00:09</span></div>
+          <div class="tl-trilho">
+            <div class="tl-janela" id="tl-janela" style="left:18%;width:46%"></div>
+            <div class="tl-cursor" id="tl-cursor" style="left:52%"></div>
+            <div class="tl-marca in" id="tl-marca-in" style="left:18%"></div>
+            <div class="tl-marca out" id="tl-marca-out" style="left:64%"></div>
+          </div>
+          <div class="tl-transporte">
+            <button data-tl="-5">◀◀ -5 s</button>
+            <button data-tl="-1">◀ -1 quadro</button>
+            <button class="btn-play" data-tl="play"><svg><use href="#i-play"/></svg>REPRODUZIR</button>
+            <button data-tl="pause"><svg><use href="#i-pause"/></svg>PAUSAR</button>
+            <button data-tl="+1">+1 quadro ▶</button>
+            <button data-tl="now">▶▶ MAIS RECENTE</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer class="replay-barra">
+      <div class="rb-player">PLAYER PARA EXIBIR
+        <div class="seg">
+          <button class="is-on" data-player-alvo="A">A</button>
+          <button data-player-alvo="B">B</button>
+        </div>
+      </div>
+      <button class="btn-no-ar" id="btn-colocar-no-ar"><svg><use href="#i-play"/></svg>COLOCAR NO AR</button>
+      <label class="switch compacto">
+        <input type="checkbox" id="replay-auto-entrada">
+        <span class="switch-trilho"><i></i></span>
+        <span class="switch-texto">REPRODUZIR AO ENTRAR</span>
+      </label>
+      <div class="rb-status">STATUS <span class="dot"></span><b id="rb-status-texto">AO VIVO</b></div>
+      <button class="btn-voltar" id="btn-voltar-vivo"><svg><use href="#i-restore"/></svg>VOLTAR AO VIVO</button>
+      <button class="btn-avancado">⌃ Opções avançadas</button>
+    </footer>
+  </section>
+
+  <!-- ─────────── CONFIGURAÇÕES (overlay) ─────────── -->
+  <section class="tela-config" id="tela-config" hidden>
+    <header class="cfg-topo">
+      <div class="cfg-marca">
+        <span class="brand-dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <b>3Mix</b><span class="cfg-sep">/</span><span class="cfg-atual">Configurações</span>
+      </div>
+      <button class="view-pill" id="cfg-projeto"><svg><use href="#i-monitor"/></svg><b>Futsal ao vivo</b><svg class="ico-chevron"><use href="#i-chevron"/></svg></button>
+      <div class="cfg-busca"><svg><use href="#i-search"/></svg><input type="text" placeholder="Buscar configuração..." spellcheck="false"></div>
+      <div class="win-controls"><button><svg><use href="#i-minus"/></svg></button><button><svg><use href="#i-square"/></svg></button><button class="win-close" data-fechar-config><svg><use href="#i-x"/></svg></button></div>
+    </header>
+
+    <div class="cfg-corpo">
+      <nav class="cfg-menu" id="cfg-menu">
+        <span class="cfg-grupo">PRODUÇÃO</span>
+        <button class="cfg-item is-on" data-cfg="video"><svg><use href="#i-camera"/></svg>Vídeo</button>
+        <button class="cfg-item" data-cfg="audio"><svg><use href="#i-stream"/></svg>Áudio</button>
+        <button class="cfg-item" data-cfg="saidas-audio"><svg><use href="#i-stream"/></svg>Saídas de áudio</button>
+        <span class="cfg-grupo">TRANSMISSÃO</span>
+        <button class="cfg-item" data-cfg="streaming"><svg><use href="#i-stream"/></svg>Streaming</button>
+        <button class="cfg-item" data-cfg="gravacao"><svg><use href="#i-record"/></svg>Gravação</button>
+        <button class="cfg-item" data-cfg="ndi"><svg><use href="#i-stream"/></svg>Saídas NDI / SRT</button>
+        <span class="cfg-grupo">OPERAÇÃO</span>
+        <button class="cfg-item" data-cfg="aparencia"><svg><use href="#i-monitor"/></svg>Aparência e workspace</button>
+        <button class="cfg-item" data-cfg="multiview"><svg><use href="#i-grid"/></svg>Multiview e tela cheia</button>
+        <button class="cfg-item" data-cfg="atalhos"><svg><use href="#i-list"/></svg>Atalhos</button>
+        <button class="cfg-item" data-cfg="remoto"><svg><use href="#i-grid"/></svg>Controle remoto</button>
+        <span class="cfg-grupo">SISTEMA</span>
+        <button class="cfg-item" data-cfg="desempenho"><svg><use href="#i-gear"/></svg>Desempenho</button>
+        <button class="cfg-item" data-cfg="cor"><svg><use href="#i-clock"/></svg>Cor</button>
+        <button class="cfg-item" data-cfg="sobre"><svg><use href="#i-info"/></svg>Sobre</button>
+      </nav>
+
+      <div class="cfg-conteudo" id="cfg-conteudo"></div>
+    </div>
+
+    <footer class="cfg-rodape">
+      <div class="cfg-rodape-esq">
+        <button class="btn-rodape"><svg><use href="#i-download"/></svg>Importar</button>
+        <button class="btn-rodape"><svg><use href="#i-upload"/></svg>Exportar</button>
+        <button class="btn-rodape" id="cfg-restaurar"><svg><use href="#i-restore"/></svg>Restaurar padrão</button>
+      </div>
+      <div class="cfg-rodape-dir">
+        <span class="cfg-alterado" id="cfg-alterado"><span class="dot"></span>Alterações não salvas</span>
+        <button class="btn-rodape" id="cfg-cancelar">Cancelar</button>
+        <button class="btn-rodape" id="cfg-aplicar">Aplicar</button>
+        <button class="btn-salvar" id="cfg-salvar">Salvar</button>
+      </div>
+    </footer>
+  </section>
+
+</main>
+
+<!-- ══════════════ STATUS BAR ══════════════ -->
+<footer class="statusbar" id="statusbar">
+  <div class="status-esq">
+    <span class="status-sinal"><span class="dot"></span></span>
+    <span class="status-chip">1920×1080</span>
+    <span class="status-sep"></span>
+    <span class="status-chip" id="status-fps-format">59.94p</span>
+    <span class="status-sep"></span>
+    <span class="status-chip">CPU <b id="status-cpu">12%</b></span>
+    <span class="status-sep"></span>
+    <span class="status-chip">GPU <b id="status-gpu">18%</b></span>
+    <span class="status-sep"></span>
+    <span class="status-chip">FPS <b id="status-fps">60</b></span>
+    <span class="status-sep"></span>
+    <span class="status-chip">Frames perdidos <b id="status-drops">0 (0.0%)</b></span>
+  </div>
+  <div class="status-dir">
+    <button class="btn-status btn-gravar" id="btn-gravar"><span class="dot"></span>Gravar</button>
+    <button class="btn-status btn-transmitir" id="btn-transmitir"><svg><use href="#i-stream"/></svg>Transmitir</button>
+    <button class="btn-status"><svg><use href="#i-multi"/></svg>Multigravação</button>
+    <button class="btn-status"><svg><use href="#i-rundown"/></svg>Rundown</button>
+    <button class="btn-status" id="btn-config"><svg><use href="#i-gear"/></svg>Configurações</button>
+    <button class="btn-status btn-icone" title="Mais"><svg><use href="#i-dots"/></svg></button>
+    <button class="btn-status btn-icone" title="Módulos"><svg><use href="#i-grid"/></svg></button>
+  </div>
+</footer>
+
+<div class="toast" id="toast" hidden></div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

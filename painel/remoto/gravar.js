@@ -157,7 +157,7 @@
     draft = null;
   }
   const close = () => window.FreeMixClosePanel?.();
-  const openSettings = (category) => { location.href = '/settings?category=' + encodeURIComponent(category) + '&context=recording'; };
+  const openSettings = (category) => { location.href = '/configuracoes?category=' + encodeURIComponent(category) + '&context=recording'; };
 
   E('formats').onclick = (e) => { const b = e.target.closest('button'); if (!b || b.disabled) return; const now = split(current().format), container = b.dataset.container; edit({ format: now.variant && formats().includes(join(container, now.variant)) ? join(container, now.variant) : container }); E('msg').dataset.auto = '1'; draw(); };
   E('directory').oninput = (e) => { edit({ directory: e.target.value }); E('msg').dataset.auto = '1'; draw(); };
@@ -175,7 +175,7 @@
     note('Pasta escolhida: ' + folder + '. Confira o espaço livre antes de aplicar.', 'ok');
     draw();
   };
-  E('advanced').onclick = () => { if (dirty() && !confirm('Há alterações não salvas nesta janela. Abrir o editor completo mesmo assim?')) return; location.href = '/settings?category=recording&context=recording'; };
+  E('advanced').onclick = () => { if (dirty() && !confirm('Há alterações não salvas nesta janela. Abrir o editor completo mesmo assim?')) return; location.href = '/configuracoes?category=recording&context=recording'; };
   E('cancel').onclick = close;
   E('ok').onclick = async () => {
     if (busy) return;

@@ -1,0 +1,73 @@
+3Mix — Termos de uso da versão Beta
+=====================================
+
+Estes termos regem o uso desta versão BETA do 3Mix. Esta não é a versão final (1.0) do
+produto. Ao instalar ou executar este software, você concorda com os termos abaixo.
+
+1. Natureza desta entrega
+--------------------------
+
+Esta é uma versão de testes (beta), distribuída para avaliação e uso antes do lançamento
+comercial final. Partes do produto já foram testadas em ambiente de desenvolvimento; outras
+partes, listadas em LIMITES-CONHECIDOS.md, ainda não foram comprovadas fora desse ambiente
+(por exemplo: instalação em Windows "limpo", hardware físico de captura SDI/ASIO, chamadas
+remotas via internet). Use esta beta sabendo disso.
+
+2. Sem garantia
+-----------------
+
+Este software é fornecido "como está", sem garantia de qualquer tipo, expressa ou
+implícita, incluindo garantias de comercialização, adequação a uma finalidade específica
+ou não violação de direitos de terceiros. O uso em produção ao vivo (transmissões reais,
+eventos comerciais) é de responsabilidade exclusiva de quem opera o software; recomenda-se
+testar extensivamente antes de qualquer uso crítico.
+
+3. Sem telemetria
+-------------------
+
+O 3Mix não envia dados de uso, diagnóstico ou qualquer outra informação automaticamente
+para nenhum servidor. A única coleta de dados existente (geração de um ZIP de diagnóstico)
+é manual, iniciada explicitamente pelo usuário, e o conteúdo gerado nunca é enviado
+automaticamente — ver SOLICITAR-SUPORTE.md para o que esse ZIP contém e não contém.
+
+4. Limites desta versão
+--------------------------
+
+Esta beta não deve ser usada com a expectativa de que os seguintes cenários já foram
+comprovados (lista completa e com fontes em LIMITES-CONHECIDOS.md):
+  - Chamadas remotas (Calls) via internet com convidados reais;
+  - Equipamento físico SDI, ASIO ou HDR ponta a ponta;
+  - Recursos NDI Advanced que exigem licença adicional;
+  - Bonding multipath em redes reais;
+  - Instalação em uma máquina Windows "limpa", sem ferramentas de desenvolvimento.
+
+5. Componentes de terceiros e código aberto
+----------------------------------------------
+
+O 3Mix é construído sobre um motor que é um fork do OBS Studio e inclui diversos plugins
+de código aberto, a maioria sob a licença GPL-2.0 (alguns componentes sob MIT ou termos
+próprios de SDK). A lista completa, com origem e licença de cada componente, está em
+THIRD-PARTY-NOTICES.txt — incluindo a oferta de código-fonte exigida pela GPL. Estes termos
+de uso (EULA) se aplicam ao conjunto do produto "3Mix" como entregue; eles não substituem,
+restringem nem alteram os termos da GPL ou das demais licenças de terceiros listadas lá.
+
+6. Verificação do instalador
+-------------------------------
+
+O instalador desta beta não possui assinatura Authenticode (reconhecida nativamente pelo
+Windows); por isso o SmartScreen do Windows pode exibir um aviso ao executá-lo. Para
+verificar que o arquivo não foi alterado, confira o hash SHA-256 publicado junto à entrega
+contra o arquivo recebido antes de executá-lo — ver LEIA-ME-BETA.md, seção de verificação.
+
+7. Suporte
+------------
+
+Esta beta não tem um canal de suporte formal definido ainda — ver SOLICITAR-SUPORTE.md para
+o estado atual disso. Não há compromisso de prazo de resposta (SLA) nesta fase.
+
+8. Alterações
+---------------
+
+Estes termos valem para esta versão beta específica e podem mudar na versão final (1.0) do
+3Mix, incluindo eventual necessidade de aceite formal, política de privacidade dedicada e
+termos comerciais, que serão apresentados separadamente quando definidos.

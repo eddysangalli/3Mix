@@ -7,13 +7,13 @@
     "styleFields": [
       {
         "key": "accent",
-        "label": "Cor de destaque",
+        "label": "Cor primária (Destaque)",
         "type": "color",
         "default": "#19c9aa"
       },
       {
         "key": "background",
-        "label": "Cor do painel",
+        "label": "Cor do painel (Fundo)",
         "type": "color",
         "default": "#102330"
       },
@@ -38,12 +38,6 @@
         "default": 100,
         "min": 70,
         "max": 140
-      },
-      {
-        "key": "fontFamily",
-        "label": "Fonte instalada (família)",
-        "type": "text",
-        "default": "Arial"
       },
       {
         "key": "imageOpacity",
@@ -76,13 +70,32 @@
       "key": "brand",
       "label": "Marca",
       "type": "text",
-      "default": "FREEMIX"
+      "default": "3MIX"
     },
     {
       "key": "label",
       "label": "Etiqueta",
       "type": "text",
       "default": "AO VIVO"
+    },
+    {
+      "key": "secondary",
+      "label": "Cor secundária (Acento 2)",
+      "type": "color",
+      "default": "#0284c7"
+    },
+    {
+      "key": "designStyle",
+      "label": "Estilo Visual / Geometria",
+      "type": "select",
+      "default": "modern_internet",
+      "options": [
+        "modern_internet",
+        "classic_tv",
+        "swiss_square",
+        "esports_neon",
+        "corporate_glass"
+      ]
     }
   ]
 }

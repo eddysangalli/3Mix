@@ -15,7 +15,7 @@ if(WIN32)
 endif()
 
 # Localização de pacotes Qt6
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network WebSockets)
 
 # Localização do SDK libobs
 # Pode ser fornecido via -DOBS_DIR="caminho" ou variáveis de ambiente
@@ -54,6 +54,8 @@ set(FREEMIX_SOURCES
     src/ui/FreeMixMainWindow.h
     src/ui/VideoDisplayWidget.cpp
     src/ui/VideoDisplayWidget.h
+    src/services/StateEngine.cpp
+    src/services/StateEngine.h
     src/services/OutputManager.cpp
     src/services/OutputManager.h
     src/services/AudioBusManager.cpp
@@ -93,6 +95,7 @@ target_link_libraries(FreeMix PRIVATE
     Qt6::Gui
     Qt6::Widgets
     Qt6::Network
+    Qt6::WebSockets
     obs
 )
 

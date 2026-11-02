@@ -3,144 +3,130 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Recuperação e Backup de Projetos</title>
-<link rel="stylesheet" href="vmix-dialogo.css">
+<title>3Mix · Recuperação</title>
+<script src="3mix-padrao.js"></script>
+<link rel="stylesheet" href="3mix-grafite.css">
+<link rel="stylesheet" href="3mix-padrao.css">
 <style>
-.vd-status table { width: 100%; border-collapse: collapse; }
-.vd-status th, .vd-status td { padding: 4px 8px; border: 1px solid #39444d; text-align: left; font-size: 11px; }
-.vd-status th { background: #26303a; font-weight: 700; position: sticky; top: 0; z-index: 1; }
-.vd-status td input[type=radio] { margin: 0; vertical-align: middle; }
-#candidate { padding: 8px 12px; border: 1px solid #d4a400; background: #3b321b; margin-bottom: 8px; }
-details summary { cursor: pointer; font-weight: 700; color: #fff; padding: 4px 0; outline: none; }
-details summary:hover { color: #1e7fd6; }
-pre#report, pre#import-project-report { white-space: pre-wrap; word-break: break-all; max-height: 120px; overflow-y: auto; background: #12171b; border: 1px solid #39444d; padding: 6px; font: 11px Consolas, monospace; }
+  #candidate { padding: 14px 16px; background: #302511; border: 1px solid #6b5320; border-left: 3px solid var(--p3-warn); border-radius: 4px; display: flex; flex-direction: column; gap: 10px; }
+  #candidate-title { font-weight: 700; color: #f0d9a5; font-size: 15px; }
+  #candidate-detail { color: #e6d6ad; font-size: 13px; }
+  .re-list { max-height: 320px; }
+  .re-list input[type=radio] { display: block; }
+  #backups tr { cursor: pointer; }
+  #dependency-map { font: 12px/1.45 Consolas, monospace; }
+  #remote-urls { font: 12px/1.45 Consolas, monospace; }
+  .re-auto { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+  .re-auto .p3-field { flex: 0 0 170px; }
 </style>
 </head>
-<body data-page="recuperacao" class="vd">
-<div class="vd-window vd-fill">
-  <div class="vd-strip">
-    <span class="vd-title">Recuperação e Segurança</span>
-    <span class="vd-flex"></span>
-    <span id="current" class="vd-note" style="font-size:11px">Aguardando motor...</span>
-    <span id="connection" hidden></span>
-  </div>
+<body data-page="recuperacao" class="p3">
+<header class="p3-head">
+  <a href="/" title="3Mix"><img class="p3-logo" src="/img/3mix-logo.png" alt="3Mix"></a>
+  <h1>Recuperação</h1>
+  <span class="p3-flex"></span>
+  <span id="connection" hidden></span>
+</header>
 
-  <p id="error" class="vd-msg vd-error" hidden role="alert" style="margin:4px 12px"></p>
+<main class="p3-main">
+  <p id="error" hidden role="alert"></p>
 
   <div id="candidate" hidden>
-    <div id="candidate-title" style="font-weight:700;color:#fadb14"></div>
-    <p id="candidate-detail" style="margin:4px 0;font-size:11px"></p>
-    <div class="vd-inline" style="gap:6px">
-      <button id="candidate-select" class="vd-warn">Selecionar Sessão para Recuperar</button>
-      <button id="candidate-dismiss">Dispensar Aviso</button>
+    <div id="candidate-title"></div>
+    <p id="candidate-detail"></p>
+    <div class="p3-row">
+      <button type="button" id="candidate-select" class="primary">Escolher esta sessão</button>
+      <button type="button" id="candidate-dismiss">Ignorar</button>
     </div>
   </div>
 
-  <div class="vd-body" style="padding-bottom:0">
-    <div class="vd-row">
-      <span>Cópias Salvas</span>
-      <div class="vd-inline" style="flex:1">
-        <button id="refresh">Atualizar Lista</button>
-        <span class="vd-note" style="font-size:11px">Selecione uma versão abaixo para inspecionar ou restaurar:</span>
-      </div>
+  <section class="p3-card">
+    <div class="p3-card-head">
+      <h2>Cópias salvas</h2>
+      <span class="p3-row">
+        <span id="current" class="p3-note"></span>
+        <button type="button" id="refresh" class="small">Atualizar</button>
+      </span>
     </div>
-  </div>
-
-  <div class="vd-status vd-grow" style="margin: 4px 12px; min-height: 140px; overflow: auto;">
-    <table>
-      <thead>
-        <tr>
-          <th style="width:30px"></th>
-          <th style="width:50%">Produção / Tipo</th>
-          <th style="width:30%">Data do Registro</th>
-          <th style="width:15%">Arquivos</th>
-        </tr>
-      </thead>
-      <tbody id="backups"></tbody>
-    </table>
-  </div>
-
-  <div class="vd-body" style="padding-top:4px">
-    <div class="vd-row">
-      <span>Restaurar Cópia</span>
-      <div class="vd-inline" style="flex-wrap:wrap;gap:6px">
-        <input id="name" maxlength="80" placeholder="Nome para a produção recuperada" spellcheck="false" style="max-width:260px">
-        <label class="vd-check"><input id="restore-profile" type="checkbox" checked> Perfil de vídeo/saídas</label>
-        <label class="vd-check"><input id="replay-journal" type="checkbox"> Reaplicar ações operacionais</label>
-      </div>
+    <div class="p3-table-wrap re-list">
+      <table>
+        <thead><tr><th style="width:40px"></th><th>Produção</th><th style="width:28%">Data</th><th style="width:90px">Arquivos</th></tr></thead>
+        <tbody id="backups"></tbody>
+      </table>
     </div>
 
-    <div class="vd-row">
-      <span>Ações na Cópia</span>
-      <div class="vd-inline" style="gap:6px">
-        <button id="diagnose">Conferir Dependências</button>
-        <button id="journal-plan">Conferir Histórico de Ações</button>
-        <button id="restore" class="vd-on">Recuperar como Nova Produção</button>
-      </div>
+    <div class="p3-inline">
+      <label class="p3-field">Nome da produção recuperada
+        <input id="name" maxlength="80" placeholder="Ex.: Jogo de sábado (recuperado)" spellcheck="false">
+      </label>
+      <button type="button" id="restore" class="primary">Recuperar cópia</button>
     </div>
 
-    <textarea id="dependency-map" rows="1" placeholder='Mapear caminhos alterados (opcional): {"D:\\antigo":"D:\\novo"}' style="width:100%;height:24px;font:11px Consolas,monospace;background:#e9eaeb;color:#000;border:1px solid #6f757b;padding:2px;margin:2px 0" hidden></textarea>
-
-    <pre id="report" role="status" style="margin:4px 0"></pre>
-
-    <!-- Seções Avançadas: Backup Manual e Salvamento Automático -->
-    <details class="vd-advanced" style="margin-top:4px">
-      <summary>Criar Cópia Manual e Configurar Autosave Periódico</summary>
-      <div class="vd-row">
-        <span>Cópia Manual</span>
-        <div class="vd-inline" style="flex-wrap:wrap;gap:6px">
-          <label class="vd-check"><input id="include-media" type="checkbox"> Mídia local (até 2GB)</label>
-          <label class="vd-check"><input id="materialize-remote" type="checkbox"> Materializar URLs</label>
-          <button id="backup" class="vd-on">Criar Cópia de Segurança Agora</button>
-        </div>
+    <details>
+      <summary>Opções da recuperação</summary>
+      <div class="p3-row" style="margin-bottom:12px">
+        <label class="p3-check"><input id="restore-profile" type="checkbox" checked> Trazer perfil de vídeo e saídas</label>
+        <label class="p3-check"><input id="replay-journal" type="checkbox"> Refazer as ações registradas</label>
+        <span class="p3-flex"></span>
+        <button type="button" id="diagnose" class="small">Conferir arquivos</button>
+        <button type="button" id="journal-plan" class="small">Ver ações registradas</button>
       </div>
-      <div class="vd-row">
-        <span>URLs Remotas</span>
-        <textarea id="remote-urls" rows="2" placeholder="https://servidor/conteudo.html (uma por linha)" style="width:100%;font:11px Consolas,monospace;background:#e9eaeb;color:#000;border:1px solid #6f757b;padding:2px"></textarea>
-      </div>
+      <textarea id="dependency-map" rows="2" placeholder='Trocar caminhos: {"D:\\antigo":"D:\\novo"}' hidden></textarea>
+    </details>
+    <pre id="report" class="p3-log" role="status"></pre>
+  </section>
 
-      <div class="vd-row" style="margin-top:6px">
-        <span>Autosave</span>
-        <div class="vd-inline" style="flex-wrap:wrap;gap:8px">
-          <label class="vd-check"><input id="autosave-enabled" type="checkbox" checked> Ativado</label>
-          <label class="vd-check">A cada <input id="autosave-interval" type="number" min="30" max="3600" value="60" style="width:50px"> s</label>
-          <label class="vd-check">Retenção <input id="autosave-retention" type="number" min="3" max="100" value="20" style="width:45px"> versões</label>
-          <button id="autosave-save">Aplicar Configuração</button>
-          <button id="checkpoint">Salvar Versão Agora</button>
-          <span id="session-status" class="vd-note" style="font-size:11px"></span>
-        </div>
+  <section class="p3-card">
+    <h2>Salvar cópias</h2>
+    <div class="re-auto">
+      <label class="p3-check" style="height:38px"><input id="autosave-enabled" type="checkbox" checked> Automático</label>
+      <label class="p3-field">A cada (segundos)<input id="autosave-interval" type="number" min="30" max="3600" value="60"></label>
+      <label class="p3-field">Guardar (versões)<input id="autosave-retention" type="number" min="3" max="100" value="20"></label>
+      <button type="button" id="autosave-save">Aplicar</button>
+      <button type="button" id="checkpoint">Salvar versão agora</button>
+      <span id="session-status" class="p3-note"></span>
+    </div>
+
+    <details>
+      <summary>Cópia completa, com mídia</summary>
+      <div class="p3-row" style="margin-bottom:12px">
+        <label class="p3-check"><input id="include-media" type="checkbox"> Incluir mídia local (até 2 GB)</label>
+        <label class="p3-check"><input id="materialize-remote" type="checkbox"> Baixar páginas remotas</label>
       </div>
+      <label class="p3-field" style="margin-bottom:12px">Endereços remotos (um por linha)
+        <textarea id="remote-urls" rows="2" placeholder="https://servidor/conteudo.html"></textarea>
+      </label>
+      <button type="button" id="backup">Criar cópia completa</button>
     </details>
 
-    <!-- Importar projeto .fmx de outra máquina -->
-    <details class="vd-advanced" style="margin-top:4px">
-      <summary>Importar Pacote UUID.fmx de Outra Máquina</summary>
-      <div class="vd-row">
-        <span>Pasta .fmx</span>
-        <div class="vd-inline" style="flex:1">
+    <details>
+      <summary>Importar produção de outro computador</summary>
+      <div class="p3-grid" style="margin-bottom:12px">
+        <label class="p3-field">Pasta .fmx
           <input id="import-project-path" type="text" placeholder="C:\Projetos\UUID.fmx" spellcheck="false" autocomplete="off">
-          <input id="import-project-name" type="text" maxlength="80" placeholder="Nome da produção importada" spellcheck="false" style="max-width:200px">
-        </div>
+        </label>
+        <label class="p3-field">Nome da produção
+          <input id="import-project-name" type="text" maxlength="80" spellcheck="false">
+        </label>
       </div>
-      <div class="vd-row">
-        <span></span>
-        <div class="vd-inline" style="gap:6px">
-          <button id="import-project-preview">Conferir Pacote</button>
-          <button id="import-project-apply" class="vd-on" disabled>Importar Produção</button>
-        </div>
+      <div class="p3-row">
+        <button type="button" id="import-project-preview">Conferir</button>
+        <button type="button" id="import-project-apply" class="primary" disabled>Importar</button>
       </div>
-      <pre id="import-project-report" role="status" style="margin:4px 0"></pre>
+      <pre id="import-project-report" class="p3-log" role="status" style="margin-top:12px"></pre>
     </details>
-  </div>
-
-  <div class="vd-bar">
-    <span class="vd-flex"></span>
-    <button id="close-btn" onclick="window.FreeMixClosePanel ? window.FreeMixClosePanel() : window.close()">Fechar</button>
-  </div>
-</div>
+  </section>
+</main>
 
 <script src="fechar-janela.js"></script>
 <script src="controle.js"></script>
-<script src="recuperacao.js"></script>
+<script src="recuperacao.js?v=20261101p"></script>
+<script>
+  // Clicar na linha escolhe a cópia, não só o círculo pequeno.
+  document.getElementById('backups').addEventListener('click', (event) => {
+    const radio = event.target.closest('tr')?.querySelector('input[type=radio]');
+    if (radio && event.target !== radio && !radio.checked) { radio.checked = true; radio.dispatchEvent(new Event('change', { bubbles: true })); }
+  });
+</script>
 </body>
 </html>

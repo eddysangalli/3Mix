@@ -3,7 +3,7 @@
 (() => {
   document.body.dataset.page = 'settings';
   document.body.innerHTML = `<header class="settings-topbar">
-    <div class="brand-title"><strong>3Mix</strong><span>/</span><span id="window-title">Configurações</span></div>
+    <div class="brand-title"><img class="settings-brand-logo" src="/img/3mix-logo.png" alt="3Mix"><span>/</span><span id="window-title">Configurações</span></div>
     <span id="settings-project" class="project-sel-box">Conectando à produção…</span>
     <div class="search-settings">
       <span aria-hidden="true">🔍</span>

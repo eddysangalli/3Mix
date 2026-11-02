@@ -1,0 +1,328 @@
+﻿3Mix - SUPER PROMPT PARA O CLAUDE (Beta instalavel)
+Gerado de: 3mix-panel/docs/SUPER-PROMPT-CLAUDE-BETA-20261030.md
+Data: 30/10/2026
+
+=== INÍCIO DO PROMPT ===`) e entregue ao Claude dentro do repositório `D:\DRIVE\IA\antigravity\3Mix`. O texto foi escrito para ser autocontido: um agente sem contexto anterior deve conseguir executar.
+
+**Antes de entregar:** leia a seção “Decisões que precisam do dono” no fim do prompt. Se alguma delas ainda não estiver decidida, o Claude deve parar e perguntar em vez de assumir.
+
+---
+
+````text
+=== INÍCIO DO PROMPT ===
+
+# MISSÃO
+
+Você é o engenheiro responsável por transformar o 3Mix — suíte broadcast que já funciona parcialmente — em uma BETA INSTALÁVEL, com a interface dos mockups aplicada à plataforma real, sem quebrar a instalação do operador.
+
+Você trabalha no repositório:
+
+  D:\DRIVE\IA\antigravity\3Mix
+
+Idioma de trabalho: português do Brasil. Código, comentários e documentação em pt-BR, seguindo o estilo existente.
+
+O resultado final é uma pasta de entrega contendo:
+  - Setup Windows novo, com a versão atual do motor e o painel novo;
+  - interface 3Mix (mockup) rodando dentro da janela real do programa;
+  - EULA, avisos de terceiros e oferta de fonte;
+  - guia de instalação/primeiro uso, limites conhecidos e canal de suporte;
+  - recibos de QA dos 12 cenários de aceite, incluindo Windows limpo.
+
+# FATOS DO AMBIENTE (verificados; não invente outros)
+
+## Produto e arquitetura
+- O motor é um fork C/C++ do OBS Studio 32.2.2 (libobs). O executável é `FreeMix.exe`; a marca do produto é **3Mix**.
+- NÃO existe Rust no produto. Existe um shell experimental em `3mix-desk/` com `INICIAR-3MIX-RUST.cmd`; ele NÃO faz parte do caminho de entrega e não deve ser usado nem expandido.
+- A janela principal é o próprio OBS em modo estúdio: Preview e Programa são nativos (Qt), não HTML. Isso é intencional e deve continuar assim.
+- O painel operacional é HTML carregado como browser dock (CEF) dentro da janela do OBS.
+- A API local é Node (`3mix-panel/ferramentas/servidor-api.mjs`), porta padrão 8088; em produção costuma subir em 18188–18198. Há WebSocket de estado e endpoints HTTP.
+
+## Caminhos que importam
+| Função | Caminho |
+|---|---|
+| Raiz do workspace | `D:\DRIVE\IA\antigravity\3Mix` |
+| Inicializador do operador | `INICIAR-3MIX.cmd` |
+| Bootstrap | `scripts/inicializacao/abrir-3mix-atualizado.mjs` |
+| Início do motor | `3mix-runtime/ferramentas/iniciar-freemix.mjs` |
+| Runtime portátil | `3mix-runtime/` (16 GB, 11.737 arquivos) |
+| Executável | `3mix-runtime/bin/64bit/FreeMix.exe` |
+| Config do OBS | `3mix-runtime/config/obs-studio/user.ini` e `global.ini` |
+| Painel em produção | `3mix-runtime/painel/` (`mesa.html` 294 KB, `topbar.html`, `freemix-call.html`) |
+| Painel em fonte | `3mix-panel/painel/` |
+| Interface nova (mockup) | `3mix-panel/painel/estudio/` (13 arquivos, ES modules) |
+| API | `3mix-panel/ferramentas/servidor-api.mjs` |
+| Ações do motor | `3mix-panel/ferramentas/controle-producao.mjs` |
+| Servidor de prévia | `3mix-panel/ferramentas/servir-painel.mjs` (porta 8377) |
+| Instalador | `3mix-panel/scripts/installer-windows/` (`Setup.cs`, `Uninstall.cs`, `build.mjs`) |
+| Recibos e versões | `entregas/` |
+| QA | `3mix-panel/qa-finalizacao/`, `qa-interface/` |
+| Mockups | `lab/MOCUKP 3 MIX/` |
+| Visão de produto | `3mix-panel/docs/PRODUCT-VISION.md` |
+
+## Estado atual (não confunda com o que está documentado)
+- Runtime do operador: `0.1.0-local.20261011145116` (Native38 `ed08547` + painel `71f8aa7`). A atualização incremental FOI aplicada em 11/10, 18:01 BRT — comprovado por `entregas/APLICACAO-ULTIMA.json` e `3mix-runtime/version.json`. O arquivo `docs/ENTREGA-ATUAL.md` está desatualizado nesse ponto; não o use como verdade sem conferir os recibos.
+- Instalador completo selecionado: `0.1.0-local.20261010060000`, Native24 `a047860`, 1.375.666.176 bytes, SHA-256 `3a53cc01ea2998d785e4914c219084e6868ad4bf7b33fff31f074685878993bd`. Sem Authenticode; assinatura interna Ed25519. NÃO contém o Native38 nem a interface nova.
+- Docks atuais (`user.ini`, chave `ExtraBrowserDocks`): dois browsers `file:///…/painel/topbar.html` e `file:///…/painel/mesa.html`, com UUIDs fixos. O layout fica em `DockState` (base64).
+- `mesa.html` tem 294.173 bytes, 59 usos de `innerHTML`, 4 `setInterval`, 45 `addEventListener` — é a principal suspeita de lentidão.
+- A `estudio/` nova: Mesa, Áudio, Replay e Configurações; visual muito próximo do mockup, mas ligada a um subconjunto de comandos e servida só em desenvolvimento. Exemplo de defeito real: o DSK envia `overlay_toggle`, que NÃO existe na API; a ação real é `overlay`.
+- Os docks carregam por `file://`. Chromium bloqueia ES modules nesse esquema. Por isso a interface nova precisa ser servida por HTTP local (pela própria API) ou convertida para script clássico.
+
+## Comandos úteis
+```text
+# Prévia da interface nova (desenvolvimento)
+node 3mix-panel/ferramentas/servir-painel.mjs
+# abre http://127.0.0.1:8377/estudio/index.html
+
+# API isolada para testes (NÃO substitui a do operador)
+node 3mix-panel/ferramentas/servidor-api.mjs
+# porta padrão 8088
+
+# Captura visual sem navegador visível (Chrome headless)
+& "C:\Program Files\Google\Chrome\Application\chrome.exe" --headless=new --disable-gpu --hide-scrollbars --window-size=1600,1000 --virtual-time-budget=3000 --screenshot="CAMINHO.png" "http://127.0.0.1:8377/estudio/index.html"
+
+# Conferir fontes do motor (sem compilar)
+cd 3mix-runtime
+node scripts/reconstruir-motor.mjs --check
+
+# Selar ZIP e gerar Setup (destinos novos; o builder recusa sobrescrever)
+python scripts/distribuicao/zip-pacote-verificado.py --receipt=RECIBO.json --output=FreeMix-Completo-VERSAO.zip --result=RECIBO-NOVO.json
+node scripts/installer-windows/build.mjs --zip=FreeMix-Completo-VERSAO.zip --output=FreeMix-Studio-Setup-VERSAO.exe
+```
+
+# REGRAS INVIOLÁVEIS
+
+1. **Não quebre a instalação do operador.** Não encerre `FreeMix.exe`, `node` da API nem qualquer processo de transmissão sem autorização explícita. Não sobrescreva `3mix-runtime/` sem backup datado.
+2. **Todo teste e saída temporária fica dentro do projeto**, em `qa-beta/` (crie). É proibido criar `D:\3Mix-QA*` ou pastas soltas na raiz de discos.
+3. **Nada de Rust no produto.** O motor continua C/C++. Não adicione dependências Rust, não use `3mix-desk`.
+4. **Preview e Programa continuam nativos.** Não troque vídeo nativo por JPEG/HTTP. Se precisar de miniatura, use `GetSourceScreenshot` com cache.
+5. **Não invente PASS.** Todo resultado precisa de recibo com comando, data, versão e caminho da evidência. O que não foi testado é `NÃO TESTADO`, nunca “ok”.
+6. **Não relaxe critério para passar.** Se um teste falhar, registre a falha e a causa; corrija a causa, não a expectativa.
+7. **Não altere o motor C++** a menos que um defeito comprovado bloqueie a beta. Nesse caso: patch mínimo, build `RelWithDebInfo`, QA do caso e das regressões vizinhas, recibo.
+8. **Não renomeie `FreeMix.exe` nesta fase.** A marca externa vira 3Mix; o binário permanece, para não quebrar configuração, atualizador, atalhos e QA.
+9. **Nada de segredo em repositório ou pacote.** Chaves de assinatura, tokens, credenciais e dados do operador ficam fora.
+10. **A interface não pode mentir.** Motor desconectado = estado “desconectado” visível e controles desabilitados. Proibido mostrar valores falsos de medidor, tempo ou status.
+11. **Siga a identidade de produto** de `3mix-panel/docs/PRODUCT-VISION.md`: grafite, verde de Preview `#1f7233`, vermelho de Programa `#b02a1f`, azul de fader `#2f6fed`. Nada de aparência de OBS genérico nem de vMix copiado.
+12. **Não prometa na beta** o que não foi provado: Calls WAN, SDI, ASIO, HDR ponta a ponta, NDI Advanced, bonding, importação universal de `.fmx`.
+
+# DEFINIÇÃO DE PRONTO (a beta só termina quando os 12 passarem em Windows limpo)
+
+1. Instala em Windows 11 limpo, sem Node/VS/ffmpeg instalados.
+2. Abre pelo atalho e chega à mesa em < 30 s, sem erro de porta/API.
+3. Reconhece webcam e captura HDMI sem editar configuração.
+4. PV/PGM, CUT, FADE e T-BAR com p95 ≤ 120 ms.
+5. DSK 1–4 entram/saem independentes.
+6. Áudio: fader, mute, AFV e medidores sem travar.
+7. Grava 30 min Full HD; arquivo válido no ffprobe.
+8. Transmite 30 min RTMP ou SRT, com reconexão após queda.
+9. Replay: grava, marca IN/OUT, A/B, volta ao vivo.
+10. Fecha e reabre preservando projeto/layout/configuração.
+11. Desinstala sem apagar projetos, mídia, gravações e configurações.
+12. Gera diagnóstico sanitizado e o usuário sabe para onde enviar.
+
+# PLANO DE EXECUÇÃO
+
+Execute na ordem. Cada fase termina com recibo e um resumo no formato da seção “FORMATO DE RESPOSTA”. Não avance se a fase anterior não passou — registre o bloqueio.
+
+## FASE 0 — Linha de base e segurança (0,5 dia)
+
+Tarefas:
+1. Criar `qa-beta/` com subpastas `backups/`, `capturas/`, `recibos/`, `runtime-teste/`.
+2. Registrar a linha de base: versão do runtime, hash do `FreeMix.exe`, tamanho/hash de `mesa.html` e `topbar.html`, conteúdo de `ExtraBrowserDocks`, processos ativos. Salvar em `qa-beta/recibos/00-linha-de-base.json`.
+3. Fazer backup de `3mix-runtime/painel/` (só os arquivos que serão tocados) e de `3mix-runtime/config/obs-studio/user.ini` em `qa-beta/backups/`.
+4. Confirmar que nenhum processo do operador será encerrado. Se `FreeMix.exe` estiver rodando e for necessário reiniciar, PARE e peça autorização.
+
+Aceite: recibo com versão, hashes e lista de backups; nenhum arquivo do operador alterado ainda.
+
+## FASE 1 — Dock 3Mix dentro da janela real (prioridade máxima)
+
+Objetivo: o operador abre pelo `INICIAR-3MIX.cmd` e vê a interface do mockup, com Preview/Programa nativos.
+
+### 1.1 Ponte de carregamento (resolve o bloqueio de `file://`)
+Crie `3mix-panel/painel/estudio-dock.html`:
+- HTML mínimo, **script clássico** (sem `type="module"`), sem dependências.
+- Descobre a API testando, em ordem: `location.origin` (se http), `http://127.0.0.1:8088`, `http://127.0.0.1:18188` … `18198`, com `fetch('/api/health')` e timeout de 700 ms; aceita resposta com `app === "FreeMix"` ou `"3Mix"`.
+- Ao achar, redireciona para `http://127.0.0.1:PORT/estudio/index.html?dock=1`.
+- Se não achar em ~6 s, mostra uma tela de erro legível (“API do 3Mix não respondeu — abra pelo INICIAR-3MIX.cmd”) com botão “Tentar de novo”.
+- Nada de laço infinito; no máximo 3 tentativas.
+
+### 1.2 Modo dock na interface nova
+Em `3mix-panel/painel/estudio/index.html` + `js/app.js`:
+- Ler `?dock=1`.
+- Esconder: topbar completa, monitores PV/PGM, navegação de telas que não fazem sentido no dock.
+- Mostrar, em uma única coluna vertical: barra de barramentos PV/PGM, linha de DSK 1–4, grade de 8 fontes (4×2), mixer de 7 canais e barra de status.
+- A barra de status deve mostrar: conexão com API (host:porta), motor conectado/desconectado, REC, STREAM, versão.
+- Em modo dock, a altura útil é ~40% da janela: priorize legibilidade em 1600×900 e 1920×1080; teste 1366×768 e 2560×1440.
+
+### 1.3 Comandos reais (corrigir o vocabulário)
+Mapeie cada controle para ações existentes em `controle-producao.mjs`. Mínimo obrigatório:
+| Controle | Ação |
+|---|---|
+| Selecionar fonte para Preview | `preview` com `{input}` |
+| Mandar Preview para Programa | `active` com `{input}` |
+| CUT | `cut` |
+| AUTO / FADE | `fade` com `{duration}` (ou `transition`) |
+| T-BAR | `tbar` com `{position, release}` |
+| DSK 1–4 TAKE | `overlay` com canal/estado |
+| Fader | `audio_volume` |
+| Mute | `audio_mute` |
+| AFV | ação correspondente já existente; se não existir, NÃO invente — deixe o botão desabilitado com tooltip “indisponível nesta versão” |
+| REC | `record` |
+| STREAM | `stream` |
+
+Regras:
+- Não invente nomes de ação. Confira no código antes de usar.
+- Toda chamada deve tratar falha: mostrar toast curto e manter o estado real (não otimista).
+- Não use `setInterval` para re-render global. Estado via WebSocket + atualização por chave.
+- Debounce de fader em ~40 ms; envie o valor final.
+
+### 1.4 Miniaturas reais
+- Crie endpoint na API: `GET /api/thumbs` → `{ thumbs: { [inputName]: "data:image/jpeg;base64,…" } }`.
+- Implementação: `GetSourceScreenshot` 160×90, JPEG qualidade 55, no máximo 1 captura por fonte a cada 900 ms, cache em memória, concorrência limitada a 2.
+- Se o motor estiver desconectado, devolver `{ thumbs: {} }` e a UI usa a imagem estática de `img/cena/` com selo “prévia”.
+- Não capture cena de Programa em loop pesado; priorize as fontes visíveis.
+
+### 1.5 Topbar 3Mix
+- Reestilize `3mix-runtime/painel/topbar.html` (ou uma cópia em `estudio/topbar-dock.html`) com os mesmos tokens: grafite, relógios (show time / wall clock), telemetria discreta, nome do projeto, estado REC/STREAM.
+- Mantenha os IDs e o contrato que a `mesa.html` antiga usa, se houver dependência; se não houver, simplifique.
+- Não duplique menu nativo do OBS.
+
+### 1.6 Instalação no runtime (com backup)
+- Copie `3mix-panel/painel/estudio/` e `3mix-panel/painel/img/cena/` para `3mix-runtime/painel/`.
+- Copie `estudio-dock.html` para `3mix-runtime/painel/`.
+- Atualize `ExtraBrowserDocks` no `user.ini` **da cópia de teste** (ou com backup e autorização): o dock “Mesa” passa a apontar para `file:///…/painel/estudio-dock.html`, mantendo o UUID para o layout não se perder.
+- Mantenha `mesa.html` no lugar como fallback. Documente como voltar (trocar a URL de volta).
+- NÃO altere `global.ini`.
+
+### 1.7 Tema nativo
+- Crie `3mix-runtime/config/obs-studio/themes/3Mix.obt` (baseado em tema existente), com paleta grafite, acentos verde/vermelho e cantos discretos.
+- Aplique apenas na cópia de teste nesta fase; registrar como ativar/desativar.
+- Se o tema quebrar contraste em algum diálogo nativo, reverta e registre.
+
+### 1.8 Aceite da Fase 1
+- Abrir pelo `INICIAR-3MIX.cmd` (cópia de teste) e ver a mesa nova sem erro no console.
+- 12 controles críticos operando o motor real: preview, active, cut, fade, tbar, DSK 1, DSK 2, DSK 3, DSK 4, mute, fader, REC.
+- Miniaturas refletindo as fontes reais (com carimbo de tempo ≤ 1 s).
+- Comparação lado a lado com `lab/MOCUKP 3 MIX/Interface de transmissão em grafite-1.png`; listar diferenças conscientes.
+- Nenhuma regressão em Preview/Programa nativos; fechar e reabrir mantém o dock.
+
+## FASE 2 — Desempenho (2–3 dias)
+
+Tarefas:
+1. Instrumentar `performance.mark`/`measure` em: clique → comando aceito → estado aplicado.
+2. Medir 20 ciclos de Preview, 20 de Cut, 20 de fade, 10 min de medidores.
+3. Metas: p95 Cut ≤ 120 ms; frame de UI ≤ 16 ms; CPU ociosa ≤ 3% de um núcleo; memória do dock ≤ 300 MB.
+4. Corrigir:
+   - trocar reconstrução total de DOM por atualização por chave (fonte/canal);
+   - medidores em `requestAnimationFrame` com `transform: scaleY()` e `will-change`;
+   - limitar estado a 10 Hz; coalescer mensagens do WebSocket;
+   - evitar layout thrashing (ler e escrever DOM em blocos separados);
+   - se a lista de fontes crescer, virtualizar.
+5. Comparar com a `mesa.html` antiga no mesmo cenário e registrar tabela antes/depois.
+
+Aceite: tabela com as quatro metas, medida em 30 min contínuos, sem long task > 50 ms durante a operação.
+
+## FASE 3 — Identidade, licenças e primeira execução (5–8 dias)
+
+### 3.1 Marca
+- Interface, instalador, atalhos, título da janela, “Sobre”, README, EULA e mensagens passam a dizer **3Mix**.
+- `FreeMix.exe` permanece como nome interno nesta beta; registre a dívida para a 1.0.
+- Remova da raiz de entrega o `INICIAR-3MIX-RUST.cmd` (mova para `archived/` ou marque como experimental), para não confundir o testador.
+
+### 3.2 Licenças
+- Crie `EULA.txt` (beta: uso, sem garantia, limites, suporte, ausência de telemetria).
+- Gere `THIRD-PARTY-NOTICES.txt` a partir de `3mix-runtime/licenses/`, incluindo OBS/libobs (GPLv3), FFmpeg, CEF, Qt, plugins e NDI (se aplicável).
+- Inclua a oferta de código-fonte correspondente (link/arquivo) exigida pela GPLv3.
+- Tela “Sobre” com versão, licenças e link da oferta.
+
+### 3.3 Primeira execução
+- Verificação inicial visível: motor, API, portas, permissão de gravação, espaço em disco.
+- Projeto demo “Futsal” com 4 cenas de mídia (sem hardware).
+- Mensagens acionáveis para: porta ocupada, motor desconectado, permissão negada, disco cheio.
+- Checklist de primeira transmissão em uma página.
+
+Aceite: usuário sem conhecimento prévio instala, abre, cria projeto e faz um CUT em < 10 min seguindo o guia.
+
+## FASE 4 — Pacote completo novo (3–5 dias)
+
+Tarefas:
+1. Congelar fontes: Native38 + painel atual + interface nova.
+2. Atualizar `3mix-runtime/version.json` para a versão da beta (ex.: `0.1.0-beta.20261115`), `kind: "full"`.
+3. Passar o contrato de payload (`canonical-payload-overlay-contract.json`) sem relaxar guardas; se recusar payload já selado, corrija a autoria do pacote, não a guarda.
+4. Gerar ZIP verificado e Setup novo em `entregas/`, com destinos novos.
+5. Emitir recibos: inventário, hashes, build, assinatura interna, instalação e desinstalação.
+6. Atualizar `docs/ENTREGA-ATUAL.md` com a verdade dos recibos (versão, data, hash, o que está incluído e o que não está).
+
+Aceite: Setup novo instala em pasta vazia; “Sobre” mostra a versão nova; hash publicado bate com o arquivo.
+
+## FASE 5 — Windows limpo e aceite (3–5 dias)
+
+Tarefas:
+1. VM Windows 11 23H2 limpa, sem Node, VS, ffmpeg ou runtime de desenvolvimento.
+2. Executar os 12 cenários da definição de pronto, na ordem, com captura e recibo por cenário em `qa-beta/recibos/`.
+3. Corrigir falhas na causa; repetir do zero o cenário afetado e os vizinhos.
+4. Medir tempo de instalação, tempo até a mesa, uso de disco e memória em repouso.
+
+Aceite: 12/12 com evidência; nenhum “PASS” sem arquivo.
+
+## FASE 6 — Documentação, suporte e selagem (3–4 dias)
+
+Tarefas:
+1. `LEIA-ME-BETA.md`: instalar, abrir, primeiro projeto, limites, como atualizar, como desinstalar, o que fazer se o SmartScreen avisar, SHA-256.
+2. `LIMITES-CONHECIDOS.md`: lista honesta do que não funciona ou não foi provado.
+3. `GUIA-RAPIDO.md`: uma página, com capturas da interface nova.
+4. `SOLICITAR-SUPORTE.md`: como gerar o ZIP de diagnóstico, o que anexar, para onde enviar.
+5. Selar: congelar, gerar hash, publicar pasta de entrega com Setup + README + EULA + notices + checksums.
+6. Arquivar recibos e atualizar `docs/ENTREGA-ATUAL.md`, `docs/CHANGELOG.md`.
+
+Aceite: pasta de entrega autossuficiente; um testador externo consegue instalar e relatar problema sem falar com o desenvolvedor.
+
+# FORMATO DE RESPOSTA (ao fim de cada fase)
+
+```text
+## FASE N — <nome>
+Status: CONCLUÍDA | PARCIAL | BLOQUEADA
+O que mudou: <arquivos e caminhos>
+Evidência: <caminhos dos recibos/capturas>
+Testes: <comando> → <resultado>
+Falhas conhecidas: <lista ou "nenhuma">
+Riscos: <lista>
+Próximo passo: <fase N+1 ou bloqueio>
+```
+
+Cada recibo JSON deve conter, no mínimo:
+`{ "fase", "versao", "inicio", "fim", "resultado", "comando", "evidencia", "observacoes" }`.
+
+# O QUE NÃO FAZER
+
+- Não reescrever a arquitetura do motor.
+- Não substituir o OBS por um app Electron/WebView2 paralelo.
+- Não usar Rust, nem `3mix-desk`, nem `INICIAR-3MIX-RUST.cmd`.
+- Não apagar `mesa.html` (fallback), nem `topbar.html` antes de o novo estar provado.
+- Não mexer em `user.ini` sem backup e sem autorização se o FreeMix estiver aberto.
+- Não criar pastas fora do projeto.
+- Não declarar beta pronta sem Windows limpo.
+- Não prometer WAN/SDI/NDI Advanced/bonding na beta.
+- Não inventar números de medidor, tempo ou status.
+- Não “consertar” teste mudando tolerância.
+- Não publicar pacote sem EULA, notices e oferta de fonte.
+
+# DECISÕES QUE PRECISAM DO DONO (pare e pergunte se não estiverem definidas)
+
+1. Beta fechada (conviver com aviso do SmartScreen, publicando SHA-256) ou beta aberta (exige Authenticode)?
+2. Manter `FreeMix.exe` como binário interno nesta beta? (recomendação: sim)
+3. Confirmar o corte de escopo da Beta 1 (sem Calls WAN, SDI, ASIO, HDR, NDI Advanced, bonding, importação universal).
+4. Canal de suporte: e-mail, WhatsApp ou pasta compartilhada?
+5. Beta gratuita com prazo ou paga com desconto para a 1.0?
+
+Se qualquer resposta for “decidir depois”, registre a suposição usada e siga; não bloqueie o trabalho técnico por causa dela.
+
+# CRITÉRIO DE PARADA
+
+Pare e peça ajuda se:
+- for necessário encerrar processo do operador;
+- um teste de aceite falhar duas vezes pela mesma causa não identificada;
+- o pacote exigir mudança de motor C++ além de patch mínimo;
+- faltar certificado, domínio, licença NDI ou hardware para concluir um gate;
+- houver risco de perda de dados do operador.
+
+=== FIM DO PROMPT ===

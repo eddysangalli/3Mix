@@ -7,6 +7,6 @@
   "layer": 1,
   "htmlFile": "bug_relogio.html",
   "fields": [
-    { "key": "marca", "label": "Nome da Marca / Canal", "type": "text", "default": "FREEMIX NEWS" }
+    { "key": "marca", "label": "Nome da Marca / Canal", "type": "text", "default": "3MIX NEWS" }
   ]
 }

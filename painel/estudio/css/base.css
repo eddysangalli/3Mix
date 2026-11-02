@@ -1,0 +1,443 @@
+/* ══════════════════════════════════════════════════════════════
+   3Mix Studio — sistema visual base
+   Grade broadcast de 8 px, superfícies grafite, acentos PV/PGM.
+   ══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* superfícies */
+  --app:            #141619;
+  --app-2:          #0f1113;
+  --topo:           #101214;
+  --painel:         #1b1e22;
+  --painel-2:       #20242a;
+  --painel-3:       #262b31;
+  --painel-alto:    #2c323a;
+  --campo:          #171a1e;
+  --linha:          #2a2f36;
+  --linha-2:        #363d46;
+  --linha-3:        #454d58;
+
+  /* texto */
+  --txt:            #e4e9ef;
+  --txt-2:          #9aa5b1;
+  --txt-3:          #6b7683;
+  --txt-4:          #4d5763;
+
+  /* acentos */
+  --verde:          #2f7d3d;
+  --verde-topo:     #1f7233;
+  --verde-claro:    #48b563;
+  --vermelho:       #b02a1f;
+  --vermelho-topo:  #b02a1f;
+  --vermelho-vivo:  #e0392b;
+  --ambar:          #e8a33d;
+  --azul:           #2f6fed;
+  --azul-claro:     #5b8ff0;
+  --ciano:          #35b6c9;
+
+  /* medidas */
+  --topo-h:         42px;
+  --status-h:       36px;
+  --raio:           4px;
+  --raio-g:         6px;
+  --gap:            8px;
+
+  --sombra:         0 1px 2px rgba(0,0,0,.45), 0 8px 24px rgba(0,0,0,.25);
+  --fonte: "Segoe UI Variable Text", "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: "Cascadia Mono", "Consolas", "SF Mono", ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: var(--app);
+  color: var(--txt);
+  font-family: var(--fonte);
+  font-size: 12px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  user-select: none;
+}
+
+body.app {
+  display: grid;
+  grid-template-rows: var(--topo-h) minmax(0, 1fr) var(--status-h);
+}
+
+svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+input, select { font: inherit; color: inherit; }
+h1, h2, h3, h4 { margin: 0; font-weight: 600; }
+
+.dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; display: inline-block; flex: none; }
+
+/* ───────────────────────── TOPBAR ───────────────────────── */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px;
+  background: var(--topo);
+  border-bottom: 1px solid #23272c;
+  position: relative;
+  z-index: 30;
+}
+
+.tb-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+
+.brand { display: flex; align-items: center; gap: 7px; }
+.brand-dots {
+  display: grid;
+  grid-template-columns: repeat(3, 2.5px);
+  grid-template-rows: repeat(3, 2.5px);
+  gap: 2.5px;
+}
+.brand-dots i { width: 2.5px; height: 2.5px; border-radius: 50%; background: #cfd6dd; }
+.brand-dots i:nth-child(1), .brand-dots i:nth-child(9) { background: #7d8792; }
+.brand-name { font-size: 15px; font-weight: 800; letter-spacing: -.2px; }
+
+.tb-divider { width: 1px; height: 18px; background: #2b3138; }
+
+.view-pill {
+  display: flex; align-items: center; gap: 7px;
+  height: 26px; padding: 0 9px;
+  border-radius: var(--raio);
+  color: var(--txt-2);
+  font-size: 12px;
+}
+.view-pill b { color: var(--txt); font-weight: 600; }
+.view-pill:hover { background: #1c2025; color: var(--txt); }
+.view-pill .ico-pencil { width: 12px; height: 12px; opacity: .55; }
+.view-pill .ico-chevron { width: 13px; height: 13px; opacity: .6; }
+
+.tabs {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  background: #0b0d0f;
+  border: 1px solid #22272d;
+  border-radius: 5px;
+}
+.tab {
+  min-width: 88px;
+  height: 26px;
+  padding: 0 18px;
+  border-radius: 3px;
+  color: var(--txt-3);
+  font-size: 12px;
+  font-weight: 600;
+  transition: background .12s, color .12s;
+}
+.tab:hover { color: var(--txt); }
+.tab.is-on { background: #343b44; color: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.5); }
+
+.tb-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 26px; padding: 0 9px;
+  border: 1px solid var(--linha);
+  border-radius: var(--raio);
+  background: #171a1e;
+  color: var(--txt-2);
+  font-size: 11px;
+}
+.btn-ghost:hover { background: #20252b; color: var(--txt); border-color: var(--linha-2); }
+.btn-ghost svg { width: 13px; height: 13px; }
+
+.clock { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.15; padding: 0 2px; }
+.clock b { font-size: 13px; font-weight: 700; font-family: var(--mono); letter-spacing: .2px; font-variant-numeric: tabular-nums; }
+.clock span { font-size: 9.5px; color: var(--txt-3); }
+
+.pill {
+  display: flex; align-items: center; gap: 6px;
+  height: 30px; padding: 0 9px;
+  border: 1px solid var(--linha);
+  border-radius: var(--raio);
+  background: #171a1e;
+  line-height: 1.1;
+}
+.pill .dot { width: 7px; height: 7px; }
+.pill em { display: block; font-style: normal; font-size: 9px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: var(--txt-3); }
+.pill b { display: block; font-size: 10.5px; font-weight: 600; font-family: var(--mono); color: var(--txt-2); font-variant-numeric: tabular-nums; }
+
+.pill-rec .dot { background: var(--vermelho-vivo); box-shadow: 0 0 6px rgba(224,57,43,.7); }
+.pill-rec em { color: #ef6b60; }
+.pill-rec.is-on { border-color: #5a2320; background: #24100f; }
+.pill-rec.is-on em, .pill-rec.is-on b { color: #ff6b5d; }
+
+.pill-live .dot { background: #35c05a; box-shadow: 0 0 6px rgba(53,192,90,.6); }
+.pill-live em { color: #6fbf85; }
+.pill-live.is-on { border-color: #1f4530; background: #0f2118; }
+
+.btn-cameras { color: #cbd5df; }
+
+.win-controls { display: flex; gap: 0; margin-left: 2px; }
+.win-controls button {
+  width: 34px; height: 30px;
+  display: grid; place-items: center;
+  color: var(--txt-3);
+  border-radius: 3px;
+}
+.win-controls button:hover { background: #23282e; color: var(--txt); }
+.win-controls .win-close:hover { background: #c0392b; color: #fff; }
+.win-controls svg { width: 13px; height: 13px; }
+
+/* ───────────────────────── PALCO ───────────────────────── */
+
+.palco { position: relative; min-height: 0; overflow: hidden; }
+.tela { height: 100%; min-height: 0; }
+.tela[hidden] { display: none; }
+
+/* ───────────────────────── CARDS ───────────────────────── */
+
+.card {
+  background: var(--painel);
+  border: 1px solid var(--linha);
+  border-radius: var(--raio-g);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.card-topo {
+  display: flex; align-items: center; gap: 8px;
+  height: 30px; min-height: 30px;
+  padding: 0 8px 0 10px;
+  border-bottom: 1px solid var(--linha);
+  background: #191c20;
+}
+.card-topo h3 {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  color: var(--txt-2);
+  text-transform: uppercase;
+}
+.card-topo .card-acoes { margin-left: auto; display: flex; gap: 2px; }
+.ico-btn {
+  width: 22px; height: 22px;
+  display: grid; place-items: center;
+  border-radius: 3px;
+  color: var(--txt-3);
+}
+.ico-btn:hover { background: #2a3038; color: var(--txt); }
+.ico-btn svg { width: 13px; height: 13px; }
+
+.mini-tag {
+  font-size: 9.5px;
+  color: var(--txt-3);
+  letter-spacing: .3px;
+  font-family: var(--mono);
+}
+
+/* ───────────────────────── STATUS BAR ───────────────────────── */
+
+.statusbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  background: #101214;
+  border-top: 1px solid #23272c;
+  z-index: 20;
+}
+.status-esq { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.status-sinal { display: flex; align-items: center; }
+.status-sinal .dot { width: 7px; height: 7px; background: #35c05a; box-shadow: 0 0 7px rgba(53,192,90,.55); }
+.status-chip { font-size: 11px; color: var(--txt-3); white-space: nowrap; }
+.status-chip b { color: var(--txt-2); font-weight: 600; font-variant-numeric: tabular-nums; }
+.status-sep { width: 1px; height: 13px; background: #262c33; }
+
+.status-dir { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.btn-status {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 26px; padding: 0 10px;
+  background: #1a1e23;
+  border: 1px solid #2c333b;
+  border-radius: var(--raio);
+  color: var(--txt-2);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.btn-status:hover { background: #242a31; color: var(--txt); border-color: #3b444f; }
+.btn-status svg { width: 13px; height: 13px; }
+.btn-status .dot { width: 7px; height: 7px; background: var(--vermelho-vivo); }
+.btn-gravar.is-on { background: #2a1110; border-color: #6b2420; color: #ff7468; }
+.btn-gravar.is-on .dot { box-shadow: 0 0 7px rgba(224,57,43,.8); animation: pulsar 1.4s infinite; }
+.btn-transmitir.is-on { background: #10251a; border-color: #275c39; color: #6ee08c; }
+.btn-icone { padding: 0 7px; }
+
+@keyframes pulsar { 0%,100% { opacity: 1 } 50% { opacity: .35 } }
+
+/* ───────────────────────── CONTROLES COMUNS ───────────────────────── */
+
+.seg {
+  display: inline-flex;
+  padding: 2px;
+  gap: 2px;
+  background: #0d0f11;
+  border: 1px solid var(--linha);
+  border-radius: 4px;
+}
+.seg button {
+  height: 24px; padding: 0 12px;
+  border-radius: 3px;
+  font-size: 11px; font-weight: 600;
+  color: var(--txt-3);
+}
+.seg button:hover { color: var(--txt); }
+.seg button.is-on { background: #333a43; color: #fff; }
+
+.btn-secundario {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 28px; padding: 0 11px;
+  background: #1b1f24;
+  border: 1px solid var(--linha);
+  border-radius: var(--raio);
+  color: var(--txt-2);
+  font-size: 11px;
+}
+.btn-secundario:hover { background: #242a31; color: var(--txt); }
+
+.select { position: relative; display: flex; align-items: center; }
+.select select {
+  appearance: none;
+  height: 26px;
+  padding: 0 24px 0 9px;
+  background: var(--campo);
+  border: 1px solid var(--linha);
+  border-radius: 3px;
+  color: var(--txt);
+  font-size: 11px;
+  outline: none;
+  width: 100%;
+}
+.select select:hover { border-color: var(--linha-2); }
+.select select:focus { border-color: #4a6ea8; }
+.select svg { position: absolute; right: 6px; width: 12px; height: 12px; color: var(--txt-3); pointer-events: none; }
+
+.campo-busca {
+  display: flex; align-items: center; gap: 6px;
+  height: 26px; padding: 0 8px;
+  background: var(--campo);
+  border: 1px solid var(--linha);
+  border-radius: 3px;
+  min-width: 170px;
+}
+.campo-busca svg { width: 13px; height: 13px; color: var(--txt-3); }
+.campo-busca input {
+  background: none; border: 0; outline: none;
+  font-size: 11px; color: var(--txt);
+  width: 100%;
+}
+.campo-busca input::placeholder { color: var(--txt-4); }
+
+.switch { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.switch input { display: none; }
+.switch-trilho {
+  width: 34px; height: 18px;
+  background: #2a2f36;
+  border: 1px solid #3a424c;
+  border-radius: 10px;
+  position: relative;
+  transition: background .15s;
+  flex: none;
+}
+.switch-trilho i {
+  position: absolute; top: 2px; left: 2px;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: #8b96a3;
+  transition: transform .15s, background .15s;
+}
+.switch input:checked + .switch-trilho { background: #2f6fed; border-color: #4785ff; }
+.switch input:checked + .switch-trilho i { transform: translateX(16px); background: #fff; }
+.switch-texto { font-size: 10.5px; color: var(--txt-2); line-height: 1.2; }
+.switch-texto small { color: var(--txt-3); font-size: 9.5px; }
+
+/* ───────────────────────── TOAST ───────────────────────── */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--status-h) + 18px);
+  transform: translateX(-50%) translateY(8px);
+  padding: 9px 16px;
+  background: #232a32;
+  border: 1px solid #3a434e;
+  border-radius: 6px;
+  color: var(--txt);
+  font-size: 11.5px;
+  box-shadow: var(--sombra);
+  opacity: 0;
+  transition: opacity .18s, transform .18s;
+  pointer-events: none;
+  z-index: 200;
+}
+.toast.is-on { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast[hidden] { display: block; visibility: hidden; }
+
+/* scrollbars discretas */
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2c333b; border-radius: 5px; border: 2px solid var(--painel); }
+::-webkit-scrollbar-thumb:hover { background: #3c4551; }
+
+/* drag region para a janela nativa */
+.topbar, .cfg-topo { -webkit-app-region: drag; }
+.topbar button, .topbar input, .topbar select,
+.cfg-topo button, .cfg-topo input { -webkit-app-region: no-drag; }
+
+/* modo desktop: moldura sem borda */
+body.desktop .win-controls { display: flex; }
+body:not(.desktop) .win-controls { display: none; }
+
+/* ───────────────────── MODO DOCK (?dock=1) ─────────────────────
+   Carregado como browser dock dentro da janela nativa do motor,
+   que já mostra Preview/Programa nativos (Qt/D3D11). Aqui escondemos
+   topbar completa, monitores PV/PGM e abas de navegação que fariam
+   duplicata visual; o dock mostra só barramentos, DSK, fontes,
+   mixer e a barra de status — tudo abaixo da grade nativa. */
+body.modo-dock {
+  grid-template-rows: minmax(0, 1fr) var(--status-h);
+}
+body.modo-dock .topbar { display: none; }
+/* Bug real da Fase 2 (achado testando no browser): a regra antiga escondia
+   .linha-monitores inteira — mas essa linha também contém .coluna-centro
+   (CUT/AUTO/T-BAR/DSK), não só os dois monitores de vídeo. Isso deixava o
+   dock sem transição nem DSK, quebrando o próprio critério de aceite da
+   Fase 1 ("12 controles críticos operando o motor real"). Agora só os
+   monitores (duplicata real do Preview/Programa nativo) somem; a coluna
+   central continua, ocupando a largura toda. */
+body.modo-dock .linha-monitores { grid-template-columns: minmax(0, 1fr); }
+body.modo-dock .monitor-pv,
+body.modo-dock .monitor-pgm { display: none; }
+body.modo-dock .tela-mesa { padding-top: 0; }
+body.modo-dock .btn-cameras,
+body.modo-dock #btn-salvar-workspace { display: none !important; }
+/* abas Áudio/Replay continuam acessíveis por um seletor compacto
+   próprio do dock, não pela topbar escondida — ver dock-nav no app.js */
+body.modo-dock .dock-nav {
+  display: flex; gap: 2px; padding: 4px 8px; background: var(--topo);
+  border-bottom: 1px solid #23272c;
+}
+body.modo-dock .dock-nav button {
+  flex: 1; padding: 5px 0; font-size: 11px; font-weight: 600;
+  color: var(--txt-2); border-radius: 4px; text-align: center;
+}
+body.modo-dock .dock-nav button.is-on { background: var(--painel-2); color: var(--txt); }
+body:not(.modo-dock) .dock-nav { display: none; }

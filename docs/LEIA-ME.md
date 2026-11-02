@@ -1,4 +1,4 @@
-# FreeMix Studio
+# 3Mix Studio
 
 Abra **FreeMix Studio.cmd** nesta pasta; na raiz do projeto use **ABRIR-FREEMIX.cmd**. O launcher inicia motor e controle juntos e espera a conexão real. Não abra apenas bin/64bit/FreeMix.exe.
 

@@ -1,22 +1,29 @@
 :root {
+  /* Identidade 3Mix (ver docs/PRODUCT-VISION.md e painel/remoto/3mix-grafite.css):
+     grafite neutro, verde de Preview #1f7233, vermelho de Programa #b02a1f.
+     Correção de 31/10/2026 — esta tela usava uma terceira paleta própria
+     (#181818 de fundo, #00e676 verde neon de destaque), sem nenhuma camada
+     de marca por cima; era a tela mais visitada de toda a navegação (hub.html,
+     24 links de saída) sem identidade — ver qa-beta/recibos/
+     auditoria-visual-janelas.md. */
   color-scheme: dark;
-  --bg: #14181c;
-  --bg-gradient: linear-gradient(180deg, #181d22 0%, #121519 100%);
-  --panel: #1b2026;
-  --panel-card: #1f252d;
-  --panel-hover: #262e37;
-  --line: #2e3742;
-  --line-light: #414d5c;
-  --text: #e2e8f0;
+  --bg: #202020;
+  --bg-gradient: linear-gradient(180deg, #242424 0%, #1a1a1a 100%);
+  --panel: #252525;
+  --panel-card: #242424;
+  --panel-hover: #2d2d2d;
+  --line: #414141;
+  --line-light: #595959;
+  --text: #ededed;
   --text-bright: #ffffff;
-  --muted: #8c9ba8;
-  --accent: #00e676;
-  --accent-hover: #00c853;
-  --red: #ff3b30;
-  --red-hover: #d02018;
-  --green: #00e676;
-  --green-hover: #00c853;
-  --orange: #f7931e;
+  --muted: #b0b0b0;
+  --accent: #1f7233;
+  --accent-hover: #255f30;
+  --red: #b02a1f;
+  --red-hover: #8f2219;
+  --green: #1f7233;
+  --green-hover: #255f30;
+  --orange: #dca900;
   --radius-sm: 3px;
   --radius-md: 4px;
   --radius-lg: 6px;
@@ -43,8 +50,8 @@ header {
   align-items: center;
   gap: 16px;
   padding: 10px 20px;
-  border-bottom: 1px solid #28323d;
-  background: #0a0f14;
+  border-bottom: 1px solid #323232;
+  background: #0f0f0f;
   position: sticky;
   top: 0;
   z-index: 50;
@@ -59,8 +66,8 @@ header a {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #242c35;
-  border: 1px solid #44515e;
+  background: #2c2c2c;
+  border: 1px solid #515151;
   padding: 5px 12px;
   border-radius: var(--radius-sm);
   transition: all 0.15s;
@@ -68,9 +75,27 @@ header a {
 }
 
 header a:hover {
-  background: #333d49;
+  background: #3e3e3e;
   border-color: #5c6c7d;
   color: #fff;
+}
+
+/* Marca: o logo real, sem o chip de texto que parecia um botão. */
+header a.brand-logo {
+  background: none;
+  border: 0;
+  padding: 0;
+  border-radius: 0;
+  line-height: 0;
+}
+header a.brand-logo img {
+  display: block;
+  height: 26px;
+  width: auto;
+}
+header a.brand-logo:hover {
+  background: none;
+  border: 0;
 }
 
 h1 {
@@ -89,10 +114,10 @@ h1 {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(0, 230, 118, 0.1);
+  background: rgba(31, 114, 51, 0.1);
   padding: 4px 10px;
   border-radius: 20px;
-  border: 1px solid rgba(0, 230, 118, 0.25);
+  border: 1px solid rgba(31, 114, 51, 0.25);
 }
 
 #connection::before {
@@ -141,7 +166,7 @@ h2 {
   gap: 8px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  border-left: 3px solid #00e676;
+  border-left: 3px solid #1f7233;
   padding-left: 8px;
 }
 
@@ -161,7 +186,7 @@ h2 {
 button, select, input, textarea {
   font: inherit;
   color: var(--text-bright);
-  background: #101418;
+  background: #141414;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   padding: 7px 12px;
@@ -175,20 +200,20 @@ button {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background: linear-gradient(180deg, #323b45 0%, #242b32 100%);
-  border: 1px solid #44505d;
+  background: linear-gradient(180deg, #3b3b3b 0%, #2b2b2b 100%);
+  border: 1px solid #505050;
   color: #e2e8f0;
   box-shadow: 0 1px 2px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
 }
 
 button:hover {
-  background: linear-gradient(180deg, #3e4a57 0%, #2b343d 100%);
+  background: linear-gradient(180deg, #4a4a4a 0%, #343434 100%);
   border-color: #5c6b7c;
   color: #fff;
 }
 
 button:active {
-  background: #191f24;
+  background: #1f1f1f;
   transform: translateY(1px);
 }
 
@@ -199,25 +224,25 @@ button:disabled {
 }
 
 button.on, .preview {
-  background: linear-gradient(180deg, #006400 0%, #004d00 100%) !important;
-  border-color: #00e676 !important;
+  background: linear-gradient(180deg, #1f7233 0%, #14501f 100%) !important;
+  border-color: #1f7233 !important;
   color: #fff !important;
-  box-shadow: 0 0 12px rgba(0, 230, 118, 0.35);
+  box-shadow: 0 0 12px rgba(31, 114, 51, 0.35);
 }
 
 button.air, .program {
-  background: linear-gradient(180deg, #b3140c 0%, #881111 100%) !important;
-  border-color: #ff3b30 !important;
+  background: linear-gradient(180deg, #b02a1f 0%, #7a2015 100%) !important;
+  border-color: #b02a1f !important;
   color: #fff !important;
-  box-shadow: 0 0 12px rgba(255, 59, 48, 0.4);
+  box-shadow: 0 0 12px rgba(176, 42, 31, 0.4);
 }
 
 input[type=range] {
   padding: 0;
-  accent-color: #00e676;
+  accent-color: #1f7233;
   height: 6px;
   border-radius: 3px;
-  background: #242b33;
+  background: #2b2b2b;
   border: none;
 }
 
@@ -237,7 +262,7 @@ a.card {
   font-size: 15px;
   font-weight: 600;
   display: block;
-  background: #1b2026;
+  background: #202020;
   border: 1px solid var(--line);
   padding: 16px;
   border-radius: var(--radius-md);
@@ -245,9 +270,9 @@ a.card {
 }
 
 a.card:hover {
-  color: #00e676;
-  border-color: #00e676;
-  background: #222932;
+  color: #1f7233;
+  border-color: #1f7233;
+  background: #2a2a2a;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.5);
 }
@@ -265,14 +290,14 @@ small, .muted { color: var(--muted); }
 
 #message.error {
   color: #fecdd3;
-  background: rgba(255, 59, 48, 0.15);
-  border: 1px solid rgba(255, 59, 48, 0.35);
+  background: rgba(176, 42, 31, 0.15);
+  border: 1px solid rgba(176, 42, 31, 0.35);
 }
 
 #message.ok {
   color: #a7f3d0;
-  background: rgba(0, 230, 118, 0.15);
-  border: 1px solid rgba(0, 230, 118, 0.35);
+  background: rgba(31, 114, 51, 0.15);
+  border: 1px solid rgba(31, 114, 51, 0.35);
 }
 
 table {
@@ -285,7 +310,7 @@ table {
 }
 
 th {
-  background: #181d23;
+  background: #1d1d1d;
   color: #8c9ba8;
   font-size: 11px;
   text-transform: uppercase;
@@ -297,7 +322,7 @@ th {
 td {
   padding: 8px 12px;
   border-bottom: 1px solid var(--line);
-  background: #12161a;
+  background: #161616;
   color: #e2e8f0;
 }
 
@@ -308,7 +333,7 @@ tr:last-child td { border-bottom: none; }
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  background: #1b2026;
+  background: #202020;
   box-shadow: var(--shadow-sm);
 }
 
@@ -316,18 +341,18 @@ tr:last-child td { border-bottom: none; }
 
 .meter {
   height: 8px;
-  background: #0d1115;
+  background: #111111;
   margin: 10px 0;
   overflow: hidden;
   border-radius: 2px;
-  border: 1px solid #28323d;
+  border: 1px solid #323232;
 }
 
 .meter i {
   display: block;
   height: 100%;
   width: 0;
-  background: linear-gradient(90deg, #00e676 0%, #f7931e 80%, #ff3b30 100%);
+  background: linear-gradient(90deg, #1f7233 0%, #dca900 80%, #b02a1f 100%);
   border-radius: 2px;
   transition: width 0.08s ease-out;
 }

@@ -63,10 +63,16 @@ export class CallReturns{
    if(this.engine.director)common.add(this.engine.director.key);
    this.pending.push(...batch.packets||[]);if(this.pending.length>1000)this.pending.splice(0,this.pending.length-1000);
    if(this.pending.length){
-    const rate=this.pending[0].rate,block=Math.round(rate*.05),pos=p=>Number(BigInt(p.timestamp)*BigInt(rate)/1000000000n);
+    const rate=this.pending[0].rate,block=Math.round(rate*.05);
+    const pos=p=>typeof p.timestamp==='bigint'?Number(p.timestamp*BigInt(rate)/1000000000n):Math.round(Number(p.timestamp)*rate/1e9);
     const newest=Math.max(...this.pending.map(p=>pos(p)+p.frames));
     if(this.cursor===null)this.cursor=Math.min(...this.pending.map(pos));
-    if(newest-this.cursor>rate*.5)this.cursor=newest-block*2;
+    const targetLag=block*2,currentLag=newest-this.cursor;
+    if(currentLag>rate*.5||currentLag<-block)this.cursor=newest-targetLag;
+    else if(Math.abs(currentLag-targetLag)>rate*.01){
+     const driftAdj=Math.sign(currentLag-targetLag)*Math.min(Math.abs(Math.round((currentLag-targetLag)*.05)),Math.round(block*.05));
+     this.cursor+=driftAdj;
+    }
     for(let sent=0;sent<4&&this.cursor+block<=newest;sent++){
      const packets=this.pending.filter(p=>pos(p)<this.cursor+block&&pos(p)+p.frames>this.cursor);
      for(const route of this.routes){const client=this.clients.get(route.key);if(!client||client.ws.readyState!==1)continue;

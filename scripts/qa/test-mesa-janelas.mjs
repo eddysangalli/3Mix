@@ -9,7 +9,7 @@ import { openTest, until, sleep } from "./navegador-teste.mjs";
 const t = await openTest({ width: 1835, height: 885, shots: process.argv[2] ? path.resolve(process.argv[2]) : null }), { page, check } = t;
 const { connect } = await import(pathToFileURL(path.join(t.sandbox.installed, "ferramentas/obsws.mjs"))), obs = await connect({ root: t.sandbox.installed });
 const panels = async () => { const r = (await obs.req("CallVendorRequest", { vendorName: "freemix", requestType: "get_interface", requestData: {} })).responseData; return r.panels || []; };   // the program lists its windows by title and size
-const closePanel = async (url) => (await fetch(t.base + "/api/panel-close", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) })).json();
+const closePanel = async (url) => { for (let i = 0; i < 5; i++) { try { const r = await (await fetch(t.base + "/api/panel-close", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) })).json(); if (r.success === true) return r; } catch {} await sleep(250); } return { success: false }; };
 const WINDOWS = [["streamset", "/transmitir", "Configurações de streaming", 700, 445], ["recset", "/gravar", "Configuração de gravação", 700, 300], ["ext", "/externo", "Saídas externas", 700, 540], ["iso", "/multicorder", "MultiGravação", 700, 540]];
 const shown = async (name, w, h) => (await panels()).find((p) => p.visible && p.title.toLowerCase() === name.toLowerCase() && p.width === w && p.height === h);
 try {
@@ -24,7 +24,9 @@ try {
     const result = await page.click(selector), url = t.base + route;
     const opened = await until(() => shown(name, w, h), 15000);
     check(`a engrenagem de "${name}" abre a janela nova dentro do programa, com esse título e ${w}×${h}`, result === "ok" && !!opened, opened ? "" : `clique: ${result}; janelas abertas: ${(await panels()).map((p) => `"${p.title}" ${p.width}×${p.height}`).join(", ") || "nenhuma"}`);
-    const closed = await closePanel(url), gone = await until(async () => !(await panels()).some((p) => p.visible && p.width === w && p.height === h && p.title.toLowerCase().includes(name.toLowerCase().slice(0, 6))), 8000); if (opened) check(`"${name}" fecha pelo pedido de fechar`, closed.success === true && gone === true);
+    const closed = await closePanel(url), gone = await until(async () => !(await panels()).some((p) => p.visible && p.width === w && p.height === h && p.title.toLowerCase().includes(name.toLowerCase().slice(0, 6))), 8000);
+    if (opened) check(`"${name}" fecha pelo pedido de fechar`, closed.success === true && gone === true);
+    await sleep(350);
   }
   check("nenhum erro de script na mesa", t.problems.length === 0, t.problems.slice(0, 3).join(" | "));
 } finally { obs.close?.(); }

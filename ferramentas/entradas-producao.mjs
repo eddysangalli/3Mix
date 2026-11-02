@@ -39,7 +39,7 @@ export class InputEngine{
  presets(){return structuredClone(compositionPresets);}
  async frame(input){const scene=await this.scene(input);if(!this.entries[scene.sceneUuid]?.composition)throw Error('Selecione uma composição');const v=await this.p.req('GetVideoSettings'),scale=Math.min(1,960/Math.max(v.baseWidth,v.baseHeight));return (await this.p.req('GetSourceScreenshot',{sourceUuid:scene.sceneUuid,imageFormat:'png',imageWidth:Math.round(v.baseWidth*scale),imageHeight:Math.round(v.baseHeight*scale)})).imageData;}
  async scene(key){const r=await this.p.req('GetSceneList'),s=r.scenes.find(s=>s.sceneUuid===key||s.sceneName===key);if(!s)throw Error('Entrada não encontrada');return s;}
- async cycle(parent,child,seen=new Set()){if(parent===child)return true;if(seen.has(child))return false;seen.add(child);const items=(await this.p.req('GetSceneItemList',{sceneName:child})).sceneItems;for(const i of items)if(i.inputKind===null&&!i.isGroup&&await this.cycle(parent,i.sourceName,seen))return true;return false;}
+ async cycle(parent,child,seen=new Set()){if(parent===child)return true;if(seen.has(child))return false;seen.add(child);const items=(await this.p.req('GetSceneItemList',{sceneName:child})).sceneItems;for(const i of items)if(i.sourceType==='OBS_SOURCE_TYPE_SCENE'&&!i.isGroup&&await this.cycle(parent,i.sourceName,seen))return true;return false;}
  async transform(scene,item,rect,mode='fit',style={}){
   if(style.wrapper)return this.transformWrapped(scene,item,rect,mode,style);
   const v=(await this.p.req('GetVideoSettings')),W=v.baseWidth,H=v.baseHeight,[x,y,w,h]=rect;

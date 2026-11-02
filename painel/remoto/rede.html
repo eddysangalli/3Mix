@@ -3,178 +3,108 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>3Mix Pro · Rede multipath</title>
-<link rel="stylesheet" href="vmix-dialogo.css">
+<title>3Mix · Rede Multipath</title>
+<script src="3mix-padrao.js"></script>
+<link rel="stylesheet" href="3mix-grafite.css">
+<link rel="stylesheet" href="3mix-padrao.css">
 <style>
-.vd-window { min-width: 720px; max-width: 900px; }
-.vd-table-box { border: 1px solid #39444d; background: #12171b; margin: 4px 0 8px; max-height: 180px; overflow-y: auto; }
-.vd-table-box table { width: 100%; border-collapse: collapse; }
-.vd-table-box th, .vd-table-box td { padding: 3px 6px; text-align: left; border-bottom: 1px solid #252e35; font-size: 11px; }
-.vd-table-box th { background: #26303a; font-weight: 700; color: #fff; position: sticky; top: 0; }
-.vd-table-box td input { height: 21px; padding: 1px 4px; border: 1px solid #6f757b; background: #e9eaeb; color: #000; font: 11px "Segoe UI", sans-serif; width: 100%; }
-.vd-table-box td button { height: 21px; min-width: 50px; font-size: 11px; padding: 0 6px; background: #5c1815; border-color: #a82e28; }
-.vd-table-box td button:hover { background: #7d201c; }
-.vd-note-box { background: #151a1e; border: 1px solid #2b353d; padding: 6px 10px; font-size: 11px; color: #b0bac2; line-height: 1.35; margin: 4px 0; }
-.vd-grid-two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; }
-#stats { background: #0d1115; border: 1px solid #2b353d; padding: 6px; font-size: 11px; max-height: 120px; overflow: auto; margin: 4px 0; white-space: pre-wrap; color: #7fe08f; }
+  #message:empty { display: none; }
+  .rd-checks { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+  .rd-checks label { display: flex; align-items: center; gap: 7px; font-size: 13.5px; color: #ddd; }
+  .rd-checks input { width: auto; height: auto; }
+  .rd-tabela { overflow: auto; border: 1px solid var(--p3-line); border-radius: 4px; }
+  .rd-tabela table { width: 100%; border-collapse: collapse; }
+  .rd-tabela th, .rd-tabela td { padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--p3-line-soft); font-size: 12.5px; }
+  .rd-tabela th { background: #1d1d1d; color: #bbb; font-weight: 700; }
+  .rd-tabela tr:last-child td { border-bottom: 0; }
+  .p3 .rd-tabela td input { width: 100%; min-width: 70px; height: 30px; }
+  .p3 .rd-tabela td button { height: 30px; }
+  .rd-barra { position: sticky; bottom: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 0; background: var(--p3-bg, #202020); border-top: 1px solid var(--p3-line); }
+  .p3 #stop:not(:disabled) { background: #b02a1f; border-color: #d8392b; color: #fff; }
+  #stats { max-height: 260px; }
+  .rd-um { max-width: 260px; }
 </style>
 </head>
-<body data-page="rede" class="vd">
-<div class="vd-window">
-  <div class="vd-strip">
-    <span class="vd-title">Rede Multipath & Bonding</span>
-    <span class="vd-flex"></span>
-    <span id="connection" class="vd-note">Carregando…</span>
-  </div>
+<body data-page="rede" class="p3">
+<header class="p3-head">
+  <a href="/" title="3Mix"><img class="p3-logo" src="/img/3mix-logo.png" alt="3Mix"></a>
+  <h1>Rede Multipath</h1>
+  <span class="p3-flex"></span>
+  <span id="connection" class="p3-badge">Carregando…</span>
+</header>
+<main class="p3-main">
+  <p id="message" class="p3-note" role="status"></p>
 
-  <div style="padding: 4px 12px 0;">
-    <p id="message" class="vd-msg" role="status" style="margin-left: 0;"></p>
-  </div>
-
-  <div class="vd-body">
-    <div class="vd-note-box">
-      Transporte multipath experimental com criptografia AES-256-GCM. Escolha duplicação para redundância integral ou agregação para distribuição ponderada de banda.
-    </div>
-
-    <!-- SEÇÃO: PARÂMETROS BÁSICOS -->
-    <div class="vd-grid-two">
-      <div>
-        <label class="vd-row"><span>Papel</span>
-          <select id="role">
-            <option value="both">Emissor e receptor local (teste)</option>
+  <section class="p3-card">
+    <h2>Transporte</h2>
+    <div class="p3-grid">
+      <label class="p3-field">Papel<select id="role"><option value="both">Emissor e receptor local (teste)</option>
             <option value="sender">Emissor</option>
-            <option value="receiver">Receptor</option>
-          </select>
-        </label>
-
-        <label class="vd-row"><span>Modo transporte</span>
-          <select id="mode">
-            <option value="duplicate">Duplicação / redundância</option>
-            <option value="aggregate">Agregação / ponderada</option>
-          </select>
-        </label>
-
-        <label class="vd-row"><span>FEC XOR</span>
-          <select id="fecGroup">
-            <option value="0">Desativado</option>
+            <option value="receiver">Receptor</option></select></label>
+      <label class="p3-field">Modo<select id="mode"><option value="duplicate">Duplicação / redundância</option>
+            <option value="aggregate">Agregação / ponderada</option></select></label>
+      <label class="p3-field">FEC XOR<select id="fecGroup"><option value="0">Desativado</option>
             <option value="2">1 paridade a cada 2 pacotes (50%)</option>
             <option value="4">1 paridade a cada 4 pacotes (25%)</option>
             <option value="8">1 paridade a cada 8 pacotes (12,5%)</option>
-            <option value="16">1 paridade a cada 16 pacotes (6,25%)</option>
-          </select>
-        </label>
-
-        <label class="vd-row"><span>Jitter / Buffer</span>
-          <input id="latencyMs" type="number" min="20" max="2000" class="vd-short">
-        </label>
-      </div>
-
-      <div>
-        <label class="vd-row"><span>Limite Mbps</span>
-          <input id="maxMbps" type="number" min="1" max="200" class="vd-short">
-        </label>
-
-        <label class="vd-row"><span>Janela pacotes</span>
-          <input id="window" type="number" min="64" max="8192" class="vd-short">
-        </label>
-
-        <label class="vd-row"><span>Chave AES</span>
-          <input id="secret" type="password" autocomplete="off" placeholder="Vazia mantém a atual">
-        </label>
-
-        <label class="vd-row"><span>Bridge SRT local</span>
-          <input id="bridgePort" type="number" min="1024" max="65535" class="vd-short">
-        </label>
-      </div>
+            <option value="16">1 paridade a cada 16 pacotes (6,25%)</option></select></label>
+      <label class="p3-field">Jitter / buffer (ms)<input id="latencyMs" type="number" min="20" max="2000"></label>
+      <label class="p3-field">Limite (Mbps)<input id="maxMbps" type="number" min="1" max="200"></label>
+      <label class="p3-field">Janela (pacotes)<input id="window" type="number" min="64" max="8192"></label>
+      <label class="p3-field">Chave AES<input id="secret" type="password" autocomplete="off" placeholder="Vazia mantém a atual"></label>
     </div>
+  </section>
 
-    <!-- SEÇÃO: PORTAS UDP E RECEPTOR -->
-    <div class="vd-grid-two">
-      <div>
-        <label class="vd-row"><span>Host receptor</span>
-          <input id="receiverHost" type="text" value="127.0.0.1">
-        </label>
-
-        <label class="vd-row"><span>Porta entrada TS</span>
-          <input id="ingestPort" type="number" min="1024" max="65535" class="vd-short">
-        </label>
-      </div>
-
-      <div>
-        <label class="vd-row"><span>Porta receptor</span>
-          <input id="receiverPort" type="number" min="1024" max="65535" class="vd-short">
-        </label>
-
-        <label class="vd-row"><span>Saída TS local</span>
-          <input id="outputPort" type="number" min="1024" max="65535" class="vd-short">
-        </label>
-      </div>
+  <section class="p3-card">
+    <h2>Portas</h2>
+    <div class="p3-grid">
+      <label class="p3-field">Host receptor<input id="receiverHost" type="text" value="127.0.0.1"></label>
+      <label class="p3-field">Porta do receptor<input id="receiverPort" type="number" min="1024" max="65535"></label>
+      <label class="p3-field">Entrada TS<input id="ingestPort" type="number" min="1024" max="65535"></label>
+      <label class="p3-field">Saída TS local<input id="outputPort" type="number" min="1024" max="65535"></label>
+      <label class="p3-field">Bridge SRT local<input id="bridgePort" type="number" min="1024" max="65535"></label>
     </div>
+  </section>
 
-    <!-- SEÇÃO: RECUPERAÇÃO E SAÚDE -->
-    <div class="vd-row"><span>Políticas</span>
-      <div class="vd-inline" style="flex-wrap: wrap;">
-        <label class="vd-check"><input id="retransmit" type="checkbox" checked> NACK autenticado</label>
-        <label class="vd-check"><input id="adaptive" type="checkbox"> Saúde adaptativa</label>
-        <label class="vd-check"><input id="measureMedia" type="checkbox"> Medir perda original</label>
-        <label class="vd-check"><input id="measuredAllocation" type="checkbox"> Alocar por banda medida</label>
-        <label class="vd-check"><input id="bridge" type="checkbox"> Bridge SRT local</label>
-      </div>
+  <section class="p3-card">
+    <h2>Recuperação e saúde</h2>
+    <div class="rd-checks">
+      <label><input id="retransmit" type="checkbox" checked>NACK autenticado</label>
+      <label><input id="adaptive" type="checkbox">Saúde adaptativa</label>
+      <label><input id="measureMedia" type="checkbox">Medir perda original</label>
+      <label><input id="measuredAllocation" type="checkbox">Alocar por banda medida</label>
+      <label><input id="bridge" type="checkbox">Bridge SRT local</label>
     </div>
-
-    <label class="vd-row"><span>Timeout probe</span>
-      <div class="vd-inline">
-        <input id="adaptiveTimeoutMs" type="number" min="1000" max="15000" value="2500" class="vd-short">
-        <span class="vd-note">ms sem resposta autenticada</span>
-      </div>
-    </label>
-
-    <!-- SEÇÃO: CAMINHOS DE REDE -->
-    <div class="vd-row"><span>Caminhos</span>
-      <div class="vd-inline">
-        <button id="add" type="button">Adicionar caminho</button>
-        <span id="interfaces" class="vd-note"></span>
-      </div>
+    <div class="rd-um">
+      <label class="p3-field">Tempo limite da sonda (ms)<input id="adaptiveTimeoutMs" type="number" min="1000" max="15000" value="2500"></label>
     </div>
+  </section>
 
-    <div class="vd-table-box">
+  <section class="p3-card">
+    <div class="p3-row"><h2>Caminhos</h2><span class="p3-flex"></span><span id="interfaces" class="p3-note"></span><button id="add" type="button">Adicionar caminho</button></div>
+    <div class="rd-tabela">
       <table>
-        <thead>
-          <tr>
-            <th>IPv4 receptor</th>
-            <th>Porta</th>
-            <th>IPv4 interface local</th>
-            <th>Peso (1–100)</th>
-            <th style="width: 60px;">Ação</th>
-          </tr>
-        </thead>
+        <thead><tr><th>IPv4 do receptor</th><th>Porta</th><th>IPv4 da interface local</th><th>Peso (1–100)</th><th></th></tr></thead>
         <tbody id="paths"></tbody>
       </table>
     </div>
+    <p id="receiver-file" class="p3-note"></p>
+  </section>
 
-    <div class="vd-row"><span>Pacote privado</span>
-      <span id="receiver-file" class="vd-note"></span>
-    </div>
+  <details class="p3-card">
+    <summary>Diagnóstico em tempo real</summary>
+    <pre id="stats" class="p3-log"></pre>
+  </details>
 
-    <!-- SEÇÃO: DIAGNÓSTICO -->
-    <details>
-      <summary style="font-weight: 700; cursor: pointer; color: #c9d1d8;">Diagnóstico e Telemetria em Tempo Real</summary>
-      <pre id="stats" class="vd-mono"></pre>
-    </details>
-  </div>
-
-  <!-- BARRA DE AÇÕES -->
-  <div class="vd-bar">
+  <div class="rd-barra">
+    <button id="start" type="button" class="primary">Iniciar transporte</button>
+    <button id="stop" type="button" disabled>Parar</button>
+    <span class="p3-flex"></span>
     <button id="measure" type="button" disabled title="Teste de vazão até 64 Mbps">Medir banda</button>
-    <button id="export" type="button" title="Gera pacote ZIP autônomo do receptor">Exportar receptor</button>
-    <span class="vd-flex"></span>
+    <button id="export" type="button" title="Gera o pacote do receptor">Exportar receptor</button>
     <button id="save" type="button">Salvar</button>
-    <button id="start" type="button" class="vd-on">Iniciar transporte</button>
-    <button id="stop" type="button" class="vd-air" disabled>Parar</button>
-    <button type="button" onclick="window.FreeMixClosePanel ? window.FreeMixClosePanel() : window.close()">Fechar</button>
   </div>
-</div>
-
+</main>
 <script src="fechar-janela.js"></script>
 <script src="rede.js"></script>
 </body>

@@ -1,4 +1,4 @@
-# Tarefa para o agente: auditoria das pendências reais do FreeMix
+# Tarefa para o agente: auditoria das pendências reais do 3Mix
 
 Analise o estado atual de `D:\DRIVE\IA\antigravity\vmixtwste` e entregue um resumo direto do que realmente falta. Esta é uma auditoria: não editar código, instalar, publicar, iniciar/parar a mesa, transmitir ou modificar o projeto do operador. Não confiar em declarações antigas de conclusão sem conferir evidências e o pacote efetivamente entregue.
 

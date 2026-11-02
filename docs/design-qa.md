@@ -1,4 +1,4 @@
-# Conferência visual FreeMix — 08/10/2026
+# Conferência visual 3Mix — 08/10/2026
 
 Referências fornecidas pelo usuário: mesa vMix e janelas MultiCorder, Recording Setup, Playlist, Input Select e Streaming Settings. Comparação salva em `qa-portatil/comparativo-playlist-final.jpg`: imagens proporcionais no mesmo painel, sem deformação; a janela vMix original é menor, então não se afirma igualdade de pixel ou DPI.
 
@@ -16,7 +16,7 @@ Conferência funcional das telas web aprovada no limite descrito. Aprovação vi
 
 - P2 aberto: organização completa de todas as janelas e todos os controles ainda não reproduz integralmente os prints. Central oferece acesso ao diálogo original para categorias ainda não migradas.
 - P2 aberto: revisar tamanhos/alinhamentos em 100%, 125%, 150% e segundo monitor; relatório não comprova esses cenários.
-- P3: nomes dos comandos e controles próprios diferem da referência por funções adicionais do FreeMix.
+- P3: nomes dos comandos e controles próprios diferem da referência por funções adicionais do 3Mix.
 
 Não há afirmação de layout 1:1 final. Recursos pendentes ficam em `PENDENCIAS.md`; esta conferência não aprova transmissão externa, hardware nem carga longa.
 

@@ -25,7 +25,7 @@ Fonte/cena QA removidas depois da prova; QA PID 30448 salva e fechada normalment
 
 ## Como usar e limites
 
-Na próxima abertura do FreeMix, abrir os filtros originais da entrada, adicionar **Advanced Mask**, escolher Shape/Circle/Rectangle ou outro modo e ajustar. O plugin também oferece máscaras por fonte, imagem e gradiente segundo a documentação do autor. Círculo e retângulo foram exercitados; os demais modos não recebem declaração de QA nesta entrega.
+Na próxima abertura do 3Mix, abrir os filtros originais da entrada, adicionar **Advanced Mask**, escolher Shape/Circle/Rectangle ou outro modo e ajustar. O plugin também oferece máscaras por fonte, imagem e gradiente segundo a documentação do autor. Círculo e retângulo foram exercitados; os demais modos não recebem declaração de QA nesta entrega.
 
 Este trabalho integra o filtro original; **não adiciona controles específicos dentro do editor Compor**. Máscara de uma fonte compartilhada afeta todos os locais que usam aquela fonte: para efeito por slot, aplicar no wrapper/cena independente da composição, preservando a câmera original. A distribuição versionada ainda deve incluir os três namespaces de arquivos listados acima e a fonte ZIP; não se afirma que o instalador antigo já contém este plugin.
 
@@ -35,6 +35,6 @@ O link histórico Xaymar/obs-StreamFX redireciona para [Vhonowslend/StreamFX-Pub
 
 O repositório público tem LICENSE GPLv2; README menciona GPLv3, então há divergência documental. Isso não prova licença/proveniência de um binário privado atual; a integração exigiria o artefato oficial compatível e sua licença/fonte correspondente. Não promete StreamFX como recurso entregue.
 
-Alternativas já disponíveis por área: Advanced Masks para máscara geométrica/fonte/imagem/gradiente; Move 3.2.1 para transformação animada/Merge; filtros originais OBS para crop, chromakey, correção de cor e máscara de imagem; encoders originais H.264/HEVC/AV1 agora descobertos pelo FreeMix. Essas alternativas **não equivalem ao pacote inteiro StreamFX**: blur avançado, transformação 3D e shaders personalizados continuam fora desta integração.
+Alternativas já disponíveis por área: Advanced Masks para máscara geométrica/fonte/imagem/gradiente; Move 3.2.1 para transformação animada/Merge; filtros originais OBS para crop, chromakey, correção de cor e máscara de imagem; encoders originais H.264/HEVC/AV1 agora descobertos pelo 3Mix. Essas alternativas **não equivalem ao pacote inteiro StreamFX**: blur avançado, transformação 3D e shaders personalizados continuam fora desta integração.
 
 Inventário completo e hashes de todos os arquivos novos: [portable-install.json](qa-portatil/advanced-masks-provenance/portable-install.json). Inspeção StreamFX: [streamfx-inspection.json](qa-portatil/advanced-masks-provenance/streamfx-inspection.json).

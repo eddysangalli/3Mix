@@ -54,13 +54,19 @@
     },
     {
       "key": "accent",
-      "label": "Cor de destaque",
+      "label": "Cor primária (Destaque)",
       "type": "color",
       "default": "#19c9aa"
     },
     {
+      "key": "secondary",
+      "label": "Cor secundária (Acento 2)",
+      "type": "color",
+      "default": "#0284c7"
+    },
+    {
       "key": "background",
-      "label": "Cor do painel",
+      "label": "Cor do painel (Fundo)",
       "type": "color",
       "default": "#102330"
     },
@@ -69,6 +75,19 @@
       "label": "Cor do texto",
       "type": "color",
       "default": "#ffffff"
+    },
+    {
+      "key": "designStyle",
+      "label": "Estilo Visual / Geometria",
+      "type": "select",
+      "default": "modern_internet",
+      "options": [
+        "modern_internet",
+        "classic_tv",
+        "swiss_square",
+        "esports_neon",
+        "corporate_glass"
+      ]
     },
     {
       "key": "opacity",
@@ -112,9 +131,19 @@
     },
     {
       "key": "fontFamily",
-      "label": "Fonte instalada (família)",
-      "type": "text",
-      "default": "Arial"
+      "label": "Família da fonte",
+      "type": "select",
+      "default": "Segoe UI",
+      "options": [
+        "Segoe UI",
+        "Arial",
+        "Montserrat",
+        "Bebas Neue",
+        "Roboto",
+        "Impact",
+        "Trebuchet MS",
+        "Georgia"
+      ]
     },
     {
       "key": "fontAsset",
@@ -172,7 +201,7 @@
     },
     {
       "key": "animation",
-      "label": "Animação",
+      "label": "Efeito de Transição",
       "type": "select",
       "default": "slide",
       "options": [
@@ -180,7 +209,9 @@
         "fade",
         "slide",
         "zoom",
-        "rotate"
+        "rotate",
+        "blur_fade",
+        "wipe"
       ]
     },
     {
@@ -208,7 +239,8 @@
         "linear",
         "ease-in",
         "ease-out",
-        "ease-in-out"
+        "ease-in-out",
+        "cubic-bezier(0.16, 1, 0.3, 1)"
       ]
     }
   ],

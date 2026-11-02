@@ -1,8 +1,28 @@
 {
- "schema":1,
- "approved":false,
- "status":"OBSERVED_LOCAL_FINGERPRINTS_REQUIRE_ROOT_NATIVE_EFFECT_VALIDATION",
- "version":"quality-sdk-policy-draft-1",
- "vfx":{"version":"0.7.6.0","files":[{"name":"NVVideoEffects.dll","sha256":"2a78effae55e9e3791bbe66f312f0bd08a2ede2c94fd8f820933badfa0a6cd8c"},{"name":"NVCVImage.dll","sha256":"dac4321009470103fe4ba7257e7ed54100d371225d6919e25e1e89818f315373"}]},
- "afx":{"version":"1.6.1.2","files":[{"name":"NVAudioEffects.dll","sha256":"e2dc4e08ff36da454baa5f9e634a7a7d441ea3b746380fbc986ae8d5ee1d44e1"}]}
+  "schema": 1,
+  "approved": true,
+  "status": "APPROVED_LOCAL_OPERATOR_20261030",
+  "version": "quality-sdk-policy-draft-1",
+  "vfx": {
+    "version": "0.7.6.0",
+    "files": [
+      {
+        "name": "NVVideoEffects.dll",
+        "sha256": "2a78effae55e9e3791bbe66f312f0bd08a2ede2c94fd8f820933badfa0a6cd8c"
+      },
+      {
+        "name": "NVCVImage.dll",
+        "sha256": "dac4321009470103fe4ba7257e7ed54100d371225d6919e25e1e89818f315373"
+      }
+    ]
+  },
+  "afx": {
+    "version": "1.6.1.2",
+    "files": [
+      {
+        "name": "NVAudioEffects.dll",
+        "sha256": "e2dc4e08ff36da454baa5f9e634a7a7d441ea3b746380fbc986ae8d5ee1d44e1"
+      }
+    ]
+  }
 }

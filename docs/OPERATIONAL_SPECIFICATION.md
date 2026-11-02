@@ -1,6 +1,6 @@
-# FreeMix Studio — Especificação Operacional Completa da Interface e Serviços
+# 3Mix Studio — Especificação Operacional Completa da Interface e Serviços
 
-Este documento estabelece a especificação funcional detalhada de cada controle, tela, menu e serviço do **FreeMix Studio**, tomando como referência a arquitetura operacional do **vMix 29** e consolidando o fluxo broadcast sobre a biblioteca `libobs`.
+Este documento estabelece a especificação funcional detalhada de cada controle, tela, menu e serviço do **3Mix Studio**, tomando como referência a arquitetura operacional do **vMix 29** e consolidando o fluxo broadcast sobre a biblioteca `libobs`.
 
 ---
 
@@ -45,7 +45,7 @@ Este documento estabelece a especificação funcional detalhada de cada controle
 
 ## 3. Oito Canais de Overlays Independentes (1 a 8)
 
-Conforme a documentação oficial do vMix 29, o FreeMix Studio implementa **oito canais de sobreposição simultâneos**, permitindo construir composições complexas sem colisão de camadas:
+Conforme a documentação oficial do vMix 29, o 3Mix Studio implementa **oito canais de sobreposição simultâneos**, permitindo construir composições complexas sem colisão de camadas:
 
 1. **Overlay 1 (Bug de Emissora / Marca)**: Canto superior direito, 100% de opacidade, transição Fade 300ms, permanente.
 2. **Overlay 2 (Lower Third Principal)**: Tarja inferior com nome e cargo do entrevistado, transição Slide lateral, duração 400ms.
@@ -65,7 +65,7 @@ Conforme a documentação oficial do vMix 29, o FreeMix Studio implementa **oito
 
 ## 4. Central de Replay com Múltiplas Câmeras, Players A e B e Listas
 
-A arquitetura de Replay do FreeMix separa formalmente quatro componentes fundamentais:
+A arquitetura de Replay do 3Mix separa formalmente quatro componentes fundamentais:
 
 ```mermaid
 graph TD
@@ -151,4 +151,4 @@ O arquivo `.fmx` (formato JSON v1.1.0) armazena a totalidade dos dados operacion
 ```
 
 * **Salvar Atômico**: Escrita em arquivo temporário `.fmx.tmp` com renomeação instantânea para prevenir perda de dados em quedas de energia.
-* **Relocalização de Mídias Ausentes**: Ao abrir um preset, se um arquivo de vídeo ou imagem foi movido, o FreeMix exibe a janela de busca para apontar o novo local da pasta com remapeamento automático relativo.
+* **Relocalização de Mídias Ausentes**: Ao abrir um preset, se um arquivo de vídeo ou imagem foi movido, o 3Mix exibe a janela de busca para apontar o novo local da pasta com remapeamento automático relativo.

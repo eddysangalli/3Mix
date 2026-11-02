@@ -13,15 +13,28 @@ import { AudioRoutingEngine } from './audio-routing-producao.mjs';
 import { MacroEngine } from './macros-producao.mjs';
 import { RecoveryEngine } from './recuperacao-producao.mjs';
 import { OutputEngine } from './saidas-producao.mjs';
+import { MixEffectsEngine } from './mix-effects-producao.mjs';
 import { SessionRecovery } from './sessao-producao.mjs';
 import { NetworkEngine } from './bonding-producao.mjs';
 import { QueueEngine } from './fila-producao.mjs';
+import { MediaPlayoutEngine } from './media-playout-engine.mjs';
 import { ControllerEngine } from './controlador-producao.mjs';
 import { GlobalHotkeys } from './atalhos-globais.mjs';
 import { GCLibraryEngine } from './gc-biblioteca-producao.mjs';
 import { GCCompatibleEngine } from './gc-html-producao.mjs';
 import { EffectsEngine } from './efeitos-producao.mjs';
 import { SignalEngine } from './sinais-producao.mjs';
+import { SignalRegistryEngine } from './registro-sinais-producao.mjs';
+import { PatchRegistryEngine } from './patch-registry-producao.mjs';
+import { MixAudioEngine } from './mix-audio-producao.mjs';
+import { OverlayEngine } from './overlays-producao.mjs';
+import { PreflightEngine } from './preflight-producao.mjs';
+import { IncidentBlackboxEngine } from './blackbox-producao.mjs';
+import { BroadcastDelayEngine } from './broadcast-delay.mjs';
+import { ReturnFeedManager } from './return-feed-producao.mjs';
+import { AudioDuckingEngine } from './audio-ducking-engine.mjs';
+import { RundownEngine } from './rundown-producao.mjs';
+import { PTZManager } from './ptz-manager.mjs';
 import { createHash } from 'node:crypto';
 import { basename } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -48,20 +61,72 @@ export class Production {
   }
   constructor({root,panel,getObs,publish=()=>{},finalProgramGateQualified=false}) {
     this.finalProgramGateQualified=finalProgramGateQualified===true; this.root=root; this.panel=panel; this.getObs=getObs; this.publish=publish; this.tail=Promise.resolve(); this.levels=new Map(); this.generation=0;
+    // Módulos opcionais em standby: servidor-api.mjs substitui esta função pela leitura
+    // real de modulos-config.mjs; por padrão (aqui e em qualquer outro host que não a
+    // configure) todo módulo conta como ativo, preservando o comportamento de hoje.
+    this.moduloAtivo=()=>true;
     this.state={connected:false,scenes:[],inputs:[],audioInputs:[],media:[],overlays:[],gc:{},revision:0}; this.scope=null; this.dataSources=new DataSources(root);this.inputEngine=new InputEngine(this);this.settingsEngine=new SettingsEngine(this);this.callEngine=new CallEngine(this);
     this.macroEngine=new MacroEngine(this);
     this.recoveryEngine=new RecoveryEngine(this);
     this.sessionRecovery=new SessionRecovery(this);
     this.networkEngine=new NetworkEngine(this);
-    this.queueEngine=new QueueEngine(this);
+    this.playoutEngine=new MediaPlayoutEngine(this);
+    this.queueEngine=this.playoutEngine;
     this.controllerEngine=new ControllerEngine(this);this.globalHotkeys=new GlobalHotkeys(this);
-    this.outputEngine=new OutputEngine(this);this.audioRoutingEngine=new AudioRoutingEngine(this);
-    this.gcCompatible=new GCCompatibleEngine(this);this.gcLibrary=new GCLibraryEngine(this);this.effectsEngine=new EffectsEngine(this);this.signalEngine=new SignalEngine(this);
+    // Audit finding A6: one MixEffectsEngine shared by OutputEngine (the HTTP
+    // path's outputs_mix/operationId receipts) and SignalRegistryEngine (the
+    // Signal Registry's meTally()/summary()) — they used to each construct
+    // their own, so /api/mix-effects/check could confirm an operation the
+    // Signal Registry's own read of mixes/meTally never agreed had happened.
+    // Single instance means both now observe exactly the same receipts map.
+    this.mixEffects=new MixEffectsEngine(this);
+    this.outputEngine=new OutputEngine(this,this.mixEffects);this.audioRoutingEngine=new AudioRoutingEngine(this);this.overlayEngine=new OverlayEngine(this);
+    this.gcCompatible=new GCCompatibleEngine(this);this.gcLibrary=new GCLibraryEngine(this);this.effectsEngine=new EffectsEngine(this);this.signalEngine=new SignalEngine(this);this.signalRegistry=new SignalRegistryEngine(this,this.mixEffects);this.patchRegistry=new PatchRegistryEngine(this);this.mixAudio=new MixAudioEngine(this);this.preflightEngine=new PreflightEngine(this);this.blackboxEngine=new IncidentBlackboxEngine(this);this.broadcastDelayEngine=new BroadcastDelayEngine(this);this.returnFeedManager=new ReturnFeedManager(this);this.audioDuckingEngine=new AudioDuckingEngine(this);this.rundownEngine=new RundownEngine(this);this.ptzManager=new PTZManager(this);
   }
-  req(type,data={}) { const obs=this.getObs(); if(!obs) throw new Error('Sem conexão com o motor FreeMix'); return obs.req(type,data); }
+  req(type,data={}) { const obs=this.getObs(); if(!obs) throw new Error('Sem conexão com o motor 3Mix'); return obs.req(type,data); }
   async optional(type,data) { try { return await this.req(type,data); } catch { return null; } }
   async vendor(type,data={},name='downstream-keyer') { const r=await this.req('CallVendorRequest',{vendorName:name,requestType:type,requestData:data}); if(r.responseData?.success===false) throw new Error(`O motor recusou ${type}${r.responseData.error?': '+r.responseData.error:''}`); return r.responseData; }
-  run(action,data={}) { if(action==='gc_library_import'&&data.payload?.kind==='freemix-gtzip-import'&&data.payload.operation==='update'){if(data.payload.format!==1)return Promise.reject(Error('Formato de importação GTZIP inválido'));return this.runTickerUpdate(data);} if(['preview','active','cut','fade','transition','ftb','input_remove'].includes(action))return this.runRealtime(action,data);if(action==='macro_cancel')this.macroEngine.cancel();const p=this.tail.then(async()=>{this.sessionRecovery.beginMutation();try{await this.refresh(); await this.routeLegacyAudio(); await this.execute(action,data); this.macroEngine.recordAction?.(action,data); await this.sessionRecovery.journal(action,data); await this.refresh(); return this.state;}finally{this.sessionRecovery.endMutation();}}); this.tail=p.catch(()=>{}); return p; }
+  // PTZ move/stop/zoom/focus bypass the serialized production tail entirely: they must
+  // never wait behind a GetSourceScreenshot or a slow macro step, and Stop in particular
+  // must land immediately (task requirement: "Botão STOP claramente disponível" + the
+  // continuous-motion safety watchdog depends on low, predictable latency). PTZManager
+  // keeps its own per-device serialization (one socket per camera) and lease arbitration;
+  // it does not touch this.state or need a production refresh.
+  async runPtz(action,data={}) { this.ptzResult=await this.ptzManager.execute(action,data); return this.state; }
+  run(action,data={}) { if(action.startsWith('ptz_'))return this.runPtz(action,data); if(action==='gc_library_import'&&data.payload?.kind==='freemix-gtzip-import'&&data.payload.operation==='update'){if(data.payload.format!==1)return Promise.reject(Error('Formato de importação GTZIP inválido'));return this.runTickerUpdate(data);} if(['preview','active','cut','fade','transition','ftb','input_remove'].includes(action))return this.runRealtime(action,data);if(action==='macro_cancel')this.macroEngine.cancel();const p=this.tail.then(async()=>{this.sessionRecovery.beginMutation();try{await this.refresh(); await this.routeLegacyAudio(); await this.execute(action,data); this.macroEngine.recordAction?.(action,data); await this.sessionRecovery.journal(action,data); await this.refresh(); return this.state;}finally{this.sessionRecovery.endMutation();}}); this.tail=p.catch(()=>{}); return p; }
+  // Rundown operations get the same serialized connection snapshot as other
+  // production commands, but deliberately skip legacy audio migration: a step
+  // may only touch the audio explicitly listed in its own actions.
+  runRundown(action,data={}) {
+    if(typeof this.rundownEngine?.execute!=='function')return Promise.reject(Error('Motor de Rundown indisponível nesta instalação'));
+    const p=this.tail.then(async()=>{
+      this.sessionRecovery.beginMutation();
+      try {
+        await this.refresh();
+        const result=await this.rundownEngine.execute(action,data);
+        let refreshError=null;
+        try {
+          await this.refresh();
+        } catch (error) {
+          // The action was already confirmed by the engine. Preserve its
+          // receipt and report the stale snapshot separately instead of
+          // pretending the command was rejected.
+          refreshError=error.message;
+          console.error('3Mix: rundown-refresh: '+error.message);
+        }
+        return {result,state:this.state,refreshError};
+      } catch (error) {
+        // Falha parcial pode ter mudado Programa/DSK/áudio antes de abortar.
+        // Atualiza o snapshot para a tela mostrar o que realmente ocorreu.
+        try { await this.refresh(); } catch (refreshFailure) { console.error('3Mix: rundown-failure-refresh: '+refreshFailure.message); }
+        throw error;
+      } finally {
+        this.sessionRecovery.endMutation();
+      }
+    });
+    this.tail=p.catch(()=>{});
+    return p;
+  }
 
   runTickerUpdate(data) {
     const queued=this.tail.then(async()=>{this.sessionRecovery.beginMutation();try{await this.refresh();const scope=this.scope,connection=this.getObs(),assertContext=()=>{if(this.scope!==scope||this.getObs()!==connection)throw Error('Projeto ou conexão mudou; atualização de ticker não enviada');};const dispatched=await dispatchGtTickerUpdate(this.gcLibrary,data.payload,{assertContext});this.gcLibrary.last=dispatched.receipt;this.state={...this.state,gcLibrary:this.gcLibrary.summary()};return {scope,connection,dispatched};}finally{this.sessionRecovery.endMutation();}});
@@ -171,7 +236,12 @@ export class Production {
     if(!name||visited.has(name))return visited;visited.add(name);
     const r=await this.req(group?'GetGroupSceneItemList':'GetSceneItemList',{sceneName:name});
     if(!Array.isArray(r?.sceneItems))throw Error('Não foi possível confirmar a composição no ar');
-    for(const item of r.sceneItems)if(item.sceneItemEnabled!==false){if(item.isGroup||item.inputKind===null)await this.realtimeVisibleTree(item.sourceName,visited,item.isGroup);else visited.add(item.sourceName);}
+    // Mesmo bug de sceneSources()/visibleTree() (ver comentários ali): se a cena-proxy pública de M/E
+    // ("FreeMix Mix N Output") estiver aninhada na árvore do Programa do MAIN ou de algum DSK -- exatamente
+    // o caso de usá-la como signal de Patch (passo 4 do plano) ou dentro de outra Scene -- inputKind===null
+    // também bate na transição privada dela, e GetSceneItemList('FreeMix Mix N') (a transição, não uma
+    // cena) lançava aqui sem guarda nenhuma, quebrando a exclusão de Input nesse cenário real.
+    for(const item of r.sceneItems)if(item.sceneItemEnabled!==false){if(item.isGroup||item.sourceType==='OBS_SOURCE_TYPE_SCENE')await this.realtimeVisibleTree(item.sourceName,visited,item.isGroup);else visited.add(item.sourceName);}
     return visited;
   }
 
@@ -180,7 +250,7 @@ export class Production {
     if(this.dataPollTask||this.dataPollReady)return;
     this.dataPollTask=this.dataSources.preparePoll().then(batch=>{this.dataPollReady=batch;},error=>{this.dataPollError=error.message;}).finally(()=>{this.dataPollTask=null;});
   }
-  tick() { const p=this.tail.then(async()=>{await this.refresh();if(await this.routeLegacyAudio())await this.refresh();if(!this.state.buses&&!this.state.recording&&!this.state.streaming&&this.autoBusScope!==this.scope){this.autoBusScope=this.scope;try{await this.execute('audio_enable',{});this.busSetupError=null;await this.refresh();}catch(e){this.busSetupError=e.message;this.state={...this.state,busSetupError:e.message};this.publish(this.state);}}const batch=this.dataPollReady;this.dataPollReady=null;const changes=batch?await this.dataSources.applyPoll(batch):[];this.startDataPoll();for(const s of changes)if(s.binding?.autoPublish){try{await this.publishData(s.id);}catch(e){s.error='Publicação: '+e.message;}}const summary=this.dataSources.summary();if(JSON.stringify(summary)!==JSON.stringify(this.state.dataSources)){this.state={...this.state,dataSources:summary,revision:++this.generation};this.publish(this.state);}await this.queueEngine.observe();this.macroEngine.observe?.(this.state);await this.signalEngine.observe();this.state.signals=this.signalEngine.summary();this.publish(this.state);return this.state;}); this.tail=p.catch(()=>{}); return p; }
+  tick() { const p=this.tail.then(async()=>{await this.refresh();if(await this.routeLegacyAudio())await this.refresh();if(!this.state.buses&&!this.state.recording&&!this.state.streaming&&this.autoBusScope!==this.scope){this.autoBusScope=this.scope;try{await this.execute('audio_enable',{});this.busSetupError=null;await this.refresh();}catch(e){this.busSetupError=e.message;this.state={...this.state,busSetupError:e.message};this.publish(this.state);}}const dataSourcesAtivo=this.moduloAtivo('dataSources');const batch=dataSourcesAtivo?this.dataPollReady:null;this.dataPollReady=null;const changes=batch?await this.dataSources.applyPoll(batch):[];if(dataSourcesAtivo)this.startDataPoll();for(const s of changes)if(s.binding?.autoPublish){try{await this.publishData(s.id);}catch(e){s.error='Publicação: '+e.message;}}const summary=this.dataSources.summary();if(JSON.stringify(summary)!==JSON.stringify(this.state.dataSources)){this.state={...this.state,dataSources:summary,revision:++this.generation};this.publish(this.state);}await this.queueEngine.observe();this.macroEngine.observe?.(this.state);await this.signalEngine.observe();this.state.signals=this.signalEngine.summary();this.publish(this.state);return this.state;}); this.tail=p.catch(()=>{}); return p; }
   async routeLegacyAudio() {
     if(!this.state.buses)return false;let changed=false;const director=await this.callEngine.source();
     for(const input of this.state.audioInputs.filter(a=>!a.bus&&a.name!==director?.inputName)) {
@@ -191,7 +261,7 @@ export class Production {
     }
     return changed;
   }
-  disconnected() { this.macroEngine.cancel();this.globalHotkeys.disconnected();this.autoBusScope=null;this.busSetupError=null;this.state={...this.state,connected:false}; this.levels.clear(); this.publish(this.state); }
+  disconnected() { this.macroEngine.cancel();this.rundownEngine?.disconnected?.();this.globalHotkeys.disconnected();this.autoBusScope=null;this.busSetupError=null;this.state={...this.state,connected:false}; this.levels.clear(); this.publish(this.state); }
   onMeters(inputs=[]) {
     for(const i of inputs) this.levels.set(i.inputName,{levels:(i.inputLevelsMul||[]).map(ch=>Math.max(0,ch[1]||0)),at:Date.now()});
   }
@@ -199,18 +269,31 @@ export class Production {
   async sceneSources(name,visited=new Set()) {
     if(visited.has(name)) return []; visited.add(name);
     const r=await this.req('GetSceneItemList',{sceneName:name}); const sources=[];
+    // Bug real encontrado em QA (qa-beta/recibos/switcher-strip-patch-audio-tally-e2e.md): um item com
+    // inputKind===null NÃO é só uma cena aninhada -- a transição privada dentro da cena-proxy pública de
+    // nesting de M/E ("FreeMix Mix N Output", de FreeMixMixEffectManager.hpp) também tem inputKind===null
+    // (sourceType OBS_SOURCE_TYPE_TRANSITION, não OBS_SOURCE_TYPE_SCENE). Recursar nela chamava
+    // GetSceneItemList numa cena que não existe ("FreeMix Mix 2" é a transição, não uma cena registrada),
+    // lançando um erro não tratado que derrubava refresh() inteiro -- e portanto connected:false na API
+    // toda -- assim que qualquer M/E 2-4 fazia seu primeiro preview+cut/fade/take. Mesmo filtro por
+    // sourceType já usado em entradas-producao.mjs (InputEngine.cycle()) para o mesmo tipo de bug.
     for(const i of r.sceneItems){ if(i.isGroup) { const g=await this.req('GetGroupSceneItemList',{sceneName:i.sourceName}); sources.push(...g.sceneItems.map(s=>s.sourceName)); }
-      else if(i.inputKind===null) sources.push(...await this.sceneSources(i.sourceName,visited)); else sources.push(i.sourceName); }
+      else if(i.sourceType==='OBS_SOURCE_TYPE_SCENE') sources.push(...await this.sceneSources(i.sourceName,visited)); else sources.push(i.sourceName); }
     return [...new Set(sources)];
   }
   async visibleTree(name,visited=new Set(),group=false){
     if(!name||visited.has(name))return visited;visited.add(name);
     const r=await this.optional(group?'GetGroupSceneItemList':'GetSceneItemList',{sceneName:name});
-    for(const item of r?.sceneItems||[])if(item.sceneItemEnabled!==false){if(item.isGroup||item.inputKind===null)await this.visibleTree(item.sourceName,visited,item.isGroup);else visited.add(item.sourceName);}
+    // Mesmo bug de sceneSources() (ver comentário ali): inputKind===null também é verdade pra transição
+    // privada dentro da cena-proxy pública de M/E ("FreeMix Mix N Output"), não só pra cena aninhada.
+    // optional() já evitava um crash aqui (retorna null, loop vira no-op), mas descer com sourceType
+    // explícito é a checagem correta -- meTally() usa exatamente esta função pro tally recursivo do
+    // passo 7, então classificar certo aqui importa pra correção do recurso, não só pra não quebrar.
+    for(const item of r?.sceneItems||[])if(item.sceneItemEnabled!==false){if(item.isGroup||item.sourceType==='OBS_SOURCE_TYPE_SCENE')await this.visibleTree(item.sourceName,visited,item.isGroup);else visited.add(item.sourceName);}
     return visited;
   }
   async refresh() {
-    const obs=this.getObs(); if(!obs){this.disconnected(); throw new Error('Sem conexão com o motor FreeMix');}
+    const obs=this.getObs(); if(!obs){this.disconnected(); throw new Error('Sem conexão com o motor 3Mix');}
     const [sc,ins,rec,stream,tr,preset,video]=await Promise.all([
       this.req('GetSceneList'),this.req('GetInputList'),this.req('GetRecordStatus'),this.req('GetStreamStatus'),this.req('GetSceneTransitionList'),this.req('GetSceneCollectionList'),this.req('GetVideoSettings')]);
     if(this.scope!==preset.currentSceneCollectionName){
@@ -220,8 +303,10 @@ export class Production {
     }
     await this.dataSources.setScope(this.scope);
     await this.macroEngine.setScope(this.scope);
+    if(typeof this.rundownEngine?.setScope==='function')await this.rundownEngine.setScope(this.scope);
+    await this.ptzManager.setScope(this.scope);
     await this.inputEngine.setScope(this.scope);
-    await this.gcCompatible.setScope(this.scope);await this.gcLibrary.setScope(this.scope);this.signalEngine.setScope(this.scope);
+    await this.gcCompatible.setScope(this.scope);await this.gcLibrary.setScope(this.scope);await this.overlayEngine.setScope(this.scope);this.signalEngine.setScope(this.scope);await this.patchRegistry.setScope(this.scope);await this.mixAudio.setScope(this.scope);
     const sceneFingerprint=JSON.stringify([this.scope,sc.scenes.map(s=>s.sceneUuid).sort()]);
     if(this.privateSceneFingerprint!==sceneFingerprint){await this.inputEngine.prunePrivateScenes();this.privateSceneFingerprint=sceneFingerprint;}
     await this.queueEngine.setScope(this.scope);
@@ -266,9 +351,9 @@ export class Production {
     for(const input of inputs)input.tally={program:programTree.has(input.name),preview:previewTree.has(input.name)};
     const gc={...this.gc}; gc.activeLowerThird=overlays.some(o=>o.scene==='FreeMix Tarja'); gc.activeScore=overlays.some(o=>o.scene==='FreeMix Placar');
     this.state={operation:this.state.operation,operationReceipts:[...(this.operationReceipts?.values()||[])].map(r=>({...r})),connected:true,preset:this.scope,scenes:inputs.map(i=>i.name),inputs:this.inputEngine.decorate(inputs,video),compositionTemplates:structuredClone(this.inputEngine.templates),compositionPresets:this.inputEngine.presets?.()||[],gcLibrary:this.gcLibrary.summary(),program:sc.currentProgramSceneName,preview:sc.currentPreviewSceneName,
-      sourceStatus,tally,signals:this.signalEngine.summary(),sourceInputs:ins.inputs.map(i=>({key:i.inputUuid,name:i.inputName,kind:i.unversionedInputKind||i.inputKind})),variables:this.dataSources.publishedVariables(),people:this.dataSources.people(),audioInputs:audio,media,overlays,gc,buses,calls:await this.callEngine.summary(inputs),dataSources:this.dataSources.summary(),recording:rec.outputActive,streaming:stream.outputActive,recordTimecode:rec.outputTimecode,streamTimecode:stream.outputTimecode,
-      transition:tr.currentSceneTransitionName,transitions:tr.transitions,video,controllers:this.controllerEngine.summary(),queue:this.queueEngine.summary(),recoverySession:this.sessionRecovery.summary(),macros:this.macroEngine.summary(),busSetupError:this.busSetupError||null,revision:++this.generation,updatedAt:Date.now()};
-    this.state.globalHotkeys=await this.globalHotkeys.sync();this.state.controllers=this.controllerEngine.summary();this.state.queue=this.queueEngine.summary();
+      sourceStatus,tally,signals:this.signalEngine.summary(),sourceInputs:ins.inputs.map(i=>({key:i.inputUuid,name:i.inputName,kind:i.unversionedInputKind||i.inputKind})),variables:this.dataSources.publishedVariables(),people:this.dataSources.people(),audioInputs:audio,media,overlays,overlaysEngine:this.overlayEngine.summary(),preflight:this.preflightEngine.summary(),blackbox:this.blackboxEngine.summary(),broadcastDelay:this.broadcastDelayEngine.summary(),returnFeeds:this.returnFeedManager.summary(),audioDucking:this.audioDuckingEngine.summary(),rundown:this.rundownEngine.summary(),gc,buses,calls:await this.callEngine.summary(inputs),dataSources:this.dataSources.summary(),recording:rec.outputActive,streaming:stream.outputActive,recordTimecode:rec.outputTimecode,streamTimecode:stream.outputTimecode,
+      transition:tr.currentSceneTransitionName,transitions:tr.transitions,video,controllers:this.controllerEngine.summary(),playout:this.playoutEngine.summary(),queue:this.playoutEngine.summary(),recoverySession:this.sessionRecovery.summary(),macros:this.macroEngine.summary(),busSetupError:this.busSetupError||null,revision:++this.generation,updatedAt:Date.now()};
+    this.state.globalHotkeys=await this.globalHotkeys.sync();this.state.controllers=this.controllerEngine.summary();this.state.playout=this.playoutEngine.summary();this.state.queue=this.playoutEngine.summary();
     await this.inputEngine.observeAudio(this.state);
     this.state.audioRouting=await this.audioRoutingEngine.refresh({scope:this.scope,audioInputs:audio,sourceInputs:this.state.sourceInputs,tally,director:this.state.calls?.director,connected:true});this.publish(this.state); return this.state;
   }
@@ -328,17 +413,27 @@ export class Production {
   async execute(action,d) {
     if(action.startsWith('effects_')){this.effectsResult=await this.effectsEngine.execute(action,d);return;}
     if(action.startsWith('signal_'))return this.signalEngine.execute(action,d);
+    if(action.startsWith('patch_'))return this.patchRegistry.execute(action,d);
+    if(action.startsWith('mix_audio_'))return this.mixAudio.execute(action,d);
     if(action.startsWith('gc_html_')){this.gcCompatible.last=await this.gcCompatible.execute(action,d);return;}
     if(action.startsWith('gc_library_')){this.gcLibrary.last=await this.gcLibrary.execute(action,d);return;}
     if(action.startsWith('outputs_')){await this.outputEngine.execute(action,d);return;}
     if(action.startsWith('controller_')){this.controllerEngine.last=await this.controllerEngine.execute(action,d);return;}
-    if(action.startsWith('queue_'))return this.queueEngine.execute(action,d);
+    if(action.startsWith('preflight_'))return this.preflightEngine.execute(action,d);
+    if(action.startsWith('blackbox_'))return this.blackboxEngine.execute(action,d);
+    if(action.startsWith('delay_')||action==='dump')return this.broadcastDelayEngine.execute(action,d);
+    if(action.startsWith('return_feed_'))return this.returnFeedManager.execute(action,d);
+    if(action.startsWith('ducking_'))return this.audioDuckingEngine.execute(action,d);
+    if(action.startsWith('rundown_'))return this.rundownEngine.execute(action,d);
+    if(action.startsWith('ptz_')){this.ptzResult=await this.ptzManager.execute(action,d);return;}
+    if(action.startsWith('playout_')||action.startsWith('queue_'))return this.playoutEngine.execute(action,d);
     if(action.startsWith('network_')){await this.networkEngine.execute(action,d);return;}
     if(action.startsWith('recovery_')){this.recoveryResult=await this.recoveryEngine.execute(action,d);return;}
     if(action.startsWith('macro_'))return this.macroEngine.execute(action,d);
     if(action.startsWith('call_')){this.callResult=await this.callEngine.execute(action,d);return;}
     if(action.startsWith('settings_'))return this.settingsEngine.execute(action,d);
     if(action==='input_remove'){const target=await this.guardRealtimeDelete(d.input);return this.inputEngine.execute(action,{...d,input:target.key});}if(action.startsWith('input_'))return this.inputEngine.execute(action,d);
+    if(action.startsWith('overlay_')){this.overlayResult=await this.overlayEngine.execute(action,d);return;}
     if(action.startsWith('audio_routing_'))return this.audioRoutingEngine.execute(action,d);
     switch(action){
       case 'audio_enable': {
@@ -368,7 +463,16 @@ export class Production {
       case 'preview': {const scene=this.scene(d.input).name; await this.req('SetCurrentPreviewScene',{sceneName:scene}); await this.wait('GetSceneList',{},s=>s.currentPreviewSceneName===scene); break;}
       case 'active': {const scene=this.scene(d.input).name; await this.req('SetCurrentProgramScene',{sceneName:scene}); await this.wait('GetSceneList',{},s=>s.currentProgramSceneName===scene); break;}
       case 'cut': case 'fade': case 'transition': {
-        if(d.input){const name=this.scene(d.input).name;await this.req('SetCurrentPreviewScene',{sceneName:name});await this.wait('GetSceneList',{},s=>s.currentPreviewSceneName===name);}
+        const direct=!!d.input;
+        const before=await this.req('GetSceneList');
+        const previousPreview=before.currentPreviewSceneName;
+        const directName=direct?this.scene(d.input).name:'';
+        // Clicar no PGM da própria entrada que já está no ar não deve mexer em nada.
+        if(direct&&directName===before.currentProgramSceneName)break;
+        // CUT/fade/transição direto: usa o Preview como ponte e devolve o Preview anterior no fim.
+        // OBS em Studio Mode troca o Preview mesmo em SetCurrentProgramScene; por isso a ponte.
+        const restorePreview=direct&&directName!==previousPreview?previousPreview:'';
+        if(direct){await this.req('SetCurrentPreviewScene',{sceneName:directName});await this.wait('GetSceneList',{},s=>s.currentPreviewSceneName===directName);}
         const t=action==='transition'?await this.req('GetCurrentSceneTransition'):this.state.transitions.find(t=>t.transitionKind===(action==='cut'?'cut_transition':'fade_transition')); if(!t) throw new Error('Transição indisponível');
         // OBS refuses selection while the preceding AUDIO transition is still active,
         // even when its visual cursor already reads 1. Retry selection until confirmed.
@@ -378,7 +482,9 @@ export class Production {
         const target=(await this.req('GetSceneList')).currentPreviewSceneName;
         await this.req('TriggerStudioModeTransition'); await this.wait('GetSceneList',{},s=>s.currentProgramSceneName===target);
         // Program is selected at transition START, not at its final video frame.
-        await delay(action==='fade'?Number(d.duration??500)+50:action==='transition'&&t.transitionKind!=='cut_transition'?Math.max(50,Math.min(20000,Number(t.transitionDuration)||0)+50):50);await this.wait('GetCurrentSceneTransitionCursor',{},s=>s.transitionCursor===1);break;
+        await delay(action==='fade'?Number(d.duration??500)+50:action==='transition'&&t.transitionKind!=='cut_transition'?Math.max(50,Math.min(20000,Number(t.transitionDuration)||0)+50):50);await this.wait('GetCurrentSceneTransitionCursor',{},s=>s.transitionCursor===1);
+        if(restorePreview){await this.req('SetCurrentPreviewScene',{sceneName:restorePreview}).catch(()=>{});await this.wait('GetSceneList',{},s=>s.currentPreviewSceneName===restorePreview).catch(()=>{});}
+        break;
       }
       case 'tbar': {const position=number(d.position,0,1,'Posição');await this.req('SetTBarPosition',{position,release:d.release===true});if(position>0&&position<1&&!d.release)await this.wait('GetCurrentSceneTransitionCursor',{},s=>Math.abs(s.transitionCursor-position)<.06);break;}
       case 'audio_mute': case 'audio_volume': case 'audio_bus': case 'audio_monitor': case 'audio_balance': {

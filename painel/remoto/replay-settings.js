@@ -575,7 +575,7 @@
       }
     } catch (e) {
       if (isManual) {
-        showMessage('Sem conexão com o FreeMix: falha na leitura do motor.', true);
+        showMessage('Sem conexão com o 3Mix: falha na leitura do motor.', true);
       }
     }
   }

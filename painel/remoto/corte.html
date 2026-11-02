@@ -1,347 +1,108 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>3Mix · Mesa de Corte Tátil</title>
-  <link rel="stylesheet" href="controle.css">
-  <style>
-    :root {
-      --pv-border: #00e676;
-      --pgm-border: #ff3b30;
-    }
-    body {
-      touch-action: manipulation;
-    }
-    .switcher-container {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>3Mix · Mesa de corte</title>
+<script src="3mix-padrao.js"></script>
+<link rel="stylesheet" href="controle.css?v=20261102a">
+<link rel="stylesheet" href="3mix-grafite.css">
+<link rel="stylesheet" href="3mix-padrao.css">
+<style>
+  /* controle.css continua aqui só pelo diálogo de pareamento e pelos botões de entrada. */
+  body.p3 { background-image: none; touch-action: manipulation; }
+  .p3 main.p3-main { width: 100%; max-width: 1560px; margin: 0 auto; gap: 12px; }
+  .p3 header.p3-head { padding: 0 16px; }
+  #message:empty { display: none; }
+  #message { padding: 8px 12px; background: var(--p3-panel); border: 1px solid var(--p3-line); border-radius: 4px; font-size: 13px; }
 
-    /* Monitores Duplos Preview e Program */
-    .monitors-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-    .monitor-card {
-      background: #14181c;
-      border: 2px solid #2e3742;
-      border-radius: 4px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.6);
-      transition: border-color 0.15s;
-    }
-    .monitor-card.pv {
-      border-color: var(--pv-border);
-      box-shadow: 0 0 16px rgba(0, 230, 118, 0.35);
-    }
-    .monitor-card.pgm {
-      border-color: var(--pgm-border);
-      box-shadow: 0 0 18px rgba(255, 59, 48, 0.4);
-    }
-    .monitor-header {
-      padding: 6px 12px;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #1b2026;
-      border-bottom: 1px solid #28323d;
-    }
-    .monitor-card.pv .monitor-header {
-      background: #004d00;
-      color: #a7f3d0;
-      border-bottom: 1px solid #00e676;
-    }
-    .monitor-card.pgm .monitor-header {
-      background: #881111;
-      color: #fecdd3;
-      border-bottom: 1px solid #ff3b30;
-    }
-    .monitor-viewport {
-      height: 180px;
-      background: repeating-conic-gradient(#1a2028 0% 25%, #12161b 0% 50%) 50%/20px 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
-    .monitor-source-title {
-      font-size: 22px;
-      font-weight: 800;
-      color: #ffffff;
-      letter-spacing: -0.3px;
-    }
+  .monitores { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .p3 section.mon { padding: 0; margin: 0; }
+  .mon { display: flex; flex-direction: column; border: 2px solid #3a3a3a; border-radius: 4px; overflow: hidden; background: #000; }
+  .mon.pv { border-color: #1f9d55; }
+  .mon.pgm { border-color: #d8392b; }
+  .mon-head { display: flex; align-items: center; gap: 10px; height: 30px; padding: 0 10px; background: #1d1d1d; font-size: 12px; font-weight: 800; letter-spacing: .4px; }
+  .mon.pv .mon-tag { color: #4ade80; }
+  .mon.pgm .mon-tag { color: #ff6a5e; }
+  .mon-nome { color: #fff; font-size: 13px; letter-spacing: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mon-tela { position: relative; aspect-ratio: var(--formato, 16 / 9); background: #000; }
+  .mon-tela img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
+  .mon-tela img[hidden] { display: none; }
+  .mon-vazio { position: absolute; inset: 0; display: grid; place-items: center; color: #777; font-size: 13px; }
+  .mon-tela.com-imagem .mon-vazio { display: none; }
 
-    /* Console de Transições e T-Bar */
-    .transitions-panel {
-      background: #1b2026;
-      border: 1px solid #2e3742;
-      border-radius: 4px;
-      padding: 16px 20px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) 1.5fr;
-      gap: 16px;
-      align-items: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    }
-    .cut-btn {
-      height: 54px;
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: 1px;
-      background: linear-gradient(180deg, #b3140c 0%, #881111 100%);
-      border: 1px solid #ff3b30;
-      border-radius: 4px;
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(255, 59, 48, 0.4);
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .cut-btn:hover {
-      background: linear-gradient(180deg, #d02018 0%, #9f1239 100%);
-      box-shadow: 0 0 16px rgba(255, 59, 48, 0.6);
-    }
-    .cut-btn:active {
-      transform: translateY(1px);
-    }
-    .fade-btn {
-      height: 54px;
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: 1px;
-      background: linear-gradient(180deg, #323b45 0%, #242b32 100%);
-      border: 1px solid #4d5b6a;
-      border-radius: 4px;
-      color: #ffffff;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .fade-btn:hover {
-      background: linear-gradient(180deg, #3e4a57 0%, #2b343d 100%);
-      border-color: #00e676;
-      box-shadow: 0 0 12px rgba(0, 230, 118, 0.3);
-    }
-    .fade-btn:active {
-      transform: translateY(1px);
-    }
+  .controles { display: grid; grid-template-columns: 150px 150px 100px minmax(200px, 1fr) auto auto; align-items: end; gap: 10px; padding: 12px; background: var(--p3-panel); border: 1px solid var(--p3-line); border-radius: 4px; }
+  .p3 .controles button, .p3 .controles .acao { height: 52px; border-radius: 4px; font-size: 15px; font-weight: 800; letter-spacing: .5px; }
+  .p3 .controles .cut-btn { background: #b02a1f; border: 1px solid #d8392b; color: #fff; }
+  .p3 .controles .cut-btn:hover { background: #c5352a; }
+  .p3 .controles .fade-btn { background: #333; border: 1px solid #555; color: #fff; }
+  .p3 .controles .fade-btn:hover { background: #3d3d3d; }
+  .p3 .controles .secundario { padding: 0 16px; font-size: 13px; font-weight: 700; letter-spacing: 0; background: #2a2a2a; border: 1px solid var(--p3-line); color: #ddd; }
+  .p3 .controles .secundario.armado { background: #b02a1f; border-color: #d8392b; color: #fff; }
+  .p3 .controles a.secundario { display: inline-flex; align-items: center; text-decoration: none; }
+  .controles label { display: flex; flex-direction: column; gap: 6px; color: #ddd; font-size: 12.5px; font-weight: 600; min-width: 0; }
+  .p3 .controles input[type=number] { height: 52px; width: 100%; font-size: 15px; }
+  .tbar-topo { display: flex; justify-content: space-between; width: 100%; }
+  .controles label.tbar { align-items: stretch; }
+  .p3 .controles input[type=range] { width: 100%; height: 52px; margin: 0; cursor: pointer; accent-color: var(--p3-accent); }
 
-    .tbar-box {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .tbar-track {
-      width: 100%;
-      height: 14px;
-      border-radius: 3px;
-      background: #101418;
-      border: 1px solid #2e3742;
-      overflow: hidden;
-    }
+  .entradas { display: flex; flex-direction: column; gap: 8px; }
+  .entradas h2 { font-size: 11.5px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: #8d8d8d; border: 0; padding: 0; margin: 0; }
+  #inputs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .p3 #inputs button { position: relative; aspect-ratio: 16 / 9; min-height: 0; height: auto; padding: 0; overflow: hidden; display: flex; align-items: flex-end; background: #161616 center / cover no-repeat; background-image: var(--thumb, none) !important; border: 2px solid #3a3a3a; border-radius: 4px; color: #fff; font-size: 12.5px; font-weight: 700; text-align: left; box-shadow: none; }
+  .p3 #inputs button span { display: block; width: 100%; padding: 3px 7px; background: rgba(0, 0, 0, .72); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .p3 #inputs button:hover { border-color: #777; }
+  .p3 #inputs button.preview { border-color: #1f9d55; background-color: #161616; }
+  .p3 #inputs button.preview span { background: #17693b; }
+  .p3 #inputs button.program { border-color: #d8392b; background-color: #161616; }
+  .p3 #inputs button.program span { background: #b02a1f; }
 
-    /* Barramento de Entradas (Bandeja Broadcast) */
-    .inputs-card {
-      background: #1b2026;
-      border: 1px solid #2e3742;
-      border-radius: 4px;
-      padding: 16px 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    }
-    .inputs-tray {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-      gap: 10px;
-    }
-    .input-btn {
-      min-height: 58px;
-      padding: 8px;
-      font-size: 12px;
-      font-weight: 700;
-      text-align: center;
-      background: linear-gradient(180deg, #2b333c 0%, #1f262e 100%);
-      border: 1px solid #3d4956;
-      border-radius: 4px;
-      color: #e2e8f0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .input-btn:hover {
-      background: linear-gradient(180deg, #37424d 0%, #262e37 100%);
-      border-color: #556577;
-      color: #fff;
-    }
-    .input-btn.preview {
-      background: linear-gradient(180deg, #006400 0%, #004d00 100%) !important;
-      border-color: #00e676 !important;
-      color: #fff !important;
-      box-shadow: 0 0 12px rgba(0, 230, 118, 0.5);
-    }
-    .input-btn.program {
-      background: linear-gradient(180deg, #b3140c 0%, #881111 100%) !important;
-      border-color: #ff3b30 !important;
-      color: #fff !important;
-      box-shadow: 0 0 14px rgba(255, 59, 48, 0.5);
-    }
-
-    /* Responsividade Vertical (9:16 / Mobile Portrait) */
-    @media (orientation: portrait), (max-aspect-ratio: 1/1), (max-width: 768px) {
-      .monitors-grid {
-        grid-template-columns: 1fr;
-        gap: 10px;
-      }
-      .monitor-viewport {
-        height: 140px;
-      }
-      .monitor-source-title {
-        font-size: 18px;
-      }
-      .transitions-panel {
-        grid-template-columns: 1fr 1fr;
-      }
-      .tbar-box {
-        grid-column: 1 / -1;
-      }
-      .inputs-tray {
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-        gap: 6px;
-      }
-      .input-btn {
-        min-height: 48px;
-        font-size: 11px;
-      }
-    }
-  </style>
+  @media (max-width: 900px), (orientation: portrait) {
+    .monitores { grid-template-columns: 1fr; }
+    .controles { grid-template-columns: 1fr 1fr; }
+    .controles .tbar { grid-column: 1 / -1; }
+    #inputs { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+  }
+</style>
 </head>
-<body data-page="corte">
-  <header>
-    <a href="/">3Mix</a>
-    <h1>Mesa de Corte Tátil</h1>
-    <span id="connection">Conectando…</span>
-  </header>
+<body data-page="corte" class="p3">
+<header class="p3-head">
+  <a href="/" title="3Mix" class="brand-logo"><img class="p3-logo" src="/img/3mix-logo.png" alt="3Mix"></a>
+  <h1>Mesa de corte</h1>
+  <span class="p3-flex"></span>
+  <span id="connection" class="p3-badge">Conectando…</span>
+</header>
 
-  <main>
-    <div id="message" role="status" aria-live="polite"></div>
+<main class="p3-main">
+  <div id="message" role="status" aria-live="polite"></div>
 
-    <div class="switcher-container">
-      <!-- Monitores Preview e Program -->
-      <div class="monitors-grid">
-        <!-- Preview -->
-        <div class="monitor-card pv">
-          <div class="monitor-header">
-            <span>PREVIEW</span>
-            <span>PRÓXIMO</span>
-          </div>
-          <div class="monitor-viewport">
-            <span class="monitor-source-title" id="preview">—</span>
-          </div>
-        </div>
+  <div class="monitores">
+    <section class="mon pv">
+      <div class="mon-head"><span class="mon-tag">PREVIEW</span><span class="mon-nome" id="preview">—</span></div>
+      <div class="mon-tela" data-monitor="preview"><img alt="Imagem do Preview" hidden><span class="mon-vazio">Sem imagem</span></div>
+    </section>
+    <section class="mon pgm">
+      <div class="mon-head"><span class="mon-tag">PROGRAMA</span><span class="mon-nome" id="program">—</span></div>
+      <div class="mon-tela" data-monitor="program"><img alt="Imagem do Programa" hidden><span class="mon-vazio">Sem imagem</span></div>
+    </section>
+  </div>
 
-        <!-- Program -->
-        <div class="monitor-card pgm">
-          <div class="monitor-header">
-            <span>PROGRAM</span>
-            <span style="color:#fecdd3;">● NO AR</span>
-          </div>
-          <div class="monitor-viewport">
-            <span class="monitor-source-title" id="program">—</span>
-          </div>
-        </div>
-      </div>
+  <section class="controles">
+    <button class="cut-btn" data-action="cut">CUT</button>
+    <button class="fade-btn" data-action="fade">AUTO</button>
+    <label>Duração (ms)<input id="duration" type="number" min="50" max="20000" value="500"></label>
+    <label class="tbar"><span class="tbar-topo"><span>T-Bar</span><span id="tbar-val">0%</span></span><input id="tbar" type="range" min="0" max="100" value="0"></label>
+    <button id="btn-dump" type="button" class="secundario" title="Descarta o trecho do delay no ar. Clique duas vezes para confirmar.">DUMP</button>
+    <a class="acao secundario" href="/preflight" target="_blank" rel="noopener">Pre-Flight</a>
+  </section>
 
-      <!-- Barra de Transição e T-Bar -->
-      <section class="transitions-panel">
-        <button class="cut-btn" data-action="cut">CUT</button>
-        <button class="fade-btn" data-action="fade">AUTO / FADE</button>
-        <button id="btn-dump" style="height:54px;background:linear-gradient(180deg,#991b1b,#7f1d1d);border:2px solid #ef4444;color:#fff;font-weight:900;letter-spacing:1px;border-radius:4px;cursor:pointer;padding:0 12px;" title="DUMP: Censura imediata ao vivo — descarta trecho ofensivo até o keyframe recente">💥 DUMP</button>
-        <button id="btn-preflight" style="height:54px;background:linear-gradient(180deg,#065f46,#064e3b);border:2px solid #10b981;color:#fff;font-weight:800;border-radius:4px;cursor:pointer;padding:0 10px;" title="Pre-Flight Check: Auditoria técnica antes do GO LIVE">🛡️ PRE-FLIGHT</button>
+  <section class="entradas">
+    <h2>Entradas</h2>
+    <div id="inputs"></div>
+  </section>
+</main>
 
-        <label style="display:flex;flex-direction:column;gap:4px;min-width:120px;">
-          <span>Duração (ms)</span>
-          <input id="duration" type="number" min="50" max="20000" value="500" style="height:38px;">
-        </label>
-
-        <div class="tbar-box">
-          <div style="display:flex;justify-content:space-between;font-size:12px;color:#8c9ba8;font-weight:600;">
-            <span>T-Bar Fader</span>
-            <span id="tbar-val">0%</span>
-          </div>
-          <input id="tbar" type="range" min="0" max="100" value="0" style="height:12px;cursor:pointer;">
-        </div>
-      </section>
-
-      <!-- Bandeja de Entradas (Inputs) -->
-      <section class="inputs-card">
-        <h2>Entradas de Produção (Toque para Preview / Corte)</h2>
-        <div id="inputs" class="inputs-tray"></div>
-      </section>
-    </div>
-  </main>
-
-  <script src="controle.js"></script>
-  <script>
-    const tbar = document.getElementById('tbar');
-    const tbarVal = document.getElementById('tbar-val');
-    if (tbar && tbarVal) {
-      tbar.addEventListener('input', e => {
-        tbarVal.textContent = e.target.value + '%';
-      });
-    }
-
-    const btnDump = document.getElementById('btn-dump');
-    if (btnDump) {
-      btnDump.addEventListener('click', async () => {
-        if (!confirm('Deseja acionar o DUMP de censura ao vivo agora? O trecho do buffer será descartado imediatamente!')) return;
-        try {
-          const res = await fetch('/api/control', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'dump', note: 'DUMP acionado pela mesa de corte' })
-          });
-          const d = await res.json();
-          alert('💥 DUMP executado com sucesso! Transmissão alinhada no keyframe.');
-        } catch (err) {
-          alert('Erro ao executar DUMP: ' + err.message);
-        }
-      });
-    }
-
-    const btnPreflight = document.getElementById('btn-preflight');
-    if (btnPreflight) {
-      btnPreflight.addEventListener('click', async () => {
-        try {
-          const res = await fetch('/api/control', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'preflight_check' })
-          });
-          const d = await res.json();
-          const p = d.state?.preflight;
-          if (p) {
-            alert(`🛡️ Pre-Flight Check: ${p.verdict}\n${p.summary}\nDisco: ${p.disk?.freeGb ?? 0} GB livres (~${p.disk?.estRecordingHours ?? 0}h de gravação)`);
-          } else {
-            alert('Pre-Flight executado com sucesso.');
-          }
-        } catch (err) {
-          alert('Erro ao rodar Pre-Flight: ' + err.message);
-        }
-      });
-    }
-  </script>
+<script src="controle.js?v=20261102a"></script>
+<script src="corte.js?v=20261102a"></script>
 </body>
 </html>

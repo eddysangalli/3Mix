@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3Mix · Montagem do Multiview</title>
+<script src="3mix-padrao.js"></script>
+<link rel="stylesheet" href="3mix-grafite.css">
+<link rel="stylesheet" href="3mix-padrao.css">
+<style>
+  html, body.p3 { height: 100%; overflow: hidden; user-select: none; }
+  .mm { flex: 1 1 auto; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 12px; padding: 2px 2px 8px; }
+  html:not(.embed-3mix) .mm { padding: 16px; }
+  .mm-bar { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+  .mm-bar .p3-field { flex: 0 1 200px; }
+  .mm-seg { display: flex; gap: 2px; padding: 2px; background: #242424; border: 1px solid #444; border-radius: 4px; }
+  .p3 .mm-seg button { height: 32px; padding: 0 12px; background: transparent; border: 0; color: #b5b5b5; }
+  .p3 .mm-seg button:hover:not(:disabled) { background: #343434; color: #fff; }
+  .p3 .mm-seg button.selected { background: #454545; color: #fff; box-shadow: inset 0 -2px var(--p3-accent); }
+  #mm-status { font-size: 12.5px; color: var(--p3-dim); min-width: 60px; }
+  #mm-status.err { color: #ffb4a8; }
+
+  .mm-work { min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 12px; }
+  #mm-stage { min-width: 0; min-height: 0; display: flex; align-items: center; justify-content: center; background: var(--p3-sunken); border: 1px solid var(--p3-line-soft); border-radius: 4px; padding: 12px; overflow: hidden; }
+  #mm-canvas { position: relative; flex: none; background: #0d0d0d; outline: 1px solid #555; touch-action: none; overflow: hidden; }
+
+  .t { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; background: #262626; border: 1px solid #4d4d4d; color: #ddd; font-size: 12.5px; font-weight: 700; text-align: center; cursor: move; overflow: hidden; }
+  .t b { display: block; max-width: 96%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .t small { color: var(--p3-dim); font-size: 10.5px; font-weight: 600; }
+  .t.programa { background: #3a2422; border-color: #b02a1f; }
+  .t.preview { background: #1f3024; border-color: #2fa04d; }
+  .t.relogio { background: #1d2230; border-color: #3d5a9c; }
+  .t.vazio { background: transparent; border-style: dashed; color: var(--p3-dim); }
+  .t.sel { outline: 2px solid var(--p3-accent-strong); outline-offset: -1px; z-index: 50; }
+  .h { position: absolute; width: 12px; height: 12px; background: var(--p3-accent-strong); border: 1px solid #fff; display: none; }
+  .t.sel .h { display: block; }
+  .h.nw { left: -1px; top: -1px; cursor: nwse-resize; }
+  .h.ne { right: -1px; top: -1px; cursor: nesw-resize; }
+  .h.sw { left: -1px; bottom: -1px; cursor: nesw-resize; }
+  .h.se { right: -1px; bottom: -1px; cursor: nwse-resize; }
+
+  #mm-panel { min-height: 0; overflow-y: auto; padding: 14px; gap: 12px; }
+  #mm-panel h2 { font-size: 15px; }
+  .pos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; }
+  .fmt { width: 100%; }
+  .p3 .fmt button { flex: 1; padding: 0 6px; }
+  .acoes { display: flex; gap: 6px; flex-wrap: wrap; }
+  .p3 .acoes button { flex: 1; }
+  @media (max-width: 860px) { .mm-work { grid-template-columns: 1fr; grid-template-rows: minmax(240px, 1fr) minmax(0, 1fr); } }
+</style>
+</head>
+<body class="p3" data-page="multiview-montagem">
+<header class="p3-head">
+  <a href="/" title="3Mix"><img class="p3-logo" src="/img/3mix-logo.png" alt="3Mix"></a>
+  <h1>Montagem do Multiview</h1>
+</header>
+
+<div class="mm">
+  <div class="mm-bar">
+    <label class="p3-field">Montagem
+      <select id="mm-lista"></select>
+    </label>
+    <button type="button" id="mm-nova">Nova</button>
+    <div class="p3-field" style="flex:none">Monitor
+      <div class="mm-seg" role="group">
+        <button type="button" data-monitor="horizontal">Horizontal</button>
+        <button type="button" data-monitor="vertical">Vertical</button>
+      </div>
+    </div>
+    <label class="p3-field" style="flex-basis:270px">Começar de um modelo
+      <select id="mm-modelo"></select>
+    </label>
+    <button type="button" id="mm-add-monitor">+ Monitor</button>
+    <button type="button" id="mm-add-relogio">+ Relógio</button>
+    <span class="p3-flex"></span>
+    <span id="mm-status" role="status"></span>
+    <button type="button" id="mm-desfazer" disabled>Desfazer</button>
+  </div>
+
+  <div class="mm-work">
+    <div id="mm-stage"><div id="mm-canvas"></div></div>
+    <aside class="p3-card" id="mm-panel" aria-label="Propriedades"></aside>
+  </div>
+</div>
+
+<script src="multiview-modelos.js?v=20261102a"></script>
+<script src="multiview-montagem.js?v=20261102a"></script>
+</body>
+</html>

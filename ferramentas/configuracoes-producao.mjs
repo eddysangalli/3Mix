@@ -30,7 +30,7 @@ export class SettingsEngine {
   const server=service.streamServiceSettings.server||'',protocol=streamProtocol(service,server);
   return {nativePreferences,capabilities:{simpleEncoders:simpleEncoderChoices(native),protocols:normalizeProtocols(native),recordingFormats,error:native.error||null},protocol,serviceType:service.streamServiceType,serviceName:service.streamServiceSettings.service||'',video,recordDirectory:dir.recordDirectory,server,hasKey:!!service.streamServiceSettings.key,mode:mode||'Simple',values,stats,virtualCamera:virtual.outputActive};
  }
- async execute(action,d){const p=this.p;
+ async execute(action,d={}){const p=this.p;
    if(['settings_encoder_read','settings_encoder_preview','settings_encoder_apply'].includes(action)){if(!['stream','record'].includes(d.target))throw Error('Destino do encoder inválido');if(action!=='settings_encoder_read'&&(typeof d.encoder!=='string'||typeof d.revision!=='string'||!/^([a-f0-9]{64})$/.test(d.revision)||!d.values||typeof d.values!=='object'||Array.isArray(d.values)||JSON.stringify(d.values).length>32768))throw Error('Parâmetros de encoder inválidos');this.last=await p.vendor('control',{action:action.replace('settings_',''),target:d.target,encoder:d.encoder,revision:d.revision,values:d.values},'freemix-preferences');return;}
    if(action==='settings_plugin_tools'){this.last=await p.vendor('control',{action:'plugin_tools'},'freemix-preferences');return;}
    if(action==='settings_plugin_open'){if(!Number.isInteger(d.id)||d.id<0||d.id>1000||typeof d.label!=='string'||!d.label||d.label.length>300)throw Error('Ferramenta de plugin inválida');this.last=await p.vendor('control',{action:'plugin_tool_open',id:d.id,label:d.label},'freemix-preferences');return;}
@@ -45,6 +45,17 @@ export class SettingsEngine {
   if(action==='settings_projector'){if(!['PROGRAM','PREVIEW','MULTIVIEW'].includes(d.mix))throw Error('Saída inválida');await p.req('OpenVideoMixProjector',{videoMixType:'OBS_WEBSOCKET_VIDEO_MIX_TYPE_'+d.mix,monitorIndex:-1});return;}
   if(action==='settings_source_projector'){await p.req('OpenSourceProjector',{sourceName:p.scene(d.input).name,monitorIndex:-1});return;}
   if(action==='settings_virtual'){await p.req((d.active?'Start':'Stop')+'VirtualCam');return;}
+  if(action==='settings_stream_key'){
+    const key=String(d.key||'');
+    if(!key||key.length>2000||/[\x00-\x1f]/.test(key))throw Error('Chave de transmissão inválida');
+    const service=await p.req('GetStreamServiceSettings');
+    const streamServiceSettings={...service.streamServiceSettings,key};
+    await p.req('SetStreamServiceSettings',{streamServiceType:service.streamServiceType,streamServiceSettings});
+    const actual=await p.req('GetStreamServiceSettings');
+    if((actual.streamServiceSettings.key||'')!==key)throw Error('Motor não confirmou a chave');
+    this.last={...(await this.read()),keyOnly:true,requiresRestart:false};
+    return;
+  }
   if(action!=='settings_apply')throw Error('Configuração inválida');
   if(p.macroEngine.controller||p.callEngine.lease||p.state.recording||p.state.streaming||(await p.req('GetVirtualCamStatus')).outputActive||(await p.req('GetOutputList')).outputs.some(o=>o.outputActive))throw Error('Pare gravação, transmissões, saídas de rede e câmera virtual antes de aplicar configurações');
   const before=await this.read(),undo=[];

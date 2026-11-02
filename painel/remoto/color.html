@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3Mix · Color Studio</title>
+<link rel="stylesheet" href="3mix-grafite.css">
+<link rel="stylesheet" href="color.css?v=20261101c">
+<style>
+  .quality-color { display: flex; flex-direction: column; gap: 10px; padding: 12px; }
+  .quality-color .q-row { display: flex; flex-direction: column; gap: 5px; font-size: 13px; font-weight: 600; color: #ddd; }
+  .quality-color label.q-row:has(#quality-input) { display: none; }
+  .quality-color .q-inline { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .quality-color .q-check { display: flex; align-items: center; gap: 7px; font-weight: 500; }
+  .quality-color .fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+  .quality-color .fields label { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; }
+  .quality-color button.q-on { background: #2f6fed; border-color: #2f6fed; color: #fff; }
+  .quality-color .q-msg { margin: 0; color: #aaa; font-size: 12.5px; }
+</style>
+</head>
+<body>
+
+<header class="color-top">
+  <div id="color-nav" class="color-nav"></div>
+  <div class="color-top-status">
+    <span id="color-engine" class="color-led" title="Estado da conexão com o motor">Conectando…</span>
+    <span id="color-project" class="color-project" title="Projeto em uso">—</span>
+    <button type="button" id="color-surface-toggle" class="color-btn" title="Abrir a superfície de cor: trackballs, anéis e knobs" aria-pressed="false">Superfície</button>
+    <a class="color-btn" href="/docs/usuario/manual-operador.html#05-cor" target="_blank" rel="noopener" title="Manual do usuário do 3Mix">Manual</a>
+    <button type="button" id="color-refresh" class="color-btn" title="Reler entradas, filtros e câmeras">Atualizar</button>
+    <button type="button" id="color-open-ptz-top" class="color-btn" title="Abrir o console PTZ completo">PTZ</button>
+  </div>
+</header>
+
+<div class="color-steps" aria-label="Fluxo de trabalho do Color Studio">
+  <span class="color-step" data-step="input"><b>1</b> Entrada</span>
+  <span class="color-step" data-step="analysis"><b>2</b> Análise</span>
+  <span class="color-step" data-step="correction"><b>3</b> Correção</span>
+  <span class="color-step" data-step="compare"><b>4</b> Comparação</span>
+  <span class="color-step" data-step="remote"><b>5</b> Shading</span>
+</div>
+
+<div class="color-toolbar">
+  <label class="color-field color-field-input">Entrada
+    <select id="color-input" title="Entrada de vídeo analisada neste monitor"></select>
+  </label>
+  <span id="color-input-badge" class="color-chip">—</span>
+  <label class="color-field color-field-scope">Escopo
+    <select id="color-scope-select" class="color-scope-select" title="Trocar instrumento de análise" aria-label="Instrumento de análise"></select>
+  </label>
+  <div class="color-scope-tabs" id="color-scope-tabs" role="tablist" aria-label="Instrumento de análise" hidden>
+    <button type="button" data-scope="wave" class="active" role="tab" aria-selected="true">Onda Y</button>
+    <button type="button" data-scope="rgb" role="tab" aria-selected="false">Onda RGB</button>
+    <button type="button" data-scope="parade" role="tab" aria-selected="false">Parade RGB</button>
+    <button type="button" data-scope="yuv" role="tab" aria-selected="false">YUV Parade</button>
+    <button type="button" data-scope="vector" role="tab" aria-selected="false">Vectorscópio</button>
+    <button type="button" data-scope="hist" role="tab" aria-selected="false">Histograma</button>
+    <button type="button" data-scope="false" role="tab" aria-selected="false">False Color</button>
+    <button type="button" data-scope="cie" role="tab" aria-selected="false">CIE 1931</button>
+    <button type="button" data-scope="rgba" role="tab" aria-selected="false">RGBA</button>
+  </div>
+  <span id="color-msg" class="color-msg" role="status" aria-live="polite"></span>
+</div>
+
+<main class="color-layout">
+  <aside class="color-sources color-card">
+    <div class="color-card-head">
+      <h2>Entradas de vídeo</h2>
+      <span id="color-source-count" class="color-count">0</span>
+    </div>
+    <div id="color-source-list" class="color-source-list"></div>
+    <p class="color-note">A lista vem do motor. Só entradas com vídeo aparecem aqui; entradas de áudio não são analisadas.</p>
+  </aside>
+
+  <section class="color-center">
+    <div class="color-monitor color-card">
+      <div class="color-card-head">
+        <h2 id="color-monitor-title">Monitor</h2>
+        <div class="color-monitor-tools">
+          <span id="color-preview-badge" class="color-chip warn" hidden title="Prévia local no monitor; o motor só recebe ao aplicar">prévia local</span>
+          <span id="color-frame-state" class="color-chip">sem quadro</span>
+          <button type="button" id="color-zebra-toggle" class="color-btn color-btn-small" aria-pressed="false" title="Zebra: marca áreas com luma acima de 95% (Z)">Zebra</button>
+          <button type="button" id="color-peaking-toggle" class="color-btn color-btn-small" aria-pressed="false" title="Foco: realça as bordas do quadro (F)">Foco</button>
+          <button type="button" id="color-freeze" class="color-btn color-btn-small" title="Congelar a atualização do quadro para analisar um instante" disabled>Congelar</button>
+        </div>
+      </div>
+      <div class="color-monitor-options" id="color-monitor-options">
+        <button type="button" id="color-ref-capture" class="color-btn color-btn-small" title="Congela o quadro atual como referência" disabled>Congelar ref.</button>
+        <button type="button" id="color-ref-clear" class="color-btn color-btn-small" title="Remove a referência congelada" disabled>Limpar ref.</button>
+        <label class="color-monitor-opt"><input type="checkbox" id="color-split-toggle" disabled> Split</label>
+        <input type="range" id="color-split-range" class="color-split-range" min="0" max="100" step="1" value="50" hidden title="Posição do split">
+        <output id="color-split-val" class="color-split-val" hidden>50%</output>
+        <label class="color-monitor-opt"><input type="checkbox" id="color-mask-toggle"> Máscara</label>
+        <select id="color-mask-mode" class="color-mask-mode" title="Área segura da máscara">
+          <option value="90">90%</option>
+          <option value="80">80%</option>
+          <option value="4x3">4:3</option>
+        </select>
+        <label class="color-monitor-opt"><input type="checkbox" id="color-grid-toggle" checked> Grade</label>
+        <label class="color-monitor-opt"><input type="checkbox" id="color-preview-toggle" checked> Prévia</label>
+      </div>
+      <div class="color-frame-stage">
+        <div class="color-frame-wrap" id="color-frame-wrap">
+          <img id="color-frame" alt="Quadro da entrada selecionada">
+          <canvas id="color-preview-canvas" class="color-preview-canvas" aria-hidden="true" hidden></canvas>
+          <canvas id="color-monitor-overlay" class="color-monitor-overlay" aria-hidden="true" hidden></canvas>
+          <img id="color-reference-frame" class="color-reference-frame" alt="Quadro de referência congelado" hidden>
+          <div class="color-frame-hud color-frame-hud-tl">
+            <span id="color-hud-input" class="color-hud-input">—</span>
+            <span id="color-hud-state" class="color-hud-state">SEM QUADRO</span>
+          </div>
+          <div class="color-frame-hud color-frame-hud-tr" id="color-hud-time">--:--:--</div>
+          <div id="color-pick-cross" class="color-pick-cross" hidden></div>
+          <div id="color-pick" class="color-pick" hidden>
+            <span id="color-pick-swatch" class="color-pick-swatch"></span>
+            <b id="color-pick-rgb">RGB —</b>
+            <span id="color-pick-hex">#——</span>
+            <span id="color-pick-y">Y —</span>
+          </div>
+          <div id="color-frame-empty" class="color-frame-empty">
+            <strong>Sem quadro</strong>
+            <span>Selecione uma entrada de vídeo ou atualize.</span>
+          </div>
+          <div class="color-frame-grid" aria-hidden="true"></div>
+          <div class="color-frame-safe" aria-hidden="true"></div>
+          <div id="color-frame-mask" class="color-frame-mask" data-mode="90" aria-hidden="true"></div>
+          <div id="color-split-line" class="color-split-line" role="slider" tabindex="0" aria-label="Posição da linha de comparação" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" hidden>
+            <span class="color-split-handle" aria-hidden="true"></span>
+            <span class="color-split-badge" id="color-split-badge">50%</span>
+          </div>
+        </div>
+      </div>
+      <div class="color-monitor-foot">
+        <span id="color-frame-info">—</span>
+        <span id="color-frame-time">—</span>
+      </div>
+    </div>
+
+    <div class="color-scope-card color-card">
+      <div class="color-card-head color-scope-head">
+        <h2 id="color-scope-title">Onda Y</h2>
+        <span class="color-note" id="color-scope-note">Escala relativa 0-100% do quadro recebido</span>
+      </div>
+      <div class="color-scope-options" id="color-scope-options">
+        <label class="color-scope-opt" id="color-vector-gain-wrap" hidden>Ganho
+          <input type="range" id="color-vector-gain" min="0.5" max="5" step="0.1" value="1">
+          <output id="color-vector-gain-val">1.0×</output>
+        </label>
+        <label class="color-scope-opt">Escala
+          <select id="color-scope-scale">
+            <option value="pct">%</option>
+            <option value="8bit">8-bit</option>
+          </select>
+        </label>
+        <label class="color-scope-opt"><input type="checkbox" id="color-scope-labels" checked> Rótulos</label>
+        <span id="color-scope-clip" class="color-scope-clip" title="Percentual de amostras no branco (255) e no preto (0)">CLIP —</span>
+      </div>
+      <canvas id="color-scope" class="color-scope-canvas" aria-label="Instrumento de análise de sinal"></canvas>
+      <div id="color-scope-legend" class="color-scope-legend"></div>
+    </div>
+  </section>
+
+  <aside class="color-control color-card">
+    <div class="color-control-tabs" role="tablist" aria-label="Controle de cor">
+      <button type="button" data-pane="local" class="active" role="tab" aria-selected="true">Correção local</button>
+      <button type="button" data-pane="remote" role="tab" aria-selected="false">Shading remoto</button>
+      <button type="button" data-pane="quality" role="tab" aria-selected="false">Qualidade</button>
+    </div>
+
+<section id="color-pane-quality" class="color-pane" hidden><div class="color-pane-scroll quality-color">
+
+    <label class="q-row"><span>Entrada</span>
+      <select id="quality-input"></select>
+    </label>
+
+    <label class="q-row"><span>Ajuste</span>
+      <select id="quality-type">
+        <optgroup label="Imagem">
+          <option value="color">Cor e luz</option>
+          <option value="sharpness">Nitidez</option>
+          <option value="chroma">Fundo verde</option>
+          <option value="nvBackground">Remover fundo · NVIDIA</option>
+          <option value="nvBlur">Desfocar fundo · NVIDIA</option>
+        </optgroup>
+        
+      </select>
+    </label>
+
+    <div class="q-row"><span></span><span id="quality-reason" class="vd-note"></span></div>
+
+    <div id="quality-color-presets" class="q-row" style="grid-template-columns:100px minmax(0,1fr)" hidden>
+      <span>Looks de Cor</span>
+      <div class="q-inline" style="flex-wrap:wrap;gap:4px">
+        <button type="button" class="ai-preset-btn" id="color-preset-rec709" title="Rec.709 Legal Broadcast">Rec.709</button>
+        <button type="button" class="ai-preset-btn" id="color-preset-warm" title="Estúdio Quente / Warm Skin">Quente</button>
+        <button type="button" class="ai-preset-btn" id="color-preset-cinema" title="Cinema / Drama">Cinema</button>
+        <button type="button" class="ai-preset-btn" id="color-preset-cold" title="Jornalismo Frio">Frio</button>
+        <button type="button" class="ai-preset-btn" id="color-preset-reset" title="Restaurar padrão 1:1">↺ Neutro</button>
+      </div>
+    </div>
+
+    <div id="quality-fields" class="fields"></div>
+
+    <div id="quality-preset-review" class="color-note" hidden>
+      <p style="margin: 0 0 6px;">Usa os filtros de áudio existentes: gate abre −32 / fecha −38 dB; compressor 2:1 em −18 dB, ganho 0; limiter −3 dB. Não altera mute, AFV, barramentos ou N−1.</p>
+      <label class="q-check"><input id="quality-confirm-preset" type="checkbox"> Revisei e confirmo aplicação do preset de voz</label>
+    </div>
+
+    <div class="q-row"><span>Estado</span>
+      <div class="q-inline">
+        <label class="q-check"><input id="quality-enabled" type="checkbox"> Filtro ativo</label>
+      </div>
+    </div>
+
+    <div class="q-row"><span></span>
+      <div class="q-inline">
+        <button id="quality-apply" disabled class="q-on">Aplicar e confirmar</button>
+        <button id="quality-remove" disabled>Remover filtro</button>
+        <button id="quality-refresh">Conferir estado</button>
+      </div>
+    </div>
+
+    <p id="quality-status" class="q-msg" role="status">Verificando disponibilidade…</p>
+
+    <!-- PAINEL DE PROCESSAMENTO NEURAL E IA PARA VÍDEO -->
+  </div></section>
+
+    <section id="color-pane-local" class="color-pane">
+      <div class="color-pane-scroll">
+        <div class="color-pane-head">
+          <div>
+            <h2>Cor e luz no 3Mix</h2>
+            <p id="color-local-state" class="color-note">Selecione uma entrada.</p>
+          </div>
+          <span id="color-local-badge" class="color-chip">—</span>
+        </div>
+        <div class="color-local-tabs" role="tablist" aria-label="Controles de correção local">
+          <button type="button" data-local-tab="basic" role="tab" aria-selected="false">Cor e luz</button>
+          <button type="button" data-local-tab="rgb" class="active" role="tab" aria-selected="true">Ajuste RGB</button>
+        </div>
+        <div id="color-local-basic" hidden>
+          <div class="color-presets" id="color-presets" aria-label="Presets de correção local">
+            <button type="button" data-preset="neutral">Neutro</button>
+            <button type="button" data-preset="broadcast">Broadcast</button>
+            <button type="button" data-preset="warm">Quente</button>
+            <button type="button" data-preset="cool">Frio</button>
+            <button type="button" data-preset="contrast">Contraste</button>
+            <button type="button" data-preset="soft">Suave</button>
+          </div>
+          <div class="color-sliders" id="color-local-fields"></div>
+        </div>
+        <div id="color-local-rgb">
+          <div class="color-rgb-head">
+            <span>Ajuste RGB / White balance</span>
+            <button type="button" id="color-rgb-reset" class="color-btn color-btn-small" title="Volta ganho, lift e hue para o neutro">Neutro RGB</button>
+          </div>
+          <div id="color-rgb-fields" class="color-rgb-fields"></div>
+          <p class="color-note"><b>Gain</b> multiplica e age mais nos brancos. <b>Lift</b> soma um offset e age mais nos pretos; o offset é o nível de preto. <b>Gamma</b> por canal age nos médios.</p>
+        </div>
+        <p class="color-note">Aplicar cria ou atualiza o filtro de qualidade de cor nesta entrada. Não coloca nada no ar e não altera áudio.</p>
+        <p id="color-local-reason" class="color-note"></p>
+      </div>
+      <div class="color-actions">
+        <button type="button" id="color-apply" class="color-btn color-btn-primary">Aplicar correção</button>
+        <button type="button" id="color-remove" class="color-btn">Remover</button>
+      </div>
+      <div class="color-inline">
+        <label class="color-check"><input id="color-enabled" type="checkbox"> Filtro ativo</label>
+        <button type="button" id="color-reconcile" class="color-btn color-btn-small" title="Confere uma operação pendente com o motor">Conferir estado</button>
+      </div>
+    </section>
+
+    <section id="color-pane-remote" class="color-pane" hidden>
+      <div class="color-pane-scroll">
+        <div class="color-pane-head">
+          <div>
+            <h2>Shading na câmera</h2>
+            <p id="color-remote-state" class="color-note">Leia a câmera para ver os parâmetros suportados.</p>
+          </div>
+          <span id="color-remote-badge" class="color-chip">—</span>
+        </div>
+        <label class="color-field">Câmera PTZ
+          <select id="color-device" title="Câmera cadastrada no console PTZ"></select>
+        </label>
+        <div id="color-remote-fields" class="color-sliders"></div>
+        <p id="color-remote-note" class="color-note">O vínculo câmera ↔ entrada é feito no console PTZ. A leitura abaixo mostra somente o que a câmera realmente devolveu.</p>
+      </div>
+      <div class="color-actions">
+        <button type="button" id="color-remote-read" class="color-btn color-btn-primary">Ler da câmera</button>
+        <button type="button" id="color-open-ptz" class="color-btn">Abrir PTZ</button>
+      </div>
+    </section>
+  </aside>
+</main>
+
+<section id="color-surface" class="color-surface" hidden aria-label="Superfície de cor">
+  <div class="cs-top">
+    <div class="cs-brand">
+      <span class="cs-brand-led" aria-hidden="true"></span>
+      <strong>3Mix</strong>
+      <span>COLOR SURFACE</span>
+    </div>
+    <div class="cs-displays">
+      <div class="cs-display">
+        <span class="cs-display-kicker" id="cs-display-kicker">RODA ATIVA</span>
+        <strong id="cs-display-title">Lift</strong>
+        <div class="cs-display-values" id="cs-display-values">R 0 · G 0 · B 0</div>
+      </div>
+      <div class="cs-display">
+        <span class="cs-display-kicker">MESTRES</span>
+        <strong id="cs-display-master-title">Luz / Contraste</strong>
+        <div class="cs-display-values" id="cs-display-masters">Luz +0.00 · Contraste +0.00</div>
+      </div>
+    </div>
+    <div class="cs-filter">
+      <label class="cs-check"><input type="checkbox" id="cs-enabled"> Filtro</label>
+      <button type="button" class="cs-key cs-key-small" data-surface="remove" title="Remove os filtros de cor e gamma da entrada">Remover</button>
+      <button type="button" class="cs-key cs-key-small" data-surface="conferir" title="Confere uma operação pendente com o motor">Conferir</button>
+    </div>
+    <div class="cs-top-actions">
+      <button type="button" class="cs-key" data-surface="neutral" title="Volta rods e knobs ao neutro (N)">Neutro</button>
+      <button type="button" class="cs-key cs-key-primary" data-surface="apply" title="Aplica a correção no motor (A)">Aplicar</button>
+      <button type="button" class="cs-key" data-surface="close" title="Fecha a superfície (Esc)">Fechar</button>
+    </div>
+  </div>
+  <div class="cs-body">
+    <div class="cs-wheels" id="cs-wheels"></div>
+    <div class="cs-right">
+      <div class="cs-knobs" id="cs-knobs"></div>
+      <div class="cs-keys">
+        <button type="button" class="cs-key" data-surface="reset" title="Reset da roda selecionada (R)">Reset roda</button>
+        <button type="button" class="cs-key" data-surface="help" title="Mostrar atalhos e comandos (?)">Atalhos</button>
+        <span class="cs-hint">1/2/3 roda · setas R/B · [ ] G · Shift fino · A aplicar</span>
+      </div>
+    </div>
+  </div>
+  <div id="cs-help" class="cs-help" hidden>
+    <div class="cs-help-box" role="dialog" aria-modal="true" aria-labelledby="cs-help-title">
+      <div class="cs-help-head">
+        <strong id="cs-help-title">Superfície de cor — atalhos e comandos</strong>
+        <button type="button" class="cs-key" data-surface="help" title="Fechar ajuda">Fechar</button>
+      </div>
+      <div class="cs-help-grid">
+        <div><b>1 / 2 / 3</b><span>Seleciona Lift, Gamma ou Gain</span></div>
+        <div><b>← →</b><span>Ajusta R da roda selecionada</span></div>
+        <div><b>↑ ↓</b><span>Ajusta B da roda selecionada</span></div>
+        <div><b>[ / ]</b><span>Ajusta G (anel) da roda selecionada</span></div>
+        <div><b>Shift</b><span>Ajuste fino (1/10 do passo)</span></div>
+        <div><b>R</b><span>Reset da roda selecionada</span></div>
+        <div><b>N</b><span>Neutro em rods e knobs</span></div>
+        <div><b>A</b><span>Aplica a correção no motor</span></div>
+        <div><b>Esc</b><span>Fecha a superfície</span></div>
+        <div><b>Z / F</b><span>Liga/desliga Zebra e Foco</span></div>
+        <div><b>Duplo clique</b><span>Reset de um knob</span></div>
+      </div>
+      <p class="cs-help-note">Comandos externos: <code>FreeMixColorSurface.set('gain','r',80)</code>, <code>nudge</code>, <code>reset</code>, <code>neutral</code>, <code>apply</code>, <code>state</code>, ou <code>postMessage({type:'freemix-color-surface', action:'set', group:'gain', channel:'r', value:80})</code>. Cada ajuste emite o evento <code>freemix-color-surface</code>. A prévia é local; o motor só recebe em Aplicar. Manual do operador: <a href="/docs/usuario/manual-operador.html#05-cor" target="_blank" rel="noopener">capítulo de cor</a>.</p>
+    </div>
+  </div>
+</section>
+
+<section class="color-compare color-card" id="color-compare">
+  <div class="color-card-head">
+    <h2>Comparação multicâmera</h2>
+    <div class="color-compare-tools">
+      <span id="color-compare-count" class="color-count">0/4</span>
+      <button type="button" id="color-compare-add" class="color-btn color-btn-small">Adicionar selecionada</button>
+      <button type="button" id="color-copy-ref" class="color-btn color-btn-small" disabled title="Copia a correção local da câmera de referência para as demais">Copiar correção da referência</button>
+      <button type="button" id="color-clear-compare" class="color-btn color-btn-small">Limpar</button>
+    </div>
+  </div>
+  <div id="color-compare-grid" class="color-compare-grid"></div>
+  <div class="color-compare-foot">
+    <span id="color-reference-label">Referência: —</span>
+    <span class="color-note">Clique em uma câmera para analisar. “Ref.” fixa a referência para copiar a correção local.</span>
+  </div>
+</section>
+
+<button type="button" id="color-surface-jump" class="color-surface-jump" hidden>Superfície aberta · ir para os controles</button>
+
+<div id="color-confirm" class="color-confirm" hidden>
+  <div class="color-confirm-box" role="dialog" aria-modal="true" aria-labelledby="color-confirm-title">
+    <strong id="color-confirm-title">Confirmar</strong>
+    <p id="color-confirm-text"></p>
+    <div class="color-actions">
+      <button type="button" id="color-confirm-yes" class="color-btn color-btn-primary">Confirmar</button>
+      <button type="button" id="color-confirm-no" class="color-btn">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script src="workspace-nav.js?v=20261101b"></script>
+<script src="efeitos-gate.js"></script>
+<script src="qualidade.js?v=20261102b" defer></script>
+<script src="fechar-janela.js"></script>
+<script src="color.js?v=20261102b"></script>
+<script src="color-qualidade.js?v=20261102b" defer></script>
+</body>
+</html>

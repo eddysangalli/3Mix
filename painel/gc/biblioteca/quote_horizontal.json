@@ -1,0 +1,226 @@
+{
+  "id": "fm_quote_horizontal",
+  "kind": "quote",
+  "orientation": "horizontal",
+  "name": "Citação / Aspas · Horizontal",
+  "collection": "Jornalismo",
+  "category": "Citação / Aspas",
+  "width": 1920,
+  "height": 1080,
+  "file": "biblioteca/quote_horizontal.html",
+  "thumbnail": "thumbnails/quote_horizontal.png",
+  "fields": [
+    {
+      "key": "author",
+      "label": "Autor",
+      "type": "text",
+      "default": "DR. ROBERTO ALENCAR"
+    },
+    {
+      "key": "role",
+      "label": "Cargo / Instituição",
+      "type": "text",
+      "default": "Diretor Geral de Pesquisas"
+    },
+    {
+      "key": "quote",
+      "label": "Declaração",
+      "type": "text",
+      "default": "\"Os resultados superaram em 40% as melhores expectativas.\""
+    },
+    {
+      "key": "accent",
+      "label": "Cor primária (Destaque)",
+      "type": "color",
+      "default": "#19c9aa"
+    },
+    {
+      "key": "secondary",
+      "label": "Cor secundária (Acento 2)",
+      "type": "color",
+      "default": "#0284c7"
+    },
+    {
+      "key": "background",
+      "label": "Cor do painel (Fundo)",
+      "type": "color",
+      "default": "#102330"
+    },
+    {
+      "key": "foreground",
+      "label": "Cor do texto",
+      "type": "color",
+      "default": "#ffffff"
+    },
+    {
+      "key": "designStyle",
+      "label": "Estilo Visual / Geometria",
+      "type": "select",
+      "default": "modern_internet",
+      "options": [
+        "modern_internet",
+        "classic_tv",
+        "swiss_square",
+        "esports_neon",
+        "corporate_glass"
+      ]
+    },
+    {
+      "key": "opacity",
+      "label": "Opacidade do painel (%)",
+      "type": "number",
+      "default": 96,
+      "min": 0,
+      "max": 100
+    },
+    {
+      "key": "fontSize",
+      "label": "Tamanho do texto (%)",
+      "type": "number",
+      "default": 100,
+      "min": 70,
+      "max": 140
+    },
+    {
+      "key": "offsetX",
+      "label": "Deslocamento horizontal (%)",
+      "type": "number",
+      "default": 0,
+      "min": -25,
+      "max": 25
+    },
+    {
+      "key": "offsetY",
+      "label": "Deslocamento vertical (%)",
+      "type": "number",
+      "default": 0,
+      "min": -25,
+      "max": 25
+    },
+    {
+      "key": "scale",
+      "label": "Escala (%)",
+      "type": "number",
+      "default": 100,
+      "min": 60,
+      "max": 120
+    },
+    {
+      "key": "fontFamily",
+      "label": "Família da fonte",
+      "type": "select",
+      "default": "Segoe UI",
+      "options": [
+        "Segoe UI",
+        "Arial",
+        "Montserrat",
+        "Bebas Neue",
+        "Roboto",
+        "Impact",
+        "Trebuchet MS",
+        "Georgia"
+      ]
+    },
+    {
+      "key": "fontAsset",
+      "label": "Arquivo de fonte importado",
+      "type": "asset",
+      "kind": "font",
+      "default": ""
+    },
+    {
+      "key": "imageAsset",
+      "label": "Imagem / logotipo",
+      "type": "asset",
+      "kind": "image",
+      "default": ""
+    },
+    {
+      "key": "imageX",
+      "label": "Imagem X (%)",
+      "type": "number",
+      "default": 5,
+      "min": 0,
+      "max": 100
+    },
+    {
+      "key": "imageY",
+      "label": "Imagem Y (%)",
+      "type": "number",
+      "default": 5,
+      "min": 0,
+      "max": 100
+    },
+    {
+      "key": "imageWidth",
+      "label": "Imagem largura (%)",
+      "type": "number",
+      "default": 15,
+      "min": 1,
+      "max": 100
+    },
+    {
+      "key": "imageHeight",
+      "label": "Imagem altura (%)",
+      "type": "number",
+      "default": 15,
+      "min": 1,
+      "max": 100
+    },
+    {
+      "key": "imageOpacity",
+      "label": "Imagem opacidade (%)",
+      "type": "number",
+      "default": 100,
+      "min": 0,
+      "max": 100
+    },
+    {
+      "key": "animation",
+      "label": "Efeito de Transição",
+      "type": "select",
+      "default": "slide",
+      "options": [
+        "none",
+        "fade",
+        "slide",
+        "zoom",
+        "rotate",
+        "blur_fade",
+        "wipe"
+      ]
+    },
+    {
+      "key": "animationInMs",
+      "label": "Entrada (ms)",
+      "type": "number",
+      "default": 280,
+      "min": 0,
+      "max": 5000
+    },
+    {
+      "key": "animationOutMs",
+      "label": "Saída (ms)",
+      "type": "number",
+      "default": 280,
+      "min": 0,
+      "max": 5000
+    },
+    {
+      "key": "animationEasing",
+      "label": "Curva da animação",
+      "type": "select",
+      "default": "ease-out",
+      "options": [
+        "linear",
+        "ease-in",
+        "ease-out",
+        "ease-in-out",
+        "cubic-bezier(0.16, 1, 0.3, 1)"
+      ]
+    }
+  ],
+  "htmlFile": "quote_horizontal.html",
+  "version": 1,
+  "layer": 3
+}

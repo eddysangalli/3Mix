@@ -3,7 +3,8 @@
 (() => {
   const MODULES = [
     ['audio', 'Áudio', '/audio'],
-    ['replay', 'Replay', '/replay']
+    ['replay', 'Replay', '/replay'],
+    ['color', 'Color', '/color']
   ];
   const panelUrl = () => {
     try { return sessionStorage.getItem('freemix.panel.url') || location.href; } catch { return location.href; }
@@ -62,7 +63,7 @@
       };
       update(); setInterval(update, 8000);
     }
-    setTitle(active === 'audio' ? 'Áudio' : active === 'replay' ? 'Replay' : '3Mix');
+    setTitle(active === 'audio' ? 'Áudio' : active === 'replay' ? 'Replay' : active === 'color' ? 'Color Studio' : '3Mix');
   }
   window.FreeMixWorkspaceNav = { open, nav, bind, setTitle };
 })();

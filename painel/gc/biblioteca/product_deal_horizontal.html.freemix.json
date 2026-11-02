@@ -1,0 +1,119 @@
+{
+  "freemixCompatibility": {
+    "version": 1,
+    "animation": true,
+    "clock": true,
+    "style": true,
+    "styleFields": [
+      {
+        "key": "accent",
+        "label": "Cor primária (Destaque)",
+        "type": "color",
+        "default": "#19c9aa"
+      },
+      {
+        "key": "background",
+        "label": "Cor do painel (Fundo)",
+        "type": "color",
+        "default": "#102330"
+      },
+      {
+        "key": "foreground",
+        "label": "Cor do texto",
+        "type": "color",
+        "default": "#ffffff"
+      },
+      {
+        "key": "opacity",
+        "label": "Opacidade do painel (%)",
+        "type": "number",
+        "default": 96,
+        "min": 0,
+        "max": 100
+      },
+      {
+        "key": "fontSize",
+        "label": "Tamanho do texto (%)",
+        "type": "number",
+        "default": 100,
+        "min": 70,
+        "max": 140
+      },
+      {
+        "key": "imageOpacity",
+        "label": "Imagem opacidade (%)",
+        "type": "number",
+        "default": 100,
+        "min": 0,
+        "max": 100
+      },
+      {
+        "key": "animationInMs",
+        "label": "Entrada (ms)",
+        "type": "number",
+        "default": 280,
+        "min": 0,
+        "max": 5000
+      },
+      {
+        "key": "animationOutMs",
+        "label": "Saída (ms)",
+        "type": "number",
+        "default": 280,
+        "min": 0,
+        "max": 5000
+      }
+    ]
+  },
+  "fields": [
+    {
+      "key": "badge",
+      "label": "Destaque",
+      "type": "text",
+      "default": "OFERTA EXCLUSIVA AO VIVO"
+    },
+    {
+      "key": "product",
+      "label": "Produto",
+      "type": "text",
+      "default": "Câmera Broadcast 4K Studio Pro"
+    },
+    {
+      "key": "price_old",
+      "label": "Preço De",
+      "type": "text",
+      "default": "De: R$ 4.899,00"
+    },
+    {
+      "key": "price_new",
+      "label": "Preço Por",
+      "type": "text",
+      "default": "Por: R$ 3.290,00"
+    },
+    {
+      "key": "coupon",
+      "label": "Cupom",
+      "type": "text",
+      "default": "CUPOM: 3MIXVIP"
+    },
+    {
+      "key": "secondary",
+      "label": "Cor secundária (Acento 2)",
+      "type": "color",
+      "default": "#0284c7"
+    },
+    {
+      "key": "designStyle",
+      "label": "Estilo Visual / Geometria",
+      "type": "select",
+      "default": "modern_internet",
+      "options": [
+        "modern_internet",
+        "classic_tv",
+        "swiss_square",
+        "esports_neon",
+        "corporate_glass"
+      ]
+    }
+  ]
+}

@@ -30,7 +30,7 @@ Revisão Root deste topo: GitHub98d4bad. Duas ações de abertura têm caminho e
 
 ---
 
-# Situação atual do FreeMix —10/10
+# Situação atual do 3Mix —10/10
 
 Entrega selecionada: **0.1.0-local.20261010060000, Native24/a047860**, imutável. Fonte atual Native36/e81afe7 compilada viaALL_BUILD e congelada:2085arquivos,36patches/3submódulos/231snapshots reconstruídos. Cursor retido integrado; reinício NTSC real33 PASS no cursor, fullFTB ainda pendente. Ainda não há novo instalador aprovado. Native30/93d73e2 e candidato093000/FAIL permanecem históricos.
 

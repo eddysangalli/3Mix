@@ -4,25 +4,26 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>3Mix Pro · Retornos de Externa (Return Feeds & N-1)</title>
+<script src="3mix-padrao.js"></script>
 <link rel="stylesheet" href="3mix-tipografia.css">
+<link rel="stylesheet" href="3mix-padrao.css">
 <style>
 /* ============================================================
    3Mix · Retornos de Externa SRT & N-1 — identidade grafite da
-   suíte (mesma línguagem de Áudio/Replay): base #111318/#14171c/
-   #1a1d23, bordas #2a2e35, verde do sistema #2f9e5f. Sem azul ou
-   roxo decorativo. Escala tipográfica em 3mix-tipografia.css.
+   suíte: grafite neutro #202020/#252525/#1d1d1d, bordas #414141,
+   igual a Configurações. Escala tipográfica em 3mix-tipografia.css.
    ============================================================ */
 :root {
-  --ret-bg: #111318;
-  --ret-panel: #14171c;
-  --ret-panel-2: #181c22;
-  --ret-field: #1a1d23;
-  --ret-deep: #0e1014;
-  --ret-line: #2a2e35;
-  --ret-line-soft: #22262d;
-  --ret-text: #e8ebef;
-  --ret-dim: #a0a7b2;
-  --ret-mute: #7d8592;
+  --ret-bg: #202020;
+  --ret-panel: #252525;
+  --ret-panel-2: #232323;
+  --ret-field: #1d1d1d;
+  --ret-deep: #1b1b1b;
+  --ret-line: #414141;
+  --ret-line-soft: #353535;
+  --ret-text: #ededed;
+  --ret-dim: #b0b0b0;
+  --ret-mute: #8d8d8d;
   --ret-green: #2f9e5f;
   --ret-green-soft: #223026;
   --ret-amber: #c9a227;
@@ -56,8 +57,8 @@ button, input, select { font: inherit; color: inherit; }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: var(--ret-deep); }
-::-webkit-scrollbar-thumb { background: #2f343c; border-radius: 5px; border: 2px solid var(--ret-deep); }
-::-webkit-scrollbar-thumb:hover { background: #3d434c; }
+::-webkit-scrollbar-thumb { background: #353535; border-radius: 5px; border: 2px solid var(--ret-deep); }
+::-webkit-scrollbar-thumb:hover { background: #444444; }
 
 /* ---------------------------------------------------------------- topo */
 
@@ -68,7 +69,7 @@ button, input, select { font: inherit; color: inherit; }
   display: flex;
   align-items: center;
   gap: 14px;
-  background: #12151a;
+  background: #161616;
   border-bottom: 1px solid var(--ret-line);
   z-index: 4;
 }
@@ -81,6 +82,7 @@ button, input, select { font: inherit; color: inherit; }
   color: #fff;
   white-space: nowrap;
 }
+.ret-brand img { display: block; height: 26px; width: auto; }
 
 .ret-mods {
   display: flex;
@@ -105,7 +107,7 @@ button, input, select { font: inherit; color: inherit; }
   align-items: center;
 }
 
-.ret-mod.active { background: #2a303a; color: #fff; box-shadow: inset 0 -2px var(--ret-text); }
+.ret-mod.active { background: #313131; color: #fff; box-shadow: inset 0 -2px var(--ret-text); }
 
 .ret-project {
   display: inline-flex;
@@ -169,7 +171,7 @@ button, input, select { font: inherit; color: inherit; }
   cursor: pointer;
 }
 
-.ret-wb:hover:not(:disabled) { background: #1a1f26; border-color: var(--ret-line); color: #fff; }
+.ret-wb:hover:not(:disabled) { background: #202020; border-color: var(--ret-line); color: #fff; }
 .ret-wb:disabled { opacity: .45; cursor: default; }
 .ret-wb.close:hover { background: #7d2727; border-color: #9e3535; color: #fff; }
 
@@ -217,7 +219,7 @@ button, input, select { font: inherit; color: inherit; }
 }
 
 .ret-add .ret-plus { color: #7fd6a3; font-weight: 800; font-size: 14px; }
-.ret-add:hover:not(:disabled) { background: #20262e; border-color: var(--ret-green); }
+.ret-add:hover:not(:disabled) { background: #272727; border-color: var(--ret-green); }
 .ret-add:disabled { opacity: .55; cursor: default; }
 
 /* ----------------------------------------------------------------- grid */
@@ -333,8 +335,8 @@ button, input, select { font: inherit; color: inherit; }
   letter-spacing: .3px;
   padding: 2px 7px;
   border-radius: 3px;
-  border: 1px solid #384049;
-  background: #2b2f36;
+  border: 1px solid #404040;
+  background: #303030;
   color: #a7afb9;
   white-space: nowrap;
   transition: background .15s, border-color .15s, color .15s;
@@ -373,7 +375,7 @@ button, input, select { font: inherit; color: inherit; }
 .ret-btn {
   height: 30px;
   padding: 0 12px;
-  border: 1px solid #3a404a;
+  border: 1px solid #414141;
   border-radius: 4px;
   background: var(--ret-field);
   color: var(--ret-text);
@@ -387,7 +389,7 @@ button, input, select { font: inherit; color: inherit; }
   gap: 6px;
 }
 
-.ret-btn:hover:not(:disabled) { background: #222831; border-color: #4a5260; color: #fff; }
+.ret-btn:hover:not(:disabled) { background: #292929; border-color: #4a5260; color: #fff; }
 .ret-btn:disabled { opacity: .5; cursor: default; }
 
 .ret-btn.go {
@@ -415,7 +417,7 @@ button, input, select { font: inherit; color: inherit; }
   align-items: center;
   gap: 9px;
   overflow: hidden;
-  background: #0f1216;
+  background: #121212;
   border-top: 1px solid var(--ret-line);
   color: var(--ret-dim);
   font-size: 13px;
@@ -432,7 +434,7 @@ button, input, select { font: inherit; color: inherit; }
   flex: 0 0 auto;
   height: 30px;
   padding: 0 12px;
-  border: 1px solid #3a404a;
+  border: 1px solid #414141;
   border-radius: 4px;
   background: var(--ret-field);
   color: var(--ret-text);
@@ -441,7 +443,7 @@ button, input, select { font: inherit; color: inherit; }
   white-space: nowrap;
 }
 
-.ret-close:hover { background: #222831; border-color: #4a5260; }
+.ret-close:hover { background: #292929; border-color: #4a5260; }
 
 /* ---------------------------------------------------------------- toast */
 
@@ -452,9 +454,9 @@ button, input, select { font: inherit; color: inherit; }
   z-index: 10;
   max-width: 420px;
   padding: 9px 12px;
-  border: 1px solid #3a404a;
+  border: 1px solid #414141;
   border-radius: 4px;
-  background: #1c2128;
+  background: #222222;
   color: var(--ret-text);
   font-size: var(--fs-body);
   box-shadow: 0 8px 24px rgba(0, 0, 0, .45);
@@ -472,34 +474,27 @@ button, input, select { font: inherit; color: inherit; }
 <body class="ret-window" data-tipografia="3mix">
 
 <header class="ret-top">
-  <div class="ret-brand">3Mix</div>
+  <div class="ret-brand"><img src="/img/3mix-logo.png" alt="3Mix"></div>
   <nav class="ret-mods" aria-label="Módulos 3Mix">
     <span class="ret-mod active" aria-current="page">Retornos SRT &amp; N-1</span>
   </nav>
   <span class="ret-project" title="Projeto em uso">
-    Projeto: <b id="project-name">—</b><span class="ret-caret" aria-hidden="true">▾</span>
+    Projeto: <b id="project-name">—</b>
   </span>
   <div class="ret-top-right">
     <div class="ret-conn" title="Estado da conexão com o motor 3Mix">
       <span class="ret-led" id="status-led"></span>
       <span id="connection">Conectando…</span>
     </div>
-    <div class="ret-win" aria-label="Controles da janela">
-      <button type="button" class="ret-wb" disabled title="Controle da janela pelo Windows">–</button>
-      <button type="button" class="ret-wb" disabled title="Controle da janela pelo Windows">□</button>
-      <button type="button" class="ret-wb close" id="win-close" title="Fechar janela" aria-label="Fechar janela"
-        onclick="window.FreeMixClosePanel ? window.FreeMixClosePanel() : (window.close ? window.close() : null)">×</button>
-    </div>
   </div>
 </header>
 
 <section class="ret-pagehead">
   <div>
-    <h1>CANAIS DE RETORNO (RETURN FEEDS)</h1>
-    <p class="ret-sub">SRT CALLER/LISTENER + N-1 MIX-MINUS · retorno para repórteres, comentaristas e estúdio B</p>
+    <h1>Retornos SRT e N-1</h1>
   </div>
   <button type="button" class="ret-add" id="btn-add-feed" title="Cria um novo canal de retorno (SRT listener)">
-    <span class="ret-plus" aria-hidden="true">+</span>Adicionar Canal de Retorno
+    <span class="ret-plus" aria-hidden="true">+</span>Novo retorno
   </button>
 </section>
 

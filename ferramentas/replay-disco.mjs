@@ -4,7 +4,7 @@ import { existsSync } from "node:fs";
 import { spawn } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
 import { mkdir, readFile, writeFile, rename, stat, unlink, readdir, lstat } from "node:fs/promises";
-import { join, resolve, relative } from "node:path";
+import { join, resolve, relative, basename } from "node:path";
 import { frameRate, replayCameraOptions, frameTargets, seekTargets, estimateAudioOffset } from './replay-sincronia.mjs';
 import {ReplayCadence} from './replay-cadence.mjs';
 import {ReplayPreview,PREVIEW_SECONDS} from './replay-preview.mjs';
@@ -28,7 +28,7 @@ const FILTER = "FreeMix Replay Rec";
 // Source Record forwards this OBS enum; DISABLE (0) bypasses GPU rescaling.
 const GPU_SCALE_BICUBIC = 2;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const empty = () => ({ rec: false, speed: 50, activePlayer: "A", events: [], players: {}, markIn: null, session: null, back: null, linked: false, cameraOptions: {}, audioEnabled: true, retention: { minutes: 30, segmentSeconds: 60, enabled: false } });
+const empty = () => ({ rec: false, speed: 50, activePlayer: "A", events: [], players: {}, markIn: null, session: null, back: null, backPreview: null, linked: false, cameraOptions: {}, audioEnabled: true, retention: { minutes: 30, segmentSeconds: 60, enabled: false } });
 
 function execute(executable, args, timeout = 60000, binary = false) {
   return new Promise((resolve, reject) => {
@@ -65,6 +65,9 @@ export class DiskReplay {
     this.preview = new ReplayPreview({root,ffmpeg:this.ffmpeg,probe:file=>this.probe(file),session:()=>this.state.session});
     this.historyPin=null;
     this.previewRequests=new Map();
+    this.quadQueue=Promise.resolve();
+    this.quadToken=0;
+    this.transitionCache=null;
     this.disposing=false;
     this.disposed=false;
     this.disposePromise=null;
@@ -98,7 +101,7 @@ export class DiskReplay {
 
   async req(type, data) {
     const obs = this.getObs();
-    if (!obs) throw new Error("Sem conexão com o FreeMix");
+    if (!obs) throw new Error("Sem conexão com o 3Mix");
     return obs.req(type, data);
   }
   async optional(type, data) { try { return await this.req(type, data); } catch { return null; } }
@@ -132,12 +135,21 @@ export class DiskReplay {
   }
 
   async waitFor(type, data, ready) {
-    for (let attempt = 0; attempt < 40; attempt++) {
-      const result = await this.req(type, data);
-      if (ready(result)) return result;
-      await sleep(75);
-    }
-    throw new Error(`O motor não confirmou ${type} a tempo`);
+    // Status polling is read-only: a request can time out while the UI thread is
+    // finishing a CEF window teardown. Keep polling instead of failing the
+    // whole replay command on a single transient timeout.
+    const deadline = Date.now() + 20000;
+    let lastError = null;
+    do {
+      try {
+        const result = await this.req(type, data);
+        if (ready(result)) return result;
+      } catch (error) {
+        lastError = error;
+      }
+      await sleep(100);
+    } while (Date.now() < deadline);
+    throw lastError || new Error(`O motor não confirmou ${type} a tempo`);
   }
 
   async scopeState() {
@@ -163,7 +175,15 @@ export class DiskReplay {
   async save() {
     await mkdir(join(this.root, "config", "obs-studio", "plugin_config", this.namespace), { recursive: true });
     await writeFile(`${this.file}.tmp`, JSON.stringify(this.state, null, 2), "utf8");
-    await rename(`${this.file}.tmp`, this.file);
+    for (let attempt = 0; attempt < 5; attempt++) {
+      try {
+        await rename(`${this.file}.tmp`, this.file);
+        break;
+      } catch (e) {
+        if (attempt === 4 || !['EPERM', 'EBUSY', 'EACCES'].includes(e.code)) throw e;
+        await sleep(50);
+      }
+    }
     this.onChange(this.state);
   }
 
@@ -171,6 +191,9 @@ export class DiskReplay {
     try{this.assertReplayOpen();}catch(e){return Promise.reject(e);}
     // Proxy encoding must never hold the recording/transport mutation queue.
     if(action==='history-preview')return this.historyPreview(data);
+    // Quad frames are read-only, but four FFmpeg decodes must not pile up on
+    // the operator queue. They run in their own serial lane.
+    if(action==='history-quad')return this.historyQuadSerial(data);
     const work = this.queue.then(async () => {
       this.assertReplayOpen();
       await this.scopeState();
@@ -194,6 +217,11 @@ export class DiskReplay {
         case "retention": await this.retention(data); break;
         case "auto-align": await this.autoAlign(data);break;
         case "repair": await this.repairClip(data);break;
+        case "relocate": await this.relocateClip(data);break;
+        case "relink": await this.relinkFolder(data);break;
+        case "update-event": await this.updateEvent(data);break;
+        case "trim-event": await this.trimEvent(data);break;
+        case "unload": await this.unloadPlayer(data.player);break;
         case "link": await this.link(data.enabled); break;
         case "transport": await this.transport(data); break;
         case "seek": await this.seekPlayer(data); break;
@@ -243,8 +271,22 @@ export class DiskReplay {
       if(this.programScene===null)this.programScene=list.currentProgramSceneName;
       else if(this.programScene!==list.currentProgramSceneName)this.onProgramChanged(list.currentProgramSceneName)?.catch(e=>{this.state.playbackError=e.message;this.onChange(this.state);});
     }
-    const players={...this.state.players};for(const player of REPLAY_PLAYERS)if(players[player]){const media=await this.optional('GetMediaInputStatus',{inputName:`Replay Player ${player}`});if(media)players[player]={...players[player],mediaCursor:media.mediaCursor,mediaDuration:media.mediaDuration,mediaState:media.mediaState};}
-    return { ...this.state, historySupported:this.recordingFolder==='replay',historyPlaybackSupported:this.recordingFolder==='replay',programAutoplaySupported:this.recordingFolder==='replay',playerIds:REPLAY_PLAYERS,players, ...(audioChoices?{audioChoices,audioBusSourceSupported:this.isoBusSourceCapture,audioSourceLimit:this.isoBusSourceCapture?'Bus independente deve ficar sem rotas M/A/B: captura PCM própria, fora das trilhas globais. Folhas públicas ainda exigem trilha 1.':'Fonte direta exige folha pública com trilha 1 já habilitada; buses isolados não são capturados diretamente por este SourceRecord. Use sua rota A/B e escolha Bus A/B.'}:{}), program: list.currentProgramSceneName, preview: list.currentPreviewSceneName,
+    const fileState=this.fileAvailability||(this.fileAvailability=new Map());
+    const available=file=>{if(!file)return false;const hit=fileState.get(file);if(hit&&Date.now()-hit.at<3000)return hit.ok;const ok=existsSync(file);fileState.set(file,{ok,at:Date.now()});return ok;};
+    const players={...this.state.players};for(const player of REPLAY_PLAYERS)if(players[player]){const media=await this.optional('GetMediaInputStatus',{inputName:`Replay Player ${player}`});players[player]={...players[player],available:available(players[player].file),...(media?{mediaCursor:media.mediaCursor,mediaDuration:media.mediaDuration,mediaState:media.mediaState}:{})};}
+    const events=this.state.events.map(event=>({...event,clips:(event.clips||[]).map(clip=>({...clip,available:available(clip.file)})),available:(event.clips||[]).some(clip=>available(clip.file))}));
+    // Return-to-live needs the exact source and transition the operator will
+    // resume. The transition is cached briefly so polling stays cheap.
+    let backTransition=null;
+    if(this.state.back){
+      const now=Date.now();
+      if(!this.transitionCache||now-this.transitionCache.at>10000){
+        const current=await this.optional('GetSceneTransitionList',{});
+        this.transitionCache={at:now,name:current?.currentSceneTransitionName||'Corte',durationMs:Number(current?.currentSceneTransitionDuration)||0};
+      }
+      backTransition={scene:this.state.back,name:this.transitionCache.name,durationMs:this.transitionCache.durationMs};
+    }
+    return { ...this.state, events, backTransition, backAvailable:this.state.back?list.scenes.some(s=>s.sceneName===this.state.back):false, historySupported:this.recordingFolder==='replay',historyPlaybackSupported:this.recordingFolder==='replay',programAutoplaySupported:this.recordingFolder==='replay',playerIds:REPLAY_PLAYERS,players, ...(audioChoices?{audioChoices,audioBusSourceSupported:this.isoBusSourceCapture,audioSourceLimit:this.isoBusSourceCapture?'Bus independente deve ficar sem rotas M/A/B: captura PCM própria, fora das trilhas globais. Folhas públicas ainda exigem trilha 1.':'Fonte direta exige folha pública com trilha 1 já habilitada; buses isolados não são capturados diretamente por este SourceRecord. Use sua rota A/B e escolha Bus A/B.'}:{}), program: list.currentProgramSceneName, preview: list.currentPreviewSceneName,
       availableCams: list.scenes.map((s) => s.sceneName).filter((n) => !n.startsWith("REPLAY ") && n !== "FreeMix Barramentos") };
   }
 
@@ -275,11 +317,26 @@ export class DiskReplay {
 
   async hasRecordedVideoPacket(file,expectedCodec) {
     // Live MKV has no duration footer until closed. Require an actual video
-    // packet and dimensions rather than rejecting it for missing duration.
-    const result=JSON.parse(await execute(this.ffprobe,['-v','error','-read_intervals','%+#32','-show_entries','stream=index,codec_type,codec_name,width,height:packet=stream_index,size','-of','json',file],5000));
+    // stream header and valid dimensions/codec, plus either recorded packets
+    // or confirmed video stream allocation with growing file size.
+    let result;
+    try {
+      result=JSON.parse(await execute(this.ffprobe,['-v','error','-select_streams','v','-read_intervals','%+#64','-show_entries','stream=index,codec_type,codec_name,width,height:packet=stream_index,size','-of','json',file],5000));
+    } catch {
+      return false;
+    }
     const video=result.streams?.find(s=>s.codec_type==='video'&&s.width>0&&s.height>0);
-    if(expectedCodec&&video?.codec_name!==expectedCodec)throw Error('O motor gravou um codec diferente do selecionado');
-    return !!video&&result.packets?.some(p=>p.stream_index===video.index&&Number(p.size)>0);
+    if(!video)return false;
+    if(expectedCodec&&video.codec_name!==expectedCodec)throw Error('O motor gravou um codec diferente do selecionado');
+    const hasPackets=Array.isArray(result.packets)&&result.packets.some(p=>Number(p.size)>0);
+    if(hasPackets)return true;
+    // Em fontes com imagem fixa/estática (ex: tela preta, color bar), o muxer Matroska
+    // retém pequenos blocos no buffer antes de fechar o cluster. Se o stream de vídeo
+    // já foi criado e inicializado no container com resolução real e o arquivo existe
+    // no disco com tamanho além do cabeçalho (>= 1KB), a gravação está ativa.
+    const fileStat=await stat(file).catch(()=>null);
+    if(fileStat&&fileStat.size>=1024)return true;
+    return false;
   }
 
   async start(names) {
@@ -317,7 +374,7 @@ export class DiskReplay {
         const replayAudio=replayCameraOptions(this.state.cameraOptions?.[name]).recordAudio;
         const settings = { path: camDir, filename_formatting: session.segmented ? `cam-${i+1}-%CCYY-%MM-%DD_%hh-%mm-%ss` : ownOptions?.splitSeconds?`${basename}-%CCYY-%MM-%DD_%hh-%mm-%ss`:basename, rec_format: ownOptions?.format==='mp4_safe'?'mkv':ownOptions?.format||"mpegts", record_mode: 1,
           ...(!options?{different_audio:replayAudio!=='input',audio_track:({input:0,master:1,'bus-a':2,'bus-b':3})[replayAudio],audio_source:''}:{}),
-          split_file: session.segmented, max_time_sec: session.retention.segmentSeconds, max_size_mb: 0, record_max_seconds: 0, keyint_sec: 1,
+          split_file: session.segmented, max_time_sec: session.retention.segmentSeconds, max_size_mb: 0, record_max_seconds: 0, keyint_sec: 1, opts: 'keyint=1', x264opts: 'keyint=1',
           ...(process.env.FREEMIX_REPLAY_ENCODER ? { encoder: process.env.FREEMIX_REPLAY_ENCODER } : {}),
           ...(ownOptions?{encoder:ownOptions.encoder==='default'?'':ownOptions.encoder,rate_control:ownOptions.bitrate?'CBR':ownOptions.encoder.includes('nvenc')?'CQP':'CRF',cqp:ownOptions.crf,bitrate:ownOptions.bitrate||4000,crf:ownOptions.crf,tune:ownOptions.encoder==='obs_x264'?'zerolatency':'',split_file:ownOptions.splitSeconds>0,max_time_sec:ownOptions.splitSeconds,different_audio:ownOptions.audio!=='input',audio_track:({input:0,source:0,master:1,'bus-a':2,'bus-b':3,'all-tracks':-1})[ownOptions.audio],audio_source:ownOptions.audio==='source'?audioSources.get(ownOptions.audioSourceUUID).name:'',scale:!!ownOptions.width,scale_type:ownOptions.width?GPU_SCALE_BICUBIC:0,width:ownOptions.width,height:ownOptions.height,resolution:ownOptions.width?ownOptions.width+'x'+ownOptions.height:'',frame_rate_divisor:ownOptions.fpsDivisor>1?ownOptions.fpsDivisor:0}: {}) };
         if (!before) {
@@ -331,10 +388,12 @@ export class DiskReplay {
       // Confirm actual output, rather than treating a successful settings request as recording.
       for (const cam of session.cams) {
         let ready = false;
-        for (let attempt = 0; attempt < 40; attempt++) {
+        const maxAttempts = cam.extension === '.mkv' ? 60 : 40;
+        const minSize = cam.extension === '.mkv' ? 1024 : 188 * 10;
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
           if(session.segmented){const prefix=`cam-${cam.index}-`;const names=(await readdir(session.dir)).filter(n=>n.startsWith(prefix)&&n.endsWith('.ts')).sort();if(names.length)cam.file=join(session.dir,names[0]);}
           if(cam.options?.splitSeconds){const files=(await readdir(cam.dir)).filter(n=>n.startsWith(cam.basename+'-')&&n.endsWith(cam.extension)).sort();if(files.length)cam.file=join(cam.dir,files[0]);}
-          if ((await stat(cam.file).catch(() => null))?.size > 188 * 10) {
+          if ((await stat(cam.file).catch(() => null))?.size >= minSize) {
             try { if(cam.extension==='.mkv'){if(!await this.hasRecordedVideoPacket(cam.file,cam.expectedCodec))throw Error('no video packet');}else {const info=await this.probe(cam.file);if(cam.expectedCodec&&!info.streams.some(s=>s.codec_name===cam.expectedCodec))throw Error('wrong codec');}ready = true; break; } catch {}
           }
           await sleep(250);
@@ -456,14 +515,9 @@ export class DiskReplay {
     return {sessionId:this.state.session.id,start,end,recording:this.state.rec,cameras:ranges.map(r=>r.name),frameRate:ranges[0].frameRate||null};
   }
 
-  async historyFrame(d) {
-    const ranges=await this.positions(false),history=await this.history(ranges);
-    if(!history||d.sessionId!==history.sessionId)throw Error('A sessão mudou. Atualize a timeline');
-    const cursor=Number(d.cursor);
-    if(!Number.isFinite(cursor)||cursor<history.start||cursor>history.end)throw Error('Posição fora do histórico disponível');
-    const cam=ranges.find(r=>r.name===d.cam);
+  async frameJpeg(ranges, camName, at) {
+    const cam=ranges.find(r=>r.name===camName);
     if(!cam)throw Error('Selecione uma câmera da sessão');
-    const at=Math.min(cursor,Math.max(history.start,history.end-0.1));
     let file=cam.file,localAt=at,containerStart=cam.containerStart;
     if(this.state.session.segmented){
       const part=cam.segments.find(s=>!s.deleted&&s.start<=at&&s.start+s.duration>at);
@@ -472,7 +526,47 @@ export class DiskReplay {
     }
     const jpeg=await execute(this.ffmpeg,['-hide_banner','-v','error','-nostdin','-ss',String(Math.max(0,localAt-3)),'-copyts','-i',file,'-vf',`trim=start=${Math.round((localAt+containerStart)*90000)/90000},setpts=PTS-STARTPTS,scale=640:-2`,'-frames:v','1','-an','-c:v','mjpeg','-q:v','3','-f','image2pipe','pipe:1'],15000,true);
     if(!jpeg.length)throw Error('Quadro ainda não disponível. Volte um pouco na timeline');
-    return {history,historyFrame:{cursor:at,cam:cam.name,image:'data:image/jpeg;base64,'+jpeg.toString('base64')}};
+    return jpeg;
+  }
+
+  async historyFrame(d) {
+    const ranges=await this.positions(false),history=await this.history(ranges);
+    if(!history||d.sessionId!==history.sessionId)throw Error('A sessão mudou. Atualize a timeline');
+    const cursor=Number(d.cursor);
+    if(!Number.isFinite(cursor)||cursor<history.start||cursor>history.end)throw Error('Posição fora do histórico disponível');
+    const at=Math.min(cursor,Math.max(history.start,history.end-0.1));
+    const jpeg=await this.frameJpeg(ranges,d.cam,at);
+    return {history,historyFrame:{cursor:at,cam:d.cam,image:'data:image/jpeg;base64,'+jpeg.toString('base64')}};
+  }
+
+  // One shared cursor, four independent camera decodes. The caller receives
+  // every available angle even if a single camera fails at that position.
+  async historyQuad(d) {
+    this.assertReplayOpen();
+    await this.scopeState();
+    const ranges=await this.positions(false),history=await this.history(ranges);
+    if(!history||d.sessionId!==history.sessionId)throw Error('A sessão mudou. Atualize a timeline');
+    const cursor=Number(d.cursor);
+    if(!Number.isFinite(cursor)||cursor<history.start||cursor>history.end)throw Error('Posição fora do histórico disponível');
+    const requested=Array.isArray(d.cams)&&d.cams.length?d.cams:history.cameras.slice(0,4);
+    const cams=[...new Set(requested)].filter(name=>history.cameras.includes(name)).slice(0,4);
+    if(!cams.length)throw Error('Selecione até quatro câmeras do histórico');
+    const at=Math.min(cursor,Math.max(history.start,history.end-0.1));
+    const frames=await Promise.all(cams.map(async cam=>{
+      try{const jpeg=await this.frameJpeg(ranges,cam,at);return {cam,image:'data:image/jpeg;base64,'+jpeg.toString('base64')};}
+      catch(error){return {cam,error:error.message};}
+    }));
+    return {history,historyFrames:{cursor:at,frames}};
+  }
+
+  historyQuadSerial(d) {
+    const token=++this.quadToken;
+    const run=this.quadQueue.then(()=>{
+      if(token!==this.quadToken){const error=Error('Busca de quadro substituída');error.code='REPLAY_QUAD_STALE';throw error;}
+      return this.historyQuad(d);
+    });
+    this.quadQueue=run.catch(()=>{});
+    return run;
   }
 
   async historyPreview(d) {
@@ -674,28 +768,44 @@ export class DiskReplay {
     await this.save();
   }
 
+  async restorePreview(scene) {
+    if (!scene) return false;
+    for (let attempt = 0; attempt < 10; attempt++) {
+      await this.req("SetCurrentPreviewScene", { sceneName: scene }).catch(() => {});
+      const list = await this.req("GetSceneList").catch(() => null);
+      if (list?.currentPreviewSceneName === scene) return true;
+      await sleep(80);
+    }
+    return false;
+  }
+
   async air(player = this.state.activePlayer) {
     if (!REPLAY_PLAYERS.includes(player) || !this.state.players[player]) throw new Error("Carregue um lance no player antes de colocá-lo no ar");
     const list = await this.req("GetSceneList");
     if (!list.currentProgramSceneName?.startsWith("REPLAY ")) this.state.back = list.currentProgramSceneName;
+    // Guarda o Preview do operador; SetCurrentProgramScene troca o Preview no Studio Mode.
+    if (list.currentPreviewSceneName && !list.currentPreviewSceneName.startsWith("REPLAY ")) this.state.backPreview = list.currentPreviewSceneName;
     const input = `Replay Player ${player}`;
     const settings = await this.req("GetInputSettings", { inputName: input });
     if (settings.inputSettings.local_file !== this.state.players[player].file) throw new Error("O arquivo do player foi alterado. Carregue o lance novamente.");
     await this.probe(this.state.players[player].file);
     if(this.state.linked && list.currentProgramSceneName?.startsWith("REPLAY ")){
       await this.align(true);this.internalProgramTarget=`REPLAY ${player}`;await this.req("SetCurrentProgramScene",{sceneName:`REPLAY ${player}`});
-      await this.waitFor("GetSceneList",{},s=>s.currentProgramSceneName===`REPLAY ${player}`);this.internalProgramTarget=null;this.state.activePlayer=player;await this.applyPlayerAudio();await this.save();return;
+      await this.waitFor("GetSceneList",{},s=>s.currentProgramSceneName===`REPLAY ${player}`);this.internalProgramTarget=null;this.state.activePlayer=player;await sleep(120);await this.restorePreview(this.state.backPreview);await this.applyPlayerAudio();await this.restorePreview(this.state.backPreview);await this.save();return;
     }
     this.internalProgramTarget=`REPLAY ${player}`;
     await this.req("SetCurrentProgramScene", { sceneName: `REPLAY ${player}` });
     await this.waitFor("GetSceneList", {}, (s) => s.currentProgramSceneName === `REPLAY ${player}`);
     this.internalProgramTarget=null;
+    await sleep(120);
+    await this.restorePreview(this.state.backPreview);
     // The source must be showing before its native RESTART actually starts the decoder.
     await this.req("TriggerMediaInputAction", { inputName: input, mediaAction: "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_RESTART" });
     if(this.state.linked)await Promise.all(Object.keys(this.state.players).filter(id=>id!==player).map(id=>this.req("TriggerMediaInputAction",{inputName:`Replay Player ${id}`,mediaAction:"OBS_WEBSOCKET_MEDIA_INPUT_ACTION_RESTART"})));
     await this.waitFor("GetMediaInputStatus", { inputName: input }, (s) => s.mediaState === "OBS_MEDIA_STATE_PLAYING" && s.mediaCursor < 250);
     this.state.activePlayer = player;
     await this.applyPlayerAudio();
+    await this.restorePreview(this.state.backPreview);
     await this.save();
   }
 
@@ -705,7 +815,10 @@ export class DiskReplay {
     await this.req("SetCurrentProgramScene", { sceneName: this.state.back });
     await this.waitFor("GetSceneList", {}, (s) => s.currentProgramSceneName === this.state.back);
     this.internalProgramTarget=null;
+    await sleep(120);
+    await this.restorePreview(this.state.backPreview);
     await this.applyPlayerAudio();
+    await this.restorePreview(this.state.backPreview);
     await this.save();
   }
 
@@ -727,6 +840,204 @@ export class DiskReplay {
     const original=resolve(d.file),input=await lstat(original);if(!input.isFile()||input.isSymbolicLink()||input.size>8*1024**3)throw Error('Arquivo irregular ou maior que 8 GB');
     const id=randomUUID(),dir=join(this.root,'gravacoes/replay/recuperados',id);await mkdir(dir,{recursive:true});const file=join(dir,'clip.mkv');
     try{await execute(this.ffmpeg,['-hide_banner','-v','warning','-nostdin','-y','-fflags','+discardcorrupt+genpts','-err_detect','ignore_err','-i',original,'-t','120','-map','0:v:0','-map','0:a:0?','-c:v','libx264','-preset','veryfast','-crf','18','-g','1','-bf','0','-pix_fmt','yuv420p','-c:a','aac',file],180000);const media=await this.probe(file);await execute(this.ffmpeg,['-hide_banner','-v','error','-xerror','-nostdin','-i',file,'-f','null','-'],180000);this.state.events.push({id,name:String(d.name||'Clipe recuperado').slice(0,120),cam:'Recuperado',dur:media.duration,createdAt:Date.now(),time:new Date().toLocaleTimeString('pt-BR'),recovered:true,repair:{originalPreserved:true,maxSeconds:120,decodedVerified:true,lossPossible:true},clips:[{cam:'Recuperado',file,start:0,end:media.duration,duration:media.duration}]});await this.save();}catch(error){await unlink(file).catch(()=>{});throw Error('Recuperação recusada: '+error.message);}
+  }
+
+  localFile(value,label){
+    if(typeof value!=='string'||!value.trim()||value.length>1000||!/^([a-z]:[\\/]|\\\\[^\\]+\\[^\\]+)/i.test(value.trim())||/[\x00-\x1f]/.test(value))throw Error(label+': informe um caminho local absoluto');
+    return resolve(value.trim());
+  }
+
+  // Repoint one saved angle (or the angle loaded in a player) to the file on
+  // its new drive. The media is probed before the reference is accepted.
+  async relocateClip(d) {
+    const player=d.player?String(d.player):null;
+    if(player&&!REPLAY_PLAYERS.includes(player))throw Error('Player inválido');
+    let event=d.eventId?this.state.events.find(e=>e.id===d.eventId):null;
+    if(!event&&player){const loaded=this.state.players[player];event=loaded?this.state.events.find(e=>e.id===loaded.eventId):null;}
+    if(!event)throw Error('Selecione o lance que contém o arquivo ausente');
+    const cam=d.cam||(player?this.state.players[player]?.cam:null)||event.cam;
+    const clip=event.clips.find(c=>c.cam===cam)||(event.clips.length===1?event.clips[0]:null);
+    if(!clip)throw Error('O ângulo '+cam+' não pertence a este lance');
+    const file=this.localFile(d.file,'Localizar arquivo');
+    const info=await lstat(file).catch(()=>null);
+    if(!info?.isFile()||info.isSymbolicLink()||info.size>20*1024**3)throw Error('Localizar arquivo: informe um vídeo local existente de até 20 GB');
+    const media=await this.probe(file);
+    clip.file=file;clip.duration=media.duration;
+    if(!Number.isFinite(Number(clip.start)))clip.start=0;
+    if(!Number.isFinite(Number(clip.end)))clip.end=Number(clip.start)+media.duration;
+    event.dur=Number(event.clips[0].duration||media.duration);
+    // The player source is only repointed after a successful load; this keeps
+    // the UI honest if the engine cannot reopen the located file.
+    this.fileAvailability?.clear();
+    this.state.lastRelocate={at:Date.now(),eventId:event.id,cam:clip.cam,file};
+    await this.save();
+  }
+
+  // The recorder folder may return under another drive letter. Find the
+  // missing basenames inside the folder the operator selects and repair every
+  // exact match; ambiguous duplicates are left untouched.
+  async relinkFolder(d) {
+    if(this.recordingFolder!=='replay')throw Error('Religar pasta é exclusivo do Replay');
+    if(this.state.rec)throw Error('Pare a gravação SSD antes de religar a pasta de gravações');
+    const folder=this.localFile(d.folder,'Religar pasta de gravações');
+    const info=await lstat(folder).catch(()=>null);
+    if(!info?.isDirectory()||info.isSymbolicLink())throw Error('Religar pasta: selecione uma pasta existente neste computador');
+    const refs=[];
+    const add=(owner,key)=>{if(owner&&typeof owner[key]==='string'&&owner[key])refs.push({owner,key});};
+    if(this.state.session)for(const cam of this.state.session.cams){add(cam,'file');for(const segment of cam.segments||[])add(segment,'file');}
+    for(const player of Object.values(this.state.players))add(player,'file');
+    for(const event of this.state.events)for(const clip of event.clips||[])add(clip,'file');
+    const missing=refs.filter(ref=>!existsSync(ref.owner[ref.key]));
+    if(!missing.length){
+      this.state.lastRelink={at:Date.now(),folder,relinked:0,unresolved:0,ambiguous:[],scanned:0};
+      await this.save();
+      return;
+    }
+    let relinked=0;
+    const remaining=[];
+    // Preserve the tail of the original path first. Event clips share names
+    // such as cam-1.mp4, so a basename-only scan would be ambiguous.
+    for(const ref of missing){
+      const parts=String(ref.owner[ref.key]).split(/[\\/]+/).filter(Boolean);
+      let hit=null;
+      for(let count=Math.min(8,parts.length);count>=1;count--){
+        const candidate=join(folder,...parts.slice(-count));
+        try{const info=await lstat(candidate);if(info.isFile()&&!info.isSymbolicLink()){hit=candidate;break;}}catch{}
+      }
+      if(hit){ref.owner[ref.key]=hit;relinked++;}
+      else remaining.push(ref);
+    }
+    const names=new Set(remaining.map(ref=>basename(ref.owner[ref.key])));
+    const found=new Map();
+    let scanned=0;
+    const walk=async(dir,depth)=>{
+      if(depth>8||scanned>20000)return;
+      let entries;try{entries=await readdir(dir,{withFileTypes:true});}catch{return;}
+      for(const entry of entries){
+        if(scanned++>20000)return;
+        if(entry.isSymbolicLink())continue;
+        const full=join(dir,entry.name);
+        if(entry.isDirectory()){await walk(full,depth+1);continue;}
+        if(!entry.isFile()||!names.has(entry.name))continue;
+        const list=found.get(entry.name)||[];
+        if(list.length<5)list.push(full);
+        found.set(entry.name,list);
+      }
+    };
+    if(remaining.length)await walk(folder,0);
+    const ambiguous=[];
+    for(const ref of remaining){
+      const name=basename(ref.owner[ref.key]),list=found.get(name)||[];
+      if(list.length===1){ref.owner[ref.key]=list[0];relinked++;}
+      else if(list.length>1)ambiguous.push({name,count:list.length});
+    }
+    this.fileAvailability?.clear();
+    const reload={reloaded:0,failed:0,onAir:[]};
+    if(this.recordingFolder==='replay'){
+      const program=(await this.optional('GetSceneList',{}))?.currentProgramSceneName||'';
+      for(const [id,player] of Object.entries(this.state.players)){
+        if(program==='REPLAY '+id){reload.onAir.push(id);continue;}
+        const settings=await this.optional('GetInputSettings',{inputName:'Replay Player '+id});
+        if(settings?.inputSettings?.local_file===player.file)continue;
+        try{await this.load(id,player.eventId,player.cam);reload.reloaded++;}
+        catch{reload.failed++;}
+      }
+    }
+    this.state.lastRelink={at:Date.now(),folder,relinked,unresolved:missing.length-relinked,ambiguous:ambiguous.slice(0,12),scanned,reload};
+    await this.save();
+  }
+
+  async updateEvent(d) {
+    const event=this.state.events.find(e=>e.id===d.eventId);
+    if(!event)throw Error('Lance não encontrado');
+    if(d.name!==undefined){
+      const name=String(d.name).trim();
+      if(!name||name.length>120||/[\x00-\x1f]/.test(name))throw Error('Título deve ter de 1 a 120 caracteres sem controles');
+      event.name=name;
+    }
+    if(d.category!==undefined){
+      const category=String(d.category).trim();
+      if(category.length>60||/[\x00-\x1f]/.test(category))throw Error('Categoria deve ter até 60 caracteres sem controles');
+      event.category=category;
+    }
+    await this.save();
+  }
+
+  // Real IN/OUT edit of a saved event: every angle is re-encoded between the
+  // requested offsets, then the references are replaced only after all angles
+  // pass a finite-duration probe.
+  async trimEvent(d) {
+    if(this.recordingFolder!=='replay')throw Error('Ajuste de IN/OUT é exclusivo do Replay');
+    if(this.state.rec)throw Error('Pare a gravação SSD antes de ajustar IN/OUT de um lance');
+    const event=this.state.events.find(e=>e.id===d.eventId);
+    if(!event)throw Error('Lance não encontrado');
+    const duration=Number(event.dur),start=Number(d.in),end=Number(d.out);
+    if(!Number.isFinite(duration)||!Number.isFinite(start)||!Number.isFinite(end))throw Error('Informe IN e OUT em segundos');
+    if(start<0||end>duration+0.05||end-start<0.2||end-start>120)throw Error('IN/OUT deve ficar dentro do lance e durar de 0,2 a 120 segundos');
+    if(start<0.001&&Math.abs(end-duration)<0.001)return;
+    const loaded=Object.entries(this.state.players).find(([,player])=>player.eventId===event.id);
+    if(loaded)throw Error(`Remova o lance do Player ${loaded[0]} antes de ajustar IN/OUT`);
+    const program=(await this.req('GetSceneList')).currentProgramSceneName;
+    if(Object.entries(this.state.players).some(([id,player])=>player.eventId===event.id&&program==='REPLAY '+id))throw Error('Volte ao vivo antes de ajustar este lance');
+    const jobs=[];
+    const temps=[];
+    try{
+      for(const clip of event.clips){
+        const temp=clip.file+'.trim.mp4';
+        temps.push(temp);
+        await execute(this.ffmpeg,['-hide_banner','-loglevel','error','-nostdin','-y','-i',clip.file,
+          '-vf',`trim=start=${start}:end=${end},setpts=PTS-STARTPTS`,'-af',`atrim=start=${start}:end=${end},asetpts=PTS-STARTPTS`,
+          '-map','0:v:0','-map','0:a:0?','-c:v','libx264','-preset','ultrafast','-crf','18','-g','1','-bf','0','-pix_fmt','yuv420p',
+          '-c:a','aac','-movflags','+faststart',temp],180000);
+        const media=await this.probe(temp);
+        if(Math.abs(media.duration-(end-start))>0.2)throw Error('O novo corte de '+clip.cam+' ficou incompleto');
+        jobs.push({clip,temp,media,backup:clip.file+'.trim.bak'});
+      }
+    }catch(error){
+      for(const temp of temps)await unlink(temp).catch(()=>{});
+      throw error;
+    }
+    const replaced=[];
+    try{
+      for(const job of jobs){
+        await unlink(job.backup).catch(()=>{});
+        await rename(job.clip.file,job.backup);
+        try{
+          await rename(job.temp,job.clip.file);
+        }catch(error){
+          await rename(job.backup,job.clip.file).catch(()=>{});
+          throw error;
+        }
+        replaced.push(job);
+        job.clip.start=Number(job.clip.start||0)+start;
+        job.clip.end=Number(job.clip.end||duration)-(duration-end);
+        job.clip.duration=job.media.duration;
+        job.clip.trimmed=true;
+      }
+    }catch(error){
+      for(const job of replaced.reverse()){
+        await unlink(job.clip.file).catch(()=>{});
+        await rename(job.backup,job.clip.file).catch(()=>{});
+      }
+      for(const job of jobs)await unlink(job.temp).catch(()=>{});
+      throw Error('Ajuste recusado e revertido: '+error.message);
+    }
+    for(const job of jobs)await unlink(job.backup).catch(()=>{});
+    event.dur=Number(event.clips[0]?.duration||end-start);
+    event.editedAt=Date.now();
+    this.fileAvailability?.clear();
+    await this.save();
+  }
+
+  async unloadPlayer(player) {
+    if(!REPLAY_PLAYERS.includes(player))throw Error('Player inválido');
+    if(!this.state.players[player])return;
+    const list=await this.req('GetSceneList');
+    if(list.currentProgramSceneName===`REPLAY ${player}`)throw Error(`Volte ao vivo antes de remover o Player ${player}`);
+    await this.optional('TriggerMediaInputAction',{inputName:`Replay Player ${player}`,mediaAction:'OBS_WEBSOCKET_MEDIA_INPUT_ACTION_STOP'});
+    delete this.state.players[player];
+    this.fileAvailability?.clear();
+    await this.save();
   }
 
   async link(enabled) {
@@ -882,13 +1193,18 @@ export class DiskReplay {
       await this.req("SetInputSettings", { inputName, inputSettings: { speed_percent: value } });
       // ffmpeg_source reopens the decoder when speed changes. Restore the actual clip position and pause state.
       await sleep(200);
-      await this.waitFor("GetMediaInputStatus", { inputName }, (s) => s.mediaDuration > 0);
-      if (before.mediaState === "OBS_MEDIA_STATE_PAUSED") {
+      const reopened = await this.waitFor("GetMediaInputStatus", { inputName }, (s) => s.mediaDuration > 0);
+      const paused = before.mediaState !== "OBS_MEDIA_STATE_PLAYING";
+      if (paused) {
         await this.req("TriggerMediaInputAction", { inputName, mediaAction: "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_PAUSE" });
         await this.waitFor("GetMediaInputStatus", { inputName }, (s) => s.mediaState === "OBS_MEDIA_STATE_PAUSED");
       }
-      await this.req("SetMediaInputCursor", { inputName, mediaCursor: before.mediaCursor });
-      if(before.mediaState==="OBS_MEDIA_STATE_PAUSED")await this.waitFor("GetMediaInputStatus",{inputName},m=>Math.abs(m.mediaCursor-before.mediaCursor)<100);
+      // EOF has null duration/cursor in OBS. Preserve its last valid frame,
+      // paused, instead of serializing null as an invalid native seek request.
+      const cursor = Number.isFinite(before.mediaCursor) ? before.mediaCursor : before.mediaState === 'OBS_MEDIA_STATE_ENDED' ? Math.max(0,reopened.mediaDuration-1) : 0;
+      const target = Math.max(0,Math.min(cursor,reopened.mediaDuration-1));
+      await this.req("SetMediaInputCursor", { inputName, mediaCursor: target });
+      if(paused)await this.waitFor("GetMediaInputStatus",{inputName},m=>Number.isFinite(m.mediaCursor)&&Math.abs(m.mediaCursor-target)<100);
     }
     this.state.speed = value;
     await this.save();

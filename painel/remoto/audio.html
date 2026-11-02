@@ -18,7 +18,7 @@
     <button type="button" class="a-mod" data-module="replay" data-route="/replay">Replay</button>
   </nav>
   <span class="a-project" id="audio-project" title="Projeto em uso">
-    Projeto: <b id="project-name">Demonstração</b><span class="a-caret" aria-hidden="true">▾</span>
+    Projeto: <b id="project-name">Demonstração</b>
   </span>
   <div class="a-top-right">
     <div class="a-conn" title="Estado da conexão com o motor 3Mix">
@@ -26,9 +26,8 @@
       <span id="connection">Motor 3Mix conectado</span>
     </div>
     <div class="a-window-btns" aria-label="Controles da janela">
-      <button type="button" class="a-win" disabled title="Controle da janela pelo Windows">–</button>
-      <button type="button" class="a-win" disabled title="Controle da janela pelo Windows">□</button>
-      <button type="button" class="a-win close" id="win-close" title="Fechar janela" aria-label="Fechar janela">×</button>
+
+      <button type="button" class="a-win close" id="win-close" title="Fechar janela" aria-label="Fechar janela" hidden>×</button>
     </div>
   </div>
 </header>
@@ -328,7 +327,7 @@
         <span class="panel-status" id="returns-internal-count">0</span>
       </header>
       <ul id="returns-internal" class="internal-list"></ul>
-      <p class="panel-note">Canais <code>FreeMix N1</code> e <code>FreeMix Retorno</code> são criados pelo motor para as Calls. A mixagem por convidado pertence à central Calls; aqui eles aparecem para conferência, sem controle duplicado.</p>
+      <p class="panel-note">Canais internos <code>N1</code> e <code>Retorno</code> são criados pelo motor para as Calls. A mixagem por convidado pertence à central Calls; aqui eles aparecem para conferência, sem controle duplicado.</p>
     </section>
   </section>
 
@@ -400,9 +399,9 @@
 <div id="audio-toast" class="audio-toast" role="status" aria-live="polite" hidden></div>
 
 <script src="fechar-janela.js"></script>
-<script src="audio.js"></script>
+<script src="audio.js?v=20261101b"></script>
 <script src="audio-buses.js"></script>
 <script src="workspace-nav.js"></script>
-<script src="audio-mixer-workspace.js"></script>
+<script src="audio-mixer-workspace.js?v=20261101b"></script>
 </body>
 </html>

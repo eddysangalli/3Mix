@@ -1,24 +1,24 @@
 @OBSThemeMeta {
-    name: 'Mesa de Corte';
+    name: '3Mix Grafite';
     id: 'local.mesadecorte.Yami';
     extends: 'com.obsproject.Yami';
-    author: 'vmixtwste';
+    author: '3Mix';
     dark: 'true';
 }
 
 @OBSThemeVars {
     /* Neutral dark greys, flat, square: switcher look instead of the stock rounded blue */
-    --grey1: #5a636e;
-    --grey2: #4a525c;
-    --grey3: #404b56;
-    --grey4: #293038;
-    --grey5: #293038;
-    --grey6: #1e2328;
-    --grey7: #1e2328;
-    --grey8: #0a0f14;
+    --grey1: #777777;
+    --grey2: #494949;
+    --grey3: #414141;
+    --grey4: #303030;
+    --grey5: #292929;
+    --grey6: #242424;
+    --grey7: #202020;
+    --grey8: #191919;
 
-    --mesa_preview: #f7931e;
-    --mesa_preview_dark: #d97a00;
+    --mesa_preview: #16752c;
+    --mesa_preview_dark: #125923;
     --mesa_program: #0e7a0d;
     --mesa_program_light: #16a014;
     --mesa_input: #3c4858;
@@ -27,7 +27,7 @@
 
     --bg_window: var(--grey7);
     --bg_base: var(--grey6);
-    --bg_preview: #1e2328;
+    --bg_preview: #202020;
 
     /* Colour only where it means something: green = active, orange = preview, red = on air */
     --primary: var(--mesa_program);
@@ -255,6 +255,34 @@ QPushButton:checked {
 
 .slider-tbar::handle:horizontal:hover {
     background: #ffffff;
+}
+
+/* 3Mix T-Bar vertical */
+.slider-tbar::groove:vertical {
+    background: #111111;
+    border: 1px solid #5a5a5a;
+    width: 10px;
+    border-radius: 4px;
+}
+
+.slider-tbar::handle:vertical {
+    background: #d0d0d0;
+    border: 1px solid #808080;
+    height: 24px;
+    margin: 0px -9px;
+    border-radius: 3px;
+}
+
+.slider-tbar::handle:vertical:hover {
+    background: #ffffff;
+}
+
+.slider-tbar::sub-page:vertical {
+    background: #3a3a3a;
+}
+
+.slider-tbar::add-page:vertical {
+    background: #1c1c1c;
 }
 
 /* Audio mixer */
@@ -573,3 +601,30 @@ MenuButton {
 /* The display clears its unused margins with this color too: CSS background alone does not affect it. */
 OBSQTDisplay { qproperty-displayBackgroundColor: #1e2328; }
 #canvasEditor, #previewContainer, #programContainer { background-color: #1e2328; border: none; }
+
+/* 3Mix Grafite — acabamento da plataforma nativa existente. */
+QDialog, OBSBasicSettings { background-color: #202020; color: #ededed; }
+QMenu { background-color: #262626; border-color: #4a4a4a; }
+QMenu::item:selected { background-color: #444444; }
+QComboBox, QLineEdit, QSpinBox, QDoubleSpinBox { background-color: #252525; border-color: #505050; color: #ededed; border-radius: 3px; }
+QTabWidget::pane { background-color: #202020; border-color: #444444; }
+QTabBar::tab { background-color: #292929; border-color: #444444; color: #cccccc; }
+QTabBar::tab:selected { background-color: #414141; border-top: 2px solid #cccccc; border-bottom: 1px solid #414141; }
+OBSBasicSettings QListWidget { background-color: #202020; border-color: #444444; }
+OBSBasicSettings QListWidget::item:selected { background: #454545; border-left: 3px solid #dddddd; }
+OBSBasicSettings QGroupBox { background: #252525; border-color: #484848; border-radius: 4px; }
+OBSBasicSettings QGroupBox::title { background: #303030; border-color: #505050; border-bottom: 1px solid #555555; }
+#freemixTransitionColumn { background-color: #232323; }
+#freemixTransitionColumn QPushButton, MenuButton { background-color: #353535; border-color: #555555; border-radius: 3px; }
+#freemixTransitionColumn QPushButton:hover, MenuButton:hover { background-color: #484848; }
+#freemixTransitionColumn QPushButton:checked { background-color: #c01920; }
+.label-preview-title { background-color: #ed181d; color: #ffffff; padding: 5px 10px; }
+#previewLabel { background-color: #16752c; color: #ffffff; }
+#canvasEditor > QWidget > QLabel.label-preview-title { min-height: 24px; max-height: 30px; padding: 4px 10px; }
+OBSQTDisplay { qproperty-displayBackgroundColor: #202020; }
+#canvasEditor, #previewContainer, #programContainer { background-color: #202020; }
+#freemixDskHeading { background: #292929; color: #eeeeee; padding: 5px; font-weight: bold; }
+#freemixDskInput { background: #292929; border: 1px solid #484848; border-radius: 3px; color: #dddddd; padding: 4px; font-size: 11px; }
+#freemixSwitcherControls { background: #232323; }
+.slider-tbar::groove:vertical { background: #111111; border: 1px solid #555555; width: 9px; border-radius: 2px; }
+.slider-tbar::handle:vertical { background: #c8c8c8; border: 1px solid #777777; height: 18px; margin-left: -15px; margin-right: -15px; border-radius: 3px; }

@@ -42,34 +42,45 @@ body.no-inputs #side-panel.on { flex: 1 1 auto; width: auto !important; max-widt
 /* Segundo dock. */
 #side-panel-2 { display: none; flex-direction: column; width: 30vw; min-width: 340px; border: 1px solid #414141; border-radius: 4px; }
 #side-panel-2.on { display: flex; }
-body.dock2 #side-panel.on { width: 27vw; min-width: 340px; }
-body.dock2.no-inputs #side-panel.on,
-body.dock2.no-inputs #side-panel-2 { flex: 1 1 50%; width: auto; min-width: 320px; }
-#side-panel-2 .side-panel-header { justify-content: flex-start; gap: 5px; }
-#side-panel-2 .side-tabs { flex: 1; overflow-x: auto; }
-#side-panel-2 .st-tab { height: 24px; padding: 0 7px; font-size: 11px; flex: none; }
-#side-panel-2 .st2 { opacity: .72; }
-#side-panel-2 .st2:hover { opacity: 1; }
-#side-panel-2 .st2.on { opacity: 1; }
-#side-panel-2 .d2-return { width: 24px; padding: 0; text-align: center; color: #d9c08c; border-color: #6a5638; }
-#side-panel-2 .d2-return:hover { color: #ffe6ab; border-color: #a58a4a; }
-#side-panel-2 .st-tab.on { background: #4a4a4a; border-color: #777; color: #fff; }
-#side-panel-2 .st2-close { color: #ffb4b4; border-color: #6b3a3e; }
+#side-panel-2 { min-width: 200px; }
+body.dock2 #side-panel.on { width: 27vw; min-width: 200px; }
 
-/* Sem a barra de Fontes, as abas do dock continuam no cabeçalho. */
-body.no-inputs #side-panel .side-tabs { display: flex; overflow-x: auto; }
-body.no-inputs #side-panel .side-tabs .st-tab { height: 24px; padding: 0 7px; font-size: 11px; flex: none; }
-body.no-inputs #side-panel .side-panel-header { gap: 5px; }
+/* Sem entradas: as docks dividem a área pela proporção escolhida, de ponta a ponta. */
+body.dock2.no-inputs #splitter-dock2 { display: flex !important; }
+body.dock2.no-inputs #side-panel.on { flex: var(--dock1-parte, .5) 1 0; width: auto !important; min-width: 200px; max-width: none; }
+body.dock2.no-inputs #side-panel-2.on { flex: var(--dock2-parte, .5) 1 0; width: auto !important; min-width: 200px; max-width: none; }
+/* Só a dock 2 aberta: ela ocupa a área e não há o que dividir. */
+body.dock1-off #splitter-dock2, body.dock1-off #splitter-side { display: none !important; }
+body.dock1-off.no-inputs #side-panel-2.on { flex: 1 1 auto; }
+
+/* Cabeçalho igual nas duas docks: abas à esquerda, ferramentas à direita. */
+.side-panel .side-panel-header, #side-panel-2 .side-panel-header { justify-content: flex-start; gap: 6px; height: 38px; padding: 4px 6px; }
+.side-panel .side-tabs { display: flex; flex: 1 1 auto; min-width: 0; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+.side-panel .side-tabs::-webkit-scrollbar { display: none; }
+.side-panel .side-tabs .st-tab { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; background: transparent; border: 0; border-bottom: 2px solid transparent; border-radius: 3px 3px 0 0; color: #b0b0b0; font: 600 13px/1 "Segoe UI Variable Text", "Segoe UI", sans-serif; box-shadow: none; opacity: 1; }
+.side-panel .side-tabs .st-tab svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.side-panel .side-tabs .st-tab:hover { background: #333; color: #fff; }
+.side-panel .side-tabs .st-tab.on { background: #3a3a3a; color: #fff; border-bottom-color: #2f6fed; box-shadow: none; }
+/* Vermelho só quando grava de verdade. */
+.side-panel .side-tabs .st-tab.live { color: #ff8a80; }
+.side-panel .side-tabs .st-tab.live::after { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #e5484d; }
+.dock-tools { flex: none; display: flex; align-items: center; gap: 2px; padding-left: 6px; border-left: 1px solid #3d3d3d; }
+.side-panel .dock-tools .side-undock-btn { width: 30px; height: 30px; padding: 0; display: grid; place-items: center; background: transparent; border: 1px solid transparent; border-radius: 4px; color: #b0b0b0; }
+.side-panel .dock-tools .side-undock-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.side-panel .dock-tools .side-undock-btn:hover { background: #3a3a3a; border-color: #5a5a5a; color: #fff; }
+.side-panel .dock-tools .dock-fechar:hover { background: #3a2725; border-color: #7c3a33; color: #ffb4a8; }
 
 /* Tudo fechado: a área não fica escura em silêncio, mostra como reabrir. */
-.mid-empty { display: none; position: absolute; inset: 0; align-items: center; justify-content: center; color: #9a9a9a; font-size: 13px; z-index: 1; }
-body.no-inputs:not(:has(#side-panel.on)) .mid-empty { display: flex; }
+.mid-empty { display: none; position: absolute; inset: 0; flex-direction: column; gap: 14px; align-items: center; justify-content: center; color: #b0b0b0; font-size: 15px; z-index: 1; }
+.mid-empty span { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.mid-empty .b { height: 38px; padding: 0 16px; font-size: 13px; font-weight: 600; }
+body.no-inputs:not(:has(#side-panel.on)):not(:has(#side-panel-2.on)) .mid-empty { display: flex; }
 
 /* Rodapé: informações + botões de módulos. */
 .stat { gap: 10px; }
 .stat-info { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; overflow: hidden; }
 .view-toggles { display: flex; align-items: center; gap: 3px; flex: none; }
-.view-toggles .lt { height: 17px; padding: 0 6px; font: 600 10px/15px 'Segoe UI'; background: #242424; border: 1px solid #3d3d3d; border-radius: 3px; color: #8f8f8f; cursor: pointer; }
+.view-toggles .lt { height: 22px; padding: 0 9px; font: 600 12px/20px 'Segoe UI'; background: #242424; border: 1px solid #3d3d3d; border-radius: 3px; color: #8f8f8f; cursor: pointer; }
 .view-toggles .lt:hover { border-color: #777; color: #eee; }
 .view-toggles .lt.on { background: #3a3a3a; border-color: #6a6a6a; color: #f0f0f0; }
 
@@ -113,3 +124,11 @@ body.no-inputs:not(:has(#side-panel.on)) .mid-empty { display: flex; }
 #view-mixer #mixer .bt button { flex: 1; min-width: 0; height: 18px; padding: 0; font: 700 9px/1 'Segoe UI'; background: #303030; border: 1px solid #4a4a4a; border-radius: 3px; color: #d5d5d5; cursor: pointer; }
 #view-mixer #mixer .bt button.on { background: rgba(47,158,95,.2); border-color: #2f9e5f; color: #d9ffe3; }
 
+
+/* Dock sem abas: o módulo continua vivo, só sua apresentação fica oculta. */
+.dock-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; height:100%; padding:16px; box-sizing:border-box; color:#9a9a9a; text-align:center; }
+.dock-empty[hidden] { display:none; }
+
+/* Dentro da dock, só o que é da operação: nome, "abrir janela" e configuração ficam no cabeçalho padrão. */
+.rp-dock .rp-title, .rp-dock .rp-expand, .rp-dock .rp-hint, #view-ptz .ptzc-open, #view-ptz .ptzc-title, .list-dock-head strong { display: none; }
+.rp-dock .rp-head { justify-content: flex-end; }

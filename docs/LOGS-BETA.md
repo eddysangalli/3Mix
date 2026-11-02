@@ -1,12 +1,12 @@
-# Enviar diagnóstico do FreeMix
+# Enviar diagnóstico do 3Mix
 
-1. Na mesa: **Configurar → Gerar ZIP de diagnóstico**. Também fica em **Configurações → Logs para suporte**.
-2. Clique **Gerar ZIP de diagnóstico**, confira a prévia e clique **Baixar ZIP para enviar**.
-3. Envie o arquivo ao responsável por e-mail ou WhatsApp. Nenhum envio automático acontece.
+1. Na mesa: **Relatar problema…**. Também fica em **Configurações › Sobre e suporte**.
+2. Preencha o relato, clique **Gerar pacote** e use **Abrir pasta**.
+3. Envie o ZIP ao responsável. Nenhum envio automático acontece.
 
-Se o FreeMix não abrir ou tiver acabado de fechar por erro, execute **COLETAR-LOGS.cmd** na raiz. O ZIP fica em **obs-vmix/diagnosticos/** nesta árvore de desenvolvimento, ou **diagnosticos/** na distribuição portátil. O BAT seleciona o arquivo no Explorer; não inicia nem reinicia o motor. A coleta não depende da API estar conectada ao OBS.
+Se o 3Mix não abrir ou tiver acabado de fechar por erro, execute **COLETAR-LOGS.cmd** na raiz. O ZIP fica em **obs-vmix/diagnosticos/** nesta árvore de desenvolvimento, ou **diagnosticos/** na distribuição portátil. O BAT seleciona o arquivo no Explorer; não inicia nem reinicia o motor. A coleta não depende da API estar conectada ao OBS.
 
-O pacote reúne logs recentes do motor e plugins, relatórios de crash, nome/apelido da máquina, identificador local, versão, sistema e descrição opcional do problema. Chaves e senhas conhecidas, URLs de servidores, e-mails, IPs e caminhos locais são removidos dos logs. Projetos, configurações completas, mídias, screenshots, documentos pessoais e dumps de memória não entram. Texto livre de um plugin pode conter dados que nenhum filtro consegue identificar: revise a prévia antes de enviar.
+O pacote reúne relato do testador, logs recentes do motor e plugins, erros das telas, relatórios e resumo de crash, placa de vídeo e driver, estado no momento, últimas ações da sessão, hash dos binários, nome/apelido da máquina, identificador local, versão, sistema e descrição opcional do problema. Chaves e senhas conhecidas, URLs de servidores, e-mails, IPs e caminhos locais são removidos dos logs. Projetos, configurações completas, mídias, screenshots, documentos pessoais e dumps de memória não entram. Texto livre de um plugin pode conter dados que nenhum filtro consegue identificar: revise a prévia antes de enviar.
 
 Coleta limitada a 70 logs e 16 MB de texto; até 1 MB por arquivo, mantendo início e final quando grande. O manifesto informa quais logs entraram e quais foram truncados. Até cinco ZIPs gerados são conservados na pasta; logs originais não são apagados. ZIP com hashes SHA256 e CRC conferidos antes de gravar. O nome do arquivo usa horário UTC para evitar confusão entre fusos.
 

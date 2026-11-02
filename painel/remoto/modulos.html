@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3Mix · Módulos</title>
+<script src="3mix-padrao.js"></script>
+<link rel="stylesheet" href="3mix-grafite.css">
+<link rel="stylesheet" href="3mix-padrao.css">
+<style>
+  .lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; }
+  .modulo { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border: 1px solid var(--p3-line); border-radius: 4px; background: var(--p3-field); cursor: pointer; }
+  .modulo:hover { border-color: #6a6a6a; }
+  .modulo:has(input:checked) { border-color: var(--p3-accent); background: #20262f; }
+  .modulo input[type=checkbox] { margin-top: 2px; }
+  .modulo .rotulo { font-size: 14px; font-weight: 700; color: #fff; }
+  .modulo .desc { margin-top: 2px; color: var(--p3-muted); font-size: 12.5px; line-height: 1.4; }
+  #status.ok { color: var(--p3-ok); }
+  #status.err { color: #ffb4a8; }
+</style>
+</head>
+<body class="p3" data-page="modulos">
+<header class="p3-head">
+  <a href="/" title="3Mix"><img class="p3-logo" src="/img/3mix-logo.png" alt="3Mix"></a>
+  <h1>Módulos</h1>
+</header>
+
+<main class="p3-main">
+  <p id="offline-note" class="p3-warn" hidden>Sem conexão com o 3Mix: a seleção atual não pôde ser lida.</p>
+  <section class="p3-card">
+    <div class="p3-card-head">
+      <h2>Módulos ligados</h2>
+      <span class="p3-row">
+        <button type="button" id="all" class="small quiet">Ligar todos</button>
+        <button type="button" id="none" class="small quiet">Desligar todos</button>
+      </span>
+    </div>
+    <div class="lista" id="lista"><p class="p3-note">Lendo…</p></div>
+    <div class="p3-row">
+      <button type="button" id="apply" class="primary" disabled>Aplicar</button>
+      <span id="status" class="p3-note"></span>
+    </div>
+  </section>
+</main>
+<script src="fechar-janela.js"></script>
+<script>
+(() => {
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const lista = document.getElementById('lista'), status = document.getElementById('status'), apply = document.getElementById('apply'), offlineNote = document.getElementById('offline-note');
+  // O que cada módulo é, em uma linha. O efeito técnico de desligar fica no contrato do servidor.
+  const CURTO = {
+    replay: 'Replay com marcação IN/OUT e volta ao vivo.',
+    rundown: 'Roteiro da produção em blocos e passos.',
+    calls: 'Chamadas de vídeo e retornos SRT com N-1.',
+    multiview: 'Grade com todas as câmeras numa tela.',
+    iso: 'Gravação separada de cada entrada.',
+    dataSources: 'Planilhas e feeds ligados a títulos e placares.',
+    srtHdr: 'Envio HDR por SRT, OMT e NDI.',
+    blackbox: 'Guarda os 60 segundos antes de uma falha.',
+    broadcastDelay: 'Atraso de segurança com DUMP.',
+  };
+  const PADRAO = [
+    { id: 'replay', rotulo: 'Replay' }, { id: 'rundown', rotulo: 'Rundown' }, { id: 'calls', rotulo: 'Calls e Retornos N-1' },
+    { id: 'multiview', rotulo: 'Multiview' }, { id: 'iso', rotulo: 'ISO (multigravação por entrada)' }, { id: 'dataSources', rotulo: 'Fontes de Dados' },
+    { id: 'srtHdr', rotulo: 'SRT/NDI avançado (HDR)' }, { id: 'blackbox', rotulo: 'Caixa-Preta de Incidentes' }, { id: 'broadcastDelay', rotulo: 'Broadcast Delay' },
+  ];
+  let definicao = [], atual = {}, salvo = '', carregado = false;
+
+  const assinatura = () => JSON.stringify(definicao.map((item) => [item.id, atual[item.id] !== false]));
+  function render() {
+    lista.innerHTML = definicao.map((item) => `<label class="modulo" data-id="${esc(item.id)}" title="${esc(item.descricao || '')}"><input type="checkbox" ${atual[item.id] !== false ? 'checked' : ''}><div><div class="rotulo">${esc(item.rotulo)}</div><div class="desc">${esc(CURTO[item.id] || item.descricao || '')}</div></div></label>`).join('');
+    dirty();
+  }
+  function dirty() { apply.disabled = !carregado || assinatura() === salvo; }
+
+  async function load() {
+    try {
+      const r = await fetch('/api/modulos', { cache: 'no-store', signal: AbortSignal.timeout(6000) });
+      const d = await r.json();
+      if (!r.ok || d.success !== true) throw new Error(d.error || 'Falha ao ler módulos');
+      definicao = d.definicao; atual = d.modulos; carregado = true;
+      salvo = assinatura();
+      offlineNote.hidden = true;
+    } catch {
+      // Sem conseguir ler, mostra o padrão (tudo ligado) e avisa: nunca afirma um estado que não conhece.
+      carregado = false; definicao = PADRAO; atual = {}; salvo = assinatura();
+      offlineNote.hidden = false;
+    }
+    render();
+  }
+
+  lista.addEventListener('change', (ev) => {
+    const row = ev.target.closest('.modulo'); if (!row) return;
+    atual[row.dataset.id] = ev.target.checked;
+    status.textContent = ''; dirty();
+  });
+  document.getElementById('all').addEventListener('click', () => { for (const item of definicao) atual[item.id] = true; render(); });
+  document.getElementById('none').addEventListener('click', () => { for (const item of definicao) atual[item.id] = false; render(); });
+
+  apply.addEventListener('click', async () => {
+    apply.disabled = true; status.textContent = 'Aplicando…'; status.className = 'p3-note';
+    try {
+      const r = await fetch('/api/modulos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ modulos: atual }), signal: AbortSignal.timeout(6000) });
+      const d = await r.json();
+      if (!r.ok || d.success !== true) throw new Error(d.error || 'Falha ao salvar');
+      atual = d.modulos; salvo = assinatura(); status.textContent = 'Salvo.'; status.className = 'ok'; render();
+    } catch (e) { status.textContent = e.message || 'Falha ao salvar'; status.className = 'err'; dirty(); }
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>

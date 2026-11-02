@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3Mix — Manual do Usuário</title>
+<style>
+:root{
+  --bg:#0f1113; --bg2:#14171a; --panel:#171a1d; --panel2:#1c2024; --line:#2a3036; --line2:#39424a;
+  --tx:#e6ebef; --tx2:#a9b4bc; --tx3:#6f7d86; --cyan:#2f6fed; --amber:#dca900; --green:#34d17b; --red:#e5484d;
+  --shadow:0 18px 40px rgba(0,0,0,.45);
+}
+html[data-theme="light"]{--bg:#f4f6f7;--bg2:#fff;--panel:#fff;--panel2:#eef1f3;--line:#d7dde1;--line2:#bcc6cd;--tx:#14181b;--tx2:#3d474e;--tx3:#6b7880;--shadow:0 10px 28px rgba(20,30,40,.14);}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--tx);font:14px/1.55 "Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;display:flex;flex-direction:column}
+a{color:var(--cyan);text-decoration:none}a:hover{text-decoration:underline}
+code{font:12.5px/1.4 ui-monospace,Consolas,"Cascadia Mono",monospace;background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:1px 5px}
+pre{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow:auto}
+pre code{background:none;border:0;padding:0;font-size:12.5px}
+header.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;height:56px;padding:0 16px;background:color-mix(in srgb,var(--bg2) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:.02em;white-space:nowrap}
+.brand .dot{width:10px;height:10px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px rgba(47,111,237,.8)}
+.brand small{color:var(--tx3);font-weight:600;letter-spacing:.14em;font-size:10px}
+.tabs{display:flex;gap:4px;padding:3px;border:1px solid var(--line2);border-radius:6px;background:var(--panel)}
+.tabs a{padding:5px 11px;border-radius:4px;color:var(--tx3);font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase}
+.tabs a:hover{color:var(--tx);text-decoration:none}
+.tabs a.on{background:var(--cyan);color:#08222a}
+.search{position:relative;flex:1;max-width:520px}
+.search input{width:100%;height:34px;padding:0 34px 0 32px;border-radius:6px;border:1px solid var(--line2);background:var(--panel);color:var(--tx);font:13px inherit}
+.search input:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(47,111,237,.18)}
+.search .ico{position:absolute;left:10px;top:8px;color:var(--tx3);font-size:13px}
+.search kbd{position:absolute;right:8px;top:7px;color:var(--tx3);border:1px solid var(--line2);border-radius:4px;padding:1px 5px;font:10px ui-monospace,monospace}
+.tools{display:flex;gap:6px;margin-left:auto}
+.btn{height:34px;padding:0 12px;border-radius:6px;border:1px solid var(--line2);background:var(--panel);color:var(--tx2);font:12px/1 inherit;font-weight:700;cursor:pointer}
+.btn:hover{color:var(--tx);border-color:var(--cyan)}
+.layout{flex:1;min-height:0;display:grid;grid-template-columns:286px minmax(0,1fr)}
+.layout.no-nav{grid-template-columns:0 minmax(0,1fr)}
+nav{overflow:auto;border-right:1px solid var(--line);background:var(--bg2);padding:14px 12px 40px}
+.nav-cat{margin-bottom:18px}
+.nav-cat-title{display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--tx3)}
+.nav-cat-title span{font-size:10px;background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:1px 7px;color:var(--tx3)}
+.nav-hint{margin:4px 0 8px;font-size:11px;color:var(--tx3)}
+nav ul{list-style:none;margin:0;padding:0}
+nav li{margin:1px 0}
+nav a{display:flex;gap:8px;align-items:flex-start;padding:6px 8px;border-radius:6px;color:var(--tx2);font-size:12.5px;line-height:1.35}
+nav a:hover{background:var(--panel2);color:var(--tx);text-decoration:none}
+nav a.current{background:color-mix(in srgb,var(--cyan) 14%,transparent);color:#eafcff}
+.dot{width:7px;height:7px;margin-top:5px;border-radius:50%;flex:none;background:var(--tx3)}
+.dot-vigente{background:var(--green)}.dot-parcial{background:var(--amber)}.dot-relatorio{background:var(--cyan)}.dot-historico{background:var(--tx3)}
+main{overflow:auto;scroll-behavior:smooth;padding:26px 34px 90px}
+.page{max-width:1180px;margin:0 auto 34px;padding:0 0 26px;border-bottom:1px dashed var(--line)}
+.page:last-child{border-bottom:0}
+.page-head{position:relative;margin-bottom:12px}
+.page-marker{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--tx3);font-size:11px}
+.page-num{display:inline-grid;place-items:center;min-width:26px;height:20px;padding:0 6px;border-radius:4px;background:var(--panel2);border:1px solid var(--line);color:var(--cyan);font:700 11px ui-monospace,monospace}
+.page-cat{letter-spacing:.1em;text-transform:uppercase}
+.page-src{color:var(--tx3);font:11px ui-monospace,monospace;opacity:.8}
+.page-actions{position:absolute;right:0;top:0;display:flex;gap:6px}
+.mini{height:24px;padding:0 9px;border-radius:5px;border:1px solid var(--line2);background:var(--panel);color:var(--tx3);font:11px/1 inherit;font-weight:700;cursor:pointer}
+.mini:hover{color:var(--tx);border-color:var(--cyan)}
+.page-title{margin:6px 0 0;font-size:23px;line-height:1.25;letter-spacing:-.01em}
+.page-note{margin:0 0 12px;padding:9px 11px;border-left:3px solid var(--amber);background:var(--panel);border-radius:0 6px 6px 0;color:var(--tx2);font-size:12.5px}
+.page-body h1{font-size:26px;margin:18px 0 10px}
+.page-body h2{font-size:20px;margin:22px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--line)}
+.page-body h3{font-size:16px;margin:18px 0 6px;color:#dfe8ee}
+.page-body h4{font-size:14px;margin:14px 0 4px;color:var(--tx2)}
+.page-body p{margin:9px 0;color:var(--tx2)}
+.page-body li{margin:4px 0;color:var(--tx2)}
+.page-body strong{color:var(--tx)}
+.page-body hr{border:0;border-top:1px solid var(--line);margin:20px 0}
+.page-body blockquote{margin:12px 0;padding:10px 14px;border-left:3px solid var(--line2);background:var(--panel);border-radius:0 6px 6px 0;color:var(--tx2)}
+.page-body table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12.5px;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.page-body th{text-align:left;padding:8px 10px;background:var(--panel2);border-bottom:1px solid var(--line);color:var(--tx);font-size:11.5px;letter-spacing:.04em;text-transform:uppercase}
+.page-body td{padding:7px 10px;border-bottom:1px solid var(--line);color:var(--tx2);vertical-align:top}
+.page-body tr:last-child td{border-bottom:0}
+.page-body img{max-width:100%}
+.mono{font-family:ui-monospace,Consolas,monospace}
+.results{position:absolute;top:40px;left:0;right:0;max-height:60vh;overflow:auto;background:var(--panel);border:1px solid var(--line2);border-radius:8px;box-shadow:var(--shadow);display:none;z-index:30}
+.results.open{display:block}
+.results a{display:block;padding:9px 12px;border-bottom:1px solid var(--line);color:var(--tx2);font-size:12.5px}
+.results a:hover{background:var(--panel2);color:var(--tx);text-decoration:none}
+.results mark{background:color-mix(in srgb,var(--cyan) 30%,transparent);color:#eafcff;border-radius:3px;padding:0 2px}
+.results .r-head{display:flex;justify-content:space-between;gap:8px;color:var(--tx);font-weight:700}
+.results .r-meta{color:var(--tx3);font-size:11px}
+.hidden-page{display:none}
+.toast{position:fixed;right:18px;bottom:18px;background:var(--panel);border:1px solid var(--cyan);color:var(--tx);padding:9px 13px;border-radius:8px;box-shadow:var(--shadow);opacity:0;transform:translateY(8px);transition:.18s;pointer-events:none;z-index:40}
+.toast.show{opacity:1;transform:none}
+.toc{position:fixed;z-index:45;min-width:230px;max-width:340px;max-height:60vh;overflow:auto;background:var(--panel);border:1px solid var(--line2);border-radius:8px;box-shadow:var(--shadow);padding:8px 0;display:none}
+.toc.open{display:block}
+.toc a{display:block;padding:6px 13px;color:var(--tx2);font-size:12.5px;line-height:1.35}
+.toc a:hover{background:var(--panel2);color:var(--tx);text-decoration:none}
+.toc a.level3{padding-left:26px;color:var(--tx3);font-size:12px}
+.progress{position:fixed;left:0;top:0;height:2px;background:var(--cyan);z-index:50;width:0}
+.callout{margin:14px 0;padding:13px 15px;border:1px solid var(--line2);border-left:3px solid var(--cyan);border-radius:0 8px 8px 0;background:var(--panel)}
+.callout.warn{border-left-color:var(--amber)}
+.callout.good{border-left-color:var(--green)}
+.callout b{display:block;margin-bottom:4px;color:var(--tx);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.callout p{margin:0}
+.steps{counter-reset:step;list-style:none;padding:0;margin:10px 0}
+.steps>li{counter-increment:step;position:relative;padding:0 0 10px 34px;color:var(--tx2)}
+.steps>li::before{content:counter(step);position:absolute;left:0;top:0;width:22px;height:22px;display:grid;place-items:center;border-radius:50%;background:var(--panel2);border:1px solid var(--line2);color:var(--cyan);font:700 11px ui-monospace,monospace}
+.steps>li b{color:var(--tx)}
+.kbd{font:11.5px ui-monospace,Consolas,monospace;border:1px solid var(--line2);border-bottom-width:2px;border-radius:4px;padding:1px 6px;background:var(--panel2);color:var(--tx)}
+@media print{
+  header.top,nav,.page-actions,.results,.toast,.progress,.toc{display:none!important}
+  body{background:#fff;color:#000}
+  .layout{display:block}
+  main{overflow:visible;padding:0}
+  .page{break-after:page;border-bottom:0}
+  .page:last-child{break-after:auto}
+  .page-body table,.page-body pre,.page-body blockquote{break-inside:avoid}
+}
+@media (max-width:900px){.layout{grid-template-columns:1fr}nav{position:fixed;inset:56px 0 0;z-index:15;transform:translateX(-100%);transition:.2s}nav.open{transform:none}.layout.no-nav nav{transform:translateX(-100%)}main{padding:18px 16px 70px}.page-title{font-size:19px}.page-actions{position:static;margin-top:8px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<header class="top">
+  <div class="brand"><span class="dot"></span>3Mix <small>MANUAL DO USUÁRIO</small></div>
+  <div class="tabs"><a href="manual-operador.html" class="on" aria-current="page">Usuário</a><a href="../manual.html" class="">Técnico</a></div>
+  <div class="search">
+    <span class="ico">âŒ•</span>
+    <input id="q" type="search" placeholder="Buscar no manual do usuário ( / )" autocomplete="off">
+    <kbd>/</kbd>
+    <div class="results" id="results"></div>
+  </div>
+  <div class="tools">
+    <button class="btn" id="toggle-nav">Ãndice</button>
+    <button class="btn" id="toggle-theme">Tema</button>
+    <button class="btn" id="print">Imprimir</button>
+  </div>
+</header>
+<div class="layout" id="layout">
+  <nav id="nav"><div class="nav-cat"><div class="nav-cat-title">Começar<span>4</span></div>
+    <p class="nav-hint">Abrir, cortar e montar cena</p>
+    <ul><li><a href="#inicio" data-nav="inicio"><span class="dot dot-vigente"></span>Início — o 3Mix na sua mesa</a></li><li><a href="#01-primeiros-passos" data-nav="01-primeiros-passos"><span class="dot dot-vigente"></span>Primeiros 5 minutos</a></li><li><a href="#02-entrada-programa-preview" data-nav="02-entrada-programa-preview"><span class="dot dot-vigente"></span>Entradas, Preview e Programa</a></li><li><a href="#03-cenas-e-fontes" data-nav="03-cenas-e-fontes"><span class="dot dot-vigente"></span>Cenas e fontes: como criar do jeito certo</a></li></ul></div><div class="nav-cat"><div class="nav-cat-title">Cor<span>1</span></div>
+    <p class="nav-hint">Color Studio e Superfície</p>
+    <ul><li><a href="#05-cor" data-nav="05-cor"><span class="dot dot-vigente"></span>Cor: Color Studio e Superfície</a></li></ul></div><div class="nav-cat"><div class="nav-cat-title">Produção<span>6</span></div>
+    <p class="nav-hint">GC, áudio, replay, overlays, macros, calls</p>
+    <ul><li><a href="#04-gc-titulos" data-nav="04-gc-titulos"><span class="dot dot-vigente"></span>GC, títulos e placar</a></li><li><a href="#06-audio" data-nav="06-audio"><span class="dot dot-vigente"></span>Áudio na prática</a></li><li><a href="#07-replay" data-nav="07-replay"><span class="dot dot-vigente"></span>Replay na prática</a></li><li><a href="#10-macros-atalhos" data-nav="10-macros-atalhos"><span class="dot dot-vigente"></span>Macros, atalhos e controladores</a></li><li><a href="#11-dsk-overlays" data-nav="11-dsk-overlays"><span class="dot dot-vigente"></span>Overlays e DSK</a></li><li><a href="#12-calls-rundown" data-nav="12-calls-rundown"><span class="dot dot-vigente"></span>Calls e rundown</a></li></ul></div><div class="nav-cat"><div class="nav-cat-title">Transmissão e saídas<span>2</span></div>
+    <p class="nav-hint">Checklist, destinos, NDI/SRT</p>
+    <ul><li><a href="#08-transmissao" data-nav="08-transmissao"><span class="dot dot-vigente"></span>Transmissão: o passo a passo</a></li><li><a href="#09-saidas-ndi-srt" data-nav="09-saidas-ndi-srt"><span class="dot dot-vigente"></span>Saídas externas: NDI, OMT, SRT</a></li></ul></div><div class="nav-cat"><div class="nav-cat-title">Dia a dia<span>4</span></div>
+    <p class="nav-hint">Regras de ouro, diagnóstico e atalhos</p>
+    <ul><li><a href="#13-dicas-operacao" data-nav="13-dicas-operacao"><span class="dot dot-vigente"></span>Regras de ouro e dicas de operação</a></li><li><a href="#14-diagnostico" data-nav="14-diagnostico"><span class="dot dot-vigente"></span>Quando algo dá errado</a></li><li><a href="#15-atalhos-rapidos" data-nav="15-atalhos-rapidos"><span class="dot dot-vigente"></span>Atalhos e palavras do dia a dia</a></li><li><a href="#sobre" data-nav="sobre"><span class="dot dot-vigente"></span>Sobre este manual</a></li></ul></div></nav>
+  <main id="main"><section class="page" id="inicio" data-cat="comecar" data-title="Início — o 3Mix na sua mesa">
+  <div class="page-head">
+    <div class="page-marker"><span class="page-num">01</span><span class="page-cat">Começar</span>
+      <span class="badge badge-vigente">Manual do usuário</span></div>
+    <h2 class="page-title">Início — o 3Mix na sua mesa</h2>
+    <div class="page-actions">
+      <button type="button" class="mini" data-toc>TOC</button>
+      <button type="button" class="mini" data-copy="inicio">copiar link</button>
+    </div>
+  </div>
+  <div class="page-body"><p class="page-note">Este é o manual do <b>operador</b>: como usar o 3Mix no dia a dia, o jeito certo de fazer cada coisa
+    e o que fazer quando algo trava. Nada aqui é interno de manutenção.</p>
+    <h3>Em 60 segundos</h3>
+    <ol class="steps">
+      <li><b>Abra</b> pelo <code>INICIAR-3MIX.cmd</code>. O motor sobe minimizado; a interface é o painel web.</li>
+      <li><b>Escolha a entrada</b> na Mesa de corte. Ela entra no <b>Preview</b>.</li>
+      <li><b>Confira no Preview</b>: enquadramento, cor e áudio.</li>
+      <li><b>TAKE</b> quando for ao ar. O que está no ar é <b>Programa</b> e não se desfaz.</li>
+      <li><b>Antes de transmitir</b>: rode o <b>Pré-Flight</b>, ajuste o áudio do Master e salve a chave do destino.</li>
+    </ol>
+    <h3>Onde está cada coisa</h3>
+    <table>
+      <thead><tr><th>Você quer…</th><th>Vá para</th></tr></thead>
+      <tbody>
+        <tr><td>Cortar, ver Preview e Programa</td><td><a href="#02-entrada-programa-preview">Entradas, Preview e Programa</a></td></tr>
+        <tr><td>Montar o desenho do programa</td><td><a href="#03-cenas-e-fontes">Cenas e fontes</a></td></tr>
+        <tr><td>Criar cartaz, titular ou placar</td><td><a href="#04-gc-titulos">GC, títulos e placar</a></td></tr>
+        <tr><td>Corrigir cor da câmera</td><td><a href="#05-cor">Cor: Color Studio e Superfície</a></td></tr>
+        <tr><td>Transmitir com segurança</td><td><a href="#08-transmissao">Transmissão: o passo a passo</a></td></tr>
+        <tr><td>Resolver um problema agora</td><td><a href="#14-diagnostico">Quando algo dá errado</a></td></tr>
+        <tr><td>Guia rápido de teclas e palavras</td><td><a href="#15-atalhos-rapidos">Atalhos e palavras</a></td></tr>
+      </tbody>
+    </table>
+    <h3>Este manual e o outro</h3>
+    <div class="callout good">
+      <b>Dois manuals, um propósito</b>
+      <p><b>Manual do Usuário</b> (esta página): como operar, passo a passo, com dicas.
+      <b>Manual Técnico</b> (<a href="../manual.html">abrir</a>): o que está implementado, com que estado, o que
+      ainda não está pronto e por quê — leitura de manutenção, não de operação.</p>
+    </div>
+    <div class="callout warn">
+      <b>Promessa honesta</b>
+      <p>Onde a-feature ainda não está no motor do operador, o manual diz isso na cara
+      (Mix 2/3/4, por exemplo). Nada aqui promete o que não existe.</p>
+    </div></div>
+</section>
+<section class="page" id="01-primeiros-passos" data-cat="comecar" data-title="Primeiros 5 minutos">
+  <div class="page-head">
+    <div class="page-marker"><span class="page-num">02</span><span class="page-cat">Começar</span>
+      <span class="badge badge-vigente">Manual do usuário</span></div>
+    <h2 class="page-title">Primeiros 5 minutos</h2>
+    <div class="page-actions">
+      <button type="button" class="mini" data-toc>TOC</button>
+      <button type="button" class="mini" data-copy="01-primeiros-passos">copiar link</button>
+    </div>
+  </div>
+  <div class="page-body"><p>Este capítulo é o começo de verdade: abrir o 3Mix, escolher o que entra no ar e gravar.</p>
+<h2 id="01-primeiros-passos-abrir">Abrir</h2>
+<ol>
+<li>Use <strong>INICIAR-3MIX.cmd</strong> na raiz do projeto. Não abra o executável do motor na mão.</li>
+<li>O motor sobe <strong>minimizado na bandeja</strong>. A interface do operador é o painel web, no navegador.</li>
+<li>Abra o <strong>Hub de Operadores</strong> em <code>http://127.0.0.1:18188</code> e escolha um módulo:</li>
+</ol>
+<p>   <strong>Mesa de corte</strong>, <strong>Mixer de áudio</strong>, <strong>Replay</strong>, <strong>Color Studio</strong>, <strong>PTZ</strong>, <strong>Configurações</strong>.</p>
+<ol>
+<li>Confira o indicador <strong>Motor conectado</strong> no topo. Se aparecer &quot;Conectando&quot;, o motor ainda está subindo.</li>
+</ol>
+<h2 id="01-primeiros-passos-os-tres-botoes-que-voce-mais-usa">Os três botões que você mais usa</h2>
+<table><thead><tr><th>Botão</th><th>Onde</th><th>Para quê</th></tr></thead><tbody><tr><td><strong>TAKE</strong></td><td>Mesa de corte</td><td>manda a entrada em Preview para o Programa</td></tr><tr><td><strong>Rec</strong></td><td>Mesa de corte</td><td>começa e para a gravação</td></tr><tr><td><strong>Aplicar</strong></td><td>Color Studio</td><td>grava a correção de cor no motor (só depois de conferir a prévia)</td></tr></tbody></table>
+<h2 id="01-primeiros-passos-olhar-antes-de-mandar-ao-ar">Olhar antes de mandar ao ar</h2>
+<ol>
+<li>Escolha a <strong>entrada</strong> no seletor do topo da Mesa de corte.</li>
+<li>Olhe o <strong>Preview</strong>: é o que está pronto para ir ao ar.</li>
+<li>Olhe o <strong>Programa</strong>: é o que está no ar agora.</li>
+<li>Confira o <strong>Pré-Flight</strong> antes de transmitir: ele lista o que ainda impede a saída.</li>
+</ol>
+<h2 id="01-primeiros-passos-gravar-um-ensaio">Gravar um ensaio</h2>
+<ol>
+<li>Aperte <strong>Rec</strong>.</li>
+<li>Faça a cena.</li>
+<li>Aperte <strong>Rec</strong> de novo para parar.</li>
+<li>Vá em <strong>Replay</strong> para marcar, revirar e exportar.</li>
+</ol>
+<blockquote><p><strong>Dica:</strong> use nomes que você reconheça em dois segundos: <code>CAM 1</code>, <code>GC TITULAR</code>, <code>PLACAR</code>.</p></blockquote>
+<h2 id="01-primeiros-passos-quando-algo-nao-abre">Quando algo não abre</h2>
+<ul>
+<li><strong>Painel em branco ou &quot;Conectando&quot;</strong>: recarregue a página (F5). O painel reconecta sozinho.</li>
+<li><strong>Um módulo não abre</strong>: feche a janela do módulo e abra de novo pelo Hub.</li>
+<li><strong>Motor caiu</strong>: rode <strong>INICIAR-3MIX.cmd</strong> de novo; o projeto, as cenas e as fontes continuam onde estavam.</li>
+</ul></div>
+</section>
+<section class="page" id="02-entrada-programa-preview" data-cat="comecar" data-title="Entradas, Preview e Programa">
+  <div class="page-head">
+    <div class="page-marker"><span class="page-num">03</span><span class="page-cat">Começar</span>
+      <span class="badge badge-vigente">Manual do usuário</span></div>
+    <h2 class="page-title">Entradas, Preview e Programa</h2>
+    <div class="page-actions">
+      <button type="button" class="mini" data-toc>TOC</button>
+      <button type="button" class="mini" data-copy="02-entrada-programa-preview">copiar link</button>
+    </div>
+  </div>
+  <div class="page-body"><p>Entender Preview e Programa é o que separa quem opera de quem fica lost.</p>
+<h2 id="02-entrada-programa-preview-os-dois-lados">Os dois lados</h2>
+<ul>
+<li><strong>Preview</strong>: a entrada que você está preparando. Nada vai ao ar por acidente.</li>
+<li><strong>Programa</strong>: o que está no ar. Cada corte é irreversível no ar.</li>
+</ul>
+<h2 id="02-entrada-programa-preview-trocar-de-entrada">Trocar de entrada</h2>
+<ol>
+<li>Clique no cartão da entrada na <strong>grade de entradas</strong>.</li>
+<li>A entrada entra no Preview.</li>
+<li>Aperte <strong>TAKE</strong> (ou o botão do cartão) para promover ao ar.</li>
+</ol>
+<h2 id="02-entrada-programa-preview-corte-com-fade">Corte com fade</h2>
+<ol>
+<li>Selecione a entrada em Preview.</li>
+<li>Ajuste <strong>Duração</strong> no controle de transição (por exemplo 300 ms).</li>
+<li><strong>TAKE</strong>: a antiga sai em fade enquanto a nova entra.</li>
+</ol>
+<h2 id="02-entrada-programa-preview-regras-que-economizam-susto">Regras que economizam susto</h2>
+<ul>
+<li><strong>Fade curto</strong> (0–100 ms) para corte seco; <strong>300 ms</strong> para mudança de assunto; <strong>1–2 s</strong> para saída de programa.</li>
+<li><strong>AUTO</strong> faz o corte automático quando a entrada está marcada como próxima.</li>
+<li><strong>DUMP</strong> corta imediatamente, sem transição — use só em emergência ou no fim do bloco.</li>
+<li>Confira sempre o <strong>contador de tempo</strong> do programa antes de uma fala longa.</li>
+</ul>
+<h2 id="02-entrada-programa-preview-lista-de-entradas">Lista de entradas</h2>
+<ul>
+<li>A grade mostra <strong>todas as entradas</strong> do projeto, com miniatura quando existe.</li>
+<li>O nome com <em>fonte</em> entre parênteses é a fonte de vídeo real por trás do cartão.</li>
+<li>Entradas de <strong>áudio</strong> aparecem só na lista de áudio do mixer; elas não entram no corte.</li>
+</ul>
+<h2 id="02-entrada-programa-preview-onde-ver-o-que-esta-no-ar">Onde ver o que está no ar</h2>
+<ul>
+<li><strong>MultiView Broadcast</strong>: até 4 fontes ao vivo com rótulo, para conferir enquadramento e programa antes do corte.</li>
+<li><strong>PVW</strong> no MultiView mostra o Preview ao lado do Programa.</li>
+</ul></div>
+</section>
+<section class="page" id="03-cenas-e-fontes" data-cat="comecar" data-title="Cenas e fontes: como criar do jeito certo">
+  <div class="page-head">
+    <div class="page-marker"><span class="page-num">04</span><span class="page-cat">Começar</span>
+      <span class="badge badge-vigente">Manual do usuário</span></div>
+    <h2 class="page-title">Cenas e fontes: como criar do jeito certo</h2>
+    <div class="page-actions">
+      <button type="button" class="mini" data-toc>TOC</button>
+      <button type="button" class="mini" data-copy="03-cenas-e-fontes">copiar link</button>
+    </div>
+  </div>
+  <div class="page-body"><p>Cena é o desenho do programa: quais fontes aparecem, em que ordem e onde.</p>
+<h2 id="03-cenas-e-fontes-criar-uma-cena">Criar uma cena</h2>
+<ol>
+<li>Na <strong>Mesa de corte</strong>, abra o menu da <strong>Coleção de cenas</strong> (o ícone de pastas no canto da lista de cenas).</li>
+<li><strong>Nova cena</strong> dá uma cena vazia chamada &quot;Cena&quot;.</li>
+<li>Renomeie com um nome que diga o que é a cena (&quot;TITULAR 1&quot;, &quot;ENTREVISTA&quot;, &quot;GRAFICO&quot;).</li>
+<li>Adicione as fontes que compõem a cena.</li>
+<li>Posicione e redimensione cada fonte para a composição final.</li>
+<li>Marque a cena como <strong>próxima</strong> ou faça o TAKE dela quando for ao ar.</li>
+</ol>
+<h2 id="03-cenas-e-fontes-adicionar-uma-fonte-a-uma-cena">Adicionar uma fonte a uma cena</h2>
+<ol>
+<li>Com a cena aberta, use <strong>+</strong> na lista de fontes.</li>
+<li>Escolha o tipo:</li>
+<ul>
+<li><strong>Câmera / dispositivo</strong> — uma entrada de vídeo.</li>
+<li><strong>GC / HTML</strong> — um título ou placar.</li>
+<li><strong>Mídia</strong> — vídeo ou imagem.</li>
+<li><strong>Fonte de dados</strong> — texto dinâmico (placar, relógio).</li>
+</ul>
+<li>Renomeie a fonte com um nome de leitura rápida.</li>
+</ol>
+<h2 id="03-cenas-e-fontes-organizar-as-camadas">Organizar as camadas</h2>
+<ul>
+<li>A ordem da lista <strong>é</strong> a ordem de desenho: o primeiro fica por cima.</li>
+<li>Use as setas para subir/descer camadas sem reabrir a cena.</li>
+<li>Evite fontes com o mesmo retângulo: o operador não sabe o que está por cima.</li>
+</ul>
+<h2 id="03-cenas-e-fontes-jeito-certo-de-montar-um-cartaz">Jeito certo de montar um cartaz</h2>
+<ol>
+<li>Crie o título no <strong>GC</strong> (capítulo 4).</li>
+<li>Na cena, adicione o GC como fonte.</li>
+<li>Posicione-o no canto superior, deixando a área do quadro limpa.</li>
+<li>Confirme no Preview: o texto não pode cobrir o rosto do apresentador.</li>
+<li>Faça o TAKE da cena <strong>no corte</strong>, não durante a fala.</li>
+</ol>
+<h2 id="03-cenas-e-fontes-copiar-correcoes-entre-cenas">Copiar correções entre cenas</h2>
+<ul>
+<li>O <strong>Color Studio</strong> copia a correção por <strong>câmera</strong>, não por cena. Ajuste a câmera e o ajuste acompanha todas as cenas que usam aquela fonte.</li>
+</ul></div>
+</section>
+<section class="page" id="05-cor" data-cat="cor" data-title="Cor: Color Studio e Superfície">
+  <div class="page-head">
+    <div class="page-marker"><span class="page-num">05</span><span class="page-cat">Cor</span>
+      <span class="badge badge-vigente">Manual do usuário</span></div>
+    <h2 class="page-title">Cor: Color Studio e Superfície</h2>
+    <div class="page-actions">
+      <button type="button" class="mini" data-toc>TOC</button>
+      <button type="button" class="mini" data-copy="05-cor">copiar link</button>
+    </div>
+  </div>
+  <div class="page-body"><p>Aqui é onde o 3Mix dá controle de cor de verdade: você vê o quadro real, corrige com as mãos e só grava no motor quando estiver bom.</p>
+<h2 id="05-cor-entrar-no-color-studio">Entrar no Color Studio</h2>
+<ol>
+<li>Hub → <strong>Color Studio</strong> (ou o botão <strong>Color</strong> na barra superior).</li>
+<li>Escolha a <strong>entrada</strong> no seletor do topo. O monitor mostra o quadro real daquela câmera.</li>
+<li>Escolha o <strong>escopo</strong> que você quer ler:</li>
+<ul>
+<li><strong>Onda Y</strong> para exposição geral;</li>
+<li><strong>Onda RGB</strong> para ver canais separados;</li>
+<li><strong>Vectorscópio</strong> para croma e pele;</li>
+<li><strong>Histograma</strong> para recorte de branco e preto;</li>
+<li><strong>False Color</strong> para ver zonas estouradas.</li>
+</ul>
+</ol>
+<h2 id="05-cor-ajustar-sem-medo-de-errar">Ajustar sem medo de errar</h2>
+<ol>
+<li>Mova um slider (Luz, Contraste, Saturação, Gamma) ou o RGB (Gain, Lift, Gamma por canal).</li>
+<li>O quadro mostra <strong>prévia local</strong> na hora; os scopes acompanham.</li>
+<li>Nada disso vai ao ar nem entra no motor até você apertar <strong>Aplicar correção</strong>.</li>
+</ol>
+<h2 id="05-cor-superficie-trackballs">Superfície (trackballs)</h2>
+<ol>
+<li>Aperte <strong>Superfície</strong> no topo. O inspetor recolhe e o monitor/scopes ganham espaço.</li>
+<li>Escolha a roda: <strong>Lift</strong> (pretos), <strong>Gamma</strong> (médios) ou <strong>Gain</strong> (brancos).</li>
+<li>Arraste o <strong>ball</strong>: horizontal = R, vertical = B. O <strong>anel</strong> = G.</li>
+<li>O centro da bola é o neutro. Lift só soma, Gain só tira — é o limite real do filtro.</li>
+<li>Os <strong>knobs</strong> do lado (Luz, Contraste, Saturação, Gamma, Hue) são os mesmos controles do inspetor.</li>
+</ol>
+<h2 id="05-cor-atalhos-da-superficie">Atalhos da superfície</h2>
+<table><thead><tr><th>Tecla</th><th>Ação</th></tr></thead><tbody><tr><td><code>1</code> <code>2</code> <code>3</code></td><td>Lift / Gamma / Gain</td></tr><tr><td><code>←</code> <code>→</code></td><td>R da roda</td></tr><tr><td><code>↑</code> <code>↓</code></td><td>B da roda</td></tr><tr><td><code>[</code> <code>]</code></td><td>G (anel)</td></tr><tr><td><code>Shift</code></td><td>ajuste fino</td></tr><tr><td><code>R</code></td><td>reset da roda</td></tr><tr><td><code>N</code></td><td>neutro em tudo</td></tr><tr><td><code>A</code></td><td>aplicar no motor</td></tr><tr><td><code>Z</code> / <code>F</code></td><td>zebra / foco</td></tr><tr><td><code>?</code></td><td>ajuda</td></tr></tbody></table>
+<h2 id="05-cor-zebra-e-foco">Zebra e foco</h2>
+<ul>
+<li><strong>Zebra</strong> marca o que está estourado (acima de 95%): é o alarme de &quot;esticou&quot;.</li>
+<li><strong>Foco</strong> realça as bordas: mostra se o enquadramento está limpo.</li>
+<li>Ambos ficam <strong>só na imagem</strong>; não alteram o sinal.</li>
+</ul>
+<h2 id="05-cor-comparar-com-uma-referencia">Comparar com uma referência</h2>
+<ol>
+<li><strong>Congelar ref.</strong> guarda o quadro atual.</li>
+<li>Ligue <strong>Split</strong> e arraste a <strong>linha dourada</strong> (ou use o slider) para comparar antes/depois.</li>
+<li>Duplo clique na linha volta para 50%.</li>
+</ol>
+<h2 id="05-cor-medir-uma-cor">Medir uma cor</h2>
+<p>Passe o mouse sobre o quadro: aparece RGB, HEX e luma. <strong>Clique copia o HEX</strong> — útil para casar com o design da vinheta.</p>
+<h2 id="05-cor-regras-de-cor">Regras de cor</h2>
+<ul>
+<li><strong>Gain</strong> mexe nos brancos, <strong>Lift</strong> nos pretos, <strong>Gamma</strong> nos médios.</li>
+<li>Se a imagem ficou &quot;lavada&quot;, volte Gain; se ficou sem preto, volte Lift.</li>
+<li>Confira o <strong>False Color</strong> e o <strong>Histograma</strong> antes de aplicar.</li>
+<li>Aplicar cria/atualiza o filtro na <strong>entrada</strong>; não muda o áudio nem coloca nada no ar.</li>
+</ul></div>
+</section>
+<section class="page" id="04-gc-titulos" data-cat="producao" data-title="GC, títulos e placar">
+  <div class="page-head">
+    <div class="page-marker"><span class="page-num">06</span><span class="page-cat">Produção</span>
+      <span class="badge badge-vigente">Manual do usuário</span></div>
+    <h2 class="page-title">GC, títulos e placar</h2>
+    <div class="page-actions">
+      <button type="button" class="mini" data-toc>TOC</button>
+      <button type="button" class="mini" data-copy="04-gc-titulos">copiar link</button>
+    </div>
+  </div>
+  <div class="page-body"><p>O GC (Broadcast Graphics) cria os cartazes, titulares e placares em HTML, com o mesmo visual no ar e na página de Saídas.</p>
+<h2 id="04-gc-titulos-criar-um-titulo">Criar um título</h2>
+<ol>
+<li>Abra <strong>GC e placar</strong>.</li>
+<li><strong>Novo título</strong> abre o editor com um modelo em branco.</li>
+<li>Escreva o texto. Os campos com <code>{{campo}}</code> viram variáveis que você preenche em tempo real.</li>
+<li><strong>Sincronizar HTML compatível</strong> valida o título nos formatos H e V.</li>
+<li><strong>Salvar na biblioteca</strong> guarda o modelo para os próximos blocos.</li>
+</ol>
+<h2 id="04-gc-titulos-usar-um-titulo-no-ar">Usar um título no ar</h2>
+<ol>
+<li>Na cena, adicione <strong>GC / HTML</strong> como fonte e escolha o título da biblioteca.</li>
+<li>Posicione e ajuste o tamanho.</li>
+<li>Se o título tiver variáveis (placar, tarja), preencha antes de mandar ao ar.</li>
+</ol>
+<h2 id="04-gc-titulos-modelos-proprios">Modelos próprios</h2>
+<ul>
+<li>Modelos podem ser sincronizados com o GC do projeto: o mesmo desenho no ar e na página de Saídas.</li>
+<li>Antes de promover um modelo, confira a versão <strong>vertical</strong> (celular) — é onde o texto costuma estourar.</li>
+</ul>
+<h2 id="04-gc-titulos-jeito-certo-de-fazer-um-placar">Jeito certo de fazer um placar</h2>
+<ol>
+<li>Use uma <strong>fonte de dados</strong> com o placar, não texto digitado no GC.</li>
+<li>Vincule o placar à fonte de dados no painel de propriedades.</li>
+<li>Deixe a área do placar pronta antes do bloco: trocar o conteúdo no ar chama atenção.</li>
+</ol>
+<h2 id="04-gc-titulos-erros-comuns">Erros comuns</h2>
+<ul>
+<li><strong>Texto pequeno demais</strong>: em transmissão pequena, o mínimo legível é o dobro do que parece no monitor.</li>
+<li><strong>Sombra/contraste</strong>: fundo semitransparente ajuda, mas texto com sombra dura sempre é melhor.</li>
+<li><strong>Safe area</strong>: use <strong>Máscara 90%</strong> no monitor para conferir o que pode ser cortado pela TV.</li>
+</ul></div>
+</section>
+<section class="page" id="06-audio" data-cat="producao" data-title="Áudio na prática">
+  <div class="page-head">
+    <div class="page-marker"><span class="page-num">07</span><span class="page-cat">Produção</span>
+      <span class="badge badge-vigente">Manual do usuário</span></div>
+    <h2 class="page-title">Áudio na prática</h2>
+    <div class="page-actions">
+      <button type="button" class="mini" data-toc>TOC</button>
+      <button type="button" class="mini" data-copy="06-audio">copiar link</button>
+    </div>
+  </div>
+  <div class="page-body"><p>O 3Mix separa áudio por <strong>canal</strong>, <strong>barramento</strong> e <strong>destino</strong>.</p>
+<h2 id="06-audio-conceitos">Conceitos</h2>
+<ul>
+<li><strong>Canal</strong>: uma entrada de áudio (microfone, retorno, mídia).</li>
+<li><strong>Barramento (Master/A/B)</strong>: para onde o canal vai.</li>
+<li><strong>Ducking</strong>: um canal baixa sozinho quando outro fala.</li>
+<li><strong>Mix</strong>: a mistura que vai para a transmissão.</li>
+</ul>
+<h2 id="06-audio-checks-antes-de-transmitir">Checks antes de transmitir</h2>
+<ol>
+<li>Abra o <strong>Mixer de áudio</strong>.</li>
+<li>Cada microfone que vai ao ar deve estar <strong>no barramento certo</strong>.</li>
+<li>Confira o nível: fala normal fica entre -18 e -6 dB; picos acima de 0 dB causam clip.</li>
+<li>Se um microfone não é usado, <strong>mute</strong> (não deixe aberto por engano).</li>
+</ol>
+<h2 id="06-audio-dicas">Dicas</h2>
+<ul>
+<li><strong>Fale antes de abrir</strong> a trilha: microfone aberto sem fala levanta o ruído de fundo.</li>
+<li>Use <strong>ducking</strong> para entrevistas: quem não fala some do Master sem cortar o microfone.</li>
+<li>Retorno de programa no mixer é perigoso: pode gerar microfonia. Use fone.</li>
+<li>Gravação ISO: grave cada microfone separado; a mixagem final é feita no Replay/Mixer.</li>
+</ul>
+<h2 id="06-audio-audio-por-m-e">Áudio por M/E</h2>
+<p>Ainda <strong>não está disponível no motor do operador</strong>: o conceito existe no código, mas o pacote não foi instalado. Não conte com isso na operação de hoje.</p></div>
+</section>
+<section class="page" id="07-replay" data-cat="producao" data-title="Replay na prática">
+  <div class="page-head">
+    <div class="page-marker"><span class="page-num">08</span><span class="page-cat">Produção</span>
+      <span class="badge badge-vigente">Manual do usuário</span></div>
+    <h2 class="page-title">Replay na prática</h2>
+    <div class="page-actions">
+      <button type="button" class="mini" data-toc>TOC</button>
+      <button type="button" class="mini" data-copy="07-replay">copiar link</button>
+    </div>
+  </div>
+  <div class="page-body"><p>Replay é o Instant Replay: você marca o que aconteceu e revira na hora.</p>
+<h2 id="07-replay-ligar-o-replay">Ligar o replay</h2>
+<ol>
+<li>O botão <strong>Replay</strong> na Mesa liga o <strong>Replay Rec</strong> (buffer circular).</li>
+<li>Assim que liga, o buffer começa a gravar o que está no ar — não precisa marcar nada para ter a última jogada.</li>
+</ol>
+<h2 id="07-replay-marcar-e-revirar">Marcar e revirar</h2>
+<ol>
+<li>Durante o bloco, clique em <strong>marcar</strong> no ponto que você quer rever.</li>
+<li>O marcador entra na <strong>timeline</strong> com o tempo do programa.</li>
+<li>Escolha o marcador e use <strong>Play</strong> para rever; use <strong>Trim/IN-OUT</strong> se quiser encurtar.</li>
+<li><strong>Exportar</strong> grava a seleção em arquivo.</li>
+</ol>
+<h2 id="07-replay-jeito-certo-de-usar">Jeito certo de usar</h2>
+<ul>
+<li><strong>Marque falando</strong>: &quot;gol&quot;, &quot;erro&quot;, &quot;repetiu&quot;. Quem assiste entende sem legenda.</li>
+<li><strong>Deixe um marcador de entrada</strong> antes do bloco: ajuda a achar o início.</li>
+<li><strong>Não apague o marcador errado</strong>: em sessão ao vivo, o marcador mais recente é o seu.</li>
+<li>Se o buffer encher, o sistema mantém a janela configurada; confira em <strong>Replay → Armazenamento</strong> onde está a pasta.</li>
+</ul>
+<h2 id="07-replay-replay-e-gravacao">Replay e gravação</h2>
+<ul>
+<li>Replay e gravação são coisas diferentes: o replay é buffer de replay, a gravação é o arquivo final.</li>
+<li>Replay não substitui a gravação: para guardar a transmissão completa, grave o <strong>programa</strong> com o botão <strong>Rec</strong>.</li>
+</ul></div>
+</section>
+<section class="page" id="10-macros-atalhos" data-cat="producao" data-title="Macros, atalhos e controladores">
+  <div class="page-head">
+    <div class="page-marker"><span class="page-num">09</span><span class="page-cat">Produção</span>
+      <span class="badge badge-vigente">Manual do usuário</span></div>
+    <h2 class="page-title">Macros, atalhos e controladores</h2>
+    <div class="page-actions">
+      <button type="button" class="mini" data-toc>TOC</button>
+      <button type="button" class="mini" data-copy="10-macros-atalhos">copiar link</button>
+    </div>
+  </div>
+  <div class="page-body"><p>Macro é uma sequência gravada de ações (cortar, mixar, colocar GC, iniciar destino).</p>
+<h2 id="10-macros-atalhos-gravar-uma-macro">Gravar uma macro</h2>
+<ol>
+<li><strong>Macros e Automação</strong> → <strong>Nova Macro</strong>.</li>
+<li>Dê o nome da ação (&quot;abrir entrevista&quot;, &quot;voltar ao titular&quot;).</li>
+<li><strong>Preparar no Preview</strong> tudo que a macro vai usar (cena, fonte, GC).</li>
+<li><strong>Gravar</strong>: execute as ações normalmente. O que é clicável fica registrado.</li>
+<li><strong>Salvar</strong>.</li>
+</ol>
+<h2 id="10-macros-atalhos-usar">Usar</h2>
+<ul>
+<li><strong>Executar</strong> a macro na Mesa ou no painel de atalhos.</li>
+<li>Macros não repetem transição: corte e fade <strong>não</strong> são gravados (por segurança). Os passos ficam registrados e você decide o corte.</li>
+</ul>
+<h2 id="10-macros-atalhos-atalhos">Atalhos</h2>
+<ol>
+<li><strong>Atalhos e Controladores</strong> → <strong>Editar Atalho</strong>.</li>
+<li>Escolha <strong>Teclado</strong> ou <strong>MIDI</strong>, a tecla/comando e a ação.</li>
+<li><strong>Tecla global</strong> funciona mesmo com o foco em outro painel.</li>
+</ol>
+<h2 id="10-macros-atalhos-regras-para-nao-errar">Regras para não errar</h2>
+<ul>
+<li>Macro deve ser <strong>idempotente</strong>: rodar duas vezes não deve deixar a mesa torta.</li>
+<li><strong>Evite macros com contagem</strong>: &quot;ir para a próxima cena&quot; depende do estado do momento.</li>
+<li>Teste a macro <strong>com o programa em Preview</strong>, nunca no ar.</li>
+</ul>
+<h2 id="10-macros-atalhos-controladores">Controladores</h2>
+<ul>
+<li>O 3Mix lê <strong>MIDI</strong> (controladoras como Stream Deck): dá para mapear botão físico para TAKE, GC ou macro.</li>
+<li>A caixa de feedback mostra o que o comando realmente fez no motor.</li>
+</ul></div>
+</section>
+<section class="page" id="11-dsk-overlays" data-cat="producao" data-title="Overlays e DSK">
+  <div class="page-head">
+    <div class="page-marker"><span class="page-num">10</span><span class="page-cat">Produção</span>
+      <span class="badge badge-vigente">Manual do usuário</span></div>
+    <h2 class="page-title">Overlays e DSK</h2>
+    <div class="page-actions">
+      <button type="button" class="mini" data-toc>TOC</button>
+      <button type="button" class="mini" data-copy="11-dsk-overlays">copiar link</button>
+    </div>
+  </div>
+  <div class="page-body"><p>Os DSK (Downstream Keyers) são 8 canais de sobreposição <strong>por cima</strong> do programa.</p>
+<h2 id="11-dsk-overlays-quando-usar">Quando usar</h2>
+<ul>
+<li>Chave, logo, tarja, placar: tudo que é <strong>aplicado por cima</strong> sem trocar de cena.</li>
+<li>Se o conteúdo é parte do desenho do programa, use <strong>cena</strong>; se é informação por cima, use DSK.</li>
+</ul>
+<h2 id="11-dsk-overlays-como-ligar">Como ligar</h2>
+<ol>
+<li><strong>Overlays / DSK</strong> no Hub.</li>
+<li>Escolha o canal (1 a 8).</li>
+<li><strong>TAKE</strong> liga a camada; <strong>OFF</strong> desliga.</li>
+<li>Configure a <strong>transição</strong> e o <strong>TIE</strong> quando quiser que o canal siga o corte do programa.</li>
+</ol>
+<h2 id="11-dsk-overlays-jeito-certo">Jeito certo</h2>
+<ul>
+<li><strong>TIE</strong> só para camadas que entram e saem com o programa (ex.: tarja da entrevista).</li>
+<li>Camada <strong>fixa</strong> (placar permanente) fica sem TIE.</li>
+<li><strong>Auto-off</strong> desliga a camada depois de um tempo: evita tarja esquecida no ar.</li>
+<li><strong>Kill All</strong> desliga tudo de uma vez: use quando algo ficou preso no ar.</li>
+</ul>
+<h2 id="11-dsk-overlays-perigo-real">Perigo real</h2>
+<ul>
+<li>Uma camada que ficou ligada <strong>cobre o programa inteiro</strong>. Confira o MultiView depois de TAKE em DSK.</li>
+</ul></div>
+</section>
+<section class="page" id="12-calls-rundown" data-cat="producao" data-title="Calls e rundown">
+  <div class="page-head">
+    <div class="page-marker"><span class="page-num">11</span><span class="page-cat">Produção</span>
+      <span class="badge badge-vigente">Manual do usuário</span></div>
+    <h2 class="page-title">Calls e rundown</h2>
+    <div class="page-actions">
+      <button type="button" class="mini" data-toc>TOC</button>
+      <button type="button" class="mini" data-copy="12-calls-rundown">copiar link</button>
+    </div>
+  </div>
+  <div class="page-body"><h2 id="12-calls-rundown-calls-comunicacao-com-quem-esta-longe">Calls (comunicação com quem está longe)</h2>
+<ol>
+<li><strong>Calls e talkback</strong> no Hub.</li>
+<li>Crie uma <strong>call</strong> por destino (estúdio remoto, região).</li>
+<li>A <strong>talkback</strong> fala para o destino sem sair no ar — o microfone é roteado só para ele.</li>
+<li>Acompanhe quem está na sala pelo indicador.</li>
+</ol>
+<h2 id="12-calls-rundown-rundown-roteiro">Rundown (roteiro)</h2>
+<ol>
+<li><strong>Roteiro / Rundown</strong>.</li>
+<li>Monte a lista de itens do bloco: tema, duração, quem fala, material de apoio.</li>
+<li>Use o <strong>cue</strong> para chamar a atenção de quem está na sala.</li>
+<li>O rundown é <strong>planejamento</strong>: não controla o ar. Quem corta é a Mesa.</li>
+</ol>
+<h2 id="12-calls-rundown-jeito-certo-de-usar">Jeito certo de usar</h2>
+<ul>
+<li>Rundown curto e visível é mais útil que um longo escondido.</li>
+<li>Marque o item &quot;agora&quot; quando mudar de assunto: evita o presenter repetir bloco.</li>
+<li>Calls: <strong>uma pessoa por destino</strong>; várias linhas no mesmo destino se confundem.</li>
+</ul></div>
+</section>
+<section class="page" id="08-transmissao" data-cat="transmissao" data-title="Transmissão: o passo a passo">
+  <div class="page-head">
+    <div class="page-marker"><span class="page-num">12</span><span class="page-cat">Transmissão e saídas</span>
+      <span class="badge badge-vigente">Manual do usuário</span></div>
+    <h2 class="page-title">Transmissão: o passo a passo</h2>
+    <div class="page-actions">
+      <button type="button" class="mini" data-toc>TOC</button>
+      <button type="button" class="mini" data-copy="08-transmissao">copiar link</button>
+    </div>
+  </div>
+  <div class="page-body"><h2 id="08-transmissao-antes-de-transmitir">Antes de transmitir</h2>
+<ol>
+<li><strong>Pré-Flight</strong>: rode a lista e resolva o que estiver marcado.</li>
+<li><strong>Caixa-Preta</strong> (Blackbox): buffer de 60 s de telemetria; se algo travar, ele mostra o que aconteceu.</li>
+<li><strong>Cor</strong>: confira a câmera que vai ao ar no Color Studio (é o que vai para fora, não o que parece no multiview).</li>
+<li><strong>Áudio</strong>: confira os níveis do Master.</li>
+<li><strong>Chave</strong>: salve a chave <strong>antes</strong> de transmitir. A chave pode ser trocada <strong>sem parar nada</strong>.</li>
+</ol>
+<h2 id="08-transmissao-ligar">Ligar</h2>
+<ol>
+<li>Configure o <strong>Destino 1 (Principal)</strong>: URL do servidor RTMP e a chave.</li>
+<li>Aperte <strong>Iniciar transmissão</strong>. O botão fica vermelho quando está no ar.</li>
+<li>Confira o <strong>status</strong> do destino: confirmação de que o motor aceitou.</li>
+</ol>
+<h2 id="08-transmissao-destinos-extras-2-a-5">Destinos extras (2 a 5)</h2>
+<ul>
+<li>Cada destino tem URL, chave, qualidade e origem própria (Programa, Preview, fonte, Clean, MIX 2/3/4).</li>
+<li><strong>Mix 2/3/4 não estão disponíveis no motor do operador hoje</strong> — o painel mostra a opção, mas o motor não implementa. Não programe nada nesses destinos.</li>
+</ul>
+<h2 id="08-transmissao-durante-a-transmissao">Durante a transmissão</h2>
+<ul>
+<li><strong>Contador de tempo</strong> no canto: é o seu tempo no ar.</li>
+<li><strong>Taxa de bits</strong> e <strong>quadros perdidos</strong> no rodapé: se o contador de drop subir, o problema é da rede ou do encoder.</li>
+<li><strong>Reconexão</strong>: o destino tenta reconectar sozinho; o contador de tempo não zera.</li>
+</ul>
+<h2 id="08-transmissao-encerrar">Encerrar</h2>
+<ol>
+<li>Aperte <strong>Parar transmissão</strong> (ou <strong>Parar tudo</strong> se quiser derrubar os destinos).</li>
+<li>Confirme que o destino ficou <strong>parado</strong> no painel de Saídas.</li>
+<li>Guarde o recibo/relatório se foi uma demonstração.</li>
+</ol></div>
+</section>
+<section class="page" id="09-saidas-ndi-srt" data-cat="transmissao" data-title="Saídas externas: NDI, OMT, SRT">
+  <div class="page-head">
+    <div class="page-marker"><span class="page-num">13</span><span class="page-cat">Transmissão e saídas</span>
+      <span class="badge badge-vigente">Manual do usuário</span></div>
+    <h2 class="page-title">Saídas externas: NDI, OMT, SRT</h2>
+    <div class="page-actions">
+      <button type="button" class="mini" data-toc>TOC</button>
+      <button type="button" class="mini" data-copy="09-saidas-ndi-srt">copiar link</button>
+    </div>
+  </div>
+  <div class="page-body"><h2 id="09-saidas-ndi-srt-ndi-e-omt">NDI e OMT</h2>
+<ol>
+<li><strong>Saídas externas</strong> → adicione uma saída (<strong>+</strong>).</li>
+<li>Escolha o protocolo (<strong>NDI</strong> ou <strong>OMT</strong>).</li>
+<li>Dê um <strong>nome de rede</strong> curto e sem acento: é assim que o outro programa vai enxergar.</li>
+<li>Escolha a <strong>origem</strong> do vídeo: Programa, Preview, uma entrada específica ou MIX.</li>
+<li>Ligue a saída. Ela aparece como fonte no NDI/OMT do outro lado.</li>
+</ol>
+<h2 id="09-saidas-ndi-srt-srt">SRT</h2>
+<ol>
+<li>Mesmo caminho; no protocolo <strong>SRT</strong> informe host, porta e <strong>chave de stream</strong> (stream key).</li>
+<li>SRT é ponto a ponto: um lado escuta, o outro envia.</li>
+<li>Para <strong>Retornos SRT &amp; N-1</strong>, o painel mostra quem está chamando quem e o áudio que volta.</li>
+</ol>
+<h2 id="09-saidas-ndi-srt-regras-praticas">Regras práticas</h2>
+<ul>
+<li><strong>Um nome por uso</strong>: <code>PLACAR</code>, <code>CAM2-SRT</code>; nomes vagos causam chamado errado.</li>
+<li><strong>Não apague a saída com alguém consumindo</strong>: o outro lado perde o feed no meio do bloco.</li>
+<li>Se a saída for para dentro da própria casa, prefira <strong>NDI</strong> (latência menor que SRT).</li>
+</ul></div>
+</section>
+<section class="page" id="13-dicas-operacao" data-cat="diaadia" data-title="Regras de ouro e dicas de operação">
+  <div class="page-head">
+    <div class="page-marker"><span class="page-num">14</span><span class="page-cat">Dia a dia</span>
+      <span class="badge badge-vigente">Manual do usuário</span></div>
+    <h2 class="page-title">Regras de ouro e dicas de operação</h2>
+    <div class="page-actions">
+      <button type="button" class="mini" data-toc>TOC</button>
+      <button type="button" class="mini" data-copy="13-dicas-operacao">copiar link</button>
+    </div>
+  </div>
+  <div class="page-body"><p>O que separa uma operação tranquila de uma correria.</p>
+<h2 id="13-dicas-operacao-antes-do-ar">Antes do ar</h2>
+<ul>
+<li>Pré-Flight limpo.</li>
+<li>Cor da câmera <strong>certa</strong> conferida no Preview.</li>
+<li>Nível de áudio do Master conferido.</li>
+<li>Destino principal com URL e chave <strong>já salvos</strong> (trocar a chave não precisa parar nada).</li>
+<li>Roteiro aberto na tela do rundown.</li>
+</ul>
+<h2 id="13-dicas-operacao-durante-o-ar">Durante o ar</h2>
+<ul>
+<li><strong>Preview</strong> é onde você prepara; <strong>Programa</strong> é sagrado. Nada de mexer no que está no ar sem querer.</li>
+<li><strong>Fade</strong> curto para corte, longo para troca de assunto.</li>
+<li><strong>Contador de tempo</strong> à vista.</li>
+<li><strong>Uma pessoa na Mesa</strong>: quem fala não mexe no corte.</li>
+</ul>
+<h2 id="13-dicas-operacao-depois-do-ar">Depois do ar</h2>
+<ul>
+<li>Parar a transmissão e <strong>confirmar</strong> que parou.</li>
+<li>Marcar o replay do que vale guardar.</li>
+<li>Se foi demonstração: exportar o log/diagnóstico e guardar o recibo.</li>
+</ul>
+<h2 id="13-dicas-operacao-erros-que-eu-mais-vejo">Erros que eu mais vejo</h2>
+<table><thead><tr><th>Erro</th><th>Como evitar</th></tr></thead><tbody><tr><td>&quot;mudou&quot; na entrada</td><td>o motor estava reconectando: espere o indicador estabilizar antes de cortar</td></tr><tr><td>microfonia</td><td>retorno de programa ligado no mixer</td></tr><tr><td>tarja no ar</td><td>confira o DSK depois do TAKE</td></tr><tr><td>chave não salvou</td><td>salve <strong>antes</strong> de iniciar a transmissão</td></tr><tr><td>quadro travado no ar</td><td>o buffer de replay estava cheio: veja o espaço em Replay</td></tr></tbody></table>
+<h2 id="13-dicas-operacao-ritmo">Ritmo</h2>
+<ul>
+<li>Fala em bloco: <strong>uma ideia por corte</strong>.</li>
+<li>Corte na pausa, não no meio da frase.</li>
+<li>Deixe o respiro: 2–3 segundos entre blocos dão o trabalho de quem está assistindo.</li>
+</ul></div>
+</section>
+<section class="page" id="14-diagnostico" data-cat="diaadia" data-title="Quando algo dá errado">
+  <div class="page-head">
+    <div class="page-marker"><span class="page-num">15</span><span class="page-cat">Dia a dia</span>
+      <span class="badge badge-vigente">Manual do usuário</span></div>
+    <h2 class="page-title">Quando algo dá errado</h2>
+    <div class="page-actions">
+      <button type="button" class="mini" data-toc>TOC</button>
+      <button type="button" class="mini" data-copy="14-diagnostico">copiar link</button>
+    </div>
+  </div>
+  <div class="page-body"><p>Diagnóstico por sintoma. Nenhum passo abaixo mexe no ar.</p>
+<table><thead><tr><th>Sintoma</th><th>O que fazer</th></tr></thead><tbody><tr><td>Painel mostra &quot;Conectando&quot;</td><td>recarregue (F5); se persistir, reinicie pelo INICIAR-3MIX.cmd</td></tr><tr><td>Motor caiu</td><td>rode INICIAR-3MIX.cmd; projeto e cenas continuam</td></tr><tr><td>&quot;Esta entrada mudou&quot; ao abrir o editor</td><td>o motor reconectou: clique na entrada de novo</td></tr><tr><td>Cor não mudou na câmera</td><td>você mexeu na <strong>prévia</strong>; falta <strong>Aplicar correção</strong></td></tr><tr><td>Cor mudou e sumiu</td><td>o filtro foi removido ou desativado: veja &quot;Filtro ativo&quot; no Color Studio</td></tr><tr><td>Destino não conecta</td><td>confira URL, porta e chave; o log do destino mostra o erro do servidor</td></tr><tr><td>Transmissão cai e volta</td><td>rede ou encoder: veja quadros perdidos no rodapé e o log do plugin</td></tr><tr><td>Áudio sumiu no ar</td><td>o canal saiu do barramento certo: confira o Mixer</td></tr><tr><td>Áudio com microfonia</td><td>retorno de programa aberto no mixer</td></tr><tr><td>Replay sem material</td><td>o buffer não estava ligado (Replay Rec) ou a sessão foi apagada</td></tr><tr><td>GC em branco</td><td>o título não sincronizou: use &quot;Sincronizar HTML compatível&quot;</td></tr><tr><td>Tela do 3Mix não abre</td><td>o motor abre minimizado por padrão; use o ícone da bandeja</td></tr></tbody></table>
+<h2 id="14-diagnostico-onde-olhar">Onde olhar</h2>
+<ul>
+<li><strong>Caixa-Preta (Blackbox)</strong>: buffer de 60 s de telemetria do motor.</li>
+<li><strong>Diagnósticos</strong>: gera um ZIP local e sanitizado com logs de motor, API e plugins.</li>
+<li><strong>Logs da API</strong>: <code>3mix-runtime/config/obs-studio/plugin_config/freemix-control/api-error.log</code>.</li>
+<li><strong>Recibo de QA</strong>: <code>qa-beta/recibos</code> (leitura de manutenção, não do operador).</li>
+</ul>
+<h2 id="14-diagnostico-antes-de-culpar-o-3mix">Antes de culpar o 3Mix</h2>
+<ol>
+<li>O motor está conectado?</li>
+<li>A fonte existe e tem quadro?</li>
+<li>O destino tem URL/chave?</li>
+<li>O erro aparece no log?</li>
+</ol></div>
+</section>
+<section class="page" id="15-atalhos-rapidos" data-cat="diaadia" data-title="Atalhos e palavras do dia a dia">
+  <div class="page-head">
+    <div class="page-marker"><span class="page-num">16</span><span class="page-cat">Dia a dia</span>
+      <span class="badge badge-vigente">Manual do usuário</span></div>
+    <h2 class="page-title">Atalhos e palavras do dia a dia</h2>
+    <div class="page-actions">
+      <button type="button" class="mini" data-toc>TOC</button>
+      <button type="button" class="mini" data-copy="15-atalhos-rapidos">copiar link</button>
+    </div>
+  </div>
+  <div class="page-body"><p>Referência de bolso. Os atalhos dependem do painel com o foco; os <strong>globais</strong> funcionam em qualquer tela.</p>
+<h2 id="15-atalhos-rapidos-atalhos-globais-funcionam-em-qualquer-painel">Atalhos globais (funcionam em qualquer painel)</h2>
+<table><thead><tr><th>Atalho</th><th>Ação</th></tr></thead><tbody><tr><td><code>F1</code> … <code>F8</code></td><td>TAKE dos canais 1 a 8 (mapeamento típico)</td></tr><tr><td><code>Shift</code> + <code>F*</code></td><td>CUT sem transição</td></tr><tr><td><code>Ctrl</code> + <code>Shift</code> + <code>F*</code></td><td>TAKE com fade</td></tr></tbody></table>
+<blockquote><p>Confira o que está ligado em <strong>Atalhos e Controladores</strong>: o mapeamento muda com a instalação, esta tabela é um exemplo típico.</p></blockquote>
+<h2 id="15-atalhos-rapidos-mesa-de-corte">Mesa de corte</h2>
+<table><thead><tr><th>Atalho</th><th>Ação</th></tr></thead><tbody><tr><td><code>Space</code></td><td>TAKE do Preview</td></tr><tr><td><code>A</code></td><td>alternar AUTO</td></tr><tr><td><code>D</code></td><td>DUMP</td></tr><tr><td><code>←</code> <code>→</code></td><td>fonte anterior/seguinte do Preview</td></tr><tr><td><code>F9</code></td><td>abrir/ocultar o Multiview</td></tr></tbody></table>
+<h2 id="15-atalhos-rapidos-color-studio-superficie">Color Studio / Superfície</h2>
+<table><thead><tr><th>Atalho</th><th>Ação</th></tr></thead><tbody><tr><td><code>1</code> <code>2</code> <code>3</code></td><td>Lift / Gamma / Gain</td></tr><tr><td><code>←</code> <code>→</code> <code>↑</code> <code>↓</code></td><td>R e B da roda</td></tr><tr><td><code>[</code> <code>]</code></td><td>G (anel)</td></tr><tr><td><code>Shift</code></td><td>fino</td></tr><tr><td><code>R</code> <code>N</code> <code>A</code></td><td>reset / neutro / aplicar</td></tr><tr><td><code>Z</code> <code>F</code></td><td>zebra / foco</td></tr><tr><td><code>?</code></td><td>ajuda</td></tr></tbody></table>
+<h2 id="15-atalhos-rapidos-palavras-que-valem">Palavras que valem</h2>
+<table><thead><tr><th>Palavra</th><th>Significado</th></tr></thead><tbody><tr><td><strong>Preview / PVW</strong></td><td>o que está pronto</td></tr><tr><td><strong>Programa / PGM</strong></td><td>o que está no ar</td></tr><tr><td><strong>TAKE</strong></td><td>promover o Preview ao ar</td></tr><tr><td><strong>CUT</strong></td><td>troca sem transição</td></tr><tr><td><strong>Fade</strong></td><td>troca com transição</td></tr><tr><td><strong>AUTO</strong></td><td>corte automático na próxima fonte</td></tr><tr><td><strong>DUMP</strong></td><td>corte imediato</td></tr><tr><td><strong>DSK</strong></td><td>camada por cima do programa</td></tr><tr><td><strong>GC</strong></td><td>títulos e placares</td></tr><tr><td><strong>Replay / Instant</strong></td><td>buffer de replay</td></tr><tr><td><strong>Pre-flight</strong></td><td>lista de segurança antes de transmitir</td></tr><tr><td><strong>Mix 2/3/4</strong></td><td>switchers independentes — <strong>ainda não disponíveis no motor</strong></td></tr></tbody></table></div>
+</section>
+<section class="page" id="sobre" data-cat="diaadia" data-title="Sobre este manual">
+  <div class="page-head">
+    <div class="page-marker"><span class="page-num">17</span><span class="page-cat">Dia a dia</span>
+      <span class="badge badge-vigente">Manual do usuário</span></div>
+    <h2 class="page-title">Sobre este manual</h2>
+    <div class="page-actions">
+      <button type="button" class="mini" data-toc>TOC</button>
+      <button type="button" class="mini" data-copy="sobre">copiar link</button>
+    </div>
+  </div>
+  <div class="page-body"><h3>Como ele é feito</h3>
+    <p>Cada capítulo é um arquivo markdown em <code>docs/usuario/capitulos/</code>. O gerador
+    (<code>node docs/usuario/gerar-manual-operador.mjs</code>) transforma esses arquivos nesta página única.
+    O texto se edita no markdown; o HTML é resultado, nunca se edita na mão.</p>
+    <h3>O que ele cobre</h3>
+    <ul>
+      <li><b>Operação</b>: o que o operador faz, em ordem, com atalho e dica.</li>
+      <li><b>Jeito certo</b>: a receita recomendada para cada tarefa (criar cena, montar cartaz, ajustar cor, transmitir).</li>
+      <li><b>Diagnóstico</b>: sintoma → o que fazer, sem mexer no ar.</li>
+    </ul>
+    <h3>Regra editorial</h3>
+    <ol>
+      <li>Se a feature não está no motor do operador, o manual diz <b>não está disponível</b>.</li>
+      <li>Nada de jargão sem explicação: cada palavra técnica aparece na tabela do capítulo 15.</li>
+      <li>Nenhum passo de diagnóstico toca o ar.</li>
+    </ol>
+    <h3>Quando algo muda no produto</h3>
+    <p>Atualize o capítulo correspondente, rode o gerador e a auditoria de páginas. O recibo
+    <code>qa-beta/recibos/manual-online-20261101.md</code> registra o que foi publicado.</p></div>
+</section></main>
+</div>
+<div class="toast" id="toast"></div>
+<div class="toc" id="toc"></div>
+<script>
+(function(){
+  var pages = Array.prototype.slice.call(document.querySelectorAll('.page'));
+  var nav = document.getElementById('nav');
+  var main = document.getElementById('main');
+  var q = document.getElementById('q');
+  var results = document.getElementById('results');
+  var toc = document.getElementById('toc');
+  var toast = document.getElementById('toast');
+  var toastTimer = 0;
+  function showToast(text){ toast.textContent = text; toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(function(){ toast.classList.remove('show'); }, 1800); }
+  function normalize(text){ return (text || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+  function runSearch(){
+    var term = normalize(q.value.trim());
+    results.innerHTML = '';
+    if(term.length < 2){ results.classList.remove('open'); pages.forEach(function(p){ p.classList.remove('hidden-page'); }); return; }
+    var hits = [];
+    pages.forEach(function(page){
+      var body = page.querySelector('.page-body');
+      var text = normalize(body.innerText);
+      var count = text.split(term).length - 1;
+      if(!count) return;
+      var idx = text.indexOf(term);
+      var start = Math.max(0, idx - 70);
+      var snippet = (body.innerText.slice(start, start + 190) || '').replace(/\s+/g,' ').trim();
+      hits.push({ page: page, count: count, snippet: snippet });
+    });
+    pages.forEach(function(p){ p.classList.add('hidden-page'); });
+    hits.forEach(function(hit){ hit.page.classList.remove('hidden-page'); });
+    if(!hits.length){ results.innerHTML = '<a href="#"><span class="r-head">Nada encontrado</span></a>'; }
+    else {
+      results.innerHTML = hits.map(function(hit){
+        var title = hit.page.dataset.title || hit.page.id;
+        var safe = q.value.trim().replace(/[.*+?^$(){}|[\]\\]/g, '\\$&');
+        var snippet = hit.snippet.replace(new RegExp('(' + safe + ')', 'ig'), '<mark>$1</mark>');
+        return '<a href="#' + hit.page.id + '" data-hit="' + hit.page.id + '"><span class="r-head">' + title + '<span class="r-meta">' + hit.count + ' ocorrÃªncia(s)</span></span><span>' + snippet + '</span></a>';
+      }).join('');
+    }
+    results.classList.add('open');
+  }
+  q.addEventListener('input', runSearch);
+  q.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ q.value=''; runSearch(); q.blur(); } });
+  document.addEventListener('keydown', function(e){
+    if(e.key === '/' && document.activeElement !== q){ e.preventDefault(); q.focus(); q.select(); }
+  });
+  results.addEventListener('click', function(e){ var a = e.target.closest('a[data-hit]'); if(a){ results.classList.remove('open'); q.value=''; runSearch(); } });
+  toc.addEventListener('click', function(e){ if(e.target.closest('a')) toc.classList.remove('open'); });
+  document.addEventListener('click', function(e){
+    var tocBtn = e.target.closest('[data-toc]');
+    if(tocBtn){
+      var page = tocBtn.closest('.page');
+      var items = Array.prototype.slice.call(page.querySelectorAll('.page-body h2, .page-body h3'));
+      if(!items.length){ toc.classList.remove('open'); return; }
+      toc.innerHTML = items.map(function(h){
+        return '<a href="#' + h.id + '" data-level="' + (h.tagName === 'H3' ? 3 : 2) + '">' + (h.textContent || '') + '</a>';
+      }).join('');
+      var rect = tocBtn.getBoundingClientRect();
+      toc.style.top = (rect.bottom + 8) + 'px';
+      toc.style.left = Math.max(12, Math.min(rect.left - 130, window.innerWidth - 360)) + 'px';
+      toc.classList.add('open');
+      e.stopPropagation();
+      return;
+    }
+    if(!e.target.closest('.search')) results.classList.remove('open');
+    if(!e.target.closest('#toc') && !e.target.closest('[data-toc]')) toc.classList.remove('open');
+    var copy = e.target.closest('[data-copy]');
+    if(copy){
+      var url = location.origin + location.pathname + '#' + copy.dataset.copy;
+      if(navigator.clipboard) navigator.clipboard.writeText(url).then(function(){ showToast('Link copiado: ' + url); }, function(){ showToast(url); });
+      else showToast(url);
+    }
+  });
+  document.getElementById('toggle-nav').addEventListener('click', function(){ document.getElementById('layout').classList.toggle('no-nav'); });
+  document.getElementById('toggle-theme').addEventListener('click', function(){
+    var next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('3mix.manual.theme', next); } catch (e) {}
+  });
+  try { var saved = localStorage.getItem('3mix.manual.theme'); if(saved) document.documentElement.setAttribute('data-theme', saved); } catch (e) {}
+  document.getElementById('print').addEventListener('click', function(){ window.print(); });
+  var links = Array.prototype.slice.call(nav.querySelectorAll('a[data-nav]'));
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(!entry.isIntersecting) return;
+      var id = entry.target.id;
+      links.forEach(function(link){ link.classList.toggle('current', link.dataset.nav === id); });
+    });
+  }, { root: main, rootMargin: '-10% 0px -80% 0px' });
+  pages.forEach(function(p){ observer.observe(p); });
+  main.addEventListener('scroll', function(){
+    var max = main.scrollHeight - main.clientHeight;
+    document.getElementById('progress').style.width = (max > 0 ? (main.scrollTop / max) * 100 : 0) + '%';
+  });
+  if(location.hash){
+    var id = decodeURIComponent(location.hash.replace(/^#/, ''));
+    var target = id ? document.getElementById(id) : null;
+    if(target) setTimeout(function(){ target.scrollIntoView({ block: 'start' }); }, 60);
+  }
+})();
+</script>
+</body>
+</html>

@@ -14,8 +14,9 @@ export async function acquireStartupLock(root,{name='launcher',timeoutMs=60000}=
  let waitingLogged=false;
  while(true){await noLinks(path);try{const handle=await open(path,'wx',0o600);await handle.writeFile(JSON.stringify({format:1,pid:process.pid,identity,token,startedAt:Date.now()}));await handle.close();return async()=>{await noLinks(path);const current=JSON.parse(await readFile(path,'utf8').catch(()=>'{"token":null}'));if(current.token===token)await unlink(path).catch(e=>{if(e.code!=='ENOENT')throw e;});};}catch(e){if(e.code!=='EEXIST')throw e;}
   const stat=await lstat(path).catch(e=>{if(e.code==='ENOENT')return null;throw e;});if(!stat)continue;if(!stat.isFile()||stat.size>4096)throw Error('Registro de abertura inválido');let current;try{current=JSON.parse(await readFile(path,'utf8'));}catch{if(Date.now()-stat.mtimeMs<5000&&Date.now()<deadline){await delay(100);continue;}throw Error('Registro de abertura incompleto; aguarde a primeira abertura e tente novamente');}
-  if(current.identity!==identity||!Number.isInteger(current.pid)||current.pid<1)throw Error('Registro de abertura pertence a outra instalação');let alive=true;try{process.kill(current.pid,0);}catch(e){if(e.code==='ESRCH')alive=false;}
-  if(!alive){await noLinks(path);const unchanged=JSON.parse(await readFile(path,'utf8'));if(unchanged.token===current.token)await unlink(path);continue;}
+  let alive=false;if(Number.isInteger(current?.pid)&&current.pid>0){try{process.kill(current.pid,0);alive=true;}catch(e){if(e.code==='ESRCH')alive=false;else alive=true;}}
+  if(!alive){await noLinks(path);await unlink(path).catch(e=>{if(e.code!=='ENOENT')throw e;});continue;}
+  if(current.identity!==identity||!Number.isInteger(current.pid)||current.pid<1)throw Error('Registro de abertura pertence a outra instalação ativa (PID: '+current.pid+')');
   if(!waitingLogged){await startupRecord(root,name+'-waiting',{ownerPid:current.pid});waitingLogged=true;}
   if(Date.now()>deadline)throw Error('Outra abertura desta instalação ainda está em andamento. Aguarde e use a janela existente; nenhum processo foi encerrado.');await delay(200);
  }

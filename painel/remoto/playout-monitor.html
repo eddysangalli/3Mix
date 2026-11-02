@@ -9,7 +9,7 @@
 body {
   margin: 0;
   padding: 12px;
-  background: #090c0f;
+  background: #0c0c0c;
   color: #e1e7ef;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   height: 100vh;
@@ -21,7 +21,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 2px solid #1f2730;
+  border-bottom: 2px solid #272727;
   padding-bottom: 8px;
   margin-bottom: 12px;
 }
@@ -36,8 +36,8 @@ body {
 }
 .badge-readonly {
   font-size: 10px;
-  background: #242c35;
-  border: 1px solid #44515e;
+  background: #2c2c2c;
+  border: 1px solid #515151;
   color: #8c9ba8;
   padding: 2px 6px;
   border-radius: 3px;
@@ -53,15 +53,15 @@ body {
 .mon-main {
   display: flex;
   flex-direction: column;
-  background: #11161b;
-  border: 1px solid #28333e;
+  background: #252525;
+  border: 1px solid #414141;
   border-radius: 4px;
   padding: 16px;
   justify-content: space-between;
 }
 .mon-screen {
   background: #000;
-  border: 1px solid #1f2730;
+  border: 1px solid #272727;
   border-radius: 4px;
   flex: 1;
   display: flex;
@@ -80,7 +80,7 @@ body {
   position: absolute;
   top: 12px;
   left: 12px;
-  background: #dc2626;
+  background: #b02a1f;
   color: #fff;
   font-weight: 900;
   font-size: 12px;
@@ -106,8 +106,8 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-top: 16px;
-  background: #0a0e12;
-  border: 1px solid #1f2937;
+  background: #0e0e0e;
+  border: 1px solid #2a2a2a;
   padding: 12px 16px;
   border-radius: 4px;
 }
@@ -118,22 +118,22 @@ body {
   letter-spacing: 1px;
 }
 .time-rem {
-  color: #ef4444;
+  color: #b02a1f;
 }
 .time-cur {
-  color: #10b981;
+  color: #1f7233;
 }
 .progress-wrap {
   height: 10px;
   background: #000;
-  border: 1px solid #374151;
+  border: 1px solid #414141;
   border-radius: 2px;
   margin-top: 8px;
   overflow: hidden;
 }
 .progress-bar {
   height: 100%;
-  background: #dc2626;
+  background: #b02a1f;
   width: 0%;
 }
 .clip-info {
@@ -149,7 +149,7 @@ body {
 }
 .clip-file {
   font-size: 12px;
-  color: #94a3b8;
+  color: #909090;
   margin-top: 2px;
   white-space: nowrap;
   overflow: hidden;
@@ -164,22 +164,22 @@ body {
   min-height: 0;
 }
 .next-box {
-  background: #11161b;
-  border: 1px solid #00e676;
+  background: #252525;
+  border: 1px solid #1f7233;
   border-radius: 4px;
   padding: 12px;
 }
 .next-label {
   font-size: 11px;
   font-weight: 800;
-  color: #00e676;
+  color: #1f7233;
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
 .next-title {
   font-size: 14px;
   font-weight: 700;
-  color: #f1f5f9;
+  color: #ededed;
   margin-top: 4px;
   white-space: nowrap;
   overflow: hidden;
@@ -187,14 +187,14 @@ body {
 }
 .next-dur {
   font-size: 12px;
-  color: #94a3b8;
+  color: #909090;
   font-family: Consolas, monospace;
   margin-top: 2px;
 }
 .list-box {
   flex: 1;
-  background: #11161b;
-  border: 1px solid #28333e;
+  background: #252525;
+  border: 1px solid #414141;
   border-radius: 4px;
   padding: 12px;
   display: flex;
@@ -211,19 +211,19 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 6px 8px;
-  border-bottom: 1px solid #242b32;
+  border-bottom: 1px solid #353535;
   font-size: 11px;
 }
 .list-item.is-pgm {
-  background: #450a0a;
-  border-left: 3px solid #ff3b30;
-  color: #fca5a5;
+  background: #3a1512;
+  border-left: 3px solid #b02a1f;
+  color: #e8a89f;
   font-weight: 700;
 }
 .list-item.is-pv {
-  background: #004d00;
-  border-left: 3px solid #00e676;
-  color: #a7f3d0;
+  background: #14321d;
+  border-left: 3px solid #1f7233;
+  color: #9fd4ad;
   font-weight: 700;
 }
 </style>
@@ -234,7 +234,7 @@ body {
     <span>3Mix Pro · Playout Remote Monitor</span>
     <span class="badge-readonly">SOMENTE LEITURA</span>
   </div>
-  <div style="font-size: 12px; color: #94a3b8;">
+  <div style="font-size: 12px; color: #909090;">
     <span id="conn-stat">Conectando…</span> · <span id="clock">00:00:00</span>
   </div>
 </div>
@@ -260,11 +260,11 @@ body {
 
     <div class="mon-timer-block">
       <div>
-        <div style="font-size: 10px; color: #94a3b8; font-weight: 700;">DECORRIDO</div>
+        <div style="font-size: 10px; color: #909090; font-weight: 700;">DECORRIDO</div>
         <div id="timer-cur" class="time-num time-cur">00:00:00</div>
       </div>
       <div style="text-align: right;">
-        <div style="font-size: 10px; color: #94a3b8; font-weight: 700;">TEMPO RESTANTE</div>
+        <div style="font-size: 10px; color: #909090; font-weight: 700;">TEMPO RESTANTE</div>
         <div id="timer-rem" class="time-num time-rem">-00:00:00</div>
       </div>
     </div>
@@ -281,7 +281,7 @@ body {
     <div class="list-box">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <span style="font-weight: 700; font-size: 12px; color:#cbd5e1;">Playlist Atual</span>
-        <span id="list-name" style="font-size: 11px; color:#00e676; font-weight:700;">--</span>
+        <span id="list-name" style="font-size: 11px; color:#1f7233; font-weight:700;">--</span>
       </div>
       <div id="list-scroll" class="list-scroll">
         <!-- Itens da lista -->

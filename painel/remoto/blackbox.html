@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>3Mix Pro · Caixa-Preta de Incidentes (Blackbox)</title>
+<script src="3mix-padrao.js"></script>
 <link rel="stylesheet" href="3mix-tipografia.css">
 <link rel="stylesheet" href="blackbox.css">
 </head>
@@ -15,25 +16,18 @@
     <span class="bb-mod active" aria-current="page">Caixa-Preta</span>
   </nav>
   <span class="bb-project" title="Projeto em uso">
-    Projeto: <b id="project-name">—</b><span class="bb-caret" aria-hidden="true">▾</span>
+    Projeto: <b id="project-name">—</b>
   </span>
   <div class="bb-top-right">
-    <div class="bb-win" aria-label="Controles da janela">
-      <button type="button" class="bb-wb" disabled title="Controle da janela pelo Windows">–</button>
-      <button type="button" class="bb-wb" disabled title="Controle da janela pelo Windows">□</button>
-      <button type="button" class="bb-wb close" id="win-close" title="Fechar janela" aria-label="Fechar janela"
-        onclick="window.FreeMixClosePanel ? window.FreeMixClosePanel() : (window.close ? window.close() : null)">×</button>
-    </div>
   </div>
 </header>
 
 <main class="bb-main">
   <section class="bb-pagehead">
     <div>
-      <h1>CAIXA-PRETA DE INCIDENTES (BLACKBOX)
+      <h1>Caixa-preta
         <span class="bb-ring-badge">RING BUFFER CIRCULAR 60s ATIVO</span>
       </h1>
-      <p class="bb-sub">Gravação contínua de telemetria em ring buffer · snapshot instantâneo dos últimos 60 segundos</p>
     </div>
     <button type="button" class="bb-btn" id="btn-refresh" onclick="fetchBlackbox()"
       aria-label="Atualizar os dados da caixa-preta">⟳ Atualizar</button>

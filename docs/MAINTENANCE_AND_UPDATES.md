@@ -1,12 +1,12 @@
-# Manutenção, Ciclo de Vida e Atualização de Complementos do FreeMix Studio
+# Manutenção, Ciclo de Vida e Atualização de Complementos do 3Mix Studio
 
-Este documento estabelece o procedimento operacional e automatizado para verificação de integridade, diagnóstico e atualização dos plugins integrados e do motor `libobs` no FreeMix Studio, eliminando a necessidade de procedimentos manuais complexos ("malabarismos").
+Este documento estabelece o procedimento operacional e automatizado para verificação de integridade, diagnóstico e atualização dos plugins integrados e do motor `libobs` no 3Mix Studio, eliminando a necessidade de procedimentos manuais complexos ("malabarismos").
 
 ---
 
 ## 1. Arquitetura de Complementos e Isolamento
 
-O FreeMix Studio utiliza o motor `libobs` em conjunto com um ecossistema de plugins broadcast homologados. Cada componente possui responsabilidade estrita para evitar sobreposição ou colisões de recursos:
+O 3Mix Studio utiliza o motor `libobs` em conjunto com um ecossistema de plugins broadcast homologados. Cada componente possui responsabilidade estrita para evitar sobreposição ou colisões de recursos:
 
 | Componente | Função Principal | DLL / Runtime | Pasta de Dados |
 | :--- | :--- | :--- | :--- |
@@ -37,11 +37,11 @@ powershell -ExecutionPolicy Bypass -File "ferramentas/verificar-atualizacoes.ps1
    - `[ATUALIZADO]`: versão local corresponde à última release estável.
    - `[NOVA VERSÃO DISPONÍVEL]`: há uma versão mais recente na nuvem com link de download direto do asset x64.
    - `[OPCIONAL (NÃO INSTALADO)]`: componentes adicionais opcionais (ex: NDI DistroAV).
-4. **Exportação Estruturada:** Gera `config/plugins-status.json` para alimentação automática da interface do FreeMix Studio.
+4. **Exportação Estruturada:** Gera `config/plugins-status.json` para alimentação automática da interface do 3Mix Studio.
 
 ---
 
-## 3. Como Atualizar Componentes Sem Afetar o FreeMix
+## 3. Como Atualizar Componentes Sem Afetar o 3Mix
 
 ### Atualizando um Plugin Específico:
 Para atualizar ou instalar um plugin diretamente do GitHub mantendo a estrutura íntegra:
@@ -52,10 +52,10 @@ powershell -ExecutionPolicy Bypass -File "ferramentas/verificar-atualizacoes.ps1
 ### Atualizando a Base do OBS Studio (quando sair nova versão estável):
 1. Baixe o pacote zip da release oficial do OBS Studio x64 (ex: `OBS-Studio-33.x.x-Windows.zip`).
 2. Extraia apenas as pastas de runtime sobre a pasta de distribuição:
-   - `bin/64bit/` (atualiza `obs.dll`, bibliotecas FFmpeg, etc., preservando `FreeMix.exe`)
+   - `bin/64bit/` (atualiza `obs.dll`, bibliotecas FFmpeg, etc., preservando `FreeMix.exe` — nome de binário interno, renomear exige rebuild do motor)
    - `data/libobs/` e `data/obs-studio/`
 3. Execute o script de empacotamento com recompilação automática:
    ```powershell
    powershell -ExecutionPolicy Bypass -File "ferramentas/empacotar.ps1"
    ```
-4. O empacotador recompila o executável nativo `FreeMix.exe`, injeta os metadados oficiais e o ícone PE, e gera o pacote `.zip` final sem qualquer perda de configuração.
+4. O empacotador recompila o executável nativo `FreeMix.exe` (nome de binário interno; renomear exige rebuild do motor), injeta os metadados oficiais e o ícone PE, e gera o pacote `.zip` final sem qualquer perda de configuração.

@@ -3,203 +3,185 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Macros e Automação</title>
-<link rel="stylesheet" href="vmix-dialogo.css">
+<title>3Mix · Automação</title>
+<script src="3mix-padrao.js"></script>
+<link rel="stylesheet" href="3mix-grafite.css">
+<link rel="stylesheet" href="3mix-padrao.css">
 <style>
-.vd-status table { width: 100%; border-collapse: collapse; }
-.vd-status th, .vd-status td { padding: 4px 8px; border: 1px solid #39444d; text-align: left; font-size: 11px; }
-.vd-status th { background: #26303a; font-weight: 700; position: sticky; top: 0; z-index: 1; }
-.vd-status td button { height: 20px; font-size: 11px; padding: 0 4px; min-width: 24px; margin-right: 2px; }
-#items button { width: 100%; height: 26px; text-align: left; padding: 0 8px; border: 0; border-bottom: 1px solid #1a2228; background: transparent; color: #fff; font: 12px 'Segoe UI',sans-serif; cursor: default; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#items button:hover { background: #1b242b; }
-details summary { cursor: pointer; font-weight: 700; color: #fff; padding: 4px 0; outline: none; }
-details summary:hover { color: #1e7fd6; }
-fieldset { border: 1px solid #39444d; padding: 6px 10px; margin: 4px 0; background: #12171b; }
-fieldset legend { font-weight: 700; font-size: 11px; color: #9aa6b0; padding: 0 4px; }
+  .au { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 16px; align-items: start; }
+  .au-list { padding: 12px; gap: 10px; }
+  #items { display: flex; flex-direction: column; gap: 2px; max-height: 420px; overflow: auto; }
+  #items:empty::before { content: "Nenhuma macro."; color: var(--p3-dim); font-size: 13px; padding: 8px; }
+  .p3 #items button { width: 100%; justify-content: flex-start; background: transparent; border: 1px solid transparent; overflow: hidden; text-overflow: ellipsis; }
+  .p3 #items button:hover:not(:disabled) { background: #2d2d2d; border-color: transparent; }
+  .p3 #items button.selected, .p3 #items button.vd-on { background: #2f3436; border-color: var(--p3-accent); box-shadow: inset 3px 0 var(--p3-accent); color: #fff; }
+  .au-rec { border-top: 1px solid var(--p3-line-soft); padding-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .au-rec-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .au-step { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
+  .au-step > .p3-field { flex: 1 1 170px; min-width: 150px; }
+  .au-step > .p3-field.short { flex: 0 1 110px; min-width: 90px; }
+  .au-step textarea { min-height: 76px; }
+  .au-step > label:not(.p3-field) { display: flex; flex-direction: column; gap: 6px; flex: 1 1 100%; color: #ddd; font-size: 13.5px; font-weight: 600; }
+  #steps-wrap { min-height: 110px; max-height: 300px; }
+  #steps td:last-child { white-space: nowrap; text-align: right; }
+  #steps-wrap:has(#steps tbody:empty)::after { content: "Sem passos."; display: block; padding: 18px; text-align: center; color: var(--p3-dim); }
+  .p3 #steps td button { min-width: 30px; padding: 0 8px; }
+  .au-cond { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
+  .au-cond > * { flex: 1 1 140px; }
+  .au-cond > button { flex: 0 0 auto; }
+  .au-foot { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; border-top: 1px solid var(--p3-line-soft); padding-top: 14px; }
+  .au-foot > label { display: inline-flex; align-items: center; gap: 8px; color: #ddd; font-size: 13.5px; font-weight: 600; margin-right: auto; }
+  #triggers td:last-child:not([colspan]) { white-space: nowrap; text-align: right; }
+  @media (max-width: 860px) { .au { grid-template-columns: 1fr; } #items { max-height: 180px; } }
 </style>
 </head>
-<body data-page="macros" class="vd">
-<div class="vd-window vd-fill">
-  <div class="vd-strip">
-    <span class="vd-title">Macros e Automação</span>
-    <span class="vd-flex"></span>
-    <span id="job" class="vd-note" style="font-size:11px"></span>
-    <span id="connection" class="vd-note" style="font-size:11px">Conectando…</span>
-  </div>
+<body data-page="macros" class="p3">
+<header class="p3-head">
+  <a href="/" title="3Mix"><img class="p3-logo" src="/img/3mix-logo.png" alt="3Mix"></a>
+  <h1>Automação</h1>
+  <span class="p3-flex"></span>
+  <span id="job" class="p3-note"></span>
+  <span id="connection">Conectando…</span>
+</header>
 
-  <p id="error" class="vd-msg vd-error" hidden role="alert" style="margin:4px 12px"></p>
+<main class="p3-main">
+  <p id="error" hidden role="alert"></p>
 
-  <div class="vd-main">
-    <nav class="vd-side" aria-label="Lista de Macros" style="width:200px">
-      <div style="padding:6px 8px;display:flex;gap:4px;background:#151c22;border-bottom:1px solid #26303a">
-        <button id="new" class="vd-on" style="flex:1;height:24px;min-width:0;padding:0 6px">+ Nova Macro</button>
-        <button id="stop" class="vd-warn" style="height:24px;min-width:0;padding:0 6px" title="Parar execução">■ Parar</button>
+  <div class="au">
+    <aside class="p3-card au-list" aria-label="Macros">
+      <button type="button" id="new" class="primary">Nova macro</button>
+      <div id="items"></div>
+      <div class="au-rec">
+        <div class="p3-row" style="justify-content:space-between">
+          <span class="p3-note">Gravar ações</span>
+          <span id="record-status" class="p3-note">Parada</span>
+        </div>
+        <div class="au-rec-btns">
+          <button type="button" id="record-start" class="small">Gravar</button>
+          <button type="button" id="record-stop" class="small">Salvar</button>
+        </div>
       </div>
-      <div id="items" style="flex:1;overflow-y:auto"></div>
-      <div style="padding:6px 8px;border-top:1px solid #26303a;background:#151c22">
-        <div style="font-weight:700;font-size:10px;color:#9aa6b0;margin-bottom:4px">GRAVAÇÃO DE AÇÕES</div>
-        <div class="vd-inline" style="gap:4px">
-          <button id="record-start" style="height:22px;padding:0 4px;font-size:11px">● Gravar</button>
-          <button id="record-stop" style="height:22px;padding:0 4px;font-size:11px">■ Salvar</button>
-        </div>
-        <div id="record-status" class="vd-note" style="font-size:10px;margin-top:2px">Parada</div>
+    </aside>
+
+    <section class="p3-card">
+      <label class="p3-field">Nome
+        <input id="name" maxlength="80" placeholder="Ex.: Abertura do programa" spellcheck="false">
+      </label>
+
+      <div class="au-step">
+        <label class="p3-field">Adicionar passo
+          <select id="action">
+            <option value="preview">Mandar para o Preview</option>
+            <option value="cut">Cortar para a entrada</option>
+            <option value="fade">Fade para a entrada</option>
+            <option value="active">Direto no Programa</option>
+            <option value="overlay">Ligar DSK</option>
+            <option value="wait">Esperar</option>
+            <option value="audio_mute">Mudo da entrada</option>
+            <option value="audio_volume">Volume da entrada</option>
+            <option value="audio_bus">Enviar a um barramento</option>
+            <option value="media">Controlar VT</option>
+          </select>
+        </label>
+        <label id="input-field" class="p3-field">Entrada
+          <select id="input"></select>
+        </label>
+        <label id="value-field" class="p3-field short">Valor
+          <input id="value" type="number" value="500">
+        </label>
+        <label id="bus-field" class="p3-field short" hidden>Barramento
+          <select id="bus"><option>M</option><option>A</option><option>B</option></select>
+        </label>
+        <label id="toggle-field" class="p3-field short" hidden>Estado
+          <select id="toggle"><option value="true">Ligado</option><option value="false">Desligado</option></select>
+        </label>
+        <label id="command-field" class="p3-field short" hidden>VT
+          <select id="command">
+            <option value="PLAY">Play</option>
+            <option value="PAUSE">Pausar</option>
+            <option value="RESTART">Reiniciar</option>
+            <option value="STOP">Parar</option>
+            <option value="NEXT">Próximo</option>
+            <option value="PREVIOUS">Anterior</option>
+          </select>
+        </label>
+        <button type="button" id="add">Adicionar</button>
       </div>
-    </nav>
 
-    <div class="vd-pane">
-      <div class="vd-body">
-        <div class="vd-row">
-          <span>Nome da Macro</span>
-          <div class="vd-inline" style="flex:1">
-            <input id="name" maxlength="80" placeholder="Nome da macro (ex: Abertura do Programa)" spellcheck="false">
-          </div>
+      <div class="p3-table-wrap" id="steps-wrap">
+        <table id="steps">
+          <thead><tr><th style="width:44px">#</th><th style="width:32%">Ação</th><th>Detalhes</th><th style="width:130px"></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <details>
+        <summary>Só executar o último passo se…</summary>
+        <div class="au-cond">
+          <select id="condition-field" aria-label="Condição">
+            <option value="recording">Gravando</option>
+            <option value="streaming">Transmitindo</option>
+            <option value="connected">Motor conectado</option>
+            <option value="program">Nome no Programa</option>
+            <option value="preview">Nome no Preview</option>
+            <option value="input.muted">Entrada no mudo</option>
+            <option value="input.volume">Volume da entrada</option>
+            <option value="input.program">Entrada no Programa</option>
+            <option value="input.preview">Entrada no Preview</option>
+            <option value="input.exists">Entrada existe</option>
+            <option value="call.connected">Call conectado</option>
+            <option value="data.error">Fonte de dados com erro</option>
+          </select>
+          <select id="condition-operator" aria-label="Comparação">
+            <option value="eq">igual a</option>
+            <option value="ne">diferente de</option>
+            <option value="gt">maior que</option>
+            <option value="gte">maior ou igual a</option>
+            <option value="lt">menor que</option>
+            <option value="lte">menor ou igual a</option>
+            <option value="contains">contém</option>
+          </select>
+          <input id="condition-value" value="true" spellcheck="false" aria-label="Valor">
+          <button type="button" id="condition-add">Aplicar</button>
         </div>
+      </details>
 
-        <div class="vd-row">
-          <span>Adicionar Passo</span>
-          <div class="vd-inline" style="flex-wrap:wrap;gap:6px">
-            <select id="action" class="vd-short" style="width:170px">
-              <option value="preview">Preparar no Preview</option>
-              <option value="cut">Cut para Entrada</option>
-              <option value="fade">Fade para Entrada</option>
-              <option value="active">Programa Direto</option>
-              <option value="overlay">Canal de Overlay</option>
-              <option value="wait">Esperar (delay)</option>
-              <option value="audio_mute">Mute de Áudio</option>
-              <option value="audio_volume">Volume de Áudio</option>
-              <option value="audio_bus">Enviar ao Barramento</option>
-              <option value="media">Controle de Mídia</option>
-            </select>
-
-            <label id="input-field" class="vd-inline" style="gap:4px">
-              <span style="font-weight:700">Entrada:</span>
-              <select id="input" style="max-width:180px"></select>
-            </label>
-
-            <label id="value-field" class="vd-inline" style="gap:4px">
-              <span style="font-weight:700">Valor (ms/canal):</span>
-              <input id="value" type="number" value="500" style="width:65px">
-            </label>
-
-            <label id="bus-field" class="vd-inline" style="gap:4px" hidden>
-              <span style="font-weight:700">Bus:</span>
-              <select id="bus" style="width:60px"><option>M</option><option>A</option><option>B</option></select>
-            </label>
-
-            <label id="toggle-field" class="vd-inline" style="gap:4px" hidden>
-              <span style="font-weight:700">Estado:</span>
-              <select id="toggle" style="width:85px"><option value="true">Ligado</option><option value="false">Desligado</option></select>
-            </label>
-
-            <label id="command-field" class="vd-inline" style="gap:4px" hidden>
-              <span style="font-weight:700">Mídia:</span>
-              <select id="command" style="width:100px">
-                <option value="PLAY">Play</option>
-                <option value="PAUSE">Pausar</option>
-                <option value="RESTART">Reiniciar</option>
-                <option value="STOP">Parar</option>
-                <option value="NEXT">Próximo</option>
-                <option value="PREVIOUS">Anterior</option>
-              </select>
-            </label>
-
-            <button id="add" class="vd-on">+ Passo</button>
-          </div>
+      <details>
+        <summary>Disparar sozinha quando…</summary>
+        <div class="p3-grid">
+          <label class="p3-field">Evento<select id="trigger-event"></select></label>
+          <label class="p3-field">Macro<select id="trigger-macro"></select></label>
+          <label class="p3-field">Nome<input id="trigger-name" maxlength="80" spellcheck="false"></label>
+          <label class="p3-field">Grupo<input id="trigger-group" maxlength="80"></label>
+          <label class="p3-field">Intervalo mínimo (ms)<input id="trigger-debounce" type="number" value="250" min="0" max="60000"></label>
         </div>
-
-        <div class="vd-status vd-grow" style="margin:4px 0;min-height:140px;max-height:220px;overflow-y:auto">
-          <table id="steps">
-            <thead>
-              <tr>
-                <th style="width:30px">#</th>
-                <th style="width:30%">Ação</th>
-                <th style="width:50%">Entrada / Parâmetros</th>
-                <th style="width:70px">Ordem</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
+        <div class="p3-row" style="margin:12px 0">
+          <label class="p3-check"><input id="trigger-condition" type="checkbox"> Exigir a condição acima</label>
+          <label class="p3-check"><input id="trigger-enabled" type="checkbox"> Ativo</label>
+          <span class="p3-flex"></span>
+          <button type="button" id="trigger-save">Criar gatilho</button>
+        </div>
+        <div class="p3-table-wrap" style="max-height:200px">
+          <table>
+            <thead><tr><th>Nome</th><th>Evento → macro</th><th>Estado</th><th></th></tr></thead>
+            <tbody id="triggers"></tbody>
           </table>
         </div>
+      </details>
 
-        <!-- Condições do Passo -->
-        <fieldset>
-          <legend>Condição (Executar passo somente se)</legend>
-          <div class="vd-inline" style="flex-wrap:wrap;gap:6px">
-            <select id="condition-field" style="width:140px">
-              <option value="recording">Gravando</option>
-              <option value="streaming">Transmitindo</option>
-              <option value="connected">Motor Conectado</option>
-              <option value="program">Nome no Programa</option>
-              <option value="preview">Nome no Preview</option>
-              <option value="input.muted">Entrada Mutada</option>
-              <option value="input.volume">Volume da Entrada</option>
-              <option value="input.program">Entrada no Programa</option>
-              <option value="input.preview">Entrada no Preview</option>
-              <option value="input.exists">Entrada Existe</option>
-              <option value="call.connected">Call Conectado</option>
-              <option value="data.error">Fonte de Dados com Erro</option>
-            </select>
-            <select id="condition-operator" style="width:110px">
-              <option value="eq">Igual (=)</option>
-              <option value="ne">Diferente (!=)</option>
-              <option value="gt">Maior (&gt;)</option>
-              <option value="gte">Maior ou Igual (&gt;=)</option>
-              <option value="lt">Menor (&lt;)</option>
-              <option value="lte">Menor ou Igual (&lt;=)</option>
-              <option value="contains">Contém</option>
-            </select>
-            <input id="condition-value" value="true" style="width:90px" spellcheck="false">
-            <button id="condition-add">Condicionar Último Passo</button>
-          </div>
-        </fieldset>
-
-        <!-- Gatilhos de Automação -->
-        <details class="vd-advanced" style="margin-top:6px">
-          <summary>Gatilhos de Automação (Disparar macro por evento)</summary>
-          <div class="vd-row">
-            <span>Novo Gatilho</span>
-            <div class="vd-inline" style="flex-wrap:wrap;gap:6px">
-              <input id="trigger-name" maxlength="80" placeholder="Nome do gatilho" spellcheck="false" style="max-width:160px">
-              <select id="trigger-event" style="max-width:160px"></select>
-              <select id="trigger-macro" style="max-width:140px"></select>
-              <input id="trigger-group" maxlength="80" placeholder="Grupo (opcional)" style="width:100px">
-              <input id="trigger-debounce" type="number" value="250" min="0" max="60000" style="width:50px" title="Debounce ms"> ms
-              <label class="vd-check"><input id="trigger-condition" type="checkbox"> Condição</label>
-              <label class="vd-check"><input id="trigger-enabled" type="checkbox"> Ativo</label>
-              <button id="trigger-save" class="vd-on">Criar Gatilho</button>
-            </div>
-          </div>
-          <div class="vd-status" style="margin:4px 0;max-height:120px;overflow-y:auto">
-            <table>
-              <thead>
-                <tr>
-                  <th>Nome / Grupo</th>
-                  <th>Evento → Macro</th>
-                  <th>Estado</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody id="triggers"></tbody>
-            </table>
-          </div>
-        </details>
-
-        <p id="status" class="vd-msg" role="status" style="margin-left:0"></p>
+      <div class="au-foot">
+        <button type="button" id="save" class="primary">Salvar</button>
+        <button type="button" id="run">Executar</button>
+        <button type="button" id="stop">Parar</button>
+        <button type="button" id="remove" class="danger">Excluir</button>
       </div>
-    </div>
+      <p id="status" role="status"></p>
+    </section>
   </div>
-
-  <div class="vd-bar">
-    <button id="save" class="vd-on">Salvar</button>
-    <button id="run">Executar Macro</button>
-    <button id="remove" class="vd-warn">Excluir Macro</button>
-    <span class="vd-flex"></span>
-    <button id="close-btn" onclick="window.FreeMixClosePanel ? window.FreeMixClosePanel() : window.close()">Fechar</button>
-  </div>
-</div>
+</main>
 
 <script src="fechar-janela.js"></script>
 <script src="controle.js"></script>
-<script src="macros.js"></script>
+<script src="macros.js?v=20261101p"></script>
 </body>
 </html>

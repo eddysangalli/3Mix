@@ -6,7 +6,7 @@ Dono: agente `transportes_rede_conclusao`. Root integra, compila e empacota em s
 
 O SDK Windows de `plugins/decklink/win/decklink-sdk` contém `bmdFormat10BitRGBXLE`, `bmdFrameContainsHDRMetadata`, `IDeckLinkVideoFrameMetadataExtensions`, `BMDDeckLinkSupportsHDRMetadata`, `BMDDeckLinkSupportsColorspaceMetadata`, `BMDDeckLinkSupportedDynamicRange`, `DoesSupportVideoMode` e a indicação `bmdDisplayModeColorspaceRec2020`. Não falta uma licença de SDK para escrever esta rota. A homologação da placa, driver e sinal físico continua necessária.
 
-A rota FreeMix atual força SDR e BGRA8. O plugin original decide HDR pelo canvas global e anuncia EOTF PQ com pico global. Nenhuma dessas decisões serve para uma view HDR independente de origem real enquanto o monitor principal permanece SDR.
+A rota 3Mix atual força SDR e BGRA8. O plugin original decide HDR pelo canvas global e anuncia EOTF PQ com pico global. Nenhuma dessas decisões serve para uma view HDR independente de origem real enquanto o monitor principal permanece SDR.
 
 No libobs deste checkout, a saída R10L direta não tem conversão implementada e a textura cairia em BGRA8. A implementação usará view P416 HDR de16bits com renderização float; no plugin, YUV444 limitado Rec2020 será convertido em RGBX10LE sem passar por8bits. O formato de dez bits e o suporte do driver serão comprovados antes de iniciar. HDR com keyer/alpha será recusado.
 

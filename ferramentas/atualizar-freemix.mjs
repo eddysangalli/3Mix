@@ -14,7 +14,7 @@ async function closed(root){if(process.platform!=='win32')return;
   const ids=execFileSync('tasklist.exe',['/FO','CSV','/NH'],{encoding:'utf8',windowsHide:true,timeout:10000}).split(/\r?\n/).map(line=>line.match(/^"(?:FreeMix|obs64|node|powershell|pwsh)\.exe","(\d+)"/i)?.[1]).filter(id=>id&&Number(id)!==process.pid);
   if(!ids.length)return;
   const rows=JSON.parse(execFileSync(join(root,'runtime/freemix-process-info.exe'),ids,{encoding:'utf8',windowsHide:true,timeout:10000}));
-  if(rows.some(p=>!p.exited&&(!p.path||resolve(p.path).toLowerCase().startsWith(root.toLowerCase()+ '\\'))))throw Error('Feche o FreeMix e seu ajudante antes de atualizar');
+  if(rows.some(p=>!p.exited&&(!p.path||resolve(p.path).toLowerCase().startsWith(root.toLowerCase()+ '\\'))))throw Error('Feche o 3Mix e seu ajudante antes de atualizar');
 }
 export async function inspect(root,pkg,key){root=resolve(root);pkg=resolve(pkg);const raw=await readFile(join(pkg,'manifest.json')),sig=await readFile(join(pkg,'manifest.sig'));
  if(!verify(null,raw,key,sig))throw Error('Assinatura da versão inválida');const m=JSON.parse(raw);if(m.format!==1||typeof m.version!=='string'||!Array.isArray(m.files)||!m.files.length||m.files.length>40000)throw Error('Manifesto inválido');

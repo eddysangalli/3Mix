@@ -3,7 +3,7 @@
  'use strict';
  const valid=id=>typeof id==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
  function uniqueSources(list){const seen=new Set();return list.filter(s=>{const identity=valid(s.key)?'uuid:'+s.key:'name:'+s.name+'\0'+s.kind;if(seen.has(identity))return false;seen.add(identity);return true;});}
- function sceneMatches(context,target){return Boolean(context?.on&&target?.scope&&context.scope===target.scope&&valid(target.ownerKey)&&context.sceneKeys?.[target.owner]===target.ownerKey);}
+ function sceneMatches(context,target){return Boolean(context?.on&&(context.scope||'')===(target?.scope||'')&&valid(target.ownerKey)&&context.sceneKeys?.[target.owner]===target.ownerKey);}
  function create({context,request,publish,deadlineMs=5000}){
   let intent=null,querying=false,opening=false;
   const output=(stage,message,extra={})=>{const s=Object.freeze({stage,message,pending:Boolean(intent),...(intent?{sourceKey:intent.key,sourceName:String(intent.name||'').slice(0,160),kind:intent.kind}:{}),...extra,zOrderVerified:false});publish(s);return s;};
@@ -29,7 +29,7 @@
     const items=await call(i,'GetSceneItemList',{sceneUuid:i.ownerKey});
     const source=Array.isArray(items?.sceneItems)&&items.sceneItems.find(s=>s.sourceUuid===i.key&&s.inputKind);if(!source)throw Error('EDITOR_SOURCE_REMOVED');
     if(typeof source.sourceName==='string')i.name=source.sourceName;
-    const collection=await call(i,'GetSceneCollectionList',{});if(collection?.currentSceneCollectionName!==i.scope)throw Error('EDITOR_CONTEXT_CHANGED');
+    const collection=await call(i,'GetSceneCollectionList',{});if(i.scope&&collection?.currentSceneCollectionName!==i.scope)throw Error('EDITOR_CONTEXT_CHANGED');
     check(i);dispatched=true;output('opening','Abrindo a janela no motor…');
     await call(i,i.kind==='filters'?'OpenInputFiltersDialog':'OpenInputPropertiesDialog',{inputUuid:i.key});
     output('accepted','O motor recebeu o pedido. Conferindo a janela…');return await observe(true);

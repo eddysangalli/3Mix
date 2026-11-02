@@ -5,9 +5,13 @@ import{AudioBusesEngine,BUS_KIND}from'./audio-buses-producao.mjs';
 
 export const AUDIO_FILTERS={
  gain:{kind:'gain_filter',name:'FreeMix Audio - Gain',defaults:{db:0},ranges:{db:[-30,30]}},
+ eq:{kind:'basic_eq_filter',name:'FreeMix Audio - EQ 3 bandas',defaults:{low:0,mid:0,high:0},ranges:{low:[-20,20],mid:[-20,20],high:[-20,20]}},
  gate:{kind:'noise_gate_filter',name:'FreeMix Audio - Gate',defaults:{open_threshold:-26,close_threshold:-32,attack_time:25,hold_time:200,release_time:150},ranges:{open_threshold:[-60,0],close_threshold:[-60,0],attack_time:[0,10000,true],hold_time:[0,10000,true],release_time:[0,10000,true]}},
  compressor:{kind:'compressor_filter',name:'FreeMix Audio - Compressor',defaults:{ratio:4,threshold:-18,attack_time:6,release_time:60,output_gain:0},ranges:{ratio:[1,32],threshold:[-60,0],attack_time:[1,100,true],release_time:[1,1000,true],output_gain:[-30,30]}},
- limiter:{kind:'limiter_filter',name:'FreeMix Audio - Limiter',defaults:{threshold:-6,release_time:60},ranges:{threshold:[-60,0],release_time:[1,1000,true]}}
+ limiter:{kind:'limiter_filter',name:'FreeMix Audio - Limiter',defaults:{threshold:-6,release_time:60},ranges:{threshold:[-60,0],release_time:[1,1000,true]}},
+ rnnoise:{kind:'noise_suppress_filter',name:'FreeMix Audio - RNNoise (IA)',defaults:{suppress_method:'rnnoise'},ranges:{}},
+ nvidia:{kind:'nvidia_audiofx_filter',name:'FreeMix Audio - NVIDIA Denoise',defaults:{intensity:0.5,method:'denoiser'},ranges:{intensity:[0,1]}},
+ expander:{kind:'expander_filter',name:'FreeMix Audio - Expander',defaults:{ratio:2,threshold:-40,attack_time:10,release_time:50,output_gain:0},ranges:{ratio:[1,32],threshold:[-60,0],attack_time:[1,100,true],release_time:[1,1000,true],output_gain:[-30,30]}}
 };
 export function filterSettings(type,value={},previous={}){
  const spec=AUDIO_FILTERS[type];if(!spec||!value||typeof value!=='object'||Array.isArray(value))throw Error('Filtro ou parâmetros inválidos');
@@ -32,7 +36,20 @@ export class AudioRoutingEngine{
  async observe(context){
   this.context=context;await this.busEngine.refresh(context);if(context.connected===false){this.applied.clear();this.kinds=null;this.rows=[];return this.summary();}
   await this.load(context.scope||this.p.scope||this.p.state?.preset);const sources=context.sourceInputs||[],audio=context.audioInputs||[],onAir=new Set(context.tally?.program||[]),director=context.director;
-  this.rows=audio.map(a=>{const source=sources.find(s=>s.name===a.name||s.key===a.key),key=source?.key||a.key;return {...a,key,kind:source?.kind||a.kind,protected:!key||source?.kind===BUS_KIND||!!a.bus||key===director?.key||a.name===director?.name||/^FreeMix (?:Master|Bus|Retorno|N1)(?:\s|$)/.test(a.name),onAir:onAir.has(a.name)};});
+  const isUuid = s => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(s||'')) || /^[0-9a-f-]{30,}$/i.test(String(s||''));
+  const isInternalBus = s => /^(?:FreeMix|3Mix) (?:Master|Bus|Retorno|N1|Barramentos)(?:\s|$)/i.test(String(s||''));
+  this.rows=audio.map(a=>{
+    const source=sources.find(s=>s.name===a.name||s.key===a.key),key=source?.key||a.key;
+    // As keys são UUIDs por definição. Marcar todo key UUID como interno
+    // esvaziava o mixer; só o nome gerado pelo motor identifica um canal oculto.
+    const isSysInternal = isUuid(a.name) || isInternalBus(a.name) || a.kind==='mix-track-to-source' || (source?.name && isInternalBus(source.name));
+    return {
+      ...a,key,kind:source?.kind||a.kind,
+      protected:!key||source?.kind===BUS_KIND||!!a.bus||a.kind==='mix-track-to-source'||key===director?.key||a.name===director?.name||isSysInternal,
+      internal:!!isSysInternal,
+      onAir:onAir.has(a.name)
+    };
+  });
   this.error=null;let changed=false;
   for(const row of this.rows){const entry=this.config.sources[row.key];if(!entry?.afv)continue;
    if(row.protected){entry.afv=false;entry.override='Fonte privada ou barramento';this.applied.delete(row.key);changed=true;continue;}
@@ -71,8 +88,38 @@ export class AudioRoutingEngine{
    if(d.remove){if(existing)await this.p.req('RemoveSourceFilter',{sourceUuid:row.key,filterName:spec.name});}
    else{const settings=filterSettings(d.type,d.settings||{},existing?.filterSettings);if(existing){if(d.settings!==undefined)await this.p.req('SetSourceFilterSettings',{sourceUuid:row.key,filterName:spec.name,filterSettings:settings,overlay:true});}else await this.p.req('CreateSourceFilter',{sourceUuid:row.key,filterName:spec.name,filterKind:spec.kind,filterSettings:settings});await this.p.req('SetSourceFilterEnabled',{sourceUuid:row.key,filterName:spec.name,filterEnabled:d.enabled??true});}
    await this.inspect(row.key);
+  }else if(action==='audio_routing_open_filters'){
+   await this.p.req('OpenInputFiltersDialog',{inputName:row.name});
   }else throw Error('Comando de áudio não reconhecido');
   this.last=this.summary();
  }
- summary(){return {scope:this.scope,error:this.error,details:this.details,routing:this.busEngine.summary(),sources:this.rows.map(r=>({key:r.key,name:r.name,kind:r.kind,protected:r.protected,onAir:r.onAir,muted:r.muted,afv:this.config.sources[r.key]?.afv===true,override:this.config.sources[r.key]?.override||null,delayMs:this.details?.key===r.key?this.details.delayMs:this.config.sources[r.key]?.delayMs??null})),limitations:['AFV usa o tally visível do Programa e overlays','Mute manual desliga AFV da fonte','Filtros e barramentos adicionais dependem das capabilities reais do motor']};}
+ summary(){
+  const getCat = (kind) => {
+    if (['wasapi_input_capture','coreaudio_input_capture','pulse_input_capture','alsa_input_capture','asio_input_capture'].includes(kind)) return 'mic';
+    if (['ffmpeg_source','vlc_source','media_source'].includes(kind)) return 'media';
+    if (['browser_source','webrtc_source','call_source'].includes(kind)) return 'web';
+    if (['dshow_input','ndi_source','omt_source','decklink-input'].includes(kind)) return 'camera';
+    return 'other';
+  };
+  return {
+    scope:this.scope,
+    error:this.error,
+    details:this.details,
+    routing:this.busEngine.summary(),
+    sources:this.rows.map(r=>({
+      key:r.key,
+      name:r.name,
+      kind:r.kind,
+      category:getCat(r.kind),
+      protected:r.protected,
+      internal:!!r.internal,
+      onAir:r.onAir,
+      muted:r.muted,
+      afv:this.config.sources[r.key]?.afv===true,
+      override:this.config.sources[r.key]?.override||null,
+      delayMs:this.details?.key===r.key?this.details.delayMs:this.config.sources[r.key]?.delayMs??null
+    })),
+    limitations:['AFV usa o tally visível do Programa e overlays','Mute manual desliga AFV da fonte','Filtros e barramentos adicionais dependem das capabilities reais do motor']
+  };
+ }
 }

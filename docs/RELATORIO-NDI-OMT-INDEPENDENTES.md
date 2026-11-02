@@ -1,6 +1,6 @@
 # NDI e OMT: conteúdo e áudio por destino
 
-Implementado no bridge nativo `network_output` e na tela Saídas. Cada protocolo escolhe Programa ou uma entrada/cena por UUID; a fonte independente alimenta uma view privada, sem trocar o Programa global. O áudio seleciona o Master, Bus A ou Bus B real após os respectivos barramentos: índices 0/1/2, alimentados pelos `mix-track-to-source` do FreeMix.
+Implementado no bridge nativo `network_output` e na tela Saídas. Cada protocolo escolhe Programa ou uma entrada/cena por UUID; a fonte independente alimenta uma view privada, sem trocar o Programa global. O áudio seleciona o Master, Bus A ou Bus B real após os respectivos barramentos: índices 0/1/2, alimentados pelos `mix-track-to-source` do 3Mix.
 
 Os plugins oficiais instalados são DistroAV 6.2.1 / NDI runtime 6.3.2.0 e omtplugin 1.0.0.19. A integração usa `obs_output_set_media` e `obs_output_set_mixers`, que os callbacks originais dos plugins consomem. O filtro NDI por fonte não foi usado para áudio de cenas; OMT não fornece filtro de saída equivalente nessa versão.
 

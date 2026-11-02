@@ -1,5 +1,6 @@
-# Documentação do FreeMix
+# Documentação do 3Mix
 
+- [Manual online do 3Mix](manual.html) — página única com categorias, busca, marcadores de página e arquivo de documentos (também em `http://127.0.0.1:18188/docs/manual.html`)
 - [Instalar e abrir para demonstração](INSTALACAO.md)
 - [Entrega atual](ENTREGA-ATUAL.md)
 - [Pendências reais e critérios para finalizar](PENDENCIAS-REAIS.md)

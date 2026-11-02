@@ -1,4 +1,4 @@
-# Catálogo de Gráficos (GCs), Galeria e Fontes de Dados — FreeMix
+# Catálogo de Gráficos (GCs), Galeria e Fontes de Dados — 3Mix
 
 > **Especificação do Módulo de Gráficos e Operação On-Air**
 
@@ -6,7 +6,7 @@
 
 ## 1. Arquitetura de Camadas (Layers) Sem Conflitos
 
-O FreeMix organiza os elementos gráficos em três camadas lógicas de sobreposição:
+O 3Mix organiza os elementos gráficos em três camadas lógicas de sobreposição:
 
 | Camada | Função Primária | Exemplos de Templates | Comportamento no Ar |
 | :---: | :--- | :--- | :--- |
@@ -33,7 +33,7 @@ O FreeMix organiza os elementos gráficos em três camadas lógicas de sobreposi
 
 ## 3. Fontes de Dados (DataSources)
 
-O módulo de Gráficos do FreeMix integra nativamente:
+O módulo de Gráficos do 3Mix integra nativamente:
 1. **Preenchimento Manual**: Edição instantânea em formulário na própria interface.
 2. **Planilhas CSV**: Vínculo com arquivos `.csv` (com separador `,` ou `;`), permitindo carregar centenas de nomes de palestrantes ou atletas e preencher a arte com 1 clique.
 3. **Feeds JSON (Local ou HTTP)**: Consulta a endpoints REST para atualização de dados esportivos ou financeiros sem reiniciar a animação.

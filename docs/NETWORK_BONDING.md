@@ -1,4 +1,4 @@
-# Transmissão por Múltiplas Conexões (Multi-WAN & Bonding) — FreeMix
+# Transmissão por Múltiplas Conexões (Multi-WAN & Bonding) — 3Mix
 
 > **Especificação futura — NÃO IMPLEMENTADA nem homologada no pacote local de 08/10/2026.** Não existe receptor de recomposição entregue. O texto descreve comportamento pretendido, não funcionalidades disponíveis.
 
@@ -31,7 +31,7 @@ Para entregar fluxos protegidos a plataformas como YouTube, Twitch ou estúdios 
 
 ```
 +------------------+         Caminho A (Ethernet)
-|  FreeMix Studio  | ==============================> +--------------------------+          RTMP Único
+|   3Mix Studio    | ==============================> +--------------------------+          RTMP Único
 |  (Local do Ar)   |         Caminho B (Wi-Fi 5G)   |  Receptor de Recomposição | ======================> YouTube / Twitch
 |                  | ==============================> |  (Reordena & Deduplica)  |
 +------------------+                                 +--------------------------+

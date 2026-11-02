@@ -1,4 +1,4 @@
-# FreeMix — estado real e próximas etapas
+# 3Mix — estado real e próximas etapas
 
 Lista única de execução atual: [PENDENCIAS.md](PENDENCIAS.md). Inclui todos os pedidos e prints de 07–08/10/2026. As especificações de integração/outputs são planos; a lista registra o limite do que foi implementado e efetivamente testado.
 
@@ -6,7 +6,7 @@ Atualizado em 08/10/2026. Entrega escolhida: ZIP para teste neste computador com
 
 ## Entregue para teste local
 
-- FreeMix.exe compilado no fork `freemix-app`, ramo `freemix/broadcast-suite`; Preview/Programa e transições nativas. Essa é a base operacional. `src/app` é um protótipo de arquitetura, não o executável entregue.
+- FreeMix.exe (nome de binário interno; renomear exige rebuild do motor) compilado no fork `freemix-app`, ramo `freemix/broadcast-suite`; Preview/Programa e transições nativas. Essa é a base operacional. `src/app` é um protótipo de arquitetura, não o executável entregue.
 - Mesa/consoles com API compartilhada, Cut/Fade/T-bar, mídia/VT, GC/placar, medidores e Master/A/B.
 - ISO em arquivos reais; replay TS/MP4, IN/OUT, retenção e A/B vinculados com tolerância de 100 ms.
 - CSV/JSON/XLSX, arquivo/HTTP, edição/seleção de linha e vínculo à Tarja/Placar.

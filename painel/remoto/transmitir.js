@@ -49,7 +49,7 @@
   // ---- drawing ----
   function draw() {
     if (!loaded) return;
-    const n = selected, c = current(n), locked = c.live || !c.editable || busy;
+    const n = selected, c = current(n), locked = !c.editable || busy;
     for (const b of E('nums').children) { const i = Number(b.dataset.n), s = saved(i); b.classList.toggle('vd-on', i === n); b.classList.toggle('vd-live', s.live); b.setAttribute('aria-selected', i === n); b.title = s.live ? 'No ar' : s.url ? 'Configurado' : 'Livre'; }
     const provider = providerOf(c.url), active = document.activeElement;
     fill(E('provider'), PROVIDERS.map((p) => `<option value="${p.id}">${esc(p.label)}</option>`).join('')); if (E('provider').value !== provider.id) E('provider').value = provider.id;
@@ -66,17 +66,18 @@
     if (c.audioBitrate) E('audio-bitrate').value = c.audioBitrate;
     const encoders = n === 0 ? mainEncoders() : extraEncoders();
     fill(E('encoder'), encoders.map((e) => `<option value="${esc(e.id)}">${esc(e.name)}</option>`).join('')); if (E('encoder').value !== c.encoder) E('encoder').value = c.encoder;
-    E('hardware').checked = HARDWARE.test(c.encoder); E('hardware').disabled = locked || !encoders.some((e) => HARDWARE.test(e.id));
+    E('hardware').checked = HARDWARE.test(c.encoder); E('hardware').disabled = c.live || locked || !encoders.some((e) => HARDWARE.test(e.id));
     E('same-row').hidden = n === 0; const same = n !== 0 && sameAsMain(c); E('same').checked = same;
-    for (const id of ['provider', 'url', 'key', 'quality', 'quality-cog', 'encoder', 'same']) E(id).disabled = locked;
-    for (const id of ['width', 'height', 'bitrate', 'audio-bitrate']) E(id).disabled = locked || same;
+    for (const id of ['provider', 'url', 'quality', 'quality-cog', 'encoder', 'same']) E(id).disabled = c.live || locked;
+    E('key').disabled = locked || (c.live && n > 0);
+    for (const id of ['width', 'height', 'bitrate', 'audio-bitrate']) E(id).disabled = c.live || locked || same;
     if (same) for (const id of ['quality', 'encoder', 'hardware', 'quality-cog']) E(id).disabled = true;
     // Bottom bar
     const lives = [0, 1, 2, 3, 4].filter((i) => saved(i).live);
     E('start-one').textContent = (c.live ? 'Parar ' : 'Começar ') + (n + 1); E('start-one').classList.toggle('vd-air', c.live); E('start-one').disabled = busy || (!c.live && !c.url);
     E('start-all').textContent = lives.length ? 'Parar tudo' : 'Iniciar tudo'; E('start-all').classList.toggle('vd-air', lives.length > 0); E('start-all').disabled = busy || (!lives.length && ![0, 1, 2, 3, 4].some((i) => current(i).url));
     E('save-close').disabled = busy; E('advanced').disabled = busy;
-    if (!E('msg').textContent || E('msg').dataset.auto) { const text = c.live ? `Destino ${n + 1} no ar: pare para alterar.` : !c.editable ? 'O perfil do motor está em modo avançado: use “Avançado” para alterar o destino 1.' : c.error ? 'Motor: ' + c.error : dirty(n) ? 'Alterações ainda não salvas.' : ''; say(text, c.error && !c.live ? 'error' : ''); E('msg').dataset.auto = '1'; }
+    if (!E('msg').textContent || E('msg').dataset.auto) { const text = c.live ? (n === 0 ? 'Destino 1 no ar: só a chave pode ser alterada; ela vale no próximo início.' : `Destino ${n + 1} no ar: pare para alterar.`) : !c.editable ? 'O perfil do motor está em modo avançado: use “Avançado” para alterar o destino 1.' : c.error ? 'Motor: ' + c.error : dirty(n) ? 'Alterações ainda não salvas.' : ''; say(text, c.error && !c.live ? 'error' : ''); E('msg').dataset.auto = '1'; }
     if (!E('status').hidden) drawStatus();
   }
   function drawStatus() {
@@ -98,8 +99,13 @@
     if (!c.url && n === 0) throw Error('Destino 1: informe a URL.');
     if (c.url && !/^(rtmps?|srt|rist|https?):\/\/\S+$/i.test(c.url)) throw Error(`Destino ${n + 1}: a URL deve começar por rtmp://, rtmps://, srt://, rist:// ou http(s)://`);
     if (n === 0) {
-      const r = await send('settings_apply', { category: 'streaming', protocol: protocolOf(c.url, 'rtmp'), server: c.url, bitrate: Number(c.bitrate), audioBitrate: String(c.audioBitrate), encoder: c.encoder, ...(key ? { key } : {}) });
+      const keyOnly = Object.keys(drafts[0]).every((k) => k === 'key');
+      const r = keyOnly
+        ? await send('settings_stream_key', { category: 'streaming', key })
+        : await send('settings_apply', { category: 'streaming', protocol: protocolOf(c.url, 'rtmp'), server: c.url, bitrate: Number(c.bitrate), audioBitrate: String(c.audioBitrate), encoder: c.encoder, ...(key ? { key } : {}) });
       if (!r.settings?.values) throw Error('Resposta incompleta do motor ao salvar o destino 1'); settings = r.settings;
+      drafts[n] = null;
+      return keyOnly ? 'key' : true;
     } else {
       const d = c.raw, mode = ['source', 'program', 'preview', 'clean', 'mix'].includes(d.mode) ? d.mode : 'program', hls = /^https?:/i.test(c.url);
       await send('outputs_configure', { index: n - 1, name: d.name || providerOf(c.url).label.replace('Servidor RTMP personalizado', 'Destino ' + (n + 1)), server: c.url, protocol: hls ? 'hls' : d.protocol === 'hls' ? 'auto' : d.protocol || 'auto', mode, ...(mode === 'source' ? { input: d.sourceUuid } : {}), mixId: d.mixId ?? 2, width: Number(c.width), height: Number(c.height), bitrate: Number(c.bitrate), audioTrack: d.audioTrack ?? 0, audioSourceUuid: d.audioSourceUuid || '', encoder: c.encoder, fpsDivisor: d.fpsDivisor ?? 1, overlaysMask: d.overlaysMask ?? 0, fill: d.fill === true, stingerAudio: d.stingerAudio !== false, enhancedRtmp: d.enhancedRtmp === true, enabled: !!c.url, autoStart: !!c.url && d.autoStart === true, ...(key ? { key } : !c.url ? { clearKey: true } : {}) });
@@ -127,11 +133,11 @@
   E('encoder').onchange = (e) => { edit(selected, { encoder: e.target.value }); draw(); };
   E('hardware').onchange = (e) => { const list = selected === 0 ? mainEncoders() : extraEncoders(), codec = codecOf(selected, current(selected).encoder).toLowerCase(), pool = list.filter((x) => HARDWARE.test(x.id) === e.target.checked), pick = pool.find((x) => x.codec === codec) || pool[0]; if (pick) edit(selected, { encoder: pick.id }); draw(); };
   E('same').onchange = (e) => { if (e.target.checked) { const m = current(0), list = extraEncoders(), twin = list.find((x) => HARDWARE.test(x.id) === HARDWARE.test(m.encoder) && x.codec === codecOf(0, m.encoder).toLowerCase()); edit(selected, { width: m.width, height: m.height, bitrate: m.bitrate, ...(twin ? { encoder: twin.id } : {}) }); } draw(); };
-  E('advanced').onclick = () => { if ([0, 1, 2, 3, 4].some(dirty) && !confirm('Há alterações não salvas nesta janela. Abrir o editor avançado mesmo assim?')) return; location.href = selected === 0 ? '/settings?category=streaming&context=streaming' : '/saidas?context=streaming'; };
+  E('advanced').onclick = () => { if ([0, 1, 2, 3, 4].some(dirty) && !confirm('Há alterações não salvas nesta janela. Abrir o editor avançado mesmo assim?')) return; location.href = selected === 0 ? '/configuracoes?category=streaming&context=streaming' : '/saidas?context=streaming'; };
   E('view-status').onclick = () => { E('status').hidden = !E('status').hidden; E('view-status').classList.toggle('vd-on', !E('status').hidden); document.querySelector('.vd-window').classList.toggle('vd-with-status', !E('status').hidden); draw(); };
   E('start-one').onclick = () => { const n = selected, on = !saved(n).live; run((on ? 'Começando ' : 'Parando ') + (n + 1), async () => { await toggle(n, on); return on ? `Destino ${n + 1} confirmado no ar pelo motor.` : `Destino ${n + 1} parado.`; }); };
   E('start-all').onclick = () => { const lives = [0, 1, 2, 3, 4].filter((i) => saved(i).live); run(lives.length ? 'Parando tudo' : 'Iniciando tudo', async () => { const failed = []; for (const i of lives.length ? lives : [0, 1, 2, 3, 4].filter((x) => current(x).url)) { try { await toggle(i, !lives.length); } catch (e) { failed.push(`${i + 1}: ${plain(e.message).replace(/^O destino 1 /, '')}`); } } if (failed.length) throw Error('Não confirmado — ' + failed.join(' · ')); return lives.length ? 'Todos os destinos parados.' : 'Destinos configurados confirmados no ar.'; }); };
-  E('save-close').onclick = () => run('Salvando', async () => { for (const i of [0, 1, 2, 3, 4]) await save(i); setTimeout(() => window.FreeMixClosePanel(), 150); return 'Configurações salvas e confirmadas pelo motor.'; });
+  E('save-close').onclick = () => run('Salvando', async () => { let keyOnly = false; for (const i of [0, 1, 2, 3, 4]) { const r = await save(i); if (r === 'key') keyOnly = true; } setTimeout(() => window.FreeMixClosePanel(), 150); return keyOnly ? 'Chave salva; vale no próximo início da transmissão.' : 'Configurações salvas e confirmadas pelo motor.'; });
 
   // The main stream's state arrives with the shared connection; the additional destinations are re-read (a pure read).
   let lastStreaming = null;

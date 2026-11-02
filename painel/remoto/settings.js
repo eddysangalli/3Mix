@@ -36,11 +36,12 @@
   // ---- the tree of the window: four groups, the operator's words and the mockup's icons ----
   const LABELS = {
     video: 'Vídeo da produção', audio: 'Áudio da produção', color: 'Cor da produção',
-    recording: 'Gravação', streaming: 'Transmissão', outputs: 'Saídas externas', encoders: 'Encoder',
-    replay: 'Replay', dsk: 'DSK', multiview: 'Multiview', shortcuts: 'Atalhos',
-    workspace: 'Interface', performance: 'Desempenho', remote: 'Remoto', automation: 'Automação',
-    recovery: 'Recuperação', diagnostics: 'Diagnóstico', updates: 'Sobre',
-    streamMultistream: 'MultiStream', streamExternal: 'Saídas externas de rede',
+    recording: 'Gravação', streaming: 'Transmissão', outputs: 'Monitores', returns: 'Retornos SRT e N-1', aux: 'Matriz AUX', encoders: 'Encoder',
+    replay: 'Replay', dsk: 'DSK', multiview: 'Multiview', shortcuts: 'Atalhos', modulos: 'Módulos',
+    patch: 'Patch de Sinais', preflight: 'Pre-Flight',
+    workspace: 'Interface', performance: 'Desempenho', remote: 'Remoto', network: 'Rede Multipath', automation: 'Automação',
+    recovery: 'Recuperação', about: 'Sobre e suporte',
+    streamMultistream: 'MultiStream', streamExternal: 'Saídas de rede',
     // sub-tabs and aliases kept for old links
     mixer: 'Mixer e roteamento', outputAdvanced: 'Saída avançada', files: 'Arquivos e divisão',
     audioTracks: 'Trilhas de áudio', networkOutput: 'Rede da transmissão', startstop: 'Ao iniciar e parar',
@@ -49,9 +50,10 @@
   };
   const GROUPS = [
     { id: 'producao', title: 'Produção', items: ['video', 'audio', 'color'] },
-    { id: 'saidas', title: 'Saídas', items: ['recording', 'streaming', 'outputs', 'encoders'] },
-    { id: 'operacao', title: 'Operação', items: ['replay', 'dsk', 'multiview', 'shortcuts'] },
-    { id: 'sistema', title: 'Sistema', items: ['workspace', 'performance', 'remote', 'automation', 'recovery', 'diagnostics', 'updates'] },
+    { id: 'saidas', title: 'Saídas', items: ['recording', 'streaming', 'outputs', 'returns', 'aux', 'encoders'] },
+    { id: 'operacao', title: 'Operação', items: ['replay', 'dsk', 'multiview', 'shortcuts', 'patch', 'preflight'] },
+    { id: 'sistema', title: 'Sistema', items: ['workspace', 'modulos', 'performance', 'remote', 'network', 'automation', 'recovery'] },
+    { id: 'sobre', title: 'Sobre', items: ['about'] },
   ];
   const ICONS = {
     video: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>',
@@ -65,18 +67,24 @@
     dsk: '<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="1"/><path d="m7 15 3-6 3 6M8 13h4M15 9h2a2 2 0 0 1 0 4h-2V9Z"/></svg>',
     multiview: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="7"/><rect x="14" y="4" width="7" height="7"/><rect x="3" y="15" width="7" height="5"/><rect x="14" y="15" width="7" height="5"/></svg>',
     shortcuts: '<svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h.01M18 14h.01M9 14h6"/></svg>',
+    patch: '<svg viewBox="0 0 24 24"><circle cx="6" cy="7" r="2"/><circle cx="18" cy="17" r="2"/><path d="M8 7h5a3 3 0 0 1 3 3v4M16 17H11a3 3 0 0 1-3-3V8"/></svg>',
+    preflight: '<svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="m8 9 2 2 4-4M8 15h8"/></svg>',
+    network: '<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 11l10-4M7 13l10 4"/></svg>',
+    returns: '<svg viewBox="0 0 24 24"><path d="M9 7 4 12l5 5"/><path d="M4 12h11a5 5 0 0 1 5 5"/></svg>',
+    aux: '<svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="1.6" fill="currentColor"/><circle cx="15" cy="12" r="1.6" fill="currentColor"/><circle cx="7" cy="17" r="1.6" fill="currentColor"/></svg>',
     workspace: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg>',
+    modulos: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1" fill="none" stroke-dasharray="2 2"/></svg>',
     performance: '<svg viewBox="0 0 24 24"><path d="M4 18a8 8 0 1 1 16 0"/><path d="m12 14 4-4"/><circle cx="12" cy="14" r="1.5"/></svg>',
     remote: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>',
     automation: '<svg viewBox="0 0 24 24"><path d="M4 6h10M4 12h16M4 18h10"/><circle cx="17" cy="6" r="2"/><circle cx="17" cy="18" r="2"/></svg>',
     recovery: '<svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>',
     diagnostics: '<svg viewBox="0 0 24 24"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg>',
-    updates: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>',
+    about: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>',
   };
   // Sub-tabs inside a consolidated category. This keeps the sidebar at 18 entries.
   const SUBTABS = {
     recording: [['recording', 'Básico'], ['files', 'Arquivos'], ['audioTracks', 'Trilhas'], ['startstop', 'Ao iniciar/parar'], ['outputAdvanced', 'Avançado']],
-    streaming: [['streaming', 'Básico'], ['streamMultistream', 'MultiStream'], ['streamExternal', 'Saídas externas'], ['networkOutput', 'Rede'], ['audioTracks', 'Trilhas'], ['startstop', 'Ao iniciar/parar'], ['outputAdvanced', 'Avançado']],
+    streaming: [['streaming', 'Básico'], ['streamMultistream', 'MultiStream'], ['streamExternal', 'Saídas de rede'], ['networkOutput', 'Rede'], ['audioTracks', 'Trilhas'], ['startstop', 'Ao iniciar/parar'], ['outputAdvanced', 'Avançado']],
     workspace: [['workspace', 'Layout da mesa'], ['appearance', 'Texto e densidade'], ['general', 'Janela e encaixe']],
     performance: [['performance', 'Geral'], ['advanced', 'Motor e prioridade']],
   };
@@ -89,19 +97,26 @@
   // Editor windows of the program, opened on purpose and one route each.
   const OPEN = {
     mixer: ['/audio', 'Abrir mixer'],
-    outputs: ['/externo', 'Abrir saídas externas'],
+    outputs: ['/saidas?transport=monitors', 'Abrir monitores'],
+    returns: ['/retornos', 'Abrir retornos'],
+    aux: ['/aux', 'Abrir Matriz AUX'],
     replay: ['/replay?view=settings', 'Abrir Replay'],
     dsk: ['/overlays', 'Abrir DSK'],
-    multiview: ['/multiview', 'Abrir multiview'],
+    multiview: ['/multiview-montagem.html', 'Abrir montagem'],
+    modulos: ['/modulos', 'Abrir módulos'],
     shortcuts: ['/atalhos', 'Abrir atalhos'],
+    patch: ['/patch', 'Abrir Patch de Sinais'],
+    preflight: ['/preflight', 'Abrir Pre-Flight'],
     remote: ['/hub', 'Abrir acesso remoto'],
+    network: ['/rede', 'Abrir Rede Multipath'],
     automation: ['/macros', 'Abrir automação'],
     streamMultistream: ['/transmitir', 'Abrir MultiStream'],
-    streamExternal: ['/externo', 'Abrir saídas externas'],
+    streamExternal: ['/externo', 'Abrir saídas de rede'],
     recovery: ['/recuperacao', 'Abrir recuperação'],
-    diagnostics: ['/diagnosticos', 'Abrir diagnóstico'],
-    updates: ['/atualizacao', 'Abrir atualizações'],
+    about: ['/sobre.html', 'Abrir Sobre e suporte'],
   };
+  // Categoria em que o botão do topo abre outra coisa: a montagem do Multiview se edita aqui, o vídeo fica na janela.
+  const WINDOW_ACTION = { multiview: ['/multiview', 'Abrir Multiview'] };
   // Pages rendered inside the central through a same-origin iframe. Each entry loads the page's real route, so there
   // is one implementation only. The injected style removes the embedded page's own title bar / close chrome, never its
   // controls or scripts. Routes are the same ones the standalone window uses; ?embed=1 is kept for pages that may
@@ -116,26 +131,24 @@
     html.embed-3mix .vd-footer button#btn-close { display: none !important; }
     html.embed-3mix .vd-bar { position: static !important; }
   `;
-  // Identidade grafite 3Mix das páginas embutidas (mesma linguagem de Áudio/Replay): base #111318/#14171c/#1a1d23,
-  // bordas #2a2e35, texto #e8ebef; título 22, seção 16, labels 13, corpo 14, campos 36 px. Verde/vermelho/azul só
-  // carregam estado operacional real (no ar, crítico, seleção/emfatizado em grafite); o resto fica grafite/neutro.
-  // É só pintura: controles, IDs, handlers e comportamento da página embutida não são tocados.
-  const EMBED_GRAFITE_IDS = new Set(['dsk', 'multiview', 'remote', 'automation', 'outputs', 'streamMultistream', 'streamExternal']);
+  // Pintura das páginas que ainda têm folha própria (Monitores, Matriz AUX, MultiStream, Saídas de rede). As demais usam
+  // 3mix-padrao.css direto. Mesma paleta de Configurações: grafite neutro; azul para seleção; verde/vermelho só para estado.
+  const EMBED_GRAFITE_IDS = new Set(['outputs', 'aux', 'streamMultistream', 'streamExternal']);
   const EMBED_GRAFITE_CSS = `
     /* ---- paleta grafite da suíte ---- */
     html.embed-3mix {
-      --bg:#111318; --bg-gradient:none; --panel:#14171c; --panel-card:#1a1d23; --panel-hover:#22262d;
-      --line:#2a2e35; --line-light:#3a404a; --text:#e8ebef; --text-bright:#ffffff; --muted:#7d8592;
-      --accent:#2f9e5f; --green:#2f9e5f; --green-hover:#2f9e5f; --red:#c05046; --red-hover:#a8443c; --orange:#c9a227;
-      --card-bg:#14171c; --border-color:#2a2e35; color-scheme:dark;
+      --bg:#202020; --bg-gradient:none; --panel:#252525; --panel-card:#1d1d1d; --panel-hover:#2d2d2d;
+      --line:#414141; --line-light:#555555; --text:#ededed; --text-bright:#ffffff; --muted:#8d8d8d;
+      --accent:#2f6fed; --green:#2f9e5f; --green-hover:#2f9e5f; --red:#c05046; --red-hover:#a8443c; --orange:#c9a227;
+      --card-bg:#252525; --border-color:#414141; color-scheme:dark;
     }
-    html.embed-3mix, html.embed-3mix body { background:#111318 !important; background-image:none !important; color:#e8ebef !important; }
-    html.embed-3mix body.vd { background:#111318 !important; }
+    html.embed-3mix, html.embed-3mix body { background:#202020 !important; background-image:none !important; color:#ededed !important; }
+    html.embed-3mix body.vd { background:#202020 !important; }
 
     /* ---- tipografia: título 22 · seção 16 · labels 13 · corpo 14 ---- */
     html.embed-3mix body { font-family:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif !important; font-size:14px !important; line-height:1.45 !important; }
     html.embed-3mix h1 { font-size:22px !important; line-height:24px !important; font-weight:700 !important; letter-spacing:-.2px !important; color:#fff !important; }
-    html.embed-3mix h2 { font-size:16px !important; line-height:18px !important; font-weight:700 !important; letter-spacing:0 !important; text-transform:none !important; color:#fff !important; border-left:2px solid #2a2e35 !important; padding-left:8px !important; }
+    html.embed-3mix h2 { font-size:16px !important; line-height:18px !important; font-weight:700 !important; letter-spacing:0 !important; text-transform:none !important; color:#fff !important; border-left:2px solid #414141 !important; padding-left:8px !important; }
     html.embed-3mix h3 { font-size:14px !important; font-weight:700 !important; color:#fff !important; }
     html.embed-3mix label, html.embed-3mix legend, html.embed-3mix th, html.embed-3mix .vd-row > span:first-child { font-size:13px !important; }
     html.embed-3mix small, html.embed-3mix .muted, html.embed-3mix .vd-note, html.embed-3mix .ext-sub, html.embed-3mix .field-help { font-size:12px !important; }
@@ -143,71 +156,71 @@
     /* ---- superfícies ---- */
     html.embed-3mix section, html.embed-3mix .card, html.embed-3mix .ext-protocol, html.embed-3mix details.ext-other,
     html.embed-3mix .vd-window, html.embed-3mix .vd-body, html.embed-3mix .content, html.embed-3mix .workspace nav {
-      background:#14171c !important; border:1px solid #2a2e35 !important; box-shadow:none !important;
+      background:#252525 !important; border:1px solid #414141 !important; box-shadow:none !important;
     }
     html.embed-3mix .vd-bar, html.embed-3mix .vd-strip, html.embed-3mix .vd-status, html.embed-3mix header {
-      background:#181c22 !important; border-color:#2a2e35 !important; box-shadow:none !important;
+      background:#232323 !important; border-color:#414141 !important; box-shadow:none !important;
     }
-    html.embed-3mix fieldset { background:#14171c !important; border:1px solid #2a2e35 !important; }
-    html.embed-3mix legend { color:#7d8592 !important; }
-    html.embed-3mix table { border:1px solid #2a2e35 !important; }
-    html.embed-3mix th { background:#181c22 !important; color:#7d8592 !important; border-bottom:1px solid #2a2e35 !important; }
-    html.embed-3mix td { background:#14171c !important; color:#e8ebef !important; border-bottom:1px solid #22262d !important; }
-    html.embed-3mix tr:hover td { background:#1a1d23 !important; }
-    html.embed-3mix .vd-status tr.vd-sel td { background:#242a33 !important; }
+    html.embed-3mix fieldset { background:#252525 !important; border:1px solid #414141 !important; }
+    html.embed-3mix legend { color:#8d8d8d !important; }
+    html.embed-3mix table { border:1px solid #414141 !important; }
+    html.embed-3mix th { background:#232323 !important; color:#8d8d8d !important; border-bottom:1px solid #414141 !important; }
+    html.embed-3mix td { background:#252525 !important; color:#ededed !important; border-bottom:1px solid #2d2d2d !important; }
+    html.embed-3mix tr:hover td { background:#1d1d1d !important; }
+    html.embed-3mix .vd-status tr.vd-sel td { background:#33383a !important; }
 
     /* ---- campos 36 px ---- */
     html.embed-3mix input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]),
     html.embed-3mix select, html.embed-3mix textarea {
-      height:36px !important; min-height:36px !important; background:#1a1d23 !important; border:1px solid #2a2e35 !important;
-      color:#e8ebef !important; border-radius:3px !important; padding:6px 10px !important; font-size:14px !important;
+      height:36px !important; min-height:36px !important; background:#1d1d1d !important; border:1px solid #414141 !important;
+      color:#ededed !important; border-radius:3px !important; padding:6px 10px !important; font-size:14px !important;
     }
     html.embed-3mix textarea { height:auto !important; min-height:72px !important; }
     html.embed-3mix input:focus, html.embed-3mix select:focus, html.embed-3mix textarea:focus {
-      border-color:#4a5260 !important; box-shadow:0 0 0 2px rgba(232,235,239,.12) !important; outline:none !important;
+      border-color:#2f6fed !important; box-shadow:0 0 0 3px rgba(47,111,237,.18) !important; outline:none !important;
     }
     html.embed-3mix input:disabled, html.embed-3mix select:disabled, html.embed-3mix textarea:disabled {
-      background:#16191f !important; color:#7d8592 !important; border-color:#22262d !important;
+      background:#191919 !important; color:#8d8d8d !important; border-color:#2d2d2d !important;
     }
-    html.embed-3mix input::placeholder { color:#666e79 !important; }
-    html.embed-3mix input[type=checkbox], html.embed-3mix input[type=radio] { accent-color:#7d8592 !important; }
-    html.embed-3mix input[type=range] { accent-color:#7d8592 !important; background:#22262d !important; }
+    html.embed-3mix input::placeholder { color:#777777 !important; }
+    html.embed-3mix input[type=checkbox], html.embed-3mix input[type=radio] { accent-color:#2f6fed !important; }
+    html.embed-3mix input[type=range] { accent-color:#2f6fed !important; background:#2d2d2d !important; }
 
     /* ---- botões: grafite/neutro ---- */
     html.embed-3mix button, html.embed-3mix input[type=button], html.embed-3mix input[type=submit] {
-      background:#22262d !important; background-image:none !important; border:1px solid #3a404a !important;
-      border-radius:3px !important; color:#e8ebef !important; box-shadow:none !important; text-shadow:none !important;
+      background:#2d2d2d !important; background-image:none !important; border:1px solid #555555 !important;
+      border-radius:3px !important; color:#ededed !important; box-shadow:none !important; text-shadow:none !important;
     }
-    html.embed-3mix button:hover:not(:disabled) { background:#2a303a !important; border-color:#4a5260 !important; color:#fff !important; }
-    html.embed-3mix button:active:not(:disabled) { background:#16191f !important; }
-    html.embed-3mix button:disabled { background:#181c22 !important; border-color:#22262d !important; color:#7d8592 !important; opacity:.55 !important; }
+    html.embed-3mix button:hover:not(:disabled) { background:#3a3a3a !important; border-color:#6a6a6a !important; color:#fff !important; }
+    html.embed-3mix button:active:not(:disabled) { background:#191919 !important; }
+    html.embed-3mix button:disabled { background:#232323 !important; border-color:#2d2d2d !important; color:#8d8d8d !important; opacity:.55 !important; }
     /* ação primária / seleção: destaque grafite (nunca o verde de outro produto) */
     html.embed-3mix button.on, html.embed-3mix button.selected, html.embed-3mix button.active,
     html.embed-3mix button.vd-on, html.embed-3mix .preview, html.embed-3mix .mv-btn.active,
     html.embed-3mix .channel-tabs button.active, html.embed-3mix .dve-grid button.active,
     html.embed-3mix .vd-nums button[aria-selected="true"], html.embed-3mix .vd-nums button.vd-on,
     html.embed-3mix .output-navigation button[aria-selected="true"], html.embed-3mix .workspace nav button.selected {
-      background:#2a303a !important; background-image:none !important; border-color:#4a5260 !important;
-      color:#fff !important; box-shadow:inset 0 -2px #e8ebef !important;
+      background:#3a3a3a !important; background-image:none !important; border-color:#6a6a6a !important;
+      color:#fff !important; box-shadow:inset 0 -2px #2f6fed !important;
     }
     html.embed-3mix button.on:hover:not(:disabled), html.embed-3mix button.vd-on:hover:not(:disabled),
     html.embed-3mix .mv-btn.active:hover:not(:disabled), html.embed-3mix .channel-tabs button.active:hover:not(:disabled),
-    html.embed-3mix .dve-grid button.active:hover:not(:disabled) { background:#333a44 !important; border-color:#5a6472 !important; }
+    html.embed-3mix .dve-grid button.active:hover:not(:disabled) { background:#454545 !important; border-color:#7a7a7a !important; }
     /* ações destrutivas/parar: também neutras; vermelho fica para o estado no ar */
     html.embed-3mix button.vd-warn, html.embed-3mix button.vd-air,
     html.embed-3mix .action-btn-air, html.embed-3mix .action-btn-off, html.embed-3mix .kill-all-btn {
-      background:#22262d !important; background-image:none !important; border:1px solid #3a404a !important;
-      color:#e8ebef !important; box-shadow:none !important;
+      background:#2d2d2d !important; background-image:none !important; border:1px solid #555555 !important;
+      color:#ededed !important; box-shadow:none !important;
     }
     html.embed-3mix button.vd-warn:hover:not(:disabled), html.embed-3mix button.vd-air:hover:not(:disabled),
     html.embed-3mix .action-btn-air:hover:not(:disabled), html.embed-3mix .action-btn-off:hover:not(:disabled),
-    html.embed-3mix .kill-all-btn:hover:not(:disabled) { background:#2a303a !important; border-color:#4a5260 !important; color:#fff !important; }
+    html.embed-3mix .kill-all-btn:hover:not(:disabled) { background:#3a3a3a !important; border-color:#6a6a6a !important; color:#fff !important; }
 
     /* ---- estado operacional real continua colorido ---- */
     html.embed-3mix .badge-on { background:#3a2725 !important; border:1px solid #61403c !important; color:#e0b6b0 !important; padding:2px 8px !important; border-radius:3px !important; font-size:11px !important; font-weight:700 !important; }
-    html.embed-3mix .badge-off { background:#1a1d23 !important; border:1px solid #2a2e35 !important; color:#7d8592 !important; padding:2px 8px !important; border-radius:3px !important; font-size:11px !important; }
+    html.embed-3mix .badge-off { background:#1d1d1d !important; border:1px solid #414141 !important; color:#8d8d8d !important; padding:2px 8px !important; border-radius:3px !important; font-size:11px !important; }
     html.embed-3mix .channel-tabs button.on-air { border-left:3px solid #c05046 !important; }
-    html.embed-3mix .ext-state { background:#1a1d23 !important; border:1px solid #2a2e35 !important; color:#a0a7b2 !important; }
+    html.embed-3mix .ext-state { background:#1d1d1d !important; border:1px solid #414141 !important; color:#b0b0b0 !important; }
     html.embed-3mix .ext-state.live { background:#3a2725 !important; border-color:#61403c !important; color:#e0b6b0 !important; }
     html.embed-3mix .ext-state.error { background:#2b2114 !important; border-color:#6b5320 !important; color:#f3c886 !important; }
     html.embed-3mix .vd-nums button.vd-live { border-color:#c05046 !important; }
@@ -219,24 +232,24 @@
     html.embed-3mix #connection::before { background:#2f9e5f !important; box-shadow:none !important; }
 
     /* ---- links e cards ---- */
-    html.embed-3mix a { color:#cdd5df !important; }
+    html.embed-3mix a { color:#cfcfcf !important; }
     html.embed-3mix a:hover { color:#fff !important; }
-    html.embed-3mix a.card { background:#14171c !important; border:1px solid #2a2e35 !important; color:#e8ebef !important; box-shadow:none !important; border-radius:4px !important; transform:none !important; }
-    html.embed-3mix a.card:hover { background:#1a1d23 !important; border-color:#3a404a !important; color:#fff !important; transform:none !important; }
+    html.embed-3mix a.card { background:#252525 !important; border:1px solid #414141 !important; color:#ededed !important; box-shadow:none !important; border-radius:4px !important; transform:none !important; }
+    html.embed-3mix a.card:hover { background:#1d1d1d !important; border-color:#555555 !important; color:#fff !important; transform:none !important; }
     /* chip "3Mix Modular Studio" e destaques iguais: grafite como qualquer outro card */
-    html.embed-3mix .grid a.card { border-color:#2a2e35 !important; box-shadow:none !important; }
+    html.embed-3mix .grid a.card { border-color:#414141 !important; box-shadow:none !important; }
 
     /* ---- ajustes por página ---- */
-    html.embed-3mix #items button { height:26px !important; background:transparent !important; border:0 !important; border-bottom:1px solid #22262d !important; border-radius:0 !important; color:#e8ebef !important; box-shadow:none !important; }
-    html.embed-3mix #items button:hover { background:#1a1d23 !important; }
-    html.embed-3mix details summary { color:#e8ebef !important; }
+    html.embed-3mix #items button { height:26px !important; background:transparent !important; border:0 !important; border-bottom:1px solid #2d2d2d !important; border-radius:0 !important; color:#ededed !important; box-shadow:none !important; }
+    html.embed-3mix #items button:hover { background:#1d1d1d !important; }
+    html.embed-3mix details summary { color:#ededed !important; }
     html.embed-3mix details summary:hover { color:#fff !important; }
-    html.embed-3mix .vd-check, html.embed-3mix .vd-row > span:first-child { color:#a0a7b2 !important; }
-    html.embed-3mix .vd-check input { accent-color:#7d8592 !important; }
+    html.embed-3mix .vd-check, html.embed-3mix .vd-row > span:first-child { color:#b0b0b0 !important; }
+    html.embed-3mix .vd-check input { accent-color:#8d8d8d !important; }
     html.embed-3mix .ext-strip .vd-title { display:none !important; }
-    html.embed-3mix .vd-nums button { background:#1a1d23 !important; border:1px solid #2a2e35 !important; color:#a0a7b2 !important; }
+    html.embed-3mix .vd-nums button { background:#1d1d1d !important; border:1px solid #414141 !important; color:#b0b0b0 !important; }
     html.embed-3mix .ext-protocol-head h2 { font-size:16px !important; }
-    html.embed-3mix .matrix-table th, html.embed-3mix .matrix-table td { border-bottom:1px solid #2a2e35 !important; }
+    html.embed-3mix .matrix-table th, html.embed-3mix .matrix-table td { border-bottom:1px solid #414141 !important; }
     html.embed-3mix img.qr { background:#fff !important; }
   `;
   const EMBED_CHROME = {
@@ -249,53 +262,20 @@
       html.embed-3mix .vd-footer-left > a,
       html.embed-3mix .vd-footer-right { display:none !important; }
     `,
-    dsk: `
-      html.embed-3mix body > header { display:none !important; }
-      html.embed-3mix main { padding:16px 20px 24px !important; }
-    `,
-    multiview: `
-      html.embed-3mix body { height:100% !important; }
-      html.embed-3mix body > header { justify-content:flex-end !important; flex-wrap:wrap !important; gap:8px !important; padding:4px 8px !important; background:#14171c !important; border-bottom:1px solid #2a2e35 !important; }
-      html.embed-3mix .mv-brand,
-      html.embed-3mix .clock-display { display:none !important; }
-      html.embed-3mix .mv-controls { flex:1 !important; justify-content:flex-end !important; flex-wrap:wrap !important; }
-    `,
-    shortcuts: `
-      html.embed-3mix .vd-strip { display:none !important; }
-      html.embed-3mix .vd-window.vd-fill { min-height:0 !important; height:100% !important; }
-    `,
-    remote: `
+    dsk: '', multiview: '', shortcuts: '', remote: '', network: '', automation: '', modulos: '', recovery: '', about: '', patch: '', preflight: '', returns: '',
+    // Monitores (saidas.html?transport=monitors): só monitores e câmera virtual. MultiStream pertence a Transmissão e a
+    // Matriz AUX tem entrada própria; a navegação e os links de outras seções não aparecem aqui.
+    outputs: `
+      html.embed-3mix #monitors-panel { max-width:820px; }
+      html.embed-3mix #monitors-panel h2 { border:0 !important; padding:0 !important; }
+      html.embed-3mix body { overflow:auto !important; height:100% !important; }
       html.embed-3mix body > header { display:none !important; }
       html.embed-3mix main { max-width:none !important; padding:16px 20px 24px !important; }
     `,
-    automation: `
-      html.embed-3mix .vd-strip { display:none !important; }
-      html.embed-3mix .vd-window.vd-fill { min-height:0 !important; height:100% !important; }
-    `,
-    recovery: `
-      html.embed-3mix .vd-strip,
-      html.embed-3mix .vd-bar { display:none !important; }
-      html.embed-3mix .vd-window.vd-fill { min-height:0 !important; height:100% !important; }
-    `,
-    diagnostics: `
-      html.embed-3mix .vd-strip,
-      html.embed-3mix .vd-bar { display:none !important; }
-      html.embed-3mix .vd-window { width:100% !important; max-width:none !important; min-width:0 !important; margin:0 !important; min-height:100% !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; }
-      html.embed-3mix body { overflow:auto !important; }
-    `,
-    updates: `
-      html.embed-3mix .vd-strip { display:none !important; }
-      html.embed-3mix .vd-window { width:100% !important; max-width:none !important; min-width:0 !important; margin:0 !important; min-height:100% !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; }
-      html.embed-3mix .vd-bar { padding:8px 12px !important; border-top:1px solid #333c44 !important; }
-    `,
-    // Saídas externas (externo.html): a mesma página da janela própria, sem a barra de título duplicada. Abrir a
-    // página não inicia saída nenhuma; os botões de iniciar continuam sendo do operador.
-    outputs: `
-      html.embed-3mix body.ext-page { overflow:auto !important; height:100% !important; }
-      html.embed-3mix .vd-window.ext-window { width:100% !important; max-width:none !important; height:100% !important; min-height:0 !important; margin:0 !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; }
-      html.embed-3mix .ext-strip { padding:6px 12px !important; }
-      html.embed-3mix .ext-strip .vd-title { display:none !important; }
-      html.embed-3mix .ext-state { margin-left:auto !important; }
+    aux: `
+      html.embed-3mix body { overflow:auto !important; height:100% !important; }
+      html.embed-3mix body > header { display:none !important; }
+      html.embed-3mix main { max-width:none !important; padding:2px 2px 12px !important; }
     `,
     streamMultistream: `
       html.embed-3mix body { overflow:auto !important; height:100% !important; }
@@ -349,7 +329,7 @@
 
   const params = new URLSearchParams(location.search);
   // Legacy names used by older links. They keep working without adding duplicate categories to the tree.
-  const CATEGORY_ALIASES = { display: 'video', about: 'updates', 'audio-outs': 'audio', 'ndi-srt': 'outputs', output: 'outputAdvanced' };
+  const CATEGORY_ALIASES = { checklistTx: 'preflight', display: 'video', updates: 'about', diagnostics: 'about', 'audio-outs': 'audio', 'ndi-srt': 'streamExternal', output: 'outputAdvanced' };
   const requestedRaw = params.get('category');
   const requested = CATEGORY_ALIASES[requestedRaw] || requestedRaw;
   const context = ['recording', 'streaming', 'output'].includes(params.get('context')) ? params.get('context') : 'general';
@@ -363,6 +343,7 @@
   if (!ORDER.some((v) => v.id === selected)) selected = 'video';
   let activeParent = PARENT[selected] || selected;
 
+  let hiddenByModule = new Set();
   let config = null, outputs = null, outputsAt = 0, preset = '', viewScope = '', busy = false;
   const drafts = new Map();          // view id -> { field: value } changed here and not saved yet
   const baseline = new Map();        // view id -> { field: value } read from the engine for this session
@@ -486,7 +467,7 @@
       + '<small class="field-current">' + esc(f.userLabel || ('Atual: ' + current)) + '</small>' + diff + '</label>';
   }
   function fieldsGrid(list, id, locked) {
-    return '<div class="native-fields">' + list.map((f) => fieldControl(id, f, locked)).join('') + '</div>';
+    return '<div class="native-fields">' + list.map((f) => fieldControl(id, f, typeof locked === 'function' ? locked(f) : locked)).join('') + '</div>';
   }
 
   function outputRows() {
@@ -583,8 +564,11 @@
     const hint = view.id === 'recording'
       ? 'Formato e pasta da gravação principal. Use as abas acima para arquivos, trilhas e comportamento ao iniciar/parar.'
       : 'Destino e codificação da transmissão principal. Use as abas acima para MultiStream, saídas externas, rede, trilhas e comportamento ao iniciar/parar.';
+    const fieldLocked = view.id === 'streaming'
+      ? (f) => locked && !(f.name === 'key' && !busy && isLive() && config.mode !== 'Advanced')
+      : locked;
     return '<div class="settings-card"><div class="card-title-row"><h2>' + title + '</h2>' + badge(config.mode, 'quiet') + '</div>'
-      + '<p class="card-desc">' + hint + '</p>' + fieldsGrid(list, view.id, locked)
+      + '<p class="card-desc">' + hint + (view.id === 'streaming' && isLive() ? ' <b>No ar: só a chave pode ser alterada.</b>' : '') + '</p>' + fieldsGrid(list, view.id, fieldLocked)
       + (config.mode === 'Advanced' ? '<p class="settings-warn">Este perfil está em saída avançada. Pasta, formato, trilhas e encoders são definidos na aba <b>Avançado</b>; esta tela fica somente leitura.</p>' : '')
       + '</div>'
       + (view.id === 'streaming' ? destinationsCard() : '');
@@ -610,11 +594,7 @@
       + '<p class="card-desc">Quadro ' + esc(v.baseWidth + ' × ' + v.baseHeight) + ' · saída ' + esc(v.outputWidth + ' × ' + v.outputHeight) + ' · ' + esc(displayFps()) + '.</p></div>'
       + '<div class="settings-card"><div class="card-title-row"><h2>Preferências de desempenho</h2></div>'
       + '<p class="card-desc">Aplicam-se ao motor e entram em vigor quando o 3Mix for reiniciado fora do ar.</p>'
-      + fieldsGrid(fieldsOf('performance'), 'performance', locked) + '</div>'
-      + '<div class="settings-card"><h2>Sobre esta instalação</h2>'
-      + '<p class="card-desc">3Mix usa executável próprio baseado no motor OBS. As preferências são lidas desta instalação e cada alteração é confirmada pelo motor.</p>'
-      + '<p class="card-note">NDI® é uma marca registrada de Vizrt NDI AB. <a href="https://ndi.video/" target="_blank" rel="noopener">Informações NDI</a> · <a href="https://downloads.ndi.tv/SDK/NDI_SDK/NDI%20SDK%20License%20Agreement.pdf" target="_blank" rel="noopener">Contrato SDK NDI</a>. O componente NDI permanece sujeito integralmente a esse contrato e às licenças de terceiros incluídas em licenses/ndi-runtime.</p>'
-      + '<div class="row settings-inline-actions"><button type="button" data-open-window="/diagnosticos">Diagnóstico da instalação</button><button type="button" data-open-window="/atualizacao">Atualizações</button><button type="button" class="settings-native-link" data-native="1">Preferências completas do motor</button></div></div>';
+      + fieldsGrid(fieldsOf('performance'), 'performance', locked) + '</div>';
   }
 
   function drawNative(view, locked) {
@@ -648,9 +628,9 @@
   function drawEmbed(view) {
     const route = embedRoute(view.id);
     return '<div class="settings-embed" data-category="' + esc(view.id) + '" data-route="' + esc(route) + '">'
-      + '<div class="settings-embed-bar"><span id="settings-embed-state" class="settings-embed-state" role="status">Carregando ' + esc(view.label) + '…</span>'
-      + '<div class="settings-embed-actions"><button type="button" data-embed-reload title="Recarregar a página embutida">Recarregar</button>'
-      + '<button type="button" data-open-window="' + esc(OPEN[view.id][0]) + '" title="Abrir a mesma página em outra janela">Abrir em janela</button></div></div>'
+      + '<div class="settings-embed-bar"><span id="settings-embed-state" class="settings-embed-state" role="status"></span>'
+      + '<div class="settings-embed-actions">'
+      + '<button type="button" data-open-window="' + esc((WINDOW_ACTION[view.id] || OPEN[view.id])[0]) + '">' + esc(WINDOW_ACTION[view.id]?.[1] || 'Abrir em janela') + '</button></div></div>'
       + '<div class="settings-embed-surface"><iframe id="settings-embed-frame" src="' + esc(route) + '" title="' + esc(view.label + ' · página do 3Mix') + '" loading="eager" referrerpolicy="same-origin"></iframe></div></div>';
   }
 
@@ -696,7 +676,7 @@
         openWindow(url.pathname + url.search + url.hash);
       }, true);
     }
-    updateEmbedStatus(label + ' · página embutida do 3Mix', false);
+    updateEmbedStatus('', false);
   }
 
   function mountEmbed(id, label) {
@@ -715,7 +695,6 @@
     const box = E('content').querySelector('.settings-embed');
     const frame = E('settings-embed-frame');
     if (!box || !frame) return;
-    updateEmbedStatus('Recarregando ' + (VIEW(box.dataset.category)?.label || 'página') + '…');
     frame.src = box.dataset.route;
   }
 
@@ -760,10 +739,10 @@
     E('window-title').textContent = 'Configurações';
     document.title = '3Mix · Configurações';
     E('title').textContent = parentView.label;
-    E('description').textContent = window.FreeMixSettingsHelp?.categories?.[parentView.id] || window.FreeMixSettingsHelp?.categories?.[view.id] || '';
+    E('description').textContent = '';
     // navigation: four groups, icons, and the parent selected while a sub-tab is open
     const nav = GROUPS.map((g) => {
-      const items = g.items.map((id) => VIEW(id)).filter((v) => ORDER.some((o) => o.id === v.id));
+      const items = g.items.filter((id) => !hiddenByModule.has(id)).map((id) => VIEW(id)).filter((v) => ORDER.some((o) => o.id === v.id));
       if (!items.length) return '';
       return '<div class="settings-nav-group"><div class="settings-nav-title">' + esc(g.title) + '</div><div class="settings-nav-items">'
         + items.map((v) => '<button type="button" data-category="' + v.id + '"' + (v.id === activeParent ? ' class="selected" aria-current="true"' : '')
@@ -778,7 +757,7 @@
     else if (view.kind === 'display') html = drawDisplay(view);
     else if (view.kind === 'simple') html = drawSimple(view, locked);
     else if (view.kind === 'workspace') html = drawWorkspace(view, locked);
-    else if (view.kind === 'encoder') html = '<div class="settings-card"><p class="card-desc">Parâmetros fornecidos pelo encoder realmente carregado. Escolha o encoder em <b>Saída avançada</b> e aplique antes de editar aqui.</p><div id="encoder-panel"></div></div>';
+    else if (view.kind === 'encoder') html = '<div class="settings-card"><p class="card-desc keep">Parâmetros fornecidos pelo encoder realmente carregado. Escolha o encoder em <b>Saída avançada</b> e aplique antes de editar aqui.</p><div id="encoder-panel"></div></div>';
     else if (view.kind === 'plugins') html = drawPlugins();
     else if (view.id === 'performance') html = drawPerformance(view, locked);
     else html = drawNative(view, locked);
@@ -795,6 +774,8 @@
     const keepEmbed = embedded && mounted?.dataset.category === view.id;
     E('content').dataset.category = view.id;
     E('content').closest('.settings-content')?.classList.toggle('is-embed', embedded);
+    document.body.classList.toggle('embed-view', embedded);
+    E('settings-project').textContent = 'Projeto: ' + (preset || 'Produção atual');
     if (!insideForm && !keepEmbed) { E('content').innerHTML = html; E('content')._html = html; }
     else if (!insideForm) { /* the iframe is already showing this category: do not reload it on every engine tick */ }
     else { if (E('settings-diff')) E('settings-diff').outerHTML = diffCard(); }
@@ -817,10 +798,12 @@
     updateSummary();
     if (!E('message').textContent || E('message').dataset.auto) {
       let text = '';
-      if (live && (view.id === 'video' || ['recording', 'streaming', 'outputAdvanced'].includes(view.id))) text = 'Há ' + stateLabel(engineState()) + ': pare as saídas para alterar esta categoria.';
+      const keyOnlyLive = live && view.id === 'streaming' && config.mode !== 'Advanced';
+      if (keyOnlyLive) text = 'No ar: só a chave pode ser alterada; ela vale no próximo início da transmissão.';
+      else if (live && (view.id === 'video' || ['recording', 'streaming', 'outputAdvanced'].includes(view.id))) text = 'Há ' + stateLabel(engineState()) + ': pare as saídas para alterar esta categoria.';
       else if (totalDrafts()) text = 'Alterações ainda não aplicadas: confira o resumo e clique em Aplicar.';
       else if (view.kind === 'native') text = 'Estas preferências entram em vigor após reiniciar o 3Mix fora do ar.';
-      say(text, text && live ? 'error' : '');
+      say(text, text && live && !keyOnlyLive ? 'error' : '');
       E('message').dataset.auto = '1';
     }
     // the destination list shows real engine state: re-read it when this view is open and the read is stale
@@ -850,6 +833,14 @@
   }
 
   const isLive = () => { const s = engineState(); return !!(s.recording || s.streaming || config?.virtualCamera || (outputs?.destinations || []).some((d) => d?.active) || (outputs?.ndi?.senders || []).some((s2) => s2.active) || (outputs?.omt?.senders || []).some((s2) => s2.active)); };
+  function onlyStreamKeyPending() {
+    if (config?.mode === 'Advanced') return false;
+    const pending = ORDER.filter((v) => isDirty(v.id));
+    if (pending.length !== 1 || pending[0].id !== 'streaming') return false;
+    const changed = drafts.get('streaming') || {};
+    const keys = Object.keys(changed);
+    return keys.length === 1 && keys[0] === 'key' && String(changed.key || '').length > 0;
+  }
   async function refreshOutputs() {
     outputsAt = Date.now();
     try { const v = await getJson('/api/outputs'); outputs = v.outputs; } catch { /* keep the last read; the note below says so */ }
@@ -918,7 +909,8 @@
       if (expectedScope !== fresh.preset) throw Error('O projeto mudou enquanto esta janela estava aberta. Feche e abra de novo.');
       // nothing is written while any output is running: the engine refuses and the operator needs to know why
       try { outputs = (await getJson('/api/outputs')).outputs; } catch { /* the engine gate still protects the write */ }
-      if (isLive()) throw Error('Pare gravação, transmissão, saídas de rede e câmera virtual antes de aplicar.');
+      const onlyStreamKey = onlyStreamKeyPending();
+      if (isLive() && !onlyStreamKey) throw Error('Pare gravação, transmissão, saídas de rede e câmera virtual antes de aplicar.');
       let written = 0, lastRestart = false;
       const keepWorkspace = config.workspace;
       for (const view of pending) {
@@ -932,17 +924,23 @@
           if (!r.ok || !v.success) throw Error(v.error || 'O workspace não confirmou a alteração');
           config.workspace = v.workspace; written++; continue;
         }
-        if (!Object.keys(values).length) continue;
-        if (view.id === 'streaming' && !values.key) delete values.key;
-        if (view.kind === 'native') {
-          const body = { category: view.engine, ...values };
-          const r = await send('settings_apply', body);
-          lastRestart = r.settings?.requiresRestart === true || lastRestart;
+        if (onlyStreamKey) {
+          const key = String(drafts.get('streaming')?.key || '');
+          if (!key) continue;
+          await send('settings_stream_key', { category: 'streaming', key });
         } else {
-          const body = { category: view.engine, ...domValues(id) };
-          if (view.id === 'streaming' && !body.key) delete body.key;
-          const r = await send('settings_apply', body);
-          lastRestart = r.settings?.requiresRestart === true || lastRestart;
+          if (!Object.keys(values).length) continue;
+          if (view.id === 'streaming' && !values.key) delete values.key;
+          if (view.kind === 'native') {
+            const body = { category: view.engine, ...values };
+            const r = await send('settings_apply', body);
+            lastRestart = r.settings?.requiresRestart === true || lastRestart;
+          } else {
+            const body = { category: view.engine, ...domValues(id) };
+            if (view.id === 'streaming' && !body.key) delete body.key;
+            const r = await send('settings_apply', body);
+            lastRestart = r.settings?.requiresRestart === true || lastRestart;
+          }
         }
         const reloaded = await settingsRequest('settings_get');
         config = reloaded.config;
@@ -951,7 +949,12 @@
         drafts.delete(id); written++;
       }
       if (!written) { note('Nenhuma alteração efetiva foi encontrada nos campos.', ''); return; }
-      note((restart || lastRestart ? 'Configurações salvas e confirmadas. Reinicie o 3Mix fora do ar para aplicar as preferências do motor.' : written + (written === 1 ? ' categoria aplicada e confirmada pelo motor.' : ' categorias aplicadas e confirmadas pelo motor.')), 'ok');
+      const done = onlyStreamKey
+        ? 'Chave salva; vale no próximo início da transmissão.'
+        : restart || lastRestart
+          ? 'Configurações salvas e confirmadas. Reinicie o 3Mix fora do ar para aplicar as preferências do motor.'
+          : written + (written === 1 ? ' categoria aplicada e confirmada pelo motor.' : ' categorias aplicadas e confirmadas pelo motor.');
+      note(done, 'ok');
       E('content')._html = null; draw();
       if (close) setTimeout(() => window.FreeMixClosePanel?.(), 250);
     } catch (e) {
@@ -1106,7 +1109,7 @@
       const select = box.querySelector('[data-target]'), value = context === 'recording' ? 'record' : 'stream';
       if (select) { select.value = value; select.dispatchEvent(new Event('change', { bubbles: true })); for (const option of [...select.options]) if (option.value !== value) option.remove(); }
     }
-    const fix = () => { window.FreeMixSettingsHelp.decorate(box); for (const a of box.querySelectorAll('a[href^="/settings?"]')) { const url = new URL(a.href); url.searchParams.set('context', context); a.href = url.pathname + url.search; } };
+    const fix = () => { window.FreeMixSettingsHelp.decorate(box); for (const a of box.querySelectorAll('a[href^="/settings?"], a[href^="/configuracoes?"]')) { const url = new URL(a.href); url.searchParams.set('context', context); a.href = url.pathname + url.search; } };
     new MutationObserver(fix).observe(box, { childList: true, subtree: true });
     fix();
   }
@@ -1170,7 +1173,7 @@
     if (E('settings-diff')) E('settings-diff').outerHTML = diffCard();
     E('settings-dirty').hidden = totalDrafts() === 0;
     E('settings-dirty').textContent = '● ' + totalDrafts() + (totalDrafts() === 1 ? ' alteração não aplicada' : ' alterações não aplicadas');
-    for (const id2 of ['apply', 'ok']) { const view = VIEW(selected); E(id2).disabled = busy || !isSupported(view, isLive()) || !totalDrafts(); }
+    for (const id2 of ['apply', 'ok']) { const view = VIEW(selected), keyOnly = view.id === 'streaming' && isLive() && onlyStreamKeyPending(); E(id2).disabled = busy || (!isSupported(view, isLive()) && !keyOnly) || !totalDrafts(); }
     if (!E('message').dataset.auto || /não aplicad|pendente/i.test(E('message').textContent)) { say('Alterações ainda não aplicadas: confira o resumo e clique em Aplicar.'); E('message').dataset.auto = '1'; }
   });
   E('content').addEventListener('change', (e) => {
@@ -1259,6 +1262,12 @@
       fetch('/api/outputs', { signal: AbortSignal.timeout(5000) }).then((r) => r.json()).then((v) => { if (v?.outputs) { outputs = v.outputs; outputsAt = Date.now(); if (['video', 'streaming'].includes(selected) && !document.querySelector('#content [data-view]:focus')) { E('content')._html = null; draw(); } } }).catch(() => {});
     }
   }, 1000);
+
+  fetch('/api/modulos', { cache: 'no-store', signal: AbortSignal.timeout(5000) }).then((r) => r.json()).then((d) => {
+    if (d?.modulos?.calls === false) hiddenByModule = new Set(['returns']);
+    E('categories')._html = null;
+    if (config) draw();
+  }).catch(() => {});
 
   (async function start() {
     for (;;) {

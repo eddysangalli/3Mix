@@ -41,7 +41,7 @@
       button.disabled=!calls?.director||!calls.nativeWatchdog||!ready||elsewhere;
       if(button.disabled&&held)stop();
       if(!held)hint(!calls?.director?'Configure o microfone em Calls.':!calls.nativeWatchdog?'Atualize o motor para usar talkback seguro.':!ready?'Abra Calls, prepare os retornos e escolha quem recebe.':elsewhere?'O diretor está falando em outro controle. Aguarde soltar.':'Convidados: '+keys.map(key=>calls.guests.find(g=>g.key===key)?.person?.name||calls.guests.find(g=>g.key===key)?.name||key).join(', ')+'.');
-    }catch(e){button.disabled=true;stop();hint('Controle local desconectado. Abra pelo atalho FreeMix Studio.');}finally{polling=false;}
+    }catch(e){button.disabled=true;stop();hint('Controle local desconectado. Abra pelo atalho 3Mix Studio.');}finally{polling=false;}
   }
   poll();setInterval(poll,1000);
 })();

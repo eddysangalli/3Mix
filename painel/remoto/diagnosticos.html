@@ -3,56 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Diagnósticos e Logs de Suporte</title>
-<link rel="stylesheet" href="vmix-dialogo.css">
-<style>
-details summary { cursor: pointer; font-weight: 700; color: #fff; padding: 4px 0; outline: none; }
-details summary:hover { color: #1e7fd6; }
-pre#contents { white-space: pre-wrap; word-break: break-all; max-height: 220px; overflow-y: auto; background: #12171b; border: 1px solid #39444d; padding: 8px; font: 11px Consolas, monospace; }
-</style>
+<title>3Mix · Relatar problema</title>
+<script src="3mix-padrao.js"></script>
+<link rel="stylesheet" href="3mix-grafite.css">
+<link rel="stylesheet" href="3mix-padrao.css">
 </head>
-<body data-page="diagnosticos" class="vd">
-<div class="vd-window">
-  <div class="vd-strip">
-    <span class="vd-title">Diagnósticos e Logs para Suporte</span>
-    <span class="vd-flex"></span>
-    <span class="vd-note" style="font-size:11px">Coleta local e sanitizada</span>
-  </div>
+<body data-page="diagnosticos" class="p3">
+<header class="p3-head">
+  <a href="/" title="3Mix"><img class="p3-logo" src="/img/3mix-logo.png" alt="3Mix"></a>
+  <h1>Relatar problema</h1>
+</header>
 
-  <div class="vd-body">
-    <div class="vd-row">
-      <span>Identificação</span>
-      <input id="machine" maxlength="80" placeholder="Apelido desta máquina (opcional; vazio usa o nome do PC)" spellcheck="false" autocomplete="off">
-    </div>
-
-    <div class="vd-row" style="align-items:start">
-      <span style="padding-top:4px">Ocorrência</span>
-      <textarea id="note" maxlength="2000" placeholder="Descreva brevemente o que aconteceu ou o horário aproximado do erro" style="height:70px;width:100%;font:12px 'Segoe UI',sans-serif;background:#e9eaeb;color:#000;border:1px solid #6f757b;padding:4px"></textarea>
-    </div>
-
-    <div class="vd-row">
-      <span></span>
-      <div class="vd-inline">
-        <button id="generate" class="vd-on">Gerar Pacote ZIP de Diagnóstico</button>
-        <a id="download" class="vd-link" style="color:#7fe08f;font-weight:700;text-decoration:underline;cursor:pointer" hidden>Baixar ZIP gerado</a>
-      </div>
-    </div>
-
-    <p id="status" class="vd-msg" role="status" style="margin-left:147px">Gera um pacote sanitizado com logs do motor, API, plugins e crashes. Senhas e tokens são removidos.</p>
-
-    <details id="preview" class="vd-advanced" hidden style="margin-top:6px">
-      <summary>Prévia dos logs coletados</summary>
-      <pre id="contents"></pre>
-    </details>
-  </div>
-
-  <div class="vd-bar">
-    <span class="vd-flex"></span>
-    <button id="close-btn" onclick="window.FreeMixClosePanel ? window.FreeMixClosePanel() : window.close()">Fechar</button>
-  </div>
-</div>
+<main class="p3-main">
+  <section class="p3-card" style="max-width:820px">
+    <div id="relato"></div>
+  </section>
+</main>
 
 <script src="fechar-janela.js"></script>
-<script src="diagnosticos.js"></script>
+<script src="diagnosticos.js?v=20261102b"></script>
 </body>
 </html>

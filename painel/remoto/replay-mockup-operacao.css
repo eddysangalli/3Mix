@@ -22,7 +22,7 @@
   --rp-dim: #8d8d8d;
   --rp-faint: #6d6d6d;
   --rp-hover: #494949;
-  --rp-selected: #303a45;
+  --rp-selected: #3a3a3a;
   --rp-white: #ffffff;
 
   /* Operational colours: reserved for real state, never decoration. */
@@ -34,7 +34,7 @@
   --rp-green-dark: #14351f;
   --rp-blue: #3b82f6;
   --rp-blue-bright: #69a5ff;
-  --rp-blue-dark: #16283f;
+  --rp-blue-dark: #2a2a2a;
   --rp-amber: #d6a11e;
   --rp-amber-bright: #ffd15a;
   --rp-amber-dark: #33280f;
@@ -761,8 +761,8 @@ summary { cursor: pointer; }
 .ev-order { display: inline-flex; gap: 2px; margin-left: 4px; vertical-align: middle; }
 .ev-order button { display: inline-flex; align-items: center; justify-content: center; height: 24px; min-height: 24px; width: 22px; padding: 0; font-size: 11px; margin-left: 0; color: #a8a8a8; background: #2b2b2b; }
 .btn-load-a, .btn-load-b { font-weight: 800; width: 28px; }
-.btn-load-a { color: #a9ccff; border-color: #2f5b91; background: #172638; }
-.btn-load-a:hover:not(:disabled) { background: #1e3652; border-color: #4b84c9; color: #fff; }
+.btn-load-a { color: #a9ccff; border-color: #2f5b91; background: #272727; }
+.btn-load-a:hover:not(:disabled) { background: #373737; border-color: #4b84c9; color: #fff; }
 .btn-load-b { color: #ffd15a; border-color: #6a5420; background: #241f12; }
 .btn-load-b:hover:not(:disabled) { background: #332a15; border-color: #9a7a2c; color: #fff; }
 .events-empty { padding: 22px !important; color: var(--rp-muted); font-size: 12.5px; line-height: 1.5; text-align: center; }

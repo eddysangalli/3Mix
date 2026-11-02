@@ -4,12 +4,12 @@
 
 O protótipo de alpha em uma entrada Web Browser foi **abortado após desempenho ruim com vídeo real no vMix**. Não usar essa rota na demonstração. O histórico está em `../archived/limpeza-demo-20261009/experimento-alpha-web/VIDEO-ALPHA-UMA-ENTRADA.md`.
 
-Primeiro salve e feche o FreeMix normalmente e abra **ABRIR-FREEMIX.cmd** na raiz. A atualização nova só é aplicada com a mesa fechada. Não basta atualizar a página de configurações.
+Primeiro salve e feche o 3Mix normalmente e abra **ABRIR-FREEMIX.cmd** na raiz. A atualização nova só é aplicada com a mesa fechada. Não basta atualizar a página de configurações.
 
 ## Um SRT: cor e máscara lado a lado em 4:2:0
 
 1. No vMix, adicione uma entrada **SRT (Listener)**, porta **18360**, latência **120 ms**. A porta precisa estar livre; OBS e vMix não podem usar a mesma porta de escuta simultaneamente nesta configuração.
-2. No FreeMix, abra **Externo → SRT**, escolha uma saída e a entrada PNG/GC/composição transparente.
+2. No 3Mix, abra **Externo → SRT**, escolha uma saída e a entrada PNG/GC/composição transparente.
 3. Clique **Preparar SRT único · 4:2:0 + máscara**. Confira x264 H.264, cor 4:2:0 e alpha **Cor + máscara lado a lado · quadro único**.
 4. Conexão: **Caller**, IP `127.0.0.1`, porta **18360**, latência **120 ms**. Em outra máquina use o IP LAN/ZeroTier do receptor.
 5. Salve e inicie a saída. Conteúdo 1280×720 transmite 2560×720: imagem à esquerda, máscara à direita. Um receptor comum mostra as duas metades; a transparência precisa ser recomposta.
@@ -19,7 +19,7 @@ Primeiro salve e feche o FreeMix normalmente e abra **ABRIR-FREEMIX.cmd** na rai
 
 ## Dois SRTs: Fill e Key em portas diferentes
 
-1. FreeMix, primeira saída: mesma entrada transparente, resolução 1280×720, x264 H.264, cor **4:2:0**, alpha **Fill · imagem colorida · 4:2:0**, Caller `127.0.0.1:18360`, latência 120 ms.
+1. 3Mix, primeira saída: mesma entrada transparente, resolução 1280×720, x264 H.264, cor **4:2:0**, alpha **Fill · imagem colorida · 4:2:0**, Caller `127.0.0.1:18360`, latência 120 ms.
 2. Segunda saída: copie a mesma entrada, resolução, FPS, enquadramento e overlays; alpha **Key · máscara em cinza · 4:2:0**, Caller `127.0.0.1:18362`, latência 120 ms. Configure e salve cada saída; inicie as duas depois que os receptores estiverem preparados.
 3. vMix: uma entrada SRT Listener na porta **18360** chamada Fill, outra na **18362** chamada Key. Ambas 120 ms. As duas recebem 1280×720, sem recortes e sem largura dobrada.
 4. Na Fill: engrenagem → **Colour Key → Key/Fill Input**, selecione a Key. Silencie o áudio da Key para não duplicar o som.

@@ -16,7 +16,7 @@
   .player-box { display: flex; flex-direction: column; gap: 6px; background: #252525; border: 1px solid #454545; padding: 8px; border-radius: 6px; min-width: 0; }
   .player-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #414141; padding-bottom: 6px; gap: 8px; }
   .player-title { font-weight: 700; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.6px; color: #ddd; }
-  .badge-pv { color: #bfe3ff; background: #173247; border: 1px solid #3d7ea6; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; }
+  .badge-pv { color: #bfe3ff; background: #303030; border: 1px solid #3d7ea6; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; }
   .badge-pgm { color: #bbb; background: #2b2b2b; border: 1px solid #555; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; }
   .badge-pgm.on-air { color: #ffd4cf; background: #4a1414; border-color: #c0392b; }
 
@@ -58,13 +58,13 @@
   .pl-table tr:hover { background: #292929; cursor: pointer; }
   .pl-table tr.selected { background: #333; color: #fff; }
   .pl-table tr.is-on-air { background: #4a1414; color: #ffc9c2; font-weight: 700; }
-  .pl-table tr.is-preview { background: #173247; color: #d6ecff; }
+  .pl-table tr.is-preview { background: #303030; color: #d6ecff; }
 
-  .badge-chain { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9.5px; font-weight: 800; background: #3d2a55; color: #e6d8ff; border: 1px solid #7c5ab5; margin-right: 4px; }
+  .badge-chain { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9.5px; font-weight: 800; background: #3f3f3f; color: #e6d8ff; border: 1px solid #7c5ab5; margin-right: 4px; }
   .badge-state { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9.5px; font-weight: 700; text-transform: uppercase; }
   .badge-state.ready { background: #1c3a2a; color: #a9e8c4; border: 1px solid #2f7d55; }
   .badge-state.playing { background: #4a1414; color: #ffc9c2; border: 1px solid #c0392b; }
-  .badge-state.frozen { background: #1e2f4a; color: #c7ddff; border: 1px solid #3d6ea6; }
+  .badge-state.frozen { background: #323232; color: #c7ddff; border: 1px solid #3d6ea6; }
   .badge-state.idle { background: #2b2b2b; color: #a5a5a5; border: 1px solid #444; }
 
   .transport-btns { display: flex; gap: 5px; align-items: center; }
@@ -76,6 +76,7 @@
   .tc-cell { font-family: Consolas, monospace; font-size: 11px; color: #c9c9c9; }
   @media (max-width: 900px) { .dual-players { grid-template-columns: 1fr; } .take-col { flex-direction: row; } }
   .vd-window button:disabled { opacity: .55; filter: saturate(.25); }
+/* menos-texto */ p.vd-note { display: none; }
 </style>
 </head>
 <body data-page="playout" class="vd">

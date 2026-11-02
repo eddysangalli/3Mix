@@ -1,0 +1,36 @@
+{
+  "$schema": "https://ebu.io/ograf/v1/schema.json",
+  "name": "3Mix Lower Third Broadcast",
+  "version": "1.0.0",
+  "type": "lower-third",
+  "aspectRatio": "16:9",
+  "framerate": 60,
+  "author": "3Mix Studio Engine",
+  "parameters": {
+    "title": {
+      "type": "string",
+      "default": "Nome do Entrevistado",
+      "label": "Título Principal"
+    },
+    "subtitle": {
+      "type": "string",
+      "default": "Cargo / Descrição",
+      "label": "Subtítulo / Crédito"
+    },
+    "category": {
+      "type": "string",
+      "default": "AO VIVO",
+      "label": "Selo / Retranca"
+    },
+    "badgeColor": {
+      "type": "color",
+      "default": "#e63946",
+      "label": "Cor do Selo"
+    },
+    "duration": {
+      "type": "number",
+      "default": 8,
+      "label": "Duração em Segundos"
+    }
+  }
+}

@@ -163,7 +163,9 @@ body.popup-mode > .switcher-banks,body.popup-mode > #dsk-bar-strip { display:non
 .dsk-panel-head { display:flex; align-items:center; justify-content:space-between; gap:10px; height:20px; flex:none; }
 .dsk-panel-head strong { display:flex; align-items:center; font-size:12px; letter-spacing:.5px; white-space:nowrap; }
 .dsk-panel-head strong::before { content:''; width:3px; height:11px; background:#cfcfcf; margin-right:6px; }
-.dsk-panel-head span { color:#9c9c9c; font-size:10.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dsk-panel-head span { flex:1; min-width:0; color:#9c9c9c; font-size:10.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dsk-panel-head .dsk-full-btn { flex:none; height:18px; padding:0 8px; border:1px solid #4d4d4d; border-radius:3px; background:#2f2f2f; color:#cfcfcf; font:600 10px/1 inherit; cursor:pointer; white-space:nowrap; }
+.dsk-panel-head .dsk-full-btn:hover { background:#3a3a3a; border-color:#7a7a7a; color:#fff; }
 .dsk-global { display:flex; align-items:center; gap:8px; flex:none; height:30px; padding:0 7px; background:#262626; border:1px solid #3c3c3c; border-radius:4px; }
 .dsk-global label { display:flex; flex-direction:row; align-items:center; gap:5px; color:#b6b6b6; font-size:11px; white-space:nowrap; }
 .dsk-global label i { font-style:normal; color:#8d8d8d; font-size:10.5px; }
@@ -356,3 +358,16 @@ body.native-switcher:not(:has(.media-bar:not(.disabled))) { grid-template-column
 /* --- janelas destacadas (popup-mode) ------------------------------------ */
 body.popup-mode .pop { font-size:14px; }
 body.popup-mode .pop input,body.popup-mode .pop select { min-height:36px; }
+
+/* Faixa de estado: cinza parado, vermelho no ar. */
+.estado-ar { display:flex; align-items:center; gap:3px; flex:none; flex-wrap:nowrap; }
+.estado-ar .ea { display:inline-flex; align-items:center; gap:5px; height:22px; padding:0 7px; background:#242424; border:1px solid #3d3d3d; border-radius:3px; color:#7f7f7f; font-size:11px; white-space:nowrap; }
+.estado-ar .ea b { font-weight:800; letter-spacing:.3px; }
+.estado-ar .ea i { width:7px; height:7px; border-radius:50%; background:#4d4d4d; flex:none; }
+.estado-ar .ea em { font-style:normal; font-variant-numeric:tabular-nums; font-weight:700; }
+.estado-ar .ea em:empty { display:none; }
+.estado-ar .ea.on { background:#b02a1f; border-color:#d8392b; color:#fff; }
+.estado-ar button.ea { font:inherit; cursor:pointer; }
+.estado-ar .ea.on i { background:#fff; animation:estado-ar-pulso 1.2s ease-in-out infinite; }
+.estado-ar.sem-motor .ea { opacity:.45; }
+@keyframes estado-ar-pulso { 0%,100% { opacity:1; } 50% { opacity:.3; } }

@@ -1,10 +1,163 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>FreeMix · Novo projeto</title><link rel="stylesheet" href="studio-dialog.css"><link rel="stylesheet" href="operacao.css"><link rel="stylesheet" href="wizard.css"></head>
-<body data-page="novo-projeto"><header><h1>FreeMix · Novo projeto</h1><p>Prepare a mesa horizontal, vertical ou vinculada com quatro posições de câmera.</p></header>
-<main class="operation-workspace"><div class="content"><nav class="operation-steps" aria-label="Etapas do novo projeto"><button type="button" data-step="0">1. Formato</button><button type="button" data-step="1">2. Câmeras e áudio</button><button type="button" data-step="2">3. Conferir</button></nav>
-<p id="operation-status" role="status" aria-live="polite">Prévia local. Nenhum dispositivo será aberto.</p><label class="template-picker" for="template-file">Carregar template de entradas<input id="template-file" type="file" accept="application/json,.json"><span class="operation-help">Informe o nome do novo projeto primeiro. O arquivo só preenche a prévia; dispositivos ausentes serão recusados.</span></label>
-<form id="wizard" novalidate><section class="operation-step" data-panel="0" aria-labelledby="format-title"><h2 id="format-title" tabindex="-1">Formato da mesa</h2><label for="name">Nome do projeto<input id="name" maxlength="40" autocomplete="off" placeholder="Nome de um novo projeto"></label><label for="format">Formato<select id="format"><option value="landscape">Horizontal · 1920 × 1080</option><option value="portrait">Vertical · 1080 × 1920</option><option value="both">Horizontal + vertical vinculados</option></select></label><p class="operation-help" id="format-help">A prévia usa quatro posições iguais no formato escolhido.</p><label for="fps">Quadros por segundo<select id="fps"><option value="25/1">25</option><option value="30/1" selected>30</option><option value="50/1">50</option><option value="60/1">60</option><option value="30000/1001">29,97</option><option value="60000/1001">59,94</option></select></label><label class="check"><input type="checkbox" id="save-template">Incluir um template de entradas reutilizável na prévia</label></section>
-<section class="operation-step" data-panel="1" aria-labelledby="sources-title" hidden><h2 id="sources-title" tabindex="-1">Câmeras e áudio</h2><div class="inventory-head"><p class="operation-help">Selecione os quatro espaços. “Escolher câmera” deixa uma cena vazia identificada para configurar depois. A consulta explícita pode abrir handles do driver para ler metadados; não inicia captura.</p><button id="read-resources" type="button">Consultar recursos do motor</button></div><label class="check"><input id="scan-consent" type="checkbox">Permitir consulta de metadados dos drivers; pode demorar e acessar o dispositivo sem iniciar captura.</label><button id="scan-devices" type="button" disabled>Consultar câmeras e modos disponíveis</button><p id="resources-help" class="operation-help">Sem adaptador integrado: câmeras e áudio físicos indisponíveis nesta prévia.</p><div id="cameras" class="camera-grid"></div><fieldset><legend>Áudio</legend><label for="audio">Captura<select id="audio"><option value="none">Sem captura de áudio</option></select></label><label for="audio-preset">Preset<select id="audio-preset"></select></label><p class="operation-help">Uma captura escolhida permanece pendente de ativação posterior, inicialmente muda e sem monitoração.</p></fieldset></section>
-<section class="operation-step" data-panel="2" aria-labelledby="review-title" hidden><h2 id="review-title" tabindex="-1">Conferir a prévia</h2><dl id="operation-summary"></dl><div id="layout-preview" aria-label="Posições das quatro câmeras"></div><ul id="warnings" class="operation-help"></ul><p class="operation-help">Exportar a prévia não cria perfil, coleção, entrada, filtro ou saída. Criar o projeto preparado exige o adaptador integrado e confirmação explícita; o botão permanece indisponível na prévia offline.</p><label class="check"><input id="apply-consent" type="checkbox">Confirmo criar perfil e coleção novos. A troca temporária de contexto será restaurada; não abrir o projeto nem ativar dispositivos.</label><button id="apply-project" type="button" disabled>Criar projeto preparado</button><p class="operation-help">Câmeras ficam desativadas; áudio físico fica pendente. Em falha parcial, o recibo informa o que foi criado e se o contexto anterior voltou.</p><button type="button" id="export-template" disabled>Exportar template</button></section>
-<div class="operation-footer"><button id="back" type="button">Voltar</button><button id="next" type="button" class="operation-primary">Continuar</button></div></form>
-<noscript><p>Ative JavaScript para preparar a prévia. Nenhuma operação foi enviada ao motor.</p></noscript></div></main><script type="module" src="wizard-client.js"></script><script type="module" src="wizard-ui.js"></script></body></html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3Mix · Novo projeto</title>
+<link rel="stylesheet" href="../vmix-dialogo.css">
+<style>
+.vd-window { min-width: 680px; max-width: 860px; }
+.camera-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 8px 0; }
+.camera-grid fieldset { border: 1px solid #434343; background: #1a1a1a; padding: 8px 10px; margin: 0; }
+.camera-grid legend { font-weight: 700; color: #c9d1d8; padding: 0 4px; }
+.camera-grid label { display: flex; flex-direction: column; gap: 2px; font-size: 11px; font-weight: 700; margin: 4px 0; }
+.slot-help { min-height: 2.2em; font-size: 11px; color: #8c97a0; margin: 4px 0 0; }
+.template-picker { display: flex; align-items: center; gap: 8px; font-size: 11px; }
+.template-picker input[type=file] { display: none; }
+.template-btn { display: inline-block; padding: 3px 8px; border: 1px solid #505050; background: #333333; color: #fff; font-weight: 700; cursor: pointer; }
+.template-btn:hover { background: #404040; }
+.vd-note-box { background: #1a1a1a; border: 1px solid #343434; padding: 6px 10px; font-size: 11px; color: #b0bac2; line-height: 1.35; margin: 4px 0; }
+#layout-preview { display: flex; gap: 16px; flex-wrap: wrap; margin: 12px 0; }
+.layout { width: min(100%, 280px); }
+.layout-grid { border: 2px solid #4a4a4a; position: relative; background: #303030; }
+.layout-grid span { position: absolute; display: grid; place-items: center; text-align: center; background: #111111; color: #fff; font-size: 10px; border: 1px solid #505050; padding: 2px; }
+.layout[data-orientation=landscape] .layout-grid { aspect-ratio: 16/9; }
+.layout[data-orientation=portrait] .layout-grid { aspect-ratio: 9/16; max-width: 160px; }
+.layout p { margin: 4px 0; font-size: 11px; font-weight: 700; }
+#operation-summary { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 4px 10px; font-size: 11px; margin: 8px 0; }
+#operation-summary dt { font-weight: 700; text-align: right; color: #a2adb7; }
+#operation-summary dd { margin: 0; color: #fff; }
+.vd-nums button.selected, .vd-nums button[aria-current="step"] { background: #0b6f1a; border-color: #2aa13e; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body data-page="novo-projeto" class="vd">
+<div class="vd-window">
+  <div class="vd-strip">
+    <nav class="vd-nums vd-words" aria-label="Etapas do novo projeto">
+      <button type="button" data-step="0" class="selected" aria-current="step">1. Formato</button>
+      <button type="button" data-step="1">2. Câmeras e áudio</button>
+      <button type="button" data-step="2">3. Conferir</button>
+    </nav>
+    <span class="vd-flex"></span>
+    <label class="template-picker" title="Carregar template de entradas">
+      <span class="template-btn">Template JSON</span>
+      <input id="template-file" type="file" accept="application/json,.json">
+    </label>
+  </div>
+
+  <div style="padding: 4px 12px 0;">
+    <p id="operation-status" class="vd-msg" role="status" aria-live="polite">Prévia local. Nenhum dispositivo será aberto.</p>
+  </div>
+
+  <form id="wizard" novalidate style="display: contents;">
+    <!-- ETAPA 0: FORMATO -->
+    <section class="vd-body operation-step" data-panel="0" aria-labelledby="format-title">
+      <h2 id="format-title" tabindex="-1" class="vd-title" style="margin: 0 0 4px; font-size: 13px;">Formato da mesa</h2>
+
+      <label class="vd-row"><span>Nome do projeto</span>
+        <input id="name" type="text" maxlength="40" autocomplete="off" placeholder="Nome de um novo projeto">
+      </label>
+
+      <label class="vd-row"><span>Formato</span>
+        <select id="format">
+          <option value="landscape">Horizontal · 1920 × 1080</option>
+          <option value="portrait">Vertical · 1080 × 1920</option>
+          <option value="both">Horizontal + vertical vinculados</option>
+        </select>
+      </label>
+
+      <div class="vd-row"><span></span><span class="vd-note" id="format-help">A prévia usa quatro posições iguais no formato escolhido.</span></div>
+
+      <label class="vd-row"><span>FPS</span>
+        <select id="fps" class="vd-short">
+          <option value="25/1">25</option>
+          <option value="30/1" selected>30</option>
+          <option value="50/1">50</option>
+          <option value="60/1">60</option>
+          <option value="30000/1001">29,97</option>
+          <option value="60000/1001">59,94</option>
+        </select>
+      </label>
+
+      <div class="vd-row"><span></span>
+        <div class="vd-inline">
+          <label class="vd-check"><input type="checkbox" id="save-template"> Incluir template de entradas reutilizável na prévia</label>
+        </div>
+      </div>
+    </section>
+
+    <!-- ETAPA 1: CÂMERAS E ÁUDIO -->
+    <section class="vd-body operation-step" data-panel="1" aria-labelledby="sources-title" hidden>
+      <h2 id="sources-title" tabindex="-1" class="vd-title" style="margin: 0 0 4px; font-size: 13px;">Câmeras e áudio</h2>
+      <div class="vd-note-box">
+        Selecione os quatro espaços. “Escolher câmera” deixa uma cena vazia identificada para configurar depois. A consulta pode ler metadados sem iniciar captura.
+      </div>
+
+      <div class="vd-row"><span>Recursos</span>
+        <div class="vd-inline">
+          <button id="read-resources" type="button">Consultar recursos</button>
+          <button id="scan-devices" type="button" disabled>Varredura de modos</button>
+        </div>
+      </div>
+
+      <div class="vd-row"><span></span>
+        <label class="vd-check"><input id="scan-consent" type="checkbox"> Permitir consulta detalhada de metadados dos drivers</label>
+      </div>
+
+      <div class="vd-row"><span></span><span id="resources-help" class="vd-note">Sem adaptador integrado: prévia offline.</span></div>
+
+      <div id="cameras" class="camera-grid"></div>
+
+      <fieldset style="border: 1px solid #39444d; background: #151a1e; padding: 8px 10px; margin: 4px 0;">
+        <legend style="font-weight: 700; color: #c9d1d8;">Áudio</legend>
+        <label class="vd-row" style="margin-bottom: 4px;"><span>Captura</span>
+          <select id="audio"><option value="none">Sem captura de áudio</option></select>
+        </label>
+        <label class="vd-row"><span>Preset</span>
+          <select id="audio-preset"></select>
+        </label>
+        <p class="vd-note" style="margin: 4px 0 0 147px;">A captura permanece pendente de ativação, inicialmente muda e sem monitoração.</p>
+      </fieldset>
+    </section>
+
+    <!-- ETAPA 2: CONFERIR -->
+    <section class="vd-body operation-step" data-panel="2" aria-labelledby="review-title" hidden>
+      <h2 id="review-title" tabindex="-1" class="vd-title" style="margin: 0 0 4px; font-size: 13px;">Conferir prévia</h2>
+
+      <dl id="operation-summary"></dl>
+
+      <div id="layout-preview" aria-label="Posições das quatro câmeras"></div>
+
+      <ul id="warnings" class="vd-note" style="padding-left: 20px; margin: 6px 0;"></ul>
+
+      <div class="vd-note-box">
+        Exportar a prévia não cria perfil nem dispositivos. Criar projeto preparado exige confirmação explícita.
+      </div>
+
+      <div class="vd-row" style="margin: 6px 0;"><span>Confirmação</span>
+        <label class="vd-check"><input id="apply-consent" type="checkbox"> Confirmo criar perfil e coleção novos sem ativar captura física</label>
+      </div>
+
+      <div class="vd-row"><span></span>
+        <div class="vd-inline">
+          <button id="apply-project" type="button" disabled class="vd-on">Criar projeto preparado</button>
+          <button id="export-template" type="button" disabled>Exportar template</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- BARRA INFERIOR DE NAVEGAÇÃO -->
+    <div class="vd-bar">
+      <button id="back" type="button" disabled>Voltar</button>
+      <span class="vd-flex"></span>
+      <button id="next" type="button" class="vd-on">Continuar</button>
+      <button type="button" onclick="window.close()">Fechar</button>
+    </div>
+  </form>
+</div>
+
+<script type="module" src="wizard-client.js"></script>
+<script type="module" src="wizard-ui.js"></script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-# FreeMix — LEIA-ME /060000
+# 3Mix — LEIA-ME /060000
 
 Estado vigente após aceite Root: **0.1.0-local.20261010060000, Native24/a047860**. Uma instalação própria, dois ciclos cooperativos counter0/crash0, Meter [0,0] preservados, diagnóstico instalado sanitizado e desinstalação conservadora. Operador preservado, não ativado/substituído.
 
@@ -18,7 +18,7 @@ Provas instaladas: qa-finalizacao/setup-060000-qa/report.json SHA 77d835df3da98d
 
 Referências a atual/pendente/próximo abaixo pertencem ao registro original; artefatos selados/recibos não foram reescritos.
 
-# FreeMix Studio — entrega selecionada 0.1.0-local.20261010035000
+# 3Mix Studio — entrega selecionada 0.1.0-local.20261010035000
 
 Abra INSTALAR-FREEMIX.cmd na raiz do workspace, escolha pasta nova/vazia e use o atalho FreeMix Studio criado pelo Setup. O seletor confere o hash da versão aprovada. Motor, controle, Node, FFmpeg e NDI Runtime acompanham o pacote. Drivers físicos continuam sendo os do fabricante.
 
