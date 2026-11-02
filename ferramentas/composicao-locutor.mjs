@@ -6,7 +6,7 @@ export function speakerOptions(value,slots){
  return {enabled:value.enabled,thresholdDb,marginDb,holdMs,debounceMs,mappings:mappings.map(m=>({slot:m.slot,audioKey:m.audioKey}))};
 }
 export function chooseSpeaker(config,state,context,now=Date.now()){
- const candidates=config.mappings.map(m=>{const input=context.sourceInputs?.find(i=>i.key===m.audioKey),audio=context.audioInputs?.find(a=>a.name===input?.name||a.key===m.audioKey),director=context.calls?.director,protectedInput=!input||audio?.bus||input.key===director?.key||input.name===director?.name||/^FreeMix (?:Master|Bus|Retorno|N1)(?:\s|$)/.test(input.name);const level=!protectedInput&&!audio?.muted&&Array.isArray(audio?.levels)?Math.max(0,...audio.levels.filter(Number.isFinite)):0;return {...m,db:level>0?20*Math.log10(level):-120};}).sort((a,b)=>b.db-a.db);
+ const candidates=config.mappings.map(m=>{const input=context.sourceInputs?.find(i=>i.key===m.audioKey),audio=context.audioInputs?.find(a=>a.name===input?.name||a.key===m.audioKey),director=context.calls?.director,protectedInput=!input||audio?.bus||input.key===director?.key||input.name===director?.name||/^3Mix (?:Master|Bus|Retorno|N1)(?:\s|$)/.test(input.name);const level=!protectedInput&&!audio?.muted&&Array.isArray(audio?.levels)?Math.max(0,...audio.levels.filter(Number.isFinite)):0;return {...m,db:level>0?20*Math.log10(level):-120};}).sort((a,b)=>b.db-a.db);
  const best=candidates[0],active=candidates.find(m=>m.slot===state.active);if(!best||best.db<config.thresholdDb||best.slot===state.active){state.pending=null;return null;}
  if(active&&best.db<active.db+config.marginDb||now-(state.changedAt??-Infinity)<config.holdMs){state.pending=null;return null;}
  if(state.pending!==best.slot){state.pending=best.slot;state.since=now;return null;}

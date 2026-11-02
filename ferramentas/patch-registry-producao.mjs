@@ -64,7 +64,7 @@ export class PatchRegistryEngine {
   async apply({ input, signal }) {
     const { scene, item } = await this.describe(input);
     const source = await this.p.inputEngine.scene(signal);
-    if (source.sceneName.startsWith('FreeMix Slot ')) throw Error('Selecione um sinal público, não um slot privado de composição.');
+    if (source.sceneName.startsWith('3Mix Slot ')) throw Error('Selecione um sinal público, não um slot privado de composição.');
     if (source.sceneUuid === scene.sceneUuid) throw Error('Um Input não pode ser roteado para si mesmo.');
     if (await this.p.inputEngine.cycle(scene.sceneName, source.sceneName)) {
       throw Error('Rota cria um ciclo: este sinal já depende deste Input, direta ou indiretamente.');

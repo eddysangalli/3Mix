@@ -24,7 +24,7 @@ export function isoRecordingOptions(value={}, nested=false) {
 }
 
 export const REPLAY_PLAYERS = Object.freeze(["A","B","C","D"]);
-const FILTER = "FreeMix Replay Rec";
+const FILTER = "3Mix Replay Rec";
 // Source Record forwards this OBS enum; DISABLE (0) bypasses GPU rescaling.
 const GPU_SCALE_BICUBIC = 2;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -113,7 +113,7 @@ export class DiskReplay {
     this.isoBusSourceCapture=capabilities.responseData?.source_record_bus_capture===true;
     // Return/monitor taps remain excluded even after renaming: their kind and UUID
     // come from the current native inventory, rather than a stale panel list.
-    const excluded=new Set((status.responseData.sources||[]).filter(s=>s.uuid===director||s.kind==='mix-track-to-source'||s.kind==='freemix_audio_bus'&&!this.isoBusSourceCapture||/^FreeMix (?:Retorno|N1|Talkback|Diretor|Master)(?:\s|$)/i.test(s.name)).map(s=>s.uuid));
+    const excluded=new Set((status.responseData.sources||[]).filter(s=>s.uuid===director||s.kind==='mix-track-to-source'||s.kind==='freemix_audio_bus'&&!this.isoBusSourceCapture||/^3Mix (?:Retorno|N1|Talkback|Diretor|Master)(?:\s|$)/i.test(s.name)).map(s=>s.uuid));
     // SourceRecord currently reads audio_output[0], which OBS zeroes when
     // track 1 is disabled. Never offer an isolated bus that would record silence.
     const candidates=(status.responseData.sources||[]).filter(s=>s.audio&&s.enabled&&!excluded.has(s.uuid));
@@ -287,7 +287,7 @@ export class DiskReplay {
       backTransition={scene:this.state.back,name:this.transitionCache.name,durationMs:this.transitionCache.durationMs};
     }
     return { ...this.state, events, backTransition, backAvailable:this.state.back?list.scenes.some(s=>s.sceneName===this.state.back):false, historySupported:this.recordingFolder==='replay',historyPlaybackSupported:this.recordingFolder==='replay',programAutoplaySupported:this.recordingFolder==='replay',playerIds:REPLAY_PLAYERS,players, ...(audioChoices?{audioChoices,audioBusSourceSupported:this.isoBusSourceCapture,audioSourceLimit:this.isoBusSourceCapture?'Bus independente deve ficar sem rotas M/A/B: captura PCM própria, fora das trilhas globais. Folhas públicas ainda exigem trilha 1.':'Fonte direta exige folha pública com trilha 1 já habilitada; buses isolados não são capturados diretamente por este SourceRecord. Use sua rota A/B e escolha Bus A/B.'}:{}), program: list.currentProgramSceneName, preview: list.currentPreviewSceneName,
-      availableCams: list.scenes.map((s) => s.sceneName).filter((n) => !n.startsWith("REPLAY ") && n !== "FreeMix Barramentos") };
+      availableCams: list.scenes.map((s) => s.sceneName).filter((n) => !n.startsWith("REPLAY ") && n !== "3Mix Barramentos") };
   }
 
   async probe(file, verifyCadence = false) {
@@ -342,7 +342,7 @@ export class DiskReplay {
   async start(names) {
     if (this.state.rec) throw new Error("A sessão de replay já está gravando");
     const list = (await this.req("GetSceneList")).scenes.map((s) => s.sceneName);
-    if (!Array.isArray(names) || !names.length || names.length > 8 || names.some((n) => !list.includes(n) || n.startsWith("REPLAY ") || n === "FreeMix Barramentos")) {
+    if (!Array.isArray(names) || !names.length || names.length > 8 || names.some((n) => !list.includes(n) || n.startsWith("REPLAY ") || n === "3Mix Barramentos")) {
       throw new Error("Selecione entre uma e oito entradas existentes para gravar");
     }
     const privacy=await this.optional('CallVendorRequest',{vendorName:'freemix',requestType:'talkback',requestData:{action:'state'}});

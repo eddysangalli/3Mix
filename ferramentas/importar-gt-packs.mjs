@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Imports title packages in the .gtzip format into the FreeMix title gallery: each package is converted to an HTML
+ * Imports title packages in the .gtzip format into the 3Mix title gallery: each package is converted to an HTML
  * template (gtzip_converter.mjs), saved under painel/gc/gt_titles and added to the gallery's catalogue (tab
  * "Importados"). Meant for titles the operator made or is licensed to use; nothing is imported by default, and
  * what is imported must not go into a package for other people unless its licence allows it.

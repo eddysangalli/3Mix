@@ -1,4 +1,12 @@
 
+## 02/11/2026 — Multi-M/E no programa e nomes 3Mix
+
+- Aba M/E ao lado de Fontes e seletor de M/E nas botoeiras do topo. O botão antigo "M/E Strips" ficava dentro de uma barra escondida e nunca aparecia.
+- Motor compilado do `main` instalado, com o núcleo de M/E e nesting.
+- Cenas, fontes e filtros internos passam de "FreeMix ..." para "3Mix ...". Projetos existentes migram ao abrir, com cópia `.pre-3mix`. Identificadores de formato de arquivo e de protocolo não mudam.
+- As saídas de M/E deixam de aparecer como entradas; no Patch elas se chamam "Saída do M/E N".
+- `aux.html` e `aux.js` passam a `aux-router`, porque AUX é nome reservado no Windows. O endereço `/aux` não muda.
+
 ## 02/11/2026 — Hub, Mesa de corte, Composições, GC, Rede e reorganização de Efeitos
 
 - Hub/Remoto: cartões com ícone, seletor no alto entre este computador, cada rede (com o nome do adaptador) e internet. O IP público só é consultado (api.ipify.org) quando o operador escolhe Internet.

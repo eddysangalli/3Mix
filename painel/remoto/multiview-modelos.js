@@ -54,7 +54,7 @@
   }
 
   // Lista da mesa, sem os itens internos do motor.
-  const entradas = (state) => (state?.inputs || []).filter((i) => i?.name && i.name !== 'FreeMix Barramentos' && !String(i.name).startsWith('FreeMix Slot '));
+  const entradas = (state) => (state?.inputs || []).filter((i) => i?.name && i.name !== '3Mix Barramentos' && !String(i.name).startsWith('3Mix Slot '));
   // Entrada só de áudio tem fonte sem imagem (0 x 0): pode ser escolhida à mão, mas não ocupa monitor sozinha.
   const temImagem = (i) => {
     const fontes = i.health?.sources;

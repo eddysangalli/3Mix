@@ -2,7 +2,7 @@
 
 /* 3Mix · Color Studio
    - Analisa o quadro real entregue pelo motor (/api/color/frame).
-   - Corrige a entrada pelo filtro existente "FreeMix Qualidade - Cor" (color_filter_v2),
+   - Corrige a entrada pelo filtro existente "3Mix Qualidade - Cor" (color_filter_v2),
      sempre pelo FreeMixEffectsGate (mesma trava de operação dos outros painéis).
    - Faz shading remoto pelo PTZ/ONVIF/VISCA existente (/api/control → ptz_*).
    - Compara até quatro câmeras e copia a correção local da referência.
@@ -10,7 +10,7 @@
 
 (() => {
   const E = (id) => document.getElementById(id);
-  const LOCAL_FILTER = 'FreeMix Qualidade - Cor';
+  const LOCAL_FILTER = '3Mix Qualidade - Cor';
   const LOCAL_TYPE = 'color';
   const SETTINGS_KEY = '3mix.color.settings.v1';
   const DEFAULT_SETTINGS = { brightness: 0, contrast: 0, saturation: 0, gamma: 0, hue_shift: 0, color_multiply: 0xFFFFFF, color_add: 0 };

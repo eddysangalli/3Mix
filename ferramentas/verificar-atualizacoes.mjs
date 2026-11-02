@@ -5,7 +5,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { isAbsolute, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("../", import.meta.url)), file = root + "componentes.json";
-if (process.argv.includes("--fixar")) throw Error("Hashes dos componentes pertencem à entrega FreeMix aprovada; não podem ser redefinidos no cliente.");
+if (process.argv.includes("--fixar")) throw Error("Hashes dos componentes pertencem à entrega 3Mix aprovada; não podem ser redefinidos no cliente.");
 const man = JSON.parse(readFileSync(file, "utf8"));
 if (!Array.isArray(man.componentes)) throw Error("Registro local de componentes inválido.");
 let changed = 0, unknown = 0;
@@ -23,5 +23,5 @@ for (const c of man.componentes) {
   }
   console.log(`${String(c.nome || c.id || "Componente").padEnd(24)} versão ${String(c.versao || "não declarada").padEnd(8)} ${notes.join(" | ") || "integridade local conferida"}`);
 }
-console.log(`${changed} com arquivo alterado ou ausente, ${unknown} sem hash registrado. Motor e componentes são atualizados somente por uma entrega FreeMix aprovada.`);
+console.log(`${changed} com arquivo alterado ou ausente, ${unknown} sem hash registrado. Motor e componentes são atualizados somente por uma entrega 3Mix aprovada.`);
 if (changed || unknown) process.exitCode = 1;

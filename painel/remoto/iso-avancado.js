@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const E = (id) => document.getElementById(id), esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const BUS_SCENE = 'FreeMix Barramentos';
+  const BUS_SCENE = '3Mix Barramentos';
   const FORMAT_LABEL = { mpegts: 'MPEG-TS', mkv: 'MKV', mp4_safe: 'MP4 seguro' };
   const AUDIO_LABEL = { input: 'Entrada', master: 'Master', 'bus-a': 'Bus A', 'bus-b': 'Bus B', 'all-tracks': 'Todas as trilhas', source: 'Fonte pública' };
   const fmtTime = (ms) => { const s = Math.max(0, Math.floor(ms / 1000)); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };

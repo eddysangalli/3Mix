@@ -320,7 +320,7 @@
       };
       if (channel.kind === 'freemix_audio_bus') continue;
       if (channel.bus || channel.kind === 'mix-track-to-source') {
-        const bus = channel.bus || (name === 'FreeMix Master' ? 'M' : /Bus A/i.test(name) ? 'A' : /Bus B/i.test(name) ? 'B' : '');
+        const bus = channel.bus || (name === '3Mix Master' ? 'M' : /Bus A/i.test(name) ? 'A' : /Bus B/i.test(name) ? 'B' : '');
         if (!bus || !['M', 'A', 'B'].includes(bus)) continue;
         outputs.push({ ...base, bus, label: bus === 'M' ? 'MAIN' : 'BUS ' + bus, tag: bus === 'M' ? 'MESTRE' : 'BUS' });
         continue;

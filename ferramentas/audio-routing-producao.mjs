@@ -4,14 +4,14 @@ import {join} from 'node:path';
 import{AudioBusesEngine,BUS_KIND}from'./audio-buses-producao.mjs';
 
 export const AUDIO_FILTERS={
- gain:{kind:'gain_filter',name:'FreeMix Audio - Gain',defaults:{db:0},ranges:{db:[-30,30]}},
- eq:{kind:'basic_eq_filter',name:'FreeMix Audio - EQ 3 bandas',defaults:{low:0,mid:0,high:0},ranges:{low:[-20,20],mid:[-20,20],high:[-20,20]}},
- gate:{kind:'noise_gate_filter',name:'FreeMix Audio - Gate',defaults:{open_threshold:-26,close_threshold:-32,attack_time:25,hold_time:200,release_time:150},ranges:{open_threshold:[-60,0],close_threshold:[-60,0],attack_time:[0,10000,true],hold_time:[0,10000,true],release_time:[0,10000,true]}},
- compressor:{kind:'compressor_filter',name:'FreeMix Audio - Compressor',defaults:{ratio:4,threshold:-18,attack_time:6,release_time:60,output_gain:0},ranges:{ratio:[1,32],threshold:[-60,0],attack_time:[1,100,true],release_time:[1,1000,true],output_gain:[-30,30]}},
- limiter:{kind:'limiter_filter',name:'FreeMix Audio - Limiter',defaults:{threshold:-6,release_time:60},ranges:{threshold:[-60,0],release_time:[1,1000,true]}},
- rnnoise:{kind:'noise_suppress_filter',name:'FreeMix Audio - RNNoise (IA)',defaults:{suppress_method:'rnnoise'},ranges:{}},
- nvidia:{kind:'nvidia_audiofx_filter',name:'FreeMix Audio - NVIDIA Denoise',defaults:{intensity:0.5,method:'denoiser'},ranges:{intensity:[0,1]}},
- expander:{kind:'expander_filter',name:'FreeMix Audio - Expander',defaults:{ratio:2,threshold:-40,attack_time:10,release_time:50,output_gain:0},ranges:{ratio:[1,32],threshold:[-60,0],attack_time:[1,100,true],release_time:[1,1000,true],output_gain:[-30,30]}}
+ gain:{kind:'gain_filter',name:'3Mix Audio - Gain',defaults:{db:0},ranges:{db:[-30,30]}},
+ eq:{kind:'basic_eq_filter',name:'3Mix Audio - EQ 3 bandas',defaults:{low:0,mid:0,high:0},ranges:{low:[-20,20],mid:[-20,20],high:[-20,20]}},
+ gate:{kind:'noise_gate_filter',name:'3Mix Audio - Gate',defaults:{open_threshold:-26,close_threshold:-32,attack_time:25,hold_time:200,release_time:150},ranges:{open_threshold:[-60,0],close_threshold:[-60,0],attack_time:[0,10000,true],hold_time:[0,10000,true],release_time:[0,10000,true]}},
+ compressor:{kind:'compressor_filter',name:'3Mix Audio - Compressor',defaults:{ratio:4,threshold:-18,attack_time:6,release_time:60,output_gain:0},ranges:{ratio:[1,32],threshold:[-60,0],attack_time:[1,100,true],release_time:[1,1000,true],output_gain:[-30,30]}},
+ limiter:{kind:'limiter_filter',name:'3Mix Audio - Limiter',defaults:{threshold:-6,release_time:60},ranges:{threshold:[-60,0],release_time:[1,1000,true]}},
+ rnnoise:{kind:'noise_suppress_filter',name:'3Mix Audio - RNNoise (IA)',defaults:{suppress_method:'rnnoise'},ranges:{}},
+ nvidia:{kind:'nvidia_audiofx_filter',name:'3Mix Audio - NVIDIA Denoise',defaults:{intensity:0.5,method:'denoiser'},ranges:{intensity:[0,1]}},
+ expander:{kind:'expander_filter',name:'3Mix Audio - Expander',defaults:{ratio:2,threshold:-40,attack_time:10,release_time:50,output_gain:0},ranges:{ratio:[1,32],threshold:[-60,0],attack_time:[1,100,true],release_time:[1,1000,true],output_gain:[-30,30]}}
 };
 export function filterSettings(type,value={},previous={}){
  const spec=AUDIO_FILTERS[type];if(!spec||!value||typeof value!=='object'||Array.isArray(value))throw Error('Filtro ou parâmetros inválidos');

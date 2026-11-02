@@ -1,29 +1,35 @@
-import './switcher-strip.js';
+import './switcher-strip.js?v=20261102b';
 const host=window.ThreeMixStripHost;
 // A Strip só aparece quando o backend Multi-M/E responde. Sem isso, o botão
 // ficaria visível e quebrado em runtimes que ainda não têm o pacote de M/E.
 async function start(){
- const button=document.createElement('button');button.type='button';button.textContent='M/E Strips';button.title='Superfícies de corte independentes';
- const dialog=document.createElement('dialog');dialog.setAttribute('aria-label','Switcher Strips');
- dialog.style.cssText='background:#202124;color:#eee;border:1px solid #555;width:min(1360px,95vw);max-height:85vh;overflow:auto';
- const close=document.createElement('button');close.textContent='Fechar';close.onclick=()=>dialog.close();dialog.append(close);
- const surface=document.createElement('div');surface.style.cssText='display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))';dialog.append(surface);
- document.body.append(dialog);(document.querySelector('.brand-box')||document.body).append(button);button.onclick=()=>{dialog.showModal();refresh();};
+ // A superfície mora na aba M/E da mesa, ao lado de Fontes.
+ const container=document.getElementById('me-surface');if(!container)return;
+ const surface=document.createElement('div');surface.className='me-strips';container.append(surface);
+ document.body.classList.add('has-me');
+ let meTarget=1,lastMixes=[];
+ const visible=()=>document.body.classList.contains('me-on')||meTarget!==1;
+ const nameOf=uuid=>window.FreeMixProductionState?.inputs?.find(i=>i.key===uuid)?.name||'';
  const pending=new Map();let scope='',polling=false;
  async function request(path,data){const response=await fetch(new URL(path,host.apiBase),{...(data?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}:{}),signal:AbortSignal.timeout(15000)});const result=await response.json();if(!response.ok||!result.success)throw Error(result.error||'Motor não confirmou');return result;}
+ async function meOperation(mixId,command,input){
+  if(pending.has(mixId))throw Error('Confirmação pendente: use Conferir motor, não repita o comando.');
+  scope=window.FreeMixProductionState?.preset||scope;
+  if(!scope)throw Error('Projeto não identificado');
+  const operation={operationId:'strip_'+crypto.randomUUID(),expectedScope:scope,mixId,command,...(input?{input}:{})};pending.set(mixId,operation);
+  try{const result=await request('control',{action:'outputs_mix',...operation});const receipt=result.outputs?.mixOperation;if(receipt?.id!==operation.operationId||receipt.stage!=='confirmed')throw Error('Confirmação pendente; consulte o motor.');pending.delete(mixId);}
+  finally{await refresh();}
+ }
  // 4 Strips fixas, Delegate inicial 1/2/3/4: cobre os 4 M/Es simultaneamente por padrão (persistência por
  // localStorage ainda permite o operador redelegar qualquer uma para qualquer M/E depois -- isto só muda o
  // ponto de partida de 2 Strips ambas em MAIN para 4 Strips já cobrindo M/E 1-4 de cara).
  const strips=[0,1,2,3].map(index=>{
   const strip=document.createElement('three-mix-switcher-strip');strip.surface={...strip.surface,mixId:index+1};surface.append(strip);
   strip.executeOperation=async({command,input,mixId})=>{
-   if(pending.has(mixId))throw Error('Confirmação pendente: use Conferir motor, não repita o comando.');
    if(mixId===1){await host.executeMain(command,input);await refresh();return;}
-   if(!scope)throw Error('Projeto não identificado');
-   const operation={operationId:'strip_'+crypto.randomUUID(),expectedScope:scope,mixId,command,...(input?{input}:{})};pending.set(mixId,operation);
-   try{const result=await request('control',{action:'outputs_mix',...operation});const receipt=result.outputs?.mixOperation;if(receipt?.id!==operation.operationId||receipt.stage!=='confirmed')throw Error('Confirmação pendente; consulte o motor.');pending.delete(mixId);}
-   finally{await refresh();}
+   return meOperation(mixId,command,input);
   };
+  strip.frameUrl=key=>new URL('ptz/preview?input='+encodeURIComponent(key)+'&t='+Date.now(),host.apiBase).href;
   // Audio Bus padrão do M/E: ação administrativa (metadado + validação contra buses reais), não uma operação de
   // switching -- sem operationId/confirmação por mixId como as acima, reflete o mesmo padrão já usado para
   // mix_audio_set no backend (local-only, idempotente, falha aberta numa leitura futura se o bus sumir).
@@ -35,7 +41,7 @@ async function start(){
  });
  const check=document.createElement('button');check.textContent='Conferir motor';check.onclick=async()=>{
   try{for(const [mixId,operation]of pending){const result=await request('mix-effects/check',operation);if(result.operation?.stage==='confirmed')pending.delete(mixId);}await refresh();}catch(error){check.title=error.message;}
- };dialog.append(check);
+ };container.append(check);
  // Patch: Source -> Input Slot. Formulário próprio (não por Strip, é uma operação de roteamento de um Input
  // específico, não de um M/E) -- dois selects populados pelos Inputs reais do snapshot, aplicando pelo mesmo
  // contrato patch_set já testado real (patch-registry-producao.mjs). O select de destino exclui Compositions
@@ -47,7 +53,7 @@ async function start(){
  const patchSignal=document.createElement('select');patchSignal.setAttribute('aria-label','Sinal de origem');
  const patchButton=document.createElement('button');patchButton.type='button';patchButton.textContent='Aplicar Patch';
  const patchStatus=document.createElement('span');patchStatus.setAttribute('role','status');
- patchBox.append(patchLabel,patchInput,document.createTextNode(' ← '),patchSignal,patchButton,patchStatus);dialog.append(patchBox);
+ patchBox.append(patchLabel,patchInput,document.createTextNode(' ← '),patchSignal,patchButton,patchStatus);container.append(patchBox);
  function fillPatchSelects(state){
   const options=(state?.inputs||[]).filter(i=>!i.composition).map(i=>'<option value="'+i.key+'">'+(i.number||'')+' '+String(i.name).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+'</option>').join('');
   const allOptions=(state?.inputs||[]).map(i=>'<option value="'+i.key+'">'+(i.number||'')+' '+String(i.name).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+(i.composition?' (Composition)':'')+'</option>').join('');
@@ -61,8 +67,16 @@ async function start(){
   catch(error){patchStatus.textContent=error.message;}
   finally{patchButton.disabled=false;}
  };
+ function fillPatchSignals(mixes){
+  const rows=mixes.filter(m=>m.proxyUuid);
+  const sig=rows.map(m=>m.mixId+':'+m.proxyUuid).join();
+  if(patchSignal.dataset.me===sig&&[...patchSignal.options].some(o=>o.dataset.me))return;
+  patchSignal.dataset.me=sig;
+  for(const o of [...patchSignal.options])if(o.dataset.me)o.remove();
+  for(const m of rows){const o=new Option('Saída do M/E '+m.mixId,m.proxyUuid);o.dataset.me='1';patchSignal.add(o);}
+ }
  async function refresh(){
-  if(polling||!dialog.open)return;polling=true;
+  if(polling||!visible())return;polling=true;
   try{const state=window.FreeMixProductionState;if(!state?.connected)return;scope=state.preset;const requestedScope=scope;
    // meTally (Tally recursivo de M/E 2-4, mesma técnica do MAIN: percorre a árvore de
    // cenas aninhadas, não só compara UUID direto) vem de /api/signals -- achado real:
@@ -78,12 +92,38 @@ async function start(){
    // o mixId:index+1 (1/2/3/4) setado na criação das Strips -- as "4 Strips fixas, Delegate inicial 1/2/3/4"
    // do comentário acima nunca funcionava numa sessão nova: as 4 nasciam em MAIN. O default agora é
    // index+1, igual à criação; localStorage com um mixId válido salvo continua podendo sobrescrever.
-   strips.forEach((strip,index)=>{const storageKey='3mix.strip.'+scope+'.'+index;if(strip.storageKey!==storageKey){strip.storageKey=storageKey;strip.surface={mixId:index+1,page:0,size:8,category:''};try{const saved=JSON.parse(localStorage.getItem(storageKey));if(saved&&[1,2,3,4].includes(saved.mixId)&&Number.isInteger(saved.page)&&saved.page>=0)strip.surface={...strip.surface,mixId:saved.mixId,page:saved.page};}catch{}}strip.update(snapshot);localStorage.setItem(storageKey,JSON.stringify(strip.surface));});
+   strips.forEach((strip,index)=>{const storageKey='3mix.strip.'+scope+'.'+index;if(strip.storageKey!==storageKey){strip.storageKey=storageKey;strip.surface={mixId:index+1,page:0,size:16,category:''};try{const saved=JSON.parse(localStorage.getItem(storageKey));if(saved&&[1,2,3,4].includes(saved.mixId)&&Number.isInteger(saved.page)&&saved.page>=0)strip.surface={...strip.surface,mixId:saved.mixId,page:saved.page};}catch{}}strip.update(snapshot);localStorage.setItem(storageKey,JSON.stringify(strip.surface));});
+   lastMixes=native.mixes||[];if(meTarget!==1)window.ThreeMixRepaintBanks?.();
+   fillPatchSignals(lastMixes);
    check.textContent=pending.size?'Conferir motor ('+pending.size+')':'Conferir motor';
    fillPatchSelects(state);
   }catch(error){check.title=error.message;}finally{polling=false;}
  }
  setInterval(refresh,1000);
+ setInterval(()=>{if(document.body.classList.contains('me-on'))strips.forEach(strip=>strip.refreshFrames());},2000);
+ // Botoeiras do topo: sempre abrem no MAIN; o M/E escolhido não fica salvo, para nunca cortar no lugar errado depois de reabrir.
+ function paintDelegate(){
+  document.body.classList.toggle('bank-on-me',meTarget!==1);
+  const bar=document.querySelector('#bank-pv .bank-me');
+  if(bar&&!bar.children.length)bar.innerHTML=[1,2,3,4].map(id=>'<button type="button" class="bank-me-b" data-a="bank_me" data-v="'+id+'" title="'+(id===1?'Botoeiras no M/E principal':'Botoeiras no M/E '+id)+'">'+(id===1?'MAIN':'M/E '+id)+'</button>').join('');
+  for(const button of document.querySelectorAll('.bank-me-b'))button.classList.toggle('on',Number(button.dataset.v)===meTarget);
+  const tag=document.querySelector('#bank-pgm .bank-me-tag');if(tag)tag.textContent=meTarget===1?'':'M/E '+meTarget;
+ }
+ window.ThreeMixME={
+  get target(){return meTarget;},
+  select(id){meTarget=id;paintDelegate();refresh().finally(()=>window.ThreeMixRepaintBanks?.());window.ThreeMixRepaintBanks?.();},
+  selectedName(side){const mix=lastMixes.find(m=>m.mixId===meTarget);return nameOf(side==='pv'?mix?.previewUuid:mix?.programUuid);},
+  async pick(side,name){
+   const key=window.FreeMixProductionState?.inputs?.find(i=>i.name===name)?.key;
+   if(!key)throw Error('Entrada não encontrada: '+name);
+   const mixId=meTarget;
+   await meOperation(mixId,'preview',key);
+   if(side==='pgm')await meOperation(mixId,'cut');
+   window.ThreeMixRepaintBanks?.();
+  },
+  tick(){refresh();strips.forEach(strip=>strip.refreshFrames());},
+ };
+ paintDelegate();
 }
 // window.ThreeMixMixEffectsAvailable, se já estiver definida por outra parte do runtime, evita a sondagem
 // abaixo. Sem ela (o caso comum: nada mais no projeto define essa flag hoje), a disponibilidade real do

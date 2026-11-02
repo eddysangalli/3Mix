@@ -319,7 +319,7 @@ function updateMesaHtml(filePath) {
             </div>
           \` : sTab === 'plugins' ? \`
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-              <span style="color:var(--text-muted);font-size:11px">Complementos e motor integrados ao FreeMix Studio:</span>
+              <span style="color:var(--text-muted);font-size:11px">Complementos e motor integrados ao 3Mix Studio:</span>
               <button class="b on" data-a="runcheckupdates">🔄 Buscar Atualizações na Nuvem</button>
             </div>
             <table style="width:100%;border-collapse:collapse;font-size:11px;background:#10141a;border:1px solid var(--border-subtle);border-radius:3px">
@@ -368,7 +368,7 @@ function updateMesaHtml(filePath) {
               </div>
               <div class="form-group">
                 <label>Tema do Estúdio</label>
-                <select class="form-control"><option>FreeMix Dark Broadcast (Padrão)</option><option>High Contrast Black</option></select>
+                <select class="form-control"><option>3Mix Dark Broadcast (Padrão)</option><option>High Contrast Black</option></select>
               </div>
               <div class="form-group">
                 <label>Inicialização</label>
@@ -509,7 +509,7 @@ function updateMesaHtml(filePath) {
             </div>
           \` : \`
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-              <span style="color:var(--text-muted);font-size:11px">Complementos e motor integrados ao FreeMix Studio:</span>
+              <span style="color:var(--text-muted);font-size:11px">Complementos e motor integrados ao 3Mix Studio:</span>
               <button class="b on" data-a="runcheckupdates">🔄 Buscar Atualizações na Nuvem</button>
             </div>
             <table style="width:100%;border-collapse:collapse;font-size:11px;background:#10141a;border:1px solid var(--border-subtle);border-radius:3px">

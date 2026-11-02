@@ -73,7 +73,7 @@ export class ThumbsEngine {
   async snapshot() {
     if (this.p.state?.connected !== true) return {};
     const inputs = (this.p.state?.inputs || [])
-      .filter(i => i.key && i.name !== 'FreeMix Barramentos' && !String(i.name).startsWith('FreeMix Slot '));
+      .filter(i => i.key && i.name !== '3Mix Barramentos' && !String(i.name).startsWith('3Mix Slot '));
     // Quem espera há mais tempo vai primeiro; sem isso as primeiras entradas da lista ocupariam todas as vagas.
     const vencidas = inputs.filter(i => {
       const atual = this.cache.get(i.key);

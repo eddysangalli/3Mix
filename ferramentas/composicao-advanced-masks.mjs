@@ -1,6 +1,6 @@
 // SDK keys/enums: obs-advanced-masks 1.5.4 mask-shape.{c,h}. No arbitrary plugin settings.
 export const advancedMaskKind='advanced_masks_filter_v2';
-export const advancedMaskFilter='FreeMix Slot Advanced Mask';
+export const advancedMaskFilter='3Mix Slot Advanced Mask';
 const shapes=['circle','rectangle','ellipse','polygon','star','heart'];
 export function normalizeAdvancedMask(value){
  if(!value||value.type!=='advanced'||!shapes.includes(value.shape))throw Error('Advanced Masks: forma inválida');

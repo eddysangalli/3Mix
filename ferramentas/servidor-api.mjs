@@ -10,7 +10,7 @@ import {handleSettingsRead} from './settings-read-http.mjs';
 import {handleWorkspaceRequest} from './workspace-config.mjs';
 import {modulosAtivos,salvarModulosAtivos,validarModulos,listarDefinicaoModulos} from './modulos-config.mjs';
 import {TickerAckBroker,readTickerAckRequest} from './gtzip-ticker-ack.mjs';
-// FreeMix control bridge. Commands use confirmed production operations.
+// 3Mix control bridge. Commands use confirmed production operations.
 import { createServer } from 'node:http';
 import { readFile,mkdir,writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';

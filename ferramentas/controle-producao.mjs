@@ -42,7 +42,7 @@ import { readFile, mkdir, writeFile, rename } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const delay = ms => new Promise(r => setTimeout(r, ms));
-const busNames = { M:'FreeMix Master', A:'FreeMix Bus A', B:'FreeMix Bus B' };
+const busNames = { M:'3Mix Master', A:'3Mix Bus A', B:'3Mix Bus B' };
 const mediaKind = k => /ffmpeg|vlc|playlist/.test(k || '');
 export const xml = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
 export function number(value, min, max, label='Valor') {
@@ -214,7 +214,7 @@ export class Production {
     const [sc,preset,mode,tr]=await Promise.all([this.req('GetSceneList'),this.req('GetSceneCollectionList'),this.req('GetStudioModeEnabled'),this.req('GetSceneTransitionList')]);
     if(data.expectedScope&&data.expectedScope!==preset.currentSceneCollectionName)throw Error('O projeto mudou. Abra a entrada novamente antes de executar.');
     if(['cut','fade','transition'].includes(action)&&!mode.studioModeEnabled)throw Error('Modo Preview/Programa foi desligado; comando de transição recusado');
-    const scenes=sc.scenes.slice().sort((a,b)=>b.sceneIndex-a.sceneIndex).filter(s=>s.sceneName!=='FreeMix Barramentos'&&!s.sceneName.startsWith('FreeMix Slot '));
+    const scenes=sc.scenes.slice().sort((a,b)=>b.sceneIndex-a.sceneIndex).filter(s=>s.sceneName!=='3Mix Barramentos'&&!s.sceneName.startsWith('3Mix Slot ')&&!/^3Mix Mix \d+ Output$/.test(s.sceneName));
     const cached=this.state.inputs||[],sameTopology=scenes.length===cached.length&&scenes.every(s=>cached.some(i=>i.key===s.sceneUuid));
     if(!this.state.connected||this.scope!==preset.currentSceneCollectionName||!sameTopology||Date.now()-(this.state.updatedAt||0)>2500)await this.refresh();
     const names=new Map(scenes.map(s=>[s.sceneUuid,s.sceneName]));
@@ -237,9 +237,9 @@ export class Production {
     const r=await this.req(group?'GetGroupSceneItemList':'GetSceneItemList',{sceneName:name});
     if(!Array.isArray(r?.sceneItems))throw Error('Não foi possível confirmar a composição no ar');
     // Mesmo bug de sceneSources()/visibleTree() (ver comentários ali): se a cena-proxy pública de M/E
-    // ("FreeMix Mix N Output") estiver aninhada na árvore do Programa do MAIN ou de algum DSK -- exatamente
+    // ("3Mix Mix N Output") estiver aninhada na árvore do Programa do MAIN ou de algum DSK -- exatamente
     // o caso de usá-la como signal de Patch (passo 4 do plano) ou dentro de outra Scene -- inputKind===null
-    // também bate na transição privada dela, e GetSceneItemList('FreeMix Mix N') (a transição, não uma
+    // também bate na transição privada dela, e GetSceneItemList('3Mix Mix N') (a transição, não uma
     // cena) lançava aqui sem guarda nenhuma, quebrando a exclusão de Input nesse cenário real.
     for(const item of r.sceneItems)if(item.sceneItemEnabled!==false){if(item.isGroup||item.sourceType==='OBS_SOURCE_TYPE_SCENE')await this.realtimeVisibleTree(item.sourceName,visited,item.isGroup);else visited.add(item.sourceName);}
     return visited;
@@ -271,9 +271,9 @@ export class Production {
     const r=await this.req('GetSceneItemList',{sceneName:name}); const sources=[];
     // Bug real encontrado em QA (qa-beta/recibos/switcher-strip-patch-audio-tally-e2e.md): um item com
     // inputKind===null NÃO é só uma cena aninhada -- a transição privada dentro da cena-proxy pública de
-    // nesting de M/E ("FreeMix Mix N Output", de FreeMixMixEffectManager.hpp) também tem inputKind===null
+    // nesting de M/E ("3Mix Mix N Output", de FreeMixMixEffectManager.hpp) também tem inputKind===null
     // (sourceType OBS_SOURCE_TYPE_TRANSITION, não OBS_SOURCE_TYPE_SCENE). Recursar nela chamava
-    // GetSceneItemList numa cena que não existe ("FreeMix Mix 2" é a transição, não uma cena registrada),
+    // GetSceneItemList numa cena que não existe ("3Mix Mix 2" é a transição, não uma cena registrada),
     // lançando um erro não tratado que derrubava refresh() inteiro -- e portanto connected:false na API
     // toda -- assim que qualquer M/E 2-4 fazia seu primeiro preview+cut/fade/take. Mesmo filtro por
     // sourceType já usado em entradas-producao.mjs (InputEngine.cycle()) para o mesmo tipo de bug.
@@ -285,7 +285,7 @@ export class Production {
     if(!name||visited.has(name))return visited;visited.add(name);
     const r=await this.optional(group?'GetGroupSceneItemList':'GetSceneItemList',{sceneName:name});
     // Mesmo bug de sceneSources() (ver comentário ali): inputKind===null também é verdade pra transição
-    // privada dentro da cena-proxy pública de M/E ("FreeMix Mix N Output"), não só pra cena aninhada.
+    // privada dentro da cena-proxy pública de M/E ("3Mix Mix N Output"), não só pra cena aninhada.
     // optional() já evitava um crash aqui (retorna null, loop vira no-op), mas descer com sourceType
     // explícito é a checagem correta -- meTally() usa exatamente esta função pro tally recursivo do
     // passo 7, então classificar certo aqui importa pra correção do recurso, não só pra não quebrar.
@@ -329,9 +329,9 @@ export class Production {
     const keyers=await this.optional('CallVendorRequest',{vendorName:'downstream-keyer',requestType:'get_downstream_keyers',requestData:{}});
     let buses=Object.values(busNames).every(name=>audio.some(a=>a.name===name&&a.kind==='mix-track-to-source'));
     if(buses){for(const [i,name] of Object.values(busNames).entries()){const setting=await this.req('GetInputSettings',{inputName:name}),a=audio.find(a=>a.name===name);if(Number(setting.inputSettings.MixTrack)!==i+3||!['1','2','3','4','5','6'].every(t=>!!a.tracks[t]===(t===String(i+1))))buses=false;}
-      const selected=keyers?.responseData?.downstream_keyers?.some(k=>k.name==='FreeMix Audio')?await this.vendor('dsk_get_scene',{dsk_name:'FreeMix Audio'}):null;
-      const items=await this.optional('GetSceneItemList',{sceneName:'FreeMix Barramentos'});buses=buses&&selected?.scene==='FreeMix Barramentos'&&Object.values(busNames).every(name=>items?.sceneItems.some(i=>i.sourceName===name&&i.sceneItemEnabled));}
-    const scenes=sc.scenes.slice().sort((a,b)=>b.sceneIndex-a.sceneIndex).filter(s=>s.sceneName!=='FreeMix Barramentos'&&!s.sceneName.startsWith('FreeMix Slot '));
+      const selected=keyers?.responseData?.downstream_keyers?.some(k=>k.name==='3Mix Audio')?await this.vendor('dsk_get_scene',{dsk_name:'3Mix Audio'}):null;
+      const items=await this.optional('GetSceneItemList',{sceneName:'3Mix Barramentos'});buses=buses&&selected?.scene==='3Mix Barramentos'&&Object.values(busNames).every(name=>items?.sceneItems.some(i=>i.sourceName===name&&i.sceneItemEnabled));}
+    const scenes=sc.scenes.slice().sort((a,b)=>b.sceneIndex-a.sceneIndex).filter(s=>s.sceneName!=='3Mix Barramentos'&&!s.sceneName.startsWith('3Mix Slot ')&&!/^3Mix Mix \d+ Output$/.test(s.sceneName));
     const inputs=[];
     for(const [i,s] of scenes.entries()){
       const sources=await this.sceneSources(s.sceneName), m=media.find(m=>sources.includes(m.name)), a=audio.filter(a=>sources.includes(a.name));
@@ -349,7 +349,7 @@ export class Production {
     const sourceStatus=(await this.optional('CallVendorRequest',{vendorName:'freemix',requestType:'get_sources_status',requestData:{}}))?.responseData?.sources||[];
     for(const input of inputs)input.health={sources:sourceStatus.filter(s=>s.name===input.name||input.sources.includes(s.name)),mediaState:input.state,signal:'unknown',freeze:'unknown'};
     for(const input of inputs)input.tally={program:programTree.has(input.name),preview:previewTree.has(input.name)};
-    const gc={...this.gc}; gc.activeLowerThird=overlays.some(o=>o.scene==='FreeMix Tarja'); gc.activeScore=overlays.some(o=>o.scene==='FreeMix Placar');
+    const gc={...this.gc}; gc.activeLowerThird=overlays.some(o=>o.scene==='3Mix Tarja'); gc.activeScore=overlays.some(o=>o.scene==='3Mix Placar');
     this.state={operation:this.state.operation,operationReceipts:[...(this.operationReceipts?.values()||[])].map(r=>({...r})),connected:true,preset:this.scope,scenes:inputs.map(i=>i.name),inputs:this.inputEngine.decorate(inputs,video),compositionTemplates:structuredClone(this.inputEngine.templates),compositionPresets:this.inputEngine.presets?.()||[],gcLibrary:this.gcLibrary.summary(),program:sc.currentProgramSceneName,preview:sc.currentPreviewSceneName,
       sourceStatus,tally,signals:this.signalEngine.summary(),sourceInputs:ins.inputs.map(i=>({key:i.inputUuid,name:i.inputName,kind:i.unversionedInputKind||i.inputKind})),variables:this.dataSources.publishedVariables(),people:this.dataSources.people(),audioInputs:audio,media,overlays,overlaysEngine:this.overlayEngine.summary(),preflight:this.preflightEngine.summary(),blackbox:this.blackboxEngine.summary(),broadcastDelay:this.broadcastDelayEngine.summary(),returnFeeds:this.returnFeedManager.summary(),audioDucking:this.audioDuckingEngine.summary(),rundown:this.rundownEngine.summary(),gc,buses,calls:await this.callEngine.summary(inputs),dataSources:this.dataSources.summary(),recording:rec.outputActive,streaming:stream.outputActive,recordTimecode:rec.outputTimecode,streamTimecode:stream.outputTimecode,
       transition:tr.currentSceneTransitionName,transitions:tr.transitions,video,controllers:this.controllerEngine.summary(),playout:this.playoutEngine.summary(),queue:this.playoutEngine.summary(),recoverySession:this.sessionRecovery.summary(),macros:this.macroEngine.summary(),busSetupError:this.busSetupError||null,revision:++this.generation,updatedAt:Date.now()};
@@ -370,7 +370,7 @@ export class Production {
     for(let n=0;n<40;n++){if((await this.vendor('dsk_get_scene',{dsk_name:String(channel)})).scene===scene) return; await delay(50);} throw new Error('O overlay não confirmou a troca');
   }
   async title(kind,data,on) {
-    const score=kind==='score', scene=score?'FreeMix Placar':'FreeMix Tarja', input=scene+' HTML', channel=score?2:1;
+    const score=kind==='score', scene=score?'3Mix Placar':'3Mix Tarja', input=scene+' HTML', channel=score?2:1;
     const file=score?'esportes/placar.html':'jornalismo/lower_third.html', t=score?'esporte_placar':'jornal_lower_third';
     const d=score?{timeA:data.teamHome??this.gc.teamHome??'CASA',timeB:data.teamAway??this.gc.teamAway??'VISITANTE',golsA:data.scoreHome??this.gc.scoreHome??0,golsB:data.scoreAway??this.gc.scoreAway??0,minutos:data.minutes??this.gc.minutes??0,periodo:data.period??this.gc.period??'1º T'}:{nome:data.title??this.gc.title??'',cargo:data.subtitle??this.gc.subtitle??'',cor:data.color??this.gc.color??'#00e676'};
     const url=pathToFileURL(join(this.panel,'gc',file)).href+'#'+encodeURIComponent(JSON.stringify({n:input,t,d}));
@@ -440,7 +440,7 @@ export class Production {
         if(this.state.buses)return;
         if(this.state.recording||this.state.streaming)throw Error('Pare gravação e transmissão antes de configurar os barramentos');
         const kinds=(await this.req('GetInputKindList')).inputKinds;if(!kinds.includes('mix-track-to-source'))throw new Error('O componente de barramentos não está instalado');
-        const scene='FreeMix Barramentos', key='FreeMix Audio', old=[];const created=[];
+        const scene='3Mix Barramentos', key='3Mix Audio', old=[];const created=[];
         try {
           for(const name of Object.values(busNames)){const existing=await this.optional('GetInputSettings',{inputName:name});if(existing&&existing.inputKind!=='mix-track-to-source')throw Error('O nome '+name+' já pertence a outra fonte. Renomeie essa fonte antes de configurar os barramentos.');}
           if(!(await this.req('GetSceneList')).scenes.some(s=>s.sceneName===scene))await this.req('CreateScene',{sceneName:scene});
@@ -492,7 +492,7 @@ export class Production {
         if(action==='audio_mute')await this.audioRoutingEngine.manualOverride(names);
         for(const name of names){const inputName=name;
           if(['audio_mute','audio_bus','audio_monitor'].includes(action)&&this.state.calls?.director?.name===name)throw Error('Este mic é privado; use o botão de talkback da central Calls');
-          if(action==='audio_bus'&&d.bus==='M'&&name==='FreeMix Bus B'&&this.state.calls?.director)throw Error('O retorno B está reservado ao talkback e não pode alimentar o Master');
+          if(action==='audio_bus'&&d.bus==='M'&&name==='3Mix Bus B'&&this.state.calls?.director)throw Error('O retorno B está reservado ao talkback e não pode alimentar o Master');
           if(action==='audio_mute'){await this.req('SetInputMute',{inputName,inputMuted:!!mute}); await this.wait('GetInputMute',{inputName},s=>s.inputMuted===!!mute);}
           if(action==='audio_volume'){const volume=number(d.volume,0,100,'Volume')/100; await this.req('SetInputVolume',{inputName,inputVolumeMul:volume}); await this.wait('GetInputVolume',{inputName},s=>Math.abs(s.inputVolumeMul-volume)<0.001);}
           if(action==='audio_bus') {const track=(this.state.buses?{M:'4',A:'5',B:'6'}:{M:'1',A:'2',B:'3'})[d.bus]; if(!track) throw new Error('Barramento deve ser M, A ou B'); const before=(await this.req('GetInputAudioTracks',{inputName})).inputAudioTracks; const enabled=d.enabled??!before[track]; await this.req('SetInputAudioTracks',{inputName,inputAudioTracks:{[track]:!!enabled}}); await this.wait('GetInputAudioTracks',{inputName},s=>s.inputAudioTracks[track]===!!enabled);}

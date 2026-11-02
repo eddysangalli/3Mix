@@ -1,5 +1,5 @@
 import{isIP}from'node:net';
-export const PTZ_KIND='face_tracker_ptz',PTZ_NAME='FreeMix PTZ Tracking';
+export const PTZ_KIND='face_tracker_ptz',PTZ_NAME='3Mix PTZ Tracking';
 export function ptzSettings(raw={}){
  const address=String(raw.address||'').trim(),port=Number(raw.port??1259),parts=address.split('.').map(Number);
  if(isIP(address)!==4||!(parts[0]===10||parts[0]===127||parts[0]===192&&parts[1]===168||parts[0]===172&&parts[1]>=16&&parts[1]<=31))throw Error('Use o IPv4 local da câmera VISCA TCP');
@@ -10,7 +10,7 @@ export function ptzSettings(raw={}){
  for(const key of Object.keys(raw))if(!['address','port',...Object.keys(bounds)].includes(key))throw Error('Parâmetro PTZ desconhecido: '+key);
  return result;
 }
-export async function ptzTargets(p){const director=(await p.vendor('talkback',{action:'state'},'freemix')).director_uuid;return(p.state.sourceInputs||[]).filter(x=>x.key&&x.key!==director&&x.key!==p.state.calls?.director?.key&&['dshow_input','ffmpeg_source','ndi_source','omtsource'].includes(x.kind)&&!/^FreeMix (?:Retorno|N1|Bus|Master|Slot)/.test(x.name)&&!x.audioOnly);}
+export async function ptzTargets(p){const director=(await p.vendor('talkback',{action:'state'},'freemix')).director_uuid;return(p.state.sourceInputs||[]).filter(x=>x.key&&x.key!==director&&x.key!==p.state.calls?.director?.key&&['dshow_input','ffmpeg_source','ndi_source','omtsource'].includes(x.kind)&&!/^3Mix (?:Retorno|N1|Bus|Master|Slot)/.test(x.name)&&!x.audioOnly);}
 export async function executePTZ(engine,d){
  if(typeof d.enabled!=='boolean')throw Error('Informe iniciar ou parar tracking PTZ');
  const targets=await ptzTargets(engine.p),target=targets.find(x=>x.key===d.key);if(!target)throw Error('Escolha uma fonte pública de vídeo assíncrono (câmera/NDI/OMT/mídia)');

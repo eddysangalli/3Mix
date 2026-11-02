@@ -64,7 +64,7 @@ function sourceClass(source) {
   if (!source) return 'unknown';
   const name = String(source.name || '').trim();
   const kind = String(source.kind || '');
-  if (kind === 'mix-track-to-source' || kind === 'freemix_audio_bus' || /^(?:FreeMix|3Mix)\s+(?:Master|Bus [A-Z])\s*$/i.test(name) || /^FreeMix Audio Bus\b/i.test(name)) return 'output';
+  if (kind === 'mix-track-to-source' || kind === 'freemix_audio_bus' || /^(?:FreeMix|3Mix)\s+(?:Master|Bus [A-Z])\s*$/i.test(name) || /^3Mix Audio Bus\b/i.test(name)) return 'output';
   if (/^(?:FreeMix|3Mix)\s+(?:N1|Retorno)\b/i.test(name) || INTERNAL_NAME.test(name)) return 'return';
   if (directorName && name === directorName) return 'private';
   if (UUID.test(name) || /^[0-9a-f-]{30,}$/i.test(name)) return 'internal';

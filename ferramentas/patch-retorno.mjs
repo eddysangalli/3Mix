@@ -1,4 +1,4 @@
-// One-off edit of painel/mesa.html: the return feed of FreeMix Call as one real switch. Replaces the two manual
+// One-off edit of painel/mesa.html: the return feed of 3Mix Call as one real switch. Replaces the two manual
 // steps left in the call window (start the virtual camera, open a sender page in a browser), which could not work:
 // the page opened inside the program and was refused camera and microphone.
 import { readFileSync, writeFileSync } from "node:fs";

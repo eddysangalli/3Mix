@@ -1,4 +1,4 @@
-// Copy only this preset's FreeMix metadata; never inherit active recording/sync sessions.
+// Copy only this preset's 3Mix metadata; never inherit active recording/sync sessions.
 import {readFile,writeFile,mkdir} from 'node:fs/promises';import {createHash} from 'node:crypto';import {join} from 'node:path';import {fileURLToPath} from 'node:url';
 export async function clonePreset(root,from,to){if(!from||!to||from===to||from.length>300||to.length>300)throw Error('Nomes de preset inválidos');const key=s=>createHash('sha256').update(s).digest('hex').slice(0,24);
 for(const namespace of ['freemix-control','freemix-data','freemix-inputs','freemix-calls','freemix-replay','freemix-iso','freemix-macros']){const dir=join(root,'config/obs-studio/plugin_config',namespace);let data;try{data=JSON.parse(await readFile(join(dir,key(from)+'.json'),'utf8'));}catch(e){if(e.code==='ENOENT')continue;throw e;}if(['freemix-replay','freemix-iso'].includes(namespace)){data.rec=false;data.markIn=null;data.linked=false;data.back=null;}await mkdir(dir,{recursive:true});await writeFile(join(dir,key(to)+'.json'),JSON.stringify(data,null,2));}}

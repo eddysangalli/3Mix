@@ -33,7 +33,7 @@
         : (has("gate") ? chk("gate", "Usar o noise gate") + sl("Fecha abaixo de", "gate", "close_threshold", -96, 0, 1, fs("gate").close_threshold ?? -32, " dB") + sl("Abre acima de", "gate", "open_threshold", -96, 0, 1, fs("gate").open_threshold ?? -26, " dB") : none("O noise gate"));
       p.innerHTML = `<h3>Configurações de áudio · ${esc(st.popArg)}</h3><div class="add"><div class="types">${[["geral", "Geral"], ["eq", "EQ"], ["comp", "Compressor"], ["gate", "Noise Gate"]].map(([id, l]) => `<button class="${tab === id ? "on" : ""}" data-a="asettab" data-v="${id}">${l}</button>`).join("")}</div><div class="form">${body}<p>As mudanças valem na hora. Os efeitos são filtros de áudio do motor aplicados a esta entrada.</p></div></div><div class="row end"><button class="b" data-a="close">Fechar</button></div>`; }
 //@@LISTEN
-  const FX = { gain: { n: "FreeMix Ganho", k: "gain_filter" }, eq: { n: "FreeMix EQ", k: "basic_eq_filter" }, comp: { n: "FreeMix Compressor", k: "compressor_filter" }, gate: { n: "FreeMix Noise Gate", k: "noise_gate_filter" } };
+  const FX = { gain: { n: "3Mix Ganho", k: "gain_filter" }, eq: { n: "3Mix EQ", k: "basic_eq_filter" }, comp: { n: "3Mix Compressor", k: "compressor_filter" }, gate: { n: "3Mix Noise Gate", k: "noise_gate_filter" } };
   document.addEventListener("input", (e) => {
     const t = e.target, d = t.dataset; if (!d || !d.fx || !st.aset) return;
     const v = +t.value, lab = $(`v-${d.fx}-${d.k}`); if (lab) lab.textContent = v + (d.u || "");

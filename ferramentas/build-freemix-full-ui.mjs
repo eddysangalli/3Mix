@@ -1,17 +1,17 @@
 import fs from 'fs';
 import path from 'path';
 
-// Gerador da Interface Completa de Produção Broadcast do FreeMix Studio
+// Gerador da Interface Completa de Produção Broadcast do 3Mix Studio
 // Atende a todos os 8 requisitos operacionais especificados.
 
 const fullMesaHtml = `<!doctype html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<title>FreeMix Studio — Produção Broadcast</title>
+<title>3Mix Studio — Produção Broadcast</title>
 <style>
   /* ==========================================================================
-     FreeMix Studio - Design System Broadcast vMix Professional Dark
+     3Mix Studio - Design System Broadcast vMix Professional Dark
      ========================================================================== */
   :root {
     --bg-main: #0c0f14;
@@ -701,7 +701,7 @@ const fullMesaHtml = `<!doctype html>
     { id: "video", label: "Video / Clipe Local", hint: "Arquivo de vídeo local (MP4, MOV, MKV, TS)." },
     { id: "list", label: "Lista de Reprodução", hint: "Lista sequencial de vídeos com reprodução contínua." },
     { id: "ndi", label: "NDI Broadcast IP", hint: "Fonte NDI de alta fidelidade na rede local." },
-    { id: "call", label: "FreeMix Call Remoto", hint: "Convidado remoto pela internet em alta definição." },
+    { id: "call", label: "3Mix Call Remoto", hint: "Convidado remoto pela internet em alta definição." },
     { id: "desktop", label: "Captura de Tela", hint: "Captura de monitor completo em 60 fps." },
     { id: "window", label: "Captura de Janela", hint: "Captura isolada de aplicativo." },
     { id: "stream", label: "Fluxo SRT / RTMP", hint: "Recepção de fluxo remoto SRT, RTMP ou RTSP." },
@@ -901,7 +901,7 @@ const fullMesaHtml = `<!doctype html>
       <span class="sp"></span>
       <span>CPU: <b>6%</b> · GPU: <b>14%</b> · Memória: <b>840 MB</b> · Quedas: <b>0 (0.0%)</b></span>
       <span class="sp"></span>
-      <span>FreeMix Studio v1.1.0 · Broadcast Engine</span>
+      <span>3Mix Studio v1.1.0 · Broadcast Engine</span>
     \`;
   }
 
@@ -1063,7 +1063,7 @@ const fullMesaHtml = `<!doctype html>
       const sTab = st.activeSettingsTab;
       p.innerHTML = \`
         <div class="modal-header">
-          <h3>\${GEAR} Configurações Globais do FreeMix Studio</h3>
+          <h3>\${GEAR} Configurações Globais do 3Mix Studio</h3>
           <button class="close-btn" data-a="closemodal">×</button>
         </div>
         <div class="modal-nav">
@@ -1080,7 +1080,7 @@ const fullMesaHtml = `<!doctype html>
           \${sTab === 'geral' ? \`
             <div class="form-grid">
               <div class="form-group"><label>Idioma</label><select class="form-control"><option>Português Brasileiro (pt-BR)</option><option>English (en-US)</option></select></div>
-              <div class="form-group"><label>Tema Visual</label><select class="form-control"><option>FreeMix Dark Broadcast</option></select></div>
+              <div class="form-group"><label>Tema Visual</label><select class="form-control"><option>3Mix Dark Broadcast</option></select></div>
               <div class="form-group full">
                 <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" checked> Carregar automaticamente o último Preset ao iniciar</label>
                 <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" checked> Iniciar no Modo Estúdio (Preview & Program)</label>
@@ -1110,7 +1110,7 @@ const fullMesaHtml = `<!doctype html>
               <div class="form-group"><label>Taxa de Quadros (FPS)</label><select class="form-control"><option>60 fps</option><option>59.94 fps (NTSC)</option><option>50 fps (PAL)</option></select></div>
             </div>
           \` : sTab === 'overlays' ? \`
-            <p style="font-size:11px;color:var(--text-muted)">O FreeMix Studio suporta 8 canais de overlay simultâneos e independentes (DSK 1 a 8), permitindo empilhar GCs, placares, PiP e logos sem conflito.</p>
+            <p style="font-size:11px;color:var(--text-muted)">O 3Mix Studio suporta 8 canais de overlay simultâneos e independentes (DSK 1 a 8), permitindo empilhar GCs, placares, PiP e logos sem conflito.</p>
           \` : sTab === 'replay' ? \`
             <div class="form-grid">
               <div class="form-group"><label>Buffer de Memória por Câmera</label><select class="form-control"><option>15 Segundos (RAM)</option><option>30 Segundos (RAM)</option><option>Gravação Contínua em Disco (NVMe)</option></select></div>
@@ -1562,13 +1562,13 @@ const fullMesaHtml = `<!doctype html>
 </html>
 `;
 
-// Escreve tanto no repositório FreeMix quanto na pasta de runtime portátil obs-vmix
+// Escreve tanto no repositório 3Mix quanto na pasta de runtime portátil obs-vmix
 const target1 = path.resolve('FreeMix/painel/mesa.html');
 const target2 = path.resolve('obs-vmix/painel/mesa.html');
 
 fs.writeFileSync(target1, fullMesaHtml, 'utf8');
 fs.writeFileSync(target2, fullMesaHtml, 'utf8');
 
-console.log('[SUCESSO] FreeMix Full Broadcast UI gerada em:');
+console.log('[SUCESSO] 3Mix Full Broadcast UI gerada em:');
 console.log('->', target1);
 console.log('->', target2);

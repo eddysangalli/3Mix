@@ -79,20 +79,8 @@ pendente. O resumo abaixo reflete o estado real confirmado nesta data.
   ao final); um Patch real trocou o conteúdo interno de um Input (confirmado via leitura direta da cena,
   não só do registro de metadado). O estado de M/E 2/3 persistiu através de dois reinícios completos do
   motor em rodadas anteriores.
-- **Switcher Strip (UI de controle dos M/Es 2-4)**: a versão atualizada (Bank por categoria, Audio Bus
-  por M/E, Tally recursivo) **já foi copiada à instalação do operador**. A operação por trás dela (as
-  mesmas chamadas HTTP que a Strip usa) está confirmada funcionando; a aparência/operação da Strip em si
-  na mesa real ainda não foi verificada visualmente nesta beta (confirmação pendente, não um defeito
-  conhecido).
-- **Nesting/identidade pública estável (proxy)**: o núcleo nativo (C++) que adiciona isso ao M/E 2-4
-  existe na fonte e foi compilado e testado com sucesso **num binário de QA isolado**
-  (`qa-beta/multi-me-build-verified/`), nunca enviado ao instalador nem à instalação do operador. O
-  binário em produção (`3mix-runtime/bin/64bit/FreeMix.exe`) **não contém** esse núcleo (confirmado por
-  varredura de bytes, não suposição) — decisão de troca de binário continua separada e pendente. Sem
-  esse núcleo, um M/E 2-4 não pode ser usado como fonte de outra composição ("nesting").
-- **Decisão pendente do dono**: só a troca do binário de produção (para trazer proxy/nesting). Até essa
-  decisão, **nesting de M/E não deve ser anunciado nem demonstrado como disponível** nesta beta —
-  Preview/Cut/Fade/Patch de M/E 2-4 já estão confirmados e podem ser considerados disponíveis.
+- **Aba M/E da mesa**: fica ao lado de Fontes, com Strip por M/E (monitores PV/PGM, botões PV e PGM, CUT, AUTO, áudio e Patch). As botoeiras do topo têm seletor MAIN/M/E 2/3/4; sempre abrem no MAIN e a escolha não fica salva. Testado no motor real em 02/11/2026.
+- **Nesting (M/E como sinal)**: o núcleo nativo compilado do `main` está na instalação. A saída de um M/E entra em outra entrada pelo Patch ("Saída do M/E N"), confirmado no motor real. **Limite conhecido**: o Patch copia o enquadramento da fonte substituída, então um M/E com tela diferente da produção (ex.: vertical) pode entrar deslocado. Ainda não há M/E como fonte direta em Composições.
 - **O que foi bem testado e deve ser preservado quando a integração restante acontecer**:
   confirmação de comandos estritamente por M/E (nunca valida M/E 2 contra o estado do MAIN), recibos com
   confirmação positiva e rejeição de reuso, persistência de identidade pública mesmo através de

@@ -1,4 +1,4 @@
-// Uses the actual OMT plugin registration and native FreeMix output bridge.
+// Uses the actual OMT plugin registration and native 3Mix output bridge.
 import {assertSdrOutputRequest,outputHdrContracts} from './saidas-hdr.mjs';
 async function nativeRequest(obs,action,data={}) {
  const r=await obs.tryReq('CallVendorRequest',{vendorName:'freemix',requestType:'network_output',requestData:{protocol:'OMT',action,...data}}).catch(()=>null);
@@ -24,7 +24,7 @@ export async function omtStart(obs,options={}) {
  if(mode==='source'&&(!state.sourceIndependent||!options.sourceUuid))throw Error('Este motor não suporta OMT por entrada independente');
  if(audioTrack!==0&&!state.audioTrackSelectable)throw Error('Este motor não suporta seleção de bus OMT');
  if(state.nativeBridge){const result=await nativeRequest(obs,'start',{...options,senderId,audioTrack,audioSourceUuid,mode,alpha:options.alpha===true});if(!result?.success||!result.active)throw Error(result?.error||'Motor não confirmou saída OMT ativa');return {...result,outputActive:result.active};}
- if(!state.outputAvailable)throw Object.assign(Error('Saída OMT não inicializada; ative OMT Output no menu Tools ou use motor FreeMix com network_output'),{code:'OMT_OUTPUT_NOT_INITIALIZED'});
+ if(!state.outputAvailable)throw Object.assign(Error('Saída OMT não inicializada; ative OMT Output no menu Tools ou use motor 3Mix com network_output'),{code:'OMT_OUTPUT_NOT_INITIALIZED'});
  if(!state.outputActive)await obs.req('StartOutput',{outputName:state.outputName});
  const result=await obs.req('GetOutputStatus',{outputName:state.outputName});if(!result.outputActive)throw Error('Plugin OMT não confirmou envio ativo');return result;
 }

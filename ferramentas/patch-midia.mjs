@@ -1,4 +1,4 @@
-// FreeMix Pro: Patch da Barra de Mídia (VideoControls embaixo de Preview e Output)
+// 3Mix Pro: Patch da Barra de Mídia (VideoControls embaixo de Preview e Output)
 // Metade esquerda para o Preview, metade direita para o Output.
 // Controles: Reiniciar, Tocar/Pausar, Anterior/Próximo (playlist), tempo decorrido, slider arrastável, tempo restante.
 import { readFileSync, writeFileSync } from "node:fs";

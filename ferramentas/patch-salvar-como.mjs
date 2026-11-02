@@ -19,7 +19,7 @@ const block = [
   '      const now = (await req("GetSceneList")).scenes.length;',
   '      if (now >= before && now > 1) return toast(`Preset salvo como "${name}"`);',
   '      await req("SetCurrentSceneCollection", { sceneCollectionName: from });',
-  '      toast("A cópia ficou vazia: o ajudante do FreeMix não respondeu. Abra o programa pelo atalho Iniciar Mesa.", true);',
+  '      toast("A cópia ficou vazia: o ajudante do 3Mix não respondeu. Abra o programa pelo atalho Iniciar Mesa.", true);',
 ].join("\n");
 s = s.slice(0, a) + block + s.slice(b + endMark.length);
 writeFileSync(file, s);

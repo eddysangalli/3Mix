@@ -22,7 +22,7 @@ rep('aplicados a esta entrada.</p></div></div><div class="row end">', part("FOOT
 rep('        : (has("gate") ? chk("gate", "Usar o noise gate") + sl("Fecha abaixo de", "gate", "close_threshold", -96, 0, 1, fs("gate").close_threshold ?? -32, " dB") + sl("Abre acima de", "gate", "open_threshold", -96, 0, 1, fs("gate").open_threshold ?? -26, " dB") : none("O noise gate"));', part("LIM"));
 rep('["gate", "Noise Gate"]].map(', '["gate", "Noise Gate"], ["lim", "Limitador"]].map(');
 rep('gate: f("gate") };', 'gate: f("gate"), lim: f("lim") };');
-rep('gate: { n: "FreeMix Noise Gate", k: "noise_gate_filter" } };', 'gate: { n: "FreeMix Noise Gate", k: "noise_gate_filter" }, lim: { n: "FreeMix Limitador", k: "limiter_filter" } };');
+rep('gate: { n: "3Mix Noise Gate", k: "noise_gate_filter" } };', 'gate: { n: "3Mix Noise Gate", k: "noise_gate_filter" }, lim: { n: "3Mix Limitador", k: "limiter_filter" } };');
 rep('if (a) { a.tracks = d.inputAudioTracks; renderMixer(); } }', 'if (a) { a.tracks = d.inputAudioTracks; renderMixer(); if (st.pop === "busman") renderPop(); } }');
 rep('await syncItems(); st.stats = await tryReq("GetStats");', 'await syncItems(); st.stats = await tryReq("GetStats"); await busCheck();');
 rep('ib("pop", st.pop === "shortcuts", "Exibir os atalhos", "M4 20V10h4v10zm6 0V4h4v16zm6 0v-7h4v7z")', 'ib("pop", st.pop === "shortcuts", "Exibir os atalhos", "M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 0h7v7h-7z")');

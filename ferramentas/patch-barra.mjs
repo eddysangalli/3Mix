@@ -18,7 +18,7 @@ rep('    record: () => run(req("ToggleRecord")),', `    top_state: () => run(req
     top_pausethumbs: () => { st.paused = !st.paused; A.top_state(); toast(st.paused ? "Miniaturas das entradas pausadas" : "Miniaturas das entradas atualizando"); },
     top_basic: () => { st.basic = !st.basic; document.body.classList.toggle("basic", st.basic); A.top_state(); },
     top_fullscreen: () => A.projopen({ v: "PROGRAM_FULL" }),
-    top_presetsave: () => run((async () => { const c = await req("GetSceneCollectionList"); st.preset = c.currentSceneCollectionName; toast(\`Preset "\${st.preset}" está gravado: o FreeMix grava cada alteração na hora\`); })()),
+    top_presetsave: () => run((async () => { const c = await req("GetSceneCollectionList"); st.preset = c.currentSceneCollectionName; toast(\`Preset "\${st.preset}" está gravado: o 3Mix grava cada alteração na hora\`); })()),
     top_presetlast: () => run((async () => {
       const c = await req("GetSceneCollectionList"), last = store.get("mesa.lastPreset", "");
       if (!last || last === c.currentSceneCollectionName || !c.sceneCollections.includes(last)) return toast("Não há um preset anterior para voltar", true);
@@ -33,7 +33,7 @@ rep('    record: () => run(req("ToggleRecord")),', `    top_state: () => run(req
       closePop();
       await req("SetPersistentData", { realm: "OBS_WEBSOCKET_DATA_REALM_GLOBAL", slotName: "freemix_cmd", slotValue: { id: Date.now(), cmd: "saveas", from: c.currentSceneCollectionName, name } });
       for (let i = 0; i < 16; i++) { await sleep(500); if ((await req("GetSceneCollectionList")).sceneCollections.includes(name)) { await req("SetCurrentSceneCollection", { sceneCollectionName: name }); return toast(\`Preset salvo como "\${name}"\`); } }
-      toast("O ajudante do FreeMix não respondeu. Abra o programa pelo atalho Iniciar Mesa.", true);
+      toast("O ajudante do 3Mix não respondeu. Abra o programa pelo atalho Iniciar Mesa.", true);
     })()),
     record: () => run(req("ToggleRecord")),`);
 

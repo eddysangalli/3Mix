@@ -65,7 +65,7 @@ export class PreflightEngine {
 
     // 3. Audio Master Health Check
     const masterAudio = (p.state?.audioInputs || []).find(a => 
-      a.name === 'Master' || a.name === 'FreeMix Master' || a.name === 'Áudio do Desktop' || a.name === 'Desktop Audio'
+      a.name === 'Master' || a.name === '3Mix Master' || a.name === 'Áudio do Desktop' || a.name === 'Desktop Audio'
     );
     if (masterAudio) {
       if (masterAudio.muted) {

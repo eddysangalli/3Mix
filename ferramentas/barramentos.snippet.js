@@ -2,8 +2,8 @@
   // Audio buses. The engine only has six mix tracks, so each bus is a "Mix Track" source (plugin Mix Track to Source):
   // inputs are sent to a sum track (4, 5, 6), the bus source picks that sum up and delivers it, through its own fader,
   // mute, meter and filters, to the output track (1 = Master, what recording and streaming take; 2 = A; 3 = B).
-  const BUSK = "mix-track-to-source", BUS_SCENE = "FreeMix Barramentos", BUS_KEYER = "FreeMix Audio", TRK = ["1", "2", "3", "4", "5", "6"];
-  const BUSES = [{ id: "M", name: "FreeMix Master", label: "Master", mix: 3, sum: "4", out: "1" }, { id: "A", name: "FreeMix Bus A", label: "A", mix: 4, sum: "5", out: "2" }, { id: "B", name: "FreeMix Bus B", label: "B", mix: 5, sum: "6", out: "3" }];
+  const BUSK = "mix-track-to-source", BUS_SCENE = "3Mix Barramentos", BUS_KEYER = "3Mix Audio", TRK = ["1", "2", "3", "4", "5", "6"];
+  const BUSES = [{ id: "M", name: "3Mix Master", label: "Master", mix: 3, sum: "4", out: "1" }, { id: "A", name: "3Mix Bus A", label: "A", mix: 4, sum: "5", out: "2" }, { id: "B", name: "3Mix Bus B", label: "B", mix: 5, sum: "6", out: "3" }];
   const onlyTracks = (...on) => Object.fromEntries(TRK.map((k) => [k, on.includes(k)]));
   // [engine track, letter, description] of the M / A / B buttons of an input: the bus sums, or the tracks themselves while the buses are off.
   const busKeys = () => BUSES.map((b) => [st.busOn ? b.sum : b.out, b.id, b.id === "M" ? "Master" : "barramento " + b.id]);

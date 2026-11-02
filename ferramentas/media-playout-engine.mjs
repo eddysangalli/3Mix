@@ -323,7 +323,7 @@ export class MediaPlayoutEngine {
 
   /**
    * Aplica o ganho individual do clipe (estilo TriCaster DDR) no motor OBS
-   * usando o filtro dedicado 'FreeMix Clip Gain' (gain_filter)
+   * usando o filtro dedicado '3Mix Clip Gain' (gain_filter)
    */
   async applyClipAudioGain(inputIdent, gainDb) {
     if (!inputIdent || gainDb === undefined || gainDb === null) return;
@@ -356,23 +356,23 @@ export class MediaPlayoutEngine {
           const filterList = await this.p.req('GetSourceFilterList', { sourceName: srcName }).catch(() => null);
           if (!filterList) continue;
 
-          const existing = (filterList.filters || []).find(f => f.filterName === 'FreeMix Clip Gain');
+          const existing = (filterList.filters || []).find(f => f.filterName === '3Mix Clip Gain');
           if (existing) {
             await this.p.req('SetSourceFilterSettings', {
               sourceName: srcName,
-              filterName: 'FreeMix Clip Gain',
+              filterName: '3Mix Clip Gain',
               filterSettings: { db: gainVal },
               overlay: true
             });
             await this.p.req('SetSourceFilterEnabled', {
               sourceName: srcName,
-              filterName: 'FreeMix Clip Gain',
+              filterName: '3Mix Clip Gain',
               filterEnabled: true
             });
           } else if (gainVal !== 0) {
             await this.p.req('CreateSourceFilter', {
               sourceName: srcName,
-              filterName: 'FreeMix Clip Gain',
+              filterName: '3Mix Clip Gain',
               filterKind: 'gain_filter',
               filterSettings: { db: gainVal }
             });

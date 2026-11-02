@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {access,mkdir} from 'node:fs/promises';
 import {prepareNdiRuntime,NDI_DLL} from './ndi-runtime.mjs';
 export function bridgeOptions(args=[]){
- const options={port:18460,host:'127.0.0.1',name:'FreeMix SRT Alpha',latencyMs:120};
+ const options={port:18460,host:'127.0.0.1',name:'3Mix SRT Alpha',latencyMs:120};
  for(let i=0;i<args.length;i++){const key=args[i];if(!['--port','--host','--name','--latency-ms'].includes(key)||i+1>=args.length)throw Error('Use --port, --host, --name, --latency-ms');const value=args[++i];if(key==='--port')options.port=Number(value);if(key==='--host')options.host=value;if(key==='--name')options.name=value;if(key==='--latency-ms')options.latencyMs=Number(value);}
  if(!Number.isInteger(options.port)||options.port<1024||options.port>65535)throw Error('Porta inválida');
  if(!/^(?:\d{1,3}\.){3}\d{1,3}$/.test(options.host)||options.host.split('.').some(n=>Number(n)>255))throw Error('Informe IP local IPv4 ou 0.0.0.0 para receber externamente');

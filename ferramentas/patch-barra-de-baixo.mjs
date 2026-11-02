@@ -16,7 +16,7 @@ rep('    record: () => run(req("ToggleRecord")),', part("ACT", "POP") + '\n    r
 rep('    else if (st.pop === "gear") p.innerHTML =', part("POP") + '\n    else if (st.pop === "gear") p.innerHTML =');
 rep('closeask: (d) => openPop("close", d.v),', 'closeask: (d) => (st.locked ? toast("Trava ligada: destrave no cadeado para fechar entradas", true) : openPop("close", d.v)),');
 rep('<span class="res">${res}</span>', '<span class="res">${res}</span><span class="${st.vcam ? "ok" : ""}" title="Saída externa (câmera virtual)">EX</span>');
-for (const [x, y] of [["CPU OBS:", "CPU FreeMix:"], ["Render:", "Render Time:"], ["FreeMix Pro 27", "FreeMix Studio"]]) { if (s.includes(x)) { s = s.split(x).join(y); done++; } else console.log("opcional não encontrado: " + x); }
+for (const [x, y] of [["CPU OBS:", "CPU FreeMix:"], ["Render:", "Render Time:"], ["3Mix Pro 27", "3Mix Studio"]]) { if (s.includes(x)) { s = s.split(x).join(y); done++; } else console.log("opcional não encontrado: " + x); }
 rep("</style>", `  .bot { background: #0d1013; justify-content: space-between; padding: 0 4px; gap: 0; }
   .bot .b { height: 24px; background: #2a3540; border: 1px solid #4b5967; color: #f2f5f8; font-weight: 700; font-size: 11px; padding: 0 12px; border-radius: 0; }
   .bot .b:hover { background: #364452; } .bot .b.live { background: var(--red); border-color: #ef5a4f; } .bot .b.on { background: var(--grn); border-color: #2fb02c; }

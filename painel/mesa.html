@@ -1102,12 +1102,13 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   </div>
 
   <section class="switcher-banks" aria-label="Seleção de entradas">
-    <div class="switcher-bank" id="bank-pv"><h2>PRÉ-VISUALIZAÇÃO (PV)<span class="bank-tools"><button class="bank-tool" data-a="banks_pos" title="Mover as botoeiras para baixo, antes do rodapé">⇅</button><button class="bank-tool" data-a="bank_hide" data-v="pv" title="Fechar a botoeira PV. Reabra no rodapé.">×</button></span></h2><div class="switcher-inputs" id="switcher-pv"></div></div>
-    <div class="switcher-bank pgm" id="bank-pgm"><h2>PROGRAMA (PGM)<span class="bank-tools"><button class="bank-tool" data-a="bank_hide" data-v="pgm" title="Fechar a botoeira PGM. Reabra no rodapé.">×</button></span></h2><div class="switcher-inputs" id="switcher-pgm"></div></div>
+    <div class="switcher-bank" id="bank-pv"><h2>PRÉ-VISUALIZAÇÃO (PV)<span class="bank-me"></span><span class="bank-tools"><button class="bank-tool" data-a="banks_pos" title="Mover as botoeiras para baixo, antes do rodapé">⇅</button><button class="bank-tool" data-a="bank_hide" data-v="pv" title="Fechar a botoeira PV. Reabra no rodapé.">×</button></span></h2><div class="switcher-inputs" id="switcher-pv"></div></div>
+    <div class="switcher-bank pgm" id="bank-pgm"><h2>PROGRAMA (PGM)<span class="bank-me-tag"></span><span class="bank-tools"><button class="bank-tool" data-a="bank_hide" data-v="pgm" title="Fechar a botoeira PGM. Reabra no rodapé.">×</button></span></h2><div class="switcher-inputs" id="switcher-pgm"></div></div>
   </section>
   <div class="tabs" id="tabs"></div>
   <div class="mid">
     <div class="tiles" id="tiles"></div>
+    <div class="me-surface" id="me-surface" aria-label="M/E"></div>
     <div class="splitter-v" id="splitter-side" title="Arraste para redimensionar o painel lateral"></div>
     <div class="side-panel on" id="side-panel">
       <div class="side-panel-header" draggable="true" data-module-drag="audio" title="Arraste este cabeçalho sobre Fontes para trocar os módulos de lado">
@@ -1470,7 +1471,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   });
   setInterval(replayPoll, 1500);
 
-  const setScenes = (list) => { st.sceneKeys=Object.fromEntries(list.map(s=>[s.sceneName,s.sceneUuid]));st.scenes = list.slice().sort((a, b) => b.sceneIndex - a.sceneIndex).map((s) => s.sceneName).filter((n) => n !== BUS_SCENE && !n.startsWith("FreeMix Slot ") && !/^FreeMix Mix \d+ Output$/.test(n)); };
+  const setScenes = (list) => { st.sceneKeys=Object.fromEntries(list.map(s=>[s.sceneName,s.sceneUuid]));st.scenes = list.slice().sort((a, b) => b.sceneIndex - a.sceneIndex).map((s) => s.sceneName).filter((n) => n !== BUS_SCENE && !n.startsWith("3Mix Slot ") && !/^3Mix Mix \d+ Output$/.test(n)); };
   async function syncScenes() {
     const r = await req("GetSceneList");
     setScenes(r.scenes); st.program = r.currentProgramSceneName || ""; st.preview = r.currentPreviewSceneName || "";
@@ -1773,7 +1774,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
           break;
         }
         case "MasterAudio": {
-          const master = "FreeMix Master";
+          const master = "3Mix Master";
           const cur = st.audio.get(master);
           if (cur) await req("SetInputMute", { inputName: master, inputMuted: !cur.muted });
           break;
@@ -2400,8 +2401,11 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     modular: () => run(launchPanel('workspace')),
     showmodules: () => { st.mixer = true; st.uiDock1Off = false; store.set("mesa.mixer", true); renderTabs(); applyUiLayout(); renderSideDock(); },
     studio: () => run(req("SetStudioModeEnabled", { studioModeEnabled: !st.studio })),
-    tagfilter: (d) => {st.tagFilter=st.tagFilter===d.v?"":d.v;st.filter=-1;renderTabs();renderTiles();},
-    filter: (d) => { st.filter = +d.v; st.tagFilter="";renderTabs(); renderTiles(); },
+    metab: () => { setMeTab(!st.meTab); renderTabs(); },
+    bank_me: (d) => window.ThreeMixME?.select(+d.v),
+    bankpick: (d) => { if (window.ThreeMixME?.target > 1) return run(window.ThreeMixME.pick(d.side, d.v)); return A[d.side === 'pv' ? 'preview' : 'cut'](d); },
+    tagfilter: (d) => {setMeTab(false);st.tagFilter=st.tagFilter===d.v?"":d.v;st.filter=-1;renderTabs();renderTiles();},
+    filter: (d) => { setMeTab(false); st.filter = +d.v; st.tagFilter="";renderTabs(); renderTiles(); },
     mixer: () => { st.mixer = !st.mixer; store.set("mesa.mixer", st.mixer); renderTabs(); renderSideDock(); },
     dockconfig: (d) => openPop("dockconfig", d.v),
     dockassign: (d) => {
@@ -2678,7 +2682,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   function initializeModuleLayout() {
     const mid=document.querySelector('.mid'),module=document.createElement('section');
     module.id='inputs-module';module.className='input-module';module.setAttribute('aria-label','Módulo de entradas');
-    mid.insertBefore(module,$('tiles'));module.append($('tabs'),$('tiles'));
+    mid.insertBefore(module,$('tiles'));module.append($('tabs'),$('tiles'),$('me-surface'));
     setInputCardWidth(inputCardWidth);applyModuleLayout();
     document.addEventListener('input',event=>{if(event.target.id==='card-width')setInputCardWidth(event.target.value);});
     document.addEventListener('click',event=>{
@@ -2709,14 +2713,15 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       switcherStructure = structure;
       for (const side of ['pv','pgm']) {
         const bank = $('switcher-' + side);
-        bank.innerHTML = names.map((name,index) => `<button class="switcher-input" data-bank-input="${esc(name)}" data-a="${side === 'pv' ? 'preview' : 'cut'}" data-v="${esc(name)}" title="${side === 'pv' ? 'Preparar no Preview' : 'Corte direto para o Programa'}: ${esc(name)}"><img data-bank-thumb="${esc(name)}" src="${thumbs.get(name) || blank}" alt=""><span><b>${index + 1}</b><em>${esc(name)}</em></span></button>`).join('');
+        bank.innerHTML = names.map((name,index) => `<button class="switcher-input" data-bank-input="${esc(name)}" data-a="bankpick" data-side="${side}" data-v="${esc(name)}" title="${side === 'pv' ? 'Preparar no Preview' : 'Corte direto para o Programa'}: ${esc(name)}"><img data-bank-thumb="${esc(name)}" src="${thumbs.get(name) || blank}" alt=""><span><b>${index + 1}</b><em>${esc(name)}</em></span></button>`).join('');
       }
     }
     paintSwitcherBanks();
   }
   function paintSwitcherBanks() {
     for (const side of ['pv','pgm']) {
-      const selected = side === 'pv' ? st.preview : st.program;
+      const me = window.ThreeMixME?.target > 1 ? window.ThreeMixME : null;
+      const selected = me ? me.selectedName(side) : side === 'pv' ? st.preview : st.program;
       for (const button of $('switcher-' + side).querySelectorAll('[data-bank-input]')) {
         const active = st.on && button.dataset.bankInput === selected;
         button.classList.toggle('selected', active);
@@ -2724,12 +2729,15 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       }
     }
   }
+  window.ThreeMixRepaintBanks = paintSwitcherBanks;
+  function setMeTab(on) { st.meTab = on; document.body.classList.toggle('me-on', on); if (on) window.ThreeMixME?.tick(); }
   function renderTabs() {
     const used = new Set(Object.values(st.tags)), names = st.catNames;
     const tip = "mostrar só as entradas desta categoria. Clique direito: dar nome às categorias. Arraste uma miniatura até aqui para pôr a entrada nela.";
     $("tabs").innerHTML = ""
       + `<span class="module-handle" draggable="true" data-module-drag="inputs" title="Arraste sobre o Mixer para trocar os módulos de lado">⠿ Fontes</span>`
-      + `<button class="c all${st.filter === -1 ? " on" : ""}" data-a="filter" data-v="-1" title="Mostrar todas as entradas. Clique direito: dar nome às categorias.">Todas</button>`
+      + `<button class="c me-tab${st.meTab ? " on" : ""}" data-a="metab" title="Superfícies de corte dos M/Es">M/E</button>`
+      + `<button class="c all${st.filter === -1 && !st.meTab ? " on" : ""}" data-a="filter" data-v="-1" title="Mostrar todas as entradas. Clique direito: dar nome às categorias.">Todas</button>`
       + [...new Set(Object.values(st.inputTags||{}).flat())].sort().map(tag=>`<button class="c named${st.tagFilter===tag?" on":""}" data-a="tagfilter" data-v="${esc(tag)}">${esc(tag)}</button>`).join("")
       + COLORS.map((c, i) => `<button class="c${names[i] ? " named" : ""}${st.filter === i ? " on" : ""}" style="background:${c};opacity:${used.has(i) || names[i] ? 1 : .45}" data-a="filter" data-v="${i}" data-cat="${i}" title="${names[i] ? esc(names[i]) + ": " : "Categoria: "}${tip}">${esc(names[i] || "")}</button>`).join("")
       + `<button class="c find${st.filter === -2 ? " on" : ""}" data-a="catfind" title="Busca: mostrar só as entradas cujo nome contém um texto. Clique de novo para trocar o texto.">${FIND}${st.filter === -2 && st.find ? `<span>${esc(st.find)}</span>` : ""}</button>`
@@ -2816,8 +2824,8 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   // Audio buses. The engine only has six mix tracks, so each bus is a "Mix Track" source (plugin Mix Track to Source):
   // inputs are sent to a sum track (4, 5, 6), the bus source picks that sum up and delivers it, through its own fader,
   // mute, meter and filters, to the output track (1 = Master, what recording and streaming take; 2 = A; 3 = B).
-  const BUSK = "mix-track-to-source", BUS_SCENE = "FreeMix Barramentos", BUS_KEYER = "FreeMix Audio", TRK = ["1", "2", "3", "4", "5", "6"];
-  const BUSES = [{ id: "M", name: "FreeMix Master", label: "Master", mix: 3, sum: "4", out: "1" }, { id: "A", name: "FreeMix Bus A", label: "A", mix: 4, sum: "5", out: "2" }, { id: "B", name: "FreeMix Bus B", label: "B", mix: 5, sum: "6", out: "3" }];
+  const BUSK = "mix-track-to-source", BUS_SCENE = "3Mix Barramentos", BUS_KEYER = "3Mix Audio", TRK = ["1", "2", "3", "4", "5", "6"];
+  const BUSES = [{ id: "M", name: "3Mix Master", label: "Master", mix: 3, sum: "4", out: "1" }, { id: "A", name: "3Mix Bus A", label: "A", mix: 4, sum: "5", out: "2" }, { id: "B", name: "3Mix Bus B", label: "B", mix: 5, sum: "6", out: "3" }];
   const onlyTracks = (...on) => Object.fromEntries(TRK.map((k) => [k, on.includes(k)]));
   // [engine track, letter, description] of the M / A / B buttons of an input: the bus sums, or the tracks themselves while the buses are off.
   const busKeys = () => BUSES.map((b) => [st.busOn ? b.sum : b.out, b.id, b.id === "M" ? "Master" : "barramento " + b.id]);
@@ -2845,11 +2853,11 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   // Audio inputs with automatic mixing switched off: kept always on air inside the bus scene.
   st.fixed = new Set();
   document.addEventListener("change", (e) => { const t = e.target; if (t.dataset?.layer) A.layerlayout(t.dataset.layer, t.value); else if (t.id === "ly-src" && t.value) A.layeradd(t.value); });
-  // Return feed of FreeMix Call: the guest sees the program and hears the mix of bus B, which carries everything
+  // Return feed of 3Mix Call: the guest sees the program and hears the mix of bus B, which carries everything
   // except the calls themselves (mix-minus). Video leaves through the virtual camera; audio through a virtual audio
   // cable already installed on the machine (an Audio Monitor filter plays bus B into it). A page kept inside the
   // program publishes both to the call service; it needs the program started with --enable-media-stream.
-  const RET_SRC = "FreeMix Retorno", RET_FILTER = "FreeMix Retorno (áudio)", RET_BUS = "FreeMix Bus B", RET_PROBE = "FreeMix sonda de áudio";
+  const RET_SRC = "3Mix Retorno", RET_FILTER = "3Mix Retorno (áudio)", RET_BUS = "3Mix Bus B", RET_PROBE = "3Mix sonda de áudio";
   const retUrl = (id, cable) => `https://vdo.ninja/?push=${id}_ret&webcam&vd=obs&${cable ? "ad=CABLE_Output" : "ad=0"}&autostart&label=Programa&aec=0&denoise=0&autogain=0`;
   st.ret = { on: false, id: "", audio: false, cable: "" };
   async function syncRet() {
@@ -4134,7 +4142,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     }
   });
   document.addEventListener("change", (e) => { const t = e.target; if (t.dataset && t.dataset.o) { st.outsel = st.outsel || {}; st.outsel[t.dataset.o] = { ...(st.outsel[t.dataset.o] || {}), [t.dataset.f]: t.value }; store.set("mesa.outs", st.outsel); } });
-  const FX = { gain: { n: "FreeMix Ganho", k: "gain_filter" }, eq: { n: "FreeMix EQ", k: "basic_eq_filter" }, comp: { n: "FreeMix Compressor", k: "compressor_filter" }, gate: { n: "FreeMix Noise Gate", k: "noise_gate_filter" }, lim: { n: "FreeMix Limitador", k: "limiter_filter" } };
+  const FX = { gain: { n: "3Mix Ganho", k: "gain_filter" }, eq: { n: "3Mix EQ", k: "basic_eq_filter" }, comp: { n: "3Mix Compressor", k: "compressor_filter" }, gate: { n: "3Mix Noise Gate", k: "noise_gate_filter" }, lim: { n: "3Mix Limitador", k: "limiter_filter" } };
   document.addEventListener("input", (e) => {
     const t = e.target, d = t.dataset;
     if (d && d.speedin) {
@@ -4489,7 +4497,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
 <script src="remoto/atalhos-engine.js"></script>
 <script src="remoto/input-editor-feedback.js"></script>
 <script src="remoto/input-menu-ui.js"></script>
-<script type="module" src="remoto/switcher-strip-host.js?v=20261031i"></script>
+<script type="module" src="remoto/switcher-strip-host.js?v=20261102b"></script>
 <script src="mesa-estado.js"></script>
 </body>
 </html>

@@ -3,7 +3,7 @@ import { readFile, writeFile, mkdir, rename } from 'node:fs/promises';
 import { join } from 'node:path';
 
 /**
- * FreeMix Auxiliary Bus Router Engine (Broadcast Output Matrix)
+ * 3Mix Auxiliary Bus Router Engine (Broadcast Output Matrix)
  * Atende à Seção 7, Item 8 do PRODUCT-VISION.md:
  * "Output Engine livre: Qualquer Mix deve poder alimentar Stream, Record, DeckLink, SDI, NDI, OMT, SRT, RIST, clean feed, vertical, AUX."
  */

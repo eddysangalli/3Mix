@@ -15,7 +15,7 @@ export class SignalEngine {
  }
  async observe(){const enabled=[...this.monitors.values()].filter(m=>m.enabled);if(!enabled.length)return;const m=enabled[this.next++%enabled.length];if(Date.now()-(m.sampledAt||0)<2000)return;await this.sample(m.key);}
  async execute(action,d){this.setScope(this.p.scope);if(action==='signal_read'){this.last=this.summary();return;}
-  const input=this.p.state.inputs.find(i=>i.key===d.input);if(!input||input.name==='FreeMix Barramentos'||input.name.startsWith('FreeMix Slot '))throw Error('Selecione uma entrada pública com vídeo');
+  const input=this.p.state.inputs.find(i=>i.key===d.input);if(!input||input.name==='3Mix Barramentos'||input.name.startsWith('3Mix Slot '))throw Error('Selecione uma entrada pública com vídeo');
   if(action==='signal_configure'){
    if(typeof d.enabled!=='boolean'||typeof d.expectMotion!=='boolean'||!Number.isInteger(d.timeoutSeconds)||d.timeoutSeconds<5||d.timeoutSeconds>120)throw Error('Informe ativação, movimento e intervalo de 5 a 120 segundos');
    if(!d.enabled){this.monitors.delete(input.key);this.last=this.summary();return;}

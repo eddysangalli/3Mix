@@ -175,7 +175,7 @@ export function aplicarEstado(d) {
   }
   if (Array.isArray(d.inputs) && d.inputs.length) {
     const entradasMotor = d.inputs
-      .filter((i) => i && i.name && !/^(REPLAY [AB]|FreeMix Barramentos)$/i.test(i.name))
+      .filter((i) => i && i.name && !/^(REPLAY [AB]|3Mix Barramentos)$/i.test(i.name))
       .map((i, indice) => ({
         id: Number(i.number) || indice + 1,
         nome: String(i.name).toUpperCase(),
@@ -302,7 +302,7 @@ export function cenaResolvidaDoDsk(dsk) {
 // Endereço real de controle de áudio para um canal do mixer (C1..C4, VT, ME,
 // MASTER da interface). O motor não tem 7 inputs de áudio fixos — ele espera
 // o nome de uma entrada real ou um alias de barramento (M/A/B, ver `busNames`
-// em controle-producao.mjs: M = "FreeMix Master"). MASTER usa esse alias.
+// em controle-producao.mjs: M = "3Mix Master"). MASTER usa esse alias.
 // Recebe o OBJETO canal (não só o id): o `id` do canal ("C1") e o nome da
 // entrada correspondente ("CAM 1") não têm relação textual nenhuma — um
 // `startsWith(id)` contra o nome da entrada parecia plausível mas nunca

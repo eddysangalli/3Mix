@@ -366,7 +366,7 @@
   }
 
   function cameraState(disk = {}) {
-    const usable = (name) => name && name !== "FreeMix Barramentos" && !String(name).startsWith("REPLAY ");
+    const usable = (name) => name && name !== "3Mix Barramentos" && !String(name).startsWith("REPLAY ");
     const availableCams = (Array.isArray(disk.availableCams) ? disk.availableCams : []).filter(usable);
     const session = (disk.session?.cams || []).map((cam) => cam?.name).filter(usable);
     const stored = (Array.isArray(disk.cams) ? disk.cams : []).filter(usable);

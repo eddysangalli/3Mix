@@ -1,16 +1,16 @@
-// Adds (or updates) the FreeMix texts in the language files: the ones of the fork's source and the ones the program
+// Adds (or updates) the 3Mix texts in the language files: the ones of the fork's source and the ones the program
 // reads in this portable copy. Run after adding a new FreeMix.* text key to the C++ code; safe to run again.
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("../../", import.meta.url));
 // A key with null is removed from the files (texts the code no longer uses).
 const TEXTS = {
-  "FreeMix.Close.Title": ["FreeMix Studio", "FreeMix Studio"],
+  "FreeMix.Close.Title": ["3Mix Studio", "3Mix Studio"],
   "FreeMix.Close.Question": ["Do you want to save the changes to the current Preset?", "Deseja salvar as alterações no Preset atual?"],
   "FreeMix.Close.Save": ["Save and close", "Salvar e fechar"],
   "FreeMix.Close.Discard": ["Discard changes and Close", "Descartar alterações e Fechar"],
   "FreeMix.Close.Cancel": ["Cancel", "Cancelar"],
-  "FreeMix.Close.LiveText": ["FreeMix Studio is RECORDING or STREAMING LIVE. Closing the program now stops it at once.", "O FreeMix Studio está GRAVANDO ou TRANSMITINDO AO VIVO. Fechar o programa agora interrompe a emissão na hora."],
+  "FreeMix.Close.LiveText": ["3Mix Studio is RECORDING or STREAMING LIVE. Closing the program now stops it at once.", "O 3Mix Studio está GRAVANDO ou TRANSMITINDO AO VIVO. Fechar o programa agora interrompe a emissão na hora."],
   "FreeMix.Scope.Missing": ["Not available: the Color Monitor component is missing from this installation", "Indisponível: o componente Color Monitor não está nesta instalação"],
   "FreeMix.Scope.KeepPicture": ["Keeps the picture and shows the graph in a corner of it", "Mantém a imagem e mostra o gráfico num canto dela"],
   "FreeMix.Overlay.Toggle": ["Overlay %1: puts the Preview input over the Output, or takes it off", "Overlay %1: põe a entrada do Preview por cima da saída, ou tira do ar"],
