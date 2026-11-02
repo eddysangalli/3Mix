@@ -355,7 +355,31 @@ export class Production {
       transition:tr.currentSceneTransitionName,transitions:tr.transitions,video,controllers:this.controllerEngine.summary(),playout:this.playoutEngine.summary(),queue:this.playoutEngine.summary(),recoverySession:this.sessionRecovery.summary(),macros:this.macroEngine.summary(),busSetupError:this.busSetupError||null,revision:++this.generation,updatedAt:Date.now()};
     this.state.globalHotkeys=await this.globalHotkeys.sync();this.state.controllers=this.controllerEngine.summary();this.state.playout=this.playoutEngine.summary();this.state.queue=this.playoutEngine.summary();
     await this.inputEngine.observeAudio(this.state);
+    await this.keepAudioInputsLive().catch(e=>{this.audioLiveError=e.message;});
     this.state.audioRouting=await this.audioRoutingEngine.refresh({scope:this.scope,audioInputs:audio,sourceInputs:this.state.sourceInputs,tally,director:this.state.calls?.director,connected:true});this.publish(this.state); return this.state;
+  }
+  // O motor só mede e mistura fonte ativa. A cena de barramentos fica sempre ativa, então é ela que segura
+  // as entradas só de áudio: microfone e áudio do computador não dependem de corte. Quem quer que o áudio
+  // acompanhe o vídeo liga o AFV. Mic junto de uma câmera continua seguindo a cena dela.
+  async keepAudioInputsLive(){
+    if(!this.state.buses)return;
+    const kinds=new Set(['wasapi_input_capture','wasapi_output_capture','wasapi_process_output_capture','asio_input_capture','coreaudio_input_capture','coreaudio_output_capture','pulse_input_capture','pulse_output_capture','alsa_input_capture']);
+    const kindOf=new Map((this.state.sourceInputs||[]).map(x=>[x.name,x.kind]));
+    const wanted=new Set();
+    for(const input of this.state.inputs||[])if(!input.composition&&input.sources?.length&&input.sources.every(name=>kinds.has(kindOf.get(name))))input.sources.forEach(name=>wanted.add(name));
+    const signature=JSON.stringify([this.scope,[...wanted].sort()]);
+    if(signature===this.audioLiveSignature)return;
+    const scene='3Mix Barramentos',items=(await this.req('GetSceneItemList',{sceneName:scene})).sceneItems;
+    const onAir=this.state.recording||this.state.streaming;
+    for(const name of wanted){
+      if(items.some(item=>item.sourceName===name))continue;
+      await this.req('CreateSceneItem',{sceneName:scene,sourceName:name,sceneItemEnabled:true});
+      // Criada no meio de uma transmissão, não abre microfone no ar sem o operador pedir.
+      if(onAir)await this.optional('SetInputMute',{inputName:name,inputMuted:true});
+    }
+    // Entrada removida: solta a fonte, senão o microfone continuaria capturando sem aparecer na mesa.
+    for(const item of items)if(!item.sourceName.startsWith('3Mix ')&&kinds.has(kindOf.get(item.sourceName))&&!wanted.has(item.sourceName))await this.optional('RemoveSceneItem',{sceneName:scene,sceneItemId:item.sceneItemId});
+    this.audioLiveSignature=signature;this.audioLiveError=null;
   }
   scene(arg) {const i=this.state.inputs.find(i=>i.name===String(arg)||i.key===arg)||(/^\d+$/.test(String(arg))?this.state.inputs.find(i=>i.number===Number(arg)):null); if(!i) throw new Error('Entrada não encontrada'); return i;}
   audioNames(arg) {if(busNames[arg]) arg=busNames[arg]; if(this.state.audioInputs.some(a=>a.name===arg)) return [arg]; const i=this.scene(arg); const names=this.state.audioInputs.filter(a=>i.sources.includes(a.name)).map(a=>a.name); if(!names.length) throw new Error('Esta entrada não possui áudio controlável'); return names;}
