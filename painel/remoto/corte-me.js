@@ -60,6 +60,7 @@
   async function iniciar() {
     try { await ler(); } catch { return; }
     E('me-alvo-caixa').hidden = false;
+    E('me-alvo-caixa').style.display = 'inline-flex';
     E('me-alvo').addEventListener('change', async (e) => {
       alvo = Number(e.target.value);
       E('tbar').disabled = alvo !== 1;
