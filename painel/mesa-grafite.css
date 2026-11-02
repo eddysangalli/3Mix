@@ -373,9 +373,11 @@ body.popup-mode .pop input,body.popup-mode .pop select { min-height:36px; }
 @keyframes estado-ar-pulso { 0%,100% { opacity:1; } 50% { opacity:.3; } }
 
 /* Aba M/E, ao lado de Fontes */
-.tabs .c.me-tab { display:none; width:auto; min-width:48px; background:#303030; color:#e6e6e6; font-weight:700; padding:0 10px; }
+.tabs .c.mod-tab { width:auto; min-width:48px; background:#303030; color:#e6e6e6; font-weight:700; padding:0 10px; }
+.tabs .c.mod-tab.on { background:#2f6fed; color:#fff; }
+.tabs .c.me-tab { display:none; }
 body.has-me:not(.popup-mode) .tabs .c.me-tab { display:inline-block; }
-.tabs .c.me-tab.on { background:#2f6fed; color:#fff; }
+body.me-on .tabs .c:not(.mod-tab) { display:none; }
 .me-surface { display:none; }
 body.me-on .tiles { display:none; }
 body.me-on .input-module .me-surface { display:block; flex:1 1 0; min-width:0; min-height:0; overflow:auto; padding:6px; background:#202020; border:1px solid #414141; border-top:0; border-radius:0 0 4px 4px; }
@@ -383,10 +385,14 @@ body.me-on .input-module .me-surface { display:block; flex:1 1 0; min-width:0; m
 .me-surface > button { margin-top:8px; background:#303030; color:#e6e6e6; border:1px solid #414141; border-radius:3px; height:26px; padding:0 10px; }
 .me-surface select { background:#202020; color:#e6e6e6; border:1px solid #414141; border-radius:3px; height:26px; }
 .me-surface div > button { background:#2f6fed; color:#fff; border:0; border-radius:3px; height:26px; padding:0 10px; }
-/* Botoeiras do topo apontando para um M/E */
-.bank-me { display:none; margin-left:10px; gap:2px; vertical-align:top; }
-body.has-me:not(.popup-mode) .bank-me { display:inline-flex; }
-.bank-me-b { height:15px; padding:0 6px; font-size:9px; font-weight:700; background:#303030; color:#a9a9a9; border:1px solid #414141; border-radius:2px; cursor:pointer; }
-.bank-me-b.on { background:#2f6fed; border-color:#2f6fed; color:#fff; }
-.bank-me-tag:not(:empty) { margin-left:10px; padding:0 6px; font-size:9px; background:#2f6fed; color:#fff; border-radius:2px; }
-body.bank-on-me .switcher-bank { outline:1px solid #2f6fed; outline-offset:-1px; }
+/* Botoeiras: cada uma com barramento e M/E */
+.me-barra { display:flex; gap:6px; margin-bottom:8px; }
+.me-surface .me-barra button { background:#303030; color:#e6e6e6; border:1px solid #414141; border-radius:3px; height:26px; padding:0 10px; cursor:pointer; }
+.switcher-bank h2 { gap:6px; }
+.bank-nome { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+.bank-config { display:inline-flex; gap:3px; margin-left:auto; }
+.bank-tools { margin-left:6px; flex:none; }
+.bank-sel { height:18px; padding:0 2px; font-size:10px; font-weight:700; background:#202020; color:#e6e6e6; border:1px solid #414141; border-radius:2px; }
+.sem-miniatura .switcher-input img { display:none; }
+.sem-miniatura .switcher-input { min-height:26px; }
+.switcher-bank.em-me { outline:1px solid #2f6fed; outline-offset:-1px; }

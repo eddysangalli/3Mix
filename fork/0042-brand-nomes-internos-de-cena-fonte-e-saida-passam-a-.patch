@@ -1,0 +1,297 @@
+From 762d5e4dfe204d6f45d2b95b3ae09aa2875632fc Mon Sep 17 00:00:00 2001
+From: Eddy Sangalli <eddyrodrigues@outlook.com>
+Date: Mon, 2 Nov 2026 15:33:40 -0300
+Subject: [PATCH] brand: nomes internos de cena, fonte e saida passam a 3Mix
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ frontend/widgets/FreeMixAudioRouting.cpp     |  4 ++--
+ frontend/widgets/FreeMixCallVideo.cpp        |  6 +++---
+ frontend/widgets/FreeMixMixEffectManager.hpp | 10 +++++-----
+ frontend/widgets/FreeMixMultistream.cpp      | 12 ++++++------
+ frontend/widgets/FreeMixNdiOutput.hpp        |  2 +-
+ frontend/widgets/FreeMixOmtHdrOutput.hpp     |  6 +++---
+ frontend/widgets/FreeMixOmtOutput.hpp        |  2 +-
+ frontend/widgets/FreeMixScope.cpp            |  2 +-
+ frontend/widgets/FreeMixSdiOutput.hpp        |  6 +++---
+ frontend/widgets/FreeMixSrtAlpha.hpp         |  4 ++--
+ frontend/widgets/FreeMixSrtHdrOutput.hpp     |  2 +-
+ 11 files changed, 28 insertions(+), 28 deletions(-)
+
+diff --git a/frontend/widgets/FreeMixAudioRouting.cpp b/frontend/widgets/FreeMixAudioRouting.cpp
+index 810a509..1b6ba15 100644
+--- a/frontend/widgets/FreeMixAudioRouting.cpp
++++ b/frontend/widgets/FreeMixAudioRouting.cpp
+@@ -33,7 +33,7 @@ bool Private(obs_source_t *s){
+  const std::string name=obs_source_get_name(s),kind=obs_source_get_id(s);
+  OBSDataAutoRelease settings=obs_source_get_private_settings(s);
+  return obs_data_get_bool(settings,"freemix_director_private")||kind=="freemix_audio_bus"||kind=="mix-track-to-source"||
+-  name.rfind("FreeMix Retorno",0)==0||name.rfind("FreeMix N1",0)==0||name.rfind("FreeMix Bus",0)==0||name=="FreeMix Master";
++  name.rfind("3Mix Retorno",0)==0||name.rfind("3Mix N1",0)==0||name.rfind("3Mix Bus",0)==0||name=="3Mix Master";
+ }
+ void Capture(void *param,obs_source_t *source,const audio_data *audio,bool muted){
+  auto *tap=static_cast<Tap *>(param);auto &bus=*tap->bus;
+@@ -241,7 +241,7 @@ struct AsioSession {
+ AsioSession *&AsioPointer(){static AsioSession *session=nullptr;return session;}
+ AsioSession &Asio(){auto *&session=AsioPointer();if(!session){session=new AsioSession;session->InitLifecycle();}return *session;} // explicit actions only; lifecycle owns stop, no getter allocation
+ }
+-void FreeMixAudioRoutingRegister(){static bool registered=false;if(registered)return;registered=true;obs_source_info info{};info.id="freemix_audio_bus";info.type=OBS_SOURCE_TYPE_INPUT;info.output_flags=OBS_SOURCE_AUDIO|OBS_SOURCE_DO_NOT_DUPLICATE;info.get_name=[](void *){return "FreeMix Independent Audio Bus";};info.create=Create;info.destroy=Destroy;info.update=Update;info.icon_type=OBS_ICON_TYPE_AUDIO_OUTPUT;obs_register_source(&info);
++void FreeMixAudioRoutingRegister(){static bool registered=false;if(registered)return;registered=true;obs_source_info info{};info.id="freemix_audio_bus";info.type=OBS_SOURCE_TYPE_INPUT;info.output_flags=OBS_SOURCE_AUDIO|OBS_SOURCE_DO_NOT_DUPLICATE;info.get_name=[](void *){return "3Mix Independent Audio Bus";};info.create=Create;info.destroy=Destroy;info.update=Update;info.icon_type=OBS_ICON_TYPE_AUDIO_OUTPUT;obs_register_source(&info);
+ 	obs_frontend_add_event_callback([](enum obs_frontend_event event, void *) {
+ 		if (event == OBS_FRONTEND_EVENT_FINISHED_LOADING && !Inventory().sourceRecordBusCaptureKnown) {
+ 			ObserveSourceRecordCapability();
+diff --git a/frontend/widgets/FreeMixCallVideo.cpp b/frontend/widgets/FreeMixCallVideo.cpp
+index 7a02180..5c466c2 100644
+--- a/frontend/widgets/FreeMixCallVideo.cpp
++++ b/frontend/widgets/FreeMixCallVideo.cpp
+@@ -70,7 +70,7 @@ bool OwnReturn(obs_source_t *source){
+  auto check=[](obs_source_t *child,bool &found){OBSDataAutoRelease settings=obs_source_get_private_settings(child);if(obs_data_get_bool(settings,"freemix_call_video_return_private"))found=true;};
+  check(source,found);obs_source_enum_full_tree(source,[](obs_source_t *,obs_source_t *child,void *param){OBSDataAutoRelease settings=obs_source_get_private_settings(child);if(obs_data_get_bool(settings,"freemix_call_video_return_private"))*static_cast<bool *>(param)=true;},&found);return found;
+ }
+-const char *Name(void *){return "FreeMix Calls continuous return video";}
++const char *Name(void *){return "3Mix Calls continuous return video";}
+ void *Create(obs_data_t *,obs_output_t *output){
+  if(!creating)return nullptr;auto *context=new(std::nothrow) RawContext;
+  if(!context)return nullptr;context->output=output;context->owner=creating;
+@@ -115,7 +115,7 @@ std::string Build(Session &s,bool (*isPrivate)(obs_source_t *)){
+  obs_video_info info{};if(!obs_get_video_info(&info)||!info.base_width||!info.base_height||!info.fps_den)return "Native video context unavailable";
+  const auto fps=DeriveFps(info.fps_num,info.fps_den);if(!fps.divisor)return "Continuous return requires Main25/50,30/60 or30000/60000 over1001; no video reset or FPS relabel";
+  s.pool.divisor=fps.divisor;s.pool.fpsNum=fps.numerator;s.pool.fpsDen=fps.denominator;s.fpsNum=info.fps_num;s.fpsDen=info.fps_den;s.baseWidth=info.base_width;s.baseHeight=info.base_height;
+- s.scene=obs_scene_create_private("FreeMix Calls auxiliary frame");if(!s.scene)return "Could not allocate private frame";
++ s.scene=obs_scene_create_private("3Mix Calls auxiliary frame");if(!s.scene)return "Could not allocate private frame";
+  {OBSDataAutoRelease settings=obs_source_get_private_settings(obs_scene_get_source(s.scene));obs_data_set_bool(settings,"freemix_call_video_return_private",true);}
+  obs_source_set_audio_mixers(obs_scene_get_source(s.scene),0);obs_source_set_monitoring_type(obs_scene_get_source(s.scene),OBS_MONITORING_TYPE_NONE);
+  auto *item=obs_scene_add(s.scene,s.source);if(!item)return "Could not frame video source";
+@@ -123,7 +123,7 @@ std::string Build(Session &s,bool (*isPrivate)(obs_source_t *)){
+  obs_sceneitem_set_alignment(item,OBS_ALIGN_CENTER);obs_sceneitem_set_pos(item,&position);obs_sceneitem_set_bounds_type(item,OBS_BOUNDS_SCALE_INNER);obs_sceneitem_set_bounds_alignment(item,OBS_ALIGN_CENTER);obs_sceneitem_set_bounds(item,&size);
+  info.output_width=Width;info.output_height=Height;info.output_format=VIDEO_FORMAT_BGRA;info.colorspace=VIDEO_CS_709;info.range=VIDEO_RANGE_FULL;info.gpu_conversion=false;
+  s.view=obs_view_create();if(!s.view)return "Could not create AUX view";obs_view_set_source(s.view,0,obs_scene_get_source(s.scene));s.video=obs_view_add2(s.view,&info);if(!s.video)return "AUX video context unavailable";
+- creating=&s;s.output=obs_output_create("freemix_calls_return_video","FreeMix Calls auxiliary video",nullptr,nullptr);creating=nullptr;if(!s.output)return "Raw AUX output unavailable";
++ creating=&s;s.output=obs_output_create("freemix_calls_return_video","3Mix Calls auxiliary video",nullptr,nullptr);creating=nullptr;if(!s.output)return "Raw AUX output unavailable";
+  obs_output_set_media(s.output,s.video,nullptr);
+  video_scale_info conversion{};conversion.format=VIDEO_FORMAT_RGBA;conversion.width=Width;conversion.height=Height;conversion.colorspace=VIDEO_CS_709;conversion.range=VIDEO_RANGE_FULL;obs_output_set_video_conversion(s.output,&conversion);
+  try{s.worker=std::thread([&s](){Worker(s);});}catch(...){obs_output_release(s.output);s.output=nullptr;return "Could not create bounded IPC worker";}
+diff --git a/frontend/widgets/FreeMixMixEffectManager.hpp b/frontend/widgets/FreeMixMixEffectManager.hpp
+index a16163e..88e9bb0 100644
+--- a/frontend/widgets/FreeMixMixEffectManager.hpp
++++ b/frontend/widgets/FreeMixMixEffectManager.hpp
+@@ -86,7 +86,7 @@ void ClearIndependentTransition(IndependentMix &mix)
+ // Shared with LoadIndependentMix, which needs the same name to re-adopt an
+ // existing proxy scene after a process restart instead of creating a new one
+ // (see the comment on EnsurePublicProxy below for why this matters).
+-std::string ProxyName(uint32_t mixId) { return std::string("FreeMix Mix ") + std::to_string(mixId) + " Output"; }
++std::string ProxyName(uint32_t mixId) { return std::string("3Mix Mix ") + std::to_string(mixId) + " Output"; }
+ // Audit finding A7: called back on the proxy scene's own "remove" signal (fires
+ // both for a direct removal and, more commonly, for every scene when the whole
+ // Scene Collection is torn down by ClearSceneData() during a collection
+@@ -169,7 +169,7 @@ OBSSourceAutoRelease FrameMixSource(IndependentMix &mix, obs_source_t *source)
+ 	if (!source || IsPrivateSource(source)) return nullptr;
+ 	const auto sw = obs_source_get_width(source), sh = obs_source_get_height(source);
+ 	if (!sw || !sh) return nullptr;
+-	const std::string frameName=std::string("FreeMix mix frame ")+obs_source_get_uuid(source);
++	const std::string frameName=std::string("3Mix mix frame ")+obs_source_get_uuid(source);
+ 	const bool moving=mix.transition&&std::string(obs_source_get_id(mix.transition))=="move_transition";
+ 	obs_scene_t *original=obs_scene_from_source(source);
+ 	obs_scene_t *scene = moving&&original?obs_scene_duplicate(original,frameName.c_str(),OBS_SCENE_DUP_PRIVATE_REFS):obs_scene_create_private(frameName.c_str());
+@@ -208,12 +208,12 @@ bool EnsureIndependentMix(IndependentMix &mix, uint32_t mixId)
+ {
+ 	if (mix.transition) {RefreshStingerTaps(mix);EnsurePublicProxy(mix,mixId);return true;}
+ 	if(mix.transitionUuid.empty()) {
+-		mix.transition = obs_source_create_private("fade_transition", "FreeMix Mix 2", nullptr);
++		mix.transition = obs_source_create_private("fade_transition", "3Mix Mix 2", nullptr);
+ 	} else if(mix.transitionUuid=="builtin:move_transition") {
+ 		OBSDataAutoRelease settings=obs_data_create();obs_data_set_bool(settings,"nested_scenes",true);
+ 		// Move matches shared sources and interpolates their geometry. This is
+ 		// the loaded plugin's actual transition, not a Fade renamed as Merge.
+-		mix.transition=obs_source_create_private("move_transition","FreeMix Merge",settings);
++		mix.transition=obs_source_create_private("move_transition","3Mix Merge",settings);
+ 	} else {
+ 		OBSSourceAutoRelease original=obs_get_source_by_uuid(mix.transitionUuid.c_str());
+ 		if(!original||obs_source_get_type(original)!=OBS_SOURCE_TYPE_TRANSITION||IsPrivateSource(original))return false;
+@@ -222,7 +222,7 @@ bool EnsureIndependentMix(IndependentMix &mix, uint32_t mixId)
+ 		if(stinger)obs_data_set_int(settings,"audio_monitoring",OBS_MONITORING_TYPE_NONE);
+ 		// Copy the actual transition and its settings; never change the main
+ 		// transition's source, timing or media playback for the independent mix.
+-		mix.transition=obs_source_create_private(obs_source_get_id(original),"FreeMix Mix 2",settings);
++		mix.transition=obs_source_create_private(obs_source_get_id(original),"3Mix Mix 2",settings);
+ 		if(stinger&&mix.transition) {
+ 			// The independent output takes its chosen bus. A cloned Stinger's
+ 			// private media must not inject its sound into the operator's Master.
+diff --git a/frontend/widgets/FreeMixMultistream.cpp b/frontend/widgets/FreeMixMultistream.cpp
+index 68ffc2c..75b90ec 100644
+--- a/frontend/widgets/FreeMixMultistream.cpp
++++ b/frontend/widgets/FreeMixMultistream.cpp
+@@ -201,7 +201,7 @@ void RequestNetworkOutput(obs_data_t *request, obs_data_t *response, void *)
+   }
+   const bool omtSdk=protocol=="OMT"&&networkOmtSdkAvailable;const bool ndiSdk=protocol=="NDI"&&networkNdiSdkAvailable;
+   const char *type=protocol=="NDI"?(requestedFillKey?"freemix_ndi_output":"ndi_output"):protocol=="OMT"?(senderId>0||!requestedName.empty()||requestedFillKey||precision==16?"freemix_omt_output":"omtoutput"):nullptr;
+-  const std::string outputName="FreeMix "+protocol+(senderId==0?" Main Output":" Sender "+std::to_string(senderId+1));std::string error;
++  const std::string outputName="3Mix "+protocol+(senderId==0?" Main Output":" Sender "+std::to_string(senderId+1));std::string error;
+   const std::string senderKey=protocol+":"+std::to_string(senderId);
+   const bool available=type&&OutputLoaded(type)&&(std::string(type)!="freemix_omt_output"||omtSdk);
+   obs_data_set_bool(response,"available",available);obs_data_set_string(response,"outputName",outputName.c_str());
+@@ -840,7 +840,7 @@ bool UpdateOutputOverlay(Destination &d, uint32_t channel, obs_source_t *overlay
+ 	if(!overlay)return true;
+ 	const uint32_t sw=obs_source_get_width(overlay),sh=obs_source_get_height(overlay);
+ 	if(!sw||!sh)return true;
+-	obs_scene_t *frame=obs_scene_create_private("FreeMix output overlay frame");
++	obs_scene_t *frame=obs_scene_create_private("3Mix output overlay frame");
+ 	OBSDataAutoRelease settings=obs_source_get_settings(obs_scene_get_source(frame));
+ 	obs_data_set_bool(settings,"custom_size",true);obs_data_set_int(settings,"cx",d.width);obs_data_set_int(settings,"cy",d.height);
+ 	obs_source_load(obs_scene_get_source(frame));
+@@ -1382,13 +1382,13 @@ void RequestFinishInputPanel(obs_data_t *request, obs_data_t *response, void *)
+   const QPointer<OBSBasic> owner = main;
+   QTimer::singleShot(0, main, [owner, panel, editor, source]() {
+    if (!owner || owner->isClosing() || frontendClosing || !panel) return;
+-   if (!panel->close()) { blog(LOG_WARNING,"FreeMix input handoff: panel refused close; input preserved"); return; }
++   if (!panel->close()) { blog(LOG_WARNING,"3Mix input handoff: panel refused close; input preserved"); return; }
+    if (editor.empty()) return;
+    // Wait for the existing cooperative CEF destructor, including its nested Qt event loops.
+    auto *timer = new QTimer(owner);
+    timer->setInterval(25);
+    QObject::connect(timer, &QTimer::timeout, owner, [owner, panel, editor, source, timer, tries=0]() mutable {
+-    if (!owner || owner->isClosing() || frontendClosing || ++tries > 160 || obs_source_removed(source)) { blog(LOG_WARNING,"FreeMix input handoff cancelled or timed out; input preserved"); timer->stop(); timer->deleteLater(); return; }
++    if (!owner || owner->isClosing() || frontendClosing || ++tries > 160 || obs_source_removed(source)) { blog(LOG_WARNING,"3Mix input handoff cancelled or timed out; input preserved"); timer->stop(); timer->deleteLater(); return; }
+     if (panel || panelDeletionDepth) return;
+     timer->stop(); timer->deleteLater();
+     if (editor == "properties") owner->CreatePropertiesWindow(source);
+@@ -1572,7 +1572,7 @@ void ApplyTalkback(bool on)
+  OBSSourceAutoRelease source = obs_get_source_by_uuid(directorUuid.c_str());
+  if (!source) { talkLease.clear(); return; }
+  // B is the private return. It must never feed Master (track 4) or its recorded output (track 1).
+- OBSSourceAutoRelease returnBus = obs_get_source_by_name("FreeMix Bus B");
++ OBSSourceAutoRelease returnBus = obs_get_source_by_name("3Mix Bus B");
+  if (returnBus) obs_source_set_audio_mixers(returnBus, 1u << 2);
+  obs_source_set_audio_mixers(source, on && !isolatedTalk ? (1u << 5) : 0u);
+  obs_source_set_monitoring_type(source, OBS_MONITORING_TYPE_NONE);
+@@ -1843,7 +1843,7 @@ bool FreeMixMultistreamDrainSrtHdr(unsigned timeoutMs)
+  const unsigned remaining=elapsed>=timeoutMs?0:timeoutMs-unsigned(elapsed);
+  const bool completed=callsDone&&freemix_srt_hdr::Drain(remaining);
+  frontendClosing=wasClosing;frontendDrainActive=false;
+- if(!completed){if(!wasClosing&&talkTimer)talkTimer->start(100);blog(LOG_WARNING,"FreeMix network drain timed out: resources retained; context change/close refused");}
++ if(!completed){if(!wasClosing&&talkTimer)talkTimer->start(100);blog(LOG_WARNING,"3Mix network drain timed out: resources retained; context change/close refused");}
+  return completed;
+ }
+ 
+diff --git a/frontend/widgets/FreeMixNdiOutput.hpp b/frontend/widgets/FreeMixNdiOutput.hpp
+index a3170b5..9a42b0e 100644
+--- a/frontend/widgets/FreeMixNdiOutput.hpp
++++ b/frontend/widgets/FreeMixNdiOutput.hpp
+@@ -49,7 +49,7 @@ struct Sender {
+ inline bool Available(){return Api().Ready();}
+ inline int Connections(obs_output_t *output){if(!output||std::string(obs_output_get_id(output))!="freemix_ndi_output")return -1;std::lock_guard<std::mutex> lock(RegistryMutex());const auto found=Registry().find(output);return found!=Registry().end()?found->second->Connections():-1;}
+ inline void Register(){
+- static bool registered=false;if(registered)return;registered=true;obs_output_info info={};info.id="freemix_ndi_output";info.flags=OBS_OUTPUT_AV;info.get_name=[](void *){return "FreeMix NDI SDK (independent sender)";};
++ static bool registered=false;if(registered)return;registered=true;obs_output_info info={};info.id="freemix_ndi_output";info.flags=OBS_OUTPUT_AV;info.get_name=[](void *){return "3Mix NDI SDK (independent sender)";};
+  info.create=[](obs_data_t *settings,obs_output_t *output)->void *{auto *s=new Sender();s->output=output;s->name=obs_data_get_string(settings,"ndi_name");s->groups=obs_data_get_string(settings,"ndi_groups");s->keyName=obs_data_get_string(settings,"key_name");s->fillKey=obs_data_get_bool(settings,"fill_key");s->alpha=obs_data_get_bool(settings,"alpha");{std::lock_guard<std::mutex> lock(RegistryMutex());Registry()[output]=s;}return s;};
+  info.destroy=[](void *data){auto *s=static_cast<Sender *>(data);{std::lock_guard<std::mutex> lock(RegistryMutex());Registry().erase(s->output);}{std::lock_guard<std::mutex> lock(s->mutex);s->DestroySenders();}delete s;};
+  info.update=[](void *data,obs_data_t *settings){auto *s=static_cast<Sender *>(data);if(obs_output_active(s->output))return;s->name=obs_data_get_string(settings,"ndi_name");s->groups=obs_data_get_string(settings,"ndi_groups");s->keyName=obs_data_get_string(settings,"key_name");s->fillKey=obs_data_get_bool(settings,"fill_key");s->alpha=obs_data_get_bool(settings,"alpha");};
+diff --git a/frontend/widgets/FreeMixOmtHdrOutput.hpp b/frontend/widgets/FreeMixOmtHdrOutput.hpp
+index b3756fa..7ae5aaf 100644
+--- a/frontend/widgets/FreeMixOmtHdrOutput.hpp
++++ b/frontend/widgets/FreeMixOmtHdrOutput.hpp
+@@ -43,7 +43,7 @@ struct Sender {
+  uint64_t Bytes(){std::lock_guard<std::mutex> lock(mutex);return bytes;}
+ };
+ inline void Register(){
+- static bool registered=false;if(registered)return;registered=true;obs_output_info info={};info.id="freemix_omt_hdr_output";info.flags=OBS_OUTPUT_AV;info.get_name=[](void *){return "FreeMix OMT HDR (manual PQ/HLG receiver)";};
++ static bool registered=false;if(registered)return;registered=true;obs_output_info info={};info.id="freemix_omt_hdr_output";info.flags=OBS_OUTPUT_AV;info.get_name=[](void *){return "3Mix OMT HDR (manual PQ/HLG receiver)";};
+  info.create=[](obs_data_t *settings,obs_output_t *output)->void *{auto *s=new Sender();s->output=output;s->name=obs_data_get_string(settings,"name");s->transfer=obs_data_get_string(settings,"transfer");return s;};
+  info.destroy=[](void *data){auto *s=static_cast<Sender *>(data);{std::lock_guard<std::mutex> lock(s->mutex);s->Destroy();}delete s;};
+  info.start=[](void *data){return static_cast<Sender *>(data)->Start();};info.stop=[](void *data,uint64_t){static_cast<Sender *>(data)->Stop();};info.raw_video=[](void *data,video_data *v){static_cast<Sender *>(data)->Video(v);};info.raw_audio=[](void *data,audio_data *a){static_cast<Sender *>(data)->Audio(a);};info.get_total_bytes=[](void *data){return static_cast<Sender *>(data)->Bytes();};obs_register_output(&info);
+@@ -116,9 +116,9 @@ inline void Request(obs_data_t *request,obs_data_t *response,bool (*isPrivate)(o
+       if(!video)error="Native HDR P216 view unavailable";
+       else{
+        const std::string audioUuid=obs_data_get_string(config,"audioSourceUuid");
+-       if(!audioUuid.empty())slot.audio=FreeMixSourceAudio::Open(audioUuid,"FreeMix OMT HDR PCM",error);
++       if(!audioUuid.empty())slot.audio=FreeMixSourceAudio::Open(audioUuid,"3Mix OMT HDR PCM",error);
+        if(error.empty()){
+-        slot.output=obs_output_create("freemix_omt_hdr_output",("FreeMix OMT HDR "+std::to_string(id+1)).c_str(),config,nullptr);
++        slot.output=obs_output_create("freemix_omt_hdr_output",("3Mix OMT HDR "+std::to_string(id+1)).c_str(),config,nullptr);
+         if(!slot.output)error="HDR output unavailable";
+         else{
+          obs_output_set_media(slot.output,video,slot.audio?slot.audio->Audio():obs_get_audio());
+diff --git a/frontend/widgets/FreeMixOmtOutput.hpp b/frontend/widgets/FreeMixOmtOutput.hpp
+index 12f024e..186c01b 100644
+--- a/frontend/widgets/FreeMixOmtOutput.hpp
++++ b/frontend/widgets/FreeMixOmtOutput.hpp
+@@ -54,7 +54,7 @@ struct Sender {
+ inline bool Available(){return Api().Ready();}
+ inline int Connections(obs_output_t *output){if(!output||std::string(obs_output_get_id(output))!="freemix_omt_output")return -1;std::lock_guard<std::mutex> lock(RegistryMutex());const auto found=Registry().find(output);return found!=Registry().end()?found->second->Connections():-1;}
+ inline void Register(){
+- static bool registered=false;if(registered)return;registered=true;obs_output_info info={};info.id="freemix_omt_output";info.flags=OBS_OUTPUT_AV;info.get_name=[](void *){return "FreeMix OMT SDK (independent sender)";};
++ static bool registered=false;if(registered)return;registered=true;obs_output_info info={};info.id="freemix_omt_output";info.flags=OBS_OUTPUT_AV;info.get_name=[](void *){return "3Mix OMT SDK (independent sender)";};
+  info.create=[](obs_data_t *settings,obs_output_t *output)->void *{auto *s=new Sender();s->output=output;s->name=obs_data_get_string(settings,"name");s->keyName=obs_data_get_string(settings,"key_name");s->fillKey=obs_data_get_bool(settings,"fill_key");s->alpha=obs_data_get_bool(settings,"alpha");s->sourceUuid=obs_data_get_string(settings,"source_uuid");s->precisionBits=int(obs_data_get_int(settings,"precision_bits"));if(s->precisionBits!=16)s->precisionBits=8;{std::lock_guard<std::mutex> lock(RegistryMutex());Registry()[output]=s;}return s;};
+  info.destroy=[](void *data){auto *s=static_cast<Sender *>(data);{std::lock_guard<std::mutex> lock(RegistryMutex());Registry().erase(s->output);}{std::lock_guard<std::mutex> lock(s->mutex);s->DestroySenders();}s->precise.reset();delete s;};
+  info.update=[](void *data,obs_data_t *settings){auto *s=static_cast<Sender *>(data);if(obs_output_active(s->output))return;s->name=obs_data_get_string(settings,"name");s->keyName=obs_data_get_string(settings,"key_name");s->fillKey=obs_data_get_bool(settings,"fill_key");s->alpha=obs_data_get_bool(settings,"alpha");s->sourceUuid=obs_data_get_string(settings,"source_uuid");s->precisionBits=int(obs_data_get_int(settings,"precision_bits"));if(s->precisionBits!=16)s->precisionBits=8;};
+diff --git a/frontend/widgets/FreeMixScope.cpp b/frontend/widgets/FreeMixScope.cpp
+index 6e28b0e..3e4405b 100644
+--- a/frontend/widgets/FreeMixScope.cpp
++++ b/frontend/widgets/FreeMixScope.cpp
+@@ -108,7 +108,7 @@ void OBSBasic::SetScopeMode(int mode, bool withPreview)
+ 				obs_data_set_int(settings, "display", choice.display);
+ 				obs_data_set_int(settings, "components", choice.components);
+ 			}
+-			created = obs_source_create_private(id, "FreeMix Scope", settings);
++			created = obs_source_create_private(id, "3Mix Scope", settings);
+ 		}
+ 		if (!created) {
+ 			mode = 0;
+diff --git a/frontend/widgets/FreeMixSdiOutput.hpp b/frontend/widgets/FreeMixSdiOutput.hpp
+index 813ae45..170ebdd 100644
+--- a/frontend/widgets/FreeMixSdiOutput.hpp
++++ b/frontend/widgets/FreeMixSdiOutput.hpp
+@@ -52,12 +52,12 @@ inline void Request(obs_data_t *request,obs_data_t *response,bool (*isPrivate)(o
+      info.base_width=info.output_width=obs_source_get_width(source);info.base_height=info.output_height=obs_source_get_height(source);info.output_format=VIDEO_FORMAT_BGRA;info.colorspace=VIDEO_CS_709;info.range=VIDEO_RANGE_FULL;
+      if(hdr){info.output_width=uint32_t(obs_data_get_int(hdrProof,"width"));info.output_height=uint32_t(obs_data_get_int(hdrProof,"height"));info.fps_num=uint32_t(obs_data_get_int(hdrProof,"fpsNum"));info.fps_den=uint32_t(obs_data_get_int(hdrProof,"fpsDen"));info.output_format=VIDEO_FORMAT_P416;info.colorspace=std::string(obs_data_get_string(config,"hdrTransfer"))=="hlg"?VIDEO_CS_2100_HLG:VIDEO_CS_2100_PQ;info.range=VIDEO_RANGE_PARTIAL;}
+      if(!info.base_width||!info.base_height||info.base_width>7680||info.base_height>4320)error="Dimensões SDI inválidas";
+-     else{obs_source_t *renderSource=source.Get();if(!hdr){Scene()=obs_scene_create_private("FreeMix SDI scene");if(!obs_scene_add(Scene(),source))error="Não foi possível criar cena SDI";else renderSource=obs_scene_get_source(Scene());}
++     else{obs_source_t *renderSource=source.Get();if(!hdr){Scene()=obs_scene_create_private("3Mix SDI scene");if(!obs_scene_add(Scene(),source))error="Não foi possível criar cena SDI";else renderSource=obs_scene_get_source(Scene());}
+       if(error.empty()){View()=obs_view_create();if(!View())error="View SDI indisponível";else{obs_view_set_source(View(),0,renderSource);video=obs_view_add2(View(),&info);if(!video)error="View SDI indisponível";}}
+      }
+     }}
+-    if(error.empty()&&!audioUuid.empty())Audio()=FreeMixSourceAudio::Open(audioUuid,"FreeMix SDI PCM",error);
+-    if(error.empty()){Output()=obs_output_create("decklink_output","FreeMix SDI Output",settings,nullptr);if(!Output())error="Plugin DeckLink indisponível";else{obs_output_set_media(Output(),video,Audio()?Audio()->Audio():obs_get_audio());obs_output_set_mixers(Output(),Audio()?1ULL:1ULL<<uint32_t(obs_data_get_int(config,"audioTrack")));if(!obs_output_start(Output()))error="Driver não iniciou SDI; confira dispositivo e modo/FPS";}}
++    if(error.empty()&&!audioUuid.empty())Audio()=FreeMixSourceAudio::Open(audioUuid,"3Mix SDI PCM",error);
++    if(error.empty()){Output()=obs_output_create("decklink_output","3Mix SDI Output",settings,nullptr);if(!Output())error="Plugin DeckLink indisponível";else{obs_output_set_media(Output(),video,Audio()?Audio()->Audio():obs_get_audio());obs_output_set_mixers(Output(),Audio()?1ULL:1ULL<<uint32_t(obs_data_get_int(config,"audioTrack")));if(!obs_output_start(Output()))error="Driver não iniciou SDI; confira dispositivo e modo/FPS";}}
+     if(!error.empty())Stop();
+    }
+   }
+diff --git a/frontend/widgets/FreeMixSrtAlpha.hpp b/frontend/widgets/FreeMixSrtAlpha.hpp
+index b00e65b..e950adb 100644
+--- a/frontend/widgets/FreeMixSrtAlpha.hpp
++++ b/frontend/widgets/FreeMixSrtAlpha.hpp
+@@ -40,7 +40,7 @@ inline void *Allocate(obs_data_t *settings,obs_source_t *owner){
+  p->mode=obs_data_get_string(settings,"mode");if(p->mode.empty())p->mode="packed";
+  if(p->mode!="packed"&&p->mode!="fill"&&p->mode!="key")return nullptr;
+  if(!p->width||p->width>(p->mode=="packed"?1920u:3840u)||!p->height||p->height>3840||p->width%2||p->height%2)return nullptr;
+- obs_enter_graphics();p->texture=gs_texrender_create(GS_RGBA,GS_ZS_NONE);char *error=nullptr;p->effect=gs_effect_create(EffectCode(),"FreeMix SRT packed alpha",&error);if(error){blog(LOG_ERROR,"FreeMix SRT alpha shader: %s",error);bfree(error);}obs_leave_graphics();
++ obs_enter_graphics();p->texture=gs_texrender_create(GS_RGBA,GS_ZS_NONE);char *error=nullptr;p->effect=gs_effect_create(EffectCode(),"3Mix SRT packed alpha",&error);if(error){blog(LOG_ERROR,"3Mix SRT alpha shader: %s",error);bfree(error);}obs_leave_graphics();
+  if(!p->texture||!p->effect)return nullptr;return p.release();
+ }
+ inline void Draw(void *data,gs_effect_t *){
+@@ -75,7 +75,7 @@ inline void Register(){
+ inline obs_source_t *Create(obs_source_t *source,uint32_t width,uint32_t height,const std::string &mode="packed"){
+  if(!source)return nullptr;Register();OBSDataAutoRelease settings=obs_data_create();obs_data_set_int(settings,"width",width);obs_data_set_int(settings,"height",height);
+  obs_data_set_string(settings,"mode",mode.c_str());
+- obs_source_t *packed=obs_source_create_private("freemix_srt_alpha_pack","FreeMix SRT packed alpha",settings);
++ obs_source_t *packed=obs_source_create_private("freemix_srt_alpha_pack","3Mix SRT packed alpha",settings);
+  if(packed){auto *context=static_cast<Packed *>(obs_obj_get_data(packed));if(!context){obs_source_release(packed);return nullptr;}context->source=obs_source_get_ref(source);}
+  return packed;
+ }
+diff --git a/frontend/widgets/FreeMixSrtHdrOutput.hpp b/frontend/widgets/FreeMixSrtHdrOutput.hpp
+index 9a398f1..d2d08e4 100644
+--- a/frontend/widgets/FreeMixSrtHdrOutput.hpp
++++ b/frontend/widgets/FreeMixSrtHdrOutput.hpp
+@@ -158,7 +158,7 @@ inline std::string Start(Slot &slot,obs_data_t *config,int id,bool (*isPrivate)(
+  info.output_format=VIDEO_FORMAT_P010;info.colorspace=VIDEO_CS_2100_PQ;info.range=VIDEO_RANGE_PARTIAL;
+  slot.view=obs_view_create();if(!slot.view)return "HDR view unavailable";obs_view_set_source(slot.view,0,slot.source);
+  auto *video=obs_view_add2(slot.view,&info);if(!video)return "Native 10-bit HDR P010 view unavailable";
+- const std::string name="FreeMix SRT HDR "+std::to_string(id+1),url=Url(config),encoder=obs_data_get_string(config,"encoder");
++ const std::string name="3Mix SRT HDR "+std::to_string(id+1),url=Url(config),encoder=obs_data_get_string(config,"encoder");
+  OBSDataAutoRelease serviceSettings=obs_data_create();obs_data_set_string(serviceSettings,"server",url.c_str());obs_data_set_string(serviceSettings,"key","");
+  slot.service=obs_service_create("rtmp_custom",(name+" service").c_str(),serviceSettings,nullptr);
+  if(!slot.service)return "SRT service unavailable";
+-- 
+2.56.0.windows.1
+

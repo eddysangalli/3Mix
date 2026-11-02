@@ -714,8 +714,8 @@ static int run_program(fstream &logFile, int argc, char *argv[])
 #ifdef _WIN32
 
 #define CRASH_MESSAGE                                                      \
-	"FreeMix has crashed!\n\nWould you like to copy the crash log " \
-	"to the clipboard? The crash log will still be saved to:\n\n%s"
+	"3Mix encontrou um erro!\n\nDeseja copiar o relatório para a área de transferência? " \
+	"O relatório também será salvo em:\n\n%s"
 
 static void main_crash_handler(const char *format, va_list args, void * /* param */)
 {
@@ -761,7 +761,7 @@ static void main_crash_handler(const char *format, va_list args, void * /* param
 
 	string finalMessage = string(message_buffer.get(), message_buffer.get() + size);
 
-	int ret = MessageBoxA(NULL, finalMessage.c_str(), "FreeMix has crashed!", MB_YESNO | MB_ICONERROR | MB_TASKMODAL);
+	int ret = MessageBoxA(NULL, finalMessage.c_str(), "3Mix encontrou um erro", MB_YESNO | MB_ICONERROR | MB_TASKMODAL);
 
 	if (ret == IDYES) {
 		size_t len = strlen(text);
@@ -820,7 +820,7 @@ static inline bool arg_is(const char *arg, const char *long_form, const char *sh
 
 #ifdef _WIN32
 static constexpr char vcRunErrorTitle[] = "Outdated Visual C++ Runtime";
-static constexpr char vcRunErrorMsg[] = "FreeMix Studio requires a newer version of the Microsoft Visual C++ "
+static constexpr char vcRunErrorMsg[] = "3Mix Studio requires a newer version of the Microsoft Visual C++ "
 					"Redistributables.\n\nYou will now be directed to the download page.";
 static constexpr char vcRunInstallerUrl[] = "https://obsproject.com/visual-studio-2022-runtimes";
 
@@ -1064,7 +1064,7 @@ int main(int argc, char *argv[])
 			exit(0);
 
 		} else if (arg_is(argv[i], "--version", "-V")) {
-			std::cout << "FreeMix Studio - " << App()->GetVersionString(false) << "\n";
+			std::cout << "3Mix Studio - " << App()->GetVersionString(false) << "\n";
 			exit(0);
 		}
 	}

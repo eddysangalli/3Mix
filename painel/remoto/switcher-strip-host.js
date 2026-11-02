@@ -1,14 +1,18 @@
-import './switcher-strip.js?v=20261102d';
+(() => {
 const host=window.ThreeMixStripHost;
 // A Strip só aparece quando o backend Multi-M/E responde. Sem isso, o botão
 // ficaria visível e quebrado em runtimes que ainda não têm o pacote de M/E.
 async function start(){
  // A superfície mora na aba M/E da mesa, ao lado de Fontes.
  const container=document.getElementById('me-surface');if(!container)return;
+ const barra=document.createElement('div');barra.className='me-barra';container.append(barra);
+ const todos=document.createElement('button');todos.type='button';barra.append(todos);
+ const pintarTodos=()=>{todos.textContent=localStorage.getItem('3mix.me.monitores')==='0'?'Ligar todos os monitores':'Desligar todos os monitores';};pintarTodos();
+ if(window.ThreeMixMeOpenWindow){const janela=document.createElement('button');janela.type='button';janela.textContent='Abrir em janela';janela.title='Abre os M/Es numa janela separada';janela.onclick=()=>window.ThreeMixMeOpenWindow();barra.append(janela);}
  const surface=document.createElement('div');surface.className='me-strips';container.append(surface);
  document.body.classList.add('has-me');
- let meTarget=1,lastMixes=[];
- const visible=()=>document.body.classList.contains('me-on')||meTarget!==1;
+ let lastMixes=[];
+ const visible=()=>document.body.classList.contains('me-on')||!!window.ThreeMixBanksUseMe?.();
  const nameOf=uuid=>window.FreeMixProductionState?.inputs?.find(i=>i.key===uuid)?.name||'';
  const pending=new Map();let scope='',polling=false;
  async function request(path,data){const response=await fetch(new URL(path,host.apiBase),{...(data?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}:{}),signal:AbortSignal.timeout(15000)});const result=await response.json();if(!response.ok||!result.success)throw Error(result.error||'Motor não confirmou');return result;}
@@ -41,8 +45,10 @@ async function start(){
    await request('control',{action:'mix_audio_set',mixId,bus});
    await refresh();
   };
+  strip.onSurfaceChange=()=>{if(strip.storageKey)localStorage.setItem(strip.storageKey,JSON.stringify(strip.surface));};
   return strip;
  });
+ todos.onclick=()=>{const ligar=localStorage.getItem('3mix.me.monitores')==='0';localStorage.setItem('3mix.me.monitores',ligar?'1':'0');pintarTodos();strips.forEach(strip=>strip.setMonitors(ligar));};
  const check=document.createElement('button');check.textContent='Conferir motor';check.onclick=async()=>{
   try{for(const [mixId,operation]of pending){const result=await request('mix-effects/check',operation);if(result.operation?.stage==='confirmed')pending.delete(mixId);}await refresh();}catch(error){check.title=error.message;}
  };container.append(check);
@@ -59,7 +65,7 @@ async function start(){
  const patchStatus=document.createElement('span');patchStatus.setAttribute('role','status');
  patchBox.append(patchLabel,patchInput,document.createTextNode(' ← '),patchSignal,patchButton,patchStatus);container.append(patchBox);
  function fillPatchSelects(state){
-  const options=(state?.inputs||[]).filter(i=>!i.composition).map(i=>'<option value="'+i.key+'">'+(i.number||'')+' '+String(i.name).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+'</option>').join('');
+  const options=(state?.inputs||[]).filter(i=>!i.composition&&!/^PGM M\/E \d+$/.test(i.name)).map(i=>'<option value="'+i.key+'">'+(i.number||'')+' '+String(i.name).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+'</option>').join('');
   const allOptions=(state?.inputs||[]).map(i=>'<option value="'+i.key+'">'+(i.number||'')+' '+String(i.name).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+(i.composition?' (Composition)':'')+'</option>').join('');
   if(patchInput.dataset.sig!==options){patchInput.dataset.sig=options;const old=patchInput.value;patchInput.innerHTML=options;if([...patchInput.options].some(o=>o.value===old))patchInput.value=old;}
   if(patchSignal.dataset.sig!==allOptions){patchSignal.dataset.sig=allOptions;const old=patchSignal.value;patchSignal.innerHTML=allOptions;if([...patchSignal.options].some(o=>o.value===old))patchSignal.value=old;}
@@ -71,14 +77,6 @@ async function start(){
   catch(error){patchStatus.textContent=error.message;}
   finally{patchButton.disabled=false;}
  };
- function fillPatchSignals(mixes){
-  const rows=mixes.filter(m=>m.proxyUuid);
-  const sig=rows.map(m=>m.mixId+':'+m.proxyUuid).join();
-  if(patchSignal.dataset.me===sig&&[...patchSignal.options].some(o=>o.dataset.me))return;
-  patchSignal.dataset.me=sig;
-  for(const o of [...patchSignal.options])if(o.dataset.me)o.remove();
-  for(const m of rows){const o=new Option('Saída do M/E '+m.mixId,m.proxyUuid);o.dataset.me='1';patchSignal.add(o);}
- }
  async function refresh(){
   if(polling||!visible())return;polling=true;
   try{const state=window.FreeMixProductionState;if(!state?.connected)return;scope=state.preset;const requestedScope=scope;
@@ -96,38 +94,28 @@ async function start(){
    // o mixId:index+1 (1/2/3/4) setado na criação das Strips -- as "4 Strips fixas, Delegate inicial 1/2/3/4"
    // do comentário acima nunca funcionava numa sessão nova: as 4 nasciam em MAIN. O default agora é
    // index+1, igual à criação; localStorage com um mixId válido salvo continua podendo sobrescrever.
-   strips.forEach((strip,index)=>{const storageKey='3mix.strip.'+scope+'.'+index;if(strip.storageKey!==storageKey){strip.storageKey=storageKey;strip.surface={mixId:index+1,page:0,size:16,category:''};try{const saved=JSON.parse(localStorage.getItem(storageKey));if(saved&&[1,2,3,4].includes(saved.mixId)&&Number.isInteger(saved.page)&&saved.page>=0)strip.surface={...strip.surface,mixId:saved.mixId,page:saved.page};}catch{}}strip.update(snapshot);localStorage.setItem(storageKey,JSON.stringify(strip.surface));});
-   lastMixes=native.mixes||[];if(meTarget!==1)window.ThreeMixRepaintBanks?.();
-   fillPatchSignals(lastMixes);
+   strips.forEach((strip,index)=>{const storageKey='3mix.strip.'+scope+'.'+index;if(strip.storageKey!==storageKey){strip.storageKey=storageKey;strip.surface={mixId:index+1,page:0,size:16,category:'',monitors:localStorage.getItem('3mix.me.monitores')!=='0'};try{const saved=JSON.parse(localStorage.getItem(storageKey));if(saved&&[1,2,3,4].includes(saved.mixId)&&Number.isInteger(saved.page)&&saved.page>=0)strip.surface={...strip.surface,mixId:saved.mixId,page:saved.page,monitors:saved.monitors!==false};}catch{}}strip.update(snapshot);localStorage.setItem(storageKey,JSON.stringify(strip.surface));});
+   lastMixes=native.mixes||[];window.ThreeMixRepaintBanks?.();
    check.textContent=pending.size?'Conferir motor ('+pending.size+')':'Conferir motor';
    fillPatchSelects(state);
   }catch(error){check.title=error.message;}finally{polling=false;}
  }
  setInterval(refresh,1000);
  setInterval(()=>{if(document.body.classList.contains('me-on'))strips.forEach(strip=>strip.refreshFrames());},2000);
- // Botoeiras do topo: sempre abrem no MAIN; o M/E escolhido não fica salvo, para nunca cortar no lugar errado depois de reabrir.
- function paintDelegate(){
-  document.body.classList.toggle('bank-on-me',meTarget!==1);
-  const bar=document.querySelector('#bank-pv .bank-me');
-  if(bar&&!bar.children.length)bar.innerHTML=[1,2,3,4].map(id=>'<button type="button" class="bank-me-b" data-a="bank_me" data-v="'+id+'" title="'+(id===1?'Botoeiras no M/E principal':'Botoeiras no M/E '+id)+'">'+(id===1?'MAIN':'M/E '+id)+'</button>').join('');
-  for(const button of document.querySelectorAll('.bank-me-b'))button.classList.toggle('on',Number(button.dataset.v)===meTarget);
-  const tag=document.querySelector('#bank-pgm .bank-me-tag');if(tag)tag.textContent=meTarget===1?'':'M/E '+meTarget;
- }
+ // Botoeiras da mesa: cada uma diz qual M/E e qual barramento controla.
  window.ThreeMixME={
-  get target(){return meTarget;},
-  select(id){meTarget=id;paintDelegate();refresh().finally(()=>window.ThreeMixRepaintBanks?.());window.ThreeMixRepaintBanks?.();},
-  selectedName(side){const mix=lastMixes.find(m=>m.mixId===meTarget);return nameOf(side==='pv'?mix?.previewUuid:mix?.programUuid);},
-  async pick(side,name){
+  selectedName(side,mixId){const mix=lastMixes.find(m=>m.mixId===mixId);return nameOf(side==='pv'?mix?.previewUuid:mix?.programUuid);},
+  async pick(side,name,mixId){
    const key=window.FreeMixProductionState?.inputs?.find(i=>i.name===name)?.key;
    if(!key)throw Error('Entrada não encontrada: '+name);
-   const mixId=meTarget;
    await meOperation(mixId,'preview',key);
    if(side==='pgm')await meOperation(mixId,'cut');
    window.ThreeMixRepaintBanks?.();
   },
   tick(){refresh();strips.forEach(strip=>strip.refreshFrames());},
  };
- paintDelegate();
+ document.body.classList.add('has-me');
+ window.ThreeMixRepaintBanks?.();
 }
 // window.ThreeMixMixEffectsAvailable, se já estiver definida por outra parte do runtime, evita a sondagem
 // abaixo. Sem ela (o caso comum: nada mais no projeto define essa flag hoje), a disponibilidade real do
@@ -138,11 +126,16 @@ if(host&&!new URLSearchParams(location.search).has('pop')){
  (async()=>{
   if(window.ThreeMixMixEffectsAvailable===true){start();return;}
   if(window.ThreeMixMixEffectsAvailable===false)return;
-  try{
-   const response=await fetch(new URL('mix-effects',host.apiBase),{signal:AbortSignal.timeout(4000)});
-   const result=await response.json().catch(()=>null);
-   window.ThreeMixMixEffectsAvailable=response.ok&&result?.success===true;
-  }catch{window.ThreeMixMixEffectsAvailable=false;}
-  if(window.ThreeMixMixEffectsAvailable)start();
+  // Só 404 quer dizer que este runtime não tem M/E. Sem resposta ou erro é motor ainda subindo: tenta de novo.
+  for(;;){
+   try{
+    const response=await fetch(new URL('mix-effects',host.apiBase),{signal:AbortSignal.timeout(4000)});
+    const result=await response.json().catch(()=>null);
+    if(response.ok&&result?.success===true){window.ThreeMixMixEffectsAvailable=true;start();return;}
+    if(response.status===404){window.ThreeMixMixEffectsAvailable=false;return;}
+   }catch{}
+   await new Promise(done=>setTimeout(done,2000));
+  }
  })();
 }
+})();

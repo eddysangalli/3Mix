@@ -165,7 +165,7 @@ async function vmix(fn,p){
   }else throw new Error('Comando não implementado: '+fn);
   await production.run(action,data);
 }
-const routes={'/novo-projeto/':'novo-projeto/index','/':'hub','/hub':'hub','/corte':'corte','/playout':'playout','/playout-monitor':'playout-monitor','/gc-html':'gc-html','/gc':'gc','/audio':'audio','/replay':'replay','/iso':'iso','/multicorder':'multicorder','/dados':'dados','/compor':'compor','/settings':'settings','/configuracoes':'configuracoes','/calls':'calls','/macros':'macros','/recuperacao':'recuperacao','/saidas':'saidas','/externo':'externo','/gravar':'gravar','/transmitir':'transmitir','/srt-hdr':'srt-hdr','/rede':'rede','/atalhos':'atalhos','/efeitos':'efeitos','/sinais':'sinais','/atualizacao':'atualizacao','/diagnosticos':'diagnosticos','/overlays':'overlays','/multiview':'multiview','/aux':'aux-router','/central-saidas':'central-saidas','/patch':'patch-registry','/primeira-transmissao':'checklist-primeira-transmissao','/rundown':'rundown','/retornos':'retornos','/blackbox':'blackbox','/preflight':'preflight','/modular':'modular','/modulos':'modulos','/ptz':'ptz','/color':'color'};
+const routes={'/novo-projeto/':'novo-projeto/index','/':'hub','/hub':'hub','/corte':'corte','/playout':'playout','/playout-monitor':'playout-monitor','/gc-html':'gc-html','/gc':'gc','/audio':'audio','/replay':'replay','/iso':'iso','/multicorder':'multicorder','/dados':'dados','/compor':'compor','/settings':'settings','/configuracoes':'configuracoes','/calls':'calls','/macros':'macros','/recuperacao':'recuperacao','/saidas':'saidas','/externo':'externo','/gravar':'gravar','/transmitir':'transmitir','/srt-hdr':'srt-hdr','/rede':'rede','/atalhos':'atalhos','/efeitos':'efeitos','/sinais':'sinais','/atualizacao':'atualizacao','/diagnosticos':'diagnosticos','/overlays':'overlays','/multiview':'multiview','/aux':'aux-router','/me':'me','/central-saidas':'central-saidas','/patch':'patch-registry','/primeira-transmissao':'checklist-primeira-transmissao','/rundown':'rundown','/retornos':'retornos','/blackbox':'blackbox','/preflight':'preflight','/modular':'modular','/modulos':'modulos','/ptz':'ptz','/color':'color'};
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.gif':'image/gif','.jpg':'image/jpeg','.webp':'image/webp','.bmp':'image/bmp','.woff2':'font/woff2','.woff':'font/woff','.ttf':'font/ttf','.otf':'font/otf','.json':'application/json'};
 
 function controlReceipt(request){
@@ -325,6 +325,7 @@ async function handleHttp(req,res){
     '/modular': ['3Mix Modular Studio', 1280, 800],
     '/modulos': ['Módulos em standby', 700, 620],
     '/ptz': ['PTZ', 1280, 800],
+    '/me': ['M/E', 1440, 900],
     '/color': ['Color Studio 3Mix', 1440, 900],
     '/novo-projeto/': ['Novo Projeto 3Mix', 800, 600],
     '/dados': ['Fontes de Dados & GC', 850, 600],

@@ -6,6 +6,22 @@ Se um recurso não está nesta lista, isso não é garantia de que ele foi aprov
 
 ---
 
+## Revisão de evidências — P0 em execução
+
+Esta revisão prevalece sobre afirmações históricas conflitantes abaixo. Não equivale a nova homologação operacional.
+
+- **Pacote posterior localizado:** existe `entregas/FreeMix-Completo-0.1.0-local.20261102162909/`. O manifesto de instalador selecionado ainda aponta para outubro; pasta de pacote não comprova promoção do instalador. A baseline em `qa-finalizacao/p0/baseline-rastreabilidade.json` confirma motor idêntico por SHA-256 entre pacote e runtime e paridade dos seis arquivos de painel/API/Replay amostrados. Não comprova paridade integral.
+- **Termos existem na fonte:** `docs/EULA.txt` já foi escrito. A pendência é revisão jurídica e distribuição comprovada, não ausência de texto. Os caminhos `docs/EULA.txt` e `docs/LIMITES-CONHECIDOS.md` não foram encontrados no runtime/pacote na baseline.
+- **Replay tem superfícies diferentes:** `painel/estudio/js/telas/replay.js` ainda contém controles locais de quadro/início/fim e marcadores. Os recibos `qa-beta/recibos/replay-ajustes-20261101.md` demonstram avanços em outra superfície e não encerram essa lacuna.
+- **Native39:** a entrada de 12/10 em `PENDENCIAS-REAIS.md` descreve falha inicial SourceRecord com `fetch failed` e gates seguintes não executados. Não atribuir esse recibo a contador de seek sem outra evidência específica.
+- **Endurance:** há alegação histórica de PASS em `PENDENCIAS-REAIS.md`, mas o JSON referenciado não foi localizado nesta inspeção. Classificação: evidência não recuperada; não declarar PASS nem regressão com base apenas no texto.
+- **Desempenho:** 0,1–0,2 ms mede trechos do laço JS, não clique até imagem exibida. O round-trip CUT de 178,2 ms p50 / 286,9 ms p95 tem escopo próprio; nenhum desses dados substitui ensaio prolongado no CEF com carga.
+- **Windows limpo e carga prolongada:** seguem sem novo ensaio nesta frente. Não substituir por testes simulados.
+
+Recibos desta execução: `qa-finalizacao/p0/RESULTADO-P0.md` e artefatos da mesma pasta. Nenhuma instalação do operador foi modificada por esta frente.
+
+---
+
 ## 1. Bloqueadores para considerar a beta "instalável" (P0)
 
 Estes nove itens estão listados como bloqueadores no levantamento de 30/10/2026 (`LEVANTAMENTO-BETA-20261030.md`, seção 3). Nenhum deles impede o uso do 3Mix em ambiente de desenvolvimento/QA, mas todos impedem tratar o pacote atual como uma beta pronta para instalação por terceiros sem ressalvas.
@@ -81,7 +97,7 @@ pendente. O resumo abaixo reflete o estado real confirmado nesta data.
   motor em rodadas anteriores.
 - **Aba M/E da mesa**: fica ao lado de Fontes, com Strip por M/E (monitores PV/PGM, botões PV e PGM, CUT, AUTO, formato, transição, duração, áudio e Patch). As botoeiras do topo e a Mesa de corte em janela têm seletor de M/E; sempre abrem no MAIN e a escolha não fica salva. Testado no motor real em 02/11/2026, com as 6 transições do projeto, inclusive Merge/Move.
 - **Saída do M/E**: nasce no formato da produção quando não há configuração salva; projetos que já tinham M/E gravado mantêm o formato até o operador trocar. Saída de formato diferente entra inteira no quadro, com barras. A imagem volta sozinha depois de reconfigurar, trocar de projeto e reiniciar. Transmissão RTMP real do M/E 2 em 720×1280 recebida e conferida quadro a quadro, com corte durante a transmissão.
-- **Nesting**: a saída do M/E aparece como "Saída do M/E N" no Patch, em Composições e no Multiview. Ciclos diretos e indiretos são recusados antes de chegar ao motor.
+- **Programa do M/E como entrada**: depois do primeiro uso, cada M/E ganha a entrada "PGM M/E N" em Entradas, reutilizável em outros M/Es, em composições, no Patch e no Multiview. Ela não pode ser removida nem renomeada. Ciclos diretos e indiretos são recusados antes de chegar ao motor.
 - **Limites conhecidos**: T-Bar só no MAIN. AUX não troca o sinal de uma saída no ar, porque o motor exige parar a saída, e avisa o operador; em saída parada, o AUX guarda a escolha mas não altera a configuração dela. A aba M/E e a Mesa de corte em outro aparelho continuam no MAIN, porque o M/E só responde neste computador. Trocar o formato de um M/E com saída no ar é recusado de propósito.
 - **O que foi bem testado e deve ser preservado quando a integração restante acontecer**:
   confirmação de comandos estritamente por M/E (nunca valida M/E 2 contra o estado do MAIN), recibos com

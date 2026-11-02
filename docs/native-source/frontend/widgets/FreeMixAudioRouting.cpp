@@ -33,7 +33,7 @@ bool Private(obs_source_t *s){
  const std::string name=obs_source_get_name(s),kind=obs_source_get_id(s);
  OBSDataAutoRelease settings=obs_source_get_private_settings(s);
  return obs_data_get_bool(settings,"freemix_director_private")||kind=="freemix_audio_bus"||kind=="mix-track-to-source"||
-  name.rfind("FreeMix Retorno",0)==0||name.rfind("FreeMix N1",0)==0||name.rfind("FreeMix Bus",0)==0||name=="FreeMix Master";
+  name.rfind("3Mix Retorno",0)==0||name.rfind("3Mix N1",0)==0||name.rfind("3Mix Bus",0)==0||name=="3Mix Master";
 }
 void Capture(void *param,obs_source_t *source,const audio_data *audio,bool muted){
  auto *tap=static_cast<Tap *>(param);auto &bus=*tap->bus;
@@ -241,7 +241,7 @@ struct AsioSession {
 AsioSession *&AsioPointer(){static AsioSession *session=nullptr;return session;}
 AsioSession &Asio(){auto *&session=AsioPointer();if(!session){session=new AsioSession;session->InitLifecycle();}return *session;} // explicit actions only; lifecycle owns stop, no getter allocation
 }
-void FreeMixAudioRoutingRegister(){static bool registered=false;if(registered)return;registered=true;obs_source_info info{};info.id="freemix_audio_bus";info.type=OBS_SOURCE_TYPE_INPUT;info.output_flags=OBS_SOURCE_AUDIO|OBS_SOURCE_DO_NOT_DUPLICATE;info.get_name=[](void *){return "FreeMix Independent Audio Bus";};info.create=Create;info.destroy=Destroy;info.update=Update;info.icon_type=OBS_ICON_TYPE_AUDIO_OUTPUT;obs_register_source(&info);
+void FreeMixAudioRoutingRegister(){static bool registered=false;if(registered)return;registered=true;obs_source_info info{};info.id="freemix_audio_bus";info.type=OBS_SOURCE_TYPE_INPUT;info.output_flags=OBS_SOURCE_AUDIO|OBS_SOURCE_DO_NOT_DUPLICATE;info.get_name=[](void *){return "3Mix Independent Audio Bus";};info.create=Create;info.destroy=Destroy;info.update=Update;info.icon_type=OBS_ICON_TYPE_AUDIO_OUTPUT;obs_register_source(&info);
 	obs_frontend_add_event_callback([](enum obs_frontend_event event, void *) {
 		if (event == OBS_FRONTEND_EVENT_FINISHED_LOADING && !Inventory().sourceRecordBusCaptureKnown) {
 			ObserveSourceRecordCapability();

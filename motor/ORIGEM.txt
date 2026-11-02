@@ -1,0 +1,6 @@
+Fontes do motor nativo do 3Mix, baseado em OBS Studio/libobs (GPL).
+Commit de origem: 45a1287fb753d2b5f2b49fa7e0bbc6f5869a8158
+deps/libdshowcapture/src: 8878638324393815512f802640b0d5ce940161f1
+plugins/obs-browser: 798c334d80dee725cabde46708120ddb1d1b1204
+plugins/obs-websocket: 79a04cd36fc31998de888c05bea57a57cb8657ec
+Atualizado por scripts/distribuicao/publicar-motor-no-repo.mjs.

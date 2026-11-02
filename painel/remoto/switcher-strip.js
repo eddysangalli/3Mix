@@ -1,4 +1,5 @@
-import {stripInputs,stripMix,changeDelegate} from './switcher-strip-model.js?v=20261102';
+(() => {
+const {stripInputs,stripMix,changeDelegate}=window.ThreeMixStripModel;
 // Host injects its existing guarded operation path. No direct fetch or MAIN bypass.
 const CSS=`:host{display:block;background:#252525;color:#e6e6e6;font:12px "Segoe UI",sans-serif;border:1px solid #414141;border-radius:4px;padding:8px;min-width:0}
 header{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
@@ -26,8 +27,10 @@ button[data-pvw]{background:#155b21;border-color:#49d54d;color:#fff}
 nav{display:flex;gap:4px;margin:4px 0}
 nav.actions button{flex:1;min-height:32px;font-weight:700}
 .status{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.status.aberto{position:static;width:auto;height:auto;clip-path:none;font-size:11px;color:#c9c9c9;margin-bottom:6px}
+.mon-toggle{min-height:24px;font-size:10px}
 [role=alert]{color:#ff7a80;font-size:11px;margin-top:4px}`;
-export class SwitcherStrip extends HTMLElement {
+class SwitcherStrip extends HTMLElement {
  constructor(){super();this.surface={mixId:1,page:0,size:16,category:''};this.snapshot={inputs:[],mixes:[]};this.attachShadow({mode:'open'});this.frames={pv:new Image(),pgm:new Image()};this.frames.pv.alt='';this.frames.pgm.alt='';this.duration=500;}
  connectedCallback(){this.render();}
  // Polled once a second: rebuild only when something shown changed, so an open list stays open and images do not blink.
@@ -38,8 +41,9 @@ export class SwitcherStrip extends HTMLElement {
   if(['SELECT','INPUT'].includes(this.shadowRoot.activeElement?.tagName))return;
   this.render();
  }
+ setMonitors(on){this.surface={...this.surface,monitors:on};this.render();if(on)this.refreshFrames();this.onSurfaceChange?.();}
  refreshFrames(){
-  if(!this.frameUrl||!this.isConnected)return;
+  if(!this.frameUrl||!this.isConnected||this.surface.monitors===false)return;
   const mix=stripMix(this.snapshot,this.surface.mixId);
   for(const [side,key] of [['pv',mix?.previewUuid],['pgm',this.surface.mixId!==1&&mix?.proxyUuid?mix.proxyUuid:mix?.programUuid]]){
    const frame=this.frames[side];
@@ -69,6 +73,7 @@ export class SwitcherStrip extends HTMLElement {
    catLabel.append(catSelect);header.append(catLabel);
   }
   header.append(label);
+  const onoff=document.createElement('button');onoff.type='button';onoff.className='mon-toggle';onoff.textContent=this.surface.monitors===false?'Ligar monitores':'Desligar monitores';onoff.title='Sem monitores, este M/E não pede imagem ao motor';onoff.onclick=()=>{this.setMonitors(this.surface.monitors===false);};header.append(onoff);
   // Audio Bus padrão: só M/E 2-4; o MAIN usa o caminho de áudio da mesa.
   if(this.surface.mixId!==1&&this.snapshot.audioBuses){
    const busLabel=document.createElement('label');busLabel.textContent='Áudio ';
@@ -95,14 +100,14 @@ export class SwitcherStrip extends HTMLElement {
    const caption=document.createElement('figcaption');const tag=document.createElement('b');tag.textContent=text;const who=document.createElement('span');who.textContent=name(uuid);caption.append(tag,who);
    figure.append(frame,caption);monitors.append(figure);
   }
-  root.append(monitors);
+  if(this.surface.monitors!==false)root.append(monitors);
   if(this.surface.mixId!==1&&mix)root.append(this.renderConfig(mix));
-  const status=document.createElement('div');status.className='status';status.setAttribute('role','status');
+  const status=document.createElement('div');status.className=this.surface.monitors===false?'status aberto':'status';status.setAttribute('role','status');
   status.textContent=mix?'PVW: '+name(mix.previewUuid)+' · PGM: '+name(mix.programUuid)+(mix.transitioning?' · TRANSIÇÃO':''):'Estado do M/E indisponível';root.append(status);
   const addButton=(parent,text,handler,disabled=false)=>{const button=document.createElement('button');button.type='button';button.textContent=text;button.title=text;button.disabled=disabled;button.onclick=handler;parent.append(button);return button;};
   // Tally recursivo (só M/E 2-4): uma entrada dentro de uma composição no ar também conta como no ar.
   const tally=this.surface.mixId!==1?this.snapshot.meTally?.[this.surface.mixId]:null;
-  const rows=stripInputs(this.snapshot.inputs,this.surface),off=!mix||this.busy||!this.executeOperation;
+  const rows=stripInputs(this.snapshot.inputs.filter(i=>i.name!=='PGM M/E '+this.surface.mixId),this.surface),off=!mix||this.busy||!this.executeOperation;
   for(const [side,text] of [['pgm','PGM'],['pv','PV']]){
    const bus=document.createElement('div');bus.className='bus';const tag=document.createElement('span');tag.textContent=text;
    const bank=document.createElement('div');bank.className='bank';
@@ -160,3 +165,4 @@ export class SwitcherStrip extends HTMLElement {
  }
 }
 if(!customElements.get('three-mix-switcher-strip'))customElements.define('three-mix-switcher-strip',SwitcherStrip);
+})();

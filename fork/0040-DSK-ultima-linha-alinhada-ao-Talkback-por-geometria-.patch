@@ -1,0 +1,1017 @@
+From 8bd8cfaf9074a8d2313b920def2cab5aefb47222 Mon Sep 17 00:00:00 2001
+From: Eddy Sangalli <eddyrodrigues@outlook.com>
+Date: Fri, 30 Oct 2026 23:38:31 -0300
+Subject: [PATCH] DSK: ultima linha alinhada ao Talkback por geometria real
+
+ApplyRowMetrics mede a posicao global do botao Talkback e distribui
+a altura disponivel entre as 8 linhas ate essa linha; queda para o
+intervalo 38-51 px quando a coluna e curta. FreeMixDskBindBottomLine
+liga o Talkback ao widget de canais.
+---
+ frontend/widgets/FreeMixCenterColumn.cpp | 520 +++++++++++++++++++++--
+ frontend/widgets/FreeMixCenterColumn.hpp |  18 +
+ frontend/widgets/OBSBasic_StudioMode.cpp | 219 +++++++++-
+ 3 files changed, 711 insertions(+), 46 deletions(-)
+
+diff --git a/frontend/widgets/FreeMixCenterColumn.cpp b/frontend/widgets/FreeMixCenterColumn.cpp
+index 27522ab..0402ef2 100644
+--- a/frontend/widgets/FreeMixCenterColumn.cpp
++++ b/frontend/widgets/FreeMixCenterColumn.cpp
+@@ -33,16 +33,22 @@
+ #include "../../plugins/obs-websocket/lib/obs-websocket-api.h"
+ 
+ #include <QGridLayout>
++#include <QHBoxLayout>
+ #include <QMenu>
+ #include <QPainter>
+ #include <QPointer>
+ #include <QPushButton>
++#include <QPixmap>
++#include <QResizeEvent>
+ #include <QTimer>
+ #include <QCoreApplication>
+ #include <QDir>
+ #include <QUrl>
+ #include <QLabel>
+ #include <QDateTime>
++#include <QTime>
++#include <QFontMetrics>
++#include <QStringList>
+ #ifdef BROWSER_AVAILABLE
+ #include <docks/BrowserDock.hpp>
+ #endif
+@@ -60,6 +66,15 @@ constexpr int kOverlayCount = 8;
+ /* Time the exit animation of a title takes; the same wait the input tiles use. */
+ constexpr int kTitleExitMs = 550;
+ 
++/* The DSK strip keeps one line of title and eight compact rows. The height the expand button used to
++ * take stays free instead of making the central column taller: the rows never grow past 46 px. */
++constexpr int kDskHeaderHeight = 26;
++constexpr int kDskSpacing = 3;
++constexpr int kDskMinRowHeight = 38;
++constexpr int kDskMaxRowHeight = 51;
++constexpr int kDskNumberWidth = 32;
++constexpr int kDskMinNameWidth = 64;
++
+ /* Calls a request of another component through the control server. Null when there is no answer. */
+ OBSDataAutoRelease CallVendor(const char *vendorName, const char *requestType, obs_data_t *requestData)
+ {
+@@ -86,10 +101,11 @@ OBSDataAutoRelease CallVendor(const char *vendorName, const char *requestType, o
+ 	return result;
+ }
+ 
+-OBSDataAutoRelease CallKeyer(const char *requestType, int channel, const char *scene)
++OBSDataAutoRelease CallKeyer(const char *requestType, int channel, const char *scene, bool immediate = false)
+ {
+ 	OBSDataAutoRelease data = obs_data_create();
+ 	obs_data_set_string(data, "dsk_name", std::to_string(channel).c_str());
++	obs_data_set_bool(data, "immediate", immediate);
+ 	if (scene) {
+ 		obs_data_set_string(data, "scene", scene);
+ 	}
+@@ -138,37 +154,161 @@ public:
+ 	explicit OverlayButtons(QWidget *parent) : QWidget(parent)
+ 	{
+ 		setObjectName("freemixOverlayButtons");
++		setMinimumWidth(220);
++		theInstance = this;
+ 
+ 		QGridLayout *grid = new QGridLayout(this);
+-		grid->setContentsMargins(0, 1, 0, 0);
+-		grid->setSpacing(2);
++		grid->setContentsMargins(10, 0, 0, 0);
++		grid->setHorizontalSpacing(kDskSpacing);
++		grid->setVerticalSpacing(kDskSpacing);
++		grid->setColumnStretch(2, 1);
++		grid->setAlignment(Qt::AlignTop);
++		/* The row heights follow the column: never let the fixed thumbnails impose a minimum height
++		 * on the central area, which would push the window or squeeze the Preview/Program displays. */
++		grid->setSizeConstraint(QLayout::SetNoConstraint);
++
++		/* Title and the expand button share the first line: the row that used to hold only the arrow
++		 * under the channel list is gone, and its height went to the thumbnails. */
++		auto *header = new QWidget(this);
++		header->setObjectName("freemixDskHeader");
++		header->setFixedHeight(kDskHeaderHeight);
++		header->setStyleSheet("background:#242424;border-bottom:1px solid #39424c;");
++		auto *headerLayout = new QHBoxLayout(header);
++		headerLayout->setContentsMargins(2, 0, 0, 0);
++		headerLayout->setSpacing(4);
++		auto *heading = new QLabel("DSK", header);
++		heading->setObjectName("freemixDskHeading");
++		heading->setStyleSheet("font-size:13px;font-weight:700;color:#e8eef4;background:transparent;");
++		auto *manage = new QPushButton("↗", header);
++		manage->setObjectName("freemixDskExpand");
++		manage->setToolTip("Expandir DSK");
++		manage->setAccessibleName("Expandir DSK");
++		manage->setCursor(Qt::PointingHandCursor);
++		manage->setFocusPolicy(Qt::NoFocus);
++		manage->setFixedSize(22, 22);
++		manage->setStyleSheet("QPushButton{font-size:14px;padding:0;background:transparent;"
++				      "border:1px solid transparent;border-radius:3px;color:#c8d4df;}"
++				      "QPushButton:hover{background:#333c46;border-color:#4a5663;}");
++		headerLayout->addWidget(heading);
++		headerLayout->addStretch(1);
++		headerLayout->addWidget(manage);
++		grid->addWidget(header, 0, 0, 1, 3);
++		connect(manage, &QPushButton::clicked, this, []() {
++			OBSDataAutoRelease data = obs_data_create();
++			OBSDataAutoRelease eventData = obs_data_create();
++			OBSDataAutoRelease freemix = obs_data_create();
++			obs_data_set_string(freemix, "do", "dsktab");
++			obs_data_set_obj(eventData, "freemix", freemix);
++			obs_data_set_obj(data, "eventData", eventData);
++			obs_websocket_call_request("BroadcastCustomEvent", data);
++		});
+ 
+ 		for (int i = 0; i < kOverlayCount; i++) {
+ 			QPushButton *button = new QPushButton(QString::number(i + 1), this);
+-			button->setProperty("class", "freemix-overlay");
+-			button->setCheckable(true);
++			/* No "freemix-overlay" class: its theme rule pins a 22 px minimum and lets the layout
++			 * shrink the number to the text. The row button is a real 32 px wide full-height key. */
+ 			button->setFocusPolicy(Qt::NoFocus);
+ 			button->setContextMenuPolicy(Qt::CustomContextMenu);
+-			button->setMinimumWidth(0);
+-			button->setFixedHeight(22);
+-			grid->addWidget(button, i / 4, i % 4);
++			button->setFixedSize(kDskNumberWidth, kDskMinRowHeight);
++			button->setStyleSheet("font-size:14px; font-weight:700; padding:0px;");
++			auto *preview = new QLabel(this);
++			preview->setObjectName("freemixDskPreview");
++			preview->setFixedSize(82, kDskMaxRowHeight);
++			preview->setAlignment(Qt::AlignCenter);
++			preview->setStyleSheet("background:#11161b;border:1px solid #4a4a4a;border-radius:3px;");
++			auto *nameLabel = new QLabel(this);
++			nameLabel->setObjectName("freemixDskName");
++			nameLabel->setMinimumWidth(kDskMinNameWidth);
++			nameLabel->setFixedHeight(kDskMaxRowHeight);
++			nameLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
++			nameLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
++			nameLabel->setStyleSheet("font-size:11px;padding-left:2px;color:#93a1af;");
++			grid->addWidget(button, i + 1, 0);
++			grid->addWidget(preview, i + 1, 1);
++			grid->addWidget(nameLabel, i + 1, 2);
++			previews[i] = preview;
++			names[i] = nameLabel;
+ 			buttons[i] = button;
+-
+-			connect(button, &QPushButton::clicked, this, [this, i]() { Toggle(i); });
++			connect(button, &QPushButton::clicked, this, [this, i]() { Toggle(i, true); });
+ 			connect(button, &QWidget::customContextMenuRequested, this,
+ 				[this, i](const QPoint &pos) { ShowMenu(i, buttons[i]->mapToGlobal(pos)); });
+ 		}
+ 
++		ApplyRowMetrics();
+ 		QTimer *timer = new QTimer(this);
+ 		connect(timer, &QTimer::timeout, this, [this]() { Refresh(); });
+ 		timer->start(500);
+ 		Refresh();
+ 	}
+ 
++protected:
++	void resizeEvent(QResizeEvent *event) override
++	{
++		QWidget::resizeEvent(event);
++		ApplyRowMetrics();
++	}
++
+ private:
+ 	std::array<QPushButton *, kOverlayCount> buttons{};
++	std::array<QLabel *, kOverlayCount> previews{};
++	std::array<QLabel *, kOverlayCount> names{};
++	std::array<std::string, kOverlayCount> assigned{};
+ 	std::array<std::string, kOverlayCount> scenes;
+ 	std::array<bool, kOverlayCount> present{};
++	QPointer<QWidget> bottomLineOf;
++	int rowHeight = 0;
++	int previewWidth = 0;
++	/* There is exactly one center column: the free function binds the Talkback to this instance. */
++	inline static OverlayButtons *theInstance = nullptr;
++
++public:
++	/* Bottom line of the column: the last row must finish exactly where the Talkback
++	 * button ends, so the strip never runs below (or above) the controls stack. */
++	void SetBottomLineWidget(QWidget *talk) { bottomLineOf = talk; }
++	static void BindBottomLine(QWidget *talk)
++	{
++		if (theInstance)
++			theInstance->SetBottomLineWidget(talk);
++	}
++
++private:
++	/* The eight rows stay compact: each row takes exactly (bottomLine - header) / 8 so the last
++	 * square finishes on the same line as the Talkback button. Falls back to the widget height
++	 * when the Talkback is not on screen, and back to the 51 px row cap when the column is tall. */
++	void ApplyRowMetrics()
++	{
++		int clientBottom = height();
++		if (bottomLineOf && bottomLineOf->isVisible()) {
++			const QPoint talkBottom = bottomLineOf->mapToGlobal(QPoint(0, bottomLineOf->height()));
++			const QPoint selfTop = mapToGlobal(QPoint(0, 0));
++			const int aligned = talkBottom.y() - selfTop.y();
++			if (aligned > 0 && aligned < clientBottom)
++				clientBottom = aligned;
++		}
++
++		const int freeHeight = clientBottom - kDskHeaderHeight - kDskSpacing * (kOverlayCount - 1);
++		int nextRowHeight = freeHeight > 0 ? freeHeight / kOverlayCount : kDskMinRowHeight;
++		nextRowHeight = std::clamp(nextRowHeight, kDskMinRowHeight, kDskMaxRowHeight);
++
++		int nextPreviewWidth = nextRowHeight * 16 / 9;
++		const int widestPreview = width() - kDskNumberWidth - kDskMinNameWidth - 2 * kDskSpacing;
++		if (nextPreviewWidth > widestPreview) {
++			nextPreviewWidth = std::max(64, widestPreview);
++			nextRowHeight = std::clamp(nextPreviewWidth * 9 / 16, kDskMinRowHeight, kDskMaxRowHeight);
++		}
++
++		if (nextRowHeight == rowHeight && nextPreviewWidth == previewWidth) {
++			return;
++		}
++		rowHeight = nextRowHeight;
++		previewWidth = nextPreviewWidth;
++
++		for (int i = 0; i < kOverlayCount; i++) {
++			buttons[i]->setFixedSize(kDskNumberWidth, rowHeight);
++			previews[i]->setFixedSize(previewWidth, rowHeight);
++			names[i]->setFixedHeight(rowHeight);
++		}
++	}
+ 
+ 	/* Which keyers exist changes rarely and is the expensive question: asked every few refreshes. */
+ 	int refreshesUntilPresence = 0;
+@@ -211,24 +351,113 @@ private:
+ 			}
+ 		}
+ 
++		static int refreshTick = 0;
++		const bool capture = (++refreshTick % 4) == 0;
++		if (capture) ReadAssignments();
+ 		for (int i = 0; i < kOverlayCount; i++) {
+ 			QPushButton *button = buttons[i];
+ 			const bool onAir = !scenes[i].empty();
++			if (onAir) assigned[i] = scenes[i];
++			const bool prepared = !onAir && !assigned[i].empty();
+ 			button->setEnabled(present[i]);
+ 			button->setChecked(onAir);
+-
++			/* The width is pinned in the style as well: the theme's default button minimum
++			 * would otherwise centre the number outside the narrow key and clip it. */
++			button->setStyleSheet(QString("font-size:15px; font-weight:700; padding:0px; "
++						      "min-width:%1px; max-width:%2px; border-radius:3px; %3")
++				.arg(kDskNumberWidth)
++				.arg(kDskNumberWidth)
++				.arg(onAir ? "background:#c01920; border:1px solid #ff6b70; color:#fff;"
++					: prepared ? "background:#17652a; border:1px solid #43c45a; color:#fff;"
++						   : "background:#303030; border:1px solid #555; color:#ddd;"));
+ 			const QString number = QString::number(i + 1);
+-			if (!present[i]) {
+-				button->setToolTip(QTStr("FreeMix.Overlay.Missing").arg(number));
+-			} else if (onAir) {
+-				button->setToolTip(QTStr("FreeMix.Overlay.OnAir").arg(number, QString::fromStdString(scenes[i])));
+-			} else {
+-				button->setToolTip(QTStr("FreeMix.Overlay.Toggle").arg(number));
++			const QString source = QString::fromStdString(assigned[i]);
++			button->setToolTip(!present[i] ? QTStr("FreeMix.Overlay.Missing").arg(number)
++				: onAir ? QString("DSK %1 · %2 · NO AR").arg(number, source)
++				: prepared ? QString("DSK %1 · %2 · PREPARADO").arg(number, source)
++					   : QString("DSK %1 · sem fonte").arg(number));
++			if (onAir || prepared) {
++				if (capture) UpdatePreview(i, assigned[i]);
++			} else if (previews[i]) {
++				previews[i]->setPixmap(QPixmap());
++			}
++			if (previews[i]) {
++				previews[i]->setStyleSheet(QString("background:#11161b;border:1px solid %1;border-radius:3px;")
++					.arg(onAir ? "#ff6b70" : prepared ? "#43c45a" : "#4a4a4a"));
++			}
++			if (names[i]) {
++				const QString label = !present[i] ? QString("Sem DSK")
++						      : (onAir || prepared) ? source
++									    : QString("Sem fonte");
++				const int available = qMax(24, names[i]->width() - 6);
++				names[i]->setText(names[i]->fontMetrics().elidedText(label, Qt::ElideRight, available));
++				names[i]->setToolTip(label);
++				names[i]->setStyleSheet(QString("font-size:10px;padding-left:2px;color:%1;")
++					.arg(onAir ? "#ff8a8f" : prepared ? "#7ee08d" : "#93a1af"));
+ 			}
+ 		}
+ 	}
+ 
+-	void TakeOff(int index)
++	void ReadAssignments()
++	{
++		OBSDataAutoRelease request = obs_data_create();
++		obs_data_set_string(request, "realm", "OBS_WEBSOCKET_DATA_REALM_GLOBAL");
++		obs_data_set_string(request, "slotName", "3mix_dsk_assignments");
++		obs_websocket_request_response *response = obs_websocket_call_request("GetPersistentData", request);
++		if (!response) return;
++		OBSDataAutoRelease data = response->response_data ? obs_data_create_from_json(response->response_data) : nullptr;
++		OBSDataAutoRelease value = data ? obs_data_get_obj(data, "slotValue") : nullptr;
++		OBSDataAutoRelease assign = value ? obs_data_get_obj(value, "assign") : nullptr;
++		if (assign) {
++			for (int i = 0; i < kOverlayCount; i++) {
++				const std::string name = std::to_string(i + 1);
++				const char *source = obs_data_get_string(assign, name.c_str());
++				assigned[i] = source ? source : "";
++			}
++		}
++		obs_websocket_request_response_free(response);
++	}
++
++	void WriteAssignments()
++	{
++		OBSDataAutoRelease request = obs_data_create();
++		OBSDataAutoRelease value = obs_data_create();
++		OBSDataAutoRelease assign = obs_data_create();
++		for (int i = 0; i < kOverlayCount; i++) {
++			const std::string name = std::to_string(i + 1);
++			obs_data_set_string(assign, name.c_str(), assigned[i].c_str());
++		}
++		obs_data_set_obj(value, "assign", assign);
++		obs_data_set_string(request, "realm", "OBS_WEBSOCKET_DATA_REALM_GLOBAL");
++		obs_data_set_string(request, "slotName", "3mix_dsk_assignments");
++		obs_data_set_obj(request, "slotValue", value);
++		obs_websocket_request_response *response = obs_websocket_call_request("SetPersistentData", request);
++		if (response) obs_websocket_request_response_free(response);
++	}
++
++	void UpdatePreview(int index, const std::string &source)
++	{
++		if (!previews[index] || source.empty()) return;
++		OBSDataAutoRelease request = obs_data_create();
++		obs_data_set_string(request, "sourceName", source.c_str());
++		obs_data_set_string(request, "imageFormat", "png");
++		obs_data_set_int(request, "imageWidth", 192);
++		obs_data_set_int(request, "imageHeight", 108);
++		obs_data_set_int(request, "imageCompressionQuality", 55);
++		obs_websocket_request_response *response = obs_websocket_call_request("GetSourceScreenshot", request);
++		if (!response) return;
++		OBSDataAutoRelease data = response->response_data ? obs_data_create_from_json(response->response_data) : nullptr;
++		const char *encoded = data ? obs_data_get_string(data, "imageData") : "";
++		if (encoded && *encoded) {
++			QByteArray bytes = QByteArray::fromBase64(QByteArray(encoded));
++			QPixmap pixmap;
++			if (pixmap.loadFromData(bytes))
++				previews[index]->setPixmap(pixmap.scaled(previews[index]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
++		}
++		obs_websocket_request_response_free(response);
++	}
++
++	void TakeOff(int index, bool immediate = false)
+ 	{
+ 		const std::string scene = scenes[index];
+ 		if (scene.empty()) {
+@@ -236,45 +465,50 @@ private:
+ 		}
+ 
+ 		QPointer<OverlayButtons> self(this);
+-		auto cut = [self, index]() {
+-			CallKeyer("dsk_select_scene", index + 1, "");
++		auto cut = [self, index, immediate]() {
++			CallKeyer("dsk_select_scene", index + 1, "", immediate);
+ 			if (self) {
+ 				self->Refresh();
+ 			}
+ 		};
+ 
+-		if (AskTitlesToLeave(scene)) {
++		if (!immediate && AskTitlesToLeave(scene)) {
+ 			QTimer::singleShot(kTitleExitMs, qApp, cut);
+ 		} else {
+ 			cut();
+ 		}
+ 	}
+ 
+-	void Toggle(int index)
++	void Toggle(int index, bool immediate = false)
+ 	{
+ 		Refresh();
+ 
+ 		OBSSourceAutoRelease preview = obs_frontend_get_current_preview_scene();
+ 		const std::string previewName = preview ? obs_source_get_name(preview) : "";
+ 
+-		if (!present[index] || previewName.empty()) {
++		if (!present[index]) {
+ 			Refresh();
+ 			return;
+ 		}
+ 
+-		if (scenes[index] == previewName) {
+-			TakeOff(index);
++		// On air: leaving never clears the assigned source.
++		if (!scenes[index].empty()) {
++			TakeOff(index, immediate);
+ 			return;
+ 		}
+ 
+-		/* The keyer only shows inputs of its own list: put the input on the list, then on air. */
+-		CallKeyer("dsk_add_scene", index + 1, previewName.c_str());
++		std::string target = assigned[index].empty() ? previewName : assigned[index];
++		if (target.empty()) {
++			Refresh();
++			return;
++		}
++		assigned[index] = target;
++		WriteAssignments();
++		CallKeyer("dsk_add_scene", index + 1, target.c_str());
+ 		QPointer<OverlayButtons> self(this);
+-		QTimer::singleShot(80, qApp, [self, index, previewName]() {
+-			CallKeyer("dsk_select_scene", index + 1, previewName.c_str());
+-			if (self) {
+-				self->Refresh();
+-			}
++		QTimer::singleShot(80, qApp, [self, index, target, immediate]() {
++			CallKeyer("dsk_select_scene", index + 1, target.c_str(), immediate);
++			if (self) self->Refresh();
+ 		});
+ 	}
+ 
+@@ -450,13 +684,224 @@ private:
+ 	}
+ };
+ 
++struct ClockSlot {
++	std::string type;
++	std::string start;
++	std::string end;
++	int offset = 0;
++	bool ampm = false;
++};
++
++OBSDataAutoRelease RequestJson(const char *type, obs_data_t *request)
++{
++	obs_websocket_request_response *response = obs_websocket_call_request(type, request);
++	if (!response || !response->response_data)
++		return nullptr;
++	return obs_data_create_from_json(response->response_data);
++}
++
++QTime ParseClockTime(const std::string &value)
++{
++	const QStringList parts = QString::fromStdString(value).split(':');
++	if (parts.size() < 2)
++		return {};
++	return QTime(parts[0].toInt(), parts[1].toInt(), parts.size() > 2 ? parts[2].toInt() : 0);
++}
++
++QString FormatHms(qint64 seconds)
++{
++	if (seconds < 0)
++		seconds = 0;
++	const qint64 h = seconds / 3600, m = (seconds / 60) % 60, s = seconds % 60;
++	return QString("%1:%2:%3")
++		.arg(h, 2, 10, QChar('0'))
++		.arg(m, 2, 10, QChar('0'))
++		.arg(s, 2, 10, QChar('0'));
++}
++
++std::vector<ClockSlot> ReadClockSlots()
++{
++	std::vector<ClockSlot> clockSlots;
++	OBSDataAutoRelease request = obs_data_create();
++	obs_data_set_string(request, "realm", "OBS_WEBSOCKET_DATA_REALM_GLOBAL");
++	obs_data_set_string(request, "slotName", "freemix_clocks");
++	OBSDataAutoRelease response = RequestJson("GetPersistentData", request);
++	OBSDataArrayAutoRelease array = response ? obs_data_get_array(response, "slotValue") : nullptr;
++	const size_t count = array ? obs_data_array_count(array) : 0;
++	for (size_t i = 0; i < count; i++) {
++		OBSDataAutoRelease item = obs_data_array_item(array, i);
++		ClockSlot slot;
++		slot.type = obs_data_get_string(item, "type");
++		slot.start = obs_data_get_string(item, "start");
++		slot.end = obs_data_get_string(item, "end");
++		slot.offset = (int)obs_data_get_int(item, "offset");
++		slot.ampm = obs_data_get_bool(item, "ampm");
++		clockSlots.push_back(slot);
++	}
++	if (clockSlots.empty())
++		clockSlots = {{"rec"}, {"stream"}, {"clock"}};
++	return clockSlots;
++}
++
++QString OutputTimecode(const char *requestType, bool &active)
++{
++	active = false;
++	OBSDataAutoRelease request = obs_data_create();
++	OBSDataAutoRelease response = RequestJson(requestType, request);
++	if (!response)
++		return "00:00:00";
++	active = obs_data_get_bool(response, "outputActive");
++	const QString timecode = QString::fromUtf8(obs_data_get_string(response, "outputTimecode"));
++	return timecode.left(8);
++}
++
++QString MediaRemaining()
++{
++	static QString mediaName;
++	static qint64 mediaAt = 0;
++	const qint64 now = QDateTime::currentMSecsSinceEpoch();
++	if (mediaName.isEmpty() || now - mediaAt > 2000) {
++		mediaAt = now;
++		OBSDataAutoRelease request = obs_data_create();
++		OBSDataAutoRelease current = RequestJson("GetCurrentProgramScene", request);
++		const QString scene = current ? QString::fromUtf8(obs_data_get_string(current, "currentProgramSceneName")) : QString();
++		mediaName.clear();
++		if (!scene.isEmpty()) {
++			OBSDataAutoRelease listRequest = obs_data_create();
++			obs_data_set_string(listRequest, "sceneName", scene.toUtf8().constData());
++			OBSDataAutoRelease list = RequestJson("GetSceneItemList", listRequest);
++			OBSDataArrayAutoRelease items = list ? obs_data_get_array(list, "sceneItems") : nullptr;
++			const size_t count = items ? obs_data_array_count(items) : 0;
++			for (size_t i = 0; i < count; i++) {
++				OBSDataAutoRelease item = obs_data_array_item(items, i);
++				const QString kind = QString::fromUtf8(obs_data_get_string(item, "inputKind"));
++				if (kind == "ffmpeg_source" || kind == "vlc_source" || kind.contains("playlist")) {
++					mediaName = QString::fromUtf8(obs_data_get_string(item, "sourceName"));
++					break;
++				}
++			}
++		}
++	}
++	if (mediaName.isEmpty())
++		return "--:--:--";
++	OBSDataAutoRelease request = obs_data_create();
++	obs_data_set_string(request, "inputName", mediaName.toUtf8().constData());
++	OBSDataAutoRelease status = RequestJson("GetMediaInputStatus", request);
++	const double duration = status ? obs_data_get_double(status, "mediaDuration") : 0;
++	const double cursor = status ? obs_data_get_double(status, "mediaCursor") : 0;
++	if (duration <= 0)
++		return "--:--:--";
++	return FormatHms((qint64)((duration - cursor) / 1000.0));
++}
++
++QString CenterClockHtml()
++{
++	static std::vector<ClockSlot> clockSlots;
++	static qint64 clockSlotsAt = 0;
++	const qint64 now = QDateTime::currentMSecsSinceEpoch();
++	if (clockSlots.empty() || now - clockSlotsAt > 2000) {
++		clockSlots = ReadClockSlots();
++		clockSlotsAt = now;
++	}
++
++	bool hasRec = false, hasStream = false, hasRemaining = false;
++	for (const ClockSlot &slot : clockSlots) {
++		hasRec = hasRec || slot.type == "rec";
++		hasStream = hasStream || slot.type == "stream";
++		hasRemaining = hasRemaining || slot.type == "remaining";
++	}
++	bool recActive = false, streamActive = false;
++	QString recTimecode, streamTimecode;
++	if (hasRec)
++		recTimecode = OutputTimecode("GetRecordStatus", recActive);
++	if (hasStream)
++		streamTimecode = OutputTimecode("GetStreamStatus", streamActive);
++
++	/* Six lines: each clock is a small label with its timecode below, stacked as blocks. Three groups
++	 * use the whole square under the T-Bar instead of sharing one cramped line each. */
++	const auto block = [](const QString &name, const QString &value, const QString &nameColor,
++			      const QString &valueColor, int valuePx, bool first) {
++		return QString("<div style='text-align:center;%1'>"
++			       "<div style='font-size:9px;letter-spacing:.12em;color:%2;line-height:1.15'>%3</div>"
++			       "<div style='font-size:%4px;font-weight:700;font-family:Consolas;color:%5;line-height:1.0'>%6</div>"
++			       "</div>")
++			.arg(first ? QString() : QString("margin-top:4px;"))
++			.arg(nameColor, name)
++			.arg(valuePx)
++			.arg(valueColor, value);
++	};
++
++	QString html;
++	int lines = 0;
++	for (const ClockSlot &slot : clockSlots) {
++		const bool first = lines == 0;
++		QString line;
++		if (slot.type == "rec") {
++			line = block("REC", recTimecode, recActive ? "#ff5a4f" : "#6e7b88",
++				     recActive ? "#ff8a8f" : "#e8eef4", 21, first);
++		} else if (slot.type == "stream") {
++			line = block("NO AR", streamTimecode, streamActive ? "#ff5a4f" : "#6e7b88",
++				     streamActive ? "#ff8a8f" : "#e8eef4", 21, first);
++		} else if (slot.type == "remaining") {
++			line = block("RESTA", MediaRemaining(), "#93a1af", "#e8eef4", 20, first);
++		} else if (slot.type == "event") {
++			const QTime start = ParseClockTime(slot.start), end = ParseClockTime(slot.end);
++			const int nowSec = QTime::currentTime().msecsSinceStartOfDay() / 1000;
++			const int startSec = start.msecsSinceStartOfDay() / 1000;
++			const int endSec = end.msecsSinceStartOfDay() / 1000;
++			QString color = "#e3b25b", text;
++			qint64 diff = 0;
++			if (!start.isValid()) {
++				text = "--:--:--";
++			} else if (nowSec < startSec) {
++				diff = startSec - nowSec;
++				text = "-" + FormatHms(diff);
++			} else if (end.isValid() && nowSec < endSec) {
++				color = "#39c46f";
++				diff = endSec - nowSec;
++				text = FormatHms(diff);
++			} else if (end.isValid()) {
++				color = "#ff5a4f";
++				diff = nowSec - endSec;
++				text = "+" + FormatHms(diff);
++			} else {
++				color = "#39c46f";
++				diff = nowSec - startSec;
++				text = FormatHms(diff);
++			}
++			line = block("EVENTO", text, color, color, 20, first);
++		} else if (slot.type == "clock") {
++			const QTime clockTime = QTime::currentTime().addSecs(slot.offset * 3600);
++			line = block("RELÓGIO", clockTime.toString(slot.ampm ? "hh:mm:ss AP" : "HH:mm:ss"),
++				     "#93a1af", "#e8eef4", 21, first);
++		}
++		if (!line.isEmpty()) {
++			lines++;
++			html += line;
++		}
++	}
++	return lines ? html : QString("<span style='color:#6e7b88'>—</span>");
++}
++
+ } // namespace
+ 
++QString FreeMixCenterClockHtml()
++{
++	return CenterClockHtml();
++}
++
+ QWidget *FreeMixCreateOverlayButtons(QWidget *parent)
+ {
+ 	return new OverlayButtons(parent);
+ }
+ 
++/* Aligns the last DSK row with the bottom of the Talkback button. */
++void FreeMixDskBindBottomLine(QWidget *dsk, QWidget *talk)
++{
++	Q_UNUSED(dsk);
++	OverlayButtons::BindBottomLine(talk);
++}
++
+ QWidget *FreeMixCreateMasterMeter(QWidget *parent)
+ {
+ 	return new MasterMeter(parent);
+@@ -482,6 +927,17 @@ QWidget *FreeMixCreateClocks(QWidget *parent)
+ 	return clock;
+ }
+ 
++void FreeMixOpenClocks()
++{
++	OBSDataAutoRelease data = obs_data_create();
++	OBSDataAutoRelease eventData = obs_data_create();
++	OBSDataAutoRelease freemix = obs_data_create();
++	obs_data_set_string(freemix, "open", "clocks");
++	obs_data_set_obj(eventData, "freemix", freemix);
++	obs_data_set_obj(data, "eventData", eventData);
++	obs_websocket_call_request("BroadcastCustomEvent", data);
++}
++
+ bool FreeMixMasterLevel(float &leftDb, float &rightDb)
+ {
+ 	if (!MasterMeter::onScreen) {
+diff --git a/frontend/widgets/FreeMixCenterColumn.hpp b/frontend/widgets/FreeMixCenterColumn.hpp
+index 0a180e0..c1e44e3 100644
+--- a/frontend/widgets/FreeMixCenterColumn.hpp
++++ b/frontend/widgets/FreeMixCenterColumn.hpp
+@@ -17,6 +17,8 @@
+ 
+ #pragma once
+ 
++#include <QString>
++
+ class QWidget;
+ 
+ /* Buttons of the eight overlay channels: lit while the channel is on air; a click puts the Preview input on the
+@@ -24,6 +26,22 @@ class QWidget;
+ QWidget *FreeMixCreateOverlayButtons(QWidget *parent);
+ QWidget *FreeMixCreateClocks(QWidget *parent);
+ 
++/* Bounds the last DSK row to finish on the same line as the given widget (the Talkback). */
++void FreeMixDskBindBottomLine(QWidget *dsk, QWidget *talk);
++
++/* Opens the panel's clock selection (the same editor used by the top bar). */
++void FreeMixOpenClocks();
++
++/* Renders the three production clocks selected in the panel, for the center column. */
++QString FreeMixCenterClockHtml();
++
++/* Momentary talkback from the center column, using the private director mic prepared in Calls.
++ * It shares the native watchdog and the same ApplyTalkback path as the Calls panel. */
++void FreeMixTalkbackPress(bool on);
++bool FreeMixTalkbackReady();
++bool FreeMixTalkbackActive();
++void FreeMixTalkbackKeepAlive();
++
+ /* Vertical stereo level meter of the Master (output track 1). */
+ QWidget *FreeMixCreateMasterMeter(QWidget *parent);
+ 
+diff --git a/frontend/widgets/OBSBasic_StudioMode.cpp b/frontend/widgets/OBSBasic_StudioMode.cpp
+index 81d9d85..3391d57 100644
+--- a/frontend/widgets/OBSBasic_StudioMode.cpp
++++ b/frontend/widgets/OBSBasic_StudioMode.cpp
+@@ -28,6 +28,26 @@
+ #include <slider-ignorewheel.hpp>
+ 
+ #include <QToolTip>
++#include <QSpinBox>
++#include <QDockWidget>
++#include <QDateTime>
++#include <QMouseEvent>
++#include <functional>
++
++class FreeMixClockLabel : public QLabel {
++public:
++	using QLabel::QLabel;
++	std::function<void()> doubleClicked;
++
++protected:
++	void mouseDoubleClickEvent(QMouseEvent *event) override
++	{
++		if (doubleClicked)
++			doubleClicked();
++		QLabel::mouseDoubleClickEvent(event);
++	}
++};
++#include <algorithm>
+ 
+ void OBSBasic::CreateProgramDisplay()
+ {
+@@ -68,17 +88,19 @@ void OBSBasic::CreateProgramOptions()
+ {
+ 	programOptions = new QWidget();
+ 	programOptions->setObjectName("freemixTransitionColumn");
+-	programOptions->setFixedWidth(124);
++	programOptions->setFixedWidth(392);
++	programOptions->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+ 
+ 	QHBoxLayout *centerLayout = new QHBoxLayout();
+ 	centerLayout->setContentsMargins(0, 0, 0, 0);
+ 	centerLayout->setSpacing(2);
+ 
+ 	QWidget *controlsColumn = new QWidget(programOptions);
++	controlsColumn->setObjectName("freemixSwitcherControls");
++	controlsColumn->setFixedWidth(132);
+ 	QVBoxLayout *layout = new QVBoxLayout(controlsColumn);
+ 	layout->setContentsMargins(0, 0, 0, 0);
+ 	layout->setSpacing(2);
+-	programTransitionsLayout = layout;
+ 
+ 	QPushButton *configTransitions = new QPushButton();
+ 	configTransitions->setProperty("class", "icon-dots-vert");
+@@ -88,20 +110,23 @@ void OBSBasic::CreateProgramOptions()
+ 	QHBoxLayout *mainButtonLayout = new QHBoxLayout();
+ 	mainButtonLayout->setSpacing(2);
+ 
+-	transitionButton = new QPushButton(QTStr("Transition"));
++	transitionButton = new QPushButton("AUTO");
+ 	transitionButton->setStyleSheet("min-width:0px; padding:0px 2px; font-size:11px;");
+ 	transitionButton->setFixedHeight(26);
+ 	transitionButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+ 
+-	QHBoxLayout *quickTransitionsLayout = new QHBoxLayout();
++	QVBoxLayout *quickTransitionsLayout = new QVBoxLayout();
+ 	quickTransitionsLayout->setSpacing(2);
++	// Quick transitions stay in this hidden layout: the visible column follows
++	// the mockup (CUT/AUTO, duration and T-Bar only).
++	programTransitionsLayout = quickTransitionsLayout;
+ 
+ 	QPushButton *addQuickTransition = new QPushButton();
+ 	addQuickTransition->setProperty("class", "icon-plus");
+ 	addQuickTransition->setFixedSize(24, 24);
+ 	addQuickTransition->setStyleSheet("min-width:0px; padding:0px;");
+ 
+-	QLabel *quickTransitionsLabel = new QLabel(QTStr("QuickTransitions"));
++	QLabel *quickTransitionsLabel = new QLabel("TRANSIÇÃO");
+ 	quickTransitionsLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+ 
+ 	quickTransitionsLayout->addWidget(quickTransitionsLabel);
+@@ -109,8 +134,24 @@ void OBSBasic::CreateProgramOptions()
+ 
+ 	mainButtonLayout->addWidget(transitionButton);
+ 	mainButtonLayout->addWidget(configTransitions);
++	mainButtonLayout->addWidget(addQuickTransition);
++	auto *cutButton = new QPushButton("CUT", controlsColumn);
++	cutButton->setFixedHeight(30);
++	cutButton->setObjectName("freemixCutButton");
++	connect(cutButton, &QPushButton::clicked, this, [this]() {
++		if (!IsPreviewProgramMode()) return;
++		OBSSourceAutoRelease cut = obs_source_create_private("cut_transition", "3Mix CUT", nullptr);
++		if (!cut) return;
++		OverrideTransition(cut.Get());
++		overridingTransition = true;
++		TransitionToScene(GetCurrentSceneSource(), false, true, 0, false);
++	});
+ 
+-	tBar = new SliderIgnoreClick(Qt::Horizontal);
++	tBar = new SliderIgnoreClick(Qt::Vertical);
++	tBar->setMinimumHeight(130);
++	/* Compact column: the T-Bar never takes the room of the clock and the talkback. */
++	tBar->setMaximumHeight(260);
++	tBar->setFixedWidth(28);
+ 	tBar->setMinimum(0);
+ 	tBar->setMaximum(T_BAR_PRECISION - 1);
+ 
+@@ -119,25 +160,176 @@ void OBSBasic::CreateProgramOptions()
+ 	connect(tBar, &QSlider::valueChanged, this, &OBSBasic::TBarChanged);
+ 	connect(tBar, &QSlider::sliderReleased, this, &OBSBasic::TBarReleased);
+ 
++	layout->addWidget(cutButton);
+ 	layout->addLayout(mainButtonLayout);
+-	layout->addLayout(quickTransitionsLayout);
+-	layout->addWidget(tBar);
+-	/* FreeMix: overlay channels 1 to 8. Added after the T-bar, where the quick transition buttons never go. */
+-	layout->addWidget(FreeMixCreateOverlayButtons(controlsColumn));
+-	layout->addWidget(FreeMixCreateClocks(controlsColumn));
+-	layout->addStretch(0);
++	auto *durationSpin = new QSpinBox(controlsColumn);
++	durationSpin->setMinimumWidth(136);
++	durationSpin->setObjectName("freemixTransitionDuration");
++	durationSpin->setRange(50, 2000);
++	durationSpin->setSingleStep(50);
++	durationSpin->setSuffix(" ms");
++	durationSpin->setPrefix("Dur. ");
++	const int transitionDuration = GetTransitionDuration();
++	durationSpin->setValue(transitionDuration >= 50 && transitionDuration <= 2000 ? transitionDuration : 500);
++	durationSpin->setToolTip("Duração da transição usada por AUTO, T-Bar e pelos DSK configurados para acompanhar a transição da mesa.");
++	connect(durationSpin, QOverload<int>::of(&QSpinBox::valueChanged), this, [this](int value) {
++		SetTransitionDuration(value);
++	});
++	layout->addWidget(durationSpin);
++	/* The holder centers the T-Bar in the controls column and gives it the free vertical space, so the
++	 * clock keeps its square and the talkback sits at the base of the column. */
++	auto *tBarHolder = new QWidget(controlsColumn);
++	tBarHolder->setObjectName("freemixTBarHolder");
++	tBarHolder->setMinimumHeight(130);
++	tBarHolder->setMaximumHeight(260);
++	auto *tBarLayout = new QHBoxLayout(tBarHolder);
++	tBarLayout->setContentsMargins(0, 0, 0, 0);
++	tBarLayout->setSpacing(0);
++	tBarLayout->addStretch(1);
++	tBarLayout->addWidget(tBar);
++	tBarLayout->addStretch(1);
++	layout->addWidget(tBarHolder, 1);
++	// Production clock and the momentary private talkback stay under the T-Bar.
++	// Native widgets only: the CEF clock widget corrupted the heap in this column.
++	auto *centerClock = new FreeMixClockLabel(controlsColumn);
++	centerClock->setObjectName("freemixCenterClock");
++	centerClock->setAlignment(Qt::AlignCenter);
++	centerClock->setFixedHeight(132);
++	centerClock->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
++	centerClock->setTextFormat(Qt::RichText);
++	centerClock->setCursor(Qt::PointingHandCursor);
++	centerClock->setToolTip("Duplo clique: escolher quais relógios aparecem aqui.");
++	centerClock->setStyleSheet("background:#0b1116;border:1px solid #2a343e;padding:2px;");
++	centerClock->doubleClicked = []() { FreeMixOpenClocks(); };
++	layout->addWidget(centerClock);
++
++	auto *centerTalk = new QPushButton("Talkback", controlsColumn);
++	centerTalk->setObjectName("freemixCenterTalkback");
++	centerTalk->setFixedHeight(28);
++	centerTalk->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
++	centerTalk->setToolTip("Segure para falar no microfone privado preparado em Calls. Soltar fecha o microfone.");
++	centerTalk->setEnabled(false);
++	centerTalk->setStyleSheet("font-size:11px;padding:0;");
++	layout->addWidget(centerTalk);
++	/* Free space stays below the group: the clock and the talkback always fit, the column never
++	 * grows, and the Preview/Program monitors keep the area they had. */
++	layout->addStretch(1);
++
++	auto *centerTimer = new QTimer(controlsColumn);
++	connect(centerTimer, &QTimer::timeout, controlsColumn, [centerClock, centerTalk]() {
++		centerClock->setText(FreeMixCenterClockHtml());
++		const bool active = FreeMixTalkbackActive();
++		centerTalk->setEnabled(FreeMixTalkbackReady());
++		if (centerTalk->property("talking").toBool() != active) {
++			centerTalk->setProperty("talking", active);
++			centerTalk->setText(active ? "FALANDO" : "Talkback");
++			centerTalk->setStyleSheet(active ? "font-size:10px;padding:0;background:#a11;color:#fff;"
++							 : "font-size:10px;padding:0;");
++		}
++	});
++	centerTimer->start(500);
++	connect(centerTalk, &QPushButton::pressed, this, []() { FreeMixTalkbackPress(true); });
++	connect(centerTalk, &QPushButton::released, this, []() { FreeMixTalkbackPress(false); });
++	auto *talkKeepAlive = new QTimer(centerTalk);
++	talkKeepAlive->setInterval(500);
++	connect(talkKeepAlive, &QTimer::timeout, centerTalk, []() { FreeMixTalkbackKeepAlive(); });
++	connect(centerTalk, &QPushButton::pressed, talkKeepAlive, [talkKeepAlive]() { talkKeepAlive->start(); });
++	connect(centerTalk, &QPushButton::released, talkKeepAlive, [talkKeepAlive]() { talkKeepAlive->stop(); });
++
++	// Two extra quick transitions from the mockup: MERGE and STINGER.
++	// They trigger the project's real quick transitions, not a fake animation.
++	auto *quickRow = new QHBoxLayout();
++	quickRow->setSpacing(2);
++	auto *mergeButton = new QPushButton("MERGE", controlsColumn);
++	auto *stingerButton = new QPushButton("STINGER", controlsColumn);
++	for (auto *button : {mergeButton, stingerButton}) {
++		button->setFixedHeight(23);
++		button->setStyleSheet("font-size:9px; padding:0px;");
++	}
++	mergeButton->setObjectName("freemixQuickMerge");
++	stingerButton->setObjectName("freemixQuickStinger");
++	mergeButton->setToolTip("Transição rápida Merge deste projeto");
++	stingerButton->setToolTip("Transição rápida Stinger deste projeto");
++	connect(mergeButton, &QPushButton::clicked, this, [this]() {
++		for (QuickTransition &qt : quickTransitions) {
++			if (!qt.source || qt.fadeToBlack) continue;
++			const char *name = obs_source_get_name(qt.source);
++			if (name && QString::fromUtf8(name).contains("merge", Qt::CaseInsensitive)) {
++				TriggerQuickTransition(qt.id);
++				return;
++			}
++		}
++	});
++	connect(stingerButton, &QPushButton::clicked, this, [this]() {
++		for (QuickTransition &qt : quickTransitions) {
++			if (!qt.source || qt.fadeToBlack) continue;
++			if (strcmp(obs_source_get_id(qt.source), "stinger_transition") == 0) {
++				TriggerQuickTransition(qt.id);
++				return;
++			}
++		}
++	});
++	auto *quickTimer = new QTimer(controlsColumn);
++	quickTimer->setInterval(1200);
++	connect(quickTimer, &QTimer::timeout, controlsColumn, [this, mergeButton, stingerButton]() {
++		bool merge = false, stinger = false;
++		for (QuickTransition &qt : quickTransitions) {
++			if (!qt.source || qt.fadeToBlack) continue;
++			const char *name = obs_source_get_name(qt.source);
++			if (name && QString::fromUtf8(name).contains("merge", Qt::CaseInsensitive)) merge = true;
++			if (strcmp(obs_source_get_id(qt.source), "stinger_transition") == 0) stinger = true;
++		}
++		mergeButton->setEnabled(merge);
++		stingerButton->setEnabled(stinger);
++	});
++	quickTimer->start();
++	mergeButton->setEnabled(false);
++	stingerButton->setEnabled(false);
++	quickRow->addWidget(mergeButton);
++	quickRow->addWidget(stingerButton);
++	layout->insertLayout(2, quickRow);
+ 
+ 	masterMeter = FreeMixCreateMasterMeter(programOptions);
+ 
+ 	centerLayout->addWidget(controlsColumn);
++	centerLayout->addWidget(FreeMixCreateOverlayButtons(programOptions), 1);
++	if (auto *dskColumn = programOptions->findChild<QWidget *>("freemixOverlayButtons"))
++		FreeMixDskBindBottomLine(dskColumn, centerTalk);
+ 	centerLayout->addWidget(masterMeter);
+ 
+ 	programOptions->setLayout(centerLayout);
++	ui->previewLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
++	ui->previewLabel->setMinimumWidth(0);
+ 	connect(ui->preview, &OBSQTDisplay::DisplayResized, programOptions, [this]() {
++		ui->previewLabel->setMinimumWidth(ui->preview->width());
+ 		ui->previewLabel->setMaximumWidth(ui->preview->width());
+ 	});
++	ui->previewLabel->setMinimumWidth(ui->preview->width());
+ 	ui->previewLabel->setMaximumWidth(ui->preview->width());
+ 
++	// Keep the monitor row at the production aspect: the empty bands above and
++	// below Preview/Program come from a central area taller than 16:9.
++	auto *fitTimer = new QTimer(this);
++	fitTimer->setSingleShot(true);
++	fitTimer->setInterval(180);
++	connect(ui->preview, &OBSQTDisplay::DisplayResized, fitTimer, [fitTimer]() { fitTimer->start(); });
++	connect(fitTimer, &QTimer::timeout, this, [this]() {
++		if (!previewProgramMode || !isVisible() || isMinimized() || property("freemixFitting").toBool()) return;
++		auto *dock = findChild<QDockWidget *>("Mesa_extraBrowser");
++		if (!dock || !dock->isVisible() || ui->preview->width() < 320) return;
++		const int desired = qRound(ui->preview->width() * 9.0 / 16.0) +
++				    (ui->previewLabel->isVisible() ? ui->previewLabel->height() : 0) + 4;
++		const int central = centralWidget() ? centralWidget()->height() : 0;
++		const int extra = central - desired;
++		if (extra <= 10) return;
++		int target = std::min(height() - 180, dock->height() + extra);
++		if (target <= dock->height() + 10) return;
++		setProperty("freemixFitting", true);
++		resizeDocks({dock}, {target}, Qt::Vertical);
++		QTimer::singleShot(350, this, [this]() { setProperty("freemixFitting", false); });
++	});
++	fitTimer->start();
++
+ 	auto onAdd = [this]() {
+ 		QScopedPointer<QMenu> menu(CreateTransitionMenu(this, nullptr));
+ 		menu->exec(QCursor::pos());
+@@ -251,7 +443,7 @@ void OBSBasic::SetPreviewProgramMode(bool enabled)
+ 		RefreshQuickTransitions();
+ 
+ 		programLabel = new QLabel(QTStr("StudioMode.ProgramSceneLabel"), this);
+-		programLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
++		programLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+ 		programLabel->setProperty("class", "label-preview-title");
+ 
+ 		programWidget = new QWidget();
+@@ -266,7 +458,6 @@ void OBSBasic::SetPreviewProgramMode(bool enabled)
+ 
+ 		ui->previewLayout->addWidget(programOptions);
+ 		ui->previewLayout->addWidget(programWidget);
+-		ui->previewLayout->setAlignment(programOptions, Qt::AlignTop);
+ 
+ 		sizeObserver = new PreviewProgramSizeObserver(ui->preview, program, this);
+ 
+-- 
+2.56.0.windows.1
+

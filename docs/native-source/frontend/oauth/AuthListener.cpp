@@ -13,14 +13,14 @@
 static const QString serverResponseHeader = QStringLiteral("HTTP/1.0 200 OK\n"
 							   "Connection: close\n"
 							   "Content-Type: text/html; charset=UTF-8\n"
-							   "Server: FreeMix\n"
+							   "Server: 3Mix\n"
 							   "\n"
-							   "<html><head><title>FreeMix"
+							   "<html><head><title>3Mix"
 							   "</title></head>");
 
 static const QString responseTemplate = "<center>"
 					"<span style=\"font-family:verdana;font-size:24pt;font-weight:bold\" "
-					"aria-label=\"FreeMix\">FM &middot; FreeMix</span>"
+					"aria-label=\"3Mix\">3Mix</span>"
 					"</center>"
 					"<center><p style=\"font-family:verdana; font-size:13pt\">%1</p></center>";
 

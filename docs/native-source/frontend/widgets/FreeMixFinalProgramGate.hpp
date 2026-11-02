@@ -12,7 +12,7 @@ void OBSBasic::FreeMixFinalProgramGateRequest(obs_data_t *request,obs_data_t *re
 {
  const auto fail=[response](const char *reason){obs_data_set_bool(response,"success",false);obs_data_set_string(response,"error",reason);};
  const auto typed=[request](const char *key,enum obs_data_type type){auto *item=obs_data_item_byname(request,key);const bool ok=item&&obs_data_item_gettype(item)==type;obs_data_item_release(&item);return ok;};
- if(isClosing()){fail("FreeMix encerrando; nenhuma etapa final será enviada.");return;}
+ if(isClosing()){fail("3Mix encerrando; nenhuma etapa final será enviada.");return;}
  auto base=FreeMixFtbSnapshot();
  if(!finalGateScope.empty()&&finalGateScope!=base.scope){ResetFreeMixFinalGate();}
  finalGateScope=base.scope;

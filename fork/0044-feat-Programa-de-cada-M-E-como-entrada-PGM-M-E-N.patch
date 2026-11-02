@@ -1,0 +1,26 @@
+From 45a1287fb753d2b5f2b49fa7e0bbc6f5869a8158 Mon Sep 17 00:00:00 2001
+From: Eddy Sangalli <eddyrodrigues@outlook.com>
+Date: Mon, 2 Nov 2026 17:12:11 -0300
+Subject: [PATCH] feat: Programa de cada M/E como entrada "PGM M/E N"
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ frontend/widgets/FreeMixMixEffectManager.hpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/frontend/widgets/FreeMixMixEffectManager.hpp b/frontend/widgets/FreeMixMixEffectManager.hpp
+index c567ada..bc78e3b 100644
+--- a/frontend/widgets/FreeMixMixEffectManager.hpp
++++ b/frontend/widgets/FreeMixMixEffectManager.hpp
+@@ -86,7 +86,7 @@ void ClearIndependentTransition(IndependentMix &mix)
+ // Shared with LoadIndependentMix, which needs the same name to re-adopt an
+ // existing proxy scene after a process restart instead of creating a new one
+ // (see the comment on EnsurePublicProxy below for why this matters).
+-std::string ProxyName(uint32_t mixId) { return std::string("3Mix Mix ") + std::to_string(mixId) + " Output"; }
++std::string ProxyName(uint32_t mixId) { return std::string("PGM M/E ") + std::to_string(mixId); }
+ // Audit finding A7: called back on the proxy scene's own "remove" signal (fires
+ // both for a direct removal and, more commonly, for every scene when the whole
+ // Scene Collection is torn down by ClearSceneData() during a collection
+-- 
+2.56.0.windows.1
+

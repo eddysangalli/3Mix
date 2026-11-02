@@ -665,7 +665,7 @@ void OBSBasic::on_actionExportProfile_triggered()
 void OBSBasic::ActivateProfile(const OBSProfile &profile, bool reset)
 {
 	if (!FreeMixMultistreamDrainSrtHdr()) {
-		QMessageBox::warning(this, "FreeMix SRT HDR", "A saída HDR ainda está parando. A alteração foi recusada. Aguarde a parada e tente novamente.");
+		QMessageBox::warning(this, "3Mix SRT HDR", "A saída HDR ainda está parando. A alteração foi recusada. Aguarde a parada e tente novamente.");
 		return;
 	}
 	ConfigFile config;

@@ -1102,8 +1102,8 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   </div>
 
   <section class="switcher-banks" aria-label="Seleção de entradas">
-    <div class="switcher-bank" id="bank-pv"><h2>PRÉ-VISUALIZAÇÃO (PV)<span class="bank-me"></span><span class="bank-tools"><button class="bank-tool" data-a="banks_pos" title="Mover as botoeiras para baixo, antes do rodapé">⇅</button><button class="bank-tool" data-a="bank_hide" data-v="pv" title="Fechar a botoeira PV. Reabra no rodapé.">×</button></span></h2><div class="switcher-inputs" id="switcher-pv"></div></div>
-    <div class="switcher-bank pgm" id="bank-pgm"><h2>PROGRAMA (PGM)<span class="bank-me-tag"></span><span class="bank-tools"><button class="bank-tool" data-a="bank_hide" data-v="pgm" title="Fechar a botoeira PGM. Reabra no rodapé.">×</button></span></h2><div class="switcher-inputs" id="switcher-pgm"></div></div>
+    <div class="switcher-bank" id="bank-pv"><h2>PRÉ-VISUALIZAÇÃO (PV)<span class="bank-tools"><button class="bank-tool" data-a="banks_pos" title="Mover as botoeiras para baixo, antes do rodapé">⇅</button><button class="bank-tool" data-a="bank_hide" data-v="pv" title="Fechar a botoeira PV. Reabra no rodapé.">×</button></span></h2><div class="switcher-inputs" id="switcher-pv"></div></div>
+    <div class="switcher-bank pgm" id="bank-pgm"><h2>PROGRAMA (PGM)<span class="bank-tools"><button class="bank-tool" data-a="bank_hide" data-v="pgm" title="Fechar a botoeira PGM. Reabra no rodapé.">×</button></span></h2><div class="switcher-inputs" id="switcher-pgm"></div></div>
   </section>
   <div class="tabs" id="tabs"></div>
   <div class="mid">
@@ -1471,7 +1471,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   });
   setInterval(replayPoll, 1500);
 
-  const setScenes = (list) => { st.sceneKeys=Object.fromEntries(list.map(s=>[s.sceneName,s.sceneUuid]));st.scenes = list.slice().sort((a, b) => b.sceneIndex - a.sceneIndex).map((s) => s.sceneName).filter((n) => n !== BUS_SCENE && !n.startsWith("3Mix Slot ") && !/^3Mix Mix \d+ Output$/.test(n)); };
+  const setScenes = (list) => { st.sceneKeys=Object.fromEntries(list.map(s=>[s.sceneName,s.sceneUuid]));st.scenes = list.slice().sort((a, b) => b.sceneIndex - a.sceneIndex).map((s) => s.sceneName).filter((n) => n !== BUS_SCENE && !n.startsWith("3Mix Slot ")); };
   async function syncScenes() {
     const r = await req("GetSceneList");
     setScenes(r.scenes); st.program = r.currentProgramSceneName || ""; st.preview = r.currentPreviewSceneName || "";
@@ -1626,11 +1626,13 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   }
 
   /* ---- miniaturas: só entradas visíveis, com orçamento separado dos comandos ---- */
-  const shown = () => st.scenes.filter((n) => (st.filter === -2 ? n.toLowerCase().includes((st.find || "").toLowerCase()) : st.filter < 0 || st.tags[n] === st.filter) && (!st.tagFilter || st.inputTags?.[n]?.includes(st.tagFilter)));
+  const isMeOutput = (n) => /^PGM M\/E \d+$/.test(n);
+  const isCompositionInput = (n) => !!window.FreeMixProductionState?.inputs?.find((i) => i.name === n)?.composition;
+  const shown = () => st.scenes.filter((n) => (st.inputsTab === 'compositions' ? isCompositionInput(n) : !isCompositionInput(n))).filter((n) => (st.filter === -2 ? n.toLowerCase().includes((st.find || "").toLowerCase()) : st.filter < 0 || st.tags[n] === st.filter) && (!st.tagFilter || st.inputTags?.[n]?.includes(st.tagFilter)));
   function visibleThumbnailNames() {
     if (!st.on || document.hidden || st.paused) return [];
     const names = new Set();
-    for (const img of document.querySelectorAll('#tiles img[data-t],.switcher-inputs img[data-bank-thumb]')) {
+    for (const img of document.querySelectorAll((st.inputsTab === 'me' ? '' : '#tiles img[data-t],') + '.switcher-bank:not(.sem-miniatura) .switcher-inputs img[data-bank-thumb]')) {
       const bounds = img.closest('.tiles,.switcher-inputs').getBoundingClientRect();
       if (bounds.width <= 0 || bounds.height <= 0) continue;
       const left = Math.max(0, bounds.left), top = Math.max(0, bounds.top);
@@ -2401,9 +2403,11 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     modular: () => run(launchPanel('workspace')),
     showmodules: () => { st.mixer = true; st.uiDock1Off = false; store.set("mesa.mixer", true); renderTabs(); applyUiLayout(); renderSideDock(); },
     studio: () => run(req("SetStudioModeEnabled", { studioModeEnabled: !st.studio })),
-    metab: () => { setMeTab(!st.meTab); renderTabs(); },
-    bank_me: (d) => window.ThreeMixME?.select(+d.v),
-    bankpick: (d) => { if (window.ThreeMixME?.target > 1) return run(window.ThreeMixME.pick(d.side, d.v)); return A[d.side === 'pv' ? 'preview' : 'cut'](d); },
+    inputstab: (d) => { setInputsTab(d.v); renderTabs(); renderTiles(); },
+    bankpick: (d) => { const b = bankOf(d.bank); if (!b) return; if (b.me > 1) { if (!window.ThreeMixME) return toast('M/E indisponível nesta instalação', true); return run(window.ThreeMixME.pick(b.bus, d.v, b.me)); } return A[b.bus === 'pv' ? 'preview' : 'cut'](d); },
+    bank_add: () => { const list = banksList(); if (list.length >= 8) return toast('Limite de 8 botoeiras', true); let n = 1; while (list.some((b) => b.id === 'x' + n)) n++; list.push({ id: 'x' + n, me: 2, bus: 'pv' }); saveBanks(); },
+    bank_remove: (d) => { st.banks = banksList().filter((b) => b.id !== d.v); saveBanks(); },
+    bank_thumb: (d) => { const b = bankOf(d.v); if (b) { b.noThumb = !b.noThumb; saveBanks(); } },
     tagfilter: (d) => {setMeTab(false);st.tagFilter=st.tagFilter===d.v?"":d.v;st.filter=-1;renderTabs();renderTiles();},
     filter: (d) => { setMeTab(false); st.filter = +d.v; st.tagFilter="";renderTabs(); renderTiles(); },
     mixer: () => { st.mixer = !st.mixer; store.set("mesa.mixer", st.mixer); renderTabs(); renderSideDock(); },
@@ -2454,7 +2458,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       persistUiLayout(); renderTabs(); applyUiLayout(); renderSideDock();
     },
     ui_reset: () => {
-      st.uiPv = true; st.uiPgm = true; st.uiBanksBottom = false; st.uiInputs = true; st.uiDock2 = false; st.uiDock1Off = false;
+      st.banks = BANKS_DEFAULT(); store.set("mesa.banks", st.banks); switcherStructure = ""; st.uiPv = true; st.uiPgm = true; st.uiBanksBottom = false; st.uiInputs = true; st.uiDock2 = false; st.uiDock1Off = false;
       st.dockTabs = [["list", "mixer", "dsk", "rundown", "ptz"], ["replay"]];
       st.mixer = true; st.sideTab = "mixer"; st.side2Tab = "replay";
       persistUiLayout(); renderTabs(); applyUiLayout(); renderSideDock();
@@ -2623,7 +2627,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     editorrelease:()=>editorController().abandon(),
     editordismiss:()=>{if(!inputEditorController?.pending())$("input-editor-status").hidden=true;},
     projector: (d) => { closePop(); run(req("OpenSourceProjector", { sourceName: d.v, monitorIndex: -1 })); },
-    renameask: (d) => openPop("rename", d.v),
+    renameask: (d) => { if (isMeOutput(d.v)) return toast('Esta entrada é o Programa de um M/E; o nome é fixo.', true); openPop("rename", d.v); },
     renamego: () => run((async () => {
       const from = st.popArg, to = $("rn-name").value.trim(); if (!to || to === from) return closePop();
       await req("SetSceneName", { sceneName: from, newSceneName: to });
@@ -2706,38 +2710,77 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     });
   }
   let switcherStructure = '';
+  // Cada botoeira escolhe PV ou PGM e o M/E que controla. PV e PGM do MAIN vêm de fábrica; as extras o operador adiciona.
+  const BANKS_DEFAULT = () => [{id:"pv",me:1,bus:"pv"},{id:"pgm",me:1,bus:"pgm"}];
+  function banksList() {
+    if (!st.banks) {
+      const saved = store.get("mesa.banks", null);
+      const ok = Array.isArray(saved) && saved.length >= 2 && saved.every((b) => /^(pv|pgm|x\d+)$/.test(b?.id) && [1,2,3,4].includes(b?.me) && ["pv","pgm"].includes(b?.bus));
+      st.banks = ok ? saved : BANKS_DEFAULT();
+    }
+    return st.banks;
+  }
+  const bankOf = (id) => banksList().find((b) => b.id === id);
+  const saveBanks = () => { store.set("mesa.banks", st.banks); switcherStructure = ""; renderSwitcherBanks(); applyUiLayout(); window.ThreeMixME?.tick(); };
+  window.ThreeMixBanksUseMe = () => banksList().some((b) => b.me > 1);
+  function ensureBankElements() {
+    const box = document.querySelector(".switcher-banks"), ids = new Set(banksList().map((b) => b.id));
+    for (const el of [...box.querySelectorAll(".switcher-bank")]) if (!ids.has(el.id.slice(5))) el.remove();
+    for (const b of banksList()) {
+      let el = $("bank-" + b.id);
+      if (!el) { el = document.createElement("div"); el.className = "switcher-bank"; el.id = "bank-" + b.id; el.innerHTML = `<h2></h2><div class="switcher-inputs" id="switcher-${b.id}"></div>`; box.append(el); }
+      el.classList.toggle("pgm", b.bus === "pgm");
+      el.classList.toggle("em-me", b.me > 1);
+      el.classList.toggle("sem-miniatura", !!b.noThumb);
+      const mes = [1,2,3,4].map((m) => `<option value="${m}"${b.me === m ? " selected" : ""}>${m === 1 ? "MAIN" : "M/E " + m}</option>`).join("");
+      el.querySelector("h2").innerHTML = `<span class="bank-nome">${b.me > 1 ? "M/E " + b.me + " · " : ""}${b.bus === "pv" ? "PRÉ-VISUALIZAÇÃO (PV)" : "PROGRAMA (PGM)"}</span>`
+        + `<span class="bank-config"><select class="bank-sel" data-bank-bus="${b.id}" aria-label="Barramento desta botoeira" title="Esta botoeira prepara no Preview ou corta para o Programa"><option value="pv"${b.bus === "pv" ? " selected" : ""}>PV</option><option value="pgm"${b.bus === "pgm" ? " selected" : ""}>PGM</option></select>`
+        + `<select class="bank-sel bank-sel-me" data-bank-me="${b.id}" aria-label="M/E desta botoeira" title="M/E que esta botoeira controla">${mes}</select></span>`
+        + `<span class="bank-tools"><button class="bank-tool" data-a="bank_add" title="Adicionar botoeira">+</button><button class="bank-tool" data-a="bank_thumb" data-v="${b.id}" title="${b.noThumb ? "Mostrar as miniaturas desta botoeira" : "Tirar as miniaturas desta botoeira para aliviar o sistema"}">${b.noThumb ? "▣" : "▢"}</button>`
+        + (b.id === "pv" ? `<button class="bank-tool" data-a="banks_pos" title="${st.uiBanksBottom ? "Mover as botoeiras de volta para cima" : "Mover as botoeiras para baixo, antes do rodapé"}">${st.uiBanksBottom ? "↑" : "↓"}</button>` : "")
+        + (b.id === "pv" || b.id === "pgm" ? `<button class="bank-tool" data-a="bank_hide" data-v="${b.id}" title="Fechar esta botoeira. Reabra no rodapé.">×</button>` : `<button class="bank-tool" data-a="bank_remove" data-v="${b.id}" title="Remover esta botoeira">×</button>`) + `</span>`;
+    }
+  }
+  document.addEventListener("change", (event) => {
+    const t = event.target;
+    if (t.dataset?.bankBus) { bankOf(t.dataset.bankBus).bus = t.value; saveBanks(); }
+    else if (t.dataset?.bankMe) { bankOf(t.dataset.bankMe).me = Number(t.value); saveBanks(); }
+  });
   function renderSwitcherBanks() {
     const names = st.on ? st.scenes : [];
-    const structure = JSON.stringify(names);
+    const structure = JSON.stringify([names, banksList()]);
     if (switcherStructure !== structure) {
       switcherStructure = structure;
-      for (const side of ['pv','pgm']) {
-        const bank = $('switcher-' + side);
-        bank.innerHTML = names.map((name,index) => `<button class="switcher-input" data-bank-input="${esc(name)}" data-a="bankpick" data-side="${side}" data-v="${esc(name)}" title="${side === 'pv' ? 'Preparar no Preview' : 'Corte direto para o Programa'}: ${esc(name)}"><img data-bank-thumb="${esc(name)}" src="${thumbs.get(name) || blank}" alt=""><span><b>${index + 1}</b><em>${esc(name)}</em></span></button>`).join('');
+      ensureBankElements();
+      for (const b of banksList()) {
+        $("switcher-" + b.id).innerHTML = names.map((name,index) => name === "PGM M/E " + b.me ? "" : `<button class="switcher-input" data-bank-input="${esc(name)}" data-a="bankpick" data-bank="${b.id}" data-v="${esc(name)}" title="${b.bus === "pv" ? "Preparar no Preview" : "Corte direto para o Programa"}${b.me > 1 ? " do M/E " + b.me : ""}: ${esc(name)}"><img data-bank-thumb="${esc(name)}" src="${thumbs.get(name) || blank}" alt=""><span><b>${index + 1}</b><em>${esc(name)}</em></span></button>`).join("");
       }
     }
     paintSwitcherBanks();
   }
   function paintSwitcherBanks() {
-    for (const side of ['pv','pgm']) {
-      const me = window.ThreeMixME?.target > 1 ? window.ThreeMixME : null;
-      const selected = me ? me.selectedName(side) : side === 'pv' ? st.preview : st.program;
-      for (const button of $('switcher-' + side).querySelectorAll('[data-bank-input]')) {
+    for (const b of banksList()) {
+      const box = $("switcher-" + b.id);
+      if (!box) continue;
+      const selected = b.me > 1 ? window.ThreeMixME?.selectedName(b.bus, b.me) : b.bus === "pv" ? st.preview : st.program;
+      for (const button of box.querySelectorAll("[data-bank-input]")) {
         const active = st.on && button.dataset.bankInput === selected;
-        button.classList.toggle('selected', active);
-        button.setAttribute('aria-pressed', String(active));
+        button.classList.toggle("selected", active);
+        button.setAttribute("aria-pressed", String(active));
       }
     }
   }
   window.ThreeMixRepaintBanks = paintSwitcherBanks;
-  function setMeTab(on) { st.meTab = on; document.body.classList.toggle('me-on', on); if (on) window.ThreeMixME?.tick(); }
+  window.ThreeMixMeOpenWindow = () => run(rpDockOpenWindow("/me"));
+  function setInputsTab(tab) { st.inputsTab = tab; document.body.classList.toggle('me-on', tab === 'me'); if (tab === 'me') window.ThreeMixME?.tick(); }
+  function setMeTab(on) { if (on) setInputsTab('me'); else if (st.inputsTab === 'me') setInputsTab('inputs'); }
   function renderTabs() {
     const used = new Set(Object.values(st.tags)), names = st.catNames;
     const tip = "mostrar só as entradas desta categoria. Clique direito: dar nome às categorias. Arraste uma miniatura até aqui para pôr a entrada nela.";
     $("tabs").innerHTML = ""
       + `<span class="module-handle" draggable="true" data-module-drag="inputs" title="Arraste sobre o Mixer para trocar os módulos de lado">⠿ Fontes</span>`
-      + `<button class="c me-tab${st.meTab ? " on" : ""}" data-a="metab" title="Superfícies de corte dos M/Es">M/E</button>`
-      + `<button class="c all${st.filter === -1 && !st.meTab ? " on" : ""}" data-a="filter" data-v="-1" title="Mostrar todas as entradas. Clique direito: dar nome às categorias.">Todas</button>`
+      + `<button class="c mod-tab${(st.inputsTab || "inputs") === "inputs" ? " on" : ""}" data-a="inputstab" data-v="inputs" title="Câmeras, mídia, áudio e demais entradas">Entradas</button><button class="c mod-tab${st.inputsTab === "compositions" ? " on" : ""}" data-a="inputstab" data-v="compositions" title="Entradas compostas">Composições</button><button class="c mod-tab me-tab${st.inputsTab === "me" ? " on" : ""}" data-a="inputstab" data-v="me" title="Superfícies de corte dos M/Es">M/E</button>`
+      + `<button class="c all${st.filter === -1 ? " on" : ""}" data-a="filter" data-v="-1" title="Mostrar todas as entradas. Clique direito: dar nome às categorias.">Todas</button>`
       + [...new Set(Object.values(st.inputTags||{}).flat())].sort().map(tag=>`<button class="c named${st.tagFilter===tag?" on":""}" data-a="tagfilter" data-v="${esc(tag)}">${esc(tag)}</button>`).join("")
       + COLORS.map((c, i) => `<button class="c${names[i] ? " named" : ""}${st.filter === i ? " on" : ""}" style="background:${c};opacity:${used.has(i) || names[i] ? 1 : .45}" data-a="filter" data-v="${i}" data-cat="${i}" title="${names[i] ? esc(names[i]) + ": " : "Categoria: "}${tip}">${esc(names[i] || "")}</button>`).join("")
       + `<button class="c find${st.filter === -2 ? " on" : ""}" data-a="catfind" title="Busca: mostrar só as entradas cujo nome contém um texto. Clique de novo para trocar o texto.">${FIND}${st.filter === -2 && st.find ? `<span>${esc(st.find)}</span>` : ""}</button>`
@@ -2767,6 +2810,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
         : `DSK ${k + 1}: preparar esta entrada (não entra no ar no primeiro clique).`;
       return `<button class="${onAir ? "on" : replaceReady ? "replace-ready" : assigned ? "assigned" : ""}" data-a="ov" data-k="${k}" data-v="${esc(name)}" title="${title}">${k + 1}</button>`;
     }).join("");
+    if (st.inputsTab === 'compositions' && !shown().length) { box.innerHTML = '<div class="empty"><b>Nenhuma composição</b><br><button class="b" data-a="pop" data-v="compositions">Criar composição</button></div>'; return; }
     box.innerHTML = shown().map((name) => {
       const isOut = name === st.program || st.recursiveTally?.program?.includes(name), isPv = st.studio && (name === st.preview || st.recursiveTally?.preview?.includes(name));
       const cls = isOut ? "out" : isPv ? "pv" : "";
@@ -2803,7 +2847,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
           ${st.iso.get(name) ? `<b class="iso" title="Gravação isolada em andamento">ISO</b>` : ""}
           <i class="tag${tag === undefined ? " none" : ""}" style="background:${tag === undefined ? "transparent" : COLORS[tag]}" data-a="tag" data-v="${v}" title="Cor da entrada"></i>
           <button class="min-btn" data-a="minimizetoggle" data-v="${v}" ${sceneButtonAttrs(name)} title="Recolher cartão; mantém a entrada no motor">−</button>
-          ${isOut ? "" : `<button class="x" data-a="closeask" data-v="${v}" ${sceneButtonAttrs(name)} title="Excluir entrada do projeto">×</button>`}
+          ${isOut || isMeOutput(name) ? "" : `<button class="x" data-a="closeask" data-v="${v}" ${sceneButtonAttrs(name)} title="Excluir entrada do projeto">×</button>`}
         </div>
         <button class="th" draggable="true" data-a="preview" data-v="${v}" title="Clique: envia para o Preview. Arraste até uma aba de categoria para pôr a entrada nela.">
           <img data-t="${v}" src="${thumbs.get(name) || blank}" alt="">
@@ -2838,10 +2882,13 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     await vendor("dsk_add_scene", { dsk_name: BUS_KEYER, scene: BUS_SCENE }).catch(() => {}); await vendor("dsk_select_scene", { dsk_name: BUS_KEYER, scene: BUS_SCENE }).catch(() => {});
     return on();
   };
+  let busRetry = null;
   async function busCheck() {
     try {const response=await fetch(replayUrl.replace(/replay$/, 'json'),{signal:AbortSignal.timeout(4000)});if(!response.ok)throw Error('Sem resposta do controle');const state=await response.json();st.busFault=st.busOn&&!state.buses?(state.busSetupError||'Barramentos incompletos: confira as trilhas e o caminho de áudio.'):'';}
     catch { st.busFault = st.busOn ? 'Sem confirmação dos barramentos pelo controle.' : ''; }
     renderMixer();
+    // Na abertura o controle ainda está montando os barramentos: confere de novo em vez de deixar o aviso preso.
+    clearTimeout(busRetry); busRetry = st.busFault ? setTimeout(busCheck, 3000) : null;
   }
   // Inputs instead of scenes: for the operator an input is one thing (a camera, a video, a title). What the engine
   // calls a scene is only the container of that input. Composition is done the way the reference does it:
@@ -3121,7 +3168,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     body.classList.toggle("banks-bottom", !!st.uiBanksBottom);
     body.classList.toggle("no-pv", !st.uiPv);
     body.classList.toggle("no-pgm", !st.uiPgm);
-    body.classList.toggle("no-banks", !st.uiPv && !st.uiPgm);
+    body.classList.toggle("no-banks", !st.uiPv && !st.uiPgm && !banksList().some((b) => b.id !== "pv" && b.id !== "pgm"));
     body.classList.toggle("no-inputs", !st.uiInputs);
     body.classList.toggle("dock2", !!st.uiDock2 && !!st.mixer);
     body.classList.toggle("dock1-off", !!st.uiDock1Off && !!st.mixer);
@@ -3429,7 +3476,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok || result.success !== true) throw Error(result.error || "A janela completa não foi aberta");
-      toast("Janela do Replay aberta");
+      toast("Janela aberta");
     } catch (error) {
       toast("Não foi possível abrir a janela completa: " + error.message, true);
     }
@@ -4165,7 +4212,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     else A.asetfx(d.fx, d.k, v);
   });
   document.addEventListener("change", (e) => { const d = e.target.dataset; if (d && d.fxon && st.aset) A.asetenable(d.fxon, e.target.checked); });
-  document.addEventListener("contextmenu", (e) => { e.preventDefault(); if (e.target.closest(".c")) return openPop("catnames"); const t = e.target.closest(".tile"); if (t) openPop("menu", t.dataset.s); });
+  document.addEventListener("contextmenu", (e) => { e.preventDefault(); if (e.target.closest(".c")) return openPop("catnames"); const t = e.target.closest(".tile"); if (t) { if (isMeOutput(t.dataset.s)) return toast('Esta entrada é o Programa de um M/E. Ajuste na aba M/E.'); openPop("menu", t.dataset.s); } });
   document.addEventListener("input", (e) => {
     if (e.target.id === "add-name") e.target.dataset.edited = "1";
     if (e.target.id === "add-name" || e.target.id === "add-n" || (e.target.id || "").startsWith("add-f-")) refreshAddPreview();
@@ -4497,7 +4544,9 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
 <script src="remoto/atalhos-engine.js"></script>
 <script src="remoto/input-editor-feedback.js"></script>
 <script src="remoto/input-menu-ui.js"></script>
-<script type="module" src="remoto/switcher-strip-host.js?v=20261102d"></script>
+<script src="remoto/switcher-strip-model.js?v=20261102e"></script>
+<script src="remoto/switcher-strip.js?v=20261102g"></script>
+<script src="remoto/switcher-strip-host.js?v=20261102g"></script>
 <script src="mesa-estado.js"></script>
 </body>
 </html>

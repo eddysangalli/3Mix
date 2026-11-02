@@ -8,11 +8,11 @@ BEGIN
     BLOCK "040904B0"
     BEGIN
       VALUE "CompanyName", "FreeMix"
-      VALUE "FileDescription", "FreeMix Studio"
+      VALUE "FileDescription", "3Mix Studio"
       VALUE "FileVersion", "${OBS_VERSION_CANONICAL}"
       VALUE "InternalName", "FreeMix"
       VALUE "OriginalFilename", "FreeMix.exe"
-      VALUE "ProductName", "FreeMix Studio"
+      VALUE "ProductName", "3Mix Studio"
       VALUE "ProductVersion", "${OBS_VERSION_CANONICAL}"
       VALUE "Comments", "Live production software built on OBS Studio, free and open source software (GPL-2.0-or-later)"
       VALUE "LegalCopyright", "${OBS_LEGAL_COPYRIGHT}"

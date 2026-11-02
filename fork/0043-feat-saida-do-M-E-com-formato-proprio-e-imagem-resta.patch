@@ -1,0 +1,105 @@
+From d4023ffed73731b87d0a48d7ad6f360d9254e736 Mon Sep 17 00:00:00 2001
+From: Eddy Sangalli <eddyrodrigues@outlook.com>
+Date: Mon, 2 Nov 2026 16:12:57 -0300
+Subject: [PATCH] feat: saida do M/E com formato proprio e imagem restaurada
+
+- M/E nasce no formato da producao quando nao ha configuracao salva
+- Saida de formato diferente entra inteira no quadro, recortada no proprio formato
+- Imagem volta depois de reconfigurar, trocar de projeto e reiniciar
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ frontend/widgets/FreeMixMixEffectManager.hpp | 36 +++++++++++++++++---
+ frontend/widgets/FreeMixMultistream.cpp      |  1 +
+ 2 files changed, 32 insertions(+), 5 deletions(-)
+
+diff --git a/frontend/widgets/FreeMixMixEffectManager.hpp b/frontend/widgets/FreeMixMixEffectManager.hpp
+index 88e9bb0..c567ada 100644
+--- a/frontend/widgets/FreeMixMixEffectManager.hpp
++++ b/frontend/widgets/FreeMixMixEffectManager.hpp
+@@ -159,9 +159,15 @@ void EnsurePublicProxy(IndependentMix &mix, uint32_t mixId)
+ 		vec2 position; vec2_set(&position, 0.0f, 0.0f);
+ 		obs_sceneitem_set_scale(mix.proxyItem, &scale);
+ 		obs_sceneitem_set_pos(mix.proxyItem, &position);
+-		obs_sceneitem_set_bounds_type(mix.proxyItem, OBS_BOUNDS_STRETCH);
+-		vec2 bounds; vec2_set(&bounds, float(mix.width), float(mix.height));
+-		obs_sceneitem_set_bounds(mix.proxyItem, &bounds);
++					obs_sceneitem_set_bounds_type(mix.proxyItem, OBS_BOUNDS_SCALE_INNER);
++			obs_sceneitem_set_bounds_alignment(mix.proxyItem, OBS_ALIGN_CENTER);
++			obs_video_info canvas{};
++			const bool hasCanvas = obs_get_video_info(&canvas) && canvas.base_width && canvas.base_height;
++			vec2 bounds; vec2_set(&bounds, float(hasCanvas ? canvas.base_width : mix.width), float(hasCanvas ? canvas.base_height : mix.height));
++			obs_sceneitem_set_bounds(mix.proxyItem, &bounds);
++		// Parada, a transição desenha a fonte sem recortar. Em formato diferente da produção,
++		// o filtro de escala faz o item passar por uma textura do tamanho do M/E e recorta o excesso.
++		if(hasCanvas&&(canvas.base_width!=mix.width||canvas.base_height!=mix.height))obs_sceneitem_set_scale_filter(mix.proxyItem,OBS_SCALE_BILINEAR);
+ 	}
+ }
+ OBSSourceAutoRelease FrameMixSource(IndependentMix &mix, obs_source_t *source)
+@@ -310,7 +316,7 @@ void RequestMix(obs_data_t *request, obs_data_t *response, void *)
+ 			else if(!std::isfinite(positionX)||!std::isfinite(positionY)||!std::isfinite(zoom)||positionX<0||positionX>1||positionY<0||positionY>1||zoom<1||zoom>4)error="invalid Mix 2 crop position or zoom";
+ 			else if(transitionUuid=="builtin:move_transition"&&!moveLoaded)error="Move plugin is not loaded; choose Fade or another available transition explicitly";
+ 			else if(!transitionUuid.empty()&&transitionUuid!="builtin:move_transition"&&(!selected||obs_source_get_type(selected)!=OBS_SOURCE_TYPE_TRANSITION||IsPrivateSource(selected)))error="select a loaded transition";
+-			else { ClearIndependentTransition(mix);mix.width = width; mix.height = height; mix.fill = fill; mix.positionX=positionX;mix.positionY=positionY;mix.zoom=zoom;mix.transitionUuid=transitionUuid; }
++			else { ClearIndependentTransition(mix);mix.width = width; mix.height = height; mix.fill = fill; mix.positionX=positionX;mix.positionY=positionY;mix.zoom=zoom;mix.transitionUuid=transitionUuid; if(!mix.programUuid.empty())EnsureIndependentMix(mix,mixId); }
+ 		} else if (action == "preview") {
+ 			OBSSourceAutoRelease source = obs_get_source_by_uuid(uuid.c_str());
+ 			if (!source || IsPrivateSource(source) || !obs_source_get_width(source)) error = "select a video input outside private director sources";
+@@ -339,6 +345,25 @@ void RequestMix(obs_data_t *request, obs_data_t *response, void *)
+ 	}
+ }
+ 
++void ApplyProductionFormat(IndependentMix &mix)
++{
++	obs_video_info canvas{};
++	if(!obs_get_video_info(&canvas))return;
++	const uint32_t w=canvas.base_width,h=canvas.base_height;
++	if(w>=240&&w<=3840&&h>=240&&h<=3840&&!(w%2)&&!(h%2)){mix.width=w;mix.height=h;}
++}
++// Depois de abrir ou trocar de projeto, cada M/E volta a mostrar o que estava no ar.
++// Só age quando a fonte já existe, e pode ser chamada mais de uma vez.
++void RestoreIndependentMixes()
++{
++	for(size_t i=0;i<independentMixes.size();i++){
++		auto &mix=independentMixes[i];
++		if(mix.transition||mix.programUuid.empty())continue;
++		OBSSourceAutoRelease source=obs_get_source_by_uuid(mix.programUuid.c_str());
++		if(!source)continue;
++		EnsureIndependentMix(mix,uint32_t(i+2));
++	}
++}
+ void SaveIndependentMix()
+ {
+ 	const auto path = ConfigPath(); if(path.empty())return;
+@@ -347,7 +372,7 @@ void SaveIndependentMix()
+ }
+ void LoadIndependentMix()
+ {
+-	for(auto &mix:independentMixes){ClearIndependentTransition(mix);mix=IndependentMix{};}
++	for(auto &mix:independentMixes){ClearIndependentTransition(mix);mix=IndependentMix{};ApplyProductionFormat(mix);}
+ 	const auto path=ConfigPath();if(path.empty())return;
+ 	OBSDataAutoRelease data=obs_data_create_from_json_file_safe((path+".mix2.json").c_str(),"bak");if(!data)return;
+ 	OBSDataArrayAutoRelease list=obs_data_get_array(data,"mixes");
+@@ -359,6 +384,7 @@ void LoadIndependentMix()
+ 		mix.positionX=std::isfinite(x)&&x>=0&&x<=1?x:0.5;mix.positionY=std::isfinite(y)&&y>=0&&y<=1?y:0.5;mix.zoom=std::isfinite(z)&&z>=1&&z<=4?z:1.0;
+ 		mix.previewUuid=obs_data_get_string(row,"previewUuid");mix.programUuid=obs_data_get_string(row,"programUuid");
+ 	}
++	RestoreIndependentMixes();
+ }
+ 
+ void Clear()
+diff --git a/frontend/widgets/FreeMixMultistream.cpp b/frontend/widgets/FreeMixMultistream.cpp
+index 75b90ec..dccfda4 100644
+--- a/frontend/widgets/FreeMixMultistream.cpp
++++ b/frontend/widgets/FreeMixMultistream.cpp
+@@ -1748,6 +1748,7 @@ void OnFrontendEvent(enum obs_frontend_event event, void *)
+ 	case OBS_FRONTEND_EVENT_FINISHED_LOADING:
+ 		frontendClosing=false;
+ 		RegisterVendor();
++		mixEffectManager.RestoreIndependentMixes();
+    for(QDockWidget *dock : OBSBasic::Get()->findChildren<QDockWidget *>()) {
+    if(dock->objectName()=="Menu_extraBrowser"||dock->objectName()=="Mesa_extraBrowser") {
+     auto *title=new QWidget(dock);title->setFixedHeight(0);dock->setTitleBarWidget(title);
+-- 
+2.56.0.windows.1
+

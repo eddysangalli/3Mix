@@ -913,7 +913,7 @@ OBSApp::OBSApp(int &argc, char **argv, profiler_name_store_t *store)
 	  appLaunchUUID_(QUuid::createUuid())
 {
 	installNativeEventFilter(new OBS::NativeEventFilter);
-	setApplicationDisplayName("FreeMix Studio");
+	setApplicationDisplayName("3Mix Studio");
 
 	/* fix float handling */
 #if defined(Q_OS_UNIX)

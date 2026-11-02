@@ -10,8 +10,8 @@ const NOME_ANTIGO=/"FreeMix (?!ICE"|Project Template|Recovery"|Settings"|New Pro
 async function migrarNomes3Mix(cfg){
  const alvos=[...await files(join(cfg,'basic/scenes'),name=>/\.(json|bak|salvo)$/.test(name)),...await files(join(cfg,'plugin_config'),name=>/\.json$/.test(name))];
  for(const file of alvos){
-  const old=await read(file);if(old===null||!old.includes('"FreeMix '))continue;
-  const novo=old.replace(NOME_ANTIGO,'"3Mix ');if(novo===old)continue;
+  const old=await read(file);if(old===null||!/"(?:FreeMix |3Mix Mix \d+ Output")/.test(old))continue;
+  const novo=old.replace(NOME_ANTIGO,'"3Mix ').replace(/"3Mix Mix (\d+) Output"/g,'"PGM M/E $1"');if(novo===old)continue;
   if(await read(file+'.pre-3mix')===null)await copyFile(file,file+'.pre-3mix');
   await writeFile(file,novo);
  }

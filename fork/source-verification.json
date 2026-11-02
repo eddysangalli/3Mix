@@ -1,8 +1,8 @@
 {
   "status": "PASS",
   "base": "ba2f32bdf791005443988a4955e963663e16b1ed",
-  "head": "7b77e328ec4741ab734e43f3275d37d9d1dfd22e",
-  "resultTree": "56ce11867c077323e36c81265176971d76a3c601",
+  "head": "45a1287fb753d2b5f2b49fa7e0bbc6f5869a8158",
+  "resultTree": "8a6b6158258fdbce14be3010a2b68a8acaa34189",
   "submodules": [
     {
       "path": "deps/libdshowcapture/src",
@@ -16,9 +16,9 @@
       "path": "plugins/obs-browser",
       "base": "3f0a2cdf378939ebe3c6f9ab36d4ea100c25aac2",
       "baseTree": "c28c9249becf1dcdb730bc3150bb05f92953a81d",
-      "head": "dd26fda9cd8e507934f080be14f44038506c3b7e",
-      "headTree": "c4be2403bdd7ab64dc18dc3e005f804a40e94563",
-      "patches": 1
+      "head": "798c334d80dee725cabde46708120ddb1d1b1204",
+      "headTree": "db82da891d9ab49195083567af84e4b55bb738fa",
+      "patches": 2
     },
     {
       "path": "plugins/obs-websocket",
@@ -34,6 +34,11 @@
       "path": "plugins/obs-browser/browser-client.cpp",
       "bytes": 19623,
       "sha256": "ada13b266e6f9431287997fad482ee0c2cda9fb1873c8b590898c00783a7cab1"
+    },
+    {
+      "path": "plugins/obs-browser/data/error.html",
+      "bytes": 41408,
+      "sha256": "046e53b92e9095b51959a73761ba55904d66c5ec7dc41aef69d8e359a778f678"
     },
     {
       "path": "plugins/obs-websocket/src/eventhandler/EventHandler.cpp",
@@ -102,18 +107,18 @@
     },
     {
       "path": "frontend/OBSApp.cpp",
-      "bytes": 54220,
-      "sha256": "c1d0b873690836f3e9f1a7ac3f32411c1295419fb530f6fd9c0663458aba78fe"
+      "bytes": 54217,
+      "sha256": "e42e5765245cf137896736cbc2d1f6d755840e67709052bfee0fa6a215d2f3d1"
     },
     {
       "path": "frontend/cmake/ui-widgets.cmake",
-      "bytes": 2905,
-      "sha256": "13f254b089f7f04f2e369a5516293cde1496f5db3fe3973f4cd6bec19f51b5a6"
+      "bytes": 2945,
+      "sha256": "6fc24f8fe9a817cc04073c5f04e7cbf01dc451f148faa6db5b9b461285329bf0"
     },
     {
       "path": "frontend/cmake/windows/freemix.ico",
-      "bytes": 51989,
-      "sha256": "10957cc2e01e186a52486428e4b41ed443143c00cb1f7c8c3aef56c5200ad43b"
+      "bytes": 13360,
+      "sha256": "8786a2a0056343098ad2bd11f060ea70740497293892cc016014ca2f35c91cae"
     },
     {
       "path": "frontend/cmake/windows/obs.manifest",
@@ -122,28 +127,28 @@
     },
     {
       "path": "frontend/cmake/windows/obs.rc.in",
-      "bytes": 812,
-      "sha256": "cc8fc25934fec4d3751b7713d3d43ca5a8e370c4628687cb2a4491d6b64d4522"
+      "bytes": 806,
+      "sha256": "a22903a6b6cf16bba501036ba5678508a502ccc5f7aa01439474f963de6144fa"
     },
     {
       "path": "frontend/data/locale/en-US.ini",
-      "bytes": 95761,
-      "sha256": "ff44043724df31861805dc8cb97c5353c2a0341e20b8efa00c29db0104eedec9"
+      "bytes": 95662,
+      "sha256": "e9ec578eea17521966ee1d92193b7f62ef5b2e0a736fcc44868c210c18641449"
     },
     {
       "path": "frontend/data/locale/pt-BR.ini",
-      "bytes": 97827,
-      "sha256": "37bc286930d9f0e7aa7be998faa66c20eef42e16ce3ae6ae985a221ac6da8d82"
+      "bytes": 97719,
+      "sha256": "105cd47d3e8097c61246fae57396035801f6fd06312cdd8383ca0ed4376bd312"
     },
     {
       "path": "frontend/dialogs/OBSAbout.cpp",
-      "bytes": 4628,
-      "sha256": "5d416f3b69fbdbf1be54a5a9c645e8dedb50f0df7915ee7b94eac3853350c016"
+      "bytes": 4625,
+      "sha256": "81efd1f31856e7fa1c6cc1195d55212d251d501722f75b460d4184e5c763c92c"
     },
     {
       "path": "frontend/dialogs/OBSYoutubeActions.cpp",
-      "bytes": 26395,
-      "sha256": "16c5283a635c415e905c96f1dea98a2cd15e3132dbb23f585185180a451fcddd"
+      "bytes": 26389,
+      "sha256": "128c22084ea4d818b858b4a166b627f695b9dc5d6f3bfd3f8048d291eb7d7a16"
     },
     {
       "path": "frontend/forms/OBSAbout.ui",
@@ -157,8 +162,8 @@
     },
     {
       "path": "frontend/forms/images/freemix.png",
-      "bytes": 26373,
-      "sha256": "de5fbfbfd5829f8c761e6fbd6ab91cfa401194242e38b21e3f3296e0fff3f213"
+      "bytes": 13706,
+      "sha256": "4802c79abe16dfb5f708641b558af2aa6a4198ca8e0394b6ccaddd65ba922903"
     },
     {
       "path": "frontend/forms/obs.qrc",
@@ -167,13 +172,13 @@
     },
     {
       "path": "frontend/importers/studio.cpp",
-      "bytes": 7958,
-      "sha256": "6ac0fb171667572d371f81162a099faf6734545cded2bc8982697bec3b591ed8"
+      "bytes": 7955,
+      "sha256": "2002a58c80cd475d87b0b15e806f66208bf349d4aa547ceca8152c488dabd3be"
     },
     {
       "path": "frontend/oauth/AuthListener.cpp",
-      "bytes": 2811,
-      "sha256": "fc437a59512b3bb21c867fc4ad7b3b93c1a01dc3bc09b7764d87700ad65d3e5c"
+      "bytes": 2787,
+      "sha256": "e20006042f67817406c9a81bf126e776e47ceba9fc02d74bbb4c5c6ab832352a"
     },
     {
       "path": "frontend/oauth/YoutubeAuth.cpp",
@@ -182,8 +187,8 @@
     },
     {
       "path": "frontend/obs-main.cpp",
-      "bytes": 30498,
-      "sha256": "304edf318d7272029293d30f14df7b19247720ce5b0fe29fc0be497c14c9abf8"
+      "bytes": 30500,
+      "sha256": "acbf7cd1c32f3c7f3133a2eac18377e402926425675a3a9663796ebe5c2eedb8"
     },
     {
       "path": "frontend/utility/AutoUpdateThread.cpp",
@@ -207,8 +212,8 @@
     },
     {
       "path": "frontend/widgets/FreeMixAudioRouting.cpp",
-      "bytes": 30244,
-      "sha256": "40a9b200c24ca1de8abc82012dd074d6b4dd31f2a6d852140d05e21864a5395f"
+      "bytes": 30229,
+      "sha256": "2a103a999a78eca960752f6231ea67812f90d0e66c467daf31b4f9b6368a8055"
     },
     {
       "path": "frontend/widgets/FreeMixAudioRouting.hpp",
@@ -232,8 +237,8 @@
     },
     {
       "path": "frontend/widgets/FreeMixCallVideo.cpp",
-      "bytes": 16455,
-      "sha256": "7edc78d639c804903d81711e6d2db953266e46e93da4c64af6e267e80fa77d66"
+      "bytes": 16446,
+      "sha256": "7a37e3cd37354d9463c8b7fc37cf308d7d06e643954ba8708a7a6326549df17c"
     },
     {
       "path": "frontend/widgets/FreeMixCallVideo.hpp",
@@ -257,13 +262,13 @@
     },
     {
       "path": "frontend/widgets/FreeMixCenterColumn.cpp",
-      "bytes": 15794,
-      "sha256": "0496641ce5547cb334ea8743338891a276e77e0fe75bdb1da79ebd5895bc40af"
+      "bytes": 34848,
+      "sha256": "3d628db2faabf637b3006a2b02fecf5b13924fe25194551cf7d3aebec3911764"
     },
     {
       "path": "frontend/widgets/FreeMixCenterColumn.hpp",
-      "bytes": 1468,
-      "sha256": "04305f410d283acf7eb3607f4eb4d4241c6620940ef8404d5c6c280ebcc1ac44"
+      "bytes": 2184,
+      "sha256": "ab4d2589f6c12f6d80bafc1c4c811fb9997912a7f538ff1dcbf3c9aa0ed21997"
     },
     {
       "path": "frontend/widgets/FreeMixEncoderPreferences.hpp",
@@ -282,13 +287,13 @@
     },
     {
       "path": "frontend/widgets/FreeMixFinalProgramGate.hpp",
-      "bytes": 9119,
-      "sha256": "05e6e8b469fae2c4f6d4255c11b338db769f339056ddf63a177cdb88efb3378d"
+      "bytes": 9116,
+      "sha256": "a0ec05c34f8cd93d1bdec276b85667f5529b70dd51a468dd49be7cab3c05c3a9"
     },
     {
       "path": "frontend/widgets/FreeMixFtbContract.hpp",
-      "bytes": 4920,
-      "sha256": "e05161eeb157e2cd86bcfd861cf6ac84defde368e71a3f370717bd230d0a241e"
+      "bytes": 4917,
+      "sha256": "19d9b84b97da94b600c268f105727decc40dab70ee82fd578b334c88c29d7fd3"
     },
     {
       "path": "frontend/widgets/FreeMixGlobalHotkeys.cpp",
@@ -301,9 +306,14 @@
       "sha256": "37ef36c59591317a3d4529655f158608fb7fd2cf33fc0913eb41f33043859390"
     },
     {
+      "path": "frontend/widgets/FreeMixMixEffectManager.hpp",
+      "bytes": 27163,
+      "sha256": "deb251a2e2946b9a1de78196939a2380ce2eda85185650a619f9bfcc9979d596"
+    },
+    {
       "path": "frontend/widgets/FreeMixMultistream.cpp",
-      "bytes": 125164,
-      "sha256": "521b81f2b325fb01fd7329e6c6ed02385906911fdbf15c511d2cde2e05ef09f1"
+      "bytes": 112916,
+      "sha256": "4153914e39495ef84016b83041c0a8e6a011e4df561bfd28994b6d2c74b1a71f"
     },
     {
       "path": "frontend/widgets/FreeMixMultistream.hpp",
@@ -312,18 +322,18 @@
     },
     {
       "path": "frontend/widgets/FreeMixNdiOutput.hpp",
-      "bytes": 8049,
-      "sha256": "e82ac177c25d2f03f94e0fccfd5a4e97409fba5c68cf706dc0f09d753debb467"
+      "bytes": 8046,
+      "sha256": "bbb8dbad5adf64e0eaa74cdde8a1ec43d9c144efad85d6c8c5b1ba2ecb4b0129"
     },
     {
       "path": "frontend/widgets/FreeMixOmtHdrOutput.hpp",
-      "bytes": 13782,
-      "sha256": "4c38b2f93970b4970fea91c33fc85cf66e1b54e966249b9034aa3ce829c0d99a"
+      "bytes": 13773,
+      "sha256": "c252926e99617fe7c863733af1cbde04cd5bb8eca97503ab3b30f656421e7a28"
     },
     {
       "path": "frontend/widgets/FreeMixOmtOutput.hpp",
-      "bytes": 8993,
-      "sha256": "f47811b172da270a11d6c8a9815ef92277013c30e10f42425ae1f4e2ba4abe86"
+      "bytes": 8990,
+      "sha256": "157e1884f57a1a40e65754f4c9aa554dd08bde43fc0f4085a2db53f28b365cf9"
     },
     {
       "path": "frontend/widgets/FreeMixPrecisionVideo.hpp",
@@ -372,18 +382,18 @@
     },
     {
       "path": "frontend/widgets/FreeMixScope.cpp",
-      "bytes": 10264,
-      "sha256": "03906374845c4c5d33562e108e8d4835f694c28aebc7ed0c5b8844ba62248e50"
+      "bytes": 10261,
+      "sha256": "0574ccf7fdbc86b8283962dc5c0f4797debb959374050f0bc8f618bf2aee06c3"
     },
     {
       "path": "frontend/widgets/FreeMixSdiOutput.hpp",
-      "bytes": 11609,
-      "sha256": "8a6219642a7cd32be07f5f114563931f3f156759f1c5555cf15c5e9276d49516"
+      "bytes": 11600,
+      "sha256": "b9ee12c6c3d8d997a3bd110a5132e03d7a68f2341569c9d4ab8878e617f73cd2"
     },
     {
       "path": "frontend/widgets/FreeMixSrtAlpha.hpp",
-      "bytes": 5322,
-      "sha256": "0818591c8d8b78a12c812aeae4adaa86f7d2fb4c0bad67bfebe609a375432c7f"
+      "bytes": 5310,
+      "sha256": "614a329a1fa266aa93e294109b4e8d21c8d7412d8d1538ce1dbc6f6b1f1c5a0b"
     },
     {
       "path": "frontend/widgets/FreeMixSrtHdrLifecycle.hpp",
@@ -392,8 +402,8 @@
     },
     {
       "path": "frontend/widgets/FreeMixSrtHdrOutput.hpp",
-      "bytes": 17922,
-      "sha256": "1934c6b8f8cb57fca2b7f30a4f4c376782b05bdcef6fda827551d15819af5e02"
+      "bytes": 17919,
+      "sha256": "c14288ce3cbd5d0ea834fb84929ae2702ea7fdc23d6d94f92455cca4ef28d137"
     },
     {
       "path": "frontend/widgets/FreeMixVideoTransports.hpp",
@@ -402,8 +412,8 @@
     },
     {
       "path": "frontend/widgets/OBSBasic.cpp",
-      "bytes": 75444,
-      "sha256": "52c011f7cf4db45a58a281523d901e04fb55818da7d7b8fddece457b4bdf585e"
+      "bytes": 75441,
+      "sha256": "43647eec361e71932c2409aa225c738c93998116db256b4f7244b334d2e4d569"
     },
     {
       "path": "frontend/widgets/OBSBasic.hpp",
@@ -432,8 +442,8 @@
     },
     {
       "path": "frontend/widgets/OBSBasic_Profiles.cpp",
-      "bytes": 27227,
-      "sha256": "28daf474c389d339ceb676448cbd50459e042bccb839929c564c71956e4eb29f"
+      "bytes": 27224,
+      "sha256": "6660f0db931eaa0ae90366059c27d223ec5e8b87f3bb914e7de9fd015ffde8ad"
     },
     {
       "path": "frontend/widgets/OBSBasic_Recording.cpp",
@@ -442,8 +452,8 @@
     },
     {
       "path": "frontend/widgets/OBSBasic_SceneCollections.cpp",
-      "bytes": 53999,
-      "sha256": "24fac0d02c14dc0cdf5873443f8763abd42b142aa53162c5c19caf4cf7e995c6"
+      "bytes": 53990,
+      "sha256": "1174184a3921de53872c8835e1504c638787739651edb8c9fcd0b6ab8a01e115"
     },
     {
       "path": "frontend/widgets/OBSBasic_Scenes.cpp",
@@ -452,18 +462,18 @@
     },
     {
       "path": "frontend/widgets/OBSBasic_StudioMode.cpp",
-      "bytes": 13653,
-      "sha256": "bfb84b4969d6c2e6862ff795e864632b410ebdf3daf52a73a1857e66bf8c01af"
+      "bytes": 22532,
+      "sha256": "066a4af1932a485237a1d6589c88fb84a622f1882b6198572bf9a8e17aa17b6c"
     },
     {
       "path": "frontend/widgets/OBSBasic_SysTray.cpp",
-      "bytes": 5675,
-      "sha256": "4bc3788ebf4f6b814a98274f8dec3cc9484d24b25d2f33566d6a1e0f4546a566"
+      "bytes": 5669,
+      "sha256": "a7d2bfa343e659494ffdde6cccdfbce6d33ede4b8b557a4a392e1f005099b058"
     },
     {
       "path": "frontend/widgets/OBSBasic_Transitions.cpp",
-      "bytes": 52151,
-      "sha256": "f6cd2d64b94b1f2b70efb06c7074b1f73862351e87d86d583dc78bacb4ae99f1"
+      "bytes": 52148,
+      "sha256": "ea989fc8672de26cf6def9a2e09eeb5594d1adce9b31bf8eb2c607022cea4041"
     },
     {
       "path": "frontend/widgets/OBSBasic_Updater.cpp",
@@ -727,23 +737,23 @@
     },
     {
       "path": "plugins/downstream-keyer/downstream-keyer-dock.cpp",
-      "bytes": 39105,
-      "sha256": "1cacd05440367a63ac8a8266d522d8dcb34a7531208a10c7eff5a5b4e98ee0be"
+      "bytes": 39178,
+      "sha256": "1a02660e0dfc00c8433b36d2ecdb7c6947e2acf1d407f6fe91e3950b8934823a"
     },
     {
       "path": "plugins/downstream-keyer/downstream-keyer-dock.hpp",
-      "bytes": 3400,
-      "sha256": "df7ae762ea1efa8221fe1e5c078bbd330c92e9902d597038bb2501493ae7d466"
+      "bytes": 3424,
+      "sha256": "1385c84fe6daef916b3856f94fa7d87e4733edec237df6a0402cc60f429305a0"
     },
     {
       "path": "plugins/downstream-keyer/downstream-keyer.cpp",
-      "bytes": 34200,
-      "sha256": "dc5d9ceed8c7fdf73b2574ca9c52ebea404f5fb889b09629f947e4fb8949ce88"
+      "bytes": 35052,
+      "sha256": "562190cb6ec68ea3ae1e93e0030ae0920a6211538401017694c83bfa412e1f29"
     },
     {
       "path": "plugins/downstream-keyer/downstream-keyer.hpp",
-      "bytes": 3696,
-      "sha256": "2153db3c279a02d90353c00258abf3b5d45ff402ea86486a5459c14ed609efdb"
+      "bytes": 3744,
+      "sha256": "0e03f57d3b5fc7d6b2489c65764bd56e2cabaec533fcf9788c1e00caba8a642d"
     },
     {
       "path": "plugins/downstream-keyer/media/icon.ico",
@@ -792,8 +802,8 @@
     },
     {
       "path": "plugins/nv-filters/FreeMixNvSdkPolicy.c",
-      "bytes": 7784,
-      "sha256": "08daefad928c11c77f3237642caa30ab38748639e24167c0e1a45dda134c03ad"
+      "bytes": 7903,
+      "sha256": "aa71283ce67a338486ba6f4c1b30252ce191dcb39d8e779e084de81423c7e443"
     },
     {
       "path": "plugins/nv-filters/FreeMixNvSdkPolicy.h",

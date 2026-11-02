@@ -43,7 +43,7 @@ struct Sender {
  uint64_t Bytes(){std::lock_guard<std::mutex> lock(mutex);return bytes;}
 };
 inline void Register(){
- static bool registered=false;if(registered)return;registered=true;obs_output_info info={};info.id="freemix_omt_hdr_output";info.flags=OBS_OUTPUT_AV;info.get_name=[](void *){return "FreeMix OMT HDR (manual PQ/HLG receiver)";};
+ static bool registered=false;if(registered)return;registered=true;obs_output_info info={};info.id="freemix_omt_hdr_output";info.flags=OBS_OUTPUT_AV;info.get_name=[](void *){return "3Mix OMT HDR (manual PQ/HLG receiver)";};
  info.create=[](obs_data_t *settings,obs_output_t *output)->void *{auto *s=new Sender();s->output=output;s->name=obs_data_get_string(settings,"name");s->transfer=obs_data_get_string(settings,"transfer");return s;};
  info.destroy=[](void *data){auto *s=static_cast<Sender *>(data);{std::lock_guard<std::mutex> lock(s->mutex);s->Destroy();}delete s;};
  info.start=[](void *data){return static_cast<Sender *>(data)->Start();};info.stop=[](void *data,uint64_t){static_cast<Sender *>(data)->Stop();};info.raw_video=[](void *data,video_data *v){static_cast<Sender *>(data)->Video(v);};info.raw_audio=[](void *data,audio_data *a){static_cast<Sender *>(data)->Audio(a);};info.get_total_bytes=[](void *data){return static_cast<Sender *>(data)->Bytes();};obs_register_output(&info);
@@ -116,9 +116,9 @@ inline void Request(obs_data_t *request,obs_data_t *response,bool (*isPrivate)(o
       if(!video)error="Native HDR P216 view unavailable";
       else{
        const std::string audioUuid=obs_data_get_string(config,"audioSourceUuid");
-       if(!audioUuid.empty())slot.audio=FreeMixSourceAudio::Open(audioUuid,"FreeMix OMT HDR PCM",error);
+       if(!audioUuid.empty())slot.audio=FreeMixSourceAudio::Open(audioUuid,"3Mix OMT HDR PCM",error);
        if(error.empty()){
-        slot.output=obs_output_create("freemix_omt_hdr_output",("FreeMix OMT HDR "+std::to_string(id+1)).c_str(),config,nullptr);
+        slot.output=obs_output_create("freemix_omt_hdr_output",("3Mix OMT HDR "+std::to_string(id+1)).c_str(),config,nullptr);
         if(!slot.output)error="HDR output unavailable";
         else{
          obs_output_set_media(slot.output,video,slot.audio?slot.audio->Audio():obs_get_audio());

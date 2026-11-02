@@ -18,7 +18,7 @@ OBSAbout::OBSAbout(QWidget *parent) : QDialog(parent), ui(new Ui::OBSAbout)
 	setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
 	ui->setupUi(this);
-	setWindowTitle(QTStr("About") + QStringLiteral(" · FreeMix Studio"));
+	setWindowTitle(QTStr("About") + QStringLiteral(" · 3Mix Studio"));
 
 	QString bitness;
 

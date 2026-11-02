@@ -27,7 +27,7 @@ try{
  }
  const ndiRuntime=await prepareNdiRuntime(root);
  const prepared=await preparePortable(root),apiInfo=await api();prepared.apiPort=Number(apiInfo.port);process.env.FREEMIX_API_PORT=String(prepared.apiPort);
- const app=spawn(exe,['--portable','--multi','--disable-updater','--disable-missing-files-check','--enable-media-stream',...(process.argv.includes('--show')?[]:['--minimize-to-tray'])],{cwd:join(root,'bin/64bit'),windowsHide:true,detached:true,stdio:'ignore'});let appError;app.on('error',e=>{appError=e;});app.unref();
+ const app=spawn(exe,['--portable','--multi','--disable-updater','--disable-missing-files-check','--enable-media-stream',...(process.argv.includes('--bandeja')?['--minimize-to-tray']:[])],{cwd:join(root,'bin/64bit'),windowsHide:true,detached:true,stdio:'ignore'});let appError;app.on('error',e=>{appError=e;});app.unref();
  await startupRecord(root,'engine-spawned',{nativePid:app.pid,apiPort:prepared.apiPort,wsPort:prepared.wsPort});
  // Compatibility helper remains asynchronous. Its reused API is not stopped by a second helper.
  const helper=spawn('powershell.exe',['-NoProfile','-ExecutionPolicy','Bypass','-WindowStyle','Hidden','-File',join(root,'ferramentas/ajudante.ps1')],{cwd:root,windowsHide:true,detached:true,stdio:'ignore',env:process.env});helper.on('error',()=>{});helper.unref();

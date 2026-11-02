@@ -37,6 +37,7 @@
 #include "FreeMixSrtAlpha.hpp"
 #include <chrono>
 #include <QTimer>
+#include <QUuid>
 #include "FreeMixCenterColumn.hpp"
 #include "FreeMixCallAudio.hpp"
 #include "FreeMixCallVideo.hpp"
@@ -47,6 +48,7 @@
 #include <QDockWidget>
 #include <QPixmap>
 #include <QDialog>
+#include <QSpinBox>
 #include <QApplication>
 #include <QDir>
 #include <QFileInfo>
@@ -96,7 +98,7 @@ void HlsUpdate(void *data,obs_data_t *settings){auto &s=*static_cast<HlsService 
 void RegisterHlsService(){
 	static bool registered=false;if(registered)return;registered=true;
 	obs_service_info info={};info.id="freemix_hls";
-	info.get_name=[](void *){return "FreeMix HLS (HTTP PUT)";};
+	info.get_name=[](void *){return "3Mix HLS (HTTP PUT)";};
 	info.create=[](obs_data_t *settings,obs_service_t *)->void *{auto *s=new HlsService();HlsUpdate(s,settings);return s;};info.destroy=[](void *data){delete static_cast<HlsService *>(data);};info.update=HlsUpdate;
 	info.get_protocol=[](void *){return "HLS";};info.get_output_type=[](void *){return "ffmpeg_hls_muxer";};
 	info.get_url=[](void *data){return static_cast<HlsService *>(data)->server.c_str();};info.get_key=[](void *data){return static_cast<HlsService *>(data)->key.c_str();};
@@ -146,7 +148,7 @@ void StopNetworkOutputs()
 void RequestFadeToBlack(obs_data_t *request,obs_data_t *response,void *)
 {
  const QPointer<OBSBasic> main=OBSBasic::Get();
- const auto fail=[response](){obs_data_set_bool(response,"success",false);obs_data_set_string(response,"error","O FreeMix está encerrando ou mudou de contexto. Nenhum FTB será enviado.");};
+ const auto fail=[response](){obs_data_set_bool(response,"success",false);obs_data_set_string(response,"error","O 3Mix está encerrando ou mudou de contexto. Nenhum FTB será enviado.");};
  if(!main||frontendClosing){fail();return;}
  const auto work=[main,request,response,fail](){if(!main||frontendClosing||main->isClosing()){fail();return;}main->FreeMixFadeToBlackRequest(request,response);};
  if(QThread::currentThread()==main->thread())work();
@@ -156,7 +158,7 @@ void RequestFadeToBlack(obs_data_t *request,obs_data_t *response,void *)
 void RequestFinalProgramGate(obs_data_t *request,obs_data_t *response,void *)
 {
  const QPointer<OBSBasic> main=OBSBasic::Get();
- const auto fail=[response](){obs_data_set_bool(response,"success",false);obs_data_set_string(response,"error","O FreeMix está encerrando ou mudou de contexto. Nenhum FTB será enviado.");};
+ const auto fail=[response](){obs_data_set_bool(response,"success",false);obs_data_set_string(response,"error","O 3Mix está encerrando ou mudou de contexto. Nenhum FTB será enviado.");};
  if(!main||frontendClosing){fail();return;}
  const auto work=[main,request,response,fail](){if(!main||frontendClosing||main->isClosing()){fail();return;}main->FreeMixFinalProgramGateRequest(request,response);};
  if(QThread::currentThread()==main->thread())work();
@@ -199,7 +201,7 @@ void RequestNetworkOutput(obs_data_t *request, obs_data_t *response, void *)
   }
   const bool omtSdk=protocol=="OMT"&&networkOmtSdkAvailable;const bool ndiSdk=protocol=="NDI"&&networkNdiSdkAvailable;
   const char *type=protocol=="NDI"?(requestedFillKey?"freemix_ndi_output":"ndi_output"):protocol=="OMT"?(senderId>0||!requestedName.empty()||requestedFillKey||precision==16?"freemix_omt_output":"omtoutput"):nullptr;
-  const std::string outputName="FreeMix "+protocol+(senderId==0?" Main Output":" Sender "+std::to_string(senderId+1));std::string error;
+  const std::string outputName="3Mix "+protocol+(senderId==0?" Main Output":" Sender "+std::to_string(senderId+1));std::string error;
   const std::string senderKey=protocol+":"+std::to_string(senderId);
   const bool available=type&&OutputLoaded(type)&&(std::string(type)!="freemix_omt_output"||omtSdk);
   obs_data_set_bool(response,"available",available);obs_data_set_string(response,"outputName",outputName.c_str());
@@ -231,7 +233,7 @@ void RequestNetworkOutput(obs_data_t *request, obs_data_t *response, void *)
     if(media.mode!=requestedMode||media.sourceUuid!=(requestedMode=="source"?requestedUuid:"")||media.audioSourceUuid!=requestedAudioUuid||media.audioTrack!=uint32_t(requestedTrack)||media.alpha!=requestedAlpha||media.fillKey!=requestedFillKey||media.precisionBits!=precision||(requestedFillKey&&!requestedKeyName.empty()&&media.keyName!=requestedKeyName)||(protocol=="OMT"&&!requestedName.empty()&&media.name!=requestedName)||(protocol=="NDI"&&((!requestedName.empty()&&requestedName!=obs_data_get_string(current,"ndi_name"))||(hasGroups&&groups!=obs_data_get_string(current,"ndi_groups")))))error="stop output before changing network content, audio or settings";
    }else{
     OBSDataAutoRelease settings=obs_data_create();
-    const std::string networkName=requestedName.empty()?(protocol=="NDI"?(senderId==0?"FreeMix Programa":"FreeMix NDI "+std::to_string(senderId+1)):"FreeMix OMT "+std::to_string(senderId+1)):requestedName;
+    const std::string networkName=requestedName.empty()?(protocol=="NDI"?(senderId==0?"3Mix Programa":"3Mix NDI "+std::to_string(senderId+1)):"3Mix OMT "+std::to_string(senderId+1)):requestedName;
     const std::string keyName=requestedFillKey?(requestedKeyName.empty()?networkName+" Key":requestedKeyName):"";
     if(requestedFillKey&&(keyName.empty()||keyName.size()>120||keyName==networkName))error="Fill and Key require different names up to 120 characters";
     if(protocol=="OMT"&&(freemix_omt_hdr::IdentityInUse(networkName,output)||(requestedFillKey&&freemix_omt_hdr::IdentityInUse(keyName,output))))error="choose a unique OMT SDR/Key/HDR network name for each active sender";
@@ -299,7 +301,7 @@ void RequestNetworkOutput(obs_data_t *request, obs_data_t *response, void *)
    else if(auto *module=obs_get_module("omtplugin")){char *path=obs_module_get_config_path(module,"omtplugin.json");if(path){settings=obs_data_create_from_json_file(path);bfree(path);}}
    const char *name=settings?obs_data_get_string(settings,"nameProperty"):nullptr;obs_data_set_string(response,"networkName",name&&*name?name:"OBS Output");
   }
-  else obs_data_set_string(response,"networkName","FreeMix Programa");
+  else obs_data_set_string(response,"networkName","3Mix Programa");
   OBSDataArrayAutoRelease senders=obs_data_array_create();for(int n=0;n<(protocol=="NDI"||omtSdk?4:1);n++){const std::string key=protocol+":"+std::to_string(n);const auto o=networkOutputs.find(key);const auto m=networkMedia.find(key);OBSDataAutoRelease item=obs_data_create();obs_data_set_int(item,"senderId",n);const bool on=o!=networkOutputs.end()&&o->second&&obs_output_active(o->second);obs_data_set_bool(item,"active",on);obs_data_set_bool(item,"outputCreated",o!=networkOutputs.end()&&o->second);obs_data_set_string(item,"backend",o!=networkOutputs.end()&&o->second?obs_output_get_id(o->second):type);if(m!=networkMedia.end()||n==senderId){const auto &state=m!=networkMedia.end()?*m->second:missingMedia;obs_data_set_string(item,"mode",state.mode.c_str());obs_data_set_string(item,"sourceUuid",state.sourceUuid.c_str());obs_data_set_string(item,"networkName",state.name.c_str());obs_data_set_int(item,"audioTrack",state.audioTrack);obs_data_set_string(item,"audioSourceUuid",state.audioSourceUuid.c_str());obs_data_set_bool(item,"alpha",state.alpha);obs_data_set_int(item,"precisionBits",state.precisionBits);obs_data_set_string(item,"groups",state.groups.c_str());obs_data_set_bool(item,"fillKey",state.fillKey);obs_data_set_string(item,"keyName",state.keyName.c_str());obs_data_set_int(item,"width",state.width);obs_data_set_int(item,"height",state.height);}const int connected=o!=networkOutputs.end()?(protocol=="NDI"?freemix_ndi::Connections(o->second):freemix_omt::Connections(o->second)):-1;obs_data_set_int(item,"connections",connected);obs_data_set_string(item,"receiverStatus",connected<0?"unknown":connected>0?"connected":"disconnected");obs_data_set_int(item,"capturedFrames",o!=networkOutputs.end()&&o->second?int64_t(obs_output_get_total_frames(o->second)):0);obs_data_array_push_back(senders,item);}obs_data_set_array(response,"senders",senders);
   obs_data_set_bool(response,"success",error.empty());if(!error.empty())obs_data_set_string(response,"error",error.c_str());
  },Qt::BlockingQueuedConnection);
@@ -348,6 +350,8 @@ void CaptureStingerAudio(void *param,obs_source_t *source,const audio_data *data
 	// pre-mute samples deliberately; never attach this callback to input scenes.
 	StoreMixAudio(*tap->tape,data,obs_source_get_volume(source),true);
 }
+#include "FreeMixMixEffectManager.hpp"
+
 struct DestinationAudioMix {
 	std::string name;
 	MixAudioTape bus;
@@ -521,45 +525,6 @@ std::array<Destination, kMaxDestinations> destinations;
 std::recursive_mutex destinationsMutex;
 obs_websocket_vendor vendor = nullptr;
 
-// Mix 2 has its own transition and framing. No global Preview/Program is changed.
-struct IndependentMix {
-	std::string previewUuid, programUuid;
-	std::string transitionUuid;
-	uint32_t width = 720, height = 1280;
-	bool fill = true;
-	double positionX = 0.5, positionY = 0.5, zoom = 1.0;
-	OBSSourceAutoRelease transition;
-	bool activeLease = false;
-	std::shared_ptr<MixAudioTape> stingerTape=std::make_shared<MixAudioTape>();
-	std::vector<std::unique_ptr<MixStingerTap>> stingerTaps;
-};
-std::array<IndependentMix,3> independentMixes;
-void RefreshStingerTaps(IndependentMix &mix)
-{
-	if(!mix.transition||std::string(obs_source_get_id(mix.transition))!="obs_stinger_transition")return;
-	obs_source_enum_full_tree(mix.transition,[](obs_source_t *parent,obs_source_t *child,void *param){
-		auto &mix=*static_cast<IndependentMix *>(param);
-		// Stinger's media is created by a deferred video-thread update. Revisit
-		// after initialization, limiting capture strictly to that private child.
-		if(parent!=static_cast<obs_source_t *>(mix.transition)||std::string(obs_source_get_id(child))!="ffmpeg_source")return;
-		OBSDataAutoRelease settings=obs_source_get_settings(child);if(!obs_data_get_bool(settings,"is_stinger"))return;
-		obs_source_set_audio_mixers(child,0);obs_source_set_muted(child,true);obs_source_set_monitoring_type(child,OBS_MONITORING_TYPE_NONE);
-		for(const auto &tap:mix.stingerTaps)if(static_cast<obs_source_t *>(tap->source)==child)return;
-		auto tap=std::make_unique<MixStingerTap>();tap->source=obs_source_get_ref(child);tap->tape=mix.stingerTape;obs_source_add_audio_capture_callback(child,CaptureStingerAudio,tap.get());mix.stingerTaps.push_back(std::move(tap));
-	},&mix);
-}
-void ClearIndependentTransition(IndependentMix &mix)
-{
-	for(auto &tap:mix.stingerTaps)obs_source_remove_audio_capture_callback(tap->source,CaptureStingerAudio,tap.get());
-	mix.stingerTaps.clear();{std::lock_guard<std::mutex> lock(mix.stingerTape->mutex);mix.stingerTape->packets.clear();mix.stingerTape->clockStarted=false;}
-	if(mix.transition) {
-		if(mix.activeLease)obs_source_dec_active(mix.transition);
-		obs_transition_clear(mix.transition);
-	}
-	mix.activeLease=false;mix.transition=nullptr;
-}
-void SaveIndependentMix();
-void LoadIndependentMix();
 bool IsPrivateSource(obs_source_t *source)
 {
 	if (!source) return false;
@@ -571,173 +536,32 @@ bool IsPrivateSource(obs_source_t *source)
 	}, &found);
 	return found;
 }
-OBSSourceAutoRelease FrameMixSource(IndependentMix &mix, obs_source_t *source)
-{
-	if (!source || IsPrivateSource(source)) return nullptr;
-	const auto sw = obs_source_get_width(source), sh = obs_source_get_height(source);
-	if (!sw || !sh) return nullptr;
-	const std::string frameName=std::string("FreeMix mix frame ")+obs_source_get_uuid(source);
-	const bool moving=mix.transition&&std::string(obs_source_get_id(mix.transition))=="move_transition";
-	obs_scene_t *original=obs_scene_from_source(source);
-	obs_scene_t *scene = moving&&original?obs_scene_duplicate(original,frameName.c_str(),OBS_SCENE_DUP_PRIVATE_REFS):obs_scene_create_private(frameName.c_str());
-	if(!scene)return nullptr;
-	OBSDataAutoRelease dimensions = obs_source_get_settings(obs_scene_get_source(scene));
-	std::vector<obs_transform_info> originalTransforms;
-	if(moving&&original){
-		// Scene load applies custom dimensions and rebuilds the item list. Save
-		// duplicated item state first so resizing cannot erase the copied scene.
-		OBSDataArrayAutoRelease items=obs_data_array_create();
-		struct SavedItems{obs_data_array_t *items;std::vector<obs_transform_info> *transforms;}saved{items,&originalTransforms};
-		obs_scene_enum_items(scene,[](obs_scene_t *,obs_sceneitem_t *item,void *param){auto &saved=*static_cast<SavedItems *>(param);obs_sceneitem_save(item,saved.items);obs_transform_info info;obs_sceneitem_get_info2(item,&info);saved.transforms->push_back(info);return true;},&saved);
-		obs_data_set_array(dimensions,"items",items);
-	}
-	obs_data_set_bool(dimensions,"custom_size",true);obs_data_set_int(dimensions,"cx",mix.width);obs_data_set_int(dimensions,"cy",mix.height);
-	obs_source_load(obs_scene_get_source(scene));
-	const float factor = float(mix.zoom) * (mix.fill ? std::max(float(mix.width)/sw, float(mix.height)/sh) : std::min(float(mix.width)/sw, float(mix.height)/sh));
-	vec2 scale, position; vec2_set(&scale, factor, factor);
-	vec2_set(&position, (float(mix.width)-sw*factor)*float(mix.positionX), (float(mix.height)-sh*factor)*float(mix.positionY));
-	if(moving&&original){
-		// Keep shared source identities directly visible to Move. Wrapping whole
-		// scenes as equally named items makes its matching switch their content
-		// at the midpoint instead of interpolating the underlying source geometry.
-		struct Geometry{float factor;vec2 offset;std::vector<obs_transform_info> *transforms;size_t next=0;}geometry{factor,position,&originalTransforms};
-		obs_scene_enum_items(scene,[](obs_scene_t *,obs_sceneitem_t *item,void *param){auto &g=*static_cast<Geometry *>(param);if(g.next>=g.transforms->size())return false;obs_transform_info info=(*g.transforms)[g.next++];info.pos.x=info.pos.x*g.factor+g.offset.x;info.pos.y=info.pos.y*g.factor+g.offset.y;info.scale.x*=g.factor;info.scale.y*=g.factor;info.bounds.x*=g.factor;info.bounds.y*=g.factor;obs_sceneitem_set_info2(item,&info);return true;},&geometry);
-	}else{
-		obs_sceneitem_t *item = obs_scene_add(scene, source);
-		obs_sceneitem_set_scale(item, &scale); obs_sceneitem_set_pos(item, &position);
-		obs_sceneitem_set_alignment(item, OBS_ALIGN_LEFT | OBS_ALIGN_TOP);
-	}
-	OBSSourceAutoRelease framed = obs_source_get_ref(obs_scene_get_source(scene));
-	obs_scene_release(scene);
-	return framed;
-}
-bool EnsureIndependentMix(IndependentMix &mix)
-{
-	if (mix.transition) {RefreshStingerTaps(mix);return true;}
-	if(mix.transitionUuid.empty()) {
-		mix.transition = obs_source_create_private("fade_transition", "FreeMix Mix 2", nullptr);
-	} else if(mix.transitionUuid=="builtin:move_transition") {
-		OBSDataAutoRelease settings=obs_data_create();obs_data_set_bool(settings,"nested_scenes",true);
-		// Move matches shared sources and interpolates their geometry. This is
-		// the loaded plugin's actual transition, not a Fade renamed as Merge.
-		mix.transition=obs_source_create_private("move_transition","FreeMix Merge",settings);
-	} else {
-		OBSSourceAutoRelease original=obs_get_source_by_uuid(mix.transitionUuid.c_str());
-		if(!original||obs_source_get_type(original)!=OBS_SOURCE_TYPE_TRANSITION||IsPrivateSource(original))return false;
-		OBSDataAutoRelease originalSettings=obs_source_get_settings(original),settings=obs_data_create();obs_data_apply(settings,originalSettings);
-		const bool stinger=std::string(obs_source_get_id(original))=="obs_stinger_transition";
-		if(stinger)obs_data_set_int(settings,"audio_monitoring",OBS_MONITORING_TYPE_NONE);
-		// Copy the actual transition and its settings; never change the main
-		// transition's source, timing or media playback for the independent mix.
-		mix.transition=obs_source_create_private(obs_source_get_id(original),"FreeMix Mix 2",settings);
-		if(stinger&&mix.transition) {
-			// The independent output takes its chosen bus. A cloned Stinger's
-			// private media must not inject its sound into the operator's Master.
-			obs_source_set_audio_mixers(mix.transition,0);
-			obs_audio_info info;if(!obs_get_audio_info(&info))return false;
-			mix.stingerTape->rate=info.samples_per_sec;mix.stingerTape->channels=get_audio_channels(info.speakers);
-			RefreshStingerTaps(mix);
-		}
-	}
-	if (!mix.transition) return false;
-	obs_transition_set_size(mix.transition, mix.width, mix.height);
-	obs_transition_set_scale_type(mix.transition, OBS_TRANSITION_SCALE_STRETCH);
-	OBSSourceAutoRelease source = obs_get_source_by_uuid(mix.programUuid.c_str());
-	OBSSourceAutoRelease framed = FrameMixSource(mix,source);
-	if (framed) obs_transition_set(mix.transition, framed);
-	return true;
-}
-void DescribeMix(obs_data_t *response, IndependentMix &mix, uint32_t mixId)
-{
-	// This mix renders video only; its unused transition audio flag can stay set
-	// after the video reached its destination. Finalize before the next operation.
-	if (mix.transition && obs_transition_is_active(mix.transition) && obs_transition_get_time(mix.transition) >= 1.0f) {
-		OBSSourceAutoRelease source = obs_get_source_by_uuid(mix.programUuid.c_str());
-		OBSSourceAutoRelease framed = FrameMixSource(mix,source);
-		if (framed) obs_transition_set(mix.transition, framed);
-		if(mix.activeLease){obs_source_dec_active(mix.transition);mix.activeLease=false;}
-	}
-	obs_data_set_int(response,"mixId",mixId);
-	obs_data_set_int(response,"stingerAudioSources",mix.stingerTaps.size());
-	{std::lock_guard<std::mutex> lock(mix.stingerTape->mutex);obs_data_set_int(response,"stingerAudioPackets",mix.stingerTape->capturedPackets);obs_data_set_double(response,"stingerAudioPeak",mix.stingerTape->capturedPeak);obs_data_set_int(response,"stingerAudioTimestamp",mix.stingerTape->packets.empty()?0:mix.stingerTape->packets.back().timestamp);}
-	obs_data_set_string(response, "previewUuid", mix.previewUuid.c_str());
-	obs_data_set_string(response, "programUuid", mix.programUuid.c_str());
-	obs_data_set_int(response, "width", mix.width); obs_data_set_int(response, "height", mix.height);
-	obs_data_set_bool(response, "fill", mix.fill);
-	obs_data_set_double(response,"positionX",mix.positionX);obs_data_set_double(response,"positionY",mix.positionY);obs_data_set_double(response,"zoom",mix.zoom);
-	obs_data_set_string(response,"transitionUuid",mix.transitionUuid.c_str());
-	OBSDataArrayAutoRelease available=obs_data_array_create();
-	const char *transitionId;for(size_t n=0;obs_enum_transition_types(n,&transitionId);n++)if(std::string(transitionId)=="move_transition"){
-		OBSDataAutoRelease item=obs_data_create();obs_data_set_string(item,"uuid","builtin:move_transition");obs_data_set_string(item,"name","Merge · movimento de fontes (Move)");obs_data_set_string(item,"kind",transitionId);obs_data_array_push_back(available,item);
-	}
-	obs_frontend_source_list transitions={};obs_frontend_get_transitions(&transitions);
-	for(size_t i=0;i<transitions.sources.num;i++) {
-		obs_source_t *source=transitions.sources.array[i];if(IsPrivateSource(source))continue;
-		OBSDataAutoRelease item=obs_data_create();obs_data_set_string(item,"uuid",obs_source_get_uuid(source));obs_data_set_string(item,"name",obs_source_get_name(source));obs_data_set_string(item,"kind",obs_source_get_id(source));obs_data_array_push_back(available,item);
-	}
-	obs_frontend_source_list_free(&transitions);obs_data_set_array(response,"transitions",available);
-	obs_data_set_bool(response, "transitioning", mix.transition && obs_transition_is_active(mix.transition));
-}
-void DescribeMixes(obs_data_t *response)
-{
-	OBSDataArrayAutoRelease mixes=obs_data_array_create();
-	for(size_t i=0;i<independentMixes.size();i++){OBSDataAutoRelease item=obs_data_create();DescribeMix(item,independentMixes[i],uint32_t(i+2));if(i==0)obs_data_apply(response,item);obs_data_array_push_back(mixes,item);}
-	obs_data_set_array(response,"mixes",mixes);
-}
+std::string ConfigPath();
+MixEffectManager mixEffectManager = [] {
+ MixEffectManager manager;
+ manager.IsPrivateSource = IsPrivateSource;
+ manager.ConfigPath = ConfigPath;
+ manager.outputBusy = [](uint32_t mixId) {
+  for (const auto &d : destinations)
+   if (d.mode == "mix" && d.mixId == mixId && d.output) return true;
+  return false;
+ };
+ return manager;
+}();
 void RequestMix(obs_data_t *request, obs_data_t *response, void *)
 {
-	const std::string action = obs_data_get_string(request, "action"), uuid = obs_data_get_string(request, "uuid");
-	const auto width = uint32_t(obs_data_get_int(request, "width")), height = uint32_t(obs_data_get_int(request, "height"));
-	const auto duration = uint32_t(obs_data_get_int(request, "duration"));
-	const bool fill = obs_data_get_bool(request, "fill");
-	const uint32_t mixId=obs_data_has_user_value(request,"mixId")?uint32_t(obs_data_get_int(request,"mixId")):2;
-	QMetaObject::invokeMethod(OBSBasic::Get(), [=]() {
-		if(frontendClosing){obs_data_set_bool(response,"success",false);obs_data_set_string(response,"error","frontend is closing");return;}
-		if(mixId<2||mixId>4){obs_data_set_bool(response,"success",false);obs_data_set_string(response,"error","select Mix 2, 3 or 4");return;}
-		IndependentMix &mix=independentMixes[mixId-2];
-		DescribeMix(response,mix,mixId);
-		std::string error;
-		if (action == "configure") {
-			const auto positionX=obs_data_has_user_value(request,"positionX")?obs_data_get_double(request,"positionX"):mix.positionX;
-			const auto positionY=obs_data_has_user_value(request,"positionY")?obs_data_get_double(request,"positionY"):mix.positionY;
-			const auto zoom=obs_data_has_user_value(request,"zoom")?obs_data_get_double(request,"zoom"):mix.zoom;
-			const std::string transitionUuid=obs_data_has_user_value(request,"transitionUuid")?obs_data_get_string(request,"transitionUuid"):mix.transitionUuid;
-			OBSSourceAutoRelease selected=transitionUuid.empty()?nullptr:obs_get_source_by_uuid(transitionUuid.c_str());
-			bool moveLoaded=false;const char *kind;for(size_t n=0;obs_enum_transition_types(n,&kind);n++)if(std::string(kind)=="move_transition")moveLoaded=true;
-			bool busy = mix.transition && obs_transition_is_active(mix.transition);
-			for (const auto &d : destinations) if (d.mode == "mix" && d.mixId==mixId && d.output) busy = true;
-			if (busy) error = "stop Mix 2 outputs before changing framing";
-			else if (width < 240 || width > 3840 || height < 240 || height > 3840 || width%2 || height%2) error = "invalid Mix 2 resolution";
-			else if(!std::isfinite(positionX)||!std::isfinite(positionY)||!std::isfinite(zoom)||positionX<0||positionX>1||positionY<0||positionY>1||zoom<1||zoom>4)error="invalid Mix 2 crop position or zoom";
-			else if(transitionUuid=="builtin:move_transition"&&!moveLoaded)error="Move plugin is not loaded; choose Fade or another available transition explicitly";
-			else if(!transitionUuid.empty()&&transitionUuid!="builtin:move_transition"&&(!selected||obs_source_get_type(selected)!=OBS_SOURCE_TYPE_TRANSITION||IsPrivateSource(selected)))error="select a loaded transition";
-			else { ClearIndependentTransition(mix);mix.width = width; mix.height = height; mix.fill = fill; mix.positionX=positionX;mix.positionY=positionY;mix.zoom=zoom;mix.transitionUuid=transitionUuid; }
-		} else if (action == "preview") {
-			OBSSourceAutoRelease source = obs_get_source_by_uuid(uuid.c_str());
-			if (!source || IsPrivateSource(source) || !obs_source_get_width(source)) error = "select a video input outside private director sources";
-			else mix.previewUuid = uuid;
-		} else if (action == "cut" || action == "fade" || action == "take") {
-			if (!EnsureIndependentMix(mix)) error = "Mix 2 transition unavailable";
-			else if (obs_transition_is_active(mix.transition)) error = "Mix 2 transition is already running";
-			else if(action=="fade"&&std::string(obs_source_get_id(mix.transition))!="fade_transition")error="use take for the configured transition";
-			else {
-				OBSSourceAutoRelease source = obs_get_source_by_uuid(mix.previewUuid.c_str());
-				OBSSourceAutoRelease framed = FrameMixSource(mix,source);
-				if (!framed) error = "Mix 2 preview has no safe video source";
-				else if (action != "cut" && (duration < 50 || duration > 10000)) error = "transition duration must be 50 to 10000 ms";
-				else {
-					if(action!="cut"&&std::string(obs_source_get_id(mix.transition))=="obs_stinger_transition"&&!mix.activeLease){{std::lock_guard<std::mutex> lock(mix.stingerTape->mutex);mix.stingerTape->packets.clear();mix.stingerTape->clockStarted=false;}obs_source_inc_active(mix.transition);mix.activeLease=true;}
-					if(action!="cut"&&!obs_transition_start(mix.transition,OBS_TRANSITION_MODE_AUTO,duration,framed)) {
-						error="Mix 2 transition did not start";
-						if(mix.activeLease){obs_source_dec_active(mix.transition);mix.activeLease=false;}
-					} else {if(action=="cut")obs_transition_set(mix.transition,framed);std::swap(mix.programUuid,mix.previewUuid);}
-				}
-			}
-		} else if (action != "state" && !action.empty()) error = "invalid Mix 2 action";
-		if(error.empty() && !action.empty() && action!="state") SaveIndependentMix();
-		DescribeMixes(response); obs_data_set_bool(response, "success", error.empty());
-		if (!error.empty()) obs_data_set_string(response, "error", error.c_str());
-	}, Qt::BlockingQueuedConnection);
+ const auto work = [=]() {
+  if (frontendClosing) {
+   obs_data_set_bool(response,"success",false);
+   obs_data_set_string(response,"error","frontend is closing");
+   return;
+  }
+  mixEffectManager.RequestMix(request,response,nullptr);
+ };
+ auto *main = OBSBasic::Get();
+ if (!main) { obs_data_set_bool(response,"success",false); return; }
+ if (QThread::currentThread() == main->thread()) work();
+ else QMetaObject::invokeMethod(main,work,Qt::BlockingQueuedConnection);
 }
 
 void RunOnInterfaceThread(std::function<void()> task)
@@ -825,7 +649,7 @@ void EmitChanged()
 
 void Load()
 {
-	LoadIndependentMix();
+	mixEffectManager.LoadIndependentMix();
 	const std::string path = ConfigPath();
 	OBSDataAutoRelease data;
 	if (!path.empty()) {
@@ -855,28 +679,6 @@ void Load()
 		destinations[i].key = obs_data_get_string(item, "key");
 		destinations[i].enabled = obs_data_get_bool(item, "enabled");
 		ReadVideoConfig(item, destinations[i]);
-	}
-}
-
-void SaveIndependentMix()
-{
-	const auto path = ConfigPath(); if(path.empty())return;
-	OBSDataAutoRelease data = obs_data_create(); DescribeMixes(data);
-	obs_data_save_json_safe(data,(path+".mix2.json").c_str(),"tmp","bak");
-}
-void LoadIndependentMix()
-{
-	for(auto &mix:independentMixes){ClearIndependentTransition(mix);mix=IndependentMix{};}
-	const auto path=ConfigPath();if(path.empty())return;
-	OBSDataAutoRelease data=obs_data_create_from_json_file_safe((path+".mix2.json").c_str(),"bak");if(!data)return;
-	OBSDataArrayAutoRelease list=obs_data_get_array(data,"mixes");
-	for(size_t i=0;i<independentMixes.size();i++){
-		OBSDataAutoRelease row=list&&i<obs_data_array_count(list)?obs_data_array_item(list,i):nullptr;if(!row&&i==0){row=obs_data_create();obs_data_apply(row,data);}if(!row)continue;auto &mix=independentMixes[i];
-		const auto w=uint32_t(obs_data_get_int(row,"width")),h=uint32_t(obs_data_get_int(row,"height"));if(w>=240&&w<=3840&&h>=240&&h<=3840&&!(w%2)&&!(h%2)){mix.width=w;mix.height=h;}
-		mix.fill=obs_data_get_bool(row,"fill");mix.transitionUuid=obs_data_get_string(row,"transitionUuid");
-		const double x=obs_data_has_user_value(row,"positionX")?obs_data_get_double(row,"positionX"):0.5,y=obs_data_has_user_value(row,"positionY")?obs_data_get_double(row,"positionY"):0.5,z=obs_data_has_user_value(row,"zoom")?obs_data_get_double(row,"zoom"):1.0;
-		mix.positionX=std::isfinite(x)&&x>=0&&x<=1?x:0.5;mix.positionY=std::isfinite(y)&&y>=0&&y<=1?y:0.5;mix.zoom=std::isfinite(z)&&z>=1&&z<=4?z:1.0;
-		mix.previewUuid=obs_data_get_string(row,"previewUuid");mix.programUuid=obs_data_get_string(row,"programUuid");
 	}
 }
 
@@ -1038,7 +840,7 @@ bool UpdateOutputOverlay(Destination &d, uint32_t channel, obs_source_t *overlay
 	if(!overlay)return true;
 	const uint32_t sw=obs_source_get_width(overlay),sh=obs_source_get_height(overlay);
 	if(!sw||!sh)return true;
-	obs_scene_t *frame=obs_scene_create_private("FreeMix output overlay frame");
+	obs_scene_t *frame=obs_scene_create_private("3Mix output overlay frame");
 	OBSDataAutoRelease settings=obs_source_get_settings(obs_scene_get_source(frame));
 	obs_data_set_bool(settings,"custom_size",true);obs_data_set_int(settings,"cx",d.width);obs_data_set_int(settings,"cy",d.height);
 	obs_source_load(obs_scene_get_source(frame));
@@ -1106,7 +908,7 @@ void StartOne(Destination &d, size_t index)
 		return;
 	}
 	if (independent) {
-		OBSSourceAutoRelease source = (d.mode == "shared" || d.mode == "program" || d.mode == "clean") ? obs_frontend_get_current_scene() : d.mode == "preview" ? obs_frontend_get_current_preview_scene() : d.mode == "mix" && EnsureIndependentMix(independentMixes[d.mixId-2]) ? obs_source_get_ref(independentMixes[d.mixId-2].transition) : obs_get_source_by_uuid(d.sourceUuid.c_str());
+		OBSSourceAutoRelease source = (d.mode == "shared" || d.mode == "program" || d.mode == "clean") ? obs_frontend_get_current_scene() : d.mode == "preview" ? obs_frontend_get_current_preview_scene() : d.mode == "mix" && mixEffectManager.EnsureIndependentMix(mixEffectManager.independentMixes[d.mixId-2], d.mixId) ? obs_source_get_ref(mixEffectManager.independentMixes[d.mixId-2].transition) : obs_get_source_by_uuid(d.sourceUuid.c_str());
 		bool privateSource = false;
 		if (source) {
 			OBSDataAutoRelease data = obs_source_get_private_settings(source);
@@ -1133,8 +935,8 @@ void StartOne(Destination &d, size_t index)
 		if (!item) { Fail(d, "could not compose source"); return; }
 		// Transition cached dimensions update on the next video tick. Mix 2 already
 		// has validated, fixed frame dimensions, including an immediate Cut/start.
-		const uint32_t sw = d.mode == "mix" ? independentMixes[d.mixId-2].width : obs_source_get_width(source);
-		const uint32_t sh = d.mode == "mix" ? independentMixes[d.mixId-2].height : obs_source_get_height(source);
+		const uint32_t sw = d.mode == "mix" ? mixEffectManager.independentMixes[d.mixId-2].width : obs_source_get_width(source);
+		const uint32_t sh = d.mode == "mix" ? mixEffectManager.independentMixes[d.mixId-2].height : obs_source_get_height(source);
 		if (!sw || !sh) { Fail(d, "source has no video dimensions"); return; }
 		const float factor = d.fill ? std::max(float(d.width)/sw, float(d.height)/sh) : std::min(float(d.width)/sw, float(d.height)/sh);
 		vec2 scale, position; vec2_set(&scale, factor, factor);
@@ -1177,7 +979,7 @@ void StartOne(Destination &d, size_t index)
 			obs_encoder_set_audio(d.audioEncoder,d.independentAudio);
 		}else if(d.mode=="mix"&&d.stingerAudio){
 			obs_audio_info audioInfo;if(!obs_get_audio_info(&audioInfo)){Fail(d,"audio is unavailable");return;}
-			d.audioMix=std::make_unique<DestinationAudioMix>();d.audioMix->name=id;d.audioMix->track=d.sourceAudio?0:d.audioTrack;d.audioMix->bus.rate=audioInfo.samples_per_sec;d.audioMix->bus.channels=d.sourceAudio?2:get_audio_channels(audioInfo.speakers);d.audioMix->stinger=independentMixes[d.mixId-2].stingerTape;
+			d.audioMix=std::make_unique<DestinationAudioMix>();d.audioMix->name=id;d.audioMix->track=d.sourceAudio?0:d.audioTrack;d.audioMix->bus.rate=audioInfo.samples_per_sec;d.audioMix->bus.channels=d.sourceAudio?2:get_audio_channels(audioInfo.speakers);d.audioMix->stinger=mixEffectManager.independentMixes[d.mixId-2].stingerTape;
 			audio_output_info outputInfo={};outputInfo.name=d.audioMix->name.c_str();outputInfo.samples_per_sec=audioInfo.samples_per_sec;outputInfo.speakers=audioInfo.speakers;outputInfo.format=AUDIO_FORMAT_FLOAT_PLANAR;outputInfo.input_callback=ReadDestinationAudio;outputInfo.input_param=d.audioMix.get();
 			if(d.sourceAudio)outputInfo.speakers=SPEAKERS_STEREO;
 			if(audio_output_open(&d.independentAudio,&outputInfo)!=AUDIO_OUTPUT_SUCCESS||!audio_output_connect(d.sourceAudio?d.sourceAudio->Audio():obs_get_audio(),d.audioMix->track,nullptr,CaptureDestinationBus,d.audioMix.get())){Fail(d,"could not create independent bus and Stinger audio");return;}
@@ -1459,7 +1261,7 @@ void RequestOpenPanel(obs_data_t *request, obs_data_t *response, void *)
  QMetaObject::invokeMethod(OBSBasic::Get(), [raw, title, response, wantWidth, wantHeight]() {
 #ifdef BROWSER_AVAILABLE
   auto *main = OBSBasic::Get();
-  if (!main || main->isClosing() || frontendClosing) { obs_data_set_bool(response, "success", false); obs_data_set_string(response, "error", "O FreeMix está encerrando. Nenhuma janela será aberta."); return; }
+  if (!main || main->isClosing() || frontendClosing) { obs_data_set_bool(response, "success", false); obs_data_set_string(response, "error", "O 3Mix está encerrando. Nenhuma janela será aberta."); return; }
   if (panelDeletionDepth) { obs_data_set_bool(response, "success", false); obs_data_set_string(response, "error", "Uma janela está sendo fechada. Tente abrir novamente."); return; }
   const QUrl url(raw);
   const QString panelRoot = QDir(QCoreApplication::applicationDirPath() + "/../../painel").canonicalPath();
@@ -1469,16 +1271,21 @@ void RequestOpenPanel(obs_data_t *request, obs_data_t *response, void *)
   if (!cef || (!file && !local)) { obs_data_set_bool(response, "success", false); obs_data_set_string(response, "error", !cef ? "O navegador interno não está disponível." : "A janela precisa usar um endereço local do FreeMix."); return; }
   auto &window = panelWindows[raw.toStdString()];
   if (!window) {
-   window = new QDialog(OBSBasic::Get(), Qt::Window | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
+   // True top-level window: no owner, so it can live on another monitor,
+   // minimize and focus independently from the desk.
+   window = new QDialog(nullptr, Qt::Window | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
    window->setObjectName("freemixPanelWindow");
-   window->setWindowTitle(title.isEmpty() ? "FreeMix" : title);
+   window->setWindowTitle(title.isEmpty() ? "3Mix" : title);
    // CEF destruction pumps Qt events. Hide/remove the window first, then
    // delete it under a guard so reentrant diagnostics cannot inspect it.
    window->setAttribute(Qt::WA_DeleteOnClose, false);
    const QPointer<QDialog> owned = window;
    const std::string key = raw.toStdString();
-   QObject::connect(window, &QDialog::finished, OBSBasic::Get(), [owned, key](int) {
+   const std::string geometryKey = raw.toUtf8().toBase64().toStdString();
+   QObject::connect(window, &QDialog::finished, OBSBasic::Get(), [owned, key, geometryKey](int) {
     if (!owned || owned->property("freemixDeletionQueued").toBool()) return;
+    const QByteArray geometry = owned->saveGeometry().toBase64();
+    config_set_string(App()->GetUserConfig(), "PanelWindows", geometryKey.c_str(), geometry.constData());
     owned->setProperty("freemixDeletionQueued", true);
     const auto found = panelWindows.find(key);
     if (found != panelWindows.end() && found->second == owned) panelWindows.erase(found);
@@ -1504,12 +1311,17 @@ void RequestOpenPanel(obs_data_t *request, obs_data_t *response, void *)
    if (!browser) { delete window.data(); obs_data_set_bool(response, "success", false); obs_data_set_string(response, "error", "O navegador interno não conseguiu criar a janela."); return; }
    browser->allowAllPopups(true);
    layout->addWidget(browser);
-   const QRect screen = OBSBasic::Get()->screen()->availableGeometry();
+   QScreen *targetScreen = (OBSBasic::Get() && OBSBasic::Get()->screen()) ? OBSBasic::Get()->screen() : QApplication::primaryScreen();
+   const QRect screen = targetScreen ? targetScreen->availableGeometry() : QRect(0, 0, 1280, 720);
    const bool sized = wantWidth >= 360 && wantWidth <= 4000 && wantHeight >= 240 && wantHeight <= 3000;
    const int width = std::min(sized ? wantWidth : 1200, screen.width() - 40), height = std::min(sized ? wantHeight : 850, screen.height() - 80);
    window->setMinimumSize(std::min(sized ? width : 800, screen.width() - 40), std::min(sized ? height : 600, screen.height() - 80));
-   window->resize(width, height);
-   window->move(screen.center() - window->rect().center());
+   const char *savedGeometry = config_get_string(App()->GetUserConfig(), "PanelWindows", geometryKey.c_str());
+   const QByteArray geometry = savedGeometry && *savedGeometry ? QByteArray::fromBase64(QByteArray(savedGeometry)) : QByteArray();
+   if (geometry.isEmpty() || !window->restoreGeometry(geometry)) {
+    window->resize(width, height);
+    window->move(screen.center() - window->rect().center());
+   }
   }
   window->show(); window->raise(); window->activateWindow();
   obs_data_set_bool(response, "success", true);
@@ -1519,6 +1331,32 @@ void RequestOpenPanel(obs_data_t *request, obs_data_t *response, void *)
 #endif
  }, Qt::BlockingQueuedConnection);
 }
+void RequestSetTransitionDuration(obs_data_t *request, obs_data_t *response, void *)
+{
+ const int value = int(obs_data_get_int(request, "duration"));
+ QMetaObject::invokeMethod(OBSBasic::Get(), [value, response]() {
+  OBSBasic *main = OBSBasic::Get();
+  auto *spin = main ? main->findChild<QSpinBox *>("freemixTransitionDuration") : nullptr;
+  if (!spin || value < 50 || value > 2000) { obs_data_set_bool(response, "success", false); return; }
+  spin->setValue(value);
+  obs_data_set_int(response, "duration", spin->value());
+  obs_data_set_bool(response, "success", true);
+ }, Qt::BlockingQueuedConnection);
+}
+
+void RequestSetPanelTitle(obs_data_t *request, obs_data_t *response, void *)
+{
+ const QString url = QString::fromUtf8(obs_data_get_string(request, "url"));
+ const QString title = QString::fromUtf8(obs_data_get_string(request, "title")).trimmed().left(100);
+ QMetaObject::invokeMethod(OBSBasic::Get(), [url, title, response]() {
+  const auto found = panelWindows.find(url.toStdString());
+  const QPointer<QDialog> window = found == panelWindows.end() ? nullptr : found->second;
+  if (!window || title.isEmpty()) { obs_data_set_bool(response, "success", false); return; }
+  window->setWindowTitle(title);
+  obs_data_set_bool(response, "success", true);
+ }, Qt::BlockingQueuedConnection);
+}
+
 void RequestReorderInputs(obs_data_t *request, obs_data_t *response, void *)
 {
  OBSDataArrayAutoRelease keys = obs_data_get_array(request, "keys");
@@ -1534,7 +1372,7 @@ void RequestFinishInputPanel(obs_data_t *request, obs_data_t *response, void *)
  const std::string name = obs_data_get_string(request, "inputName");
  QMetaObject::invokeMethod(OBSBasic::Get(), [key, editor, name, response]() {
   auto *main = OBSBasic::Get();
-  if (!main || main->isClosing() || frontendClosing || panelDeletionDepth) { obs_data_set_bool(response,"success",false); obs_data_set_string(response,"error","O FreeMix está encerrando ou fechando outra janela. Tente novamente."); return; }
+  if (!main || main->isClosing() || frontendClosing || panelDeletionDepth) { obs_data_set_bool(response,"success",false); obs_data_set_string(response,"error","O 3Mix está encerrando ou fechando outra janela. Tente novamente."); return; }
   if (!editor.empty() && editor != "properties" && editor != "filters") { obs_data_set_bool(response,"success",false); obs_data_set_string(response,"error","Editor de entrada inválido."); return; }
   const auto found = panelWindows.find(key);
   const QPointer<QDialog> panel = found == panelWindows.end() ? nullptr : found->second;
@@ -1544,13 +1382,13 @@ void RequestFinishInputPanel(obs_data_t *request, obs_data_t *response, void *)
   const QPointer<OBSBasic> owner = main;
   QTimer::singleShot(0, main, [owner, panel, editor, source]() {
    if (!owner || owner->isClosing() || frontendClosing || !panel) return;
-   if (!panel->close()) { blog(LOG_WARNING,"FreeMix input handoff: panel refused close; input preserved"); return; }
+   if (!panel->close()) { blog(LOG_WARNING,"3Mix input handoff: panel refused close; input preserved"); return; }
    if (editor.empty()) return;
    // Wait for the existing cooperative CEF destructor, including its nested Qt event loops.
    auto *timer = new QTimer(owner);
    timer->setInterval(25);
    QObject::connect(timer, &QTimer::timeout, owner, [owner, panel, editor, source, timer, tries=0]() mutable {
-    if (!owner || owner->isClosing() || frontendClosing || ++tries > 160 || obs_source_removed(source)) { blog(LOG_WARNING,"FreeMix input handoff cancelled or timed out; input preserved"); timer->stop(); timer->deleteLater(); return; }
+    if (!owner || owner->isClosing() || frontendClosing || ++tries > 160 || obs_source_removed(source)) { blog(LOG_WARNING,"3Mix input handoff cancelled or timed out; input preserved"); timer->stop(); timer->deleteLater(); return; }
     if (panel || panelDeletionDepth) return;
     timer->stop(); timer->deleteLater();
     if (editor == "properties") owner->CreatePropertiesWindow(source);
@@ -1567,7 +1405,7 @@ void RequestClosePanel(obs_data_t *request, obs_data_t *response, void *)
  const std::string key = obs_data_get_string(request, "url");
  QMetaObject::invokeMethod(OBSBasic::Get(), [key, response]() {
   auto *main = OBSBasic::Get();
-  if (!main || main->isClosing() || frontendClosing) { obs_data_set_bool(response, "success", false); obs_data_set_string(response, "error", "O FreeMix está encerrando."); return; }
+  if (!main || main->isClosing() || frontendClosing) { obs_data_set_bool(response, "success", false); obs_data_set_string(response, "error", "O 3Mix está encerrando."); return; }
   const auto found = panelWindows.find(key);
   const QPointer<QDialog> window = found == panelWindows.end() ? nullptr : found->second;
   obs_data_set_bool(response, "success", window && !panelDeletionDepth);
@@ -1617,6 +1455,9 @@ void RequestGetInterface(obs_data_t *request, obs_data_t *response, void *)
    obs_data_array_push_back(geometry, item);
   }
   obs_data_set_array(response, "layout", geometry);
+  obs_data_set_int(response, "switcherLayoutVersion", 2);
+  if (auto *duration = main->findChild<QSpinBox *>("freemixTransitionDuration"))
+   obs_data_set_int(response, "transitionDuration", duration->value());
   OBSDataArrayAutoRelease docks = obs_data_array_create();
    for (auto *dock : main->findChildren<QDockWidget *>(QString(), Qt::FindDirectChildrenOnly)) {
    OBSDataAutoRelease item = obs_data_create();
@@ -1634,8 +1475,11 @@ void RequestGetInterface(obs_data_t *request, obs_data_t *response, void *)
    obs_data_set_string(item, "title", window->windowTitle().toUtf8().constData());
    obs_data_set_int(item, "width", window->width());
    obs_data_set_int(item, "height", window->height());
+   obs_data_set_int(item, "x", window->x());
+   obs_data_set_int(item, "y", window->y());
    obs_data_set_bool(item, "visible", window->isVisible());
-   obs_data_set_bool(item, "independent", window->isWindow());
+   obs_data_set_bool(item, "independent", !window->parentWidget());
+   obs_data_set_string(item, "url", url.c_str());
    obs_data_array_push_back(windows, item);
   }
   obs_data_set_array(response, "panels", windows);
@@ -1728,7 +1572,7 @@ void ApplyTalkback(bool on)
  OBSSourceAutoRelease source = obs_get_source_by_uuid(directorUuid.c_str());
  if (!source) { talkLease.clear(); return; }
  // B is the private return. It must never feed Master (track 4) or its recorded output (track 1).
- OBSSourceAutoRelease returnBus = obs_get_source_by_name("FreeMix Bus B");
+ OBSSourceAutoRelease returnBus = obs_get_source_by_name("3Mix Bus B");
  if (returnBus) obs_source_set_audio_mixers(returnBus, 1u << 2);
  obs_source_set_audio_mixers(source, on && !isolatedTalk ? (1u << 5) : 0u);
  obs_source_set_monitoring_type(source, OBS_MONITORING_TYPE_NONE);
@@ -1828,6 +1672,8 @@ obs_websocket_vendor_register_request(vendor, "project_device_inventory", Reques
  obs_websocket_vendor_register_request(vendor, "open_settings", RequestOpenSettings, nullptr);
  obs_websocket_vendor_register_request(vendor, "open_panel", RequestOpenPanel, nullptr);
 	obs_websocket_vendor_register_request(vendor, "close_panel", RequestClosePanel, nullptr);
+	obs_websocket_vendor_register_request(vendor, "set_panel_title", RequestSetPanelTitle, nullptr);
+	obs_websocket_vendor_register_request(vendor, "set_transition_duration", RequestSetTransitionDuration, nullptr);
  obs_websocket_vendor_register_request(vendor, "finish_input_panel", RequestFinishInputPanel, nullptr);
  obs_websocket_vendor_register_request(vendor, "reorder_inputs", RequestReorderInputs, nullptr);
  obs_websocket_vendor_register_request(vendor, "talkback", RequestTalkback, nullptr);
@@ -1885,7 +1731,7 @@ void OnFrontendEvent(enum obs_frontend_event event, void *)
   if(auto *main=OBSBasic::Get())main->ResetFreeMixFtbContext();
   if(talkTimer)talkTimer->stop();
   StopNetworkOutputs(); StopAll();
-  for(auto &mix:independentMixes){ClearIndependentTransition(mix);mix.programUuid.clear();mix.previewUuid.clear();}
+  mixEffectManager.Clear();
   FreeMixCallAudioStop(); talkLease.clear();
   break;
 	case OBS_FRONTEND_EVENT_PREVIEW_SCENE_CHANGED:
@@ -1895,18 +1741,32 @@ void OnFrontendEvent(enum obs_frontend_event event, void *)
 	case OBS_FRONTEND_EVENT_SCENE_COLLECTION_CHANGED:
   StopNetworkOutputs();
   StopAll();
-  for(auto &mix:independentMixes){ClearIndependentTransition(mix);mix.programUuid.clear();mix.previewUuid.clear();}
+  mixEffectManager.Clear();
   RestorePrivateDirector();
-  LoadIndependentMix(); frontendClosing=false; if(talkTimer)talkTimer->start(100);
+  mixEffectManager.LoadIndependentMix(); frontendClosing=false; if(talkTimer)talkTimer->start(100);
   break;
 	case OBS_FRONTEND_EVENT_FINISHED_LOADING:
 		frontendClosing=false;
 		RegisterVendor();
-  for(QDockWidget *dock : OBSBasic::Get()->findChildren<QDockWidget *>()) {
+		mixEffectManager.RestoreIndependentMixes();
+   for(QDockWidget *dock : OBSBasic::Get()->findChildren<QDockWidget *>()) {
    if(dock->objectName()=="Menu_extraBrowser"||dock->objectName()=="Mesa_extraBrowser") {
     auto *title=new QWidget(dock);title->setFixedHeight(0);dock->setTitleBarWidget(title);
     if(dock->objectName()=="Menu_extraBrowser") dock->setFixedHeight(24);
    }
+   // Rebalance the existing native displays and desk, not a second web switcher.
+   QTimer::singleShot(500, OBSBasic::Get(), []() {
+    auto *main = OBSBasic::Get();
+    if (!main || main->isClosing()) return;
+    if (config_get_int(App()->GetUserConfig(), "BasicWindow", "FreeMixLayoutVersion") >= 2) return;
+    for (auto *dock : main->findChildren<QDockWidget *>(QString(), Qt::FindDirectChildrenOnly)) {
+     if (dock->objectName() == "Mesa_extraBrowser") {
+      main->resizeDocks({dock}, {std::max(280, main->height() * 52 / 100)}, Qt::Vertical);
+      config_set_int(App()->GetUserConfig(), "BasicWindow", "FreeMixLayoutVersion", 2);
+      break;
+     }
+    }
+   });
   }
   RestorePrivateDirector();
 		Load();
@@ -1915,7 +1775,7 @@ void OnFrontendEvent(enum obs_frontend_event event, void *)
   frontendClosing=true; if(auto *main=OBSBasic::Get())main->ResetFreeMixFtbContext(); if(talkTimer)talkTimer->stop();
   StopNetworkOutputs();
 		StopAll();
-  for(auto &mix:independentMixes){ClearIndependentTransition(mix);mix.programUuid.clear();mix.previewUuid.clear();}
+  mixEffectManager.Clear();
 		break;
 	case OBS_FRONTEND_EVENT_PROFILE_CHANGED:
 		frontendClosing=false; if(talkTimer)talkTimer->start(100);
@@ -1933,7 +1793,7 @@ void OnFrontendEvent(enum obs_frontend_event event, void *)
   FreeMixCallAudioStop();
   talkLease.clear(); ApplyTalkback(false);
 		StopAll();
-  if(event==OBS_FRONTEND_EVENT_EXIT){for(auto &mix:independentMixes){ClearIndependentTransition(mix);mix.programUuid.clear();mix.previewUuid.clear();}}
+  if(event==OBS_FRONTEND_EVENT_EXIT){mixEffectManager.Clear();}
 		break;
 	default:
 		break;
@@ -1941,6 +1801,34 @@ void OnFrontendEvent(enum obs_frontend_event event, void *)
 }
 
 } // namespace
+
+/* Center-column talkback. It uses the same director source and ApplyTalkback path as Calls, without a
+ * browser widget and without a second audio engine. The native watchdog still closes it after 1.5 s. */
+void FreeMixTalkbackPress(bool on)
+{
+ if (on) {
+  if (directorUuid.empty()) return;
+  talkLease = QUuid::createUuid().toString(QUuid::WithoutBraces).toStdString();
+  isolatedTalk = false;
+  talkUntil = std::chrono::steady_clock::now() + std::chrono::milliseconds(1500);
+  ApplyTalkback(true);
+ } else {
+  talkLease.clear();
+  ApplyTalkback(false);
+ }
+}
+bool FreeMixTalkbackReady()
+{
+ return !directorUuid.empty();
+}
+bool FreeMixTalkbackActive()
+{
+ return !talkLease.empty() && std::chrono::steady_clock::now() < talkUntil;
+}
+void FreeMixTalkbackKeepAlive()
+{
+ if (!talkLease.empty()) talkUntil = std::chrono::steady_clock::now() + std::chrono::milliseconds(1500);
+}
 
 bool FreeMixMultistreamDrainSrtHdr(unsigned timeoutMs)
 {
@@ -1956,7 +1844,7 @@ bool FreeMixMultistreamDrainSrtHdr(unsigned timeoutMs)
  const unsigned remaining=elapsed>=timeoutMs?0:timeoutMs-unsigned(elapsed);
  const bool completed=callsDone&&freemix_srt_hdr::Drain(remaining);
  frontendClosing=wasClosing;frontendDrainActive=false;
- if(!completed){if(!wasClosing&&talkTimer)talkTimer->start(100);blog(LOG_WARNING,"FreeMix network drain timed out: resources retained; context change/close refused");}
+ if(!completed){if(!wasClosing&&talkTimer)talkTimer->start(100);blog(LOG_WARNING,"3Mix network drain timed out: resources retained; context change/close refused");}
  return completed;
 }
 
@@ -1971,14 +1859,16 @@ void FreeMixMultistreamBeginClose()
 {
  frontendClosing = true;
  if (talkTimer) talkTimer->stop();
- // Close CEF panels while the main window is still intact. Include panels
- // removed from the registry whose deferred deletion has not run yet.
+ // Panels are true top-level windows, so collect them from the registry
+ // before clearing it; keep the legacy child search as a safety net.
+ std::vector<QPointer<QDialog>> closingPanels;
+ for (auto &[url, dialog] : panelWindows) {
+  if (dialog && !dialog->property("freemixDeleting").toBool()) closingPanels.emplace_back(dialog);
+ }
  panelWindows.clear();
  auto *main = OBSBasic::Get();
- if (!main) return;
- std::vector<QPointer<QDialog>> closingPanels;
- for (auto *dialog : main->findChildren<QDialog *>(QString(), Qt::FindDirectChildrenOnly)) {
-  if (dialog->objectName() == "freemixPanelWindow") closingPanels.emplace_back(dialog);
+ if (main) for (auto *dialog : main->findChildren<QDialog *>(QString(), Qt::FindDirectChildrenOnly)) {
+  if (dialog->objectName() == "freemixPanelWindow" && !dialog->property("freemixDeleting").toBool()) closingPanels.emplace_back(dialog);
  }
  ++panelDeletionDepth;
  for (const auto &dialog : closingPanels) {

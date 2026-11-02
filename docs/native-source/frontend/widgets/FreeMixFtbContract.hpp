@@ -44,7 +44,7 @@ public:
  Decision Check(const Request &r,const Snapshot &s)const {
   const auto reject=[](const char *e){return Decision{Kind::Reject,e};};
   if(!Identifier(r.id)||!Identifier(r.connection)||!Uuid(r.program)||!Uuid(r.preview))return reject("Identificação FTB ou UUID inválido.");
-  if(s.closing)return reject("O FreeMix está encerrando; nenhum FTB será enviado.");
+  if(s.closing)return reject("O 3Mix está encerrando; nenhum FTB será enviado.");
   if(r.scope!=s.scope||r.context!=s.context)return reject("Projeto ou contexto do motor mudou. Consulte FTB novamente.");
   const auto old=receipts.find(Key(r));
   if(old!=receipts.end()){if(old->second.signature!=Signature(r))return reject("ID FTB reutilizado para outro comando.");if(!old->second.failure.empty())return {Kind::Reject,old->second.failure};return {Kind::Replayed,{}};}

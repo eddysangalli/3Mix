@@ -2122,7 +2122,7 @@ void OBSBasic::UpdateTitleBar()
 	const char *sceneCollection = config_get_string(App()->GetUserConfig(), "Basic", "SceneCollection");
 
 	/* FreeMix: the title carries the product name and the open preset, nothing else. */
-	name << "FreeMix Studio";
+	name << "3Mix Studio";
 	if (safe_mode) {
 		name << " (" << Str("TitleBar.SafeMode") << ")";
 	}

@@ -56,7 +56,7 @@ export class MixEffectsEngine {
   if(!Number.isInteger(mixId)||![2,3,4].includes(mixId))throw Error('Selecione M/E 2, 3 ou 4');
   const data={action:d.command,mixId};
   let expectedPreviewUuid,expectedProgramUuid;
-  if(d.command==='preview'){const chosen=this.p.scene(d.input);data.uuid=chosen.key;expectedPreviewUuid=data.uuid;if(await this.p.inputEngine?.cycle?.('3Mix Mix '+mixId+' Output',chosen.name))throw Error('Esta entrada já depende da saída do M/E '+mixId+'; a rota criaria um ciclo.');}
+  if(d.command==='preview'){const chosen=this.p.scene(d.input);data.uuid=chosen.key;expectedPreviewUuid=data.uuid;if(await this.p.inputEngine?.cycle?.('PGM M/E '+mixId,chosen.name))throw Error('Esta entrada já depende da saída do M/E '+mixId+'; a rota criaria um ciclo.');}
   if(d.command==='configure'){
    data.width=Number(d.width);data.height=Number(d.height);data.fill=d.fill===true;
    for(const field of ['positionX','positionY','zoom'])if(d[field]!==undefined)data[field]=Number(d[field]);

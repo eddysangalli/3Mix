@@ -214,7 +214,7 @@ export class Production {
     const [sc,preset,mode,tr]=await Promise.all([this.req('GetSceneList'),this.req('GetSceneCollectionList'),this.req('GetStudioModeEnabled'),this.req('GetSceneTransitionList')]);
     if(data.expectedScope&&data.expectedScope!==preset.currentSceneCollectionName)throw Error('O projeto mudou. Abra a entrada novamente antes de executar.');
     if(['cut','fade','transition'].includes(action)&&!mode.studioModeEnabled)throw Error('Modo Preview/Programa foi desligado; comando de transição recusado');
-    const scenes=sc.scenes.slice().sort((a,b)=>b.sceneIndex-a.sceneIndex).filter(s=>s.sceneName!=='3Mix Barramentos'&&!s.sceneName.startsWith('3Mix Slot ')&&!/^3Mix Mix \d+ Output$/.test(s.sceneName));
+    const scenes=sc.scenes.slice().sort((a,b)=>b.sceneIndex-a.sceneIndex).filter(s=>s.sceneName!=='3Mix Barramentos'&&!s.sceneName.startsWith('3Mix Slot '));
     const cached=this.state.inputs||[],sameTopology=scenes.length===cached.length&&scenes.every(s=>cached.some(i=>i.key===s.sceneUuid));
     if(!this.state.connected||this.scope!==preset.currentSceneCollectionName||!sameTopology||Date.now()-(this.state.updatedAt||0)>2500)await this.refresh();
     const names=new Map(scenes.map(s=>[s.sceneUuid,s.sceneName]));
@@ -237,7 +237,7 @@ export class Production {
     const r=await this.req(group?'GetGroupSceneItemList':'GetSceneItemList',{sceneName:name});
     if(!Array.isArray(r?.sceneItems))throw Error('Não foi possível confirmar a composição no ar');
     // Mesmo bug de sceneSources()/visibleTree() (ver comentários ali): se a cena-proxy pública de M/E
-    // ("3Mix Mix N Output") estiver aninhada na árvore do Programa do MAIN ou de algum DSK -- exatamente
+    // ("PGM M/E N") estiver aninhada na árvore do Programa do MAIN ou de algum DSK -- exatamente
     // o caso de usá-la como signal de Patch (passo 4 do plano) ou dentro de outra Scene -- inputKind===null
     // também bate na transição privada dela, e GetSceneItemList('3Mix Mix N') (a transição, não uma
     // cena) lançava aqui sem guarda nenhuma, quebrando a exclusão de Input nesse cenário real.
@@ -271,7 +271,7 @@ export class Production {
     const r=await this.req('GetSceneItemList',{sceneName:name}); const sources=[];
     // Bug real encontrado em QA (qa-beta/recibos/switcher-strip-patch-audio-tally-e2e.md): um item com
     // inputKind===null NÃO é só uma cena aninhada -- a transição privada dentro da cena-proxy pública de
-    // nesting de M/E ("3Mix Mix N Output", de FreeMixMixEffectManager.hpp) também tem inputKind===null
+    // nesting de M/E ("PGM M/E N", de FreeMixMixEffectManager.hpp) também tem inputKind===null
     // (sourceType OBS_SOURCE_TYPE_TRANSITION, não OBS_SOURCE_TYPE_SCENE). Recursar nela chamava
     // GetSceneItemList numa cena que não existe ("3Mix Mix 2" é a transição, não uma cena registrada),
     // lançando um erro não tratado que derrubava refresh() inteiro -- e portanto connected:false na API
@@ -285,7 +285,7 @@ export class Production {
     if(!name||visited.has(name))return visited;visited.add(name);
     const r=await this.optional(group?'GetGroupSceneItemList':'GetSceneItemList',{sceneName:name});
     // Mesmo bug de sceneSources() (ver comentário ali): inputKind===null também é verdade pra transição
-    // privada dentro da cena-proxy pública de M/E ("3Mix Mix N Output"), não só pra cena aninhada.
+    // privada dentro da cena-proxy pública de M/E ("PGM M/E N"), não só pra cena aninhada.
     // optional() já evitava um crash aqui (retorna null, loop vira no-op), mas descer com sourceType
     // explícito é a checagem correta -- meTally() usa exatamente esta função pro tally recursivo do
     // passo 7, então classificar certo aqui importa pra correção do recurso, não só pra não quebrar.
@@ -331,7 +331,7 @@ export class Production {
     if(buses){for(const [i,name] of Object.values(busNames).entries()){const setting=await this.req('GetInputSettings',{inputName:name}),a=audio.find(a=>a.name===name);if(Number(setting.inputSettings.MixTrack)!==i+3||!['1','2','3','4','5','6'].every(t=>!!a.tracks[t]===(t===String(i+1))))buses=false;}
       const selected=keyers?.responseData?.downstream_keyers?.some(k=>k.name==='3Mix Audio')?await this.vendor('dsk_get_scene',{dsk_name:'3Mix Audio'}):null;
       const items=await this.optional('GetSceneItemList',{sceneName:'3Mix Barramentos'});buses=buses&&selected?.scene==='3Mix Barramentos'&&Object.values(busNames).every(name=>items?.sceneItems.some(i=>i.sourceName===name&&i.sceneItemEnabled));}
-    const scenes=sc.scenes.slice().sort((a,b)=>b.sceneIndex-a.sceneIndex).filter(s=>s.sceneName!=='3Mix Barramentos'&&!s.sceneName.startsWith('3Mix Slot ')&&!/^3Mix Mix \d+ Output$/.test(s.sceneName));
+    const scenes=sc.scenes.slice().sort((a,b)=>b.sceneIndex-a.sceneIndex).filter(s=>s.sceneName!=='3Mix Barramentos'&&!s.sceneName.startsWith('3Mix Slot '));
     const inputs=[];
     for(const [i,s] of scenes.entries()){
       const sources=await this.sceneSources(s.sceneName), m=media.find(m=>sources.includes(m.name)), a=audio.filter(a=>sources.includes(a.name));
@@ -351,7 +351,7 @@ export class Production {
     for(const input of inputs)input.tally={program:programTree.has(input.name),preview:previewTree.has(input.name)};
     const gc={...this.gc}; gc.activeLowerThird=overlays.some(o=>o.scene==='3Mix Tarja'); gc.activeScore=overlays.some(o=>o.scene==='3Mix Placar');
     this.state={operation:this.state.operation,operationReceipts:[...(this.operationReceipts?.values()||[])].map(r=>({...r})),connected:true,preset:this.scope,scenes:inputs.map(i=>i.name),inputs:this.inputEngine.decorate(inputs,video),compositionTemplates:structuredClone(this.inputEngine.templates),compositionPresets:this.inputEngine.presets?.()||[],gcLibrary:this.gcLibrary.summary(),program:sc.currentProgramSceneName,preview:sc.currentPreviewSceneName,
-      mixOutputs:sc.scenes.map(x=>({m:/^3Mix Mix (\d+) Output$/.exec(x.sceneName),key:x.sceneUuid})).filter(x=>x.m).map(x=>({mixId:Number(x.m[1]),name:'Saída do M/E '+x.m[1],key:x.key})).sort((a,b)=>a.mixId-b.mixId),sourceStatus,tally,signals:this.signalEngine.summary(),sourceInputs:ins.inputs.map(i=>({key:i.inputUuid,name:i.inputName,kind:i.unversionedInputKind||i.inputKind})),variables:this.dataSources.publishedVariables(),people:this.dataSources.people(),audioInputs:audio,media,overlays,overlaysEngine:this.overlayEngine.summary(),preflight:this.preflightEngine.summary(),blackbox:this.blackboxEngine.summary(),broadcastDelay:this.broadcastDelayEngine.summary(),returnFeeds:this.returnFeedManager.summary(),audioDucking:this.audioDuckingEngine.summary(),rundown:this.rundownEngine.summary(),gc,buses,calls:await this.callEngine.summary(inputs),dataSources:this.dataSources.summary(),recording:rec.outputActive,streaming:stream.outputActive,recordTimecode:rec.outputTimecode,streamTimecode:stream.outputTimecode,
+      sourceStatus,tally,signals:this.signalEngine.summary(),sourceInputs:ins.inputs.map(i=>({key:i.inputUuid,name:i.inputName,kind:i.unversionedInputKind||i.inputKind})),variables:this.dataSources.publishedVariables(),people:this.dataSources.people(),audioInputs:audio,media,overlays,overlaysEngine:this.overlayEngine.summary(),preflight:this.preflightEngine.summary(),blackbox:this.blackboxEngine.summary(),broadcastDelay:this.broadcastDelayEngine.summary(),returnFeeds:this.returnFeedManager.summary(),audioDucking:this.audioDuckingEngine.summary(),rundown:this.rundownEngine.summary(),gc,buses,calls:await this.callEngine.summary(inputs),dataSources:this.dataSources.summary(),recording:rec.outputActive,streaming:stream.outputActive,recordTimecode:rec.outputTimecode,streamTimecode:stream.outputTimecode,
       transition:tr.currentSceneTransitionName,transitions:tr.transitions,video,controllers:this.controllerEngine.summary(),playout:this.playoutEngine.summary(),queue:this.playoutEngine.summary(),recoverySession:this.sessionRecovery.summary(),macros:this.macroEngine.summary(),busSetupError:this.busSetupError||null,revision:++this.generation,updatedAt:Date.now()};
     this.state.globalHotkeys=await this.globalHotkeys.sync();this.state.controllers=this.controllerEngine.summary();this.state.playout=this.playoutEngine.summary();this.state.queue=this.playoutEngine.summary();
     await this.inputEngine.observeAudio(this.state);

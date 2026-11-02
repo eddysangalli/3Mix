@@ -202,7 +202,7 @@ static void FreeMixWriteFtbState(const freemix_ftb::Snapshot &s,obs_data_t *resp
 void OBSBasic::FreeMixFadeToBlackRequest(obs_data_t *request,obs_data_t *response)
 {
  const auto fail=[response](const char *reason){obs_data_set_bool(response,"success",false);obs_data_set_string(response,"error",reason);};
- if(isClosing()){fail("O FreeMix está encerrando. Nenhum FTB será enviado.");return;}
+ if(isClosing()){fail("O 3Mix está encerrando. Nenhum FTB será enviado.");return;}
  const std::string command=obs_data_get_string(request,"command");
  if(command!="state"&&command!="set"){fail("Use state ou set com active explícito para FTB.");return;}
  const auto before=FreeMixFtbSnapshot();FreeMixWriteFtbState(before,response);

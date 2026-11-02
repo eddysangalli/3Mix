@@ -1,8 +1,8 @@
 {
   "upstream": "https://github.com/obsproject/obs-studio.git",
   "base": "ba2f32bdf791005443988a4955e963663e16b1ed",
-  "head": "7b77e328ec4741ab734e43f3275d37d9d1dfd22e",
-  "version": "0.1.0-local.20261011232400",
+  "head": "45a1287fb753d2b5f2b49fa7e0bbc6f5869a8158",
+  "version": "0.1.0-local.20261102172118",
   "patches": [
     {
       "path": "0001-feat-branding-replace-OBS-identity-with-FreeMix-Stud.patch",
@@ -159,11 +159,31 @@
     {
       "path": "0039-Disable-independent-service-catalogue-updates-in-Fre.patch",
       "sha256": "723459b48490d991930743123845ad822828ed036a67981f3e1811369c040d01"
+    },
+    {
+      "path": "0040-DSK-ultima-linha-alinhada-ao-Talkback-por-geometria-.patch",
+      "sha256": "923074ab0f2cfac3e885cf6fda574618ee861410fd45c421283972ce7adab9f1"
+    },
+    {
+      "path": "0041-feat-consolidar-motor-broadcast-3Mix-e-Multi-M-E.patch",
+      "sha256": "3839747425bd869c3eb309d0ee06e0836d42319275f983f5ab496815652d68e3"
+    },
+    {
+      "path": "0042-brand-nomes-internos-de-cena-fonte-e-saida-passam-a-.patch",
+      "sha256": "fc54622bff274cbb9196f0778ac01d0a30eea45e7526fd0624250ed82c9a66ce"
+    },
+    {
+      "path": "0043-feat-saida-do-M-E-com-formato-proprio-e-imagem-resta.patch",
+      "sha256": "98ffeea94e1c3fabf8bc548e9751cadf9e32a92da1d52f7fae553a72e88fc8bf"
+    },
+    {
+      "path": "0044-feat-Programa-de-cada-M-E-como-entrada-PGM-M-E-N.patch",
+      "sha256": "1de606549d0bef0b49402e59311117b20d6d1539f74bf317ac64dd2c07f426f6"
     }
   ],
-  "sourceUpdatedAt": "2026-10-11T23:23:22.586Z",
+  "sourceUpdatedAt": "2026-11-02T20:21:44.142Z",
   "sourceSchema": 2,
-  "tree": "56ce11867c077323e36c81265176971d76a3c601",
+  "tree": "8a6b6158258fdbce14be3010a2b68a8acaa34189",
   "submodules": [
     {
       "path": "deps/libdshowcapture/src",
@@ -180,8 +200,8 @@
       "upstream": "https://github.com/obsproject/obs-browser.git",
       "base": "3f0a2cdf378939ebe3c6f9ab36d4ea100c25aac2",
       "baseTree": "c28c9249becf1dcdb730bc3150bb05f92953a81d",
-      "head": "dd26fda9cd8e507934f080be14f44038506c3b7e",
-      "headTree": "c4be2403bdd7ab64dc18dc3e005f804a40e94563",
+      "head": "798c334d80dee725cabde46708120ddb1d1b1204",
+      "headTree": "db82da891d9ab49195083567af84e4b55bb738fa",
       "patches": [
         {
           "path": "submodules/d9ec8ae3e96f7809/0001-dd26fda9cd8e.patch",
@@ -191,6 +211,15 @@
           "tree": "c4be2403bdd7ab64dc18dc3e005f804a40e94563",
           "rawCommitPath": "submodules/d9ec8ae3e96f7809/0001-dd26fda9cd8e.commit.txt",
           "rawCommitSha256": "94b66bf19b7bab79c04f9d5be5f0a67cf162e0598944196f5e195103e837fae6"
+        },
+        {
+          "path": "submodules/d9ec8ae3e96f7809/0002-798c334d80de.patch",
+          "sha256": "2e90ef31173a86b1e457ca7150fc1ede59b75d6daeab8c6f106fc77eefb434a8",
+          "commit": "798c334d80dee725cabde46708120ddb1d1b1204",
+          "parent": "dd26fda9cd8e507934f080be14f44038506c3b7e",
+          "tree": "db82da891d9ab49195083567af84e4b55bb738fa",
+          "rawCommitPath": "submodules/d9ec8ae3e96f7809/0002-798c334d80de.commit.txt",
+          "rawCommitSha256": "87dad240d908b534e45766cf1acfb21640609340a3001081538280ecf68d384a"
         }
       ],
       "sourceFiles": [
@@ -198,6 +227,11 @@
           "path": "plugins/obs-browser/browser-client.cpp",
           "bytes": 19623,
           "sha256": "ada13b266e6f9431287997fad482ee0c2cda9fb1873c8b590898c00783a7cab1"
+        },
+        {
+          "path": "plugins/obs-browser/data/error.html",
+          "bytes": 41408,
+          "sha256": "046e53b92e9095b51959a73761ba55904d66c5ec7dc41aef69d8e359a778f678"
         }
       ]
     },

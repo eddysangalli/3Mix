@@ -70,7 +70,7 @@ bool OwnReturn(obs_source_t *source){
  auto check=[](obs_source_t *child,bool &found){OBSDataAutoRelease settings=obs_source_get_private_settings(child);if(obs_data_get_bool(settings,"freemix_call_video_return_private"))found=true;};
  check(source,found);obs_source_enum_full_tree(source,[](obs_source_t *,obs_source_t *child,void *param){OBSDataAutoRelease settings=obs_source_get_private_settings(child);if(obs_data_get_bool(settings,"freemix_call_video_return_private"))*static_cast<bool *>(param)=true;},&found);return found;
 }
-const char *Name(void *){return "FreeMix Calls continuous return video";}
+const char *Name(void *){return "3Mix Calls continuous return video";}
 void *Create(obs_data_t *,obs_output_t *output){
  if(!creating)return nullptr;auto *context=new(std::nothrow) RawContext;
  if(!context)return nullptr;context->output=output;context->owner=creating;
@@ -115,7 +115,7 @@ std::string Build(Session &s,bool (*isPrivate)(obs_source_t *)){
  obs_video_info info{};if(!obs_get_video_info(&info)||!info.base_width||!info.base_height||!info.fps_den)return "Native video context unavailable";
  const auto fps=DeriveFps(info.fps_num,info.fps_den);if(!fps.divisor)return "Continuous return requires Main25/50,30/60 or30000/60000 over1001; no video reset or FPS relabel";
  s.pool.divisor=fps.divisor;s.pool.fpsNum=fps.numerator;s.pool.fpsDen=fps.denominator;s.fpsNum=info.fps_num;s.fpsDen=info.fps_den;s.baseWidth=info.base_width;s.baseHeight=info.base_height;
- s.scene=obs_scene_create_private("FreeMix Calls auxiliary frame");if(!s.scene)return "Could not allocate private frame";
+ s.scene=obs_scene_create_private("3Mix Calls auxiliary frame");if(!s.scene)return "Could not allocate private frame";
  {OBSDataAutoRelease settings=obs_source_get_private_settings(obs_scene_get_source(s.scene));obs_data_set_bool(settings,"freemix_call_video_return_private",true);}
  obs_source_set_audio_mixers(obs_scene_get_source(s.scene),0);obs_source_set_monitoring_type(obs_scene_get_source(s.scene),OBS_MONITORING_TYPE_NONE);
  auto *item=obs_scene_add(s.scene,s.source);if(!item)return "Could not frame video source";
@@ -123,7 +123,7 @@ std::string Build(Session &s,bool (*isPrivate)(obs_source_t *)){
  obs_sceneitem_set_alignment(item,OBS_ALIGN_CENTER);obs_sceneitem_set_pos(item,&position);obs_sceneitem_set_bounds_type(item,OBS_BOUNDS_SCALE_INNER);obs_sceneitem_set_bounds_alignment(item,OBS_ALIGN_CENTER);obs_sceneitem_set_bounds(item,&size);
  info.output_width=Width;info.output_height=Height;info.output_format=VIDEO_FORMAT_BGRA;info.colorspace=VIDEO_CS_709;info.range=VIDEO_RANGE_FULL;info.gpu_conversion=false;
  s.view=obs_view_create();if(!s.view)return "Could not create AUX view";obs_view_set_source(s.view,0,obs_scene_get_source(s.scene));s.video=obs_view_add2(s.view,&info);if(!s.video)return "AUX video context unavailable";
- creating=&s;s.output=obs_output_create("freemix_calls_return_video","FreeMix Calls auxiliary video",nullptr,nullptr);creating=nullptr;if(!s.output)return "Raw AUX output unavailable";
+ creating=&s;s.output=obs_output_create("freemix_calls_return_video","3Mix Calls auxiliary video",nullptr,nullptr);creating=nullptr;if(!s.output)return "Raw AUX output unavailable";
  obs_output_set_media(s.output,s.video,nullptr);
  video_scale_info conversion{};conversion.format=VIDEO_FORMAT_RGBA;conversion.width=Width;conversion.height=Height;conversion.colorspace=VIDEO_CS_709;conversion.range=VIDEO_RANGE_FULL;obs_output_set_video_conversion(s.output,&conversion);
  try{s.worker=std::thread([&s](){Worker(s);});}catch(...){obs_output_release(s.output);s.output=nullptr;return "Could not create bounded IPC worker";}

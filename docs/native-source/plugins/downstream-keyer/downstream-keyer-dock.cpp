@@ -727,13 +727,13 @@ QString DownstreamKeyerDock::GetScene(QString dskName)
 	return "";
 }
 
-bool DownstreamKeyerDock::SwitchDSK(QString dskName, QString sceneName)
+bool DownstreamKeyerDock::SwitchDSK(QString dskName, QString sceneName, bool immediate)
 {
 	const int count = tabs->count();
 	for (int i = 0; i < count; i++) {
 		auto w = dynamic_cast<DownstreamKeyer *>(tabs->widget(i));
 		if (w->objectName() == dskName) {
-			if (w->SwitchToScene(sceneName)) {
+			if (w->SwitchToScene(sceneName, immediate)) {
 				return true;
 			}
 		}
@@ -976,7 +976,7 @@ void DownstreamKeyerDock::change_scene(obs_data_t *request_data, obs_data_t *res
 		obs_data_set_bool(response_data, "success", false);
 		return;
 	}
-	obs_data_set_bool(response_data, "success", dsk->SwitchDSK(QString::fromUtf8(dsk_name), QString::fromUtf8(scene_name)));
+	obs_data_set_bool(response_data, "success", dsk->SwitchDSK(QString::fromUtf8(dsk_name), QString::fromUtf8(scene_name), obs_data_get_bool(request_data, "immediate")));
 }
 
 void DownstreamKeyerDock::add_scene(obs_data_t *request_data, obs_data_t *response_data, void *param)

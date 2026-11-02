@@ -4,12 +4,17 @@
 - Aba M/E ao lado de Fontes e seletor de M/E nas botoeiras do topo. O botão antigo "M/E Strips" ficava dentro de uma barra escondida e nunca aparecia.
 - Motor compilado do `main` instalado, com o núcleo de M/E e nesting.
 - Cenas, fontes e filtros internos passam de "FreeMix ..." para "3Mix ...". Projetos existentes migram ao abrir, com cópia `.pre-3mix`. Identificadores de formato de arquivo e de protocolo não mudam.
-- As saídas de M/E deixam de aparecer como entradas; no Patch, em Composições e no Multiview elas se chamam "Saída do M/E N".
+- O Programa de cada M/E vira a entrada "PGM M/E N", reutilizável em outros M/Es, composições, Patch e Multiview.
+- Abas Entradas, Composições e M/E; cada botoeira escolhe PV ou PGM e o M/E, com botoeiras extras e miniaturas desligáveis; M/E em janela separada, com monitores desligáveis.
+- O 3Mix abre com a janela visível, não mais escondido na bandeja. A mesa volta a carregar a Strip dentro do motor.
 - Formato, transição e duração por M/E na aba M/E; seletor de M/E na Mesa de corte em janela.
 - M/E nasce no formato da produção; formato diferente entra inteiro no quadro, sem cortar.
 - A saída do M/E mantém a imagem depois de reconfigurar, trocar de projeto e reiniciar; antes ficava preta até o próximo corte.
 - Rotas em ciclo entre M/Es são recusadas. AUTO deixa de bloquear o M/E enquanto a transição termina. O Patch salva o projeto ao concluir.
 - AUX avisa quando a saída no ar recusou a troca de sinal.
+- Entrada só de áudio mede e entra na mistura sem depender de corte; mic junto de câmera segue a cena dela e entrada criada no ar nasce muda.
+- Fontes do motor passam a ficar em `motor/`, no mesmo repositório.
+- Pacote alpha em ZIP: projeto inicial "3Mix", instruções para quem testa e logs pelo WhatsApp.
 - `aux.html` e `aux.js` passam a `aux-router`, porque AUX é nome reservado no Windows. O endereço `/aux` não muda.
 
 ## 02/11/2026 — Hub, Mesa de corte, Composições, GC, Rede e reorganização de Efeitos

@@ -30,7 +30,7 @@ void OBSBasic::SystemTrayInit()
 	QIcon trayIconFile = QIcon(":/res/images/freemix.png");
 #endif
 	trayIcon = new QSystemTrayIcon(QIcon::fromTheme("obs-tray", trayIconFile), this);
-	trayIcon->setToolTip("FreeMix Studio");
+	trayIcon->setToolTip("3Mix Studio");
 
 	trayMenu = new QMenu(this);
 
@@ -102,7 +102,7 @@ void OBSBasic::SysTrayNotify(const QString &text, QSystemTrayIcon::MessageIcon n
 {
 	if (trayIcon && trayIcon->isVisible() && QSystemTrayIcon::supportsMessages()) {
 		QSystemTrayIcon::MessageIcon icon = QSystemTrayIcon::MessageIcon(n);
-		trayIcon->showMessage("FreeMix Studio", text, icon, 10000);
+		trayIcon->showMessage("3Mix Studio", text, icon, 10000);
 	}
 }
 

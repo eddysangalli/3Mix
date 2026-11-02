@@ -108,7 +108,7 @@ void OBSBasic::SetScopeMode(int mode, bool withPreview)
 				obs_data_set_int(settings, "display", choice.display);
 				obs_data_set_int(settings, "components", choice.components);
 			}
-			created = obs_source_create_private(id, "FreeMix Scope", settings);
+			created = obs_source_create_private(id, "3Mix Scope", settings);
 		}
 		if (!created) {
 			mode = 0;

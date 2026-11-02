@@ -1,3 +1,25 @@
+# Entrega atual — alpha portátil de 02/11/2026
+
+O artefato mais recente verificado nesta rodada é **`3Mix-Alpha-20261102162909.zip`**, versão **`0.1.0-local.20261102162909`**. É um **ZIP portátil alpha**, não um Setup novo nem uma beta homologada em Windows limpo.
+
+| Campo | Evidência |
+|---|---|
+| Tamanho | 1.339.123.054 bytes |
+| SHA-256 recalculado | `09bde28d32f18d99171caa1937540557b25ce99012486573c4685d6cbab607ff` |
+| Recibo local do ZIP | `entregas/3Mix-Alpha-20261102162909.zip.json` |
+| Recibo local de selagem | `qa-finalizacao/alpha/selo.json` |
+| Relatório local de abertura | `qa-finalizacao/alpha/resultado-zip.txt` |
+
+Esses caminhos são relativos à raiz do workspace completo; não são links de download nem garantia de que os artefatos estejam publicados neste repositório.
+
+O relatório de teste da outra sessão registra abertura do pacote extraído nesta máquina, motor conectado, tema 3Mix, geração de senha própria, resposta M/E, medição de entrada de áudio e diagnóstico gerado. Esta atualização documental conferiu tamanho e SHA-256 do ZIP; **não repetiu a execução do programa**. O recibo de selagem registra assinatura interna e hashes verificados, mas `nativeCommit: null` e `rebuiltComponents: []`: não demonstra sozinho a correspondência integral entre fontes e binários. Os contadores de arquivos dos recibos têm escopos diferentes (ZIP: 9.988; selagem: 9.986); não foram reconciliados nesta rodada.
+
+**Ainda pendente:** Setup novo e seus ensaios de instalação/desinstalação, 12 cenários em Windows limpo, Authenticode, qualificação com hardware e investigação dos crashes de `source-record` registrados no status. O destino de suporte presente na configuração do pacote não constitui, por si só, aprovação comercial ou operacional do canal.
+
+O bloco abaixo é **histórico de outubro**, preservado para rastreabilidade. Suas afirmações sobre “hoje”, versão em produção e atualização não aplicada não descrevem o estado atual do operador. A versão ativa do operador não foi consultada nesta rodada.
+
+---
+
 # Entrega atual do 3Mix
 <!-- rodada-20261011-1523-r3 -->
 > **Leia primeiro este bloco.** Distingue o instalador validado pelo Root do que está de fato em produção na mesa do operador.

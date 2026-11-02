@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3Mix · M/E</title>
+<link rel="stylesheet" href="3mix-padrao.css">
+<script src="3mix-padrao.js"></script>
+<style>
+  #me-surface { padding:8px; }
+  .me-strips { display:grid; gap:8px; grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr)); }
+  .me-barra { display:flex; gap:6px; margin-bottom:8px; }
+  .me-barra button, #me-surface > button { background:#303030; color:#e6e6e6; border:1px solid #414141; border-radius:3px; height:26px; padding:0 10px; cursor:pointer; margin-top:0; }
+  #me-surface select { background:#202020; color:#e6e6e6; border:1px solid #414141; border-radius:3px; height:26px; }
+  #me-surface div > button { cursor:pointer; }
+</style>
+</head>
+<body class="p3 me-on">
+<header class="p3-head">
+  <a href="/" title="3Mix" class="brand-logo"><img class="p3-logo" src="/img/3mix-logo.png" alt="3Mix"></a>
+  <h1>M/E</h1>
+  <span class="p3-flex"></span>
+  <span id="connection" class="p3-badge">Conectando…</span>
+</header>
+<main id="me-surface"></main>
+<script>
+(() => {
+  const control = async (action, data) => {
+    const r = await fetch('/api/control', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, ...data }), signal: AbortSignal.timeout(30000) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok || d.success === false) throw Error(d.error || 'O motor não confirmou');
+    return d;
+  };
+  window.ThreeMixStripHost = { apiBase: location.origin + '/api/', executeMain: (command, input) => control(command === 'take' ? 'transition' : command, input ? { input } : {}) };
+  async function ler() {
+    try {
+      const d = await (await fetch('/api/json', { cache: 'no-store', signal: AbortSignal.timeout(5000) })).json();
+      window.FreeMixProductionState = d;
+      const on = d.connected === true, c = document.getElementById('connection');
+      c.textContent = on ? 'Motor conectado' : 'Motor desconectado';
+      c.className = 'p3-badge' + (on ? ' on' : '');
+    } catch { document.getElementById('connection').textContent = 'Sem conexão'; }
+  }
+  ler(); setInterval(ler, 1000);
+})();
+</script>
+<script src="switcher-strip-model.js?v=20261102e"></script>
+<script src="switcher-strip.js?v=20261102g"></script>
+<script src="switcher-strip-host.js?v=20261102g"></script>
+</body>
+</html>

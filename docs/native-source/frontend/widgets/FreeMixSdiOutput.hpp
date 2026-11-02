@@ -52,12 +52,12 @@ inline void Request(obs_data_t *request,obs_data_t *response,bool (*isPrivate)(o
      info.base_width=info.output_width=obs_source_get_width(source);info.base_height=info.output_height=obs_source_get_height(source);info.output_format=VIDEO_FORMAT_BGRA;info.colorspace=VIDEO_CS_709;info.range=VIDEO_RANGE_FULL;
      if(hdr){info.output_width=uint32_t(obs_data_get_int(hdrProof,"width"));info.output_height=uint32_t(obs_data_get_int(hdrProof,"height"));info.fps_num=uint32_t(obs_data_get_int(hdrProof,"fpsNum"));info.fps_den=uint32_t(obs_data_get_int(hdrProof,"fpsDen"));info.output_format=VIDEO_FORMAT_P416;info.colorspace=std::string(obs_data_get_string(config,"hdrTransfer"))=="hlg"?VIDEO_CS_2100_HLG:VIDEO_CS_2100_PQ;info.range=VIDEO_RANGE_PARTIAL;}
      if(!info.base_width||!info.base_height||info.base_width>7680||info.base_height>4320)error="Dimensões SDI inválidas";
-     else{obs_source_t *renderSource=source.Get();if(!hdr){Scene()=obs_scene_create_private("FreeMix SDI scene");if(!obs_scene_add(Scene(),source))error="Não foi possível criar cena SDI";else renderSource=obs_scene_get_source(Scene());}
+     else{obs_source_t *renderSource=source.Get();if(!hdr){Scene()=obs_scene_create_private("3Mix SDI scene");if(!obs_scene_add(Scene(),source))error="Não foi possível criar cena SDI";else renderSource=obs_scene_get_source(Scene());}
       if(error.empty()){View()=obs_view_create();if(!View())error="View SDI indisponível";else{obs_view_set_source(View(),0,renderSource);video=obs_view_add2(View(),&info);if(!video)error="View SDI indisponível";}}
      }
     }}
-    if(error.empty()&&!audioUuid.empty())Audio()=FreeMixSourceAudio::Open(audioUuid,"FreeMix SDI PCM",error);
-    if(error.empty()){Output()=obs_output_create("decklink_output","FreeMix SDI Output",settings,nullptr);if(!Output())error="Plugin DeckLink indisponível";else{obs_output_set_media(Output(),video,Audio()?Audio()->Audio():obs_get_audio());obs_output_set_mixers(Output(),Audio()?1ULL:1ULL<<uint32_t(obs_data_get_int(config,"audioTrack")));if(!obs_output_start(Output()))error="Driver não iniciou SDI; confira dispositivo e modo/FPS";}}
+    if(error.empty()&&!audioUuid.empty())Audio()=FreeMixSourceAudio::Open(audioUuid,"3Mix SDI PCM",error);
+    if(error.empty()){Output()=obs_output_create("decklink_output","3Mix SDI Output",settings,nullptr);if(!Output())error="Plugin DeckLink indisponível";else{obs_output_set_media(Output(),video,Audio()?Audio()->Audio():obs_get_audio());obs_output_set_mixers(Output(),Audio()?1ULL:1ULL<<uint32_t(obs_data_get_int(config,"audioTrack")));if(!obs_output_start(Output()))error="Driver não iniciou SDI; confira dispositivo e modo/FPS";}}
     if(!error.empty())Stop();
    }
   }

@@ -66,7 +66,8 @@ Estrutura canônica do workspace:
 | Diretório | Finalidade |
 |---|---|
 | `3mix-panel/` (este repositório; alias `FreeMix/`) | Painel Web, API e ferramentas |
-| `3mix-engine/` (alias `freemix-app/`) | Fontes do motor nativo |
+| `motor/` | Fontes do motor nativo, com os submódulos, neste repositório |
+| `3mix-engine/` (alias `freemix-app/`) | Cópia de trabalho do motor, de onde `motor/` é atualizado |
 | `3mix-runtime/` | Instalação portátil do operador |
 | `qa-beta/` | Recibos e verificações locais |
 

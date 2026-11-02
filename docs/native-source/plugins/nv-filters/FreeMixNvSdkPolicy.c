@@ -23,7 +23,8 @@ static const struct approved_file vfx_files[] = {
  {"NVCVImage.dll", "dac4321009470103fe4ba7257e7ed54100d371225d6919e25e1e89818f315373"}
 };
 static const struct approved_family policies[] = {
- {false, false, L"", afx_files, 1}, {false, false, L"", vfx_files, 2}
+ {true, true, L"C:\\Program Files\\NVIDIA Corporation\\NVIDIA Audio Effects SDK", afx_files, 1},
+ {true, true, L"C:\\Program Files\\NVIDIA Corporation\\NVIDIA Video Effects", vfx_files, 2}
 };
 enum policy_reason { NOT_APPROVED, PATH_UNCONFIRMED, FILE_UNCONFIRMED, HASH_UNCONFIRMED, VERIFIED };
 static volatile LONG reasons[] = {NOT_APPROVED, NOT_APPROVED};

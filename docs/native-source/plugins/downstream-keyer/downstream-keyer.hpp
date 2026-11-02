@@ -72,7 +72,7 @@ private slots:
 	void on_actionSceneUp_triggered();
 	void on_actionSceneDown_triggered();
 	void on_actionSceneNull_triggered();
-	void apply_source(obs_source_t *newSource);
+	void apply_source(obs_source_t *newSource, bool immediate = false);
 	void apply_selected_source();
 	void on_scenesList_itemSelectionChanged();
 signals:
@@ -95,7 +95,7 @@ public:
 	void RemoveExcludeScene(const char *scene_name);
 	bool IsSceneExcluded(const char *scene_name);
 	QString GetScene();
-	bool SwitchToScene(QString scene_name);
+	bool SwitchToScene(QString scene_name, bool immediate = false);
 	void add_scene(QString scene_name, obs_source_t *s, int insertBeforeRow);
 	bool AddScene(QString scene_name, int insertBeforeRow);
 	bool RemoveScene(QString scene_name);

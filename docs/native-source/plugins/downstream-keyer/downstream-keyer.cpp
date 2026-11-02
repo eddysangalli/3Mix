@@ -1,4 +1,5 @@
 #include "downstream-keyer.hpp"
+#include <QSignalBlocker>
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -274,7 +275,7 @@ void DownstreamKeyer::on_actionSceneNull_triggered()
 	scenesList->setCurrentRow(-1);
 }
 
-void DownstreamKeyer::apply_source(obs_source_t *const newSource)
+void DownstreamKeyer::apply_source(obs_source_t *const newSource, bool immediate)
 {
 	if (newSource && hideAfter > 0) {
 		hideTimer.stop();
@@ -317,6 +318,7 @@ void DownstreamKeyer::apply_source(obs_source_t *const newSource)
 		} else if (transition)
 			newTransition = transition;
 	}
+	if (immediate) newTransition = nullptr;
 	if (prevSource == newSource) {
 		//skip if nothing changed
 	} else {
@@ -896,8 +898,24 @@ QString DownstreamKeyer::GetScene()
 	return "";
 }
 
-bool DownstreamKeyer::SwitchToScene(QString scene_name)
+bool DownstreamKeyer::SwitchToScene(QString scene_name, bool immediate)
 {
+	if (immediate) {
+		QListWidgetItem *selected = nullptr;
+		for (int i = 0; i < scenesList->count(); i++) {
+			if (scenesList->item(i)->text() == scene_name) { selected = scenesList->item(i); break; }
+		}
+		if (!scene_name.isEmpty() && !selected) return false;
+		QSignalBlocker blocker(scenesList);
+		scenesList->clearSelection();
+		if (selected) { scenesList->setCurrentItem(selected); selected->setSelected(true); }
+		else hideTimer.stop();
+		obs_source_t *source = scene_name.isEmpty() ? nullptr : canvas ? obs_canvas_get_source_by_name(canvas, QT_TO_UTF8(scene_name)) : obs_get_source_by_name(QT_TO_UTF8(scene_name));
+		if (!scene_name.isEmpty() && !source) return false;
+		apply_source(source, true);
+		obs_source_release(source);
+		return true;
+	}
 	if (scene_name.isEmpty()) {
 		on_actionSceneNull_triggered();
 		return true;

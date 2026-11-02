@@ -411,7 +411,7 @@ bool OBSYoutubeActions::CreateEventAction(YoutubeApiWrappers *api, BroadcastDesc
 	}
 
 	if (!stream_later || ready_broadcast) {
-		stream = {"", "", "FreeMix Video Stream"};
+		stream = {"", "", "3Mix Video Stream"};
 		if (!apiYouTube->InsertStream(stream)) {
 			blog(LOG_DEBUG, "No stream created.");
 			return false;
@@ -460,7 +460,7 @@ bool OBSYoutubeActions::ChooseAnEventAction(YoutubeApiWrappers *api, StreamDescr
 		stream.title = title.c_str();
 		api->SetBroadcastId(selectedBroadcast);
 	} else {
-		stream = {"", "", "FreeMix Video Stream"};
+		stream = {"", "", "3Mix Video Stream"};
 		if (!apiYouTube->InsertStream(stream)) {
 			blog(LOG_DEBUG, "No stream created.");
 			return false;

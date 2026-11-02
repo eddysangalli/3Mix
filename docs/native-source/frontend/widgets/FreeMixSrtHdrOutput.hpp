@@ -158,7 +158,7 @@ inline std::string Start(Slot &slot,obs_data_t *config,int id,bool (*isPrivate)(
  info.output_format=VIDEO_FORMAT_P010;info.colorspace=VIDEO_CS_2100_PQ;info.range=VIDEO_RANGE_PARTIAL;
  slot.view=obs_view_create();if(!slot.view)return "HDR view unavailable";obs_view_set_source(slot.view,0,slot.source);
  auto *video=obs_view_add2(slot.view,&info);if(!video)return "Native 10-bit HDR P010 view unavailable";
- const std::string name="FreeMix SRT HDR "+std::to_string(id+1),url=Url(config),encoder=obs_data_get_string(config,"encoder");
+ const std::string name="3Mix SRT HDR "+std::to_string(id+1),url=Url(config),encoder=obs_data_get_string(config,"encoder");
  OBSDataAutoRelease serviceSettings=obs_data_create();obs_data_set_string(serviceSettings,"server",url.c_str());obs_data_set_string(serviceSettings,"key","");
  slot.service=obs_service_create("rtmp_custom",(name+" service").c_str(),serviceSettings,nullptr);
  if(!slot.service)return "SRT service unavailable";

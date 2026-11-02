@@ -40,7 +40,7 @@ inline void *Allocate(obs_data_t *settings,obs_source_t *owner){
  p->mode=obs_data_get_string(settings,"mode");if(p->mode.empty())p->mode="packed";
  if(p->mode!="packed"&&p->mode!="fill"&&p->mode!="key")return nullptr;
  if(!p->width||p->width>(p->mode=="packed"?1920u:3840u)||!p->height||p->height>3840||p->width%2||p->height%2)return nullptr;
- obs_enter_graphics();p->texture=gs_texrender_create(GS_RGBA,GS_ZS_NONE);char *error=nullptr;p->effect=gs_effect_create(EffectCode(),"FreeMix SRT packed alpha",&error);if(error){blog(LOG_ERROR,"FreeMix SRT alpha shader: %s",error);bfree(error);}obs_leave_graphics();
+ obs_enter_graphics();p->texture=gs_texrender_create(GS_RGBA,GS_ZS_NONE);char *error=nullptr;p->effect=gs_effect_create(EffectCode(),"3Mix SRT packed alpha",&error);if(error){blog(LOG_ERROR,"3Mix SRT alpha shader: %s",error);bfree(error);}obs_leave_graphics();
  if(!p->texture||!p->effect)return nullptr;return p.release();
 }
 inline void Draw(void *data,gs_effect_t *){
@@ -64,7 +64,7 @@ inline void Register(){
  static bool registered=false;if(registered)return;registered=true;
  obs_source_info info={};info.id="freemix_srt_alpha_pack";info.type=OBS_SOURCE_TYPE_INPUT;
  info.output_flags=OBS_SOURCE_VIDEO|OBS_SOURCE_CUSTOM_DRAW|OBS_SOURCE_DO_NOT_DUPLICATE;
- info.get_name=[](void *){return "FreeMix SRT Fill + Key packed";};info.create=Allocate;
+ info.get_name=[](void *){return "3Mix SRT Fill + Key packed";};info.create=Allocate;
  info.destroy=[](void *data){delete static_cast<Packed *>(data);};info.video_render=Draw;
  info.get_width=[](void *data){auto &p=*static_cast<Packed *>(data);return p.mode=="packed"?p.width*2:p.width;};
  info.get_height=[](void *data){return static_cast<Packed *>(data)->height;};
@@ -75,7 +75,7 @@ inline void Register(){
 inline obs_source_t *Create(obs_source_t *source,uint32_t width,uint32_t height,const std::string &mode="packed"){
  if(!source)return nullptr;Register();OBSDataAutoRelease settings=obs_data_create();obs_data_set_int(settings,"width",width);obs_data_set_int(settings,"height",height);
  obs_data_set_string(settings,"mode",mode.c_str());
- obs_source_t *packed=obs_source_create_private("freemix_srt_alpha_pack","FreeMix SRT packed alpha",settings);
+ obs_source_t *packed=obs_source_create_private("freemix_srt_alpha_pack","3Mix SRT packed alpha",settings);
  if(packed){auto *context=static_cast<Packed *>(obs_obj_get_data(packed));if(!context){obs_source_release(packed);return nullptr;}context->source=obs_source_get_ref(source);}
  return packed;
 }
