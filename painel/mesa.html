@@ -1626,6 +1626,20 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   }
 
   /* ---- miniaturas: só entradas visíveis, com orçamento separado dos comandos ---- */
+  async function avLoad(name) {
+    const filtros = await req("GetSourceFilterList", { sourceName: name });
+    const ajuste = filtros.filters.find((f) => f.filterName === "3Mix Atraso de Vídeo")?.filterSettings, video = ajuste?.requested_ms ?? ajuste?.delay_ms ?? 0;
+    const estado = window.FreeMixProductionState, proprias = estado?.inputs?.find((i) => i.name === name)?.sources || [];
+    const fontes = (estado?.audioRouting?.sources || []).filter((a) => proprias.includes(a.name) && !a.protected);
+    const audio = await Promise.all(fontes.map(async (a) => ({ name: a.name, key: a.key, ms: (await req("GetInputAudioSyncOffset", { inputName: a.name })).inputAudioSyncOffset })));
+    st.av = { name, video, audio };
+    if (st.pop === "avdelay") renderPop();
+  }
+  document.addEventListener("change", (e) => {
+    const t = e.target; if (!st.av || (t.dataset?.avVideo === undefined && t.dataset?.avAudio === undefined)) return;
+    const pedido = t.dataset.avVideo !== undefined ? productionAction("input_video_delay", { input: st.sceneKeys[st.av.name], ms: Number(t.value) }) : productionAction("audio_routing_delay", { key: t.dataset.avAudio, delayMs: Number(t.value) });
+    run(pedido.then(() => avLoad(st.av.name)));
+  });
   const isMeOutput = (n) => /^PGM M\/E \d+$/.test(n);
   const isCompositionInput = (n) => !!window.FreeMixProductionState?.inputs?.find((i) => i.name === n)?.composition;
   const shown = () => st.scenes.filter((n) => (st.inputsTab === 'compositions' ? isCompositionInput(n) : !isCompositionInput(n))).filter((n) => (st.filter === -2 ? n.toLowerCase().includes((st.find || "").toLowerCase()) : st.filter < 0 || st.tags[n] === st.filter) && (!st.tagFilter || st.inputTags?.[n]?.includes(st.tagFilter)));
@@ -2628,6 +2642,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     editorrelease:()=>editorController().abandon(),
     editordismiss:()=>{if(!inputEditorController?.pending())$("input-editor-status").hidden=true;},
     projector: (d) => { closePop(); run(req("OpenSourceProjector", { sourceName: d.v, monitorIndex: -1 })); },
+    avdelay: (d) => { st.av = null; openPop("avdelay", d.v); run(avLoad(d.v)); },
     renameask: (d) => { if (isMeOutput(d.v)) return toast('Esta entrada é o Programa de um M/E; o nome é fixo.', true); openPop("rename", d.v); },
     renamego: () => run((async () => {
       const from = st.popArg, to = $("rn-name").value.trim(); if (!to || to === from) return closePop();
@@ -3892,9 +3907,17 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     else if (st.pop === "menu") { const name = st.popArg, v = esc(name), ins = window.FreeMixInputEditors.uniqueSources(st.items.get(name) || []);
       const hasMedia = ins.some((i) => isMedia(i.kind));
       p.innerHTML = `<h3>${v}</h3><div class="menu">` + ins.map((i) => `<button data-a="props" data-v="${esc(i.name)}" data-source-key="${esc(i.key||'')}" data-owner="${v}" ${sceneButtonAttrs(name)}>Configurações de ${esc(i.name)}…</button>${st.gcNames.has(i.name) ? `<button data-a="gcedit" data-v="${esc(i.name)}"><b>Editar título…</b></button>` : ""}<button data-a="filters" data-v="${esc(i.name)}" data-source-key="${esc(i.key||'')}" data-owner="${v}" ${sceneButtonAttrs(name)}>Filtros de ${esc(i.name)}…</button>${i.key ? `<button data-a="corentrada" data-v="${esc(i.key)}">Cor e qualidade de ${esc(i.name)}…</button>` : ""}${i.kind === "browser_source" ? `<button data-a="calllink" data-v="${esc(i.name)}">Link do convidado (3Mix Call)…</button>` : ""}`).join("")
+        + `<button data-a="avdelay" data-v="${v}">Atraso de áudio e vídeo…</button>`
         + `<button data-a="minimizetoggle" data-v="${v}" ${sceneButtonAttrs(name)}>${st.minimized?.[name] ? "Expandir cartão" : "Recolher cartão"}</button>`
         + (hasMedia ? `<button data-a="togglespeed" data-v="${v}">${st.showSpeed?.[name] ? "Ocultar velocidade de exibição" : "Show/Hide PlayBack Speed"}</button>` : "")
         + `<button data-a="layers" data-v="${v}">Camadas: outras entradas por cima…</button><button data-a="audioadd" data-v="${v}">Juntar áudio a esta entrada…</button><button data-a="renameask" data-v="${v}">Renomear…</button><button data-a="tag" data-v="${v}">Cor…</button><button data-a="projector" data-v="${v}">Abrir em janela</button>${name === st.program ? "" : `<button data-a="closeask" data-v="${v}" ${sceneButtonAttrs(name)}>Excluir entrada</button>`}</div>`; }
+    else if (st.pop === "avdelay") { const av = st.av;
+      p.innerHTML = `<h3>Atraso · ${esc(st.popArg)}</h3>` + (!av || av.name !== st.popArg ? "<p>Lendo…</p>"
+        : `<label>Vídeo (0 a 500 ms)<input type="number" min="0" max="500" step="1" data-av-video value="${av.video}"></label>`
+          + (av.audio.length ? av.audio.map((a) => `<label>Áudio · ${esc(a.name)} (-950 a 20000 ms)<input type="number" min="-950" max="20000" step="1" data-av-audio="${esc(a.key)}" value="${a.ms}"></label>`).join("") : "<p>Esta entrada não tem áudio próprio.</p>")
+          + `<p>Vale na hora. Use para alinhar câmera e som.</p>`)
+        + `<div class="row end"><button class="b" data-a="close">Fechar</button></div>`;
+    }
     else if (st.pop === "rename") p.innerHTML = `<h3>Renomear "${esc(st.popArg)}"</h3><label>Novo nome<input id="rn-name" maxlength="40" value="${esc(st.popArg)}"></label><div class="row"><button class="b on" data-a="renamego">OK</button><button class="b" data-a="close">Cancel</button></div>`;
     else if (st.pop === "gtimportinfo") {
       p.innerHTML = `<h3>Importar Pacotes GT Title (.gtzip)</h3>`

@@ -22,6 +22,20 @@ Recibos desta execução: `qa-finalizacao/p0/RESULTADO-P0.md` e artefatos da mes
 
 ---
 
+## Em andamento agora: pedidos de quem vai testar
+
+Frentes abertas em 02/11/2026, nesta ordem. Só viram recurso disponível depois de testadas no motor real.
+
+| # | Frente | Pedido por | Estado |
+|---|---|---|---|
+| 1 | Atraso de vídeo por entrada, junto do atraso de áudio | Paulo Medeira | **Pronto.** No menu de cada entrada: vídeo de 0 a 500 ms, em passos de um quadro, e áudio de -950 a 20000 ms. Medido em gravação: 33, 100, 200, 333 e 500 ms deram 1, 3, 6, 10 e 15 quadros a 30 fps. Limite: o valor em quadros é calculado ao aplicar; se o FPS do projeto mudar, é preciso aplicar de novo |
+| 2 | Host VST3 nativo de 64 bits | Paulo Medeira | Em andamento. Hoje o motor carrega só VST2 |
+| 3 | Várias saídas DeckLink, cada uma com seu M/E | Richard Moraes | Não iniciado. Hoje há uma única saída DeckLink no programa |
+
+Também pedido, sem frente própria: uso mais leve de CPU e GPU. Depende de medir sob carga antes de mudar qualquer coisa; o ensaio prolongado está na P0 de estabilidade.
+
+---
+
 ## 1. Bloqueadores para considerar a beta "instalável" (P0)
 
 Estes nove itens estão listados como bloqueadores no levantamento de 30/10/2026 (`LEVANTAMENTO-BETA-20261030.md`, seção 3). Nenhum deles impede o uso do 3Mix em ambiente de desenvolvimento/QA, mas todos impedem tratar o pacote atual como uma beta pronta para instalação por terceiros sem ressalvas.
