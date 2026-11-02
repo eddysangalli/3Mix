@@ -395,11 +395,11 @@
             <option value="mix">Mix independente</option>
           </select>
         </label>
-        <label>Mix para esta saída
+        <label>M/E para esta saída
           <select id="output-mix">
-            <option value="2">Mix 2</option>
-            <option value="3">Mix 3</option>
-            <option value="4">Mix 4</option>
+            <option value="2">M/E 2</option>
+            <option value="3">M/E 3</option>
+            <option value="4">M/E 4</option>
           </select>
         </label>
         <label class="check">
@@ -523,11 +523,11 @@
     <section class="network" data-output-panel="destinations">
       <p><a href="https://ndi.video/" target="_blank" rel="noopener">NDI®</a> é uma marca registrada de Vizrt NDI AB. <a href="https://downloads.ndi.tv/SDK/NDI_SDK/NDI%20SDK%20License%20Agreement.pdf" target="_blank" rel="noopener">Licença do SDK</a>; o contrato e as licenças de terceiros acompanham esta instalação em licenses/ndi-runtime.</p>
       <h2>Mixes independentes · Preview / Programa próprios</h2>
-      <label>Editar Mix
+      <label>Editar M/E
         <select id="mix-id">
-          <option value="2">Mix 2</option>
-          <option value="3">Mix 3</option>
-          <option value="4">Mix 4</option>
+          <option value="2">M/E 2</option>
+          <option value="3">M/E 3</option>
+          <option value="4">M/E 4</option>
         </select>
       </label>
       <label>Resolução do Mix
@@ -638,6 +638,7 @@
 
     <section class="network" id="sdi-panel" data-output-panel="sdi">
       <h2>SDI · DeckLink</h2>
+      <label>Saída<select id="sdi-slot"></select></label>
       <label>Dispositivo<select id="sdi-device"></select></label>
       <label>Modo do driver (FPS do projeto)<select id="sdi-mode"></select></label>
       <label>Keyer real<select id="sdi-keyer"></select></label>

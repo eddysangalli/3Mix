@@ -30,12 +30,12 @@ Frentes abertas em 02/11/2026, nesta ordem. Só viram recurso disponível depois
 |---|---|---|---|
 | 1 | Atraso de vídeo por entrada, junto do atraso de áudio | Paulo Medeira | **Pronto.** No menu de cada entrada: vídeo de 0 a 500 ms, em passos de um quadro, e áudio de -950 a 20000 ms. Medido em gravação: 33, 100, 200, 333 e 500 ms deram 1, 3, 6, 10 e 15 quadros a 30 fps. Limite: o valor em quadros é calculado ao aplicar; se o FPS do projeto mudar, é preciso aplicar de novo |
 | 2 | Host VST3 nativo de 64 bits | Paulo Medeira | **Pronto.** No mixer, em cada canal, e na aba Plugins do Master e dos barramentos: lista os VST3 instalados no Windows, adiciona, liga, desliga, abre a janela do plugin e remove. Testado em 53 plugins instalados: 51 carregam e o motor não caiu em nenhum. Ajuste feito na janela chega ao áudio e volta depois de uma queda forçada do motor. Limites logo abaixo da tabela |
-| 3 | Várias saídas DeckLink, cada uma com seu M/E | Richard Moraes | Não iniciado. Hoje há uma única saída DeckLink no programa |
+| 3 | Várias saídas DeckLink, cada uma com seu M/E | Richard Moraes | **Pronto no programa; falta testar com placa.** Em Saídas › SDI / DeckLink, até 16 saídas, cada uma com placa, modo, conteúdo (Programa, PGM de qualquer M/E ou qualquer entrada) e áudio próprios. A mesma placa não entra no ar em duas saídas. Testado sem placa: seleção, gravação separada e recusas. Vídeo saindo por SDI, várias saídas no ar ao mesmo tempo, consulta de placas com outra saída no ar e a recusa de placa em uso dependem do teste do Richard |
 
 Limites do VST3, medidos nos testes:
 
 - Latência do plugin não é compensada. O som atrasa em relação ao vídeo: Clear 5310 amostras (cerca de 110 ms), Pro-L 2 3115 (cerca de 65 ms), Graillon 1074 (cerca de 22 ms). Por enquanto se corrige no atraso de áudio da entrada.
-- O plugin carrega na thread da interface. O Auto-Tune segurou a interface por mais de 25 s e não terminou de carregar no teste; a causa não foi confirmada, e pode ser a licença. Não adicione plugin novo durante uma transmissão.
+- O plugin carrega na thread da interface. O Auto-Tune segurou a interface por mais de 25 s e não terminou de carregar no teste; a causa não foi confirmada, e pode ser a licença. Ao ser encerrado à força nesse estado, o motor de teste ficou preso e o Windows não conseguiu finalizá-lo. Não adicione plugin novo durante uma transmissão.
 - O FabFilter One foi recusado, porque não oferece a entrada de áudio que o filtro exige.
 - Twin 3 e RePitch ficaram em silêncio com o tom de teste. O Pro-L 2 também, mas nele a causa está na própria janela: o período de avaliação acabou. Plugin sem licença pode cortar o som.
 - De um arquivo com vários efeitos, só o primeiro é usado.

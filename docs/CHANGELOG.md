@@ -15,6 +15,7 @@
 - Entrada só de áudio mede e entra na mistura sem depender de corte; mic junto de câmera segue a cena dela e entrada criada no ar nasce muda.
 - Fontes do motor passam a ficar em `motor/`, no mesmo repositório.
 - master_me e PodcastPlugins (Track e Master) embutidos: rack DSP, aba Plugins do mixer, inclusive no Master e nos barramentos, com a janela própria de cada um.
+- Até 16 saídas DeckLink, cada uma com placa, modo, conteúdo e áudio próprios, incluindo o PGM de qualquer M/E. A tela de Saídas passa a chamar os mixes de M/E. Ainda sem teste com placa.
 - Plugins VST3 de 64 bits no mixer e nos barramentos, com a janela do próprio plugin e ajuste preservado depois de uma queda do motor.
 - Atraso de áudio e vídeo por entrada, no menu da entrada, medido quadro a quadro em gravação.
 - Pacote alpha em ZIP: projeto inicial "3Mix", instruções para quem testa e logs pelo WhatsApp.
