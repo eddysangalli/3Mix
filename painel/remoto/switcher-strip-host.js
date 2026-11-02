@@ -1,4 +1,4 @@
-import './switcher-strip.js?v=20261102b';
+import './switcher-strip.js?v=20261102d';
 const host=window.ThreeMixStripHost;
 // A Strip só aparece quando o backend Multi-M/E responde. Sem isso, o botão
 // ficaria visível e quebrado em runtimes que ainda não têm o pacote de M/E.
@@ -12,12 +12,16 @@ async function start(){
  const nameOf=uuid=>window.FreeMixProductionState?.inputs?.find(i=>i.key===uuid)?.name||'';
  const pending=new Map();let scope='',polling=false;
  async function request(path,data){const response=await fetch(new URL(path,host.apiBase),{...(data?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}:{}),signal:AbortSignal.timeout(15000)});const result=await response.json();if(!response.ok||!result.success)throw Error(result.error||'Motor não confirmou');return result;}
- async function meOperation(mixId,command,input){
+ async function meOperation(mixId,command,input,extra={}){
   if(pending.has(mixId))throw Error('Confirmação pendente: use Conferir motor, não repita o comando.');
   scope=window.FreeMixProductionState?.preset||scope;
   if(!scope)throw Error('Projeto não identificado');
-  const operation={operationId:'strip_'+crypto.randomUUID(),expectedScope:scope,mixId,command,...(input?{input}:{})};pending.set(mixId,operation);
-  try{const result=await request('control',{action:'outputs_mix',...operation});const receipt=result.outputs?.mixOperation;if(receipt?.id!==operation.operationId||receipt.stage!=='confirmed')throw Error('Confirmação pendente; consulte o motor.');pending.delete(mixId);}
+  const operation={operationId:'strip_'+crypto.randomUUID(),expectedScope:scope,mixId,command,...(input?{input}:{}),...extra};pending.set(mixId,operation);
+  try{const result=await request('control',{action:'outputs_mix',...operation});let receipt=result.outputs?.mixOperation;if(receipt?.id!==operation.operationId)throw Error('Confirmação pendente; consulte o motor.');
+   // Durante a transição o motor responde "em andamento"; isso só vira pendência se não terminar no tempo dela.
+   const limit=Date.now()+Number(operation.duration||500)+3000;
+   while(receipt?.stage!=='confirmed'&&Date.now()<limit){await new Promise(done=>setTimeout(done,120));const check=await request('mix-effects/check',operation);receipt=check.operation||receipt;}
+   if(receipt?.stage!=='confirmed')throw Error('Confirmação pendente; consulte o motor.');pending.delete(mixId);}
   finally{await refresh();}
  }
  // 4 Strips fixas, Delegate inicial 1/2/3/4: cobre os 4 M/Es simultaneamente por padrão (persistência por
@@ -25,9 +29,9 @@ async function start(){
  // ponto de partida de 2 Strips ambas em MAIN para 4 Strips já cobrindo M/E 1-4 de cara).
  const strips=[0,1,2,3].map(index=>{
   const strip=document.createElement('three-mix-switcher-strip');strip.surface={...strip.surface,mixId:index+1};surface.append(strip);
-  strip.executeOperation=async({command,input,mixId})=>{
+  strip.executeOperation=async({command,input,mixId,...extra})=>{
    if(mixId===1){await host.executeMain(command,input);await refresh();return;}
-   return meOperation(mixId,command,input);
+   return meOperation(mixId,command,input,extra);
   };
   strip.frameUrl=key=>new URL('ptz/preview?input='+encodeURIComponent(key)+'&t='+Date.now(),host.apiBase).href;
   // Audio Bus padrão do M/E: ação administrativa (metadado + validação contra buses reais), não uma operação de

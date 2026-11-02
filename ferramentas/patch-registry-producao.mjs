@@ -92,6 +92,7 @@ export class PatchRegistryEngine {
       await this.p.optional('RemoveSceneItem', { sceneName: scene.sceneName, sceneItemId: added.sceneItemId });
       throw e;
     }
+    await this.p.optional('CallVendorRequest', { vendorName: 'freemix', requestType: 'save_preset', requestData: {} });
     return { input: scene.sceneUuid, signal: source.sceneUuid, appliedAt: this.patches[scene.sceneUuid].appliedAt };
   }
 

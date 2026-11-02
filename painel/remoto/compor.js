@@ -2,7 +2,7 @@
 const E=document.getElementById.bind(document),escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let state={},fingerprint='',history=[];const counts={'2box':2,'3box':3,'4box':4,pip:2,slides:2,vertical2box:2,verticalpip:2};
 const command=async(action,data)=>{try{E('status').textContent='Aplicando…';const result=await window.FreeMixRemote.command(action,data);E('status').textContent='Motor confirmou';fingerprint='';return result;}catch(e){E('status').textContent=e.message;throw e;}};
-const options=selected=>(state.inputs||[]).map(i=>'<option value="'+escapeHtml(i.key)+'"'+(i.key===selected?' selected':'')+'>'+escapeHtml(i.name)+'</option>').join('');
+const options=selected=>[...(state.inputs||[]),...(state.mixOutputs||[])].map(i=>'<option value="'+escapeHtml(i.key)+'"'+(i.key===selected?' selected':'')+'>'+escapeHtml(i.name)+'</option>').join('');
 function createSlots(){const old=[...E('new-slots').querySelectorAll('select')].map(s=>s.value);E('new-slots').innerHTML=Array.from({length:counts[E('layout').value]},(_,n)=>'<label>Slot '+String.fromCharCode(65+n)+'<select>'+options(old[n]||state.inputs?.[n]?.key)+'</select></label>').join('');}
 const selected=()=>state.inputs?.find(i=>i.key===E('composition').value);
 function draw(){const i=selected(),comp=i?.composition,W=state.video?.baseWidth||1920,H=state.video?.baseHeight||1080;if(!comp){E('slots').textContent='Nenhuma composição criada.';E('canvas').innerHTML='';return;}

@@ -186,7 +186,7 @@
     off.textContent = tom === 'on' ? '' : texto === 'Motor desconectado' ? 'Motor desconectado: sem imagem das entradas.' : 'Reconectando ao 3Mix…';
   }
   function aplicar(d) {
-    state = { connected: d.connected === true, program: d.program || d.active || '', preview: d.preview || '', inputs: Array.isArray(d.inputs) ? d.inputs : [], recording: d.recording, streaming: d.streaming, recordTimecode: d.recordTimecode, streamTimecode: d.streamTimecode };
+    state = { connected: d.connected === true, program: d.program || d.active || '', preview: d.preview || '', inputs: Array.isArray(d.inputs) ? d.inputs : [], mixOutputs: Array.isArray(d.mixOutputs) ? d.mixOutputs : [], recording: d.recording, streaming: d.streaming, recordTimecode: d.recordTimecode, streamTimecode: d.streamTimecode };
     conexao(state.connected ? 'Motor conectado' : 'Motor desconectado', state.connected ? 'on' : 'off');
     pintar();
   }

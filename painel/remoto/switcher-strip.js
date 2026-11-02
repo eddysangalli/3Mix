@@ -5,6 +5,8 @@ header{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
 h3{margin:0 auto 0 0;font-size:13px;font-weight:700}
 label{display:inline-flex;gap:4px;align-items:center;color:#a9a9a9;font-size:11px}
 select{background:#202020;color:#e6e6e6;border:1px solid #414141;border-radius:3px;height:24px;font:inherit;font-size:11px;max-width:120px}
+.conf{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+input{background:#202020;color:#e6e6e6;border:1px solid #414141;border-radius:3px;height:22px;width:58px;font:inherit;font-size:11px}
 .monitors{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:6px}
 figure{margin:0;min-width:0}
 .frame{position:relative;aspect-ratio:16/9;background:#000;border:2px solid #414141;overflow:hidden}
@@ -26,20 +28,20 @@ nav.actions button{flex:1;min-height:32px;font-weight:700}
 .status{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
 [role=alert]{color:#ff7a80;font-size:11px;margin-top:4px}`;
 export class SwitcherStrip extends HTMLElement {
- constructor(){super();this.surface={mixId:1,page:0,size:16,category:''};this.snapshot={inputs:[],mixes:[]};this.attachShadow({mode:'open'});this.frames={pv:new Image(),pgm:new Image()};this.frames.pv.alt='';this.frames.pgm.alt='';}
+ constructor(){super();this.surface={mixId:1,page:0,size:16,category:''};this.snapshot={inputs:[],mixes:[]};this.attachShadow({mode:'open'});this.frames={pv:new Image(),pgm:new Image()};this.frames.pv.alt='';this.frames.pgm.alt='';this.duration=500;}
  connectedCallback(){this.render();}
  // Polled once a second: rebuild only when something shown changed, so an open list stays open and images do not blink.
  update(snapshot){
   this.snapshot=snapshot;
   const signature=JSON.stringify([snapshot.inputs?.map(i=>[i.key,i.name,i.number,i.tags]),snapshot.mixes,snapshot.audioBuses,snapshot.meTally,this.surface]);
   if(signature===this.signature)return;
-  if(this.shadowRoot.activeElement?.tagName==='SELECT')return;
+  if(['SELECT','INPUT'].includes(this.shadowRoot.activeElement?.tagName))return;
   this.render();
  }
  refreshFrames(){
   if(!this.frameUrl||!this.isConnected)return;
   const mix=stripMix(this.snapshot,this.surface.mixId);
-  for(const [side,key] of [['pv',mix?.previewUuid],['pgm',mix?.programUuid]]){
+  for(const [side,key] of [['pv',mix?.previewUuid],['pgm',this.surface.mixId!==1&&mix?.proxyUuid?mix.proxyUuid:mix?.programUuid]]){
    const frame=this.frames[side];
    if(!key){frame.removeAttribute('src');continue;}
    const next=new Image();next.onload=()=>{frame.src=next.src;};next.src=this.frameUrl(key);
@@ -94,6 +96,7 @@ export class SwitcherStrip extends HTMLElement {
    figure.append(frame,caption);monitors.append(figure);
   }
   root.append(monitors);
+  if(this.surface.mixId!==1&&mix)root.append(this.renderConfig(mix));
   const status=document.createElement('div');status.className='status';status.setAttribute('role','status');
   status.textContent=mix?'PVW: '+name(mix.previewUuid)+' · PGM: '+name(mix.programUuid)+(mix.transitioning?' · TRANSIÇÃO':''):'Estado do M/E indisponível';root.append(status);
   const addButton=(parent,text,handler,disabled=false)=>{const button=document.createElement('button');button.type='button';button.textContent=text;button.title=text;button.disabled=disabled;button.onclick=handler;parent.append(button);return button;};
@@ -117,13 +120,30 @@ export class SwitcherStrip extends HTMLElement {
    addButton(nav,'Banco anterior',()=>{this.surface.page--;this.render();},this.surface.page===0);
    addButton(nav,'Banco '+(this.surface.page+1)+' →',()=>{this.surface.page++;this.render();},(this.surface.page+1)*this.surface.size>=total);root.append(nav);
   }
-  const actions=document.createElement('nav');actions.className='actions';for(const [command,text] of [['cut','CUT'],['take','AUTO']])addButton(actions,text,()=>this.perform(command),off);root.append(actions);
+  const actions=document.createElement('nav');actions.className='actions';for(const [command,text] of [['cut','CUT'],['take','AUTO']])addButton(actions,text,()=>this.perform(command,undefined,command==='take'&&this.surface.mixId!==1?{duration:this.duration}:{}),off);root.append(actions);
   if(this.error){const warning=document.createElement('div');warning.setAttribute('role','alert');warning.textContent=this.error;root.append(warning);}
  }
- async perform(command,input){
+ renderConfig(mix){
+  const conf=document.createElement('div');conf.className='conf';
+  const change=values=>this.perform('configure',undefined,{width:mix.width,height:mix.height,fill:mix.fill!==false,positionX:mix.positionX,positionY:mix.positionY,zoom:mix.zoom,transitionUuid:mix.transitionUuid||'',...values});
+  const format=document.createElement('select');format.setAttribute('aria-label','Formato do M/E');
+  const sizes=[['1920x1080','1920×1080'],['1280x720','1280×720'],['1080x1920','Vertical 1080×1920'],['720x1280','Vertical 720×1280'],['1080x1080','Quadrado 1080']];
+  const current=mix.width+'x'+mix.height;if(!sizes.some(([v])=>v===current))sizes.push([current,mix.width+'×'+mix.height]);
+  for(const [value,text] of sizes)format.add(new Option(text,value));format.value=current;
+  format.onchange=()=>{const [width,height]=format.value.split('x').map(Number);format.blur();change({width,height});};
+  const transition=document.createElement('select');transition.setAttribute('aria-label','Transição do M/E');
+  transition.add(new Option('Esmaecer (padrão)',''));for(const t of mix.transitions||[])transition.add(new Option(t.name,t.uuid));transition.value=mix.transitionUuid||'';
+  transition.onchange=()=>{const transitionUuid=transition.value;transition.blur();change({transitionUuid});};
+  const duration=document.createElement('input');duration.type='number';duration.min='50';duration.max='10000';duration.step='50';duration.value=String(this.duration);duration.setAttribute('aria-label','Duração do AUTO em milissegundos');
+  duration.onchange=()=>{const value=Number(duration.value);this.duration=Number.isFinite(value)?Math.min(10000,Math.max(50,value)):500;duration.value=String(this.duration);duration.blur();};
+  const field=(text,control)=>{const label=document.createElement('label');label.textContent=text+' ';label.append(control);return label;};
+  conf.append(field('Formato',format),field('Transição',transition),field('ms',duration));
+  return conf;
+ }
+ async perform(command,input,extra={}){
   if(this.busy||!this.executeOperation)return;
   this.busy=true;this.error='';this.render();
-  try{await this.executeOperation({command,input,mixId:this.surface.mixId});}
+  try{await this.executeOperation({command,input,mixId:this.surface.mixId,...extra});}
   catch(error){this.error=error.message;}
   finally{this.busy=false;this.render();this.refreshFrames();}
  }

@@ -4,7 +4,12 @@
 - Aba M/E ao lado de Fontes e seletor de M/E nas botoeiras do topo. O botão antigo "M/E Strips" ficava dentro de uma barra escondida e nunca aparecia.
 - Motor compilado do `main` instalado, com o núcleo de M/E e nesting.
 - Cenas, fontes e filtros internos passam de "FreeMix ..." para "3Mix ...". Projetos existentes migram ao abrir, com cópia `.pre-3mix`. Identificadores de formato de arquivo e de protocolo não mudam.
-- As saídas de M/E deixam de aparecer como entradas; no Patch elas se chamam "Saída do M/E N".
+- As saídas de M/E deixam de aparecer como entradas; no Patch, em Composições e no Multiview elas se chamam "Saída do M/E N".
+- Formato, transição e duração por M/E na aba M/E; seletor de M/E na Mesa de corte em janela.
+- M/E nasce no formato da produção; formato diferente entra inteiro no quadro, sem cortar.
+- A saída do M/E mantém a imagem depois de reconfigurar, trocar de projeto e reiniciar; antes ficava preta até o próximo corte.
+- Rotas em ciclo entre M/Es são recusadas. AUTO deixa de bloquear o M/E enquanto a transição termina. O Patch salva o projeto ao concluir.
+- AUX avisa quando a saída no ar recusou a troca de sinal.
 - `aux.html` e `aux.js` passam a `aux-router`, porque AUX é nome reservado no Windows. O endereço `/aux` não muda.
 
 ## 02/11/2026 — Hub, Mesa de corte, Composições, GC, Rede e reorganização de Efeitos

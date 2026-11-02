@@ -1,7 +1,7 @@
 // Mesa de corte: imagem real no Preview e no Programa, miniaturas nas entradas, T-Bar e DUMP com confirmação.
 (() => {
   'use strict';
-  const estado = () => window.FreeMixRemote?.getState?.() || {};
+  const estado = () => { const s = window.FreeMixRemote?.getState?.() || {}, me = window.ThreeMixCorteME?.nomes(); return me ? { ...s, ...me } : s; };
   const E = (id) => document.getElementById(id);
   const INTERVALO_MS = 350;
   let thumbs = {};

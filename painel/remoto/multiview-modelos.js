@@ -54,7 +54,7 @@
   }
 
   // Lista da mesa, sem os itens internos do motor.
-  const entradas = (state) => (state?.inputs || []).filter((i) => i?.name && i.name !== '3Mix Barramentos' && !String(i.name).startsWith('3Mix Slot '));
+  const entradas = (state) => [...(state?.inputs || []).filter((i) => i?.name && i.name !== '3Mix Barramentos' && !String(i.name).startsWith('3Mix Slot ')), ...(state?.mixOutputs || []).map((o) => ({ ...o, saidaMe: true }))];
   // Entrada só de áudio tem fonte sem imagem (0 x 0): pode ser escolhida à mão, mas não ocupa monitor sozinha.
   const temImagem = (i) => {
     const fontes = i.health?.sources;
@@ -62,7 +62,7 @@
     const proprias = fontes.filter((f) => f.kind !== 'scene');
     return !proprias.length || proprias.some((f) => Number(f.width) > 0);
   };
-  const entradasAuto = (state) => entradas(state).filter((i) => !/^REPLAY [AB]$/.test(i.name) && temImagem(i));
+  const entradasAuto = (state) => entradas(state).filter((i) => !i.saidaMe && !/^REPLAY [AB]$/.test(i.name) && temImagem(i));
 
   function textoRelogio(r, state) {
     const modo = r?.modo || 'hora';

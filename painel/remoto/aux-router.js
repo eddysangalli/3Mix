@@ -23,6 +23,21 @@ async function fetchMatrix() {
   }
 }
 
+// A escolha fica no AUX mesmo quando uma saída recusa; o operador precisa saber o que não mudou.
+function avisarNaoAplicado(data) {
+  let aviso = E('aux-aviso');
+  if (!aviso) {
+    aviso = document.createElement('div');
+    aviso.id = 'aux-aviso';
+    aviso.setAttribute('role', 'alert');
+    aviso.style.cssText = 'margin:8px 12px;padding:8px 10px;border:1px solid #ff3038;border-radius:3px;background:#3a1416;color:#ffd7d9;font-size:12px';
+    document.body.prepend(aviso);
+  }
+  const falhas = (data.cut?.applied || data.applied || []).filter((a) => a.status === 'failed');
+  aviso.hidden = !falhas.length;
+  aviso.textContent = falhas.length ? 'Sinal não trocado em ' + falhas.map((a) => a.targetId.replace('dest_', 'Saída ')).join(', ') + ': a saída está no ar. Pare a saída, troque o sinal e inicie de novo.' : '';
+}
+
 async function sendCommand(payload) {
   try {
     const res = await fetch('/api/aux-routing', {
@@ -35,6 +50,7 @@ async function sendCommand(payload) {
       alert('Erro: ' + (data.error || 'Falha no comando'));
       return;
     }
+    avisarNaoAplicado(data);
     if (data.matrix) {
       matrixData = data.matrix;
       renderAll();
