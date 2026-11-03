@@ -35,19 +35,17 @@ Os módulos têm escopos de teste distintos; esta apresentação não implica ho
 Capturas do programa em execução, com o projeto de demonstração.
 
 <p align="center">
-  <img src="docs/capturas/3mix/mesa.png" alt="Mesa principal com botoeiras de Preview e Programa e cards de entrada" width="100%">
+  <img src="docs/capturas/3mix/mesa.png" alt="Mesa principal com Preview, Programa, DSK, cards de entrada e mixer" width="100%">
 </p>
+
+**Mesa:** Preview, Programa, DSK, entradas e mixer na mesma tela.
 
 | | |
 |---|---|
-| ![Aba M/E com os quatro M/Es](docs/capturas/3mix/aba-me.png) | ![Mesa de corte controlando o M/E 3](docs/capturas/3mix/mesa-de-corte.png) |
-| **Multi-M/E:** Preview, Programa, formato e transição por M/E | **Mesa de corte:** em janela, no MAIN ou em qualquer M/E |
-| ![Mixer de áudio](docs/capturas/3mix/audio.png) | ![Replay com Players A e B e Quadview](docs/capturas/3mix/replay.png) |
-| **Áudio:** canais, barramentos e inspetor | **Replay:** Players A/B, Quadview e histórico |
-| ![GC e placar](docs/capturas/3mix/gc.png) | ![Composições](docs/capturas/3mix/composicoes.png) |
-| **GC e placar:** modelos com transparência | **Composições:** layouts multicâmera por slots |
-| ![Multiview](docs/capturas/3mix/multiview.png) | |
-| **Multiview:** montagens com tally | |
+| ![Mixer de áudio com canais, saídas e efeitos](docs/capturas/3mix/audio.png) | ![Replay com Players A e B e Quadview](docs/capturas/3mix/replay.png) |
+| **Áudio:** canais, saídas, inspetor e plugins | **Replay:** Players A/B, Quadview e histórico |
+| ![Color Studio com escopo e comparação multicâmera](docs/capturas/3mix/color.png) | |
+| **Color:** correção, escopos e comparação multicâmera | |
 
 ## Estado da entrega
 
