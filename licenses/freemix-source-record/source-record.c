@@ -33,6 +33,10 @@ struct source_record_filter_context {
 	uint64_t last_frame_time_ns;
 	obs_view_t *view;
 	bool starting_file_output;
+	/* 3Mix: o reinício de vídeo do motor libera a mistura desta vista; ela é refeita no próximo quadro. */
+	volatile bool video_stale;
+	/* 3Mix: início de gravação e reinício de vídeo nunca ao mesmo tempo. */
+	pthread_mutex_t start_lock;
 	bool starting_stream_output;
 	bool starting_replay_output;
 	bool restart;
@@ -334,28 +338,71 @@ static const char *GetFormatExt(const char *format)
 	return format;
 }
 
-static void start_file_output_task(void *data)
+/* 3Mix: a tarefa adiada não guarda ponteiro cru para o filtro. Se o ISO for removido antes de ela rodar,
+ * a referência fraca não resolve e nada é tocado (antes: uso de memória já liberada, crash de 01/11). */
+enum start_kind { START_FILE, START_STREAM, START_REPLAY };
+struct start_ticket {
+	obs_weak_source_t *weak;
+	enum start_kind kind;
+};
+
+/* 3Mix: só inicia com vídeo válido. Encoder ligado a vídeo com taxa de quadros zerada derrubava o NVENC
+ * (divisão por zero em init_encoder_base, nvenc.c: keyint * fps_num / fps_den). */
+static bool record_video_ready(struct source_record_filter_context *context, obs_output_t *output)
 {
-	struct source_record_filter_context *context = data;
-	if (obs_output_start(context->fileOutput)) {
-		if (!context->output_active) {
-			context->output_active = true;
-			obs_source_inc_showing(obs_filter_get_parent(context->source));
-		}
+	if (os_atomic_load_bool(&context->video_stale) || !context->video_output) {
+		blog(LOG_WARNING, "[Source Record] '%s': video do motor reiniciando; gravacao nao iniciada", obs_source_get_name(context->source));
+		return false;
 	}
-	context->starting_file_output = false;
+	obs_encoder_t *enc = output ? obs_output_get_video_encoder(output) : NULL;
+	video_t *video = enc ? obs_encoder_video(enc) : NULL;
+	if (video != context->video_output) {
+		blog(LOG_WARNING, "[Source Record] '%s': encoder ainda na saida de video anterior; gravacao nao iniciada", obs_source_get_name(context->source));
+		return false;
+	}
+	const struct video_output_info *voi = video ? video_output_get_info(video) : NULL;
+	if (voi && voi->fps_num && voi->fps_den && voi->width && voi->height)
+		return true;
+	blog(LOG_WARNING, "[Source Record] '%s': sem video valido; gravacao nao iniciada", obs_source_get_name(context->source));
+	return false;
 }
 
-static void start_stream_output_task(void *data)
+static void start_output_task(void *data)
 {
-	struct source_record_filter_context *context = data;
-	if (obs_output_start(context->streamOutput)) {
-		if (!context->output_active) {
-			context->output_active = true;
-			obs_source_inc_showing(obs_filter_get_parent(context->source));
+	struct start_ticket *ticket = data;
+	obs_source_t *filter = obs_weak_source_get_source(ticket->weak);
+	if (filter) {
+		struct source_record_filter_context *context = obs_obj_get_data(filter);
+		if (context) {
+			obs_output_t *output = ticket->kind == START_FILE     ? context->fileOutput
+					       : ticket->kind == START_STREAM ? context->streamOutput
+									    : context->replayOutput;
+			pthread_mutex_lock(&context->start_lock);
+			const bool started = !context->closing && output && record_video_ready(context, output) && obs_output_start(output);
+			pthread_mutex_unlock(&context->start_lock);
+			if (started && !context->output_active) {
+				context->output_active = true;
+				obs_source_inc_showing(obs_filter_get_parent(context->source));
+			}
+			if (ticket->kind == START_FILE)
+				context->starting_file_output = false;
+			else if (ticket->kind == START_STREAM)
+				context->starting_stream_output = false;
+			else
+				context->starting_replay_output = false;
 		}
+		obs_source_release(filter);
 	}
-	context->starting_stream_output = false;
+	obs_weak_source_release(ticket->weak);
+	bfree(ticket);
+}
+
+static void queue_start(struct source_record_filter_context *filter, enum start_kind kind)
+{
+	struct start_ticket *ticket = bzalloc(sizeof(*ticket));
+	ticket->weak = obs_source_get_weak_source(filter->source);
+	ticket->kind = kind;
+	run_queued(start_output_task, ticket);
 }
 
 static void release_encoders(void *param)
@@ -453,17 +500,6 @@ static void force_stop_output_task(void *data)
 	}
 }
 
-static void start_replay_task(void *data)
-{
-	struct source_record_filter_context *context = data;
-	if (obs_output_start(context->replayOutput)) {
-		if (!context->output_active) {
-			context->output_active = true;
-			obs_source_inc_showing(obs_filter_get_parent(context->source));
-		}
-	}
-	context->starting_replay_output = false;
-}
 
 static void ensure_directory(char *path)
 {
@@ -632,7 +668,7 @@ static void start_file_output(struct source_record_filter_context *filter, obs_d
 
 	filter->starting_file_output = true;
 
-	run_queued(start_file_output_task, filter);
+	queue_start(filter, START_FILE);
 }
 
 #define FTL_PROTOCOL "ftl"
@@ -713,7 +749,7 @@ static void start_stream_output(struct source_record_filter_context *filter, obs
 
 	filter->starting_stream_output = true;
 
-	run_queued(start_stream_output_task, filter);
+	queue_start(filter, START_STREAM);
 }
 
 static void start_replay_output(struct source_record_filter_context *filter, obs_data_t *settings)
@@ -767,7 +803,7 @@ static void start_replay_output(struct source_record_filter_context *filter, obs
 
 	filter->starting_replay_output = true;
 
-	run_queued(start_replay_task, filter);
+	queue_start(filter, START_REPLAY);
 }
 
 static void copy_defaults(obs_data_t *from, obs_data_t *to)
@@ -1260,6 +1296,25 @@ static void frontend_event(enum obs_frontend_event event, void *data)
 	}
 }
 
+/* 3Mix: obs_reset_video libera as misturas de todas as vistas, inclusive a deste ISO. Sem isto, a gravação
+ * seguinte usava a saída de vídeo já liberada: NVENC lia fps_den zerado (divisão por zero) ou mistura nula. */
+static void source_record_video_reset(void *data, calldata_t *cd)
+{
+	UNUSED_PARAMETER(cd);
+	struct source_record_filter_context *context = data;
+	os_atomic_set_bool(&context->video_stale, true);
+}
+
+/* Antes do reinício: espera um início de gravação em andamento terminar e marca a vista como inválida. */
+static void source_record_video_reset_begin(void *data, calldata_t *cd)
+{
+	UNUSED_PARAMETER(cd);
+	struct source_record_filter_context *context = data;
+	pthread_mutex_lock(&context->start_lock);
+	os_atomic_set_bool(&context->video_stale, true);
+	pthread_mutex_unlock(&context->start_lock);
+}
+
 static void *source_record_filter_create(obs_data_t *settings, obs_source_t *source)
 {
 	struct source_record_filter_context *context = bzalloc(sizeof(struct source_record_filter_context));
@@ -1281,6 +1336,9 @@ static void *source_record_filter_create(obs_data_t *settings, obs_source_t *sou
 	context->chapterHotkey = OBS_INVALID_HOTKEY_ID;
 	source_record_filter_update(context, settings);
 	obs_frontend_add_event_callback(frontend_event, context);
+	pthread_mutex_init(&context->start_lock, NULL);
+	signal_handler_connect(obs_get_signal_handler(), "video_reset", source_record_video_reset, context);
+	signal_handler_connect(obs_get_signal_handler(), "video_reset_begin", source_record_video_reset_begin, context);
 	return context;
 }
 
@@ -1296,6 +1354,8 @@ static void source_record_filter_destroy(void *data)
 			obs_source_dec_showing(parent);
 		context->output_active = false;
 	}
+	signal_handler_disconnect(obs_get_signal_handler(), "video_reset", source_record_video_reset, context);
+	signal_handler_disconnect(obs_get_signal_handler(), "video_reset_begin", source_record_video_reset_begin, context);
 	obs_frontend_remove_event_callback(frontend_event, context);
 
 	stop_output_sync(context, context->fileOutput);
@@ -1351,6 +1411,7 @@ static void source_record_filter_destroy(void *data)
 
 	context->source = NULL;
 	pthread_mutex_destroy(&context->bus_mutex);
+	pthread_mutex_destroy(&context->start_lock);
 	bfree(context->bus_samples);bfree(context->bus_tags);
 	bfree(context);
 }
@@ -1492,9 +1553,19 @@ static void source_record_filter_tick(void *data, float seconds)
 	 * video_output under a running encoder + replay buffer -> crash. */
 	const bool size_changed = width && height && (context->width != width || context->height != height);
 
-	if (width && height && !context->video_output) {
-		struct obs_video_info ovi = {0};
-		obs_get_video_info(&ovi);
+	/* Depois de um reinício de vídeo, refaz a saída desta vista (a anterior foi liberada pelo motor). */
+	/* O aviso "inválido" só sai depois que a saída nova existe e o encoder aponta para ela. */
+	if (os_atomic_load_bool(&context->video_stale) && context->video_output && !(context->encoder && obs_encoder_active(context->encoder))) {
+		if (context->view)
+			obs_view_remove(context->view);
+		context->video_output = NULL;
+		context->width = 0;
+		context->height = 0;
+	}
+	struct obs_video_info motor_ovi = {0};
+	const bool motor_video_ok = obs_get_video_info(&motor_ovi) && motor_ovi.fps_num && motor_ovi.fps_den;
+	if (width && height && !context->video_output && motor_video_ok) {
+		struct obs_video_info ovi = motor_ovi;
 
 		ovi.base_width = width;
 		ovi.base_height = height;
@@ -1508,15 +1579,18 @@ static void source_record_filter_tick(void *data, float seconds)
 		if (context->video_output) {
 			context->width = width;
 			context->height = height;
+			/* Encoder parado volta a apontar para a saída nova (a antiga pode ter sido liberada). */
+			if (context->encoder && !obs_encoder_active(context->encoder))
+				obs_encoder_set_video(context->encoder, context->video_output);
+			os_atomic_set_bool(&context->video_stale, false);
 		}
 	} else if (size_changed && context->video_output) {
 		if (context->output_active) {
 			/* defer: let the restart branch stop the outputs first */
 			context->restart = true;
-		} else if (!context->encoder || !obs_encoder_active(context->encoder)) {
+		} else if (motor_video_ok && (!context->encoder || !obs_encoder_active(context->encoder))) {
 			/* outputs are down and the encoder is idle: safe to swap */
-			struct obs_video_info ovi = {0};
-			obs_get_video_info(&ovi);
+			struct obs_video_info ovi = motor_ovi;
 
 			ovi.base_width = width;
 			ovi.base_height = height;

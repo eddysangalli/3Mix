@@ -78,12 +78,10 @@ console.log(`  -> PASS: Blackbox registrou incidente: ${snapRes.id}`);
 
 console.log('[4/8] Verificando Broadcast Delay + DUMP FIFO...');
 assert(production.broadcastDelayEngine, 'broadcastDelayEngine deve existir');
-production.broadcastDelayEngine.setDelay(7.0);
-production.broadcastDelayEngine.enqueuePacket({ id: 'pkt1', isKeyframe: true, sizeBytes: 1024 });
-production.broadcastDelayEngine.enqueuePacket({ id: 'pkt2', isKeyframe: false, sizeBytes: 512 });
-const dumpRes = production.broadcastDelayEngine.dump({ mode: 'to_live' });
-assert.strictEqual(dumpRes.success, true, 'DUMP deve ser executado com sucesso');
-console.log(`  -> PASS: Broadcast DUMP executado: descartou ${dumpRes.discardedPackets} pacotes (${dumpRes.discardedBytes} bytes).`);
+// Sem motor real conectado, o DUMP tem de recusar em vez de confirmar.
+await assert.rejects(() => production.broadcastDelayEngine.execute('dump'));
+assert.strictEqual(production.broadcastDelayEngine.summary().stats.dumpCount, 0, 'DUMP sem motor não pode contar como executado');
+console.log('  -> PASS: DUMP sem motor é recusado.');
 
 console.log('[5/8] Verificando Return Feed Manager (Clean Feed + N-1 Mix-Minus)...');
 assert(production.returnFeedManager, 'returnFeedManager deve existir');

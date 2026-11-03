@@ -38,13 +38,13 @@
     video: 'Vídeo da produção', audio: 'Áudio da produção', color: 'Cor da produção',
     recording: 'Gravação', streaming: 'Transmissão', outputs: 'Monitores', returns: 'Retornos SRT e N-1', aux: 'Matriz AUX', encoders: 'Encoder',
     replay: 'Replay', dsk: 'DSK', multiview: 'Multiview', shortcuts: 'Atalhos', modulos: 'Módulos',
-    patch: 'Patch de Sinais', preflight: 'Pre-Flight',
+    patch: 'Patch de Sinais', preflight: 'Pre-Flight', diagnostico: 'Diagnóstico do computador',
     workspace: 'Interface', performance: 'Desempenho', remote: 'Remoto', network: 'Rede Multipath', automation: 'Automação',
     recovery: 'Recuperação', about: 'Sobre e suporte',
     streamMultistream: 'MultiStream', streamExternal: 'Saídas de rede',
     // sub-tabs and aliases kept for old links
     mixer: 'Mixer e roteamento', outputAdvanced: 'Saída avançada', files: 'Arquivos e divisão',
-    audioTracks: 'Trilhas de áudio', networkOutput: 'Rede da transmissão', startstop: 'Ao iniciar e parar',
+    audioTracks: 'Trilhas de áudio', networkOutput: 'Rede da transmissão', broadcastDelay: 'Atraso e DUMP', startstop: 'Ao iniciar e parar',
     projectors: 'Projetores e tela cheia', appearance: 'Texto e densidade', general: 'Janela e encaixe',
     plugins: 'Ferramentas dos plugins', advanced: 'Motor e prioridade',
   };
@@ -52,7 +52,7 @@
     { id: 'producao', title: 'Produção', items: ['video', 'audio', 'color'] },
     { id: 'saidas', title: 'Saídas', items: ['recording', 'streaming', 'outputs', 'returns', 'aux', 'encoders'] },
     { id: 'operacao', title: 'Operação', items: ['replay', 'dsk', 'multiview', 'shortcuts', 'patch', 'preflight'] },
-    { id: 'sistema', title: 'Sistema', items: ['workspace', 'modulos', 'performance', 'remote', 'network', 'automation', 'recovery'] },
+    { id: 'sistema', title: 'Sistema', items: ['workspace', 'modulos', 'diagnostico', 'performance', 'remote', 'network', 'automation', 'recovery'] },
     { id: 'sobre', title: 'Sobre', items: ['about'] },
   ];
   const ICONS = {
@@ -69,6 +69,7 @@
     shortcuts: '<svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h.01M18 14h.01M9 14h6"/></svg>',
     patch: '<svg viewBox="0 0 24 24"><circle cx="6" cy="7" r="2"/><circle cx="18" cy="17" r="2"/><path d="M8 7h5a3 3 0 0 1 3 3v4M16 17H11a3 3 0 0 1-3-3V8"/></svg>',
     preflight: '<svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="m8 9 2 2 4-4M8 15h8"/></svg>',
+    diagnostico: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4M7 11l2-2 2 3 2-4 2 3h2"/></svg>',
     network: '<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 11l10-4M7 13l10 4"/></svg>',
     returns: '<svg viewBox="0 0 24 24"><path d="M9 7 4 12l5 5"/><path d="M4 12h11a5 5 0 0 1 5 5"/></svg>',
     aux: '<svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="1.6" fill="currentColor"/><circle cx="15" cy="12" r="1.6" fill="currentColor"/><circle cx="7" cy="17" r="1.6" fill="currentColor"/></svg>',
@@ -84,13 +85,13 @@
   // Sub-tabs inside a consolidated category. This keeps the sidebar at 18 entries.
   const SUBTABS = {
     recording: [['recording', 'Básico'], ['files', 'Arquivos'], ['audioTracks', 'Trilhas'], ['startstop', 'Ao iniciar/parar'], ['outputAdvanced', 'Avançado']],
-    streaming: [['streaming', 'Básico'], ['streamMultistream', 'MultiStream'], ['streamExternal', 'Saídas de rede'], ['networkOutput', 'Rede'], ['audioTracks', 'Trilhas'], ['startstop', 'Ao iniciar/parar'], ['outputAdvanced', 'Avançado']],
+    streaming: [['streaming', 'Básico'], ['streamMultistream', 'MultiStream'], ['streamExternal', 'Saídas de rede'], ['networkOutput', 'Rede'], ['broadcastDelay', 'Atraso e DUMP'], ['audioTracks', 'Trilhas'], ['startstop', 'Ao iniciar/parar'], ['outputAdvanced', 'Avançado']],
     workspace: [['workspace', 'Layout da mesa'], ['appearance', 'Texto e densidade'], ['general', 'Janela e encaixe']],
     performance: [['performance', 'Geral'], ['advanced', 'Motor e prioridade']],
   };
   const PARENT = {
     files: 'recording', audioTracks: 'recording', startstop: 'recording', outputAdvanced: 'recording',
-    networkOutput: 'streaming', streamMultistream: 'streaming', streamExternal: 'streaming',
+    networkOutput: 'streaming', broadcastDelay: 'streaming', streamMultistream: 'streaming', streamExternal: 'streaming',
     appearance: 'workspace', general: 'workspace', advanced: 'performance',
     projectors: 'multiview', plugins: 'performance',
   };
@@ -107,6 +108,7 @@
     shortcuts: ['/atalhos', 'Abrir atalhos'],
     patch: ['/patch', 'Abrir Patch de Sinais'],
     preflight: ['/preflight', 'Abrir Pre-Flight'],
+    diagnostico: ['/primeira-execucao', 'Abrir diagnóstico'],
     remote: ['/hub', 'Abrir acesso remoto'],
     network: ['/rede', 'Abrir Rede Multipath'],
     automation: ['/macros', 'Abrir automação'],
@@ -303,7 +305,8 @@
     encoders: { kind: 'encoder' },
     files: { engine: 'files', kind: 'native' },
     audioTracks: { engine: 'audioTracks', kind: 'native' },
-    networkOutput: { engine: 'networkOutput', kind: 'native' },
+    networkOutput: { engine: 'networkOutput', kind: 'native', except: ['streamDelayEnabled', 'streamDelaySeconds', 'preserveDelay'] },
+    broadcastDelay: { engine: 'networkOutput', kind: 'native', only: ['streamDelayEnabled', 'streamDelaySeconds', 'preserveDelay'] },
     startstop: { engine: 'general', kind: 'native', only: ['warnStartStream', 'warnStopStream', 'warnStopRecord', 'recordWhenStreaming', 'keepRecording', 'replayWhileStreaming', 'keepReplay'] },
     projectors: { engine: 'projectors', kind: 'native' },
     workspace: { kind: 'workspace' },
@@ -597,8 +600,31 @@
       + fieldsGrid(fieldsOf('performance'), 'performance', locked) + '</div>';
   }
 
+  function drawDelayCard() {
+    return '<div class="settings-card"><div class="card-title-row"><h2>Atraso e DUMP</h2><span id="delay-live"></span></div>'
+      + '<p class="card-desc keep">A transmissão sai com alguns segundos de atraso. Se algo indevido acontecer, o DUMP descarta esse trecho antes de ele chegar ao público.</p>'
+      + '<p class="card-desc keep">Depois do DUMP, a imagem fica parada por cerca do tempo do atraso e volta já protegida. A gravação e as saídas extras (MultiStream, SRT, NDI, DeckLink) não passam por esse atraso.</p>'
+      + '<p class="card-desc keep">Recomendado: 7 a 10 segundos. Vale no próximo início da transmissão.</p></div>';
+  }
+
+  async function readDelayLive() {
+    const box = E('delay-live');
+    if (!box) return;
+    let s = null;
+    try { s = await (await fetch('/api/delay', { cache: 'no-store', signal: AbortSignal.timeout(2500) })).json(); } catch { /* sem resposta */ }
+    const live = E('delay-live');
+    if (!live) return;
+    const names = { protected: 'No ar, protegido', rebuilding: 'No ar, refazendo o atraso', streaming_without_delay: 'No ar sem atraso', ready: 'Ligado', off: 'Desligado', unavailable: 'Indisponível neste motor' };
+    live.textContent = s ? (names[s.state] || '') : 'Sem resposta do motor';
+    setTimeout(readDelayLive, 1000);
+  }
+
   function drawNative(view, locked) {
     const list = fieldsOf(view.id);
+    if (view.id === 'broadcastDelay' && list.length) {
+      setTimeout(readDelayLive, 0);
+      return drawDelayCard() + '<div class="settings-card">' + fieldsGrid(list, view.id, locked) + '</div>';
+    }
     if (!list.length) {
       const err = config?.nativePreferences?.error;
       return '<div class="settings-card"><p>' + (err ? 'O motor não entregou estas preferências: ' + esc(err) : 'Esta versão do motor não disponibiliza campos nesta categoria.') + '</p>'
@@ -802,6 +828,7 @@
       if (keyOnlyLive) text = 'No ar: só a chave pode ser alterada; ela vale no próximo início da transmissão.';
       else if (live && (view.id === 'video' || ['recording', 'streaming', 'outputAdvanced'].includes(view.id))) text = 'Há ' + stateLabel(engineState()) + ': pare as saídas para alterar esta categoria.';
       else if (totalDrafts()) text = 'Alterações ainda não aplicadas: confira o resumo e clique em Aplicar.';
+      else if (view.id === 'broadcastDelay') text = '';
       else if (view.kind === 'native') text = 'Estas preferências entram em vigor após reiniciar o 3Mix fora do ar.';
       say(text, text && live && !keyOnlyLive ? 'error' : '');
       E('message').dataset.auto = '1';
@@ -949,7 +976,9 @@
         drafts.delete(id); written++;
       }
       if (!written) { note('Nenhuma alteração efetiva foi encontrada nos campos.', ''); return; }
-      const done = onlyStreamKey
+      const done = selected === 'broadcastDelay' && written === 1
+        ? 'Salvo. Vale no próximo início da transmissão.'
+        : onlyStreamKey
         ? 'Chave salva; vale no próximo início da transmissão.'
         : restart || lastRestart
           ? 'Configurações salvas e confirmadas. Reinicie o 3Mix fora do ar para aplicar as preferências do motor.'

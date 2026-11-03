@@ -1,61 +1,80 @@
-# 3Mix — Guia Rápido (uma página)
+# 3Mix — Guia Rápido (Alpha)
 
-Passo a passo ilustrado com capturas de tela reais do 3Mix, da instalação ao primeiro corte ao vivo. Para detalhes completos, veja [`LEIA-ME-BETA.md`](LEIA-ME-BETA.md).
-
-> **Sobre as capturas deste guia:** foram feitas a partir das telas reais do painel do 3Mix, servidas localmente sem o motor nativo rodando (modo "somente painel", usado para documentação). Por isso você verá indicadores como "sem conexão com o motor" ou "reconectando…" nas imagens — isso é esperado nesta captura e não representa um erro do produto. Com o motor aberto pelo iniciador normal, esses indicadores mudam para o estado conectado.
+Do primeiro clique ao primeiro corte no ar, em uma página. As imagens são telas reais do 3Mix. O passo a passo completo de cada tela está no **Manual do Operador** (Hub › Manual do operador, ou `painel/docs/usuario/manual-operador.html`). Para saber qual documento ler, veja [`MANUAIS.md`](MANUAIS.md).
 
 ---
 
 ## 1. Instalar
 
-Execute o instalador (`FreeMix-Studio-Setup-*.exe`), confira o SHA-256 antes (seção 8 de `LEIA-ME-BETA.md`) e escolha uma pasta nova e vazia como destino. Se o Windows SmartScreen avisar, veja a seção 6 de `LEIA-ME-BETA.md`.
+- **ZIP da Alpha:** extraia o ZIP inteiro numa pasta sua (por exemplo `Documentos\3Mix`). Não abra de dentro do ZIP.
+- **Instalador (.exe):** escolha uma pasta nova e vazia.
+
+Confira o SHA-256 antes (seção 8 de [`LEIA-ME-BETA.md`](LEIA-ME-BETA.md)). Se o Windows mostrar "O Windows protegeu o computador", veja a seção 6 do mesmo arquivo.
 
 ## 2. Abrir
 
-Use o atalho **3Mix Studio** criado pela instalação (ou `INICIAR-3MIX.cmd` no ambiente de desenvolvimento). Não abra o executável do motor sozinho.
+Dê dois cliques em **3Mix Studio.cmd** (ou no atalho **3Mix Studio**). Não abra o executável do motor sozinho. Espere o selo **Motor conectado**.
 
-## 3. Hub de Operadores
+## 3. Hub de Produção
 
-Ao abrir, você chega ao Hub — o ponto de partida com acesso a todos os módulos do 3Mix: mesa modular, mesa de corte, playlists, mixer de áudio, rundown, retornos, blackbox, GC, overlays/DSK, replay, gravação ISO, fontes de dados, composições, MultiView, matriz AUX e configurações.
+Ponto de partida das telas de operação. Cada cartão abre um módulo; **Copiar** copia o endereço para usar em outro computador ou tablet.
 
-![Hub de Operadores do 3Mix](../../qa-beta/capturas/manual/01-hub.png)
+![Hub de Produção](capturas/manual/hub.png)
 
-## 4. Mesa principal (modular)
+## 4. Mesa principal
 
-A mesa reúne Prévia (PV) e Programa (PGM) lado a lado, o módulo de entradas (fontes), o mixer de áudio, DSK e rundown em abas, e a barra inferior com gravação, saídas externas, transmissão e o botão **Pre-Flight** (verificação de segurança antes de ir ao ar). Use **Adicionar entrada** para registrar sua primeira câmera ou mídia.
+Pré-visualização (verde) e Programa (vermelho) no alto; CUT, AUTO, T-Bar e DSK no meio; entradas embaixo; mixer ao lado; rodapé com **Adicionar entrada**, **Gravar**, **Externo**, **Transmitir** e **Pre-Flight**.
 
-![Mesa principal modular do 3Mix](../../qa-beta/capturas/manual/02-mesa-modular.png)
+![Mesa principal](capturas/manual/mesa-principal.png)
+
+1. **Adicionar entrada** e escolha o tipo (câmera, mídia, GC, call…).
+2. Clique no cartão da entrada: ela vai para o Preview.
+3. **CUT** (seco) ou **AUTO** (com a transição e a duração escolhidas). No cartão, **GO** leva ao ar com a transição e **Cut** corta seco.
+4. Os botões **1** a **8** do cartão operam os DSK: primeiro clique prepara, segundo entra no ar.
 
 ## 5. Áudio
 
-O módulo de Áudio abre o mixer completo: canais de entrada à esquerda, saídas/mestre ao centro e o inspetor de canal à direita (ganho, EQ, roteamento ao selecionar um canal). As abas superiores dão acesso a Roteamento, Retornos/N-1 e Dispositivos.
+Aba **Áudio** da barra superior: canais com Ganho, Pan, MUTE, SOLO, AFV e MON; envios MAIN, A e B; saídas MAIN (vai ao ar), BUS A, BUS B e fones; efeitos e plugins no inspetor do canal.
 
-![Mixer de áudio do 3Mix](../../qa-beta/capturas/manual/03-audio.png)
+![Mixer de áudio](capturas/manual/audio-mixer.png)
 
 ## 6. Replay
 
-O módulo de Replay traz dois players independentes (A e B) para marcar entrada/saída de lances, câmera lenta ajustável, QuadView de histórico multicâmera e a lista de lances salvos. Marcar IN/OUT e carregar em A/B apenas prepara o player — não coloca no ar sozinho.
+**Iniciar REC** guarda o histórico das câmeras. **−5 s / −10 s / −20 s** ou **MARCAR IN / OUT** salvam o lance; carregue em A ou B e use **Colocar Player A no ar**. Carregar em A/B não coloca no ar sozinho.
 
-![Replay multicâmera do 3Mix](../../qa-beta/capturas/manual/04-replay.png)
+![Replay](capturas/manual/replay.png)
 
-## 7. Configurações
+## 7. Gravar e transmitir
 
-A tela de Configurações organiza categorias à esquerda e o formulário da categoria aberta à direita, com busca, escopo de aplicação (categoria aberta / rascunho / todas), importar/exportar e restaurar padrões.
+- **⚙ ao lado de Gravar:** formato, pasta e qualidade. **Gravar** inicia e para.
+- **⚙ ao lado de Transmitir:** destino, URL e chave. **Transmitir** inicia e para.
 
-![Tela de configurações do 3Mix](../../qa-beta/capturas/manual/05-configuracoes.png)
+![Transmissão](capturas/manual/transmitir.png)
 
-## 8. Saídas (MultiStream / Matriz AUX)
+## 8. Atraso e DUMP
 
-A tela de Saídas controla a transmissão principal e destinos adicionais (MultiStream), além da Matriz AUX para roteamento independente de saídas. Cada saída adicional é configurada separadamente antes de iniciar.
+Proteção para a transmissão principal: ela sai alguns segundos atrasada e o **DUMP** descarta o trecho que ainda não foi ao ar.
 
-![Tela de saídas do 3Mix](../../qa-beta/capturas/manual/06-saidas.png)
+1. **Configurações › Transmissão › Atraso e DUMP**: marque **Atraso de transmissão**, escolha **7 a 10 s**, deixe **Preservar atraso ao reconectar** e **Aplicar**.
+2. Vale no próximo início da transmissão.
+3. No ar, a barra mostra **Atraso 7 s** em verde. Para descartar: clique **DUMP**, depois **Confirmar DUMP** em até 3 s.
+
+![Configurações, Atraso e DUMP](capturas/manual/config-atraso-dump.png)
+
+![Barra da mesa no ar e protegida](capturas/manual/barra-dump-protegido.png) ![Primeiro clique: Confirmar DUMP](capturas/manual/barra-dump-armado.png)
+
+O DUMP cobre só a transmissão principal: gravação e saídas extras (MultiStream, SRT, NDI, DeckLink) não passam pelo atraso. Depois do DUMP, o destino fica com a imagem parada por cerca do tempo do atraso.
 
 ## 9. Antes de ir ao ar
 
-1. Clique em **Pre-Flight** na mesa principal e resolva os avisos apontados.
-2. Confirme fontes de áudio e vídeo ativas no módulo de Áudio e no módulo de entradas.
-3. Faça um teste de gravação curto e confira o arquivo gerado antes de uma transmissão real.
+1. Clique em **Pre-Flight**, escolha **Para: transmitir e gravar / só transmitir / só gravar** e resolva o que estiver em **BLOQUEIO** ou **ATENÇÃO**. O **↻** de cada item confere só aquele item de novo.
+2. Feche ou ignore os **Programas concorrentes** apontados.
+3. Faça uma gravação curta de teste e abra o arquivo.
+
+![Pre-Flight](capturas/manual/preflight.png)
 
 ## 10. Se algo der errado
 
-Veja [`SOLICITAR-SUPORTE.md`](SOLICITAR-SUPORTE.md) para gerar o ZIP de diagnóstico, e [`LIMITES-CONHECIDOS.md`](LIMITES-CONHECIDOS.md) para checar se o comportamento já é um limite conhecido desta beta.
+- **Caixa-preta › Registrar incidente agora** guarda os últimos 60 segundos.
+- **Configurações › Sobre e suporte › Relatar problema › Gerar pacote** cria o ZIP para o suporte. Se o 3Mix nem abrir, use **COLETAR-LOGS.cmd**.
+- Veja [`SOLICITAR-SUPORTE.md`](SOLICITAR-SUPORTE.md) e confira em [`LIMITES-CONHECIDOS.md`](LIMITES-CONHECIDOS.md) se o comportamento já é um limite conhecido desta Alpha.

@@ -3,12 +3,15 @@
   "commit": "9b5fe689e09d7ddce283ef66bec56a491956114c",
   "installedSHA256": "575dc83856c5d3c6c6d31eae737778a6dd9fdcd8ba5cb212dbc19603a0f5ac03",
   "at": "2026-10-08T22:43:50.146Z",
-  "localVersion": "0.4.8-freemix-private-bus1",
+  "localVersion": "0.4.8-freemix-private-bus1-iso-reset1",
   "originalSourceZipSHA256": "02ae42d0426901594d6396327ae065989056416b9092de871e3c0142827e4355",
-  "modifiedSourceSHA256": "3be6495676487da307b77c3cb5dc23c103203c10b167493e3407d3d244e1697a",
-  "dllSHA256": "63e4f4c4fe77382b24eb03085a62e3da7ac8e77554be5f6f94dcf17c885987e8",
+  "modifiedSourceSHA256": "02b4db650d9b08935053452c709c2dc29e2f03df6a5317ecd76dd3fe7c5bdd9d",
+  "dllSHA256": "c6fe38868167c6614a32f4bef288226d32f8ec0fcae9848a3b6b15514c608520",
   "license": "GPL-2.0",
   "change": "Explicit freemix_audio_bus mixers=0 capture via premix PCM, bounded stereo 2s ring buffer; native defaults capability flag; no change to public routing",
   "proof": "qa-portatil/source-record-premix-nativo.json",
-  "lifecycleProof": "qa-portatil/source-record-premix-qa-fechada.json"
+  "lifecycleProof": "qa-portatil/source-record-premix-qa-fechada.json",
+  "previousDllSHA256": "63e4f4c4fe77382b24eb03085a62e3da7ac8e77554be5f6f94dcf17c885987e8",
+  "changeIsoReset": "2026-11-03: start tasks use a weak filter reference (no use-after-free when the ISO is removed before the queued start runs); the view is rebuilt after an engine video reset (video_reset / video_reset_begin) and recording only starts when the encoder points at the current valid view; start and video reset are mutually exclusive. Requires the 3Mix libobs that emits video_reset_begin.",
+  "proofIsoReset": "qa-iso/testar-iso.mjs (3 ISO NVENC recordings + start/remove/video-reset stress)"
 }

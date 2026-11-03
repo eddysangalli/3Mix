@@ -1,0 +1,45 @@
+# 3Mix API
+
+> 3Mix é uma suíte broadcast (mesa de corte, áudio, overlays/DSK, GC, saídas, replay, playout, atraso com DUMP). Uma API Node.js (ferramentas/servidor-api.mjs) fica entre integrações e o motor nativo (derivado do OBS/libobs, falando obs-websocket v5). Use a API: ela serializa os comandos, confirma cada um no motor e mantém recibos. Manual completo: ../API.md. Índice de tudo que existe no código: indice-acoes.json.
+
+## Conexão
+- Base: http://127.0.0.1:8088 (padrão; instalações podem usar 18188-18198; a porta está em <instalação>/painel/local.js → MESA_LOCAL.replayUrl). Descoberta: GET /api/health (só local) → {app, brand:"3Mix", protocol:1, installationId, port, connected}.
+- Só envie comandos com connected:true.
+- Loopback dispensa token. Outro computador: Authorization: Bearer <apiToken de config/obs-studio/plugin_config/freemix-control/acesso.json> ou cookie freemix_session via POST /api/pair {"pin":"######"} (PIN em GET /api/access, só local). Header Origin diferente do Host → 401. Sem CORS para outras origens.
+- A API só escuta na rede se network.json tiver allowLan:true.
+
+## Ler estado
+- GET /api/json → estado completo (grande): connected, preset (= expectedScope), scenes, inputs[{name, number, key(uuid), type, tally, volume, muted}], program, preview, overlays[{number, scene}], audioInputs, buses, recording, streaming, transitions, video, broadcastDelay, macros, playout, rundown, operation.
+- WebSocket /ws: recebe {type:"init"|"state", data:<estado>}, {type:"meters"}, {type:"ack", id, success, data|error}, replay_state, iso_state, aux_*; envia {"id":"x","action":"preview","input":"CAM 2"}; replay: {"action":"replay","cmd":"mark-in"}.
+- GET /api (XML estilo vMix), /api/delay, /api/outputs (local), /api/overlays, /api/playout, /api/replay, /api/rundown, /api/preflight, /api/mix-effects, /api/modulos (local), /api/settings (local).
+
+## Comandar
+- POST /api/control {"action":..., ...} → 200 {success:true, state} | 400 {success:false, error}. Entrada (input) = nome, key (uuid, preferível) ou número em texto.
+- preview {input}; cut {input?, operationId?, expectedScope?}; fade {input?, duration 50-20000}; transition; active {input}; tbar {position 0-1, release}.
+- audio_volume {input:"M"|"A"|"B"|fonte|entrada, volume 0-100}; audio_mute {input, muted?}; audio_bus {input, bus:"M"|"A"|"B", enabled?}; audio_monitor; audio_balance.
+- overlay {channel 1-8, input?} (sem input = tira); overlay_take/overlay_off/overlay_toggle/overlay_configure/overlay_kill_all; gc {kind:"lower"|"score", data, on?}; score {team, delta}; gc_library_air {id, on}.
+- record {active}; stream {active}; outputs_start/outputs_stop {index 0-3} (local); outputs_mix {mixId 2-4, command preview|cut|fade|take|configure|state} (local).
+- Atraso/DUMP: POST /api/delay {action:"dump"|"delay_set"|"delay_enable"|"delay_disable"|"delay_summary", enabled, seconds 1-1800, preserve, note}. Estados: unavailable, off, ready, protected, rebuilding, streaming_without_delay. DUMP só tem sucesso com result.dumped:true (precisa estar no ar com atraso; canDump:true). delay_set é recusado no ar e vale no próximo início. uncoveredOutputs não têm atraso.
+- macro_run {id}; macro_cancel; playout_take/preload/play/pause/stop/next/previous/seek; rundown_prepare/execute/next; media {command PLAY|PAUSE|STOP|RESTART|NEXT|PREVIOUS}.
+- ftb hoje é sempre recusado (beta não qualificado).
+- Parar a transmissão com atraso ligado pode responder 400 "O motor não confirmou GetStreamStatus" mesmo parando: confira streaming no estado antes de repetir.
+- Ações de configuração (settings_*, outputs_*, call_*, effects_*, ptz_*, audio_routing_*, network_*, recovery_*, gc_html_*, macro_* exceto run/cancel, update_*, ...) só no computador do 3Mix (403).
+
+## Idempotência
+- operationId [A-Za-z0-9_-]{1,80} + expectedScope (preset) em preview/active/cut/fade/transition/input_remove. Repetir o mesmo id não executa de novo (replayed:true). stage: pending|confirmed|rejected|uncertain. Em uncertain/timeout NÃO repita: GET /api/operation-check?id=&scope=.
+
+## vMix
+- HTTP: /api/?Function=Cut|Fade|PreviewInput|ActiveInput|CutDirect|SetVolume|Audio|AudioOn|AudioOff|MasterAudio|SetMasterVolume|StartRecording|StopRecording|StartStreaming|StopStreaming|Play|Pause|Restart|NextItem|PreviousItem|SetPosition|SetSpeed|OverlayInputN[In|Out]|GCUpdate|ScoreGoal|PlayoutTake|TakeNext|PlayoutNext|PlayoutPrevious|PlayoutClipGain|PreflightCheck|BlackboxMark|ReplayPlay|ReplayLive|ReplayMarkIn|ReplayMarkOut|ReplaySetSpeed|FadeToBlack&Input=&Value=&Duration=. /api/json?Function= responde JSON.
+- TCP 8099 (sem autenticação, 0.0.0.0): XML, TALLY, SUBSCRIBE TALLY|ACTS, FUNCTION <Nome> Input=2 Value=50 (parâmetros separados por espaço; "&" não funciona), QUIT.
+
+## Motor direto (obs-websocket v5)
+- Porta/senha em <instalação>/config/obs-studio/plugin_config/obs-websocket/config.json. CallVendorRequest vendors: freemix (broadcast_delay, get_interface, get_mixes, control_mix, get_destinations, set_destinations, control_destination, sdi_output, network_output, save_preset, open_panel, shutdown_idle, ...), downstream-keyer (dsk_*), obs-browser (emit_event), freemix-preferences (control), freemix-hotkeys (control). Pula confirmações, AFV, recibos e diário: use só para o que a API não cobre. Não mexa em cenas "3Mix *".
+
+## Regras para IAs
+- Leia o estado antes de agir. Nunca dispare ação que afeta o ar (cut, fade, transition, active, tbar, overlay, gc on, score, stream, record, dump, outputs_start/stop, outputs_mix cut, playout_take, macro_run, rundown_execute, replay air, audio no Master, preflight_bypass, preflight_process_close) em produção sem confirmação humana explícita.
+- Preparar é seguro: preview, playout_preload, rundown_prepare, macro_save, delay_set.
+- Não contorne mensagens de recusa; mostre-as ao operador.
+
+## Documentos
+- [Manual completo](../API.md): rotas, parâmetros, exemplos verificados, receitas, inconsistências conhecidas.
+- [Índice gerado](indice-acoes.json): rotas, ações por módulo (com "só local"), funções vMix, vendor requests.

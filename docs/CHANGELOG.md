@@ -1,3 +1,10 @@
+## Alpha 0.1.1 · 03/11/2026
+
+- Atraso e DUMP de verdade: a transmissão sai com alguns segundos de atraso e o DUMP descarta o trecho que ainda não foi ao ar. Botão na barra da mesa e na Mesa de corte, com dois cliques, e configuração em Configurações › Transmissão › Atraso e DUMP.
+- Depois do DUMP a imagem fica parada por cerca do tempo do atraso e volta já protegida. Com o atraso ligado, a transmissão usa keyframe a cada 2 s quando estava em automático.
+- O DUMP só confirma quando o motor descartou de fato; sem atraso ativo, ele avisa e não finge.
+- Configurações abrem mesmo em computador sem câmera virtual.
+
 ## Alpha 0.1.0 · 02/11/2026
 
 - Primeira versão numerada do 3Mix, com instalador próprio.

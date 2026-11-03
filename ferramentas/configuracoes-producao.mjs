@@ -24,12 +24,12 @@ export function importSettings(document,before){if(!document||document.format!==
 export class SettingsEngine {
  constructor(p){this.p=p;this.preferences=new PreferencesEngine(p);}
  async read(){const p=this.p,P=async(c,n)=>(await p.req('GetProfileParameter',{parameterCategory:c,parameterName:n})).parameterValue;
-  const [video,dir,service,mode,stats,virtual]=await Promise.all([p.req('GetVideoSettings'),p.req('GetRecordDirectory'),p.req('GetStreamServiceSettings'),P('Output','Mode'),p.req('GetStats'),p.req('GetVirtualCamStatus')]);
+  const [video,dir,service,mode,stats,virtual]=await Promise.all([p.req('GetVideoSettings'),p.req('GetRecordDirectory'),p.req('GetStreamServiceSettings'),P('Output','Mode'),p.req('GetStats'),p.req('GetVirtualCamStatus').catch(()=>null)]);
   const cat=mode==='Advanced'?'AdvOut':'SimpleOutput',values={};for(const n of ['RecFormat2','RecQuality','RecEncoder','StreamEncoder','VBitrate','ABitrate'])values[n]=await P(cat,n);
   const [nativePreferences,native]=await Promise.all([this.preferences.read().catch(e=>({error:e.message,fields:[]})),p.vendor('get_destinations',{},'freemix').catch(e=>({error:e.message,encoders:[],protocols:[]}))]);
   const server=service.streamServiceSettings.server||'',protocol=streamProtocol(service,server);
   const virtualScene=await p.req('CallVendorRequest',{vendorName:'freemix',requestType:'virtual_cam_source',requestData:{}}).then(r=>r.responseData?.scene||'').catch(()=>'');
-  return {nativePreferences,capabilities:{simpleEncoders:simpleEncoderChoices(native),protocols:normalizeProtocols(native),recordingFormats,error:native.error||null},protocol,serviceType:service.streamServiceType,serviceName:service.streamServiceSettings.service||'',video,recordDirectory:dir.recordDirectory,server,hasKey:!!service.streamServiceSettings.key,mode:mode||'Simple',values,stats,virtualCameraScene:virtualScene,virtualCamera:virtual.outputActive};
+  return {nativePreferences,capabilities:{simpleEncoders:simpleEncoderChoices(native),protocols:normalizeProtocols(native),recordingFormats,error:native.error||null},protocol,serviceType:service.streamServiceType,serviceName:service.streamServiceSettings.service||'',video,recordDirectory:dir.recordDirectory,server,hasKey:!!service.streamServiceSettings.key,mode:mode||'Simple',values,stats,virtualCameraScene:virtualScene,virtualCamera:virtual?.outputActive};
  }
  async execute(action,d={}){const p=this.p;
    if(['settings_encoder_read','settings_encoder_preview','settings_encoder_apply'].includes(action)){if(!['stream','record'].includes(d.target))throw Error('Destino do encoder inválido');if(action!=='settings_encoder_read'&&(typeof d.encoder!=='string'||typeof d.revision!=='string'||!/^([a-f0-9]{64})$/.test(d.revision)||!d.values||typeof d.values!=='object'||Array.isArray(d.values)||JSON.stringify(d.values).length>32768))throw Error('Parâmetros de encoder inválidos');this.last=await p.vendor('control',{action:action.replace('settings_',''),target:d.target,encoder:d.encoder,revision:d.revision,values:d.values},'freemix-preferences');return;}
@@ -59,7 +59,7 @@ export class SettingsEngine {
     return;
   }
   if(action!=='settings_apply')throw Error('Configuração inválida');
-  if(p.macroEngine.controller||p.callEngine.lease||p.state.recording||p.state.streaming||(await p.req('GetVirtualCamStatus')).outputActive||(await p.req('GetOutputList')).outputs.some(o=>o.outputActive))throw Error('Pare gravação, transmissões, saídas de rede e câmera virtual antes de aplicar configurações');
+  if(p.macroEngine.controller||p.callEngine.lease||p.state.recording||p.state.streaming||(await p.req('GetVirtualCamStatus').catch(()=>null))?.outputActive||(await p.req('GetOutputList')).outputs.some(o=>o.outputActive))throw Error('Pare gravação, transmissões, saídas de rede e câmera virtual antes de aplicar configurações');
   const before=await this.read(),undo=[];
   const param=async(c,n,v)=>{const old=(await p.req('GetProfileParameter',{parameterCategory:c,parameterName:n})).parameterValue;undo.push(()=>p.req('SetProfileParameter',{parameterCategory:c,parameterName:n,parameterValue:old??''}));await p.req('SetProfileParameter',{parameterCategory:c,parameterName:n,parameterValue:String(v)});const actual=(await p.req('GetProfileParameter',{parameterCategory:c,parameterName:n})).parameterValue;if(String(actual)!==String(v))throw Error('Motor não confirmou '+n);};
   const category=d.category,values=Object.fromEntries(Object.entries(d).filter(([k])=>!['action','category'].includes(k)));d={category,...validateSettings(category,values,before)};let video;

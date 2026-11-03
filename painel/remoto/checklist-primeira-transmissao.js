@@ -67,7 +67,9 @@
     status.textContent = 'Consultando API do 3Mix…';
     try {
       const resposta = await fetch('/api/health', { cache: 'no-store', signal: AbortSignal.timeout(4000) });
-      if (resposta.status === 401 || resposta.status === 403) {
+      if (resposta.status === 403) {
+        status.textContent = 'Este navegador não está no computador do 3Mix (ou a origem foi recusada). Abra esta página no mesmo computador onde o 3Mix está rodando.';
+      } else if (resposta.status === 401) {
         status.textContent = 'Dispositivo não autorizado. Abra o Hub e autorize com o código do computador 3Mix.';
       } else if (!resposta.ok) {
         status.textContent = 'API indisponível (HTTP ' + resposta.status + '). Abra pelo atalho oficial; não inicie outro motor.';

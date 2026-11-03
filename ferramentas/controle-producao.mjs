@@ -265,7 +265,11 @@ export class Production {
   onMeters(inputs=[]) {
     for(const i of inputs) this.levels.set(i.inputName,{levels:(i.inputLevelsMul||[]).map(ch=>Math.max(0,ch[1]||0)),at:Date.now()});
   }
-  async wait(type,data,test) { for(let i=0;i<60;i++){const r=await this.req(type,data); if(test(r)) return r; await delay(50);} throw new Error(`O motor não confirmou ${type}`); }
+  // tentativas=60 (3s) serve corte/transicao/audio; parar uma saida com atraso de seguranca
+  // ativo so libera outputActive depois de ~delaySeconds reais (obs_output_delay_stop no motor
+  // so esvazia a fila do atraso antes de sinalizar parado) -- por isso esse caller pode pedir
+  // um teto maior, proporcional ao atraso configurado, em vez do fixo de sempre.
+  async wait(type,data,test,tentativas=60) { for(let i=0;i<tentativas;i++){const r=await this.req(type,data); if(test(r)) return r; await delay(50);} throw new Error(`O motor não confirmou ${type}`); }
   async sceneSources(name,visited=new Set()) {
     if(visited.has(name)) return []; visited.add(name);
     const r=await this.req('GetSceneItemList',{sceneName:name}); const sources=[];
@@ -350,6 +354,7 @@ export class Production {
     for(const input of inputs)input.health={sources:sourceStatus.filter(s=>s.name===input.name||input.sources.includes(s.name)),mediaState:input.state,signal:'unknown',freeze:'unknown'};
     for(const input of inputs)input.tally={program:programTree.has(input.name),preview:previewTree.has(input.name)};
     const gc={...this.gc}; gc.activeLowerThird=overlays.some(o=>o.scene==='3Mix Tarja'); gc.activeScore=overlays.some(o=>o.scene==='3Mix Placar');
+    await this.broadcastDelayEngine.refresh();
     this.state={operation:this.state.operation,operationReceipts:[...(this.operationReceipts?.values()||[])].map(r=>({...r})),connected:true,preset:this.scope,scenes:inputs.map(i=>i.name),inputs:this.inputEngine.decorate(inputs,video),compositionTemplates:structuredClone(this.inputEngine.templates),compositionPresets:this.inputEngine.presets?.()||[],gcLibrary:this.gcLibrary.summary(),program:sc.currentProgramSceneName,preview:sc.currentPreviewSceneName,
       sourceStatus,tally,signals:this.signalEngine.summary(),sourceInputs:ins.inputs.map(i=>({key:i.inputUuid,name:i.inputName,kind:i.unversionedInputKind||i.inputKind})),variables:this.dataSources.publishedVariables(),people:this.dataSources.people(),audioInputs:audio,media,overlays,overlaysEngine:this.overlayEngine.summary(),preflight:this.preflightEngine.summary(),blackbox:this.blackboxEngine.summary(),broadcastDelay:this.broadcastDelayEngine.summary(),returnFeeds:this.returnFeedManager.summary(),audioDucking:this.audioDuckingEngine.summary(),rundown:this.rundownEngine.summary(),gc,buses,calls:await this.callEngine.summary(inputs),dataSources:this.dataSources.summary(),recording:rec.outputActive,streaming:stream.outputActive,recordTimecode:rec.outputTimecode,streamTimecode:stream.outputTimecode,
       transition:tr.currentSceneTransitionName,transitions:tr.transitions,video,controllers:this.controllerEngine.summary(),playout:this.playoutEngine.summary(),queue:this.playoutEngine.summary(),recoverySession:this.sessionRecovery.summary(),macros:this.macroEngine.summary(),busSetupError:this.busSetupError||null,revision:++this.generation,updatedAt:Date.now()};
@@ -527,7 +532,15 @@ export class Production {
           if(action==='audio_balance') await this.req('SetInputAudioBalance',{inputName,inputAudioBalance:number(d.balance,0,1,'Balanço')});
         } break;
       }
-      case 'record': case 'stream': {const prefix=action==='record'?'Record':'Stream'; await this.req((d.active?'Start':'Stop')+prefix); await this.wait('Get'+prefix+'Status',{},s=>s.outputActive===!!d.active); break;}
+      case 'record': case 'stream': {const prefix=action==='record'?'Record':'Stream'; await this.req((d.active?'Start':'Stop')+prefix);
+        // Parar a transmissao com o Atraso/DUMP ativo so confirma outputActive:false depois que o
+        // motor esvazia a fila do atraso (obs_output_delay_stop); o teto padrao de 3s (60*50ms) nao
+        // alcanca o atraso recomendado do produto (7s) nem atrasos maiores -- nao e bug do motor,
+        // e o wait() aplicando o teto generico de corte/transicao a uma espera que pode ser mais
+        // longa de verdade. teto proporcional ao atraso configurado, com folga de 2s pra jitter.
+        const atrasoSegundos=prefix==='Stream'&&!d.active?Number(this.broadcastDelayEngine?.summary()?.delaySeconds||0):0;
+        const tentativas=atrasoSegundos>0?Math.max(60,Math.ceil((atrasoSegundos*1000+2000)/50)):60;
+        await this.wait('Get'+prefix+'Status',{},s=>s.outputActive===!!d.active,tentativas); break;}
       case 'media': {const m=this.media(d.input), cmd=String(d.command).toUpperCase(); if(!['PLAY','PAUSE','STOP','RESTART','NEXT','PREVIOUS'].includes(cmd)) throw new Error('Ação de mídia inválida'); await this.req('TriggerMediaInputAction',{inputName:m.name,mediaAction:'OBS_WEBSOCKET_MEDIA_INPUT_ACTION_'+cmd}); if(['PLAY','PAUSE','STOP'].includes(cmd)) await this.wait('GetMediaInputStatus',{inputName:m.name},s=>s.mediaState===({PLAY:'OBS_MEDIA_STATE_PLAYING',PAUSE:'OBS_MEDIA_STATE_PAUSED',STOP:'OBS_MEDIA_STATE_STOPPED'})[cmd]); break;}
       case 'media_seek': {const m=this.media(d.input); const cursor=number(d.position,0,m.duration,'Posição'); await this.req('SetMediaInputCursor',{inputName:m.name,mediaCursor:cursor});await this.wait('GetMediaInputStatus',{inputName:m.name},s=>Math.abs(s.mediaCursor-cursor)<100);break;}
       case 'media_settings': {const m=this.media(d.input), set={}; if(d.speed!==undefined){if(!/ffmpeg/.test(m.kind)) throw new Error('Esta fonte não oferece controle de velocidade'); set.speed_percent=number(d.speed,10,200,'Velocidade');}

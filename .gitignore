@@ -63,3 +63,6 @@ scratch_*
 build*/
 !scripts/build/
 !scripts/build/*.ps1
+.claude/
+qa-portatil/
+experimentos/

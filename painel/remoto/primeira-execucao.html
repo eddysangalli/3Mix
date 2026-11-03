@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3Mix · Configurar este computador</title>
+<script src="3mix-padrao.js"></script>
+<link rel="stylesheet" href="3mix-tipografia.css">
+<link rel="stylesheet" href="3mix-padrao.css">
+<style>
+  body.p3 { margin: 0; height: 100vh; display: grid; grid-template-rows: auto 1fr auto; }
+  .pe-top { display: flex; align-items: center; gap: 14px; padding: 10px 18px; border-bottom: 1px solid var(--p3-line); }
+  .pe-top img { height: 22px; }
+  .pe-top h1 { margin: 0; font-size: 16px; }
+  .pe-top .pe-ver { margin-left: auto; color: var(--p3-muted); font-size: 12px; }
+  .pe-main { display: grid; grid-template-columns: 240px 1fr; min-height: 0; }
+  .pe-steps { list-style: none; margin: 0; padding: 12px 8px; border-right: 1px solid var(--p3-line); overflow: auto; }
+  .pe-steps li { display: flex; gap: 8px; align-items: center; padding: 7px 10px; border-radius: 4px; color: var(--p3-muted); cursor: pointer; font-size: 13px; }
+  .pe-steps li.atual { background: var(--p3-accent-soft); color: var(--p3-text); }
+  .pe-steps li b { width: 18px; text-align: center; }
+  .pe-steps li[data-situacao="feita"] b { color: var(--p3-ok); }
+  .pe-steps li[data-situacao="adiada"] b { color: var(--p3-warn); }
+  .pe-body { padding: 20px 26px; overflow: auto; }
+  .pe-body h2 { margin: 0 0 6px; font-size: 20px; }
+  .pe-body .pe-sub { color: var(--p3-muted); margin: 0 0 16px; }
+  .pe-card { background: var(--p3-panel); border: 1px solid var(--p3-line); border-radius: 6px; padding: 12px 14px; margin-bottom: 10px; }
+  .pe-grid { display: grid; grid-template-columns: 180px 1fr; gap: 6px 14px; font-size: 13px; }
+  .pe-grid dt { color: var(--p3-muted); } .pe-grid dd { margin: 0; }
+  table.pe-tab { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.pe-tab th, table.pe-tab td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--p3-line-soft); }
+  table.pe-tab th { color: var(--p3-muted); font-weight: 600; }
+  body.p3 .ok { color: var(--p3-ok); } body.p3 .warn { color: var(--p3-warn); } body.p3 .bad { color: var(--p3-bad); } body.p3 .dim { color: var(--p3-dim); }
+  .pe-btn { height: 32px; padding: 0 14px; background: #2b2b2b; color: var(--p3-text); border: 1px solid var(--p3-line); border-radius: 4px; cursor: pointer; }
+  body.p3 .pe-btn.primario { background: var(--p3-accent); border-color: var(--p3-accent); color: #fff; }
+  .pe-btn:disabled { opacity: .5; cursor: default; }
+  .pe-foot { display: flex; gap: 8px; align-items: center; padding: 10px 18px; border-top: 1px solid var(--p3-line); }
+  .pe-foot .pe-msg { flex: 1; color: var(--p3-muted); font-size: 12px; }
+  .pe-foot .pe-msg.erro { color: var(--p3-bad); }
+  .pe-perfis label { margin-right: 14px; }
+  .pe-progresso { font-family: Consolas, monospace; font-size: 12px; color: var(--p3-muted); white-space: pre-wrap; max-height: 160px; overflow: auto; }
+  .pe-mod { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; border-bottom: 1px solid var(--p3-line-soft); }
+  .pe-mod small { display: block; color: var(--p3-muted); }
+  .pe-acoes { display: flex; gap: 8px; margin: 10px 0; }
+</style>
+</head>
+<body class="p3" data-tipografia="3mix">
+<header class="pe-top">
+  <img src="/img/3mix-logo.png" alt="3Mix">
+  <h1>Configurar este computador</h1>
+  <span class="pe-ver" id="pe-ver"></span>
+</header>
+<main class="pe-main">
+  <ol class="pe-steps" id="pe-steps"></ol>
+  <section class="pe-body" id="pe-body" aria-live="polite"></section>
+</main>
+<footer class="pe-foot">
+  <span class="pe-msg" id="pe-msg" role="status"></span>
+  <button type="button" class="pe-btn" id="pe-voltar">Voltar</button>
+  <button type="button" class="pe-btn" id="pe-adiar">Deixar para depois</button>
+  <button type="button" class="pe-btn primario" id="pe-avancar">Continuar</button>
+</footer>
+<script src="primeira-execucao.js"></script>
+</body>
+</html>

@@ -33,6 +33,9 @@
       <h1>Pre-Flight</h1>
       <p class="pf-sub">Última análise: <b id="last-run" class="t3-num">—</b></p>
     </div>
+    <label class="pf-alvo">Para
+      <select id="pf-alvo"><option value="ambos">transmitir e gravar</option><option value="transmitir">só transmitir</option><option value="gravar">só gravar</option></select>
+    </label>
     <button type="button" class="pf-btn pf-btn-run" id="btn-run"
       aria-label="Rodar a análise Pre-Flight novamente">↻ Rodar novamente</button>
   </section>
@@ -47,6 +50,11 @@
     </div>
   </section>
 
+  <p class="pf-message" id="pf-message" role="status"></p>
+  <section class="pf-bypass" id="pf-bypass" hidden>
+    <input id="pf-bypass-motivo" maxlength="300" placeholder="Motivo para entrar no ar mesmo assim">
+    <button type="button" class="pf-btn" id="pf-bypass-go">Registrar e liberar</button>
+  </section>
   <section class="pf-panel">
     <h2>Verificações</h2>
     <div id="checks-list" class="pf-checks">

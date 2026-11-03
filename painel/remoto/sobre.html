@@ -65,18 +65,23 @@
         <span id="up-status" class="p3-note" role="status"></span>
       </div>
       <pre id="up-details" class="p3-log"></pre>
+      <ul id="up-notas" class="novidades" hidden></ul>
+      <progress id="up-progresso" max="100" value="0" hidden style="width:100%;margin:8px 0"></progress>
       <div class="p3-row">
-        <button type="button" id="up-check" class="primary">Procurar atualização</button>
-        <button type="button" id="up-download" disabled>Baixar pacote</button>
+        <button type="button" id="up-check">Procurar atualização</button>
+        <button type="button" id="up-download" class="primary" disabled>Atualizar agora</button>
       </div>
+      <label class="p3-field" style="margin-top:12px">Canal
+        <select id="up-canal"><option value="beta">Beta (versões de teste)</option><option value="stable">Estável</option></select>
+      </label>
       <details>
-        <summary>Endereço das atualizações</summary>
+        <summary>Servidor próprio de atualizações</summary>
         <label class="p3-field" style="margin-bottom:12px">Endereço HTTPS
-          <input id="up-feed" type="url" placeholder="https://servidor/feed.json" autocomplete="off" spellcheck="false">
+          <input id="up-feed" type="url" placeholder="Vazio usa o canal oficial" autocomplete="off" spellcheck="false">
         </label>
         <div class="p3-row">
           <button type="button" id="up-configure">Salvar</button>
-          <button type="button" id="up-disable" class="quiet">Remover</button>
+          <button type="button" id="up-disable" class="quiet">Desligar atualizações</button>
         </div>
       </details>
     </section>

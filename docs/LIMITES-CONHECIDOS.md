@@ -6,6 +6,14 @@ Se um recurso não está nesta lista, isso não é garantia de que ele foi aprov
 
 ---
 
+## Atualização de 02–03/11/2026 — pacote alpha mais recente e segunda frente de trabalho
+
+Esta revisão substitui, para fins de empacotamento, a seção anterior sobre rastreabilidade de pacote (abaixo), cujo arquivo auditado não existe mais em disco.
+
+- **Pacote alpha mais recente verificado por hash:** `3Mix-Alpha-20261102174725` (ZIP), com **10000/10000 arquivos conferidos por tamanho e SHA-256 contra o manifesto**, SHA-256 do ZIP íntegro confirmado estável durante a leitura. Evidência: `qa-beta/recibos/hashes-alpha-20261102174725.json`. Isso é verificação de integridade de bytes — **não é verificação de assinatura/autenticidade** (a chave usada é do próprio pacote, não uma âncora de confiança independente), nem homologação de instalação em Windows limpo.
+- Existe também `entregas/FreeMix-Completo-0.1.0-alpha/` (pasta extraída) e um ZIP ainda mais recente, `FreeMix-Completo-0.1.0-local.20261103011403`, gerados durante a noite de 02→03/11 por uma frente de trabalho paralela a esta (ver `qa-beta/STATUS-BETA.md`).
+- **Windows limpo permanece bloqueio externo**, não falta de trabalho: nenhuma VM limpa disponível nesta ou na outra frente até o momento desta nota.
+
 ## Revisão de evidências — P0 em execução
 
 Esta revisão prevalece sobre afirmações históricas conflitantes abaixo. Não equivale a nova homologação operacional.
@@ -103,6 +111,23 @@ Tabela de `LEVANTAMENTO-BETA-20261030.md`, seção 4:
 | Operação de longa duração | Falta medir 4 câmeras Full HD por 8 horas contínuas (memória, temperatura, queda de quadros) | Estabilidade de sessões longas não comprovada |
 | MIDI/OSC/controladores físicos | Backend e testes delimitados existem; falta ensaio com controlador físico real | Não prometer suporte a hardware específico |
 | Documentação operacional | Documentos como `ENTREGA-ATUAL.md` tiveram contradições já identificadas entre si sobre qual versão está de fato em produção | Testador pode não saber com certeza qual versão está rodando — confira sempre `3mix-runtime/version.json` na própria instalação |
+
+---
+
+## Atraso e DUMP (novo na Alpha 0.1.1)
+
+O que o recurso **não** faz, para não prometer além disso. *Fontes: `ferramentas/broadcast-delay.mjs`, `docs/CHANGELOG.md` (Alpha 0.1.1) e a bancada de 03/11/2026 em `qa-manuais/` (motor isolado transmitindo para receptor RTMP local: atraso 7 s, DUMP confirmado pelo motor com 540 pacotes descartados, estados "Atraso 7 s", "Confirmar DUMP", "Trecho descartado", "Refazendo 2/7 s" e "No ar sem atraso" vistos na barra).*
+
+- **Só a transmissão principal.** Gravação e saídas extras (MultiStream, SRT, NDI, DeckLink) não passam pelo atraso: o trecho descartado no ar continua nelas.
+- **Imagem parada no destino.** Depois do DUMP, o motor só volta a enviar no próximo keyframe e com o atraso refeito; o público vê a imagem parada por cerca do tempo do atraso.
+- **Mudar o atraso exige reiniciar a transmissão.** Ligar, desligar ou trocar os segundos vale no próximo início; uma transmissão que começou sem atraso aparece como "No ar sem atraso" e não aceita DUMP.
+- **Keyframe.** Com o atraso ligado, a transmissão usa keyframe a cada 2 s quando estava em automático.
+- **Destino real.** O ensaio foi com receptor RTMP local; ainda não há ensaio registrado com plataforma externa (YouTube, Facebook) nem medição do que o espectador vê durante a pausa.
+- **Pacotes.** Os pacotes `3Mix-Alpha-20261103011403.zip` e `3Mix-Setup-20261103011403.exe` não trazem o botão DUMP na barra da mesa (o `painel/topbar.html` deles é anterior). O recurso também ainda não está na instalação do operador.
+
+## Observado na bancada de 03/11/2026 (não é do DUMP)
+
+- Abrir o **Hub** ou **Configurações** trocou o Preview para a mesma entrada do Programa (CAM 2 → CAM 1), reproduzido várias vezes na bancada `qa-manuais/` com o painel da fonte de 03/11. Mesa, Mesa de corte e barra superior não alteraram o Preview. Até ser corrigido: confira o Preview depois de abrir essas telas.
 
 ---
 

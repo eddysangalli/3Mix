@@ -1,0 +1,4365 @@
+{
+  "formato": "indice-api-3mix",
+  "versao": 1,
+  "observacao": "Gerado por scripts/documentacao/gerar-indice-api.mjs a partir do código. Não edite à mão.",
+  "rotas": [
+    {
+      "path": "/api",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/access",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/audio-routing",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/aux-routing",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/blackbox",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/calls/audio",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/color/frame",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/composition-frame",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/control",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/delay",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/diagnostics",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/diagnostics/download",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/diagnostics/preview",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/diagnostics/reveal",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/ducking",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/effects",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/effects-frame",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/final-program-gate",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/gc-compatible",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/health",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/inputs-health",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/iso",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/json",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/mix-audio",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/mix-effects",
+      "prefixo": false,
+      "arquivo": "ferramentas/mix-effects-http.mjs"
+    },
+    {
+      "path": "/api/mix-effects/check",
+      "prefixo": false,
+      "arquivo": "ferramentas/mix-effects-http.mjs"
+    },
+    {
+      "path": "/api/modulos",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/multiview",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/multiview-montagens",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/network",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/network-enable",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/operation-check",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/outputs",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/outputs-watchdog",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/overlays",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/pair",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/panel-close",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/panel-log",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/panel-open",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/panel-title",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/patch",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/playout",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/preflight",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/project/",
+      "prefixo": true,
+      "arquivo": "ferramentas/projetos/runtime-admission.mjs"
+    },
+    {
+      "path": "/api/project/apply",
+      "prefixo": false,
+      "arquivo": "ferramentas/projetos/project-api-adapter.mjs"
+    },
+    {
+      "path": "/api/project/preview",
+      "prefixo": false,
+      "arquivo": "ferramentas/projetos/project-api-adapter.mjs"
+    },
+    {
+      "path": "/api/project/read",
+      "prefixo": false,
+      "arquivo": "ferramentas/projetos/project-api-adapter.mjs"
+    },
+    {
+      "path": "/api/project/scan",
+      "prefixo": false,
+      "arquivo": "ferramentas/projetos/project-api-adapter.mjs"
+    },
+    {
+      "path": "/api/ptz",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/ptz/preview",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/qr.svg",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/replay",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/replay-preview/",
+      "prefixo": true,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/return-feeds",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/rundown",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/settings",
+      "prefixo": false,
+      "arquivo": "ferramentas/settings-read-http.mjs"
+    },
+    {
+      "path": "/api/signals",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/srt-hdr",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/thumbs",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/ticker-ack",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/update",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/video-settings",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/workspace",
+      "prefixo": false,
+      "arquivo": "ferramentas/workspace-config.mjs"
+    },
+    {
+      "path": "/ws",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    }
+  ],
+  "paginas": [
+    "/",
+    "/atalhos",
+    "/atualizacao",
+    "/audio",
+    "/aux",
+    "/blackbox",
+    "/calls",
+    "/central-saidas",
+    "/color",
+    "/compor",
+    "/configuracoes",
+    "/corte",
+    "/dados",
+    "/diagnosticos",
+    "/efeitos",
+    "/externo",
+    "/gc",
+    "/gc-html",
+    "/gravar",
+    "/hub",
+    "/iso",
+    "/macros",
+    "/me",
+    "/modular",
+    "/modulos",
+    "/multicorder",
+    "/multiview",
+    "/novo-projeto/",
+    "/overlays",
+    "/patch",
+    "/playout",
+    "/playout-monitor",
+    "/preflight",
+    "/primeira-execucao",
+    "/primeira-transmissao",
+    "/ptz",
+    "/recuperacao",
+    "/rede",
+    "/replay",
+    "/retornos",
+    "/rundown",
+    "/saidas",
+    "/settings",
+    "/sinais",
+    "/srt-hdr",
+    "/transmitir"
+  ],
+  "controle": {
+    "total": 335,
+    "acoes": [
+      {
+        "action": "active",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_balance",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_bus",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_enable",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_monitor",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_mute",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_routing_afv",
+        "modulo": "AudioRoutingEngine",
+        "arquivo": "ferramentas/audio-routing-producao.mjs",
+        "prefixo": "audio_routing_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_routing_asio_create",
+        "modulo": "AudioRoutingEngine",
+        "arquivo": "ferramentas/audio-routing-producao.mjs",
+        "prefixo": "audio_routing_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_routing_asio_output_configure",
+        "modulo": "AudioRoutingEngine",
+        "arquivo": "ferramentas/audio-routing-producao.mjs",
+        "prefixo": "audio_routing_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_routing_asio_output_control-panel",
+        "modulo": "AudioRoutingEngine",
+        "arquivo": "ferramentas/audio-routing-producao.mjs",
+        "prefixo": "audio_routing_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_routing_asio_output_start",
+        "modulo": "AudioRoutingEngine",
+        "arquivo": "ferramentas/audio-routing-producao.mjs",
+        "prefixo": "audio_routing_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_routing_asio_output_state",
+        "modulo": "AudioRoutingEngine",
+        "arquivo": "ferramentas/audio-routing-producao.mjs",
+        "prefixo": "audio_routing_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_routing_asio_output_stop",
+        "modulo": "AudioRoutingEngine",
+        "arquivo": "ferramentas/audio-routing-producao.mjs",
+        "prefixo": "audio_routing_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_routing_bus_create",
+        "modulo": "AudioRoutingEngine",
+        "arquivo": "ferramentas/audio-routing-producao.mjs",
+        "prefixo": "audio_routing_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_routing_bus_members",
+        "modulo": "AudioRoutingEngine",
+        "arquivo": "ferramentas/audio-routing-producao.mjs",
+        "prefixo": "audio_routing_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_routing_bus_remove",
+        "modulo": "AudioRoutingEngine",
+        "arquivo": "ferramentas/audio-routing-producao.mjs",
+        "prefixo": "audio_routing_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_routing_bus_route",
+        "modulo": "AudioRoutingEngine",
+        "arquivo": "ferramentas/audio-routing-producao.mjs",
+        "prefixo": "audio_routing_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_routing_bus_volume",
+        "modulo": "AudioRoutingEngine",
+        "arquivo": "ferramentas/audio-routing-producao.mjs",
+        "prefixo": "audio_routing_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_routing_chain",
+        "modulo": "AudioRoutingEngine",
+        "arquivo": "ferramentas/audio-routing-producao.mjs",
+        "prefixo": "audio_routing_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_routing_delay",
+        "modulo": "AudioRoutingEngine",
+        "arquivo": "ferramentas/audio-routing-producao.mjs",
+        "prefixo": "audio_routing_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_routing_devices",
+        "modulo": "AudioRoutingEngine",
+        "arquivo": "ferramentas/audio-routing-producao.mjs",
+        "prefixo": "audio_routing_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_routing_direct",
+        "modulo": "AudioRoutingEngine",
+        "arquivo": "ferramentas/audio-routing-producao.mjs",
+        "prefixo": "audio_routing_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_routing_filter",
+        "modulo": "AudioRoutingEngine",
+        "arquivo": "ferramentas/audio-routing-producao.mjs",
+        "prefixo": "audio_routing_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_routing_get",
+        "modulo": "AudioRoutingEngine",
+        "arquivo": "ferramentas/audio-routing-producao.mjs",
+        "prefixo": "audio_routing_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_routing_manual",
+        "modulo": "AudioRoutingEngine",
+        "arquivo": "ferramentas/audio-routing-producao.mjs",
+        "prefixo": "audio_routing_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_routing_open_filters",
+        "modulo": "AudioRoutingEngine",
+        "arquivo": "ferramentas/audio-routing-producao.mjs",
+        "prefixo": "audio_routing_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_routing_plugin",
+        "modulo": "AudioRoutingEngine",
+        "arquivo": "ferramentas/audio-routing-producao.mjs",
+        "prefixo": "audio_routing_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_routing_vst3",
+        "modulo": "AudioRoutingEngine",
+        "arquivo": "ferramentas/audio-routing-producao.mjs",
+        "prefixo": "audio_routing_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "audio_volume",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "blackbox_clear",
+        "modulo": "IncidentBlackboxEngine",
+        "arquivo": "ferramentas/blackbox-producao.mjs",
+        "prefixo": "blackbox_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "blackbox_mark",
+        "modulo": "IncidentBlackboxEngine",
+        "arquivo": "ferramentas/blackbox-producao.mjs",
+        "prefixo": "blackbox_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "blackbox_summary",
+        "modulo": "IncidentBlackboxEngine",
+        "arquivo": "ferramentas/blackbox-producao.mjs",
+        "prefixo": "blackbox_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "blackbox_trigger",
+        "modulo": "IncidentBlackboxEngine",
+        "arquivo": "ferramentas/blackbox-producao.mjs",
+        "prefixo": "blackbox_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "call_conference",
+        "modulo": "CallEngine",
+        "arquivo": "ferramentas/calls-producao.mjs",
+        "prefixo": "call_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "call_create",
+        "modulo": "CallEngine",
+        "arquivo": "ferramentas/calls-producao.mjs",
+        "prefixo": "call_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "call_director",
+        "modulo": "CallEngine",
+        "arquivo": "ferramentas/calls-producao.mjs",
+        "prefixo": "call_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "call_director_create",
+        "modulo": "CallEngine",
+        "arquivo": "ferramentas/calls-producao.mjs",
+        "prefixo": "call_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "call_ice_import",
+        "modulo": "CallEngine",
+        "arquivo": "ferramentas/calls-producao.mjs",
+        "prefixo": "call_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "call_ice_reset",
+        "modulo": "CallEngine",
+        "arquivo": "ferramentas/calls-producao.mjs",
+        "prefixo": "call_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "call_link",
+        "modulo": "CallEngine",
+        "arquivo": "ferramentas/calls-producao.mjs",
+        "prefixo": "call_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "call_rapid_targets",
+        "modulo": "CallEngine",
+        "arquivo": "ferramentas/calls-producao.mjs",
+        "prefixo": "call_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "call_reconnect",
+        "modulo": "CallEngine",
+        "arquivo": "ferramentas/calls-producao.mjs",
+        "prefixo": "call_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "call_reset_password",
+        "modulo": "CallEngine",
+        "arquivo": "ferramentas/calls-producao.mjs",
+        "prefixo": "call_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "call_return_route",
+        "modulo": "CallEngine",
+        "arquivo": "ferramentas/calls-producao.mjs",
+        "prefixo": "call_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "call_returns_prepare",
+        "modulo": "CallEngine",
+        "arquivo": "ferramentas/calls-producao.mjs",
+        "prefixo": "call_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "call_returns_stop",
+        "modulo": "CallEngine",
+        "arquivo": "ferramentas/calls-producao.mjs",
+        "prefixo": "call_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "call_talk_ping",
+        "modulo": "CallEngine",
+        "arquivo": "ferramentas/calls-producao.mjs",
+        "prefixo": "call_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "call_talk_start",
+        "modulo": "CallEngine",
+        "arquivo": "ferramentas/calls-producao.mjs",
+        "prefixo": "call_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "call_talk_stop",
+        "modulo": "CallEngine",
+        "arquivo": "ferramentas/calls-producao.mjs",
+        "prefixo": "call_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "call_video_experimental",
+        "modulo": "CallEngine",
+        "arquivo": "ferramentas/calls-producao.mjs",
+        "prefixo": "call_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "controller_adapter_fire",
+        "modulo": "ControllerEngine",
+        "arquivo": "ferramentas/controlador-producao.mjs",
+        "prefixo": "controller_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "controller_adapter_read",
+        "modulo": "ControllerEngine",
+        "arquivo": "ferramentas/controlador-producao.mjs",
+        "prefixo": "controller_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "controller_enable",
+        "modulo": "ControllerEngine",
+        "arquivo": "ferramentas/controlador-producao.mjs",
+        "prefixo": "controller_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "controller_event",
+        "modulo": "ControllerEngine",
+        "arquivo": "ferramentas/controlador-producao.mjs",
+        "prefixo": "controller_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "controller_fire",
+        "modulo": "ControllerEngine",
+        "arquivo": "ferramentas/controlador-producao.mjs",
+        "prefixo": "controller_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "controller_hold_ping",
+        "modulo": "ControllerEngine",
+        "arquivo": "ferramentas/controlador-producao.mjs",
+        "prefixo": "controller_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "controller_osc_configure",
+        "modulo": "ControllerEngine",
+        "arquivo": "ferramentas/controlador-producao.mjs",
+        "prefixo": "controller_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "controller_osc_start",
+        "modulo": "ControllerEngine",
+        "arquivo": "ferramentas/controlador-producao.mjs",
+        "prefixo": "controller_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "controller_osc_stop",
+        "modulo": "ControllerEngine",
+        "arquivo": "ferramentas/controlador-producao.mjs",
+        "prefixo": "controller_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "controller_read",
+        "modulo": "ControllerEngine",
+        "arquivo": "ferramentas/controlador-producao.mjs",
+        "prefixo": "controller_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "controller_release",
+        "modulo": "ControllerEngine",
+        "arquivo": "ferramentas/controlador-producao.mjs",
+        "prefixo": "controller_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "controller_remove",
+        "modulo": "ControllerEngine",
+        "arquivo": "ferramentas/controlador-producao.mjs",
+        "prefixo": "controller_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "controller_save",
+        "modulo": "ControllerEngine",
+        "arquivo": "ferramentas/controlador-producao.mjs",
+        "prefixo": "controller_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "cut",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "data_append",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "data_bind",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "data_edit",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "data_file",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "data_http",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "data_import",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "data_publish",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "data_refresh",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "data_remove",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "data_remove_row",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "data_scope",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "data_select",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "delay_disable",
+        "modulo": "BroadcastDelayEngine",
+        "arquivo": "ferramentas/broadcast-delay.mjs",
+        "prefixo": "delay_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "delay_dump",
+        "modulo": "BroadcastDelayEngine",
+        "arquivo": "ferramentas/broadcast-delay.mjs",
+        "prefixo": "delay_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "delay_enable",
+        "modulo": "BroadcastDelayEngine",
+        "arquivo": "ferramentas/broadcast-delay.mjs",
+        "prefixo": "delay_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "delay_set",
+        "modulo": "BroadcastDelayEngine",
+        "arquivo": "ferramentas/broadcast-delay.mjs",
+        "prefixo": "delay_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "delay_summary",
+        "modulo": "BroadcastDelayEngine",
+        "arquivo": "ferramentas/broadcast-delay.mjs",
+        "prefixo": "delay_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ducking_configure",
+        "modulo": "AudioDuckingEngine",
+        "arquivo": "ferramentas/audio-ducking-engine.mjs",
+        "prefixo": "ducking_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ducking_disable",
+        "modulo": "AudioDuckingEngine",
+        "arquivo": "ferramentas/audio-ducking-engine.mjs",
+        "prefixo": "ducking_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ducking_enable",
+        "modulo": "AudioDuckingEngine",
+        "arquivo": "ferramentas/audio-ducking-engine.mjs",
+        "prefixo": "ducking_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ducking_summary",
+        "modulo": "AudioDuckingEngine",
+        "arquivo": "ferramentas/audio-ducking-engine.mjs",
+        "prefixo": "ducking_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "dump",
+        "modulo": "BroadcastDelayEngine",
+        "arquivo": "ferramentas/broadcast-delay.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "effects_caption_create",
+        "modulo": "EffectsEngine",
+        "arquivo": "ferramentas/efeitos-producao.mjs",
+        "prefixo": "effects_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "effects_captions",
+        "modulo": "EffectsEngine",
+        "arquivo": "ferramentas/efeitos-producao.mjs",
+        "prefixo": "effects_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "effects_filter",
+        "modulo": "EffectsEngine",
+        "arquivo": "ferramentas/efeitos-producao.mjs",
+        "prefixo": "effects_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "effects_ptz",
+        "modulo": "EffectsEngine",
+        "arquivo": "ferramentas/efeitos-producao.mjs",
+        "prefixo": "effects_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "effects_source",
+        "modulo": "EffectsEngine",
+        "arquivo": "ferramentas/efeitos-producao.mjs",
+        "prefixo": "effects_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "fade",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ftb",
+        "modulo": "Production (tempo real)",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "gc",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "gc_html_clock_restart",
+        "modulo": "GCCompatibleEngine",
+        "arquivo": "ferramentas/gc-html-producao.mjs",
+        "prefixo": "gc_html_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "gc_html_link",
+        "modulo": "GCCompatibleEngine",
+        "arquivo": "ferramentas/gc-html-producao.mjs",
+        "prefixo": "gc_html_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "gc_html_play",
+        "modulo": "GCCompatibleEngine",
+        "arquivo": "ferramentas/gc-html-producao.mjs",
+        "prefixo": "gc_html_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "gc_html_stop",
+        "modulo": "GCCompatibleEngine",
+        "arquivo": "ferramentas/gc-html-producao.mjs",
+        "prefixo": "gc_html_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "gc_html_unlink",
+        "modulo": "GCCompatibleEngine",
+        "arquivo": "ferramentas/gc-html-producao.mjs",
+        "prefixo": "gc_html_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "gc_html_update",
+        "modulo": "GCCompatibleEngine",
+        "arquivo": "ferramentas/gc-html-producao.mjs",
+        "prefixo": "gc_html_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "gc_library_air",
+        "modulo": "GCLibraryEngine",
+        "arquivo": "ferramentas/gc-biblioteca-producao.mjs",
+        "prefixo": "gc_library_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "gc_library_asset",
+        "modulo": "GCLibraryEngine",
+        "arquivo": "ferramentas/gc-biblioteca-producao.mjs",
+        "prefixo": "gc_library_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "gc_library_clock_restart",
+        "modulo": "GCLibraryEngine",
+        "arquivo": "ferramentas/gc-biblioteca-producao.mjs",
+        "prefixo": "gc_library_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "gc_library_duplicate",
+        "modulo": "GCLibraryEngine",
+        "arquivo": "ferramentas/gc-biblioteca-producao.mjs",
+        "prefixo": "gc_library_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "gc_library_export",
+        "modulo": "GCLibraryEngine",
+        "arquivo": "ferramentas/gc-biblioteca-producao.mjs",
+        "prefixo": "gc_library_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "gc_library_import",
+        "modulo": "GCLibraryEngine",
+        "arquivo": "ferramentas/gc-biblioteca-producao.mjs",
+        "prefixo": "gc_library_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "gc_library_prepare",
+        "modulo": "GCLibraryEngine",
+        "arquivo": "ferramentas/gc-biblioteca-producao.mjs",
+        "prefixo": "gc_library_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "gc_library_read",
+        "modulo": "GCLibraryEngine",
+        "arquivo": "ferramentas/gc-biblioteca-producao.mjs",
+        "prefixo": "gc_library_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "gc_library_remove",
+        "modulo": "GCLibraryEngine",
+        "arquivo": "ferramentas/gc-biblioteca-producao.mjs",
+        "prefixo": "gc_library_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "gc_library_save",
+        "modulo": "GCLibraryEngine",
+        "arquivo": "ferramentas/gc-biblioteca-producao.mjs",
+        "prefixo": "gc_library_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "gc_library_unlink",
+        "modulo": "GCLibraryEngine",
+        "arquivo": "ferramentas/gc-biblioteca-producao.mjs",
+        "prefixo": "gc_library_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "gc_library_variant",
+        "modulo": "GCLibraryEngine",
+        "arquivo": "ferramentas/gc-biblioteca-producao.mjs",
+        "prefixo": "gc_library_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "input_align",
+        "modulo": "InputEngine",
+        "arquivo": "ferramentas/entradas-producao.mjs",
+        "prefixo": "input_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "input_anchor",
+        "modulo": "InputEngine",
+        "arquivo": "ferramentas/entradas-producao.mjs",
+        "prefixo": "input_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "input_background",
+        "modulo": "InputEngine",
+        "arquivo": "ferramentas/entradas-producao.mjs",
+        "prefixo": "input_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "input_content_undo",
+        "modulo": "InputEngine",
+        "arquivo": "ferramentas/entradas-producao.mjs",
+        "prefixo": "input_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "input_create",
+        "modulo": "InputEngine",
+        "arquivo": "ferramentas/entradas-producao.mjs",
+        "prefixo": "input_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "input_duplicate",
+        "modulo": "InputEngine",
+        "arquivo": "ferramentas/entradas-producao.mjs",
+        "prefixo": "input_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "input_geometry",
+        "modulo": "InputEngine",
+        "arquivo": "ferramentas/entradas-producao.mjs",
+        "prefixo": "input_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "input_layer",
+        "modulo": "InputEngine",
+        "arquivo": "ferramentas/entradas-producao.mjs",
+        "prefixo": "input_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "input_link",
+        "modulo": "InputEngine",
+        "arquivo": "ferramentas/entradas-producao.mjs",
+        "prefixo": "input_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "input_remove",
+        "modulo": "InputEngine",
+        "arquivo": "ferramentas/entradas-producao.mjs",
+        "prefixo": "input_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "input_reorder",
+        "modulo": "InputEngine",
+        "arquivo": "ferramentas/entradas-producao.mjs",
+        "prefixo": "input_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "input_slot",
+        "modulo": "InputEngine",
+        "arquivo": "ferramentas/entradas-producao.mjs",
+        "prefixo": "input_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "input_speaker",
+        "modulo": "InputEngine",
+        "arquivo": "ferramentas/entradas-producao.mjs",
+        "prefixo": "input_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "input_style",
+        "modulo": "InputEngine",
+        "arquivo": "ferramentas/entradas-producao.mjs",
+        "prefixo": "input_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "input_tags",
+        "modulo": "InputEngine",
+        "arquivo": "ferramentas/entradas-producao.mjs",
+        "prefixo": "input_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "input_template",
+        "modulo": "InputEngine",
+        "arquivo": "ferramentas/entradas-producao.mjs",
+        "prefixo": "input_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "input_undo",
+        "modulo": "InputEngine",
+        "arquivo": "ferramentas/entradas-producao.mjs",
+        "prefixo": "input_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "input_variant",
+        "modulo": "InputEngine",
+        "arquivo": "ferramentas/entradas-producao.mjs",
+        "prefixo": "input_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "input_video_delay",
+        "modulo": "InputEngine",
+        "arquivo": "ferramentas/entradas-producao.mjs",
+        "prefixo": "input_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "macro_cancel",
+        "modulo": "MacroEngine",
+        "arquivo": "ferramentas/macros-producao.mjs",
+        "prefixo": "macro_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "macro_record_start",
+        "modulo": "MacroEngine",
+        "arquivo": "ferramentas/macros-producao.mjs",
+        "prefixo": "macro_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "macro_record_stop",
+        "modulo": "MacroEngine",
+        "arquivo": "ferramentas/macros-producao.mjs",
+        "prefixo": "macro_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "macro_remove",
+        "modulo": "MacroEngine",
+        "arquivo": "ferramentas/macros-producao.mjs",
+        "prefixo": "macro_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "macro_run",
+        "modulo": "MacroEngine",
+        "arquivo": "ferramentas/macros-producao.mjs",
+        "prefixo": "macro_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "macro_save",
+        "modulo": "MacroEngine",
+        "arquivo": "ferramentas/macros-producao.mjs",
+        "prefixo": "macro_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "macro_trigger_enable",
+        "modulo": "MacroEngine",
+        "arquivo": "ferramentas/macros-producao.mjs",
+        "prefixo": "macro_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "macro_trigger_remove",
+        "modulo": "MacroEngine",
+        "arquivo": "ferramentas/macros-producao.mjs",
+        "prefixo": "macro_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "macro_trigger_save",
+        "modulo": "MacroEngine",
+        "arquivo": "ferramentas/macros-producao.mjs",
+        "prefixo": "macro_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "media",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "media_seek",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "media_settings",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "mix_audio_read",
+        "modulo": "MixAudioEngine",
+        "arquivo": "ferramentas/mix-audio-producao.mjs",
+        "prefixo": "mix_audio_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "mix_audio_set",
+        "modulo": "MixAudioEngine",
+        "arquivo": "ferramentas/mix-audio-producao.mjs",
+        "prefixo": "mix_audio_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "network_configure",
+        "modulo": "NetworkEngine",
+        "arquivo": "ferramentas/bonding-producao.mjs",
+        "prefixo": "network_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "network_export_receiver",
+        "modulo": "NetworkEngine",
+        "arquivo": "ferramentas/bonding-producao.mjs",
+        "prefixo": "network_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "network_get",
+        "modulo": "NetworkEngine",
+        "arquivo": "ferramentas/bonding-producao.mjs",
+        "prefixo": "network_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "network_measure",
+        "modulo": "NetworkEngine",
+        "arquivo": "ferramentas/bonding-producao.mjs",
+        "prefixo": "network_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "network_start",
+        "modulo": "NetworkEngine",
+        "arquivo": "ferramentas/bonding-producao.mjs",
+        "prefixo": "network_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "network_stop",
+        "modulo": "NetworkEngine",
+        "arquivo": "ferramentas/bonding-producao.mjs",
+        "prefixo": "network_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "outputs_configure",
+        "modulo": "OutputEngine",
+        "arquivo": "ferramentas/saidas-producao.mjs",
+        "prefixo": "outputs_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "outputs_external_read",
+        "modulo": "OutputEngine",
+        "arquivo": "ferramentas/saidas-producao.mjs",
+        "prefixo": "outputs_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "outputs_get",
+        "modulo": "OutputEngine",
+        "arquivo": "ferramentas/saidas-producao.mjs",
+        "prefixo": "outputs_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "outputs_mix",
+        "modulo": "OutputEngine",
+        "arquivo": "ferramentas/saidas-producao.mjs",
+        "prefixo": "outputs_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "outputs_network",
+        "modulo": "OutputEngine",
+        "arquivo": "ferramentas/saidas-producao.mjs",
+        "prefixo": "outputs_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "outputs_omt_hdr",
+        "modulo": "OutputEngine",
+        "arquivo": "ferramentas/saidas-producao.mjs",
+        "prefixo": "outputs_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "outputs_profile_load",
+        "modulo": "OutputEngine",
+        "arquivo": "ferramentas/saidas-producao.mjs",
+        "prefixo": "outputs_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "outputs_profile_save",
+        "modulo": "OutputEngine",
+        "arquivo": "ferramentas/saidas-producao.mjs",
+        "prefixo": "outputs_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "outputs_record",
+        "modulo": "OutputEngine",
+        "arquivo": "ferramentas/saidas-producao.mjs",
+        "prefixo": "outputs_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "outputs_sdi",
+        "modulo": "OutputEngine",
+        "arquivo": "ferramentas/saidas-producao.mjs",
+        "prefixo": "outputs_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "outputs_source",
+        "modulo": "OutputEngine",
+        "arquivo": "ferramentas/saidas-producao.mjs",
+        "prefixo": "outputs_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "outputs_srt_hdr",
+        "modulo": "OutputEngine",
+        "arquivo": "ferramentas/saidas-producao.mjs",
+        "prefixo": "outputs_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "outputs_start",
+        "modulo": "OutputEngine",
+        "arquivo": "ferramentas/saidas-producao.mjs",
+        "prefixo": "outputs_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "outputs_stop",
+        "modulo": "OutputEngine",
+        "arquivo": "ferramentas/saidas-producao.mjs",
+        "prefixo": "outputs_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "overlay",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "overlay_configure",
+        "modulo": "OverlayEngine",
+        "arquivo": "ferramentas/overlays-producao.mjs",
+        "prefixo": "overlay_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "overlay_dve_apply",
+        "modulo": "OverlayEngine",
+        "arquivo": "ferramentas/overlays-producao.mjs",
+        "prefixo": "overlay_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "overlay_dve_restore",
+        "modulo": "OverlayEngine",
+        "arquivo": "ferramentas/overlays-producao.mjs",
+        "prefixo": "overlay_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "overlay_get",
+        "modulo": "OverlayEngine",
+        "arquivo": "ferramentas/overlays-producao.mjs",
+        "prefixo": "overlay_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "overlay_kill_all",
+        "modulo": "OverlayEngine",
+        "arquivo": "ferramentas/overlays-producao.mjs",
+        "prefixo": "overlay_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "overlay_off",
+        "modulo": "OverlayEngine",
+        "arquivo": "ferramentas/overlays-producao.mjs",
+        "prefixo": "overlay_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "overlay_take",
+        "modulo": "OverlayEngine",
+        "arquivo": "ferramentas/overlays-producao.mjs",
+        "prefixo": "overlay_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "overlay_toggle",
+        "modulo": "OverlayEngine",
+        "arquivo": "ferramentas/overlays-producao.mjs",
+        "prefixo": "overlay_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "patch_read",
+        "modulo": "PatchRegistryEngine",
+        "arquivo": "ferramentas/patch-registry-producao.mjs",
+        "prefixo": "patch_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "patch_set",
+        "modulo": "PatchRegistryEngine",
+        "arquivo": "ferramentas/patch-registry-producao.mjs",
+        "prefixo": "patch_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_chain_link",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_chain_unlink",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_delete_playlist",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_freezeoff",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_freezeon",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_hold",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_item_update",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_load_playlist",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_loadclip",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_loopoff",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_loopon",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_next",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_pause",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_play",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_playplaylist",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_preload",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_prev",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_preview_clip",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_previewclip",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_previous",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_restart",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_save_playlist",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_seek",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_setin",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_setout",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_setposition",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_stop",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_take",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_takenext",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "preflight_bypass",
+        "modulo": "PreflightEngine",
+        "arquivo": "ferramentas/preflight-producao.mjs",
+        "prefixo": "preflight_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "preflight_check",
+        "modulo": "PreflightEngine",
+        "arquivo": "ferramentas/preflight-producao.mjs",
+        "prefixo": "preflight_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "preflight_history",
+        "modulo": "PreflightEngine",
+        "arquivo": "ferramentas/preflight-producao.mjs",
+        "prefixo": "preflight_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "preflight_process_close",
+        "modulo": "PreflightEngine",
+        "arquivo": "ferramentas/preflight-producao.mjs",
+        "prefixo": "preflight_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "preflight_process_ignore",
+        "modulo": "PreflightEngine",
+        "arquivo": "ferramentas/preflight-producao.mjs",
+        "prefixo": "preflight_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "preflight_process_unignore",
+        "modulo": "PreflightEngine",
+        "arquivo": "ferramentas/preflight-producao.mjs",
+        "prefixo": "preflight_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "preflight_run",
+        "modulo": "PreflightEngine",
+        "arquivo": "ferramentas/preflight-producao.mjs",
+        "prefixo": "preflight_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "preflight_summary",
+        "modulo": "PreflightEngine",
+        "arquivo": "ferramentas/preflight-producao.mjs",
+        "prefixo": "preflight_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "preview",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ptz_acquire",
+        "modulo": "PTZManager",
+        "arquivo": "ferramentas/ptz-manager.mjs",
+        "prefixo": "ptz_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ptz_device_info",
+        "modulo": "PTZManager",
+        "arquivo": "ferramentas/ptz-manager.mjs",
+        "prefixo": "ptz_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ptz_device_remove",
+        "modulo": "PTZManager",
+        "arquivo": "ferramentas/ptz-manager.mjs",
+        "prefixo": "ptz_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ptz_device_save",
+        "modulo": "PTZManager",
+        "arquivo": "ferramentas/ptz-manager.mjs",
+        "prefixo": "ptz_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ptz_focus",
+        "modulo": "PTZManager",
+        "arquivo": "ferramentas/ptz-manager.mjs",
+        "prefixo": "ptz_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ptz_focus_mode",
+        "modulo": "PTZManager",
+        "arquivo": "ferramentas/ptz-manager.mjs",
+        "prefixo": "ptz_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ptz_home",
+        "modulo": "PTZManager",
+        "arquivo": "ferramentas/ptz-manager.mjs",
+        "prefixo": "ptz_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ptz_imaging_get",
+        "modulo": "PTZManager",
+        "arquivo": "ferramentas/ptz-manager.mjs",
+        "prefixo": "ptz_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ptz_imaging_set",
+        "modulo": "PTZManager",
+        "arquivo": "ferramentas/ptz-manager.mjs",
+        "prefixo": "ptz_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ptz_link",
+        "modulo": "PTZManager",
+        "arquivo": "ferramentas/ptz-manager.mjs",
+        "prefixo": "ptz_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ptz_move",
+        "modulo": "PTZManager",
+        "arquivo": "ferramentas/ptz-manager.mjs",
+        "prefixo": "ptz_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ptz_ping",
+        "modulo": "PTZManager",
+        "arquivo": "ferramentas/ptz-manager.mjs",
+        "prefixo": "ptz_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ptz_preset_recall",
+        "modulo": "PTZManager",
+        "arquivo": "ferramentas/ptz-manager.mjs",
+        "prefixo": "ptz_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ptz_preset_save",
+        "modulo": "PTZManager",
+        "arquivo": "ferramentas/ptz-manager.mjs",
+        "prefixo": "ptz_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ptz_release",
+        "modulo": "PTZManager",
+        "arquivo": "ferramentas/ptz-manager.mjs",
+        "prefixo": "ptz_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ptz_stop",
+        "modulo": "PTZManager",
+        "arquivo": "ferramentas/ptz-manager.mjs",
+        "prefixo": "ptz_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ptz_test",
+        "modulo": "PTZManager",
+        "arquivo": "ferramentas/ptz-manager.mjs",
+        "prefixo": "ptz_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ptz_tracking_claim",
+        "modulo": "PTZManager",
+        "arquivo": "ferramentas/ptz-manager.mjs",
+        "prefixo": "ptz_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ptz_tracking_release",
+        "modulo": "PTZManager",
+        "arquivo": "ferramentas/ptz-manager.mjs",
+        "prefixo": "ptz_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ptz_unlink",
+        "modulo": "PTZManager",
+        "arquivo": "ferramentas/ptz-manager.mjs",
+        "prefixo": "ptz_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "ptz_zoom",
+        "modulo": "PTZManager",
+        "arquivo": "ferramentas/ptz-manager.mjs",
+        "prefixo": "ptz_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_delete",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_freezeoff",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_freezeon",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_hold",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_loadclip",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_loopoff",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_loopon",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_next",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_pause",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_play",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_playplaylist",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_preload",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_prev",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_preview_clip",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_previewclip",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_previous",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_restart",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_save",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_seek",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_setin",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_setout",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_setposition",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_start",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_stop",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_take",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "queue_takenext",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "record",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "recovery_backup",
+        "modulo": "RecoveryEngine",
+        "arquivo": "ferramentas/recuperacao-producao.mjs",
+        "prefixo": "recovery_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "recovery_checkpoint",
+        "modulo": "RecoveryEngine",
+        "arquivo": "ferramentas/recuperacao-producao.mjs",
+        "prefixo": "recovery_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "recovery_diagnose",
+        "modulo": "RecoveryEngine",
+        "arquivo": "ferramentas/recuperacao-producao.mjs",
+        "prefixo": "recovery_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "recovery_import",
+        "modulo": "RecoveryEngine",
+        "arquivo": "ferramentas/recuperacao-producao.mjs",
+        "prefixo": "recovery_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "recovery_import_preview",
+        "modulo": "RecoveryEngine",
+        "arquivo": "ferramentas/recuperacao-producao.mjs",
+        "prefixo": "recovery_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "recovery_journal_plan",
+        "modulo": "RecoveryEngine",
+        "arquivo": "ferramentas/recuperacao-producao.mjs",
+        "prefixo": "recovery_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "recovery_list",
+        "modulo": "RecoveryEngine",
+        "arquivo": "ferramentas/recuperacao-producao.mjs",
+        "prefixo": "recovery_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "recovery_restore",
+        "modulo": "RecoveryEngine",
+        "arquivo": "ferramentas/recuperacao-producao.mjs",
+        "prefixo": "recovery_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "recovery_session_config",
+        "modulo": "RecoveryEngine",
+        "arquivo": "ferramentas/recuperacao-producao.mjs",
+        "prefixo": "recovery_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "recovery_session_dismiss",
+        "modulo": "RecoveryEngine",
+        "arquivo": "ferramentas/recuperacao-producao.mjs",
+        "prefixo": "recovery_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "recovery_session_status",
+        "modulo": "RecoveryEngine",
+        "arquivo": "ferramentas/recuperacao-producao.mjs",
+        "prefixo": "recovery_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "return_feed_configure",
+        "modulo": "ReturnFeedManager",
+        "arquivo": "ferramentas/return-feed-producao.mjs",
+        "prefixo": "return_feed_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "return_feed_start",
+        "modulo": "ReturnFeedManager",
+        "arquivo": "ferramentas/return-feed-producao.mjs",
+        "prefixo": "return_feed_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "return_feed_stop",
+        "modulo": "ReturnFeedManager",
+        "arquivo": "ferramentas/return-feed-producao.mjs",
+        "prefixo": "return_feed_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "return_feed_summary",
+        "modulo": "ReturnFeedManager",
+        "arquivo": "ferramentas/return-feed-producao.mjs",
+        "prefixo": "return_feed_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_add_block",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_add_step",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_arm",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_auto_advance",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_capture",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_capture_apply",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_capture_current",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_capture_discard",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_clear_history",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_end",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_execute",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_get",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_go",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_jump",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_next",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_prepare",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_reload",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_remove_block",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_remove_step",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_reopen",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_save",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_select",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_set_steps",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_skip",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_summary",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_suspend",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_update_block",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "rundown_update_step",
+        "modulo": "RundownEngine",
+        "arquivo": "ferramentas/rundown-producao.mjs",
+        "prefixo": "rundown_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "score",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "settings_apply",
+        "modulo": "SettingsEngine",
+        "arquivo": "ferramentas/configuracoes-producao.mjs",
+        "prefixo": "settings_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "settings_defaults",
+        "modulo": "SettingsEngine",
+        "arquivo": "ferramentas/configuracoes-producao.mjs",
+        "prefixo": "settings_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "settings_encoder_apply",
+        "modulo": "SettingsEngine",
+        "arquivo": "ferramentas/configuracoes-producao.mjs",
+        "prefixo": "settings_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "settings_encoder_preview",
+        "modulo": "SettingsEngine",
+        "arquivo": "ferramentas/configuracoes-producao.mjs",
+        "prefixo": "settings_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "settings_encoder_read",
+        "modulo": "SettingsEngine",
+        "arquivo": "ferramentas/configuracoes-producao.mjs",
+        "prefixo": "settings_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "settings_export",
+        "modulo": "SettingsEngine",
+        "arquivo": "ferramentas/configuracoes-producao.mjs",
+        "prefixo": "settings_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "settings_get",
+        "modulo": "SettingsEngine",
+        "arquivo": "ferramentas/configuracoes-producao.mjs",
+        "prefixo": "settings_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "settings_import",
+        "modulo": "SettingsEngine",
+        "arquivo": "ferramentas/configuracoes-producao.mjs",
+        "prefixo": "settings_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "settings_native",
+        "modulo": "SettingsEngine",
+        "arquivo": "ferramentas/configuracoes-producao.mjs",
+        "prefixo": "settings_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "settings_pick_image",
+        "modulo": "SettingsEngine",
+        "arquivo": "ferramentas/configuracoes-producao.mjs",
+        "prefixo": "settings_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "settings_pick_image_status",
+        "modulo": "SettingsEngine",
+        "arquivo": "ferramentas/configuracoes-producao.mjs",
+        "prefixo": "settings_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "settings_plugin_open",
+        "modulo": "SettingsEngine",
+        "arquivo": "ferramentas/configuracoes-producao.mjs",
+        "prefixo": "settings_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "settings_plugin_tools",
+        "modulo": "SettingsEngine",
+        "arquivo": "ferramentas/configuracoes-producao.mjs",
+        "prefixo": "settings_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "settings_projector",
+        "modulo": "SettingsEngine",
+        "arquivo": "ferramentas/configuracoes-producao.mjs",
+        "prefixo": "settings_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "settings_source_projector",
+        "modulo": "SettingsEngine",
+        "arquivo": "ferramentas/configuracoes-producao.mjs",
+        "prefixo": "settings_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "settings_stream_key",
+        "modulo": "SettingsEngine",
+        "arquivo": "ferramentas/configuracoes-producao.mjs",
+        "prefixo": "settings_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "settings_virtual",
+        "modulo": "SettingsEngine",
+        "arquivo": "ferramentas/configuracoes-producao.mjs",
+        "prefixo": "settings_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "settings_virtual_source",
+        "modulo": "SettingsEngine",
+        "arquivo": "ferramentas/configuracoes-producao.mjs",
+        "prefixo": "settings_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "signal_configure",
+        "modulo": "SignalEngine",
+        "arquivo": "ferramentas/sinais-producao.mjs",
+        "prefixo": "signal_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": true,
+        "viaWebSocket": true
+      },
+      {
+        "action": "signal_probe",
+        "modulo": "SignalEngine",
+        "arquivo": "ferramentas/sinais-producao.mjs",
+        "prefixo": "signal_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "signal_read",
+        "modulo": "SignalEngine",
+        "arquivo": "ferramentas/sinais-producao.mjs",
+        "prefixo": "signal_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "stream",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "tbar",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "transition",
+        "modulo": "Production",
+        "arquivo": "ferramentas/controle-producao.mjs",
+        "prefixo": null,
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "update_check",
+        "modulo": "OnlineUpdateEngine",
+        "arquivo": "ferramentas/atualizacao-online.mjs",
+        "prefixo": "update_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": false
+      },
+      {
+        "action": "update_configure",
+        "modulo": "OnlineUpdateEngine",
+        "arquivo": "ferramentas/atualizacao-online.mjs",
+        "prefixo": "update_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": false
+      },
+      {
+        "action": "update_download",
+        "modulo": "OnlineUpdateEngine",
+        "arquivo": "ferramentas/atualizacao-online.mjs",
+        "prefixo": "update_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": false
+      },
+      {
+        "action": "update_install",
+        "modulo": "OnlineUpdateEngine",
+        "arquivo": "ferramentas/atualizacao-online.mjs",
+        "prefixo": "update_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": false
+      },
+      {
+        "action": "update_read",
+        "modulo": "OnlineUpdateEngine",
+        "arquivo": "ferramentas/atualizacao-online.mjs",
+        "prefixo": "update_",
+        "somenteLocalHttp": true,
+        "somenteLocalWs": false,
+        "viaWebSocket": false
+      }
+    ],
+    "porArquivo": {
+      "ferramentas/controle-producao.mjs": [
+        "active",
+        "audio_balance",
+        "audio_bus",
+        "audio_enable",
+        "audio_monitor",
+        "audio_mute",
+        "audio_volume",
+        "cut",
+        "data_append",
+        "data_bind",
+        "data_edit",
+        "data_file",
+        "data_http",
+        "data_import",
+        "data_publish",
+        "data_refresh",
+        "data_remove",
+        "data_remove_row",
+        "data_scope",
+        "data_select",
+        "fade",
+        "ftb",
+        "gc",
+        "media",
+        "media_seek",
+        "media_settings",
+        "overlay",
+        "preview",
+        "record",
+        "score",
+        "stream",
+        "tbar",
+        "transition"
+      ],
+      "ferramentas/audio-routing-producao.mjs": [
+        "audio_routing_afv",
+        "audio_routing_asio_create",
+        "audio_routing_asio_output_configure",
+        "audio_routing_asio_output_control-panel",
+        "audio_routing_asio_output_start",
+        "audio_routing_asio_output_state",
+        "audio_routing_asio_output_stop",
+        "audio_routing_bus_create",
+        "audio_routing_bus_members",
+        "audio_routing_bus_remove",
+        "audio_routing_bus_route",
+        "audio_routing_bus_volume",
+        "audio_routing_chain",
+        "audio_routing_delay",
+        "audio_routing_devices",
+        "audio_routing_direct",
+        "audio_routing_filter",
+        "audio_routing_get",
+        "audio_routing_manual",
+        "audio_routing_open_filters",
+        "audio_routing_plugin",
+        "audio_routing_vst3"
+      ],
+      "ferramentas/blackbox-producao.mjs": [
+        "blackbox_clear",
+        "blackbox_mark",
+        "blackbox_summary",
+        "blackbox_trigger"
+      ],
+      "ferramentas/calls-producao.mjs": [
+        "call_conference",
+        "call_create",
+        "call_director",
+        "call_director_create",
+        "call_ice_import",
+        "call_ice_reset",
+        "call_link",
+        "call_rapid_targets",
+        "call_reconnect",
+        "call_reset_password",
+        "call_return_route",
+        "call_returns_prepare",
+        "call_returns_stop",
+        "call_talk_ping",
+        "call_talk_start",
+        "call_talk_stop",
+        "call_video_experimental"
+      ],
+      "ferramentas/controlador-producao.mjs": [
+        "controller_adapter_fire",
+        "controller_adapter_read",
+        "controller_enable",
+        "controller_event",
+        "controller_fire",
+        "controller_hold_ping",
+        "controller_osc_configure",
+        "controller_osc_start",
+        "controller_osc_stop",
+        "controller_read",
+        "controller_release",
+        "controller_remove",
+        "controller_save"
+      ],
+      "ferramentas/broadcast-delay.mjs": [
+        "delay_disable",
+        "delay_dump",
+        "delay_enable",
+        "delay_set",
+        "delay_summary",
+        "dump"
+      ],
+      "ferramentas/audio-ducking-engine.mjs": [
+        "ducking_configure",
+        "ducking_disable",
+        "ducking_enable",
+        "ducking_summary"
+      ],
+      "ferramentas/efeitos-producao.mjs": [
+        "effects_caption_create",
+        "effects_captions",
+        "effects_filter",
+        "effects_ptz",
+        "effects_source"
+      ],
+      "ferramentas/gc-html-producao.mjs": [
+        "gc_html_clock_restart",
+        "gc_html_link",
+        "gc_html_play",
+        "gc_html_stop",
+        "gc_html_unlink",
+        "gc_html_update"
+      ],
+      "ferramentas/gc-biblioteca-producao.mjs": [
+        "gc_library_air",
+        "gc_library_asset",
+        "gc_library_clock_restart",
+        "gc_library_duplicate",
+        "gc_library_export",
+        "gc_library_import",
+        "gc_library_prepare",
+        "gc_library_read",
+        "gc_library_remove",
+        "gc_library_save",
+        "gc_library_unlink",
+        "gc_library_variant"
+      ],
+      "ferramentas/entradas-producao.mjs": [
+        "input_align",
+        "input_anchor",
+        "input_background",
+        "input_content_undo",
+        "input_create",
+        "input_duplicate",
+        "input_geometry",
+        "input_layer",
+        "input_link",
+        "input_remove",
+        "input_reorder",
+        "input_slot",
+        "input_speaker",
+        "input_style",
+        "input_tags",
+        "input_template",
+        "input_undo",
+        "input_variant",
+        "input_video_delay"
+      ],
+      "ferramentas/macros-producao.mjs": [
+        "macro_cancel",
+        "macro_record_start",
+        "macro_record_stop",
+        "macro_remove",
+        "macro_run",
+        "macro_save",
+        "macro_trigger_enable",
+        "macro_trigger_remove",
+        "macro_trigger_save"
+      ],
+      "ferramentas/mix-audio-producao.mjs": [
+        "mix_audio_read",
+        "mix_audio_set"
+      ],
+      "ferramentas/bonding-producao.mjs": [
+        "network_configure",
+        "network_export_receiver",
+        "network_get",
+        "network_measure",
+        "network_start",
+        "network_stop"
+      ],
+      "ferramentas/saidas-producao.mjs": [
+        "outputs_configure",
+        "outputs_external_read",
+        "outputs_get",
+        "outputs_mix",
+        "outputs_network",
+        "outputs_omt_hdr",
+        "outputs_profile_load",
+        "outputs_profile_save",
+        "outputs_record",
+        "outputs_sdi",
+        "outputs_source",
+        "outputs_srt_hdr",
+        "outputs_start",
+        "outputs_stop"
+      ],
+      "ferramentas/overlays-producao.mjs": [
+        "overlay_configure",
+        "overlay_dve_apply",
+        "overlay_dve_restore",
+        "overlay_get",
+        "overlay_kill_all",
+        "overlay_off",
+        "overlay_take",
+        "overlay_toggle"
+      ],
+      "ferramentas/patch-registry-producao.mjs": [
+        "patch_read",
+        "patch_set"
+      ],
+      "ferramentas/media-playout-engine.mjs": [
+        "playout_chain_link",
+        "playout_chain_unlink",
+        "playout_delete_playlist",
+        "playout_freezeoff",
+        "playout_freezeon",
+        "playout_hold",
+        "playout_item_update",
+        "playout_load_playlist",
+        "playout_loadclip",
+        "playout_loopoff",
+        "playout_loopon",
+        "playout_next",
+        "playout_pause",
+        "playout_play",
+        "playout_playplaylist",
+        "playout_preload",
+        "playout_prev",
+        "playout_preview_clip",
+        "playout_previewclip",
+        "playout_previous",
+        "playout_restart",
+        "playout_save_playlist",
+        "playout_seek",
+        "playout_setin",
+        "playout_setout",
+        "playout_setposition",
+        "playout_stop",
+        "playout_take",
+        "playout_takenext",
+        "queue_delete",
+        "queue_freezeoff",
+        "queue_freezeon",
+        "queue_hold",
+        "queue_loadclip",
+        "queue_loopoff",
+        "queue_loopon",
+        "queue_next",
+        "queue_pause",
+        "queue_play",
+        "queue_playplaylist",
+        "queue_preload",
+        "queue_prev",
+        "queue_preview_clip",
+        "queue_previewclip",
+        "queue_previous",
+        "queue_restart",
+        "queue_save",
+        "queue_seek",
+        "queue_setin",
+        "queue_setout",
+        "queue_setposition",
+        "queue_start",
+        "queue_stop",
+        "queue_take",
+        "queue_takenext"
+      ],
+      "ferramentas/preflight-producao.mjs": [
+        "preflight_bypass",
+        "preflight_check",
+        "preflight_history",
+        "preflight_process_close",
+        "preflight_process_ignore",
+        "preflight_process_unignore",
+        "preflight_run",
+        "preflight_summary"
+      ],
+      "ferramentas/ptz-manager.mjs": [
+        "ptz_acquire",
+        "ptz_device_info",
+        "ptz_device_remove",
+        "ptz_device_save",
+        "ptz_focus",
+        "ptz_focus_mode",
+        "ptz_home",
+        "ptz_imaging_get",
+        "ptz_imaging_set",
+        "ptz_link",
+        "ptz_move",
+        "ptz_ping",
+        "ptz_preset_recall",
+        "ptz_preset_save",
+        "ptz_release",
+        "ptz_stop",
+        "ptz_test",
+        "ptz_tracking_claim",
+        "ptz_tracking_release",
+        "ptz_unlink",
+        "ptz_zoom"
+      ],
+      "ferramentas/recuperacao-producao.mjs": [
+        "recovery_backup",
+        "recovery_checkpoint",
+        "recovery_diagnose",
+        "recovery_import",
+        "recovery_import_preview",
+        "recovery_journal_plan",
+        "recovery_list",
+        "recovery_restore",
+        "recovery_session_config",
+        "recovery_session_dismiss",
+        "recovery_session_status"
+      ],
+      "ferramentas/return-feed-producao.mjs": [
+        "return_feed_configure",
+        "return_feed_start",
+        "return_feed_stop",
+        "return_feed_summary"
+      ],
+      "ferramentas/rundown-producao.mjs": [
+        "rundown_add_block",
+        "rundown_add_step",
+        "rundown_arm",
+        "rundown_auto_advance",
+        "rundown_capture",
+        "rundown_capture_apply",
+        "rundown_capture_current",
+        "rundown_capture_discard",
+        "rundown_clear_history",
+        "rundown_end",
+        "rundown_execute",
+        "rundown_get",
+        "rundown_go",
+        "rundown_jump",
+        "rundown_next",
+        "rundown_prepare",
+        "rundown_reload",
+        "rundown_remove_block",
+        "rundown_remove_step",
+        "rundown_reopen",
+        "rundown_save",
+        "rundown_select",
+        "rundown_set_steps",
+        "rundown_skip",
+        "rundown_summary",
+        "rundown_suspend",
+        "rundown_update_block",
+        "rundown_update_step"
+      ],
+      "ferramentas/configuracoes-producao.mjs": [
+        "settings_apply",
+        "settings_defaults",
+        "settings_encoder_apply",
+        "settings_encoder_preview",
+        "settings_encoder_read",
+        "settings_export",
+        "settings_get",
+        "settings_import",
+        "settings_native",
+        "settings_pick_image",
+        "settings_pick_image_status",
+        "settings_plugin_open",
+        "settings_plugin_tools",
+        "settings_projector",
+        "settings_source_projector",
+        "settings_stream_key",
+        "settings_virtual",
+        "settings_virtual_source"
+      ],
+      "ferramentas/sinais-producao.mjs": [
+        "signal_configure",
+        "signal_probe",
+        "signal_read"
+      ],
+      "ferramentas/atualizacao-online.mjs": [
+        "update_check",
+        "update_configure",
+        "update_download",
+        "update_install",
+        "update_read"
+      ]
+    }
+  },
+  "acoesPorRota": {
+    "/api/aux-routing": [
+      "configure",
+      "cut",
+      "reset",
+      "route"
+    ],
+    "/api/blackbox": [
+      "blackbox_clear",
+      "blackbox_mark",
+      "blackbox_summary",
+      "blackbox_trigger"
+    ],
+    "/api/delay": [
+      "delay_disable",
+      "delay_dump",
+      "delay_enable",
+      "delay_set",
+      "delay_summary",
+      "dump"
+    ],
+    "/api/ducking": [
+      "ducking_configure",
+      "ducking_disable",
+      "ducking_enable",
+      "ducking_summary"
+    ],
+    "/api/inputs-health": [
+      "audio",
+      "frame",
+      "register",
+      "tally",
+      "unregister"
+    ],
+    "/api/iso": [
+      "configure",
+      "start",
+      "status",
+      "stop"
+    ],
+    "/api/multiview": [
+      "assign_slot",
+      "clear_slot",
+      "safe_zones",
+      "set_layout"
+    ],
+    "/api/outputs-watchdog": [
+      "drop",
+      "register",
+      "reset",
+      "start",
+      "stop",
+      "telemetry"
+    ],
+    "/api/overlays": [
+      "overlay_configure",
+      "overlay_dve_apply",
+      "overlay_dve_restore",
+      "overlay_get",
+      "overlay_kill_all",
+      "overlay_off",
+      "overlay_take",
+      "overlay_toggle"
+    ],
+    "/api/playout": [
+      "playout_chain_link",
+      "playout_chain_unlink",
+      "playout_delete_playlist",
+      "playout_freezeoff",
+      "playout_freezeon",
+      "playout_hold",
+      "playout_item_update",
+      "playout_load_playlist",
+      "playout_loadclip",
+      "playout_loopoff",
+      "playout_loopon",
+      "playout_next",
+      "playout_pause",
+      "playout_play",
+      "playout_playplaylist",
+      "playout_preload",
+      "playout_prev",
+      "playout_preview_clip",
+      "playout_previewclip",
+      "playout_previous",
+      "playout_restart",
+      "playout_save_playlist",
+      "playout_seek",
+      "playout_setin",
+      "playout_setout",
+      "playout_setposition",
+      "playout_stop",
+      "playout_take",
+      "playout_takenext",
+      "queue_delete",
+      "queue_freezeoff",
+      "queue_freezeon",
+      "queue_hold",
+      "queue_loadclip",
+      "queue_loopoff",
+      "queue_loopon",
+      "queue_next",
+      "queue_pause",
+      "queue_play",
+      "queue_playplaylist",
+      "queue_preload",
+      "queue_prev",
+      "queue_preview_clip",
+      "queue_previewclip",
+      "queue_previous",
+      "queue_restart",
+      "queue_save",
+      "queue_seek",
+      "queue_setin",
+      "queue_setout",
+      "queue_setposition",
+      "queue_start",
+      "queue_stop",
+      "queue_take",
+      "queue_takenext"
+    ],
+    "/api/preflight": [
+      "preflight_bypass",
+      "preflight_check",
+      "preflight_history",
+      "preflight_process_close",
+      "preflight_process_ignore",
+      "preflight_process_unignore",
+      "preflight_run",
+      "preflight_summary"
+    ],
+    "/api/replay": [
+      "air",
+      "audio",
+      "auto-align",
+      "camera-options",
+      "capture",
+      "capture-range",
+      "configure",
+      "delete",
+      "frame",
+      "history",
+      "history-frame",
+      "history-pin",
+      "history-preview",
+      "history-quad",
+      "import",
+      "link",
+      "live",
+      "load",
+      "mark-in",
+      "mark-out",
+      "program-changed",
+      "recover",
+      "recover-in",
+      "relink",
+      "relocate",
+      "reorder",
+      "repair",
+      "retention",
+      "seek",
+      "speed",
+      "start",
+      "status",
+      "stop",
+      "transport",
+      "trim-event",
+      "unload",
+      "update-event"
+    ],
+    "/api/return-feeds": [
+      "return_feed_configure",
+      "return_feed_start",
+      "return_feed_stop",
+      "return_feed_summary"
+    ],
+    "/api/rundown": [
+      "rundown_add_block",
+      "rundown_add_step",
+      "rundown_arm",
+      "rundown_auto_advance",
+      "rundown_capture",
+      "rundown_capture_apply",
+      "rundown_capture_current",
+      "rundown_capture_discard",
+      "rundown_clear_history",
+      "rundown_end",
+      "rundown_execute",
+      "rundown_get",
+      "rundown_go",
+      "rundown_jump",
+      "rundown_next",
+      "rundown_prepare",
+      "rundown_reload",
+      "rundown_remove_block",
+      "rundown_remove_step",
+      "rundown_reopen",
+      "rundown_save",
+      "rundown_select",
+      "rundown_set_steps",
+      "rundown_skip",
+      "rundown_summary",
+      "rundown_suspend",
+      "rundown_update_block",
+      "rundown_update_step"
+    ]
+  },
+  "vmix": {
+    "funcoes": [
+      "activeinput",
+      "adjustgain",
+      "audio",
+      "audiooff",
+      "audioon",
+      "blackboxmark",
+      "cut",
+      "cutdirect",
+      "fade",
+      "fadetoblack",
+      "gcupdate",
+      "masteraudio",
+      "nextitem",
+      "overlayinput1",
+      "overlayinput1in",
+      "overlayinput1out",
+      "overlayinput2",
+      "overlayinput2in",
+      "overlayinput2out",
+      "overlayinput3",
+      "overlayinput3in",
+      "overlayinput3out",
+      "overlayinput4",
+      "overlayinput4in",
+      "overlayinput4out",
+      "overlayinput5",
+      "overlayinput5in",
+      "overlayinput5out",
+      "overlayinput6",
+      "overlayinput6in",
+      "overlayinput6out",
+      "overlayinput7",
+      "overlayinput7in",
+      "overlayinput7out",
+      "overlayinput8",
+      "overlayinput8in",
+      "overlayinput8out",
+      "pause",
+      "play",
+      "playoutclipgain",
+      "playoutnext",
+      "playoutprev",
+      "playoutprevious",
+      "playouttake",
+      "preflightcheck",
+      "previewinput",
+      "previousitem",
+      "replaylive",
+      "replaymarkin",
+      "replaymarkout",
+      "replayplay",
+      "replaysetspeed",
+      "restart",
+      "scoregoal",
+      "setmastervolume",
+      "setposition",
+      "setspeed",
+      "setvolume",
+      "startrecording",
+      "startstreaming",
+      "stoprecording",
+      "stopstreaming",
+      "takenext"
+    ],
+    "tcpComandos": [
+      "FUNCTION",
+      "QUIT",
+      "SUBSCRIBE",
+      "TALLY",
+      "UNSUBSCRIBE",
+      "XML"
+    ],
+    "tcpAssinaturas": [
+      "ACTS",
+      "TALLY"
+    ]
+  },
+  "websocket": {
+    "servidorEnvia": [
+      "ack",
+      "aux_cut",
+      "aux_source_change",
+      "init",
+      "iso_state",
+      "meters",
+      "output_routed",
+      "replay_state",
+      "state"
+    ],
+    "acaoEspecial": [
+      "replay"
+    ]
+  },
+  "vendor": {
+    "requests": [
+      {
+        "vendor": "downstream-keyer",
+        "request": "add_downstream_keyer",
+        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+      },
+      {
+        "vendor": "downstream-keyer",
+        "request": "dsk_add_exclude_scene",
+        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+      },
+      {
+        "vendor": "downstream-keyer",
+        "request": "dsk_add_scene",
+        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+      },
+      {
+        "vendor": "downstream-keyer",
+        "request": "dsk_get_scene",
+        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+      },
+      {
+        "vendor": "downstream-keyer",
+        "request": "dsk_remove_exclude_scene",
+        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+      },
+      {
+        "vendor": "downstream-keyer",
+        "request": "dsk_remove_scene",
+        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+      },
+      {
+        "vendor": "downstream-keyer",
+        "request": "dsk_select_scene",
+        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+      },
+      {
+        "vendor": "downstream-keyer",
+        "request": "dsk_set_hide_after",
+        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+      },
+      {
+        "vendor": "downstream-keyer",
+        "request": "dsk_set_tie",
+        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+      },
+      {
+        "vendor": "downstream-keyer",
+        "request": "dsk_set_transition",
+        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+      },
+      {
+        "vendor": "downstream-keyer",
+        "request": "get_downstream_keyer",
+        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+      },
+      {
+        "vendor": "downstream-keyer",
+        "request": "get_downstream_keyers",
+        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+      },
+      {
+        "vendor": "downstream-keyer",
+        "request": "remove_downstream_keyer",
+        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+      },
+      {
+        "vendor": "freemix-hotkeys",
+        "request": "control",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixGlobalHotkeys.cpp"
+      },
+      {
+        "vendor": "freemix-preferences",
+        "request": "control",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixPreferences.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "audio_capabilities",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "broadcast_delay",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "call_audio",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "call_video",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "close_panel",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "control_destination",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "control_mix",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "fade_to_black",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "final_program_gate",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "finish_input_panel",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "get_destinations",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "get_interface",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "get_master_level",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "get_mixes",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "get_preset",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "get_scope",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "get_sources_status",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "network_output",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "omt_hdr_output",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "open_panel",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "open_settings",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "open_vst_editor",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "project_creation_policy",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "project_device_inventory",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "reorder_inputs",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "save_preset",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "sdi_output",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "set_destinations",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "set_panel_title",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "set_scope",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "set_transition_duration",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "shutdown_idle",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "srt_hdr_output",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "talkback",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "virtual_cam_source",
+        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "obs-browser",
+        "request": "emit_event",
+        "arquivo": "freemix-app/plugins/obs-browser/obs-browser-plugin.cpp"
+      }
+    ],
+    "subacoesControl": {
+      "freemix-hotkeys": [
+        "clear",
+        "configure",
+        "status"
+      ],
+      "freemix-preferences": [
+        "apply",
+        "encoder_apply",
+        "encoder_preview",
+        "encoder_read",
+        "pick_image_read",
+        "pick_image_start",
+        "plugin_tool_open",
+        "plugin_tools",
+        "read",
+        "reset_outputs",
+        "runtime_outputs"
+      ]
+    }
+  }
+}

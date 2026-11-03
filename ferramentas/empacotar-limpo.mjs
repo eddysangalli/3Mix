@@ -43,6 +43,9 @@ for(const f of runtimeModules){await mkdir(dirname(join(dest,'ferramentas',f)),{
 await cp(join(sourceRoot,'fork'),join(dest,'fork'),{recursive:true,filter});
 await mkdir(join(dest,'scripts'),{recursive:true});await cp(join(sourceRoot,'scripts/reconstruir-motor.mjs'),join(dest,'scripts/reconstruir-motor.mjs'));
 await cp(join(sourceRoot,'docs/BUILD-FROM-SOURCE.md'),join(dest,'docs/BUILD-FROM-SOURCE.md'));
+// Manuais da entrega vêm da fonte: a instalação pode ter versões antigas (ex.: manual do operador sem o DUMP).
+for(const f of ['LEIA-ME-BETA.md','GUIA-RAPIDO.md','LIMITES-CONHECIDOS.md','SOLICITAR-SUPORTE.md','CHANGELOG.md','MANUAIS.md','API.md','EULA.txt','THIRD-PARTY-NOTICES.txt'])if(existsSync(join(sourceRoot,'docs',f)))await cp(join(sourceRoot,'docs',f),join(dest,'docs',f));
+for(const d of ['docs/capturas/manual','docs/capturas/3mix','docs/api','painel/docs/usuario'])if(existsSync(join(sourceRoot,d)))await cp(join(sourceRoot,d),join(dest,d),{recursive:true,filter});
 await cp(join(sourceRoot,'docs/native-source'),join(dest,'docs/native-source'),{recursive:true,filter});
 for(const f of ['package.json','package-lock.json','componentes.json','portable_mode.txt','LEIA-ME.md','VALIDACAO.md','FONTES.md','Iniciar Mesa.cmd','Empacotar.cmd','Verificar Complementos.cmd','Atualizar Complementos.cmd','update-public.pem'])await cp(join(root,f),join(dest,f));
 
@@ -71,7 +74,7 @@ await writeFile(componentFile,JSON.stringify(metadata,null,2));
 let catalog=await readFile(join(dest,'painel/gc/catalogo.js'),'utf8');let models=JSON.parse(catalog.slice(catalog.indexOf('[')).replace(/;\s*$/,''));models=models.filter(x=>x.collection!=='Importados');await writeFile(join(dest,'painel/gc/catalogo.js'),'window.GC_CATALOG = '+JSON.stringify(models,null,2)+';\n');
 const cfg=join(dest,'config/obs-studio');await mkdir(join(cfg,'basic/profiles/Estudio'),{recursive:true});await mkdir(join(cfg,'basic/scenes'),{recursive:true});await mkdir(join(cfg,'plugin_config/obs-websocket'),{recursive:true});
 await mkdir(join(cfg,'themes'),{recursive:true});await cp(join(root,'painel/tema-padrao.ovt'),join(cfg,'themes/Yami_MesaDeCorte.ovt'));
-await cp(join(root,'ferramentas/restaurar-layout.ps1'),join(dest,'ferramentas/restaurar-layout.ps1'));await cp(join(root,'Restaurar Visual FreeMix.cmd'),join(dest,'Restaurar Visual 3Mix.cmd'));
+await cp(join(root,'ferramentas/restaurar-layout.ps1'),join(dest,'ferramentas/restaurar-layout.ps1'));await cp(join(root,'ferramentas/atualizar-e-reabrir.ps1'),join(dest,'ferramentas/atualizar-e-reabrir.ps1'));await cp(join(root,'Restaurar Visual FreeMix.cmd'),join(dest,'Restaurar Visual 3Mix.cmd'));
 const visual=JSON.parse(await readFile(join(root,'painel/layout-padrao.json'),'utf8'));
 const base=root.replaceAll('\\','/');
 await writeFile(join(cfg,'global.ini'),'[General]\nFirstRun=true\nEnableAutoUpdates=false\nLanguage=pt-BR\n\n[Video]\nRenderer=Direct3D 11\n\n[Locations]\nConfiguration=../../config\nSceneCollections=../../config\nProfiles=../../config\nPluginManagerSettings=../../config\n');

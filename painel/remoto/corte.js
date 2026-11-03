@@ -80,12 +80,29 @@
     dump.classList.remove('armado');
     dump.textContent = 'DUMP';
     try {
-      const r = await fetch('/api/control', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'dump', note: 'DUMP acionado pela mesa de corte' }) });
+      const r = await fetch('/api/delay', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'dump', note: 'DUMP acionado pela mesa de corte' }) });
       const d = await r.json().catch(() => ({}));
-      if (!r.ok || d.success === false) throw Error(d.error || 'O DUMP não foi executado');
-      E('message').textContent = 'DUMP executado.';
+      if (!r.ok || d.success === false || !d.result?.dumped) throw Error(d.error || 'O DUMP não foi executado');
+      E('message').textContent = 'DUMP executado: o trecho retido foi descartado.';
     } catch (erro) { E('message').textContent = erro.message; }
+    lerAtraso();
   });
+
+  // O botão só fica disponível quando há atraso de verdade na transmissão no ar.
+  async function lerAtraso() {
+    try {
+      const s = await (await fetch('/api/delay', { cache: 'no-store', signal: AbortSignal.timeout(2500) })).json();
+      dump.disabled = !s.canDump;
+      dump.classList.toggle('pronto', !!s.canDump);
+      dump.title = s.canDump
+        ? 'Descarta o trecho que ainda não foi ao ar. Clique duas vezes para confirmar.' + (s.uncoveredOutputs?.length ? ' Sem proteção: ' + s.uncoveredOutputs.join(', ') + '.' : '')
+        : s.state === 'streaming_without_delay' ? 'Esta transmissão começou sem atraso.'
+          : s.state === 'ready' ? 'Disponível quando a transmissão começar.'
+            : 'Atraso desligado. Configure em Configurações › Transmissão › Atraso e DUMP.';
+    } catch { dump.disabled = true; dump.title = 'Sem resposta do motor.'; }
+  }
+  lerAtraso();
+  setInterval(lerAtraso, 1000);
 
   setInterval(atualizarMonitores, 250);
   setInterval(quadroGrande, INTERVALO_MS);

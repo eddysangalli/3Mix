@@ -1,0 +1,67 @@
+# Publica no GitHub Pages somente os manifestos do canal de atualização (canal-atualizacoes/).
+# Nenhum código-fonte vai para o site, e a chave privada nunca entra no GitHub: tudo já chega assinado.
+# Mudança no canal estável passa pelo ambiente "canal-estavel", que deve exigir aprovação em Settings > Environments.
+name: Publicar canal de atualizações
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - canal-atualizacoes/**
+      - scripts/distribuicao/validar-canal.mjs
+      - .github/workflows/publicar-canal-atualizacoes.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: canal-atualizacoes
+  cancel-in-progress: false
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    outputs:
+      estavel_mudou: ${{ steps.estavel.outputs.mudou }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Validar assinaturas e conteúdo
+        run: node scripts/distribuicao/validar-canal.mjs canal-atualizacoes update-public.pem
+      - name: O canal estável mudou?
+        id: estavel
+        run: |
+          novo=$(node -p "require('./canal-atualizacoes/stable/feed.json').version")
+          site=$(curl -fsS "https://eddysangalli.github.io/3Mix/stable/feed.json" | node -p "JSON.parse(require('fs').readFileSync(0)).version" || echo "")
+          if [ "$novo" != "$site" ] && [ "$novo" != "0.0.0" ]; then echo "mudou=true" >> "$GITHUB_OUTPUT"; else echo "mudou=false" >> "$GITHUB_OUTPUT"; fi
+          echo "estável no repositório: $novo | no site: $site"
+
+  aprovar-estavel:
+    needs: validar
+    if: needs.validar.outputs.estavel_mudou == 'true'
+    runs-on: ubuntu-latest
+    environment: canal-estavel
+    steps:
+      - run: echo "Promoção ao canal estável aprovada."
+
+  publicar:
+    needs: [validar, aprovar-estavel]
+    if: ${{ !cancelled() && needs.validar.result == 'success' && (needs.aprovar-estavel.result == 'success' || needs.aprovar-estavel.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: canal-atualizacoes
+      - id: deploy
+        uses: actions/deploy-pages@v4

@@ -279,6 +279,18 @@
   });
 })();
 </script>
+<script>
+// Enquanto este computador não passou pelo assistente, o Hub oferece a configuração. Só no computador do 3Mix.
+(() => {
+  fetch('/api/diagnostico', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((d) => {
+    if (!d?.success || d.estado?.concluidoEm) return;
+    const barra = document.createElement('div');
+    barra.style.cssText = 'display:flex;gap:12px;align-items:center;padding:8px 18px;background:#1d2a44;border-bottom:1px solid #2f6fed;color:#ededed;font-size:13px';
+    barra.innerHTML = '<span style="flex:1">Este computador ainda não foi configurado para o 3Mix.</span><a href="/primeira-execucao" style="color:#fff;background:#2f6fed;padding:5px 12px;border-radius:4px;text-decoration:none">Configurar</a>';
+    document.body.prepend(barra);
+  }).catch(() => {});
+})();
+</script>
 <script src="controle.js?v=20261102a"></script>
 </body>
 </html>

@@ -1,161 +1,160 @@
-// 3Mix · Pre-Flight — janela de checklist de segurança.
-// Dados: /api/preflight (motor real preflight-engine, via servidor-api.mjs).
-// "Rodar novamente" refaz a análise sob demanda; sem polling agressivo.
+// 3Mix · Pre-Flight — confere a produção e o computador antes de entrar no ar.
+// Dados: /api/preflight (preflight-producao.mjs). Só roda quando pedido; sem polling.
 (() => {
   const E = (id) => document.getElementById(id);
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-  const ESTADO = {
-    PASS: { icone: '✔', palavra: 'OK', ordem: 2 },
-    WARN: { icone: '⚠', palavra: 'ATENÇÃO', ordem: 1 },
-    FAIL: { icone: '✖', palavra: 'FALHA', ordem: 0 }
+  const NIVEL = {
+    BLOQUEIO: { status: 'FAIL', icone: '✖', ordem: 0 },
+    'ATENÇÃO': { status: 'WARN', icone: '⚠', ordem: 1 },
+    'NÃO VERIFICADO': { status: 'NOT_VERIFIED', icone: '?', ordem: 2 },
+    APROVADO: { status: 'PASS', icone: '✔', ordem: 3 }
   };
   const VEREDITO = {
-    READY: { rotulo: 'PRONTO PARA TRANSMITIR', tone: 'ok' },
-    WARN: { rotulo: 'ATENÇÃO', tone: 'warn' },
-    FAIL: { rotulo: 'CRÍTICO', tone: 'crit' },
-    NOT_RUN: { rotulo: 'AGUARDANDO ANÁLISE', tone: 'idle' }
-  };
-  // Junção check × issue: os códigos são os do motor (preflight-producao.mjs).
-  const CODIGO_CHECK = {
-    PROGRAM_EMPTY: 'Program Input',
-    FTB_ENGAGED: 'Fade to Black',
-    AUDIO_MASTER_MUTED: 'Áudio Master',
-    INPUT_SIGNAL_LOST: 'Entradas de Vídeo / Sinais',
-    DISK_SPACE_CRITICAL: 'Espaço em Disco',
-    DISK_SPACE_LOW: 'Espaço em Disco',
-    PLAYOUT_PRELOAD_ERROR: 'Playout Dual-Player'
+    BLOQUEIO: { rotulo: 'BLOQUEIO', tone: 'crit' },
+    'ATENÇÃO': { rotulo: 'PRONTO COM ATENÇÃO', tone: 'warn' },
+    APROVADO: { rotulo: 'PRONTO PARA ENTRAR NO AR', tone: 'ok' }
   };
 
-  let analise = null;
-  let ocupado = false;
+  let analise = null, ocupado = false, armado = null;
+  const hora = (ts) => new Date(Number(ts) || Date.now()).toLocaleTimeString('pt-BR');
+  const alvo = () => E('pf-alvo')?.value || 'ambos';
 
-  const hora = (ts) => {
-    const d = new Date(Number(ts) || Date.now());
-    return d.toLocaleTimeString('pt-BR');
-  };
-
-  const plural = (n, um, muitos) => `${n} ${n === 1 ? um : muitos}`;
+  async function pedir(acao, dados = {}) {
+    const res = await fetch('/api/preflight', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: acao, ...dados }), signal: AbortSignal.timeout(40000) });
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok || d.success === false) throw new Error(d.error || 'HTTP ' + res.status);
+    return d.result;
+  }
+  const aviso = (texto, erro) => { const m = E('pf-message'); m.textContent = texto || ''; m.dataset.tone = erro ? 'crit' : ''; };
 
   function desenhar(dados) {
     analise = dados;
-    const checks = Array.isArray(dados.checks) ? dados.checks : [];
-    const issues = Array.isArray(dados.issues) ? dados.issues : [];
-    const veredito = VEREDITO[dados.verdict] || VEREDITO.NOT_RUN;
-
-    // Banner de veredito
-    const banner = E('verdict-banner');
-    banner.dataset.tone = veredito.tone;
-    E('verdict-icon').textContent = veredito.tone === 'ok' ? '✔' : veredito.tone === 'warn' ? '⚠' : veredito.tone === 'crit' ? '✖' : '●';
-    E('verdict-label').textContent = veredito.rotulo;
-    E('verdict-counts').textContent = `${plural(checks.length, 'verificação', 'verificações')} · ${plural(issues.length, 'alerta', 'alertas')}`;
-    E('verdict-summary').textContent = dados.summary ? String(dados.summary) : '';
-
-    // Última análise (timestamp real do motor; cai para a hora local se ausente)
+    const itens = Array.isArray(dados.itens) ? dados.itens : [];
+    const v = VEREDITO[dados.veredito] || { rotulo: 'AGUARDANDO ANÁLISE', tone: 'idle' };
+    E('verdict-banner').dataset.tone = v.tone;
+    E('verdict-icon').textContent = { ok: '✔', warn: '⚠', crit: '✖' }[v.tone] || '●';
+    E('verdict-label').textContent = v.rotulo;
+    const c = dados.contagem || {};
+    E('verdict-counts').textContent = [c.bloqueios ? c.bloqueios + ' bloqueio(s)' : '', c.atencoes ? c.atencoes + ' atenção' : '', c.naoVerificados ? c.naoVerificados + ' não verificado(s)' : '', (c.aprovados ?? 0) + ' aprovado(s)'].filter(Boolean).join(' · ');
+    E('verdict-summary').textContent = (dados.modo === 'leve' ? 'No ar: verificação leve, sem testes que mexam no disco. ' : '') + (dados.mudancas?.length ? 'Mudou desde a última: ' + dados.mudancas.map((m) => `${m.nome} (${m.de} → ${m.para})`).join(', ') : '');
     const quando = hora(dados.timestamp);
-    E('last-run').textContent = quando;
-    E('foot-run').textContent = quando;
-    E('foot-verdict').textContent = veredito.rotulo;
+    E('last-run').textContent = quando; E('foot-run').textContent = quando; E('foot-verdict').textContent = v.rotulo;
+    E('pf-bypass').hidden = !c.bloqueios;
 
-    // Lista de checks: críticos primeiro, depois atenção, depois ok.
-    const lista = E('checks-list');
-    const ordenados = checks.slice().sort((a, b) =>
-      (ESTADO[a.status]?.ordem ?? 3) - (ESTADO[b.status]?.ordem ?? 3));
-    if (!ordenados.length) {
-      lista.innerHTML = '<p class="pf-empty">Nenhuma verificação disponível.</p>';
-    } else {
-      // Agrupamento só quando a API trouxer categoria no check (name é livre);
-      // sem categoria da API, lista plana — nada é inventado.
-      const chaveGrupo = (check) => check.category ?? check.categoria ?? check.area ?? check.group ?? null;
-      const agrupado = ordenados.some((c) => chaveGrupo(c) != null);
-      if (agrupado) {
-        const grupos = new Map();
-        for (const check of ordenados) {
-          const chave = String(chaveGrupo(check) ?? 'Verificações');
-          if (!grupos.has(chave)) grupos.set(chave, []);
-          grupos.get(chave).push(check);
-        }
-        lista.innerHTML = [...grupos.entries()].map(([nome, itens]) =>
-          `<p class="pf-group-label">${esc(nome)}</p>` + itens.map(cartao).join('')).join('');
-      } else {
-        lista.innerHTML = ordenados.map(cartao).join('');
-      }
+    const grupos = new Map();
+    for (const it of itens.slice().sort((a, b) => (NIVEL[a.nivel]?.ordem ?? 9) - (NIVEL[b.nivel]?.ordem ?? 9))) {
+      const g = (dados.checks || []).find((x) => x.id === it.id)?.category || 'Outros';
+      if (!grupos.has(g)) grupos.set(g, []);
+      grupos.get(g).push(it);
     }
-
-    // Alertas que não correspondem a um check listado
-    const soltos = issues.filter((issue) => !CODIGO_CHECK[issue.code]);
-    const secao = E('issues-section');
-    secao.hidden = soltos.length === 0;
-    E('issues-list').innerHTML = soltos.map((issue) => `
-      <div class="pf-issue" data-severity="${esc(issue.severity || '')}">
-        <span class="pf-issue-severity">${esc(issue.severity === 'CRITICAL' ? 'CRÍTICO' : issue.severity === 'WARN' ? 'ATENÇÃO' : issue.severity || 'INFO')}</span>
-        <span>${esc(issue.message)}</span>
-      </div>`).join('');
+    E('checks-list').innerHTML = itens.length
+      ? [...grupos.entries()].map(([nome, lista]) => `<p class="pf-group-label">${esc(nome)}</p>` + lista.map(cartao).join('')).join('')
+      : '<p class="pf-empty">Nenhuma verificação disponível.</p>';
+    E('issues-section').hidden = true;
   }
 
-  function cartao(check) {
-    const estado = ESTADO[check.status] || { icone: '●', palavra: esc(check.status || '—'), ordem: 3 };
-    const detalhe = (analise?.issues || []).filter((issue) => CODIGO_CHECK[issue.code] === check.name);
+  function cartao(it) {
+    const n = NIVEL[it.nivel] || { status: '', icone: '●' };
+    const alvoTexto = it.alvo && it.alvo !== 'geral' ? ` · só ${it.alvo}` : '';
+    const processos = (it.processos || []).map((p) => `
+      <div class="pf-proc" data-nome="${esc(p.nome)}">
+        <span class="pf-proc-name">${esc(p.nome)} <small>${esc(p.tipo)}</small></span>
+        <span class="pf-proc-use">${esc(p.motivos.join(' · '))}</span>
+        <button type="button" class="pf-btn pf-mini" data-acao="detalhe">Ver detalhes</button>
+        <button type="button" class="pf-btn pf-mini" data-acao="ignorar">Ignorar</button>
+        <button type="button" class="pf-btn pf-mini" data-acao="fechar">Pedir fechamento</button>
+        <p class="pf-proc-detail" hidden>PID ${esc(p.pids.join(', '))} · CPU ${esc(p.cpu)}% · GPU ${esc(p.gpu)}% · ${esc((p.ramMb / 1024).toFixed(1))} GB${p.caminho ? ' · ' + esc(p.caminho) : ''}</p>
+      </div>`).join('');
     return `
-      <div class="pf-check" data-status="${esc(check.status || '')}">
-        <span class="pf-check-icon" aria-hidden="true">${estado.icone}</span>
+      <div class="pf-check" data-status="${n.status}" data-id="${esc(it.id)}">
+        <span class="pf-check-icon" aria-hidden="true">${n.icone}</span>
         <div class="pf-check-body">
           <div class="pf-check-line">
-            <span class="pf-check-name">${esc(check.name)}</span>
-            <span class="pf-check-status">${estado.palavra}</span>
+            <span class="pf-check-name">${esc(it.nome)}</span>
+            <span class="pf-check-status">${esc(it.nivel)}${esc(alvoTexto)}</span>
+            <button type="button" class="pf-btn pf-mini pf-recheck" data-acao="reverificar" title="Reverificar só este item">↻</button>
           </div>
-          <div class="pf-check-value">${esc(check.value)}</div>
-          ${detalhe.map((issue) => `<p class="pf-check-detail">${esc(issue.message)}</p>`).join('')}
+          <div class="pf-check-value">${esc(it.valor)}</div>
+          ${it.motivo ? `<p class="pf-check-detail">${esc(it.motivo)}</p>` : ''}
+          ${it.acao && it.nivel !== 'APROVADO' ? `<p class="pf-check-detail pf-acao">${esc(it.acao)}</p>` : ''}
+          ${processos}
         </div>
       </div>`;
   }
 
   function conexao(ok) {
-    const led = E('status-led');
-    const texto = E('connection');
-    led.dataset.tone = ok ? 'ok' : 'off';
-    texto.classList.toggle('offline', !ok);
-    texto.textContent = ok ? 'API 3Mix conectada' : 'Sem conexão com a API 3Mix';
+    E('status-led').dataset.tone = ok ? 'ok' : 'off';
+    E('connection').classList.toggle('offline', !ok);
+    E('connection').textContent = ok ? 'API 3Mix conectada' : 'Sem conexão com a API 3Mix';
   }
 
-  async function analisar() {
+  async function analisar(item) {
     if (ocupado) return;
     ocupado = true;
-    const botao = E('btn-run');
-    botao.disabled = true;
-    botao.setAttribute('aria-busy', 'true');
+    E('btn-run').disabled = true;
+    E('btn-run').setAttribute('aria-busy', 'true');
+    aviso(item ? 'Reverificando…' : 'Analisando…');
     try {
-      const res = await fetch('/api/preflight', { signal: AbortSignal.timeout(15000) });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const q = new URLSearchParams({ alvo: alvo() });
+      if (item) q.set('item', item);
+      const res = await fetch('/api/preflight?' + q, { signal: AbortSignal.timeout(40000) });
       const dados = await res.json();
+      if (!res.ok || dados.success === false) throw new Error(dados.error || 'HTTP ' + res.status);
       conexao(true);
-      desenhar(dados.success === false ? (dados.preflight || dados) : dados);
+      desenhar(dados.preflight || dados);
+      aviso('');
     } catch (erro) {
       conexao(false);
-      const banner = E('verdict-banner');
-      banner.dataset.tone = 'crit';
+      E('verdict-banner').dataset.tone = 'crit';
       E('verdict-icon').textContent = '✖';
       E('verdict-label').textContent = 'ANÁLISE INDISPONÍVEL';
       E('verdict-counts').textContent = 'Não foi possível consultar o Pre-Flight.';
-      E('verdict-summary').textContent = String(erro?.message || erro);
+      aviso(String(erro?.message || erro), true);
     } finally {
       ocupado = false;
-      botao.disabled = false;
-      botao.removeAttribute('aria-busy');
+      E('btn-run').disabled = false;
+      E('btn-run').removeAttribute('aria-busy');
     }
   }
 
-  /* Nome do projeto (mesma rota usada pelas janelas Áudio/Retornos). */
+  E('checks-list').addEventListener('click', async (ev) => {
+    const b = ev.target.closest('button[data-acao]');
+    if (!b) return;
+    const card = b.closest('.pf-check'), proc = b.closest('.pf-proc');
+    try {
+      if (b.dataset.acao === 'reverificar') return analisar(card.dataset.id);
+      if (b.dataset.acao === 'detalhe') { const d = proc.querySelector('.pf-proc-detail'); d.hidden = !d.hidden; return; }
+      if (b.dataset.acao === 'ignorar') { await pedir('preflight_process_ignore', { nome: proc.dataset.nome }); aviso(proc.dataset.nome + ' não será mais apontado.'); return analisar('processos'); }
+      if (b.dataset.acao === 'fechar') {
+        // Dois cliques, como o DUMP: o primeiro só arma.
+        if (armado !== b) { clearTimeout(b._t); armado = b; b.textContent = 'Confirmar'; b.classList.add('pf-armado'); b._t = setTimeout(() => { armado = null; b.textContent = 'Pedir fechamento'; b.classList.remove('pf-armado'); }, 3000); return; }
+        armado = null; b.disabled = true; b.textContent = 'Pedindo…';
+        const pids = (analise.itens.find((x) => x.id === 'processos')?.processos || []).find((p) => p.nome === proc.dataset.nome)?.pids;
+        const r = await pedir('preflight_process_close', { nome: proc.dataset.nome, pids, confirmar: true });
+        aviso(r.mensagem);
+        return analisar('processos');
+      }
+    } catch (erro) { aviso(erro.message, true); }
+  });
+
+  E('pf-bypass-go').addEventListener('click', async () => {
+    try {
+      const r = await pedir('preflight_bypass', { motivo: E('pf-bypass-motivo').value });
+      aviso('Liberação registrada: ' + r.bloqueios.length + ' bloqueio(s), motivo guardado no histórico.');
+      E('pf-bypass-motivo').value = '';
+    } catch (erro) { aviso(erro.message, true); }
+  });
+
   async function lerProjeto() {
     try {
-      const res = await fetch('/api/json', { signal: AbortSignal.timeout(6000) });
-      const data = await res.json();
-      const nome = data && data.preset ? String(data.preset) : '';
-      if (nome && E('project-name')) E('project-name').textContent = nome;
-    } catch { /* chip permanece “—” até a API responder */ }
+      const data = await (await fetch('/api/json', { signal: AbortSignal.timeout(6000) })).json();
+      if (data?.preset) E('project-name').textContent = String(data.preset);
+    } catch { /* chip fica "—" */ }
   }
 
-  E('btn-run').addEventListener('click', analisar);
+  E('btn-run').addEventListener('click', () => analisar());
+  E('pf-alvo').addEventListener('change', () => analisar());
   analisar();
   lerProjeto();
 })();

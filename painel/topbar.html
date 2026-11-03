@@ -51,7 +51,10 @@ body.clocks-only .rapid-talk button { display:block; width:100%; min-width:0; he
   </nav>
   <div class="grp r">
     <span class="clk" id="clk" title="Relógios de produção. Duplo clique: escolher o que cada um mostra (relógio, evento, gravação, transmissão, tempo restante)."><b id="k-rec">REC 00:00:00</b><b id="k-str">NO AR 00:00:00</b><b id="k-now" class="now"></b></span>
+    <span class="dump-state" id="dump-state" hidden></span>
+    <button class="b dump-btn" id="b-dump" data-local="1" hidden>DUMP</button>
     <button class="b save-label" data-do="presetsave" title="Salvar a produção em uso">Salvar projeto</button>
+    <button class="b up-nova" id="b-update" data-open="sobre" hidden title="Ver novidades e atualizar">Nova versão</button>
     <button class="b" data-open="settings" title="Configurações 3Mix">⚙ Configurações</button>
     <button class="b" data-open="mainmenu" title="Mais ferramentas de produção" aria-label="Mais ferramentas">•••</button>
     <span class="legacy-toggles"><button class="b" id="b-pause" data-do="pausethumbs">Pausar Entradas</button><button class="b" id="b-basic" data-do="basic">Básico</button></span>
@@ -62,7 +65,84 @@ body.clocks-only .rapid-talk button { display:block; width:100%; min-width:0; he
     <button class="b sq" id="talk-settings" data-open="calls" aria-label="Configurar Talkback" title="Microfone privado e convidados do botão Talkback">⋮</button>
     <small id="talk-status" role="status" hidden>Configure o mic em Calls.</small>
   </div>
+<style>.up-nova { background:#2f6fed !important; border-color:#2f6fed !important; color:#fff !important; } .up-nova[hidden] { display:none !important; }</style>
 <script src="local.js"></script>
+<script>
+(() => {
+  const local = window.MESA_LOCAL || {};
+  const base = local.replayUrl ? new URL('/api/update', local.replayUrl).href : null;
+  if (!base) return;
+  const nome = (v) => { const m = String(v || '').match(/^(\d+\.\d+\.\d+)(?:-(alpha|beta))?$/); return m ? (m[2] === 'alpha' ? 'Alpha ' : m[2] === 'beta' ? 'Beta ' : '') + m[1] : (v || ''); };
+  const ver = async () => { try { const u = (await (await fetch(base, { cache: 'no-store' })).json()).update; const b = document.getElementById('b-update'); if (!b) return; const nova = u && ['available', 'downloaded'].includes(u.status); b.hidden = !nova; if (nova) b.textContent = 'Nova versão: ' + nome(u.version); } catch { /* motor reabrindo */ } };
+  setTimeout(ver, 45000); setInterval(ver, 5 * 60000);
+})();
+</script>
+<style>
+.dump-state { color:#b8c0c8; font-size:11px; white-space:nowrap; margin-right:2px; }
+.dump-state.ok { color:#3ecf6b; } .dump-state.erro { color:#ff6b6b; }
+.dump-btn { font-weight:700; }
+.dump-btn.pronto { color:#ff8080; border-color:#a33a3a; }
+.dump-btn.armado { background:#c62828 !important; border-color:#ff5a5a !important; color:#fff !important; }
+.dump-state[hidden], .dump-btn[hidden] { display:none !important; }
+body.clocks-only .dump-state { display:none !important; }
+</style>
+<script>
+// DUMP: descarta o trecho retido no atraso da transmissão. Dois cliques, e o estado vem sempre do motor.
+(() => {
+  if (new URLSearchParams(location.search).get('mode') === 'clocks') return;
+  const local = window.MESA_LOCAL || {};
+  if (!local.replayUrl) return;
+  const api = (p) => new URL(p, local.replayUrl).href;
+  const botao = document.getElementById('b-dump'), rotulo = document.getElementById('dump-state');
+  let armado = null, aviso = null, avisoAte = 0, ultimo = null, moduloLigado = true;
+  const desarmar = () => { clearTimeout(armado); armado = null; botao.classList.remove('armado'); botao.textContent = 'DUMP'; };
+  const avisar = (texto, classe) => { aviso = { texto, classe }; avisoAte = Date.now() + 2500; pintar(); };
+  function pintar() {
+    const s = ultimo;
+    botao.hidden = rotulo.hidden = !moduloLigado || !s || !s.available;
+    if (botao.hidden) return;
+    botao.classList.toggle('pronto', !!s.canDump);
+    let texto = '', classe = '', titulo = 'Atraso desligado. Clique para configurar.';
+    if (s.state === 'protected') { texto = 'Atraso ' + s.delaySeconds + ' s'; classe = 'ok'; titulo = 'DUMP descarta o trecho que ainda não foi ao ar. Clique duas vezes.'; }
+    else if (s.state === 'rebuilding') { texto = 'Refazendo ' + Math.floor(s.bufferedSeconds) + '/' + s.delaySeconds + ' s'; titulo = 'O atraso está se refazendo depois do DUMP. Clique duas vezes para descartar de novo.'; }
+    else if (s.state === 'streaming_without_delay') { texto = 'No ar sem atraso'; classe = 'erro'; titulo = 'Esta transmissão começou sem atraso: o DUMP não funciona nela. Clique para configurar.'; }
+    else if (s.state === 'ready') { texto = 'Atraso ' + s.delaySeconds + ' s'; titulo = 'Atraso ligado. O DUMP fica disponível quando a transmissão começar.'; }
+    if (s.canDump && s.uncoveredOutputs.length) titulo += ' Sem proteção: ' + s.uncoveredOutputs.join(', ') + '.';
+    if (aviso && Date.now() < avisoAte) { texto = aviso.texto; classe = aviso.classe; }
+    rotulo.textContent = texto; rotulo.className = 'dump-state' + (classe ? ' ' + classe : '');
+    rotulo.hidden = !texto;
+    botao.title = titulo;
+  }
+  botao.addEventListener('click', async () => {
+    if (botao.disabled) return;
+    if (!ultimo?.canDump) { tell({ open: 'settings', arg: 'broadcastDelay' }).catch(() => {}); return; }
+    if (!armado) {
+      botao.classList.add('armado'); botao.textContent = 'Confirmar DUMP';
+      armado = setTimeout(desarmar, 3000);
+      return;
+    }
+    desarmar();
+    try {
+      const r = await fetch(api('/api/delay'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'dump', note: 'DUMP acionado na mesa' }), signal: AbortSignal.timeout(5000) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || d.success === false || !d.result?.dumped) throw Error(d.error || 'O DUMP não foi executado');
+      ultimo = d;
+      avisar('Trecho descartado', 'ok');
+    } catch (erro) { avisar('DUMP falhou', 'erro'); botao.title = erro.message; }
+  });
+  const ler = async () => {
+    try { ultimo = await (await fetch(api('/api/delay'), { cache: 'no-store', signal: AbortSignal.timeout(2500) })).json(); }
+    catch { ultimo = null; }
+    pintar();
+  };
+  const lerModulos = async () => {
+    try { const d = await (await fetch(api('/api/modulos'), { cache: 'no-store', signal: AbortSignal.timeout(2500) })).json(); moduloLigado = d?.modulos?.broadcastDelay !== false; }
+    catch { moduloLigado = true; }
+    pintar();
+  };
+  lerModulos(); ler(); setInterval(ler, 1000); setInterval(lerModulos, 15000);
+})();
+</script>
 <script src="talkback-rapido.js"></script>
 <script>
   "use strict";
@@ -106,7 +186,7 @@ body.clocks-only .rapid-talk button { display:block; width:100%; min-width:0; he
     mine.onclose = () => { if (ws !== mine) return; for (const p of pending.values()) p.rej(new Error("conexão encerrada")); pending.clear(); on = false; paint(); setTimeout(connect, 2500); };
   }
   document.addEventListener("click", (e) => {
-    const b = e.target.closest(".b"); if (!b || b.disabled) return;
+    const b = e.target.closest(".b"); if (!b || b.disabled || b.dataset.local) return;
     tell(b.dataset.open ? { open: b.dataset.open, arg: b.dataset.arg || null } : { do: b.dataset.do }).catch(() => {});
   });
   document.addEventListener("contextmenu", (e) => e.preventDefault());

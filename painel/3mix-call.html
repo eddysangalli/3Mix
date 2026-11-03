@@ -1,0 +1,742 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>3Mix Call</title>
+<style>
+    :root {
+        --bg: #14181c; --panel: #1b2026; --input: #101418; --border: #2e3742; --text: #e2e8f0; --muted: #8c9ba8; --success: #00e676; --warning: #f7931e; --error: #ff3b30; --primary: #242c35;
+        --button: linear-gradient(180deg, #323b45 0%, #242b32 100%); --button-hover: linear-gradient(180deg, #3e4a57 0%, #2b343d 100%); --button-active: #006400;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; font-family: 'Segoe UI', -apple-system, sans-serif; background: var(--bg); color: var(--text); }
+    body { display: grid; grid-template-rows: 60px 1fr 70px; overflow: hidden; }
+    .header { background: #0a0f14; border-bottom: 1px solid #28323d; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; }
+    .header h1 { margin: 0; font-size: 18px; font-weight: 600; }
+    .header .status { font-size: 14px; color: var(--muted); }
+    .main { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px; overflow-y: auto; }
+    .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 4px; padding: 20px; }
+    .panel h2 { margin-top: 0; margin-bottom: 16px; font-size: 16px; font-weight: 600; color: var(--success); }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; }
+    .form-group input, .form-group select, .form-group button { width: 100%; padding: 12px; background: var(--input); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font: inherit; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--success); }
+    .button { background: var(--button); border: none; color: var(--text); padding: 12px 20px; border-radius: 4px; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+    .button:hover { background: var(--button-hover); }
+    .button:active { background: var(--button-active); }
+    .button.primary { background: var(--success); color: #000; }
+    .button.secondary { background: var(--button); }
+    .button.danger { background: var(--error); color: #fff; }
+    .button[disabled] { background: #1a1f26; cursor: not-allowed; }
+    .video-preview { position: relative; background: #000; border-radius: 4px; overflow: hidden; aspect-ratio: 16/9; }
+    .video-preview video { width: 100%; height: 100%; object-fit: cover; background: #000; }
+    .video-preview .controls { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: var(--text); padding: 8px 12px; display: flex; justify-content: space-between; font-size: 14px; }
+    .meter { height: 8px; background: #2a333d; border-radius: 4px; overflow: hidden; margin-top: 4px; }
+    .meter .level { height: 100%; background: var(--success); transition: width 0.1s; }
+    .meter .level.warning { background: var(--warning); }
+    .meter .level.error { background: var(--error); }
+    .info-grid { display: grid; gap: 12px; }
+    .info-grid div { display: flex; justify-content: space-between; font-size: 14px; }
+    .info-grid div span:first-child { color: var(--muted); }
+    .info-grid div span:second-child { font-weight: 600; }
+    .controls-bar { display: flex; gap: 12px; flex-wrap: wrap; }
+    .controls-bar .button { flex: 1; min-width: 80px; }
+    .footer { background: var(--panel); border-top: 1px solid var(--border); padding: 0 20px; display: flex; align-items: center; justify-content: space-between; font-size: 14px; }
+    .footer .connection { display: flex; gap: 12px; align-items: center; }
+    .footer .connection .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .footer .connection .dot.connected { background: var(--success); box-shadow: 0 0 8px var(--success); }
+    .footer .connection .dot.connecting { background: var(--warning); animation: pulse 1.5s infinite; }
+    .footer .connection .dot.disconnected { background: var(--error); }
+    @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+    .tab-bar { display: flex; border-bottom: 1px solid var(--border); }
+    .tab-bar button { flex: 1; padding: 12px; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--muted); font-weight: 600; cursor: pointer; }
+    .tab-bar button.active { color: var(--success); border-bottom-color: var(--success); }
+    .tab-content { display: none; padding: 20px 0; }
+    .tab-content.active { display: block; }
+    .hidden { display: none; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: rgba(0,0,0,0.9); color: var(--text); padding: 12px 20px; border-radius: 4px; min-width: 250px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transform: translateY(100px); opacity: 0; transition: all 0.3s ease; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { border-left: 4px solid var(--success); }
+    .toast.error { border-left: 4px solid var(--error); }
+    .toast.warning { border-left: 4px solid var(--warning); }
+    @media (max-width: 768px) {
+        .main { grid-template-columns: 1fr; }
+        .controls-bar { flex-direction: column; }
+    }
+</style>
+</head>
+<body>
+<div class="header">
+    <div>
+        <h1>3Mix Call</h1>
+        <div class="subtitle">Participação remota em produções broadcast</div>
+    </div>
+    <div class="status" id="connectionStatus">Desconectado</div>
+</div>
+
+<div class="main">
+    <div class="panel">
+        <h2>Seus Dispositivos</h2>
+        <div class="form-group">
+            <label for="nameField">Seu Nome</label>
+            <input type="text" id="nameField" placeholder="Digite seu nome para aparecer na produção" value="Convidado">
+        </div>
+        <div class="form-group">
+            <label for="cameraSelect">Câmera</label>
+            <select id="cameraSelect">
+                <option value="">Selecionar câmera...</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="micSelect">Microfone</label>
+            <select id="micSelect">
+                <option value="">Selecionar microfone...</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Pré-visualização da Câmera</label>
+            <div class="video-preview" id="localPreview">
+                <video autoplay playsinline muted></video>
+                <div class="controls">
+                    <span>Câmera</span>
+                    <span id="cameraStatus">Pronto</span>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Nível do Microfone</label>
+            <div class="meter" id="micMeter"><div class="level"></div></div>
+            <div id="micLevelText">-∞ dB</div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>Retorno da Produção</h2>
+        <div class="tab-bar">
+            <button class="tab-button active" data-tab="video">Vídeo</button>
+            <button class="tab-button" data-tab="audio">Áudio</button>
+            <button class="tab-button" data-tab="settings">Configurações</button>
+        </div>
+        
+        <div class="tab-content active" id="videoTab">
+            <div class="form-group">
+                <label>Pré-visualização do Retorno</label>
+                <div class="video-preview" id="returnPreview">
+                    <video autoplay playsinline></video>
+                    <div class="controls">
+                        <span>Retorno</span>
+                        <span id="returnStatus">Aguardando conexão...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="controls-bar">
+                <button class="button" id="toggleReturnVideo">Esconder Vídeo</button>
+                <button class="button" id="fullscreenReturn">Tela Cheia</button>
+            </div>
+        </div>
+
+        <div class="tab-content" id="audioTab">
+            <div class="form-group">
+                <label>Volume do Retorno</label>
+                <input type="range" id="returnVolume" min="0" max="100" value="80">
+                <div style="display: flex; justify-content: space-between; margin-top: 4px;">
+                    <span>0%</span>
+                    <span>100%</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Nível de Áudio Recebido</label>
+                <div class="meter" id="returnMeter"><div class="level"></div></div>
+                <div id="returnLevelText">-∞ dB</div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="settingsTab">
+            <div class="form-group">
+                <label>Qualidade da Conexão</label>
+                <select id="qualitySelect">
+                    <option value="auto">Automático (Recomendado)</option>
+                    <option value="low">Baixo (até 360p)</option>
+                    <option value="medium">Médio (até 720p)</option>
+                    <option value="high">Alto (até 1080p)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Modo de Participação</label>
+                <select id="modeSelect">
+                    <option value="video-audio">Vídeo e Áudio</option>
+                    <option value="audio-only">Somente Áudio</option>
+                </select>
+            </div>
+            <div class="info-grid">
+                <div><span>Estado:</span><span id="detailedStatus">Aguardando...</span></div>
+                <div><span>Latência:</span><span id="latency">-- ms</span></div>
+                <div><span>Perda:</span><span id="packetLoss">-- %</span></div>
+                <div><span>Jitter:</span><span id="jitter">-- ms</span></div>
+                <div><span>Bitrate:</span><span id="bitrate">-- kbps</span></div>
+                <div><span>Resolução:</span><span id="resolution">--</span></div>
+                <div><span>FPS:</span><span id="fps">--</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <div class="connection">
+        <span>Status:</span>
+        <div class="dot" id="connectionDot"></div>
+        <span id="connectionText">Desconectado</span>
+    </div>
+    <div class="controls-bar">
+        <button class="button secondary" id="toggleCamera">Desligar Câmera</button>
+        <button class="button secondary" id="toggleMic">Desligar Microfone</button>
+        <button class="button" id="talkbackBtn" style="background:#d97a00;border-color:#f7931e;color:#fff" disabled>🎤 Talkback</button>
+        <button class="button primary" id="joinButton">Entrar na Chamada</button>
+        <button class="button danger" id="leaveButton" style="display: none;">Sair</button>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+class 3mixCall {
+    constructor() {
+        this.callId = null;
+        this.guestName = "";
+        this.localStream = null;
+        this.returnStream = null;
+        this.mediaRecorder = null;
+        this.isConnected = false;
+        this.isInProgram = false;
+        this.isInPreview = false;
+        this.videoEnabled = true;
+        this.audioEnabled = true;
+        this.returnVideoEnabled = true;
+        this.returnAudioEnabled = true;
+        this.returnVolume = 0.8;
+        this.quality = "auto";
+        this.mode = "video-audio";
+        this.constraints = { video: true, audio: true };
+        
+        this.init();
+    }
+
+    init() {
+        this.setupUI();
+        this.setupEventListeners();
+        this.setupDeviceEnumeration();
+        this.setupToast();
+        this.updateUIState();
+    }
+
+    setupUI() {
+        this.nameField = document.getElementById('nameField');
+        this.cameraSelect = document.getElementById('cameraSelect');
+        this.micSelect = document.getElementById('micSelect');
+        this.localPreview = document.getElementById('localPreview');
+        this.localVideo = this.localPreview.querySelector('video');
+        this.returnPreview = document.getElementById('returnPreview');
+        this.returnVideo = this.returnPreview.querySelector('video');
+        this.returnStatus = document.getElementById('returnStatus');
+        this.cameraStatus = document.getElementById('cameraStatus');
+        this.micMeter = document.getElementById('micMeter');
+        this.micLevel = this.micMeter.querySelector('.level');
+        this.micLevelText = document.getElementById('micLevelText');
+        this.returnMeter = document.getElementById('returnMeter');
+        this.returnLevel = this.returnMeter.querySelector('.level');
+        this.returnLevelText = document.getElementById('returnLevelText');
+        this.connectionStatus = document.getElementById('connectionStatus');
+        this.connectionDot = document.getElementById('connectionDot');
+        this.connectionText = document.getElementById('connectionText');
+        this.detailedStatus = document.getElementById('detailedStatus');
+        this.latency = document.getElementById('latency');
+        this.packetLoss = document.getElementById('packetLoss');
+        this.jitter = document.getElementById('jitter');
+        this.bitrate = document.getElementById('bitrate');
+        this.resolution = document.getElementById('resolution');
+        this.fps = document.getElementById('fps');
+        this.qualitySelect = document.getElementById('qualitySelect');
+        this.modeSelect = document.getElementById('modeSelect');
+        this.returnVolumeSlider = document.getElementById('returnVolume');
+        this.toggleReturnVideoBtn = document.getElementById('toggleReturnVideo');
+        this.fullscreenReturnBtn = document.getElementById('fullscreenReturn');
+        this.toggleCameraBtn = document.getElementById('toggleCamera');
+        this.toggleMicBtn = document.getElementById('toggleMic');
+        this.joinButton = document.getElementById('joinButton');
+        this.leaveButton = document.getElementById('leaveButton');
+        this.toastEl = document.getElementById('toast');
+        
+        this.tabButtons = document.querySelectorAll('.tab-button');
+        this.tabContents = document.querySelectorAll('.tab-content');
+    }
+
+    setupEventListeners() {
+        this.nameField.addEventListener('input', () => this.onNameChange());
+        this.cameraSelect.addEventListener('change', () => this.onDeviceChange());
+        this.micSelect.addEventListener('change', () => this.onDeviceChange());
+        this.qualitySelect.addEventListener('change', () => this.onQualityChange());
+        this.modeSelect.addEventListener('change', () => this.onModeChange());
+        this.returnVolumeSlider.addEventListener('input', () => this.onReturnVolumeChange());
+        this.toggleReturnVideoBtn.addEventListener('click', () => this.toggleReturnVideo());
+        this.fullscreenReturnBtn.addEventListener('click', () => this.toggleFullscreen());
+        this.toggleCameraBtn.addEventListener('click', () => this.toggleCamera());
+        this.toggleMicBtn.addEventListener('click', () => this.toggleMic());
+        this.joinButton.addEventListener('click', () => this.joinCall());
+        this.leaveButton.addEventListener('click', () => this.leaveCall());
+        
+        this.tabButtons.forEach(btn => {
+            btn.addEventListener('click', () => this.switchTab(btn.dataset.tab));
+        });
+        
+        window.addEventListener('beforeunload', () => this.leaveCall());
+        window.addEventListener('visibilitychange', () => this.handleVisibilityChange());
+        window.addEventListener('online', () => this.handleOnlineStatus());
+        window.addEventListener('offline', () => this.handleOfflineStatus());
+    }
+
+    setupDeviceEnumeration() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+            this.showToast('Seu navegador não suporta enumeração de dispositivos', 'error');
+            return;
+        }
+        
+        navigator.mediaDevices.enumerateDevices()
+            .then(devices => {
+                const videoDevices = devices.filter(d => d.kind === 'videoinput');
+                const audioDevices = devices.filter(d => d.kind === 'audioinput');
+                
+                this.cameraSelect.innerHTML = '<option value="">Selecionar câmera...</option>';
+                this.micSelect.innerHTML = '<option value="">Selecionar microfone...</option>';
+                
+                videoDevices.forEach(device => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.textContent = device.label || `Câmera ${videoDevices.length + 1}`;
+                    this.cameraSelect.appendChild(option);
+                });
+                
+                audioDevices.forEach(device => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.textContent = device.label || `Microfone ${audioDevices.length + 1}`;
+                    this.micSelect.appendChild(option);
+                });
+                
+                if (videoDevices.length === 0) {
+                    this.cameraSelect.innerHTML = '<option value="" disabled>Nenhuma câmera detectada</option>';
+                }
+                if (audioDevices.length === 0) {
+                    this.micSelect.innerHTML = '<option value="" disabled>Nenhum microfone detectado</option>';
+                }
+            })
+            .catch(err => {
+                console.error('Erro ao enumerar dispositivos:', err);
+                this.showToast('Não foi possível acessar dispositivos de mídia', 'error');
+            });
+    }
+
+    setupToast() {
+        // Toast already exists in DOM
+    }
+
+    switchTab(tabId) {
+        this.tabButtons.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tab === tabId);
+        });
+        this.tabContents.forEach(content => {
+            content.classList.toggle('active', content.id === tabId + 'Tab');
+        });
+    }
+
+    onNameChange() {
+        this.guestName = this.nameField.value.trim() || 'Convidado';
+    }
+
+    onDeviceChange() {
+        if (this.localStream) {
+            this.restartLocalPreview();
+        }
+    }
+
+    onQualityChange() {
+        this.quality = this.qualitySelect.value;
+        this.applyQualitySettings();
+    }
+
+    onModeChange() {
+        this.mode = this.modeSelect.value;
+        this.applyModeSettings();
+    }
+
+    onReturnVolumeChange() {
+        this.returnVolume = this.returnVolumeSlider.value / 100;
+        if (this.returnVideo) {
+            this.returnVideo.volume = this.returnVolume;
+        }
+        this.updateReturnLevelDisplay();
+    }
+
+    updateReturnLevelDisplay() {
+        const level = this.returnVolume;
+        this.returnLevel.style.width = (level * 100) + '%';
+        const db = 20 * Math.log10(level);
+        this.returnLevelText.textContent = db.toFixed(1) + ' dB';
+    }
+
+    applyQualitySettings() {
+        if (this.localStream) {
+            this.restartLocalPreview();
+        }
+    }
+
+    applyModeSettings() {
+        if (this.mode === 'audio-only') {
+            this.constraints = { video: false, audio: true };
+            this.localPreview.querySelector('video').style.display = 'none';
+            this.localPreview.querySelector('.controls').style.display = 'none';
+        } else {
+            this.constraints = { video: true, audio: true };
+            this.localPreview.querySelector('video').style.display = 'block';
+            this.localPreview.querySelector('.controls').style.display = 'flex';
+        }
+        
+        if (this.localStream) {
+            this.restartLocalPreview();
+        }
+    }
+
+    async startLocalPreview() {
+        try {
+            const cameraId = this.cameraSelect.value;
+            const micId = this.micSelect.value;
+            
+            const videoConstraints = cameraId ? { deviceId: { exact: cameraId }, width: { ideal: 1280 }, height: { ideal: 720 } } : true;
+            const audioConstraints = micId ? { deviceId: { exact: micId } } : true;
+            
+            if (this.mode === 'audio-only') {
+                this.localStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: audioConstraints });
+            } else {
+                this.localStream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: audioConstraints });
+            }
+            
+            this.localVideo.srcObject = this.localStream;
+            this.setupAudioMeter();
+            this.updateUIState();
+            this.showToast('Pré-visualização local iniciada', 'success');
+        } catch (err) {
+            console.error('Erro ao acessar dispositivos:', err);
+            this.showToast('Não foi possível acessar câmera/microfone: ' + err.message, 'error');
+        }
+    }
+
+    stopLocalPreview() {
+        if (this.localStream) {
+            this.localStream.getTracks().forEach(track => track.stop());
+            this.localStream = null;
+        }
+        this.localVideo.srcObject = null;
+    }
+
+    async restartLocalPreview() {
+        this.stopLocalPreview();
+        await this.startLocalPreview();
+    }
+
+    setupAudioMeter() {
+        if (!this.localStream) return;
+        
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 256;
+        
+        const source = audioContext.createMediaStreamSource(this.localStream);
+        source.connect(analyser);
+        
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        
+        const updateMeter = () => {
+            analyser.getByteFrequencyData(dataArray);
+            let sum = 0;
+            for (let i = 0; i < bufferLength; i++) {
+                sum += dataArray[i];
+            }
+            const rms = sum / bufferLength / 255;
+            const db = 20 * Math.log10(rms);
+            const normalized = Math.max(0, Math.min(1, (db + 60) / 60));
+            
+            this.micLevel.style.width = (normalized * 100) + '%';
+            this.micLevelText.textContent = db.toFixed(1) + ' dB';
+            
+            if (db > -30) {
+                this.micLevel.className = 'level';
+            } else if (db > -40) {
+                this.micLevel.className = 'level warning';
+            } else {
+                this.micLevel.className = 'level error';
+            }
+            
+            requestAnimationFrame(updateMeter);
+        };
+        
+        updateMeter();
+    }
+
+    updateConnectionStatus(status) {
+        this.isConnected = status === 'connected';
+        this.connectionStatus.textContent = status === 'connected' ? 'Conectado' : status === 'connecting' ? 'Conectando...' : 'Desconectado';
+        this.connectionDot.className = 'dot ' + (status === 'connected' ? 'connected' : status === 'connecting' ? 'connecting' : 'disconnected');
+        this.connectionText.textContent = status === 'connected' ? 'Online' : status === 'connecting' ? 'Conectando...' : 'Offline';
+        this.detailedStatus.textContent = status === 'connected' ? 'Conexão estabelecida' : status === 'connecting' ? 'Estabelecendo conexão...' : 'Desconectado';
+        this.updateUIState();
+    }
+
+    updateReturnStatus(status) {
+        this.returnStatus.textContent = status;
+    }
+
+    updateUIState() {
+        const hasName = this.guestName.length > 0;
+        const hasCamera = this.cameraSelect.value !== '';
+        const hasMic = this.micSelect.value !== '';
+        const canJoin = hasName && (this.mode === 'audio-only' || (hasCamera && hasMic));
+        
+        this.joinButton.disabled = !(canJoin && !this.isConnected);
+        this.leaveButton.style.display = this.isConnected ? 'block' : 'none';
+        this.joinButton.style.display = this.isConnected ? 'none' : 'block';
+        this.toggleCameraBtn.disabled = !this.isConnected || !this.videoEnabled;
+        this.toggleMicBtn.disabled = !this.isConnected || !this.audioEnabled;
+        this.toggleReturnVideoBtn.disabled = !this.isConnected;
+        this.fullscreenReturnBtn.disabled = !this.isConnected;
+        
+        this.toggleCameraBtn.textContent = this.videoEnabled ? 'Desligar Câmera' : 'Ligar Câmera';
+        this.toggleMicBtn.textContent = this.audioEnabled ? 'Desligar Microfone' : 'Ligar Microfone';
+        this.toggleReturnVideoBtn.textContent = this.returnVideoEnabled ? 'Esconder Vídeo' : 'Mostrar Vídeo';
+    }
+
+    showToast(message, type = 'info') {
+        this.toastEl.textContent = message;
+        this.toastEl.className = `toast show ${type}`;
+        setTimeout(() => {
+            this.toastEl.className = 'toast';
+        }, 3000);
+    }
+
+    async joinCall() {
+        if (this.isConnected) return;
+        
+        try {
+            this.updateConnectionStatus('connecting');
+            this.updateReturnStatus('Conectando...');
+            
+            await this.startLocalPreview();
+            
+            // Generate call ID
+            const timestamp = Date.now().toString(36);
+            const random = Math.random().toString(36).substr(2, 9);
+            this.callId = `fm${timestamp}${random}`;
+            
+            // In a real implementation, this would connect to the 3Mix server
+            // For now, we simulate the connection
+            await this.simulateConnection();
+            
+        } catch (err) {
+            console.error('Erro ao entrar na chamada:', err);
+            this.updateConnectionStatus('disconnected');
+            this.updateReturnStatus('Falha na conexão');
+            this.showToast('Não foi possível entrar na chamada: ' + err.message, 'error');
+        }
+    }
+
+    async simulateConnection() {
+        // Simulate connection delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Simulate successful connection
+        this.updateConnectionStatus('connected');
+        this.updateReturnStatus('Conexão estabelecida - Recebendo retorno...');
+        
+        // Simulate receiving return streams
+        await this.simulateReturnStreams();
+        
+        this.showToast('Conectado à produção 3Mix', 'success');
+        this.updateUIState();
+    }
+
+    async simulateReturnStreams() {
+        // In a real implementation, this would receive streams from VDO.Ninja
+        // For demo purposes, we'll use a placeholder or local media
+        try {
+            // Try to get a test video source (could be a local file or generated pattern)
+            // For now, we'll just show a placeholder
+            this.updateReturnStatus('Recebendo retorno de vídeo e áudio...');
+            
+            // Simulate periodic stats updates
+            setInterval(() => this.updateConnectionStats(), 2000);
+            
+        } catch (err) {
+            console.warn('Não foi possível estabelecer fluxo de retorno:', err);
+            this.updateReturnStatus('Retorno indisponível');
+        }
+    }
+
+    updateConnectionStats() {
+        // Simulate realistic connection stats
+        const latency = Math.floor(Math.random() * 80) + 20;
+        const packetLoss = (Math.random() * 0.5).toFixed(2);
+        const jitter = Math.floor(Math.random() * 30) + 5;
+        const bitrate = Math.floor(Math.random() * 1500) + 500;
+        const resolution = this.quality === 'high' ? '1920x1080' : this.quality === 'medium' ? '1280x720' : '640x360';
+        const fps = this.quality === 'high' ? 30 : this.quality === 'medium' ? 25 : 15;
+        
+        this.latency.textContent = latency + ' ms';
+        this.packetLoss.textContent = packetLoss + ' %';
+        this.jitter.textContent = jitter + ' ms';
+        this.bitrate.textContent = bitrate + ' kbps';
+        this.resolution.textContent = resolution;
+        this.fps.textContent = fps;
+        
+        // Update return level meter (simulate audio)
+        const returnLevel = Math.random() * 0.8 + 0.1;
+        this.returnLevel.style.width = (returnLevel * 100) + '%';
+        const returnDb = 20 * Math.log10(returnLevel);
+        this.returnLevelText.textContent = returnDb.toFixed(1) + ' dB';
+        
+        if (returnDb > -20) {
+            this.returnLevel.className = 'level';
+        } else if (returnDb > -30) {
+            this.returnLevel.className = 'level warning';
+        } else {
+            this.returnLevel.className = 'level error';
+        }
+    }
+
+    async leaveCall() {
+        if (!this.isConnected) return;
+        
+        try {
+            this.updateConnectionStatus('disconnecting');
+            
+            // Stop local stream
+            this.stopLocalPreview();
+            
+            // Stop return streams
+            if (this.returnStream) {
+                this.returnStream.getTracks().forEach(track => track.stop());
+                this.returnStream = null;
+            }
+            this.returnVideo.srcObject = null;
+            
+            // Notify server (in real implementation)
+            // await this.signalingServer.leaveCall(this.callId);
+            
+            this.callId = null;
+            this.updateConnectionStatus('disconnected');
+            this.updateReturnStatus('Desconectado');
+            this.showToast('Você saiu da chamada', 'info');
+            
+        } catch (err) {
+            console.error('Erro ao sair da chamada:', err);
+            this.showToast('Erro ao sair da chamada: ' + err.message, 'error');
+        } finally {
+            this.updateUIState();
+        }
+    }
+
+    toggleCamera() {
+        if (!this.localStream) return;
+        
+        const videoTrack = this.localStream.getVideoTracks()[0];
+        if (videoTrack) {
+            this.videoEnabled = !videoTrack.enabled;
+            videoTrack.enabled = this.videoEnabled;
+            this.updateUIState();
+        }
+    }
+
+    toggleMic() {
+        if (!this.localStream) return;
+        
+        const audioTrack = this.localStream.getAudioTracks()[0];
+        if (audioTrack) {
+            this.audioEnabled = !audioTrack.enabled;
+            audioTrack.enabled = this.audioEnabled;
+            this.updateUIState();
+        }
+    }
+
+    toggleReturnVideo() {
+        if (!this.isConnected) return;
+        
+        this.returnVideoEnabled = !this.returnVideoEnabled;
+        this.returnVideo.style.display = this.returnVideoEnabled ? 'block' : 'none';
+        this.updateUIState();
+    }
+
+    toggleFullscreen() {
+        if (!this.returnPreview.requestFullscreen) {
+            this.showToast('Tela cheia não suportada neste navegador', 'warning');
+            return;
+        }
+        
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+        } else {
+            this.returnPreview.requestFullscreen().catch(err => {
+                console.error('Erro ao entrar em tela cheia:', err);
+                this.showToast('Não foi possível entrar em tela cheia', 'error');
+            });
+        }
+    }
+
+    handleVisibilityChange() {
+        if (document.hidden && this.isConnected) {
+            // Pause transmission when tab is hidden to save bandwidth
+        } else if (!document.hidden && this.isConnected) {
+            // Resume normal transmission
+        }
+    }
+
+    handleOnlineStatus() {
+        if (this.isConnected) {
+            this.showToast('Conexão de internet restaurada', 'success');
+            this.updateConnectionStatus('connected');
+        }
+    }
+
+    handleOfflineStatus() {
+        if (this.isConnected) {
+            this.showToast('Conexão de internet perdida - tentando reconectar...', 'warning');
+            this.updateConnectionStatus('connecting');
+            this.reconnect();
+        }
+    }
+
+    async reconnect() {
+        if (!this.isConnected && this.callId) {
+            this.showToast('Reconectando...', 'info');
+            await this.joinCall();
+        }
+    }
+
+    startTalkback() {
+        if (!this.isConnected) return;
+        this.showToast('Talkback: falando com o operador...', 'info');
+        // In a real implementation, this would activate talkback
+    }
+
+    stopTalkback() {
+        this.showToast('Talkback encerrado', 'info');
+        // In a real implementation, this would deactivate talkback
+    }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.3mixCall = new 3mixCall();
+});
+</script>
+</body>
+</html>
