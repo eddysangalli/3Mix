@@ -20,6 +20,9 @@
   .chip b { font-size: 14px; color: #fff; font-weight: 700; word-break: break-word; }
 
   .duas { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; align-items: start; }
+  .versao-atual { margin: 0 0 8px; font-size: 14.5px; }
+  .versao-atual small, .versao-antiga small { margin-left: 6px; font-weight: 400; color: #a9a9a9; font-size: 12.5px; }
+  .versao-antiga { margin-top: 12px; } .versao-antiga summary { cursor: pointer; font-weight: 600; margin-bottom: 8px; }
   .novidades { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
   .novidades li { position: relative; padding-left: 16px; color: #ddd; font-size: 13.5px; }
   .novidades li::before { content: ""; position: absolute; left: 2px; top: 8px; width: 5px; height: 5px; border-radius: 50%; background: var(--p3-accent-strong); }
@@ -88,8 +91,8 @@
   </div>
 
   <section class="p3-card">
-    <h2>O que mudou</h2>
-    <ul class="novidades" id="s-novidades"></ul>
+    <h2>Histórico de versões</h2>
+    <div id="s-novidades"></div>
   </section>
 
   <section class="p3-card">
@@ -100,6 +103,7 @@
 </main>
 
 <script src="fechar-janela.js"></script>
+<script src="novidades.js"></script>
 <script src="atualizacao.js?v=20261102a" data-prefixo="up-"></script>
 <script src="diagnosticos.js?v=20261102b" data-prefixo="dg-"></script>
 <script>
@@ -149,23 +153,22 @@
       ['ExcelJS', '4.4', 'MIT', gh('exceljs/exceljs')],
     ]],
   ];
-  const NOVIDADES = [
-    'Multiview: montagem livre em Configurações, com monitor horizontal ou vertical, posição de cada monitor e relógio de produção.',
-    'Multiview: imagem real do motor em todos os monitores.',
-    'Faixa de estado na mesa: gravação, MultiGravação, Replay, transmissão, saídas, câmera virtual e retornos.',
-    'Remoto: lista de módulos com o endereço de rede de cada um e QR por módulo.',
-    'DSK refeito: a entrada escolhida não some, e o TAKE usa o que está na tela.',
-    'Atalhos e Automação reorganizados, com MIDI e OSC em aba própria.',
-    'Patch de Sinais e Pre-Flight disponíveis em Configurações; Retornos SRT e Matriz AUX em Saídas.',
-    'Padrão visual único em todas as telas de Configurações.',
-  ];
 
-  E('s-novidades').innerHTML = NOVIDADES.map((t) => '<li>' + esc(t) + '</li>').join('');
+  const nomeVersao = (v) => { const m = String(v || '').match(/^(\d+\.\d+\.\d+)-(alpha|beta)$/); return m ? (m[2] === 'alpha' ? 'Alpha ' : 'Beta ') + m[1] : (v || '—'); };
+  (() => {
+    const n = window.NOVIDADES_3MIX;
+    if (!n) { E('s-novidades').textContent = 'Histórico de versões indisponível.'; return; }
+    const itens = (v) => '<ul class="novidades">' + v.itens.map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul>';
+    const titulo = (v) => esc(v.nome) + (v.data ? ' <small>' + esc(v.data) + '</small>' : '');
+    E('s-novidades').innerHTML = n.versoes.map((v, i) => i === 0
+      ? '<h3 class="versao-atual">' + titulo(v) + '</h3>' + itens(v)
+      : '<details class="versao-antiga"><summary>' + titulo(v) + '</summary>' + itens(v) + '</details>').join('');
+  })();
   E('s-creditos').innerHTML = CREDITOS.map(([grupo, itens]) => '<div><h3>' + esc(grupo) + '</h3>' + itens.map(([n, v, l, u]) => '<div class="cred">'
     + (u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(n) + '</a>' : '<span class="n">' + esc(n) + '</span>')
     + (v ? '<span class="v">' + esc(v) + '</span>' : '') + '<span class="l">' + esc(l) + '</span></div>').join('') + '</div>').join('');
 
-  fetch('/api/update', { cache: 'no-store' }).then((r) => r.json()).then((v) => { if (v.update?.currentVersion) E('s-versao').textContent = v.update.currentVersion; }).catch(() => {});
+  fetch('/api/update', { cache: 'no-store' }).then((r) => r.json()).then((v) => { if (v.update?.currentVersion) E('s-versao').textContent = nomeVersao(v.update.currentVersion); }).catch(() => {});
   fetch('/api/json', { cache: 'no-store' }).then((r) => r.json()).then((v) => { if (v.preset) E('s-projeto').textContent = v.preset; }).catch(() => {});
 })();
 </script>

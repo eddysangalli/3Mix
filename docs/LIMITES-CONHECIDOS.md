@@ -42,6 +42,8 @@ Limites do VST3, medidos nos testes:
 - Plugin que não abre deixa o áudio passar direto, e o motivo fica só no log do motor.
 - Testado com tom e medidor. Ainda não foi avaliado de ouvido, nem em máquina limpa, nem durante transmissão.
 
+Versões: cada entrega recebe um número (Alpha 0.1.0, 0.1.1 e assim por diante até o beta) e uma seção em `docs/CHANGELOG.md`, que é o que aparece em Sobre. O empacotador recusa versão sem seção no changelog.
+
 Limites do Multi-M/E, medidos nos testes:
 
 - O PGM de um M/E só aparece nas Entradas depois do primeiro uso daquele M/E.

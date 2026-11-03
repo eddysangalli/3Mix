@@ -313,6 +313,14 @@ void VSTPlugin::onEditorClosed()
 	}
 }
 
+void VSTPlugin::idleEditor()
+{
+	// Sempre na thread da interface, onde effect muda; sem lockEffect para uma tela lenta nao segurar o audio.
+	if (effect && editorWidget && editorOpened) {
+		effect->dispatcher(effect, effEditIdle, 0, 0, nullptr, 0);
+	}
+}
+
 void VSTPlugin::openEditor()
 {
 	if (effect && !editorWidget) {
@@ -337,6 +345,7 @@ void VSTPlugin::openEditor()
 				QString("%1: %2 - %3").arg(sourceName.c_str(), filterName.c_str(), effectName));
 		}
 		editorWidget->show();
+		editorWidget->startEditorIdle();
 	}
 }
 

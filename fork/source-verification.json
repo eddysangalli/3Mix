@@ -1,8 +1,8 @@
 {
   "status": "PASS",
   "base": "ba2f32bdf791005443988a4955e963663e16b1ed",
-  "head": "0e8f37df7fbabbc6f449aca1322f01b125482aac",
-  "resultTree": "0b5c2546502eadbc28e7fee4532b575b5cc59daf",
+  "head": "4f3cbe7bfd54767f83231c014a721a11b069642d",
+  "resultTree": "df902ad851223ac8855702e4167f0fbe4714d936",
   "submodules": [
     {
       "path": "deps/libdshowcapture/src",
@@ -957,8 +957,8 @@
     },
     {
       "path": "frontend/cmake/windows/freemix.ico",
-      "bytes": 13360,
-      "sha256": "8786a2a0056343098ad2bd11f060ea70740497293892cc016014ca2f35c91cae"
+      "bytes": 35892,
+      "sha256": "dc3b8f693ef40cad1a26f49683c672abda5fce32877e587409ffb22f4c13bdad"
     },
     {
       "path": "frontend/cmake/windows/obs.manifest",
@@ -2021,9 +2021,24 @@
       "sha256": "411a4c6000e667e3fc9ea1428e4aa44715197b50fc8220baa43c1ac2b82e6919"
     },
     {
+      "path": "plugins/obs-vst/EditorWidget.cpp",
+      "bytes": 1518,
+      "sha256": "e74e02a6b6a3ca29f4893204d59a62d98d486c1f22b7eebe6f278a38fb8dae70"
+    },
+    {
       "path": "plugins/obs-vst/VSTPlugin.cpp",
-      "bytes": 11409,
-      "sha256": "dc9d46cc39205d4022dfbcfbf5796356046cb4b8c1ac0d25aefd47b0c67200e3"
+      "bytes": 11698,
+      "sha256": "68cf5dbaff2524635d7ba6f3ed272d8d267bfa6f783a0a0006b9c06a3f0551ca"
+    },
+    {
+      "path": "plugins/obs-vst/headers/EditorWidget.h",
+      "bytes": 1742,
+      "sha256": "9287c5fa66536405a4b5300c9185f0e44be9988957c93edf8cbf814a86620d9e"
+    },
+    {
+      "path": "plugins/obs-vst/headers/VSTPlugin.h",
+      "bytes": 3036,
+      "sha256": "62261a03cd9c870f65e03e9ba78559ff945aa762b9c1e6a0c6f9d641b0a11cad"
     },
     {
       "path": "plugins/rtmp-services/CMakeLists.txt",

@@ -10,7 +10,7 @@ const workspace=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
 const options={};for(const arg of process.argv.slice(2)){const i=arg.indexOf('=');const name=arg.slice(0,i),value=arg.slice(i+1);if(i<0||!['--root','--key','--receipt'].includes(name)||!value||options[name])throw Error('Use --root=PASTA_NOVA [--key=CHAVE_FORA_DO_PACOTE] [--receipt=ARQUIVO]');options[name]=value;}
 if(!options['--root'])throw Error('Informe explicitamente a pasta nova do pacote');
 const root=resolve(options['--root']),version=JSON.parse(await readFile(join(root,'version.json'),'utf8')).version;
-if(!/^0\.1\.0-local\.\d{14}$/.test(version))throw Error('Versão inválida');
+if(!/^(?:0\.1\.0-local\.\d{14}|\d+\.\d+\.\d+-(?:alpha|beta))$/.test(version))throw Error('Versão inválida');
 for(const name of ['manifest.json','manifest.sig'])if(await access(join(root,name)).then(()=>true,()=>false))throw Error('Entrega já selada; não modificar');
 const keyPath=resolve(options['--key']||join(workspace,'release-keys/ed25519-private.pem'));
 const keyRelative=relative(root,keyPath);if(!keyRelative.startsWith('..')&&!/^[A-Z]:/i.test(keyRelative))throw Error('Chave privada deve permanecer fora do pacote');

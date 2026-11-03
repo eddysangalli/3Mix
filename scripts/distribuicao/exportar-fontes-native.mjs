@@ -5,7 +5,7 @@ import os from 'node:os';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 const args={};for(const arg of process.argv.slice(2)){const m=/^--(native|product|head|version)=(.+)$/.exec(arg);if(!m||args[m[1]])throw Error('Explicit unique --native --product --head --version required');args[m[1]]=m[2];}
-for(const k of ['native','product','head','version'])if(!args[k])throw Error('Missing '+k);if(!/^[0-9a-f]{40}$/.test(args.head)||!/^0\.1\.0-local\.\d{14}$/.test(args.version))throw Error('Invalid head/version');
+for(const k of ['native','product','head','version'])if(!args[k])throw Error('Missing '+k);if(!/^[0-9a-f]{40}$/.test(args.head)||!/^(?:0\.1\.0-local\.\d{14}|\d+\.\d+\.\d+-(?:alpha|beta))$/.test(args.version))throw Error('Invalid head/version');
 const native=await fs.realpath(args.native),product=await fs.realpath(args.product);if(native.toLowerCase()===product.toLowerCase())throw Error('Distinct repositories required');
 const git=(repo,argv,env={},input)=>execFileSync('git',['-C',repo,...argv],{env:{...process.env,GIT_TERMINAL_PROMPT:'0',...env},input,windowsHide:true,maxBuffer:64*1024*1024});
 const str=(repo,argv)=>git(repo,argv).toString().trim(),hash=b=>createHash('sha256').update(b).digest('hex');

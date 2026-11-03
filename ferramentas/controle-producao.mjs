@@ -502,11 +502,14 @@ export class Production {
         // even when its visual cursor already reads 1. Retry selection until confirmed.
         let selected=action==='transition';for(let n=0;!selected&&n<60;n++){await this.req('SetCurrentSceneTransition',{transitionName:t.transitionName});if((await this.req('GetCurrentSceneTransition')).transitionKind===t.transitionKind){selected=true;break;}await delay(50);}if(!selected)throw new Error('A transição anterior ainda está ativa');
         if(action==='fade') await this.req('SetCurrentSceneTransitionDuration',{transitionDuration:number(d.duration??500,50,20000,'Duração')});
-        await this.wait('GetCurrentSceneTransition',{},s=>s.transitionKind===t.transitionKind&&(action!=='fade'||s.transitionDuration===Number(d.duration??500)));
+        // CUT selection was already confirmed above; only fade duration needs another read.
+        if(action==='fade') await this.wait('GetCurrentSceneTransition',{},s=>s.transitionKind===t.transitionKind&&s.transitionDuration===Number(d.duration??500));
         const target=(await this.req('GetSceneList')).currentPreviewSceneName;
         await this.req('TriggerStudioModeTransition'); await this.wait('GetSceneList',{},s=>s.currentProgramSceneName===target);
         // Program is selected at transition START, not at its final video frame.
-        await delay(action==='fade'?Number(d.duration??500)+50:action==='transition'&&t.transitionKind!=='cut_transition'?Math.max(50,Math.min(20000,Number(t.transitionDuration)||0)+50):50);await this.wait('GetCurrentSceneTransitionCursor',{},s=>s.transitionCursor===1);
+        // Poll completion immediately for CUT; wait() still retries if the engine is busy.
+        if(t.transitionKind!=='cut_transition')await delay(action==='fade'?Number(d.duration??500)+50:Math.max(50,Math.min(20000,Number(t.transitionDuration)||0)+50));
+        await this.wait('GetCurrentSceneTransitionCursor',{},s=>s.transitionCursor===1);
         if(restorePreview){await this.req('SetCurrentPreviewScene',{sceneName:restorePreview}).catch(()=>{});await this.wait('GetSceneList',{},s=>s.currentPreviewSceneName===restorePreview).catch(()=>{});}
         break;
       }

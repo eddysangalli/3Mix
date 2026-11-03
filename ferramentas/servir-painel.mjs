@@ -18,7 +18,6 @@ const types = {
 
 const routeAliases = {
   "": "remoto/mesa-principal.html",
-  "estudio": "remoto/mesa-principal.html",
   "studio": "remoto/mesa-principal.html",
   "modular": "remoto/mesa-principal.html",
   "replay": "remoto/replay.html",

@@ -18,7 +18,7 @@ using Microsoft.Win32;
 
 namespace FreeMixSetup {
     internal sealed class Options {
-        public bool Silent, Verify, NoShortcuts;
+        public bool Silent, Verify, NoShortcuts, PrereqDryRun;
         public string Destination, Log, ImportProject, ProjectName;
         public int ApiPort, WsPort;
         // Módulos desligados no passo MÓDULOS do wizard (ou via --disable-module=ID
@@ -35,6 +35,7 @@ namespace FreeMixSetup {
                 if (key == "--silent" && value == null) o.Silent = true;
                 else if (key == "--verify" && value == null) o.Verify = true;
                 else if (key == "--no-shortcuts" && value == null) o.NoShortcuts = true;
+                else if (key == "--prereq-dry-run" && value == null) o.PrereqDryRun = true;
                 else if (key == "--dest" && !String.IsNullOrWhiteSpace(value)) o.Destination = value;
                 else if (key == "--log" && !String.IsNullOrWhiteSpace(value)) o.Log = value;
                 else if (key == "--import-project" && !String.IsNullOrWhiteSpace(value)) o.ImportProject = value;
@@ -113,7 +114,7 @@ namespace FreeMixSetup {
         Label progressStatus; ProgressBar progressBar; Label doneMessage;
 
         public WizardForm(Options o) {
-            options = o; Text = "Instalar 3Mix Studio"; ClientSize = new Size(640, 460); FormBorderStyle = FormBorderStyle.FixedDialog; MaximizeBox = false; StartPosition = FormStartPosition.CenterScreen;
+            options = o; Text = "Instalar 3Mix Studio " + PayloadInfo.DisplayVersion; try { Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); } catch (Exception) { } ClientSize = new Size(640, 460); FormBorderStyle = FormBorderStyle.FixedDialog; MaximizeBox = false; StartPosition = FormStartPosition.CenterScreen;
             Font = new Font("Segoe UI", 10); BackColor = Color.FromArgb(246, 248, 252);
             stepTitle = new Label { Font = new Font("Segoe UI", 16, FontStyle.Bold), Location = new Point(28, 18), Size = new Size(584, 30) };
             Panel body = new Panel { Location = new Point(28, 56), Size = new Size(584, 352), BorderStyle = BorderStyle.None };
@@ -128,7 +129,7 @@ namespace FreeMixSetup {
 
         Panel StepWelcome() {
             Panel p = new Panel();
-            p.Controls.Add(new Label { Text = "Bem-vindo ao 3Mix Studio", Font = new Font("Segoe UI", 14, FontStyle.Bold), Location = new Point(0, 0), AutoSize = true });
+            p.Controls.Add(new Label { Text = "Bem-vindo ao 3Mix Studio " + PayloadInfo.DisplayVersion, Font = new Font("Segoe UI", 14, FontStyle.Bold), Location = new Point(0, 0), AutoSize = true });
             p.Controls.Add(new Label { Text = "Este assistente instala a suíte broadcast 3Mix de forma completa e\noffline, só para este usuário. Você vai escolher a pasta de destino e quais módulos\nopcionais quer usar — nada disso é definitivo, pode mudar depois.", Location = new Point(0, 44), Size = new Size(584, 72) });
             return p;
         }
@@ -153,7 +154,7 @@ namespace FreeMixSetup {
             project = new TextBox { Text = o.ImportProject ?? "", Location = new Point(0, 140), Size = new Size(574, 28), Enabled = importProject.Checked };
             importProject.CheckedChanged += delegate { project.Enabled = importProject.Checked; };
             p.Controls.Add(folder); p.Controls.Add(browse); p.Controls.Add(importProject); p.Controls.Add(project);
-            p.Controls.Add(new Label { Text = "Sem importar, começa com a mesa limpa. Cria atalhos e desinstalador. Não abre o\nprograma; a importação remove credenciais e início automático.", Location = new Point(0, 184), Size = new Size(574, 46) });
+            p.Controls.Add(new Label { Text = "Sem importar, começa com a mesa limpa. Cria atalhos e desinstalador.\nA importação remove credenciais e início automático.", Location = new Point(0, 184), Size = new Size(574, 46) });
             return p;
         }
         Panel StepModules(Options o) {
@@ -179,10 +180,12 @@ namespace FreeMixSetup {
             progressBar = new ProgressBar { Location = new Point(0, 96), Size = new Size(574, 16), Minimum = 0, Maximum = 100 }; p.Controls.Add(progressBar);
             return p;
         }
+        CheckBox openNow;
         Panel StepDone() {
             Panel p = new Panel();
             p.Controls.Add(new Label { Text = "Concluído", Font = new Font("Segoe UI", 13, FontStyle.Bold), Location = new Point(0, 0), AutoSize = true });
-            doneMessage = new Label { Location = new Point(0, 40), Size = new Size(574, 80) }; p.Controls.Add(doneMessage);
+            doneMessage = new Label { Location = new Point(0, 40), Size = new Size(574, 110) }; p.Controls.Add(doneMessage);
+            openNow = new CheckBox { Text = "Abrir o 3Mix agora", Checked = true, Visible = false, Location = new Point(0, 160), Size = new Size(400, 24) }; p.Controls.Add(openNow);
             return p;
         }
 
@@ -201,7 +204,7 @@ namespace FreeMixSetup {
         async void NextClicked() {
             if (current == 2) { try { Installer.ValidateDestination(folder.Text); } catch (Exception e) { MessageBox.Show(this, e.Message, "Escolha outra pasta", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; } if (importProject.Checked && String.IsNullOrWhiteSpace(project.Text)) { MessageBox.Show(this, "Informe o caminho da pasta UUID.fmx criada pela Recuperação do 3Mix.", "Projeto", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; } }
             if (current == 3) { await RunInstall(); return; }
-            if (current == 5) { Close(); return; }
+            if (current == 5) { if (openNow.Visible && openNow.Checked) Installer.OpenInstalled(options.Destination); Close(); return; }
             Navigate(current + 1);
         }
         async Task RunInstall() {
@@ -213,7 +216,8 @@ namespace FreeMixSetup {
             if (result == 0) {
                 try { WriteModulesFile(Path.GetFullPath(options.Destination), options.DisabledModules); } catch (Exception e) { result = 1; Installer.LastError = "A instalação principal foi concluída, mas a gravação da seleção de módulos falhou: " + e.Message; }
             }
-            doneMessage.Text = result == 0 ? "Instalação concluída. Use o atalho 3Mix Studio para começar." : "A instalação falhou. " + Installer.LastError + "\n\nRegistro: " + Installer.LastLog;
+            openNow.Visible = result == 0 && Installer.VcRuntimeReady();
+            doneMessage.Text = result == 0 ? "Instalação concluída." + (Installer.Warning.Length > 0 ? "\n\n" + Installer.Warning : "") : "A instalação falhou. " + Installer.LastError + "\n\nRegistro: " + Installer.LastLog;
             Navigate(5); next.Visible = true; next.Enabled = true;
         }
         internal static void TryPreselectPicker(string value, Action<string> select) {
@@ -288,6 +292,7 @@ namespace FreeMixSetup {
                         }
                         installed = true;
                         if (!String.IsNullOrWhiteSpace(options.ImportProject)) ImportProject(Path.GetFullPath(options.Destination), options, log, report);
+                        Prerequisites(Path.GetFullPath(options.Destination), scratch, options, log, report);
                         report("Criando os atalhos…", 95);
                         List<string> shortcuts = options.NoShortcuts ? new List<string>() : CreateShortcuts(Path.GetFullPath(options.Destination));
                         WriteUninstaller(Path.GetFullPath(options.Destination), shortcuts);
@@ -298,6 +303,68 @@ namespace FreeMixSetup {
                     finally { if (scratch != null) { try { SafeDelete(scratch); } catch (Exception e) { log.WriteLine("Temporary cleanup pending: " + Sanitize(e.Message)); } } }
                 }
             } catch (Exception e) { LastError = e.Message; report("Falha: " + e.Message, 0); return 1; }
+        }
+        // Visual C++ e câmera virtual exigem administrador; o resto da instalação, não. Um único pedido de permissão cobre os dois.
+        // Quem confere o resultado é o próprio Windows, lendo o registro de novo depois: o código de saída de um processo elevado não chega aqui com segurança.
+        internal static string Warning = "";
+        const string VCamClass = "CLSID\\{A3FCE0F5-3493-419F-958A-ABA1250EC20B}";
+        internal static bool VcRuntimeReady() {
+            try {
+                using (RegistryKey hive = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
+                using (RegistryKey key = hive.OpenSubKey("SOFTWARE\\Microsoft\\VisualStudio\\14.0\\VC\\Runtimes\\X64")) {
+                    if (key == null || Convert.ToInt32(key.GetValue("Installed", 0)) != 1) return false;
+                    int major = Convert.ToInt32(key.GetValue("Major", 0)), minor = Convert.ToInt32(key.GetValue("Minor", 0));
+                    return major > PayloadInfo.VcMajor || (major == PayloadInfo.VcMajor && minor >= PayloadInfo.VcMinor);
+                }
+            } catch (Exception) { return false; }
+        }
+        static bool VCamRegistered(RegistryView view) {
+            try {
+                using (RegistryKey hive = RegistryKey.OpenBaseKey(RegistryHive.ClassesRoot, view))
+                using (RegistryKey key = hive.OpenSubKey(VCamClass)) { return key != null; }
+            } catch (Exception) { return false; }
+        }
+        internal static bool VCamReady() { return VCamRegistered(RegistryView.Registry64) && VCamRegistered(RegistryView.Registry32); }
+        static void Prerequisites(string root, string scratch, Options options, StreamWriter log, Action<string,int> report) {
+            bool vc = VcRuntimeReady(), cam = VCamReady();
+            log.WriteLine("PREREQ before vc=" + vc + "; camera=" + cam + "; requiredVc=" + PayloadInfo.VcMajor + "." + PayloadInfo.VcMinor);
+            if (vc && cam && !options.PrereqDryRun) return;
+            if (options.Silent && !options.PrereqDryRun) { Warning = "Instalação silenciosa: Visual C++ e câmera virtual não foram instalados."; log.WriteLine("PREREQ skipped silent"); return; }
+            string folder = Path.Combine(scratch, "prereq"), redist = Path.Combine(folder, "vc_redist.x64.exe"), script = Path.Combine(folder, "prerequisitos.cmd");
+            Directory.CreateDirectory(FreeMixUninstall.Program.IOPath(folder));
+            using (Stream source = Assembly.GetExecutingAssembly().GetManifestResourceStream("FreeMixSetup.VcRedist")) {
+                if (source == null) throw new Exception("O instalador não contém o Visual C++.");
+                using (FileStream target = new FileStream(FreeMixUninstall.Program.IOPath(redist), FileMode.CreateNew, FileAccess.Write)) source.CopyTo(target);
+            }
+            string win = Path.Combine(root, "data", "obs-plugins", "win-dshow");
+            StringBuilder lines = new StringBuilder("@echo off\r\nchcp 65001 >nul\r\n");
+            if (!vc || options.PrereqDryRun) lines.Append("\"" + redist + "\" /install /quiet /norestart\r\n");
+            if (!cam || options.PrereqDryRun) { lines.Append("regsvr32.exe /i /s \"" + Path.Combine(win, "obs-virtualcam-module64.dll") + "\"\r\n"); lines.Append("regsvr32.exe /i /s \"" + Path.Combine(win, "obs-virtualcam-module32.dll") + "\"\r\n"); }
+            lines.Append("exit /b 0\r\n");
+            File.WriteAllText(FreeMixUninstall.Program.IOPath(script), lines.ToString(), new UTF8Encoding(false));
+            if (options.PrereqDryRun) {
+                log.WriteLine("PREREQ dry-run redistBytes=" + new FileInfo(FreeMixUninstall.Program.IOPath(redist)).Length);
+                foreach (string line in lines.ToString().Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries)) log.WriteLine("PREREQ script " + line);
+                return;
+            }
+            report("O Windows vai pedir permissão para instalar o Visual C++ e a câmera virtual…", 92);
+            try {
+                ProcessStartInfo psi = new ProcessStartInfo("cmd.exe", "/c \"\"" + script + "\"\"");
+                psi.UseShellExecute = true; psi.Verb = "runas"; psi.WindowStyle = ProcessWindowStyle.Hidden; psi.WorkingDirectory = folder;
+                using (Process process = Process.Start(psi)) { process.WaitForExit(); log.WriteLine("PREREQ script exit=" + process.ExitCode); }
+            } catch (System.ComponentModel.Win32Exception e) { log.WriteLine("PREREQ permission refused: " + e.NativeErrorCode); }
+            vc = VcRuntimeReady(); cam = VCamReady();
+            log.WriteLine("PREREQ after vc=" + vc + "; camera=" + cam);
+            if (!vc) Warning = "O Visual C++ não foi instalado, e o 3Mix não abre sem ele. Rode este instalador de novo em uma pasta nova e aceite o pedido de permissão do Windows.";
+            else if (!cam) Warning = "A câmera virtual não ficou disponível. O restante do 3Mix funciona normalmente.";
+        }
+        internal static void OpenInstalled(string destination) {
+            try {
+                string root = Path.GetFullPath(destination);
+                ProcessStartInfo psi = new ProcessStartInfo(Path.Combine(root, "3Mix Studio.cmd"));
+                psi.UseShellExecute = true; psi.WorkingDirectory = root; psi.WindowStyle = ProcessWindowStyle.Minimized;
+                Process.Start(psi);
+            } catch (Exception e) { MessageBox.Show("Não foi possível abrir o 3Mix: " + e.Message, "3Mix Studio", MessageBoxButtons.OK, MessageBoxIcon.Warning); }
         }
         static string Sanitize(string text) { return Regex.Replace(text, "(?i)(password|secret|token|authorization|credential)(\\s*[=:]\\s*)([^,}\\s]+)", "$1$2[REDACTED]"); }
         static string Quote(string value) { return "\"" + Regex.Replace(Regex.Replace(value, "(\\\\*)\"", "$1$1\\\""), "(\\\\+)$", "$1$1") + "\""; }
@@ -362,7 +429,7 @@ namespace FreeMixSetup {
             if (requested != 0) { if (!PortAvailable(requested)) throw new Exception("A porta " + requested + " já está em uso."); return requested; }
             for (int p = low; p <= high; p++) if (PortAvailable(p)) return p; throw new Exception("Nenhuma porta livre entre " + low + " e " + high + ".");
         }
-        static bool PortAvailable(int port) { TcpListener listener = null, v6 = null; try { listener = new TcpListener(IPAddress.Any, port); listener.Server.ExclusiveAddressUse = true; listener.Start(); if (Socket.OSSupportsIPv6) { v6 = new TcpListener(IPAddress.IPv6Any, port); v6.Server.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, true); v6.Server.ExclusiveAddressUse = true; v6.Start(); } return true; } catch (SocketException) { return false; } finally { if (listener != null) listener.Stop(); if (v6 != null) v6.Stop(); } }
+        static bool PortAvailable(int port) { foreach (IPEndPoint busy in System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners()) if (busy.Port == port) return false; TcpListener listener = null, v6 = null; try { listener = new TcpListener(IPAddress.Any, port); listener.Server.ExclusiveAddressUse = true; listener.Start(); if (Socket.OSSupportsIPv6) { v6 = new TcpListener(IPAddress.IPv6Any, port); v6.Server.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, true); v6.Server.ExclusiveAddressUse = true; v6.Start(); } return true; } catch (SocketException) { return false; } finally { if (listener != null) listener.Stop(); if (v6 != null) v6.Stop(); } }
         static List<string> CreateShortcuts(string root) {
             NoLinks(root); string launch = Path.Combine(root, "3Mix Studio.cmd"), icon = Path.Combine(root, "bin", "64bit", "FreeMix.exe"); if (!File.Exists(FreeMixUninstall.Program.IOPath(launch)) || !File.Exists(FreeMixUninstall.Program.IOPath(icon))) throw new Exception("Arquivos dos atalhos ausentes.");
             List<string> paths = new List<string>(); Type type = Type.GetTypeFromProgID("WScript.Shell"); object shell = Activator.CreateInstance(type);
@@ -373,7 +440,7 @@ namespace FreeMixSetup {
                 Directory.CreateDirectory(FreeMixUninstall.Program.IOPath(folder)); string path = Path.Combine(folder, "3Mix Studio.lnk");
                 while (File.Exists(FreeMixUninstall.Program.IOPath(path)) || Directory.Exists(FreeMixUninstall.Program.IOPath(path))) path = Path.Combine(folder, "3Mix Studio (" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + "-" + Guid.NewGuid().ToString("N").Substring(0, 6) + ").lnk");
                 object shortcut = type.InvokeMember("CreateShortcut", BindingFlags.InvokeMethod, null, shell, new object[] { path });
-                try { Type shortcutType = shortcut.GetType(); Set(shortcutType, shortcut, "TargetPath", launch); Set(shortcutType, shortcut, "WorkingDirectory", root); Set(shortcutType, shortcut, "IconLocation", icon + ",0"); Set(shortcutType, shortcut, "Description", "3Mix Studio"); shortcutType.InvokeMember("Save", BindingFlags.InvokeMethod, null, shortcut, new object[0]); paths.Add(path); }
+                try { Type shortcutType = shortcut.GetType(); Set(shortcutType, shortcut, "TargetPath", launch); Set(shortcutType, shortcut, "WorkingDirectory", root); Set(shortcutType, shortcut, "IconLocation", icon + ",0"); shortcutType.InvokeMember("WindowStyle", BindingFlags.SetProperty, null, shortcut, new object[] { 7 }); Set(shortcutType, shortcut, "Description", "3Mix Studio"); shortcutType.InvokeMember("Save", BindingFlags.InvokeMethod, null, shortcut, new object[0]); paths.Add(path); }
                 finally { System.Runtime.InteropServices.Marshal.FinalReleaseComObject(shortcut); }
             } } finally { System.Runtime.InteropServices.Marshal.FinalReleaseComObject(shell); } return paths;
         }
@@ -408,7 +475,7 @@ namespace FreeMixSetup {
             string registryKey = "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\FreeMixStudio-" + BitConverter.ToString(SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(root.ToLowerInvariant()))).Replace("-", "").ToLowerInvariant().Substring(0,16);
             Dictionary<string, object> plan = new Dictionary<string, object> { {"format",1}, {"root",root}, {"version",PayloadInfo.Version}, {"files",files}, {"shortcuts",links}, {"registryKey",registryKey}, {"preserveData",true} };
             File.WriteAllText(FreeMixUninstall.Program.IOPath(planPath),json.Serialize(plan),new UTF8Encoding(false));
-            using (RegistryKey key = Registry.CurrentUser.CreateSubKey(registryKey)) { key.SetValue("DisplayName","3Mix Studio"); key.SetValue("DisplayVersion",PayloadInfo.Version); key.SetValue("Publisher","3Mix Studio"); key.SetValue("InstallLocation",root); key.SetValue("UninstallString",Quote(executable)); key.SetValue("QuietUninstallString",Quote(executable)+" --silent --apply"); key.SetValue("DisplayIcon",Path.Combine(root,"bin\\64bit\\FreeMix.exe")); key.SetValue("NoModify",1,RegistryValueKind.DWord); key.SetValue("NoRepair",1,RegistryValueKind.DWord); }
+            using (RegistryKey key = Registry.CurrentUser.CreateSubKey(registryKey)) { key.SetValue("DisplayName","3Mix Studio"); key.SetValue("DisplayVersion",PayloadInfo.DisplayVersion); key.SetValue("Publisher","3Mix Studio"); key.SetValue("InstallLocation",root); key.SetValue("UninstallString",Quote(executable)); key.SetValue("QuietUninstallString",Quote(executable)+" --silent --apply"); key.SetValue("DisplayIcon",Path.Combine(root,"bin\\64bit\\FreeMix.exe")); key.SetValue("NoModify",1,RegistryValueKind.DWord); key.SetValue("NoRepair",1,RegistryValueKind.DWord); }
         }
         static void SafeDelete(string root) { NoLinks(root); foreach (string path in FreeMixUninstall.Program.Entries(root)) { NoLinks(path); if (Directory.Exists(FreeMixUninstall.Program.IOPath(path))) SafeDelete(path); else File.Delete(FreeMixUninstall.Program.IOPath(path)); } Directory.Delete(FreeMixUninstall.Program.IOPath(root)); }
     }

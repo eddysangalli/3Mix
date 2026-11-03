@@ -1,8 +1,8 @@
 {
   "upstream": "https://github.com/obsproject/obs-studio.git",
   "base": "ba2f32bdf791005443988a4955e963663e16b1ed",
-  "head": "0e8f37df7fbabbc6f449aca1322f01b125482aac",
-  "version": "0.1.0-local.20261103011403",
+  "head": "4f3cbe7bfd54767f83231c014a721a11b069642d",
+  "version": "0.1.0-alpha",
   "patches": [
     {
       "path": "0001-feat-branding-replace-OBS-identity-with-FreeMix-Stud.patch",
@@ -199,11 +199,15 @@
     {
       "path": "0049-fix-M-E-recupera-a-transicao-ao-reabrir-camera-virtu.patch",
       "sha256": "af9dec9bed88ff91bf3c1eb54579068c78a5ec7361d80f6c7880afaac12c3415"
+    },
+    {
+      "path": "0050-fix-janela-de-plugin-VST2-volta-a-atualizar-icone-3M.patch",
+      "sha256": "4f816fa76bc0df1a57f1fc1d3a24f429e97838b469fe8091288a8f9b0d0a4c5a"
     }
   ],
-  "sourceUpdatedAt": "2026-11-03T01:14:42.852Z",
+  "sourceUpdatedAt": "2026-11-03T01:45:38.834Z",
   "sourceSchema": 2,
-  "tree": "0b5c2546502eadbc28e7fee4532b575b5cc59daf",
+  "tree": "df902ad851223ac8855702e4167f0fbe4714d936",
   "submodules": [
     {
       "path": "deps/libdshowcapture/src",

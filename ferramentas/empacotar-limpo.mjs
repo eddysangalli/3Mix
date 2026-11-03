@@ -11,7 +11,7 @@ import {prepareNdiRuntime,NDI_DLL} from './ndi-runtime.mjs';
 const root=resolve(fileURLToPath(new URL('../',import.meta.url))),workspace=dirname(root);
 if(process.argv.slice(2).some(arg=>arg!=='--check'))throw Error('Opção desconhecida; use --check para conferir sem gerar pacote');
 const checkOnly=process.argv.includes('--check');
-const version=process.env.FREEMIX_PACKAGE_VERSION||'0.1.0-local.'+new Date().toISOString().replace(/\D/g,'').slice(0,14);if(!/^0\.1\.0-local\.\d{14}$/.test(version))throw Error('Versão inválida');
+const version=process.env.FREEMIX_PACKAGE_VERSION||'0.1.0-local.'+new Date().toISOString().replace(/\D/g,'').slice(0,14);if(!/^(?:0\.1\.0-local\.\d{14}|\d+\.\d+\.\d+-(?:alpha|beta))$/.test(version))throw Error('Versão inválida');
 const dest=join(workspace,'entregas','FreeMix-Completo-'+version);if(existsSync(dest))throw Error('Destino já existe; não substituir entrega');
 const nativeRundir=process.env.FREEMIX_NATIVE_RUNDIR?resolve(process.env.FREEMIX_NATIVE_RUNDIR):null;
 const nativeCommit=process.env.FREEMIX_NATIVE_COMMIT||null;
@@ -85,7 +85,7 @@ const {pluginDefaults}=await import('./plugins-defaults.mjs');const freshCollect
 await writeFile(join(dest,'config/suporte.json'),JSON.stringify({destino:'WhatsApp do Eddy'},null,2));
 await writeFile(join(dest,'LEIA-ME.md'),'# 3Mix\n\nVersão alpha para testes. As instruções estão em LEIA-ME-ALPHA.txt.\n\nFontes: https://github.com/eddysangalli/3Mix\n');
 await writeFile(join(dest,'LEIA-ME-ALPHA.txt'),'3Mix - versão alpha para testes\r\n\r\nCOMO ABRIR\r\n1. Extraia este ZIP inteiro para uma pasta sua, por exemplo Documentos\\3Mix. Não abra de dentro do ZIP.\r\n2. Dê dois cliques em "3Mix Studio.cmd".\r\n3. Se o Windows mostrar "O Windows protegeu o computador", clique em "Mais informações" e em "Executar assim mesmo". Esta versão ainda não tem assinatura digital.\r\n\r\nDEU ERRO?\r\nNo 3Mix: menu > Relatar problema. Escreva o que você estava fazendo e gere o pacote de diagnóstico.\r\nSe o 3Mix nem abrir: dê dois cliques em "COLETAR-LOGS.cmd".\r\nMande o arquivo ZIP gerado para o Eddy no WhatsApp.\r\n\r\nO pacote traz logs e dados técnicos do computador, sem suas gravações. Veja o conteúdo antes de enviar, se quiser.\r\n');
-await mkdir(join(dest,'gravacoes'),{recursive:true});await writeFile(join(dest,'version.json'),JSON.stringify({version,createdAt:new Date().toISOString(),channel:'local-candidate'}));
+await mkdir(join(dest,'gravacoes'),{recursive:true});await writeFile(join(dest,'version.json'),JSON.stringify({version,createdAt:new Date().toISOString(),channel:/-alpha$/.test(version)?'alpha':/-beta$/.test(version)?'beta':'local-candidate'}));
 const files={};async function walk(dir){for(const e of await readdir(dir,{withFileTypes:true})){const p=join(dir,e.name);if(e.isDirectory())await walk(p);else files[relative(dest,p).replaceAll('\\','/')]=createHash('sha256').update(await readFile(p)).digest('hex');}}
 await walk(dest);await writeFile(join(dest,'hashes.json'),JSON.stringify({version,files},null,2));
 await mkdir(join(workspace,'qa-finalizacao'),{recursive:true});await writeFile(join(workspace,'qa-finalizacao/ultima-entrega.json'),JSON.stringify({version,root:dest},null,2));console.log(JSON.stringify({version,root:dest,fileCount:Object.keys(files).length}));

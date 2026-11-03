@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef OBS_STUDIO_EDITORDIALOG_H
 #define OBS_STUDIO_EDITORDIALOG_H
 
+#include <QTimer>
 #include <QWidget>
 
 #if defined(_WIN32)
@@ -46,6 +47,7 @@ public:
 class EditorWidget : public QWidget {
 
 	VSTPlugin *plugin;
+	QTimer idleTimer;
 
 #if defined(__APPLE__)
 	QWidget *cocoaViewContainer = NULL;
@@ -56,6 +58,7 @@ class EditorWidget : public QWidget {
 public:
 	EditorWidget(QWidget *parent, VSTPlugin *plugin);
 	void buildEffectContainer(AEffect *effect);
+	void startEditorIdle();
 	void closeEvent(QCloseEvent *event) override;
 	void handleResizeRequest(int width, int height);
 };

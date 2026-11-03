@@ -22,10 +22,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 EditorWidget::EditorWidget(QWidget *parent, VSTPlugin *plugin) : QWidget(parent), plugin(plugin)
 {
 	setWindowFlags(this->windowFlags() |= Qt::MSWindowsFixedSizeDialogHint);
+
+	// Editores VST2 so atualizam medidores e animacoes quando o host envia effEditIdle.
+	idleTimer.setInterval(33);
+	connect(&idleTimer, &QTimer::timeout, this, [this]() { this->plugin->idleEditor(); });
+}
+
+void EditorWidget::startEditorIdle()
+{
+	idleTimer.start();
 }
 
 void EditorWidget::closeEvent(QCloseEvent *event)
 {
+	idleTimer.stop();
 	plugin->onEditorClosed();
 	UNUSED_PARAMETER(event);
 }

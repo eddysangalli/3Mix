@@ -232,11 +232,7 @@ export class AuxOutputRouter extends EventEmitter {
     
     const affectedOutputs = this.getOutputsBoundToAux(auxId);
 
-    // Real application to the engine: only destinations that are ALREADY active get the new signal pushed live
-    // (never auto-starts a stopped output -- that would be the router silently starting a transmission). A
-    // stopped destination's saved config is left as-is; its own panel decides when it starts, with whatever it
-    // was last configured to carry. Each destination is applied independently; one failing never blocks others,
-    // and every outcome (applied / skipped / failed) is reported back, never silently swallowed.
+    // Configure stopped destinations only; never restart a live output.
     const applied = this.p ? await this.applyBusToOutputs(updated, affectedOutputs) : affectedOutputs.map(o => ({ targetId: o.targetId, status: 'not-wired', detail: 'AuxOutputRouter sem referência a Production nesta instância' }));
 
     this.emit('aux_cut', {
@@ -255,7 +251,7 @@ export class AuxOutputRouter extends EventEmitter {
   }
 
   // Translates a resolved AUX bus state into the real outputs_configure/outputs_network/outputs_sdi contract,
-  // for each output target CURRENTLY ACTIVE and bound to this bus. Metadata-only buses (no production wired, or
+  // for each stopped destination bound to this bus. Metadata-only buses (no production wired, or
   // a target this version does not yet translate) are reported, never silently dropped.
   async applyBusToOutputs(bus, targets) {
     const results = [];
@@ -268,7 +264,7 @@ export class AuxOutputRouter extends EventEmitter {
           if (!destinations) destinations = (await this.p.vendor('get_destinations', {}, 'freemix')).destinations || [];
           const current = destinations[index];
           if (!current) { results.push({ targetId: target.targetId, status: 'skipped', detail: 'Saída não encontrada' }); continue; }
-          if (!current.active) { results.push({ targetId: target.targetId, status: 'skipped', detail: 'Saída parada; AUX não inicia transmissão/gravação automaticamente' }); continue; }
+          if (current.active || current.state === 'stopping') { results.push({ targetId: target.targetId, status: 'skipped', detail: 'Saída ativa ou finalizando; troca AUX recusada sem interromper o sinal' }); continue; }
           const patch = this.busToDestinationConfig(bus, current, index);
           if (!patch) { results.push({ targetId: target.targetId, status: 'skipped', detail: 'Tipo de sinal AUX ainda não aplicável a esta saída' }); continue; }
           // outputs_configure requires the FULL config (name/width/height/bitrate/etc. are all validated); we
@@ -281,7 +277,9 @@ export class AuxOutputRouter extends EventEmitter {
             audioTrack: current.audioTrack, audioSourceUuid: current.audioSourceUuid, fill: current.fill,
             enabled: current.enabled, autoStart: current.autoStart, input: current.sourceUuid, ...patch,
           });
-          results.push({ targetId: target.targetId, status: 'applied', detail: patch.mode });
+          const confirmed = (await this.p.vendor('get_destinations', {}, 'freemix')).destinations?.[index];
+          if (!confirmed || confirmed.mode !== patch.mode || (patch.mode === 'mix' && Number(confirmed.mixId) !== patch.mixId)) throw Error('Motor não confirmou o roteamento AUX');
+          results.push({ targetId: target.targetId, status: 'configured', detail: patch.mode });
         } else if (kind === 'ndi' || kind === 'omt') {
           // Correção (auditoria desta sessão): a primeira versão chamava this.p.vendor('CallVendorRequest', ...)
           // -- vendor() JÁ envolve CallVendorRequest internamente (confirmado lendo controle-producao.mjs), e

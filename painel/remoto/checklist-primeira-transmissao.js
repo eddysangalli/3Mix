@@ -55,6 +55,32 @@
 
   E('ck-abrir-preflight').addEventListener('click', () => openWindow('/preflight'));
 
+  const status = document.createElement('p');
+  status.setAttribute('role', 'status');
+  E('ck-abrir-preflight').parentElement.appendChild(status);
+  const verificar = document.createElement('button');
+  verificar.type = 'button';
+  verificar.textContent = 'Verificar conexão';
+  status.before(verificar);
+  async function verificarConexao() {
+    verificar.disabled = true;
+    status.textContent = 'Consultando API do 3Mix…';
+    try {
+      const resposta = await fetch('/api/health', { cache: 'no-store', signal: AbortSignal.timeout(4000) });
+      if (resposta.status === 401 || resposta.status === 403) {
+        status.textContent = 'Dispositivo não autorizado. Abra o Hub e autorize com o código do computador 3Mix.';
+      } else if (!resposta.ok) {
+        status.textContent = 'API indisponível (HTTP ' + resposta.status + '). Abra pelo atalho oficial; não inicie outro motor.';
+      } else {
+        const dados = await resposta.json();
+        status.textContent = dados.connected === true ? 'API e motor conectados. Confira disco e permissões no Pre-Flight antes de gravar.' : 'API respondeu, mas o motor não confirmou conexão. Confira o programa aberto e gere diagnóstico se persistir.';
+      }
+    } catch {
+      status.textContent = 'API não respondeu. Abra o 3Mix pelo atalho oficial e tente novamente. Este teste não distingue porta ocupada de serviço parado.';
+    } finally { verificar.disabled = false; }
+  }
+  verificar.addEventListener('click', verificarConexao);
+
   restore();
 })();
 

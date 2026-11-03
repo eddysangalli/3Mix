@@ -419,7 +419,7 @@ async function handleHttp(req,res){
         }
         return json(res,405,{success:false});
       }
-      if(handleMixEffects&&await handleMixEffects({req,res,path,local,originAllowed,json,body,mixes:production.outputEngine.mixes}))return;
+      if(handleMixEffects&&await handleMixEffects({req,res,path,local,authorized,originAllowed,json,body,mixes:production.outputEngine.mixes}))return;
       if(path==='/api/mix-audio'){
         if(req.method!=='GET')return json(res,405,{success:false});
         return json(res,200,{success:true,...production.mixAudio.summary()});

@@ -101,6 +101,7 @@ public:
 
 	bool isEditorOpen();
 	void onEditorClosed();
+	void idleEditor();
 
 public slots:
 	void openEditor();

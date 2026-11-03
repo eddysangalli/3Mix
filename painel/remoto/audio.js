@@ -448,6 +448,10 @@ for (const [id, preset] of [
 /* Ciclo                                                               */
 /* ------------------------------------------------------------------ */
 
+fetch('/api/update', { cache: 'no-store' }).then((r) => r.json()).then((d) => {
+  const m = String(d.update?.currentVersion || '').match(/^(\d+\.\d+\.\d+)-(alpha|beta)$/);
+  if (m && E('a-versao')) E('a-versao').textContent = (m[2] === 'alpha' ? 'Alpha ' : 'Beta ') + m[1];
+}).catch(() => {});
 poll();
 setInterval(() => { if (!document.hidden) poll(); }, 1500);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(true); });
