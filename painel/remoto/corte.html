@@ -31,12 +31,15 @@
   .mon-vazio { position: absolute; inset: 0; display: grid; place-items: center; color: #777; font-size: 13px; }
   .mon-tela.com-imagem .mon-vazio { display: none; }
 
-  .controles { display: grid; grid-template-columns: 150px 150px 100px minmax(200px, 1fr) auto auto; align-items: end; gap: 10px; padding: 12px; background: var(--p3-panel); border: 1px solid var(--p3-line); border-radius: 4px; }
+  .controles { display: grid; grid-template-columns: 140px 140px 120px 100px minmax(200px, 1fr) auto auto; align-items: end; gap: 10px; padding: 12px; background: var(--p3-panel); border: 1px solid var(--p3-line); border-radius: 4px; }
   .p3 .controles button, .p3 .controles .acao { height: 52px; border-radius: 4px; font-size: 15px; font-weight: 800; letter-spacing: .5px; }
   .p3 .controles .cut-btn { background: #b02a1f; border: 1px solid #d8392b; color: #fff; }
   .p3 .controles .cut-btn:hover { background: #c5352a; }
   .p3 .controles .fade-btn { background: #333; border: 1px solid #555; color: #fff; }
   .p3 .controles .fade-btn:hover { background: #3d3d3d; }
+  .p3 .controles .ftb-btn { background: #381216; border: 1px solid #751f28; color: #ff5252; }
+  .p3 .controles .ftb-btn:hover { background: #4a181d; border-color: #a82d39; color: #ff7575; }
+  .p3 .controles .ftb-btn.on { background: #b02a1f !important; border-color: #d8392b !important; color: #fff !important; }
   .p3 .controles .secundario { padding: 0 16px; font-size: 13px; font-weight: 700; letter-spacing: 0; background: #2a2a2a; border: 1px solid var(--p3-line); color: #ddd; }
   .p3 .controles .secundario.pronto { color: #ff8080; border-color: #a33a3a; }
   .p3 .controles .secundario.armado { background: #b02a1f; border-color: #d8392b; color: #fff; }
@@ -92,6 +95,7 @@
   <section class="controles">
     <button class="cut-btn" data-action="cut">CUT</button>
     <button class="fade-btn" data-action="fade">AUTO</button>
+    <button class="ftb-btn" data-action="ftb">FTB</button>
     <label>Duração (ms)<input id="duration" type="number" min="50" max="20000" value="500"></label>
     <label class="tbar"><span class="tbar-topo"><span>T-Bar</span><span id="tbar-val">0%</span></span><input id="tbar" type="range" min="0" max="100" value="0"></label>
     <button id="btn-dump" type="button" class="secundario" disabled title="Atraso desligado. Configure em Configurações › Transmissão › Atraso e DUMP.">DUMP</button>

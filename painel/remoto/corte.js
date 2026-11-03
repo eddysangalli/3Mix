@@ -66,6 +66,18 @@
 
   E('tbar').addEventListener('input', (e) => { E('tbar-val').textContent = e.target.value + '%'; });
 
+  // Botão FTB na mesa remota
+  const ftbBtn = document.querySelector('.ftb-btn');
+  if (ftbBtn) {
+    ftbBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      const isFtb = ftbBtn.classList.toggle('on');
+      const msg = E('message');
+      if (msg) msg.textContent = isFtb ? 'Fade to Black (FTB) ATIVO no ar.' : 'Fade to Black (FTB) Desativado.';
+    }, true);
+  }
+
   // DUMP descarta conteúdo: pede um segundo clique em até 3 segundos.
   const dump = E('btn-dump');
   let armado = null;

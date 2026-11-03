@@ -1033,6 +1033,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     <div class="media-trans-ctrl" id="media-trans-ctrl" style="display:flex; flex-direction:column; justify-content:center; gap:3px; padding:0 4px;">
       <button class="btn-atem-cut" data-a="trans_cut" title="Corte Seco Instantâneo (CUT)" style="height:26px;">CUT</button>
       <button class="btn-atem-auto" data-a="trans_auto" title="Transição Suave (AUTO / FADE)" style="height:24px;">AUTO</button>
+      <button class="btn-atem-ftb" data-a="trans_ftb" title="Fade to Black (FTB) do Programa" style="height:20px;">FTB</button>
     </div>
 
 
@@ -1753,7 +1754,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
           break;
         }
         case "FTB": {
-          await productionAction('ftb',{input:previewTakeInput()});
+          A.trans_ftb?.();
           break;
         }
         case "PreviewInput": {
@@ -1910,8 +1911,9 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       await productionAction(st.studio?'fade':'active',{input:previewTakeInput(),duration:500});
     })()),
     trans_ftb: () => run((async () => {
-      const ftbBtn = document.querySelector(".btn-atem-ftb");
-      const isFtb = ftbBtn?.classList.toggle("on");
+      const ftbBtns = document.querySelectorAll(".btn-atem-ftb");
+      const isFtb = !ftbBtns[0]?.classList.contains("on");
+      ftbBtns.forEach(b => b.classList.toggle("on", isFtb));
       toast(isFtb ? "Fade to Black (FTB) ATIVO" : "Fade to Black (FTB) Desativado");
     })()),
     blackbox_trigger: () => run((async () => {

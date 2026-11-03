@@ -494,13 +494,15 @@ export class Production {
       case 'cut': case 'fade': case 'transition': {
         const direct=!!d.input;
         const before=await this.req('GetSceneList');
+        const previousProgram=before.currentProgramSceneName;
         const previousPreview=before.currentPreviewSceneName;
         const directName=direct?this.scene(d.input).name:'';
         // Clicar no PGM da própria entrada que já está no ar não deve mexer em nada.
-        if(direct&&directName===before.currentProgramSceneName)break;
-        // CUT/fade/transição direto: usa o Preview como ponte e devolve o Preview anterior no fim.
-        // OBS em Studio Mode troca o Preview mesmo em SetCurrentProgramScene; por isso a ponte.
-        const restorePreview=direct&&directName!==previousPreview?previousPreview:'';
+        if(direct&&directName===previousProgram)break;
+        // Flip-Flop broadcast clássico: na transição padrão de corte/fade (Preview -> Program),
+        // o que estava no Program vai para o Preview após a transição.
+        // Se for um corte direto para uma entrada diferente do Preview atual, restaura o Preview anterior preservando a pré-seleção.
+        const nextPreview=(!direct||directName===previousPreview)?previousProgram:previousPreview;
         if(direct){await this.req('SetCurrentPreviewScene',{sceneName:directName});await this.wait('GetSceneList',{},s=>s.currentPreviewSceneName===directName);}
         const t=action==='transition'?await this.req('GetCurrentSceneTransition'):this.state.transitions.find(t=>t.transitionKind===(action==='cut'?'cut_transition':'fade_transition')); if(!t) throw new Error('Transição indisponível');
         // OBS refuses selection while the preceding AUDIO transition is still active,
@@ -515,7 +517,7 @@ export class Production {
         // Poll completion immediately for CUT; wait() still retries if the engine is busy.
         if(t.transitionKind!=='cut_transition')await delay(action==='fade'?Number(d.duration??500)+50:Math.max(50,Math.min(20000,Number(t.transitionDuration)||0)+50));
         await this.wait('GetCurrentSceneTransitionCursor',{},s=>s.transitionCursor===1);
-        if(restorePreview){await this.req('SetCurrentPreviewScene',{sceneName:restorePreview}).catch(()=>{});await this.wait('GetSceneList',{},s=>s.currentPreviewSceneName===restorePreview).catch(()=>{});}
+        if(nextPreview&&nextPreview!==target){await this.req('SetCurrentPreviewScene',{sceneName:nextPreview}).catch(()=>{});await this.wait('GetSceneList',{},s=>s.currentPreviewSceneName===nextPreview).catch(()=>{});}
         break;
       }
       case 'tbar': {const position=number(d.position,0,1,'Posição');await this.req('SetTBarPosition',{position,release:d.release===true});if(position>0&&position<1&&!d.release)await this.wait('GetCurrentSceneTransitionCursor',{},s=>Math.abs(s.transitionCursor-position)<.06);break;}
