@@ -5,6 +5,7 @@ import {existsSync,readdirSync} from 'node:fs';
 import{AudioBusesEngine,BUS_KIND}from'./audio-buses-producao.mjs';
 
 const VST3_PREFIX='3Mix VST3 - ';
+const HIDDEN_FROM_CHAIN=new Set(['3Mix Audio - Gain','3Mix Ganho']);
 // Plugins VST3 instalados no Windows. Um .vst3 pode ser arquivo ou pasta: nos dois casos é o plugin, e a busca para ali.
 export function findVst3(folders=[process.env.CommonProgramW6432&&join(process.env.CommonProgramW6432,'VST3'),process.env.CommonProgramFiles&&join(process.env.CommonProgramFiles,'VST3'),process.env.LOCALAPPDATA&&join(process.env.LOCALAPPDATA,'Programs','Common','VST3')]){
  const found=new Map();
@@ -79,9 +80,20 @@ export class AudioRoutingEngine{
  pluginPath(spec){return join(this.p.root,'plugins-audio',spec.vst);}
  async inspect(key){const row=this.source(key);if(!this.kinds)this.kinds=new Set((await this.p.req('GetSourceFilterKindList')).sourceFilterKinds);const [offset,list]=await Promise.all([this.p.req('GetInputAudioSyncOffset',{inputUuid:key}),this.p.req('GetSourceFilterList',{sourceUuid:key})]);
   const filters={};for(const [type,spec]of Object.entries(AUDIO_FILTERS)){const filter=list.filters.find(f=>f.filterName===spec.name);filters[type]={supported:this.kinds.has(spec.kind)&&(!spec.vst||existsSync(this.pluginPath(spec))),exists:!!filter,enabled:filter?.filterEnabled??false,settings:filter?filterSettings(type,{},filter.filterSettings):{...spec.defaults}};}
-  this.details={key,name:row.name,delayMs:offset.inputAudioSyncOffset,filters,vst3:this.vst3Rows(list.filters),filterOrder:list.filters.map(f=>f.filterName)};return this.details;
+  this.details={key,name:row.name,delayMs:offset.inputAudioSyncOffset,filters,vst3:this.vst3Rows(list.filters),chain:this.chainRows(list.filters),filterOrder:list.filters.map(f=>f.filterName)};return this.details;
  }
  vst3Rows(filters){return filters.filter(f=>f.filterKind==='vst3_filter').map(f=>({filter:f.filterName,name:f.filterName.startsWith(VST3_PREFIX)?f.filterName.slice(VST3_PREFIX.length):f.filterName,enabled:f.filterEnabled,missing:!existsSync(f.filterSettings?.plugin_path||'')}));}
+ chainRows(filters){const types=new Map(Object.entries(AUDIO_FILTERS).map(([type,spec])=>[spec.name,type]));return filters.filter(f=>!HIDDEN_FROM_CHAIN.has(f.filterName)).map(f=>({filter:f.filterName,type:types.get(f.filterName)||null,kind:f.filterKind,enabled:f.filterEnabled,label:f.filterName.replace(/^3Mix (?:Audio|VST3) - /,'').replace(/^3Mix /,''),missing:f.filterKind==='vst3_filter'&&!existsSync(f.filterSettings?.plugin_path||'')}));}
+ async chainCommand(d){
+  if(!['on','off','remove','open'].includes(d.op))throw Error('Comando de efeito inválido');
+  const row=this.pluginRow(d.key),filter=(await this.p.req('GetSourceFilterList',{sourceName:row.name})).filters.find(f=>f.filterName===d.filter);
+  if(!filter||HIDDEN_FROM_CHAIN.has(filter.filterName))throw Error('Efeito não está neste canal');
+  if(d.op==='remove')await this.p.req('RemoveSourceFilter',{sourceName:row.name,filterName:filter.filterName});
+  else if(d.op==='open'){if(!['vst_filter','vst3_filter'].includes(filter.filterKind))throw Error('Este efeito não tem janela própria');await this.p.vendor('open_vst_editor',{sourceName:row.name,filterName:filter.filterName},'freemix');}
+  else await this.p.req('SetSourceFilterEnabled',{sourceName:row.name,filterName:filter.filterName,filterEnabled:d.op==='on'});
+  await this.p.vendor('save_preset',{},'freemix');
+  if(!row.protected)await this.inspect(row.key);
+ }
  vst3Installed(){return this.vst3List||(this.vst3List=findVst3());}
  pluginRow(key){const row=this.rows.find(r=>r.key===key||r.name===key);if(!row)throw Error('Canal de áudio não encontrado');if(row.protected&&!row.bus&&row.kind!==BUS_KIND&&!/^3Mix (?:Master|Bus [A-Z])$/.test(row.name))throw Error('Este canal não recebe plugins');return row;}
  async vst3Command(d){
@@ -109,6 +121,7 @@ export class AudioRoutingEngine{
   if(action.startsWith('audio_routing_bus_')||action.startsWith('audio_routing_asio_output_')||['audio_routing_direct','audio_routing_asio_create','audio_routing_devices'].includes(action)){await this.busEngine.command(action,d);this.last=this.summary();return;}
   if(action==='audio_routing_get'){if(d.key)await this.inspect(d.key);this.last=this.summary();return;}
   if(action==='audio_routing_vst3'){await this.vst3Command(d);this.last=this.summary();return;}
+  if(action==='audio_routing_chain'){await this.chainCommand(d);this.last=this.summary();return;}
   if(action==='audio_routing_plugin'){
    const spec=AUDIO_FILTERS[d.type];if(!spec?.vst)throw Error('Plugin desconhecido');
    const row=this.pluginRow(d.key);

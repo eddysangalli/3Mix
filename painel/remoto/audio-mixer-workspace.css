@@ -3041,4 +3041,50 @@ body.header-colors .a-strip[data-visual="aux"] .a-strip-head { background: linea
 
 /* Logo oficial 3Mix no topo, igual ? janela Replay. */
 .a-brand .brand-logo { display: block; height: 26px; width: auto; }
-.a-vst3 { display:flex; flex-direction:column; gap:4px; } .a-vst3 > span { font-size:10px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; color:var(--am-mute); } .a-vst3 .check-line { flex:1; min-width:0; } .a-vst3 .check-line span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* ------------------------------------------------------------------ inspetor compacto */
+
+.a-insp-scroll { gap: 10px; padding: 10px; }
+.a-insp-line { display: flex; gap: 8px; align-items: flex-end; min-width: 0; }
+.a-insp-grow { flex: 1; min-width: 0; }
+.a-insp-dest { flex: 0 0 84px; }
+.a-insp-line .a-field > span, .a-knob-cell > span { font-size: 11px; font-weight: 600; color: var(--am-dim); }
+.a-insp-line .a-field input, .a-insp-line .a-field select { height: 32px; }
+.a-insp-knobs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.a-knob-cell { display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0; }
+.a-knob-cell .a-chip-input { width: 100%; height: 28px; padding: 0 5px; font-size: 12px; }
+.a-knob-cell .a-chip-btn { width: 100%; height: 28px; padding: 0 4px; font-size: 12px; }
+.a-knob-delay { display: flex; gap: 3px; width: 100%; min-width: 0; }
+.a-knob-delay .a-chip-input { flex: 1; min-width: 0; width: auto; }
+.a-knob-delay .a-chip-btn { flex: 0 0 24px; width: 24px; padding: 0; }
+
+.a-fx { display: flex; flex-direction: column; gap: 5px; border-top: 1px solid var(--am-line); padding-top: 9px; }
+.a-fx-head { display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 700; color: var(--am-text); }
+.a-fx-head b { font: 600 12px var(--font-mono); color: var(--am-dim); }
+#fx-rows { display: flex; flex-direction: column; gap: 3px; }
+.a-fx-row { display: flex; align-items: center; gap: 4px; min-height: 30px; padding: 0 4px 0 7px; border: 1px solid var(--am-line); border-left: 3px solid #4a4a4a; border-radius: 3px; background: var(--am-deep); }
+.a-fx-row.is-on { border-left-color: #2f9e5f; }
+.a-fx-row.is-editing { border-color: #2f6fed; border-left-color: #2f6fed; }
+.a-fx-name { flex: 1; min-width: 0; display: flex; align-items: center; gap: 7px; cursor: pointer; font-size: 12.5px; color: #8f8f8f; }
+.a-fx-row.is-on .a-fx-name { color: var(--am-text); }
+.a-fx-name span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.a-fx-name input { flex: 0 0 auto; margin: 0; }
+.a-fx-btn { flex: 0 0 auto; height: 22px; padding: 0 7px; border: 1px solid var(--am-line); border-radius: 3px; background: var(--am-field); color: #c8ced6; font-size: 11.5px; cursor: pointer; }
+.a-fx-btn:hover { background: #292929; color: #fff; }
+.a-fx-btn.is-remove { width: 22px; padding: 0; font-size: 14px; line-height: 1; }
+.a-fx-btn.is-remove:hover { background: #7d2727; border-color: #9e3535; }
+.a-fx-editor { display: flex; flex-direction: column; gap: 6px; margin: 2px 0 3px; padding: 7px; border: 1px solid var(--am-line); border-radius: 3px; background: var(--am-deep); }
+.a-fx-editor .filter-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.a-fx-editor .filter-fields label { display: flex; flex-direction: column; justify-content: flex-end; gap: 3px; min-width: 0; font-size: 10.5px; color: var(--am-dim); }
+.a-fx-editor .filter-fields input { width: 100%; height: 26px; padding: 0 5px; border: 1px solid var(--am-line); border-radius: 3px; background: var(--am-field); color: var(--am-text); font: 600 12px var(--font-mono); }
+.a-fx-editor .btn-hardware { height: 26px; font-size: 12px; }
+.a-fx-add { display: flex; gap: 5px; }
+.a-fx-add select { flex: 1; min-width: 0; height: 30px; padding: 0 6px; border: 1px solid var(--am-line); border-radius: 3px; background: var(--am-field); color: var(--am-text); font-size: 12.5px; }
+.a-fx-add .btn-hardware { flex: 0 0 auto; height: 30px; padding: 0 10px; font-size: 12px; }
+#insp-more summary { font-size: 12.5px; }
+#insp-notes { min-height: 44px; }
+.a-presets .ai-preset-btn { height: 26px; }
+
+.a-strip-fx { flex: 0 0 auto; height: 15px; padding: 0 4px; display: grid; place-items: center; border-radius: 3px; background: #2f9e5f; color: #fff; font: 700 9px/1 var(--font-mono); }
+.a-strip-fx[hidden] { display: none; }
+.a-strip-fx.is-off { background: rgba(0, 0, 0, .35); color: rgba(255, 255, 255, .7); }

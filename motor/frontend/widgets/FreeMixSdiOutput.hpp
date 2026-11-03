@@ -18,7 +18,7 @@ inline std::string HdrPreflight(obs_data_t *config,bool (*isPrivate)(obs_source_
  const std::string audioUuid=obs_data_get_string(config,"audioSourceUuid");if(!audioUuid.empty()){OBSSourceAutoRelease audio=obs_get_source_by_uuid(audioUuid.c_str());if(!FreeMixAudioBusAllowed(audio))return "Áudio independente deve ser um bus público com tracks globais desligadas";}
  OBSDataAutoRelease settings=Settings(config);calldata_t call;calldata_init(&call);calldata_set_ptr(&call,"config",settings.Get());calldata_set_ptr(&call,"response",proof);
  const bool found=proc_handler_call(obs_get_proc_handler(),"freemix_decklink_hdr_preflight",&call);calldata_free(&call);
- if(!found)return "Plugin/driver DeckLink não inicializou ou esta versão não expõe o contrato HDR. Verifique Desktop Video/placa e a versão do FreeMix";
+ if(!found)return "Plugin/driver DeckLink não inicializou ou esta versão não expõe o contrato HDR. Verifique Desktop Video/placa e a versão do 3Mix";
  if(!obs_data_get_bool(proof,"success"))return obs_data_get_string(proof,"error");
  if(obs_data_get_int(proof,"width")<=0||obs_data_get_int(proof,"height")<=0||obs_data_get_int(proof,"width")>7680||obs_data_get_int(proof,"height")>4320||obs_data_get_int(proof,"fpsNum")<=0||obs_data_get_int(proof,"fpsDen")<=0)return "Driver retornou dimensões/FPS HDR inválidos";
  return "";

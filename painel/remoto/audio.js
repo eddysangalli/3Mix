@@ -265,16 +265,12 @@ function filterForm() {
   const box = E('filter-fields');
   if (!box) return;
   box.replaceChildren();
-  const status = E('filter-status');
   const enabled = E('filter-enabled');
+  paintFx();
   if (!filter) {
-    if (status) status.textContent = 'Sem dados do canal.';
     if (enabled) enabled.disabled = true;
     return;
   }
-  if (status) status.textContent = filter.supported
-    ? (filter.exists ? (filter.enabled ? 'Ativo neste canal.' : 'Adicionado e desligado.') : 'Ainda não adicionado.')
-    : 'Indisponível neste motor.';
   if (enabled) {
     enabled.checked = !!filter.enabled;
     enabled.disabled = !filter.supported;
@@ -295,42 +291,73 @@ function filterForm() {
   }
   const save = E('save-filter');
   if (save) save.disabled = !filter.supported;
-  const remove = E('remove-filter');
-  if (remove) remove.disabled = !filter.exists;
-  paintVst3();
 }
 
-/* Plugins VST3 do canal. A lista só é refeita quando muda, para não atrapalhar o clique durante a atualização periódica. */
-let vst3Painted = '';
-function paintVst3() {
-  const rows = state?.details?.vst3 || [], installed = state?.vst3Installed || [];
-  const mark = JSON.stringify([rows, installed]);
-  if (mark === vst3Painted) return;
-  vst3Painted = mark;
-  const box = E('vst3-rows'), pick = E('vst3-pick');
+/* Efeitos do canal, na ordem real do motor. A lista só é refeita quando muda, para não atrapalhar o clique durante a atualização periódica. */
+const FX_NAMES = { eq: 'EQ 3 bandas', gate: 'Gate de ruído', compressor: 'Compressor', limiter: 'Limiter de pico', expander: 'Expansor', rnnoise: 'Limpeza neural (RNNoise)', nvidia: 'Limpeza NVIDIA', pp_track: 'PodcastPlugins Track', pp_master: 'PodcastPlugins Master', master_me: 'master_me' };
+const FX_PROCESSORS = ['eq', 'gate', 'compressor', 'limiter', 'expander', 'rnnoise', 'nvidia'], FX_PLUGINS = ['pp_track', 'pp_master', 'master_me'];
+let fxEditing = null, fxPainted = '';
+const fxEditor = E('fx-editor');
+
+function fxOption(value, text, disabled) { const o = new Option(text, value); o.disabled = !!disabled; return o; }
+
+function paintFx() {
+  const detail = state?.details, chain = detail?.chain || [], filters = detail?.filters || {}, installed = state?.vst3Installed || [];
+  if (fxEditing && !chain.some((row) => row.type === fxEditing)) fxEditing = null;
+  const mark = JSON.stringify([detail?.key, chain, installed, fxEditing, FX_PROCESSORS.concat(FX_PLUGINS).map((type) => filters[type]?.supported)]);
+  if (mark === fxPainted) return;
+  fxPainted = mark;
+  const box = E('fx-rows'), pick = E('fx-pick');
   if (!box || !pick) return;
-  box.replaceChildren(...rows.map((row) => {
+  const active = chain.filter((row) => row.enabled).length;
+  E('fx-count').textContent = chain.length ? active + (active === chain.length ? '' : ' de ' + chain.length) : '';
+  fxEditor.hidden = true;
+  box.replaceChildren(...chain.map((row) => {
     const line = document.createElement('div');
-    line.className = 'a-dsp-row';
+    line.className = 'a-fx-row' + (row.enabled ? ' is-on' : '') + (fxEditing && row.type === fxEditing ? ' is-editing' : '');
     const label = document.createElement('label');
-    label.className = 'check-line';
+    label.className = 'a-fx-name';
     const on = document.createElement('input');
     on.type = 'checkbox';
     on.checked = !!row.enabled;
-    on.addEventListener('change', () => command('audio_routing_vst3', { op: on.checked ? 'on' : 'off', filter: row.filter }));
+    on.title = row.enabled ? 'Desligar' : 'Ligar';
+    on.addEventListener('change', () => command('audio_routing_chain', { op: on.checked ? 'on' : 'off', filter: row.filter }));
     const name = document.createElement('span');
-    name.textContent = row.missing ? row.name + ' (não instalado)' : row.name;
+    name.textContent = (FX_NAMES[row.type] || row.label) + (row.missing ? ' (não instalado)' : '');
+    name.title = row.filter;
     label.append(on, name);
-    const button = (text, op) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn-hardware'; b.textContent = text; b.addEventListener('click', () => command('audio_routing_vst3', { op, filter: row.filter })); return b; };
-    line.append(label, button('Abrir', 'open'), button('Remover', 'remove'));
+    line.append(label);
+    const button = (text, title, click, cls = '') => { const b = document.createElement('button'); b.type = 'button'; b.className = 'a-fx-btn ' + cls; b.textContent = text; b.title = title; b.addEventListener('click', click); line.append(b); };
+    if (['vst_filter', 'vst3_filter'].includes(row.kind)) button('Abrir', 'Abrir a janela do plugin', () => command('audio_routing_chain', { op: 'open', filter: row.filter }));
+    else if (row.type && Object.keys(fields[row.type] || {}).length) button('Ajustar', 'Ajustar este efeito', () => { fxEditing = fxEditing === row.type ? null : row.type; dirty = false; E('filter').value = row.type; filterForm(); });
+    button('×', 'Remover este efeito', () => command('audio_routing_chain', { op: 'remove', filter: row.filter }), 'is-remove');
     return line;
   }));
-  const chosen = pick.value;
-  pick.replaceChildren(...installed.map((plugin) => { const o = document.createElement('option'); o.value = plugin.path; o.textContent = plugin.name; return o; }));
-  if (installed.some((plugin) => plugin.path === chosen)) pick.value = chosen;
-  E('vst3-add').disabled = !installed.length;
+  if (fxEditing) {
+    const target = [...box.children][chain.findIndex((row) => row.type === fxEditing)];
+    fxEditor.hidden = false;
+    target?.after(fxEditor);
+  }
+  const chosen = pick.value, applied = new Set(chain.map((row) => row.type));
+  const group = (title, items) => { const g = document.createElement('optgroup'); g.label = title; g.append(...items); return g; };
+  const processors = FX_PROCESSORS.filter((type) => !applied.has(type)).map((type) => fxOption('f:' + type, FX_NAMES[type], filters[type] && !filters[type].supported));
+  const plugins = FX_PLUGINS.filter((type) => !applied.has(type)).map((type) => fxOption('p:' + type, FX_NAMES[type], filters[type] && !filters[type].supported));
+  pick.replaceChildren(fxOption('', 'Escolher efeito…'));
+  if (processors.length) pick.append(group('Processadores', processors));
+  if (plugins.length) pick.append(group('Plugins do 3Mix', plugins));
+  if (installed.length) pick.append(group('VST3 instalados', installed.map((plugin) => fxOption('v:' + plugin.path, plugin.name))));
+  if ([...pick.options].some((o) => o.value === chosen && !o.disabled)) pick.value = chosen;
 }
-E('vst3-add')?.addEventListener('click', () => { const path = E('vst3-pick')?.value; if (path) command('audio_routing_vst3', { op: 'add', path }); });
+AUDIO.paintFx = paintFx;
+
+E('fx-add')?.addEventListener('click', async () => {
+  const value = E('fx-pick')?.value || '', kind = value.slice(0, 2), target = value.slice(2);
+  if (!target) return;
+  if (kind === 'f:') { if (await command('audio_routing_filter', { type: target, enabled: true, settings: {} })) { fxEditing = Object.keys(fields[target] || {}).length ? target : null; E('filter').value = target; filterForm(); } }
+  else if (kind === 'p:') await command('audio_routing_plugin', { type: target, op: 'on' });
+  else await command('audio_routing_vst3', { op: 'add', path: target });
+  if (E('fx-pick')) E('fx-pick').value = '';
+});
 
 /* ------------------------------------------------------------------ */
 /* Handlers do rack DSP e presets                                      */
@@ -344,21 +371,11 @@ E('save-filter')?.addEventListener('click', () => command('audio_routing_filter'
   settings: Object.fromEntries([...(E('filter-fields')?.querySelectorAll('input') || [])].map(input => [input.dataset.param, Number(input.value)]))
 }));
 
-E('remove-filter')?.addEventListener('click', () => command('audio_routing_filter', {
-  type: E('filter').value,
-  remove: true
-}));
-
 E('open-native-filters')?.addEventListener('click', () => command('audio_routing_open_filters', {}));
 
 // Plugins embutidos. No canal seguem o canal escolhido; o master_me do MAIN independe da seleção.
-const PLUGIN_TYPES = new Set(['master_me', 'pp_track', 'pp_master']);
 const MAIN_BUS = '3Mix Master';
 let masterMeOn = false;
-function paintPlugin() { const b = E('open-plugin'); if (b) b.hidden = !PLUGIN_TYPES.has(E('filter')?.value); }
-E('filter')?.addEventListener('change', paintPlugin);
-paintPlugin();
-E('open-plugin')?.addEventListener('click', () => command('audio_routing_plugin', { type: E('filter').value, op: 'open' }));
 async function pluginNoMain(op) {
   try { await send('audio_routing_plugin', { key: MAIN_BUS, type: 'master_me', op }); return true; }
   catch (error) { toast(error.message, 'warn'); return false; }

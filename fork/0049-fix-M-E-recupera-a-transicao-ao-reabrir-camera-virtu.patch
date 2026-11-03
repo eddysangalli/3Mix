@@ -1,0 +1,251 @@
+From 0e8f37df7fbabbc6f449aca1322f01b125482aac Mon Sep 17 00:00:00 2001
+From: Eddy Sangalli <eddyrodrigues@outlook.com>
+Date: Mon, 2 Nov 2026 22:13:59 -0300
+Subject: [PATCH] fix: M/E recupera a transicao ao reabrir; camera virtual
+ escolhe o conteudo
+
+O identificador de uma transicao muda a cada abertura, e o M/E que tinha uma
+escolhida parava de cortar. Agora guarda o nome e reaponta; sem ela, volta a padrao.
+A camera virtual aceita o Programa ou uma cena, inclusive o PGM de um M/E.
+Textos restantes com o nome antigo passam a 3Mix.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ frontend/forms/OBSAbout.ui                   |  2 +-
+ frontend/widgets/FreeMixMixEffectManager.hpp | 35 ++++++++++++++++++--
+ frontend/widgets/FreeMixMultistream.cpp      | 19 ++++++++++-
+ frontend/widgets/FreeMixSdiOutput.hpp        |  2 +-
+ frontend/widgets/OBSBasic.hpp                |  4 +++
+ frontend/widgets/OBSBasic_VirtualCam.cpp     | 18 ++++++++++
+ plugins/decklink/decklink-output.cpp         |  4 +--
+ 7 files changed, 76 insertions(+), 8 deletions(-)
+
+diff --git a/frontend/forms/OBSAbout.ui b/frontend/forms/OBSAbout.ui
+index 20fb8c0..6f9b322 100644
+--- a/frontend/forms/OBSAbout.ui
++++ b/frontend/forms/OBSAbout.ui
+@@ -76,7 +76,7 @@
+        <item>
+         <widget class="QLabel" name="name">
+          <property name="text">
+-          <string notr="true">FreeMix Studio</string>
++          <string notr="true">3Mix Studio</string>
+          </property>
+         </widget>
+        </item>
+diff --git a/frontend/widgets/FreeMixMixEffectManager.hpp b/frontend/widgets/FreeMixMixEffectManager.hpp
+index bc78e3b..ab49434 100644
+--- a/frontend/widgets/FreeMixMixEffectManager.hpp
++++ b/frontend/widgets/FreeMixMixEffectManager.hpp
+@@ -12,6 +12,7 @@ public:
+ struct IndependentMix {
+ 	std::string previewUuid, programUuid;
+ 	std::string transitionUuid;
++	std::string transitionName;
+ 	uint32_t width = 720, height = 1280;
+ 	bool fill = true;
+ 	double positionX = 0.5, positionY = 0.5, zoom = 1.0;
+@@ -210,9 +211,35 @@ OBSSourceAutoRelease FrameMixSource(IndependentMix &mix, obs_source_t *source)
+ 	obs_scene_release(scene);
+ 	return framed;
+ }
++// O identificador de uma transição muda a cada abertura do programa; o nome não. Sem isso, escolher uma
++// transição e reabrir deixava o M/E sem transição, recusando CUT e AUTO até o fim da sessão.
++std::string TransitionUuidByName(const std::string &name)
++{
++	std::string found;
++	if(name.empty())return found;
++	obs_frontend_source_list list={};
++	obs_frontend_get_transitions(&list);
++	for(size_t n=0;n<list.sources.num;n++){obs_source_t *t=list.sources.array[n];if(name==obs_source_get_name(t)){found=obs_source_get_uuid(t);break;}}
++	obs_frontend_source_list_free(&list);
++	return found;
++}
++bool TransitionUuidUsable(const std::string &uuid)
++{
++	OBSSourceAutoRelease source=obs_get_source_by_uuid(uuid.c_str());
++	return source&&obs_source_get_type(source)==OBS_SOURCE_TYPE_TRANSITION&&!IsPrivateSource(source);
++}
++// Reaponta pelo nome. Se a transição não existe mais, o M/E volta à padrão em vez de travar.
++void ResolveMixTransition(IndependentMix &mix)
++{
++	if(mix.transition||mix.transitionUuid.empty()||mix.transitionUuid=="builtin:move_transition"||TransitionUuidUsable(mix.transitionUuid))return;
++	const std::string current=TransitionUuidByName(mix.transitionName);
++	if(current.empty())mix.transitionName.clear();
++	mix.transitionUuid=current;
++}
+ bool EnsureIndependentMix(IndependentMix &mix, uint32_t mixId)
+ {
+ 	if (mix.transition) {RefreshStingerTaps(mix);EnsurePublicProxy(mix,mixId);return true;}
++	ResolveMixTransition(mix);
+ 	if(mix.transitionUuid.empty()) {
+ 		mix.transition = obs_source_create_private("fade_transition", "3Mix Mix 2", nullptr);
+ 	} else if(mix.transitionUuid=="builtin:move_transition") {
+@@ -265,7 +292,7 @@ void DescribeMix(obs_data_t *response, IndependentMix &mix, uint32_t mixId)
+ 	obs_data_set_int(response, "width", mix.width); obs_data_set_int(response, "height", mix.height);
+ 	obs_data_set_bool(response, "fill", mix.fill);
+ 	obs_data_set_double(response,"positionX",mix.positionX);obs_data_set_double(response,"positionY",mix.positionY);obs_data_set_double(response,"zoom",mix.zoom);
+-	obs_data_set_string(response,"transitionUuid",mix.transitionUuid.c_str());
++	obs_data_set_string(response,"transitionUuid",mix.transitionUuid.c_str());obs_data_set_string(response,"transitionName",mix.transitionName.c_str());
+ 	// Nesting: the proxy's UUID is a stable public identity for this M/E's live
+ 	// output, safe to Patch into another Input — it survives any number of
+ 	// configure/reload cycles (unlike mix.transition itself, which gets
+@@ -300,6 +327,7 @@ void RequestMix(obs_data_t *request, obs_data_t *response, void *)
+ 	{
+ 		if(mixId<2||mixId>4){obs_data_set_bool(response,"success",false);obs_data_set_string(response,"error","select Mix 2, 3 or 4");return;}
+ 		IndependentMix &mix=independentMixes[mixId-2];
++		ResolveMixTransition(mix);
+ 		DescribeMix(response,mix,mixId);
+ 		std::string error;
+ 		if (action == "configure") {
+@@ -316,7 +344,7 @@ void RequestMix(obs_data_t *request, obs_data_t *response, void *)
+ 			else if(!std::isfinite(positionX)||!std::isfinite(positionY)||!std::isfinite(zoom)||positionX<0||positionX>1||positionY<0||positionY>1||zoom<1||zoom>4)error="invalid Mix 2 crop position or zoom";
+ 			else if(transitionUuid=="builtin:move_transition"&&!moveLoaded)error="Move plugin is not loaded; choose Fade or another available transition explicitly";
+ 			else if(!transitionUuid.empty()&&transitionUuid!="builtin:move_transition"&&(!selected||obs_source_get_type(selected)!=OBS_SOURCE_TYPE_TRANSITION||IsPrivateSource(selected)))error="select a loaded transition";
+-			else { ClearIndependentTransition(mix);mix.width = width; mix.height = height; mix.fill = fill; mix.positionX=positionX;mix.positionY=positionY;mix.zoom=zoom;mix.transitionUuid=transitionUuid; if(!mix.programUuid.empty())EnsureIndependentMix(mix,mixId); }
++			else { ClearIndependentTransition(mix);mix.width = width; mix.height = height; mix.fill = fill; mix.positionX=positionX;mix.positionY=positionY;mix.zoom=zoom;mix.transitionUuid=transitionUuid;mix.transitionName=selected?obs_source_get_name(selected):""; if(!mix.programUuid.empty())EnsureIndependentMix(mix,mixId); }
+ 		} else if (action == "preview") {
+ 			OBSSourceAutoRelease source = obs_get_source_by_uuid(uuid.c_str());
+ 			if (!source || IsPrivateSource(source) || !obs_source_get_width(source)) error = "select a video input outside private director sources";
+@@ -358,6 +386,7 @@ void RestoreIndependentMixes()
+ {
+ 	for(size_t i=0;i<independentMixes.size();i++){
+ 		auto &mix=independentMixes[i];
++		ResolveMixTransition(mix);
+ 		if(mix.transition||mix.programUuid.empty())continue;
+ 		OBSSourceAutoRelease source=obs_get_source_by_uuid(mix.programUuid.c_str());
+ 		if(!source)continue;
+@@ -379,7 +408,7 @@ void LoadIndependentMix()
+ 	for(size_t i=0;i<independentMixes.size();i++){
+ 		OBSDataAutoRelease row=list&&i<obs_data_array_count(list)?obs_data_array_item(list,i):nullptr;if(!row&&i==0){row=obs_data_create();obs_data_apply(row,data);}if(!row)continue;auto &mix=independentMixes[i];
+ 		const auto w=uint32_t(obs_data_get_int(row,"width")),h=uint32_t(obs_data_get_int(row,"height"));if(w>=240&&w<=3840&&h>=240&&h<=3840&&!(w%2)&&!(h%2)){mix.width=w;mix.height=h;}
+-		mix.fill=obs_data_get_bool(row,"fill");mix.transitionUuid=obs_data_get_string(row,"transitionUuid");
++		mix.fill=obs_data_get_bool(row,"fill");mix.transitionUuid=obs_data_get_string(row,"transitionUuid");mix.transitionName=obs_data_get_string(row,"transitionName");
+ 		const double x=obs_data_has_user_value(row,"positionX")?obs_data_get_double(row,"positionX"):0.5,y=obs_data_has_user_value(row,"positionY")?obs_data_get_double(row,"positionY"):0.5,z=obs_data_has_user_value(row,"zoom")?obs_data_get_double(row,"zoom"):1.0;
+ 		mix.positionX=std::isfinite(x)&&x>=0&&x<=1?x:0.5;mix.positionY=std::isfinite(y)&&y>=0&&y<=1?y:0.5;mix.zoom=std::isfinite(z)&&z>=1&&z<=4?z:1.0;
+ 		mix.previewUuid=obs_data_get_string(row,"previewUuid");mix.programUuid=obs_data_get_string(row,"programUuid");
+diff --git a/frontend/widgets/FreeMixMultistream.cpp b/frontend/widgets/FreeMixMultistream.cpp
+index cde98ae..e3036f4 100644
+--- a/frontend/widgets/FreeMixMultistream.cpp
++++ b/frontend/widgets/FreeMixMultistream.cpp
+@@ -188,6 +188,22 @@ void RequestOpenVstEditor(obs_data_t *request,obs_data_t *response,void *){
+ 		if(!error.empty())obs_data_set_string(response,"error",error.c_str());
+ 	},Qt::BlockingQueuedConnection);
+ }
++void RequestVirtualCamSource(obs_data_t *request,obs_data_t *response,void *){
++	QMetaObject::invokeMethod(OBSBasic::Get(),[&](){
++		std::string error;
++		auto *main=OBSBasic::Get();
++		if(frontendClosing)error="closing";
++		else if(obs_data_get_bool(request,"set")){
++			const std::string scene=obs_data_get_string(request,"sceneName");
++			OBSSourceAutoRelease source=scene.empty()?nullptr:obs_get_source_by_name(scene.c_str());
++			if(!scene.empty()&&(!source||!obs_source_is_scene(source)))error="Cena não encontrada";
++			else{main->SetVirtualCamScene(scene);obs_frontend_save();}
++		}
++		obs_data_set_bool(response,"success",error.empty());
++		if(!error.empty())obs_data_set_string(response,"error",error.c_str());
++		obs_data_set_string(response,"scene",main->VirtualCamScene().c_str());
++	},Qt::BlockingQueuedConnection);
++}
+ void RequestSdiOutput(obs_data_t *request,obs_data_t *response,void *){QMetaObject::invokeMethod(OBSBasic::Get(),[=](){if(frontendClosing){obs_data_set_bool(response,"success",false);return;}freemix_sdi::Request(request,response,IsPrivateSource);},Qt::BlockingQueuedConnection);}
+ void RequestSrtHdrOutput(obs_data_t *request,obs_data_t *response,void *){
+  auto *main=OBSBasic::Get();if(!main){obs_data_set_bool(response,"success",false);return;}
+@@ -1291,7 +1307,7 @@ void RequestOpenPanel(obs_data_t *request, obs_data_t *response, void *)
+   const bool file = url.isLocalFile() && !panelRoot.isEmpty() &&
+    QFileInfo(url.toLocalFile()).canonicalFilePath().startsWith(panelRoot + "/", Qt::CaseInsensitive);
+   const bool local = url.scheme() == "http" && (url.host() == "127.0.0.1" || url.host() == "localhost") && url.userInfo().isEmpty();
+-  if (!cef || (!file && !local)) { obs_data_set_bool(response, "success", false); obs_data_set_string(response, "error", !cef ? "O navegador interno não está disponível." : "A janela precisa usar um endereço local do FreeMix."); return; }
++  if (!cef || (!file && !local)) { obs_data_set_bool(response, "success", false); obs_data_set_string(response, "error", !cef ? "O navegador interno não está disponível." : "A janela precisa usar um endereço local do 3Mix."); return; }
+   auto &window = panelWindows[raw.toStdString()];
+   if (!window) {
+    // True top-level window: no owner, so it can live on another monitor,
+@@ -1682,6 +1698,7 @@ void RegisterVendor()
+  obs_websocket_vendor_register_request(vendor,"srt_hdr_output",RequestSrtHdrOutput,nullptr);
+  obs_websocket_vendor_register_request(vendor,"sdi_output",RequestSdiOutput,nullptr);
+  obs_websocket_vendor_register_request(vendor,"open_vst_editor",RequestOpenVstEditor,nullptr);
++ obs_websocket_vendor_register_request(vendor,"virtual_cam_source",RequestVirtualCamSource,nullptr);
+  obs_websocket_vendor_register_request(vendor, "control_mix", RequestMix, nullptr);
+  obs_websocket_vendor_register_request(vendor, "get_mixes", RequestMix, nullptr);
+ 	obs_websocket_vendor_register_request(vendor, "project_creation_policy", RequestProjectPolicy, nullptr);
+diff --git a/frontend/widgets/FreeMixSdiOutput.hpp b/frontend/widgets/FreeMixSdiOutput.hpp
+index 0cd690c..f180a27 100644
+--- a/frontend/widgets/FreeMixSdiOutput.hpp
++++ b/frontend/widgets/FreeMixSdiOutput.hpp
+@@ -18,7 +18,7 @@ inline std::string HdrPreflight(obs_data_t *config,bool (*isPrivate)(obs_source_
+  const std::string audioUuid=obs_data_get_string(config,"audioSourceUuid");if(!audioUuid.empty()){OBSSourceAutoRelease audio=obs_get_source_by_uuid(audioUuid.c_str());if(!FreeMixAudioBusAllowed(audio))return "Áudio independente deve ser um bus público com tracks globais desligadas";}
+  OBSDataAutoRelease settings=Settings(config);calldata_t call;calldata_init(&call);calldata_set_ptr(&call,"config",settings.Get());calldata_set_ptr(&call,"response",proof);
+  const bool found=proc_handler_call(obs_get_proc_handler(),"freemix_decklink_hdr_preflight",&call);calldata_free(&call);
+- if(!found)return "Plugin/driver DeckLink não inicializou ou esta versão não expõe o contrato HDR. Verifique Desktop Video/placa e a versão do FreeMix";
++ if(!found)return "Plugin/driver DeckLink não inicializou ou esta versão não expõe o contrato HDR. Verifique Desktop Video/placa e a versão do 3Mix";
+  if(!obs_data_get_bool(proof,"success"))return obs_data_get_string(proof,"error");
+  if(obs_data_get_int(proof,"width")<=0||obs_data_get_int(proof,"height")<=0||obs_data_get_int(proof,"width")>7680||obs_data_get_int(proof,"height")>4320||obs_data_get_int(proof,"fpsNum")<=0||obs_data_get_int(proof,"fpsDen")<=0)return "Driver retornou dimensões/FPS HDR inválidos";
+  return "";
+diff --git a/frontend/widgets/OBSBasic.hpp b/frontend/widgets/OBSBasic.hpp
+index ef9df54..4ec7937 100644
+--- a/frontend/widgets/OBSBasic.hpp
++++ b/frontend/widgets/OBSBasic.hpp
+@@ -1694,6 +1694,10 @@ public slots:
+ 
+ 	bool VirtualCamActive();
+ 
++public:
++	void SetVirtualCamScene(const std::string &scene);
++	std::string VirtualCamScene() const;
++
+ private slots:
+ 	void UpdateVirtualCamConfig(const VCamConfig &config);
+ 	void RestartVirtualCam(const VCamConfig &config);
+diff --git a/frontend/widgets/OBSBasic_VirtualCam.cpp b/frontend/widgets/OBSBasic_VirtualCam.cpp
+index ace791e..78d3fd3 100644
+--- a/frontend/widgets/OBSBasic_VirtualCam.cpp
++++ b/frontend/widgets/OBSBasic_VirtualCam.cpp
+@@ -156,6 +156,24 @@ void OBSBasic::UpdateVirtualCamConfig(const VCamConfig &config)
+ 	log_vcam_changed(config, false);
+ }
+ 
++void OBSBasic::SetVirtualCamScene(const std::string &scene)
++{
++	VCamConfig config;
++	config.type = scene.empty() ? VCamOutputType::ProgramView : VCamOutputType::SceneOutput;
++	config.scene = scene;
++	// Entre o Programa e uma cena a câmera muda de caminho de vídeo, e isso só vale reiniciando-a.
++	const bool changesPath = (vcamConfig.type == VCamOutputType::ProgramView) != (config.type == VCamOutputType::ProgramView);
++	if (VirtualCamActive() && changesPath)
++		RestartVirtualCam(config);
++	else
++		UpdateVirtualCamConfig(config);
++}
++
++std::string OBSBasic::VirtualCamScene() const
++{
++	return vcamConfig.type == VCamOutputType::SceneOutput ? vcamConfig.scene : std::string();
++}
++
+ void OBSBasic::RestartVirtualCam(const VCamConfig &config)
+ {
+ 	restartingVCam = true;
+diff --git a/plugins/decklink/decklink-output.cpp b/plugins/decklink/decklink-output.cpp
+index 5199998..15a9ce6 100644
+--- a/plugins/decklink/decklink-output.cpp
++++ b/plugins/decklink/decklink-output.cpp
+@@ -331,14 +331,14 @@ static obs_properties_t *decklink_output_properties(void *unused)
+ 	fill_out_devices(list);
+ 
+ 	obs_properties_add_list(props, MODE_ID, TEXT_MODE, OBS_COMBO_TYPE_LIST, OBS_COMBO_FORMAT_INT);
+-	auto *hdrModes=obs_properties_add_list(props,"freemix_hdr_modes","FreeMix HDR driver modes",OBS_COMBO_TYPE_LIST,OBS_COMBO_FORMAT_INT);obs_property_set_visible(hdrModes,false);
++	auto *hdrModes=obs_properties_add_list(props,"freemix_hdr_modes","3Mix HDR driver modes",OBS_COMBO_TYPE_LIST,OBS_COMBO_FORMAT_INT);obs_property_set_visible(hdrModes,false);
+ 
+ 	obs_properties_add_bool(props, AUTO_START, TEXT_AUTO_START);
+ 	obs_properties_add_bool(props, FORCE_SDR, TEXT_FORCE_SDR);
+ 
+ 	obs_properties_add_list(props, KEYER, TEXT_ENABLE_KEYER, OBS_COMBO_TYPE_LIST, OBS_COMBO_FORMAT_INT);
+ 	// Capability marker only; a driver/mode preflight is required before HDR start.
+-	auto *hdr=obs_properties_add_bool(props,"freemix_hdr_contract","FreeMix explicit HDR contract1");obs_property_set_visible(hdr,false);
++	auto *hdr=obs_properties_add_bool(props,"freemix_hdr_contract","3Mix explicit HDR contract1");obs_property_set_visible(hdr,false);
+ 
+ 	return props;
+ }
+-- 
+2.56.0.windows.1
+

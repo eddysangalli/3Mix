@@ -174,7 +174,8 @@ void RequestOpenVstEditor(obs_data_t *request,obs_data_t *response,void *){
 		else{
 			OBSSourceAutoRelease source=obs_get_source_by_name(sourceName.c_str());
 			OBSSourceAutoRelease filter=source?obs_source_get_filter_by_name(source,filterName.c_str()):nullptr;
-			if(!filter||std::string(obs_source_get_id(filter))!="vst_filter")error="VST filter not found";
+			const std::string filterKind=filter?obs_source_get_id(filter):"";
+			if(filterKind!="vst_filter"&&filterKind!="vst3_filter")error="VST filter not found";
 			else{
 				obs_properties_t *props=obs_source_properties(filter);
 				obs_property_t *button=props?obs_properties_get(props,"open_vst_settings"):nullptr;
@@ -185,6 +186,22 @@ void RequestOpenVstEditor(obs_data_t *request,obs_data_t *response,void *){
 		}
 		obs_data_set_bool(response,"success",error.empty());
 		if(!error.empty())obs_data_set_string(response,"error",error.c_str());
+	},Qt::BlockingQueuedConnection);
+}
+void RequestVirtualCamSource(obs_data_t *request,obs_data_t *response,void *){
+	QMetaObject::invokeMethod(OBSBasic::Get(),[&](){
+		std::string error;
+		auto *main=OBSBasic::Get();
+		if(frontendClosing)error="closing";
+		else if(obs_data_get_bool(request,"set")){
+			const std::string scene=obs_data_get_string(request,"sceneName");
+			OBSSourceAutoRelease source=scene.empty()?nullptr:obs_get_source_by_name(scene.c_str());
+			if(!scene.empty()&&(!source||!obs_source_is_scene(source)))error="Cena não encontrada";
+			else{main->SetVirtualCamScene(scene);obs_frontend_save();}
+		}
+		obs_data_set_bool(response,"success",error.empty());
+		if(!error.empty())obs_data_set_string(response,"error",error.c_str());
+		obs_data_set_string(response,"scene",main->VirtualCamScene().c_str());
 	},Qt::BlockingQueuedConnection);
 }
 void RequestSdiOutput(obs_data_t *request,obs_data_t *response,void *){QMetaObject::invokeMethod(OBSBasic::Get(),[=](){if(frontendClosing){obs_data_set_bool(response,"success",false);return;}freemix_sdi::Request(request,response,IsPrivateSource);},Qt::BlockingQueuedConnection);}
@@ -1290,7 +1307,7 @@ void RequestOpenPanel(obs_data_t *request, obs_data_t *response, void *)
   const bool file = url.isLocalFile() && !panelRoot.isEmpty() &&
    QFileInfo(url.toLocalFile()).canonicalFilePath().startsWith(panelRoot + "/", Qt::CaseInsensitive);
   const bool local = url.scheme() == "http" && (url.host() == "127.0.0.1" || url.host() == "localhost") && url.userInfo().isEmpty();
-  if (!cef || (!file && !local)) { obs_data_set_bool(response, "success", false); obs_data_set_string(response, "error", !cef ? "O navegador interno não está disponível." : "A janela precisa usar um endereço local do FreeMix."); return; }
+  if (!cef || (!file && !local)) { obs_data_set_bool(response, "success", false); obs_data_set_string(response, "error", !cef ? "O navegador interno não está disponível." : "A janela precisa usar um endereço local do 3Mix."); return; }
   auto &window = panelWindows[raw.toStdString()];
   if (!window) {
    // True top-level window: no owner, so it can live on another monitor,
@@ -1681,6 +1698,7 @@ void RegisterVendor()
  obs_websocket_vendor_register_request(vendor,"srt_hdr_output",RequestSrtHdrOutput,nullptr);
  obs_websocket_vendor_register_request(vendor,"sdi_output",RequestSdiOutput,nullptr);
  obs_websocket_vendor_register_request(vendor,"open_vst_editor",RequestOpenVstEditor,nullptr);
+ obs_websocket_vendor_register_request(vendor,"virtual_cam_source",RequestVirtualCamSource,nullptr);
  obs_websocket_vendor_register_request(vendor, "control_mix", RequestMix, nullptr);
  obs_websocket_vendor_register_request(vendor, "get_mixes", RequestMix, nullptr);
 	obs_websocket_vendor_register_request(vendor, "project_creation_policy", RequestProjectPolicy, nullptr);

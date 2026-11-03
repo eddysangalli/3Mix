@@ -42,7 +42,14 @@ Limites do VST3, medidos nos testes:
 - Plugin que não abre deixa o áudio passar direto, e o motivo fica só no log do motor.
 - Testado com tom e medidor. Ainda não foi avaliado de ouvido, nem em máquina limpa, nem durante transmissão.
 
-Também pedido, sem frente própria: uso mais leve de CPU e GPU. Depende de medir sob carga antes de mudar qualquer coisa; o ensaio prolongado está na P0 de estabilidade.
+Limites do Multi-M/E, medidos nos testes:
+
+- O PGM de um M/E só aparece nas Entradas depois do primeiro uso daquele M/E.
+- O corte vale no motor em cerca de 45 ms, mas a confirmação volta à tela em cerca de 900 ms. A causa dessa demora ainda não foi encontrada.
+- Desligar os monitores das faixas não mudou o motor no projeto de demonstração: 0,6% de CPU e render de 0,72 ms ligados, 0,69 ms desligados. O alívio com câmeras reais não foi medido.
+- Câmera virtual: escolhe Programa, entrada ou PGM de M/E. Depende do driver instalado no Windows; nesta máquina ele vem de uma instalação do OBS Studio e aparece nos outros programas como "OBS Virtual Camera". Em computador sem esse driver, a câmera não fica disponível. Trocar entre o Programa e outro conteúdo com a câmera ligada a reinicia.
+
+Também pedido, sem frente própria: uso mais leve de CPU e GPU e equilíbrio entre RTX e núcleos do processador. Nada foi alterado no motor para isso. Depende de medir sob carga antes de mudar qualquer coisa; o ensaio prolongado está na P0 de estabilidade.
 
 ---
 

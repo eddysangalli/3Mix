@@ -402,6 +402,7 @@
       <header class="a-strip-head" title="${channel.private ? 'Mic privado da Calls — somente leitura' : 'Clique para inspecionar este canal'}">
         <span class="a-strip-num">${String(channel.index + 1).padStart(2, '0')}</span>
         <span class="a-strip-name" title="${esc(channel.name)}">${esc(channel.label)}</span>
+        <span class="a-strip-fx" data-fx hidden></span>
       </header>
       <div class="a-device">
         <span class="sr-only">Dispositivo</span>
@@ -549,7 +550,13 @@
     renderInspector();
   }
 
+  function masterInputName() {
+    return (modelChannels().outputs.find(channel => channel.bus === 'M') || {}).name || '3Mix Master';
+  }
+
   function paintMeter(el, levels, strip, now) {
+    // Structural snapshots must not overwrite a fresher streamed sample.
+    if (strip.liveLevels && now - strip.liveMeterAt < 500) levels = strip.liveLevels;
     const dbL = levels.length ? dbFromMul(Math.max(levels[0] ?? 0, 0)) : -Infinity;
     const dbR = levels.length ? dbFromMul(Math.max(levels[1] ?? levels[0] ?? 0, 0)) : -Infinity;
     const values = [dbL, dbR];
@@ -574,6 +581,19 @@
     el.classList.toggle('selected', AUDIO.getKey() === channel.key);
     el.classList.toggle('is-muted', channel.muted);
     el.classList.toggle('is-private', channel.private);
+
+    // O canal selecionado usa a leitura mais recente; os demais, a última leitura confirmada.
+    const fxChip = el.querySelector('[data-fx]');
+    if (fxChip) {
+      const current = AUDIO.getDetails();
+      const chain = (current?.key === channel.key ? current : details.get(channel.key))?.chain || [];
+      const active = chain.filter(row => row.enabled);
+      const text = chain.length ? 'FX ' + active.length : '';
+      if (fxChip.textContent !== text) fxChip.textContent = text;
+      fxChip.hidden = !chain.length;
+      fxChip.classList.toggle('is-off', !active.length);
+      fxChip.title = chain.map(row => (row.enabled ? '' : '(desligado) ') + row.label).join(' → ');
+    }
 
     const deviceSelect = el.querySelector('[data-device]');
     if (deviceSelect && deviceSelect.dataset.label !== channel.device.label) {
@@ -906,12 +926,12 @@
     const scroll = drawer.querySelector('.a-insp-scroll');
     const empty = E('insp-empty');
     if (!selected) {
-      if (title) title.textContent = 'INSPECTOR - —';
+      if (title) title.textContent = 'Canal';
       if (scroll) scroll.hidden = true;
       if (empty) empty.hidden = false;
       return;
     }
-    if (title) title.textContent = `INSPECTOR - ${selected.name}`;
+    if (title) { title.textContent = selected.name; title.title = selected.name; }
     if (scroll) scroll.hidden = false;
     if (empty) empty.hidden = true;
 
@@ -981,13 +1001,12 @@
     const dsp = E('insp-dsp');
     if (dsp) dsp.hidden = selected.private;
     const detail = AUDIO.getDetails();
-    const signature = JSON.stringify([detail?.key, detail?.delayMs, detail?.filterOrder, detail?.filters]);
+    const signature = JSON.stringify([detail?.key, detail?.delayMs, detail?.filterOrder, detail?.filters, detail?.chain]);
     if (signature !== lastFilterSignature) {
       lastFilterSignature = signature;
       AUDIO.renderFilterForm?.();
-      const order = E('filter-order');
-      if (order) order.textContent = detail?.filterOrder?.length ? detail.filterOrder.join(' → ') : 'sem filtros';
     }
+    AUDIO.paintFx?.();
   }
 
   function bindInspector() {
@@ -1588,8 +1607,38 @@
   document.addEventListener('audio:request-json', () => readJson(true));
   document.addEventListener('visibilitychange', () => { if (!document.hidden) readJson(true); });
 
+  // Meter events are already streamed by the authenticated API. Do not poll
+  // the full production snapshot faster just to animate the VUs.
+  let meterSocket = null, meterReconnect = null;
+  function connectMeters() {
+    if (disposed) return;
+    meterSocket = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws`);
+    meterSocket.onmessage = event => {
+      if (document.hidden || disposed) return;
+      let message;
+      try { message = JSON.parse(event.data); } catch { return; }
+      if (message.type !== 'meters' || !Array.isArray(message.inputs)) return;
+      const now = performance.now();
+      for (const input of message.inputs) {
+        const strip = strips.get(input.inputName);
+        const levels = (input.inputLevelsMul || []).map(channel => Math.max(0, Number(channel[1]) || 0));
+        if (strip) { strip.liveLevels = levels; strip.liveMeterAt = now; paintMeter(strip.el, levels, strip, now); }
+        // Headphones VU mirrors whatever source is currently routed to it
+        // (Master by default, see paintOutput's `channel || master`).
+        if (input.inputName === masterInputName()) {
+          const hp = strips.get('__headphones__');
+          if (hp) { hp.liveLevels = levels; hp.liveMeterAt = now; paintMeter(hp.el, levels, hp, now); }
+        }
+      }
+    };
+    meterSocket.onclose = () => {
+      if (!disposed) meterReconnect = setTimeout(connectMeters, 2000);
+    };
+    meterSocket.onerror = () => meterSocket.close();
+  }
+  connectMeters();
   const timer = setInterval(readJson, 1500);
-  window.addEventListener('pagehide', () => { disposed = true; clearInterval(timer); });
+  window.addEventListener('pagehide', () => { disposed = true; clearInterval(timer); clearTimeout(meterReconnect); meterSocket?.close(); });
 
   readJson(true);
   refreshDraftUi();

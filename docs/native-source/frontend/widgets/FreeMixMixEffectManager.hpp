@@ -12,6 +12,7 @@ public:
 struct IndependentMix {
 	std::string previewUuid, programUuid;
 	std::string transitionUuid;
+	std::string transitionName;
 	uint32_t width = 720, height = 1280;
 	bool fill = true;
 	double positionX = 0.5, positionY = 0.5, zoom = 1.0;
@@ -210,9 +211,35 @@ OBSSourceAutoRelease FrameMixSource(IndependentMix &mix, obs_source_t *source)
 	obs_scene_release(scene);
 	return framed;
 }
+// O identificador de uma transição muda a cada abertura do programa; o nome não. Sem isso, escolher uma
+// transição e reabrir deixava o M/E sem transição, recusando CUT e AUTO até o fim da sessão.
+std::string TransitionUuidByName(const std::string &name)
+{
+	std::string found;
+	if(name.empty())return found;
+	obs_frontend_source_list list={};
+	obs_frontend_get_transitions(&list);
+	for(size_t n=0;n<list.sources.num;n++){obs_source_t *t=list.sources.array[n];if(name==obs_source_get_name(t)){found=obs_source_get_uuid(t);break;}}
+	obs_frontend_source_list_free(&list);
+	return found;
+}
+bool TransitionUuidUsable(const std::string &uuid)
+{
+	OBSSourceAutoRelease source=obs_get_source_by_uuid(uuid.c_str());
+	return source&&obs_source_get_type(source)==OBS_SOURCE_TYPE_TRANSITION&&!IsPrivateSource(source);
+}
+// Reaponta pelo nome. Se a transição não existe mais, o M/E volta à padrão em vez de travar.
+void ResolveMixTransition(IndependentMix &mix)
+{
+	if(mix.transition||mix.transitionUuid.empty()||mix.transitionUuid=="builtin:move_transition"||TransitionUuidUsable(mix.transitionUuid))return;
+	const std::string current=TransitionUuidByName(mix.transitionName);
+	if(current.empty())mix.transitionName.clear();
+	mix.transitionUuid=current;
+}
 bool EnsureIndependentMix(IndependentMix &mix, uint32_t mixId)
 {
 	if (mix.transition) {RefreshStingerTaps(mix);EnsurePublicProxy(mix,mixId);return true;}
+	ResolveMixTransition(mix);
 	if(mix.transitionUuid.empty()) {
 		mix.transition = obs_source_create_private("fade_transition", "3Mix Mix 2", nullptr);
 	} else if(mix.transitionUuid=="builtin:move_transition") {
@@ -265,7 +292,7 @@ void DescribeMix(obs_data_t *response, IndependentMix &mix, uint32_t mixId)
 	obs_data_set_int(response, "width", mix.width); obs_data_set_int(response, "height", mix.height);
 	obs_data_set_bool(response, "fill", mix.fill);
 	obs_data_set_double(response,"positionX",mix.positionX);obs_data_set_double(response,"positionY",mix.positionY);obs_data_set_double(response,"zoom",mix.zoom);
-	obs_data_set_string(response,"transitionUuid",mix.transitionUuid.c_str());
+	obs_data_set_string(response,"transitionUuid",mix.transitionUuid.c_str());obs_data_set_string(response,"transitionName",mix.transitionName.c_str());
 	// Nesting: the proxy's UUID is a stable public identity for this M/E's live
 	// output, safe to Patch into another Input — it survives any number of
 	// configure/reload cycles (unlike mix.transition itself, which gets
@@ -300,6 +327,7 @@ void RequestMix(obs_data_t *request, obs_data_t *response, void *)
 	{
 		if(mixId<2||mixId>4){obs_data_set_bool(response,"success",false);obs_data_set_string(response,"error","select Mix 2, 3 or 4");return;}
 		IndependentMix &mix=independentMixes[mixId-2];
+		ResolveMixTransition(mix);
 		DescribeMix(response,mix,mixId);
 		std::string error;
 		if (action == "configure") {
@@ -316,7 +344,7 @@ void RequestMix(obs_data_t *request, obs_data_t *response, void *)
 			else if(!std::isfinite(positionX)||!std::isfinite(positionY)||!std::isfinite(zoom)||positionX<0||positionX>1||positionY<0||positionY>1||zoom<1||zoom>4)error="invalid Mix 2 crop position or zoom";
 			else if(transitionUuid=="builtin:move_transition"&&!moveLoaded)error="Move plugin is not loaded; choose Fade or another available transition explicitly";
 			else if(!transitionUuid.empty()&&transitionUuid!="builtin:move_transition"&&(!selected||obs_source_get_type(selected)!=OBS_SOURCE_TYPE_TRANSITION||IsPrivateSource(selected)))error="select a loaded transition";
-			else { ClearIndependentTransition(mix);mix.width = width; mix.height = height; mix.fill = fill; mix.positionX=positionX;mix.positionY=positionY;mix.zoom=zoom;mix.transitionUuid=transitionUuid; if(!mix.programUuid.empty())EnsureIndependentMix(mix,mixId); }
+			else { ClearIndependentTransition(mix);mix.width = width; mix.height = height; mix.fill = fill; mix.positionX=positionX;mix.positionY=positionY;mix.zoom=zoom;mix.transitionUuid=transitionUuid;mix.transitionName=selected?obs_source_get_name(selected):""; if(!mix.programUuid.empty())EnsureIndependentMix(mix,mixId); }
 		} else if (action == "preview") {
 			OBSSourceAutoRelease source = obs_get_source_by_uuid(uuid.c_str());
 			if (!source || IsPrivateSource(source) || !obs_source_get_width(source)) error = "select a video input outside private director sources";
@@ -358,6 +386,7 @@ void RestoreIndependentMixes()
 {
 	for(size_t i=0;i<independentMixes.size();i++){
 		auto &mix=independentMixes[i];
+		ResolveMixTransition(mix);
 		if(mix.transition||mix.programUuid.empty())continue;
 		OBSSourceAutoRelease source=obs_get_source_by_uuid(mix.programUuid.c_str());
 		if(!source)continue;
@@ -379,7 +408,7 @@ void LoadIndependentMix()
 	for(size_t i=0;i<independentMixes.size();i++){
 		OBSDataAutoRelease row=list&&i<obs_data_array_count(list)?obs_data_array_item(list,i):nullptr;if(!row&&i==0){row=obs_data_create();obs_data_apply(row,data);}if(!row)continue;auto &mix=independentMixes[i];
 		const auto w=uint32_t(obs_data_get_int(row,"width")),h=uint32_t(obs_data_get_int(row,"height"));if(w>=240&&w<=3840&&h>=240&&h<=3840&&!(w%2)&&!(h%2)){mix.width=w;mix.height=h;}
-		mix.fill=obs_data_get_bool(row,"fill");mix.transitionUuid=obs_data_get_string(row,"transitionUuid");
+		mix.fill=obs_data_get_bool(row,"fill");mix.transitionUuid=obs_data_get_string(row,"transitionUuid");mix.transitionName=obs_data_get_string(row,"transitionName");
 		const double x=obs_data_has_user_value(row,"positionX")?obs_data_get_double(row,"positionX"):0.5,y=obs_data_has_user_value(row,"positionY")?obs_data_get_double(row,"positionY"):0.5,z=obs_data_has_user_value(row,"zoom")?obs_data_get_double(row,"zoom"):1.0;
 		mix.positionX=std::isfinite(x)&&x>=0&&x<=1?x:0.5;mix.positionY=std::isfinite(y)&&y>=0&&y<=1?y:0.5;mix.zoom=std::isfinite(z)&&z>=1&&z<=4?z:1.0;
 		mix.previewUuid=obs_data_get_string(row,"previewUuid");mix.programUuid=obs_data_get_string(row,"programUuid");

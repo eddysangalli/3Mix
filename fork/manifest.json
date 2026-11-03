@@ -1,8 +1,8 @@
 {
   "upstream": "https://github.com/obsproject/obs-studio.git",
   "base": "ba2f32bdf791005443988a4955e963663e16b1ed",
-  "head": "36f44c1f21904ca17153a3d5f03dd162458dd134",
-  "version": "0.1.0-local.20261102174725",
+  "head": "0e8f37df7fbabbc6f449aca1322f01b125482aac",
+  "version": "0.1.0-local.20261103011403",
   "patches": [
     {
       "path": "0001-feat-branding-replace-OBS-identity-with-FreeMix-Stud.patch",
@@ -187,11 +187,23 @@
     {
       "path": "0046-fix-obs-vst-abre-o-editor-em-filtro-criado-fora-da-t.patch",
       "sha256": "356a6c65d46632073817e2d0568cc64b5294085be10c55dd9abf78b50289142d"
+    },
+    {
+      "path": "0047-feat-filtro-VST3-de-64-bits-com-o-SDK-da-Steinberg.patch",
+      "sha256": "58bc970f1fc2e0d515af3422365893db1dd8d17ef0ed90bb7cea851f3f357704"
+    },
+    {
+      "path": "0048-feat-ate-16-saidas-DeckLink-cada-uma-com-configuraca.patch",
+      "sha256": "2f47429b0b67ec7fdea30530b480df5b737bf2ca5c8fd191717d4c69d5e2022a"
+    },
+    {
+      "path": "0049-fix-M-E-recupera-a-transicao-ao-reabrir-camera-virtu.patch",
+      "sha256": "af9dec9bed88ff91bf3c1eb54579068c78a5ec7361d80f6c7880afaac12c3415"
     }
   ],
-  "sourceUpdatedAt": "2026-11-02T20:47:50.140Z",
+  "sourceUpdatedAt": "2026-11-03T01:14:42.852Z",
   "sourceSchema": 2,
-  "tree": "5968a3c0ef21e4989d61cceeb872dfcf0270b8cc",
+  "tree": "0b5c2546502eadbc28e7fee4532b575b5cc59daf",
   "submodules": [
     {
       "path": "deps/libdshowcapture/src",

@@ -28,7 +28,8 @@ export class SettingsEngine {
   const cat=mode==='Advanced'?'AdvOut':'SimpleOutput',values={};for(const n of ['RecFormat2','RecQuality','RecEncoder','StreamEncoder','VBitrate','ABitrate'])values[n]=await P(cat,n);
   const [nativePreferences,native]=await Promise.all([this.preferences.read().catch(e=>({error:e.message,fields:[]})),p.vendor('get_destinations',{},'freemix').catch(e=>({error:e.message,encoders:[],protocols:[]}))]);
   const server=service.streamServiceSettings.server||'',protocol=streamProtocol(service,server);
-  return {nativePreferences,capabilities:{simpleEncoders:simpleEncoderChoices(native),protocols:normalizeProtocols(native),recordingFormats,error:native.error||null},protocol,serviceType:service.streamServiceType,serviceName:service.streamServiceSettings.service||'',video,recordDirectory:dir.recordDirectory,server,hasKey:!!service.streamServiceSettings.key,mode:mode||'Simple',values,stats,virtualCamera:virtual.outputActive};
+  const virtualScene=await p.req('CallVendorRequest',{vendorName:'freemix',requestType:'virtual_cam_source',requestData:{}}).then(r=>r.responseData?.scene||'').catch(()=>'');
+  return {nativePreferences,capabilities:{simpleEncoders:simpleEncoderChoices(native),protocols:normalizeProtocols(native),recordingFormats,error:native.error||null},protocol,serviceType:service.streamServiceType,serviceName:service.streamServiceSettings.service||'',video,recordDirectory:dir.recordDirectory,server,hasKey:!!service.streamServiceSettings.key,mode:mode||'Simple',values,stats,virtualCameraScene:virtualScene,virtualCamera:virtual.outputActive};
  }
  async execute(action,d={}){const p=this.p;
    if(['settings_encoder_read','settings_encoder_preview','settings_encoder_apply'].includes(action)){if(!['stream','record'].includes(d.target))throw Error('Destino do encoder inválido');if(action!=='settings_encoder_read'&&(typeof d.encoder!=='string'||typeof d.revision!=='string'||!/^([a-f0-9]{64})$/.test(d.revision)||!d.values||typeof d.values!=='object'||Array.isArray(d.values)||JSON.stringify(d.values).length>32768))throw Error('Parâmetros de encoder inválidos');this.last=await p.vendor('control',{action:action.replace('settings_',''),target:d.target,encoder:d.encoder,revision:d.revision,values:d.values},'freemix-preferences');return;}
@@ -45,6 +46,7 @@ export class SettingsEngine {
   if(action==='settings_projector'){if(!['PROGRAM','PREVIEW','MULTIVIEW'].includes(d.mix))throw Error('Saída inválida');await p.req('OpenVideoMixProjector',{videoMixType:'OBS_WEBSOCKET_VIDEO_MIX_TYPE_'+d.mix,monitorIndex:-1});return;}
   if(action==='settings_source_projector'){await p.req('OpenSourceProjector',{sourceName:p.scene(d.input).name,monitorIndex:-1});return;}
   if(action==='settings_virtual'){await p.req((d.active?'Start':'Stop')+'VirtualCam');return;}
+  if(action==='settings_virtual_source'){const r=await p.req('CallVendorRequest',{vendorName:'freemix',requestType:'virtual_cam_source',requestData:{set:true,sceneName:d.input?p.scene(d.input).name:''}});if(!r.responseData?.success)throw Error(r.responseData?.error||'O motor não confirmou o conteúdo da câmera virtual');return;}
   if(action==='settings_stream_key'){
     const key=String(d.key||'');
     if(!key||key.length>2000||/[\x00-\x1f]/.test(key))throw Error('Chave de transmissão inválida');

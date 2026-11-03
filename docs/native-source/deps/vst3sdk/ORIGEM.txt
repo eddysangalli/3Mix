@@ -1,0 +1,2 @@
+VST3 SDK 3.8.1 da Steinberg (MIT), commit 3cdf9ca. Só as partes de host usadas por plugins/3mix-vst3.
+Origem: https://github.com/steinbergmedia/vst3sdk

@@ -15,6 +15,10 @@
 - Entrada só de áudio mede e entra na mistura sem depender de corte; mic junto de câmera segue a cena dela e entrada criada no ar nasce muda.
 - Fontes do motor passam a ficar em `motor/`, no mesmo repositório.
 - master_me e PodcastPlugins (Track e Master) embutidos: rack DSP, aba Plugins do mixer, inclusive no Master e nos barramentos, com a janela própria de cada um.
+- Corrigido: o M/E com transição escolhida parava de cortar depois de reabrir o 3Mix, porque o identificador da transição muda a cada abertura. Agora ele a recupera pelo nome e, se ela não existir mais, volta à padrão.
+- Corrigido: depois de cerca de 128 cortes na mesma sessão, os M/Es paravam de aceitar comandos até reiniciar o 3Mix. Corrigido também: depois de um comando recusado, a faixa do M/E não enviava mais nada.
+- Mixer: inspetor compacto, com Ganho, Pan e Delay lado a lado e os efeitos do canal sempre à vista, na ordem real, para ligar, ajustar, abrir e remover. Cada canal mostra quantos efeitos estão ativos.
+- Câmera virtual escolhe o conteúdo: Programa, entrada ou PGM de M/E.
 - Até 16 saídas DeckLink, cada uma com placa, modo, conteúdo e áudio próprios, incluindo o PGM de qualquer M/E. A tela de Saídas passa a chamar os mixes de M/E. Ainda sem teste com placa.
 - Plugins VST3 de 64 bits no mixer e nos barramentos, com a janela do próprio plugin e ajuste preservado depois de uma queda do motor.
 - Atraso de áudio e vídeo por entrada, no menu da entrada, medido quadro a quadro em gravação.

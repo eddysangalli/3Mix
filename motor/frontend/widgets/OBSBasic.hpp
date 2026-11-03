@@ -1694,6 +1694,10 @@ public slots:
 
 	bool VirtualCamActive();
 
+public:
+	void SetVirtualCamScene(const std::string &scene);
+	std::string VirtualCamScene() const;
+
 private slots:
 	void UpdateVirtualCamConfig(const VCamConfig &config);
 	void RestartVirtualCam(const VCamConfig &config);

@@ -331,14 +331,14 @@ static obs_properties_t *decklink_output_properties(void *unused)
 	fill_out_devices(list);
 
 	obs_properties_add_list(props, MODE_ID, TEXT_MODE, OBS_COMBO_TYPE_LIST, OBS_COMBO_FORMAT_INT);
-	auto *hdrModes=obs_properties_add_list(props,"freemix_hdr_modes","FreeMix HDR driver modes",OBS_COMBO_TYPE_LIST,OBS_COMBO_FORMAT_INT);obs_property_set_visible(hdrModes,false);
+	auto *hdrModes=obs_properties_add_list(props,"freemix_hdr_modes","3Mix HDR driver modes",OBS_COMBO_TYPE_LIST,OBS_COMBO_FORMAT_INT);obs_property_set_visible(hdrModes,false);
 
 	obs_properties_add_bool(props, AUTO_START, TEXT_AUTO_START);
 	obs_properties_add_bool(props, FORCE_SDR, TEXT_FORCE_SDR);
 
 	obs_properties_add_list(props, KEYER, TEXT_ENABLE_KEYER, OBS_COMBO_TYPE_LIST, OBS_COMBO_FORMAT_INT);
 	// Capability marker only; a driver/mode preflight is required before HDR start.
-	auto *hdr=obs_properties_add_bool(props,"freemix_hdr_contract","FreeMix explicit HDR contract1");obs_property_set_visible(hdr,false);
+	auto *hdr=obs_properties_add_bool(props,"freemix_hdr_contract","3Mix explicit HDR contract1");obs_property_set_visible(hdr,false);
 
 	return props;
 }

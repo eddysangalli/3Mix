@@ -352,6 +352,7 @@
       </label>
       <button id="monitor-source-open">Abrir esta entrada</button>
       <h3>Câmera virtual</h3>
+      <label>Conteúdo<select id="virtual-source"><option value="">Programa principal</option></select></label>
       <div class="row">
         <button id="virtual-start">Ligar câmera virtual</button>
         <button id="virtual-stop">Parar câmera virtual</button>
@@ -530,7 +531,7 @@
           <option value="4">M/E 4</option>
         </select>
       </label>
-      <label>Resolução do Mix
+      <label>Resolução do M/E
         <select id="mix-size">
           <option>720x1280</option>
           <option>1080x1920</option>
@@ -556,10 +557,10 @@
       <label>Duração (ms)<input id="mix-duration" type="number" min="50" max="10000" step="50" value="500"></label>
       <label>Entrada para Preview<select id="mix-input"></select></label>
       <div class="row">
-        <button id="mix-configure">Aplicar formato do Mix</button>
-        <button id="mix-preview">Preparar no Preview do Mix</button>
-        <button id="mix-cut">Cut do Mix</button>
-        <button id="mix-take">Transição do Mix</button>
+        <button id="mix-configure">Aplicar formato do M/E</button>
+        <button id="mix-preview">Preparar no Preview do M/E</button>
+        <button id="mix-cut">Cut do M/E</button>
+        <button id="mix-take">Transição do M/E</button>
       </div>
       <p id="mix-status"></p>
       <p>Este Mix troca cenas independentemente da mesa principal. Posição e zoom ajustam o recorte; configure antes de iniciar suas saídas. A transição copia as configurações reais da lista OBS, incluindo Stingers configurados. Selecione “Mix independente” no conteúdo da saída para gravá-lo ou transmiti-lo; o áudio usa Master/A/B ou o barramento independente selecionado naquela saída, podendo somar o Stinger privado sem enviá-lo ao Master.</p>

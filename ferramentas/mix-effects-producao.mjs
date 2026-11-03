@@ -26,7 +26,8 @@ export class MixEffectsEngine {
    if(existing.public.stage==='rejected'){const error=Error(existing.public.error||'Operação rejeitada');error.operation={...existing.public};throw error;}
    return {...existing.result,operation:{...existing.public}};
   }
-  if(this.receipts.size>=256)throw Error('Limite de recibos desta sessão atingido; nenhuma operação enviada');
+  // Só o que ainda pode ser conferido precisa ficar: recibo resolvido sai para o mais novo entrar. O M/E não pode parar por contagem.
+  if(this.receipts.size>=256){const oldest=[...this.receipts].find(([,r])=>r.public.stage==='confirmed'||r.public.stage==='rejected');if(!oldest)throw Error('Há muitas operações de M/E sem confirmação; confira o motor');this.receipts.delete(oldest[0]);}
   const entry={context,signature,public:{id,scope:context.scope,mixId:Number(d.mixId??2),command:d.command,stage:'pending'},sent:false};
   this.receipts.set(key,entry);
   try{

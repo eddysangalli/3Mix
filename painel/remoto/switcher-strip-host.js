@@ -16,12 +16,24 @@ async function start(){
  const nameOf=uuid=>window.FreeMixProductionState?.inputs?.find(i=>i.key===uuid)?.name||'';
  const pending=new Map();let scope='',polling=false;
  async function request(path,data){const response=await fetch(new URL(path,host.apiBase),{...(data?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}:{}),signal:AbortSignal.timeout(15000)});const result=await response.json();if(!response.ok||!result.success)throw Error(result.error||'Motor não confirmou');return result;}
- async function meOperation(mixId,command,input,extra={}){
+ // Recusado antes de chegar ao motor não há o que conferir: a faixa volta a aceitar comandos. Se a resposta se perdeu, a pendência continua.
+ async function settledWithoutEngine(operation){try{return (await request('mix-effects/check',operation)).operation?.stage==='rejected';}catch(error){return /não identificado/.test(error.message);}}
+ // PV e AUTO em sequência rápida: o segundo espera o primeiro terminar. Pendência só existe depois disso, se o motor não confirmou.
+ const emAndamento=new Map();
+ function meOperation(mixId,command,input,extra={}){
+  const anterior=emAndamento.get(mixId)||Promise.resolve();
+  const atual=anterior.catch(()=>{}).then(()=>meExecute(mixId,command,input,extra));
+  emAndamento.set(mixId,atual);
+  const limpar=()=>{if(emAndamento.get(mixId)===atual)emAndamento.delete(mixId);};
+  atual.then(limpar,limpar);
+  return atual;
+ }
+ async function meExecute(mixId,command,input,extra={}){
   if(pending.has(mixId))throw Error('Confirmação pendente: use Conferir motor, não repita o comando.');
   scope=window.FreeMixProductionState?.preset||scope;
   if(!scope)throw Error('Projeto não identificado');
   const operation={operationId:'strip_'+crypto.randomUUID(),expectedScope:scope,mixId,command,...(input?{input}:{}),...extra};pending.set(mixId,operation);
-  try{const result=await request('control',{action:'outputs_mix',...operation});let receipt=result.outputs?.mixOperation;if(receipt?.id!==operation.operationId)throw Error('Confirmação pendente; consulte o motor.');
+  try{let result;try{result=await request('control',{action:'outputs_mix',...operation});}catch(error){if(await settledWithoutEngine(operation))pending.delete(mixId);throw error;}let receipt=result.outputs?.mixOperation;if(receipt?.id!==operation.operationId)throw Error('Confirmação pendente; consulte o motor.');
    // Durante a transição o motor responde "em andamento"; isso só vira pendência se não terminar no tempo dela.
    const limit=Date.now()+Number(operation.duration||500)+3000;
    while(receipt?.stage!=='confirmed'&&Date.now()<limit){await new Promise(done=>setTimeout(done,120));const check=await request('mix-effects/check',operation);receipt=check.operation||receipt;}
@@ -50,7 +62,7 @@ async function start(){
  });
  todos.onclick=()=>{const ligar=localStorage.getItem('3mix.me.monitores')==='0';localStorage.setItem('3mix.me.monitores',ligar?'1':'0');pintarTodos();strips.forEach(strip=>strip.setMonitors(ligar));};
  const check=document.createElement('button');check.textContent='Conferir motor';check.onclick=async()=>{
-  try{for(const [mixId,operation]of pending){const result=await request('mix-effects/check',operation);if(result.operation?.stage==='confirmed')pending.delete(mixId);}await refresh();}catch(error){check.title=error.message;}
+  try{for(const [mixId,operation]of pending){const result=await request('mix-effects/check',operation).catch((error)=>/não identificado/.test(error.message)?{operation:{stage:'rejected'}}:Promise.reject(error));if(['confirmed','rejected'].includes(result.operation?.stage))pending.delete(mixId);}await refresh();}catch(error){check.title=error.message;}
  };container.append(check);
  // Patch: Source -> Input Slot. Formulário próprio (não por Strip, é uma operação de roteamento de um Input
  // específico, não de um M/E) -- dois selects populados pelos Inputs reais do snapshot, aplicando pelo mesmo

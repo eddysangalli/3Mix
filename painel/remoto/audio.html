@@ -78,103 +78,84 @@
           <button type="button" id="drawer-close" class="a-insp-close" title="Fechar inspetor" aria-label="Fechar inspetor">×</button>
         </header>
         <div class="a-insp-scroll">
-          <label class="a-field">
-            <span>Nome do canal</span>
-            <input id="insp-name" type="text" readonly title="Nome informado pelo motor; renomear não é exposto pelo painel">
-          </label>
+          <input id="insp-name" type="hidden">
 
-          <label class="a-field">
-            <span>Dispositivo de entrada</span>
-            <div class="a-field-row">
-              <select id="insp-device"></select>
-              <button type="button" id="insp-device-gear" class="a-gear" title="Abrir Dispositivos">⚙</button>
-            </div>
-          </label>
+          <div class="a-insp-line">
+            <label class="a-field a-insp-grow">
+              <span>Dispositivo</span>
+              <div class="a-field-row">
+                <select id="insp-device"></select>
+                <button type="button" id="insp-device-gear" class="a-gear" title="Abrir Dispositivos">⚙</button>
+              </div>
+            </label>
+            <label class="a-field a-insp-dest">
+              <span>Destino</span>
+              <select id="insp-main">
+                <option value="">Nenhum</option>
+                <option value="M">MAIN</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+              </select>
+            </label>
+          </div>
 
-          <div class="a-field">
-            <span>Ganho de entrada</span>
-            <div class="a-knob-line">
+          <div class="a-insp-knobs">
+            <div class="a-knob-cell">
+              <span>Ganho</span>
               <div class="a-knob a-knob-lg" data-knob="insp-gain" role="slider" tabindex="0" aria-label="Ganho de entrada" aria-valuemin="-30" aria-valuemax="30" aria-valuenow="0" aria-valuetext="0.0 dB">
                 <span class="a-knob-dial"></span><span class="a-knob-pointer"></span>
               </div>
-              <input id="insp-gain-value" class="a-chip-input" type="number" min="-30" max="30" step="0.1" value="0" aria-label="Ganho de entrada em dB">
-              <span class="a-unit">dB</span>
+              <input id="insp-gain-value" class="a-chip-input" type="number" min="-30" max="30" step="0.1" value="0" title="Ganho em dB" aria-label="Ganho de entrada em dB">
             </div>
-          </div>
-
-          <div class="a-field">
-            <span>Panorama</span>
-            <div class="a-knob-line">
+            <div class="a-knob-cell">
+              <span>Pan</span>
               <div class="a-knob a-knob-lg" data-knob="insp-pan" role="slider" tabindex="0" aria-label="Panorama" aria-valuemin="-100" aria-valuemax="100" aria-valuenow="0" aria-valuetext="Centro">
                 <span class="a-knob-dial"></span><span class="a-knob-pointer"></span>
               </div>
-              <button type="button" id="insp-pan-center" class="a-chip-btn">Centro (C)</button>
+              <button type="button" id="insp-pan-center" class="a-chip-btn">Centro</button>
             </div>
-          </div>
-
-          <div class="a-field">
-            <span>Delay de entrada</span>
-            <div class="a-knob-line">
+            <div class="a-knob-cell">
+              <span>Delay</span>
               <div class="a-knob a-knob-lg" data-knob="insp-delay" role="slider" tabindex="0" aria-label="Delay de entrada" aria-valuemin="-950" aria-valuemax="2000" aria-valuenow="0" aria-valuetext="0 ms">
                 <span class="a-knob-dial"></span><span class="a-knob-pointer"></span>
               </div>
-              <input id="insp-delay-value" class="a-chip-input" type="number" min="-950" max="20000" step="1" value="0" aria-label="Delay de entrada em milissegundos">
-              <button type="button" id="insp-delay-reset" class="a-chip-btn a-commit-btn" title="Zerar o Delay de entrada">0 ms</button>
+              <div class="a-knob-delay">
+                <input id="insp-delay-value" class="a-chip-input" type="number" min="-950" max="20000" step="1" value="0" title="Delay em milissegundos" aria-label="Delay de entrada em milissegundos">
+                <button type="button" id="insp-delay-reset" class="a-chip-btn" title="Zerar o Delay de entrada">0</button>
+              </div>
             </div>
           </div>
 
-          <label class="a-field">
-            <span>Destino principal</span>
-            <select id="insp-main">
-              <option value="">Sem destino</option>
-              <option value="M">MAIN</option>
-              <option value="A">A</option>
-              <option value="B">B</option>
-            </select>
-          </label>
-
-          <label class="a-field">
-            <span>Notas</span>
-            <textarea id="insp-notes" rows="4" placeholder="Ex: Microfone apresentador"></textarea>
-          </label>
-
-          <details class="a-dsp" id="insp-dsp">
-            <summary>Processamento / DSP</summary>
-            <div class="a-dsp-body">
-              <div class="a-dsp-head"><span>Rack DSP</span><span id="filter-order"></span></div>
-              <div class="a-dsp-row">
-                <select id="filter" class="filter-select">
-                  <option value="eq">EQ 3 bandas (grave/médio/agudo)</option>
-                  <option value="gate">Gate de ruído</option>
-                  <option value="compressor">Compressor</option>
-                  <option value="limiter">Limiter de pico (dBFS)</option>
-                  <option value="rnnoise">Limpeza neural (RNNoise)</option>
-                  <option value="nvidia">Limpeza NVIDIA (RTX / NVAFX)</option>
-                  <option value="expander">Expansor</option>
-                  <option value="pp_track">PodcastPlugins Track (voz)</option>
-                  <option value="pp_master">PodcastPlugins Master</option>
-                  <option value="master_me">master_me (masterização)</option>
-                </select>
-                <label class="check-line"><input type="checkbox" id="filter-enabled"><span>Ativo</span></label>
-                <span id="filter-status" class="dsp-status"></span>
-              </div>
+          <section class="a-fx" id="insp-dsp" aria-label="Efeitos do canal">
+            <header class="a-fx-head"><span>Efeitos</span><b id="fx-count"></b></header>
+            <div id="fx-rows"></div>
+            <div id="fx-editor" class="a-fx-editor" hidden>
               <div id="filter-fields" class="filter-fields"></div>
-              <div class="dsp-actions">
-                <button type="button" id="open-native-filters" class="btn-hardware" title="Abrir o diálogo nativo de filtros deste canal (VST 2.x, EQ nativo e outros)">Filtros nativos (VST 2.x)…</button>
-                <button type="button" id="open-plugin" class="btn-hardware" hidden title="Abrir a janela deste plugin">Abrir plugin</button>
-                <button type="button" id="save-filter" class="btn-hardware">Aplicar filtro</button>
-                <button type="button" id="remove-filter" class="btn-hardware danger">Remover filtro</button>
-              </div>
-              <div class="a-vst3">
-                <span>VST3</span>
-                <div id="vst3-rows"></div>
-                <div class="a-dsp-row">
-                  <select id="vst3-pick" class="filter-select"></select>
-                  <button type="button" id="vst3-add" class="btn-hardware">Adicionar</button>
-                </div>
-              </div>
+              <button type="button" id="save-filter" class="btn-hardware">Aplicar</button>
+            </div>
+            <div class="a-fx-add">
+              <select id="fx-pick" aria-label="Efeito para adicionar"></select>
+              <button type="button" id="fx-add" class="btn-hardware">Adicionar</button>
+            </div>
+            <select id="filter" hidden>
+              <option value="eq">EQ</option>
+              <option value="gate">Gate</option>
+              <option value="compressor">Compressor</option>
+              <option value="limiter">Limiter</option>
+              <option value="rnnoise">RNNoise</option>
+              <option value="nvidia">NVIDIA</option>
+              <option value="expander">Expansor</option>
+              <option value="pp_track">PodcastPlugins Track</option>
+              <option value="pp_master">PodcastPlugins Master</option>
+              <option value="master_me">master_me</option>
+            </select>
+            <input type="checkbox" id="filter-enabled" hidden>
+          </section>
+
+          <details class="a-dsp" id="insp-more">
+            <summary>Presets e notas</summary>
+            <div class="a-dsp-body">
               <div class="a-presets">
-                <span>Presets</span>
                 <button type="button" class="ai-preset-btn" id="ai-preset-broadcast" title="RNNoise + compressor 3:1 + limiter de proteção">Voz broadcast</button>
                 <button type="button" class="ai-preset-btn" id="ai-preset-rnnoise" title="Redução de ruído neural RNNoise isolada">Limpeza neural</button>
                 <button type="button" class="ai-preset-btn" id="ai-preset-noisy" title="RNNoise + gate para ambientes ruidosos">Ambiente ruidoso</button>
@@ -182,7 +163,12 @@
                 <button type="button" class="ai-preset-btn" id="plugin-master-toggle" title="Liga ou desliga o master_me no barramento MAIN">master_me no MAIN</button>
                 <button type="button" class="ai-preset-btn" id="plugin-master-open" title="Abre a janela do master_me do barramento MAIN">Abrir master_me</button>
                 <button type="button" class="ai-preset-btn" id="ai-preset-reset" title="Desativar os filtros deste canal">Limpar</button>
+                <button type="button" class="ai-preset-btn" id="open-native-filters" title="Abrir o diálogo nativo de filtros deste canal (VST 2.x e outros)">Filtros nativos…</button>
               </div>
+              <label class="a-field">
+                <span>Notas</span>
+                <textarea id="insp-notes" rows="2" placeholder="Ex: Microfone apresentador"></textarea>
+              </label>
             </div>
           </details>
         </div>
