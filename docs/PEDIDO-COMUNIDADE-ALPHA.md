@@ -241,3 +241,14 @@ Estados: Compatibilidade prevista; Implementado sem teste físico; Em homologaç
 - **Passos:** Para cada formato: comparar desligado/ligado em movimento, conferir ordem superior/inferior, taxa real, drops e offset A/V; salvar/reabrir e repetir perda/retorno de sinal.
 - **Resultado esperado:** Movimento e ordem corretos, sincronismo medido e taxa confirmada. Captura desentrelaçada não prova saída entrelaçada; saída ausente fica indisponível.
 - **Falhas, logs e evidências:** Formato/taxa/ordem/método, offset A/V e drops, vídeo antes/depois, captura do analisador e diagnóstico sanitizado. Homologar separadamente cada formato.
+
+---
+
+### MISSÃO 14 — Gerenciador de Plugins OBS (somente após entrega de build integrada)
+
+- **Estado:** roteiro de homologação Alpha; o código, os testes automatizados e a presença de uma DLL não comprovam carregamento e operação no pacote entregue. Executar em uma cópia de QA, com o tema e a configuração fechada do 3Mix conferidos antes de abrir o aplicativo, nunca durante transmissão ou gravação ativa.
+- **Base sem hardware especial:** Windows x64; versão e SHA256 do 3Mix, libobs e ZIP do plugin; origem oficial, licença e dependências identificadas. Preferir um plugin compatível que registre um filtro ou Input simples. Não executar instalador EXE.
+- **Passos:** Instalar o ZIP pela seção Configurações → Plugins; confirmar que a ação fica pendente até reiniciar; reiniciar só a instância de QA; conferir no log o módulo carregado, o recurso registrado e seu uso na Mesa; desabilitar e reiniciar; confirmar ausência do recurso; habilitar e reiniciar; atualizar com backup, executar rollback e conferir a versão anterior; remover e confirmar preservação de projetos/configurações. Repetir com ZIP incompatível, DLL x86, caminho `../` e tentativa de sobrepor módulo essencial, que devem ser recusados antes de executar qualquer código.
+- **Recuperação:** Provocar falha apenas na instância de QA com fixture autorizada, verificar identificação do último plugin alterado e iniciar o modo de segurança sem carregar terceiros. Registrar se o 3Mix continua abrindo e se o projeto original permanece íntegro.
+- **Hardware específico:** Para plugins de captura AJA/DeckLink, ASIO, NDI, GPU ou controle externo, registrar modelo/revisão, driver/SDK/runtime, firmware, conexões e recursos efetivamente enumerados. Testar sinal, áudio, reconexão e duração por equipamento. Sem o hardware ou dependência correta, classificar como **não homologado naquele equipamento**; o tester não deve suprir integração de engenharia ausente.
+- **Evidência:** Capturas da seção Plugins e do recurso na interface 3Mix, logs sanitizados de cada início, hash dos pacotes, versões antes/depois, resultado do rollback, inventário de Inputs/filtros/transições/encoders/outputs e estado de PGM/Preview, M/Es, DSKs e saídas antes/depois. Relatar separadamente interface Qt/dock próprio que exija adaptador.

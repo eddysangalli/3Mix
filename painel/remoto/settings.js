@@ -46,13 +46,13 @@
     mixer: 'Mixer e roteamento', outputAdvanced: 'Saída avançada', files: 'Arquivos e divisão',
     audioTracks: 'Trilhas de áudio', networkOutput: 'Rede da transmissão', broadcastDelay: 'Atraso e DUMP', startstop: 'Ao iniciar e parar',
     projectors: 'Projetores e tela cheia', appearance: 'Texto e densidade', general: 'Janela e encaixe',
-    plugins: 'Ferramentas dos plugins', advanced: 'Motor e prioridade',
+    plugins: 'Plugins', advanced: 'Motor e prioridade',
   };
   const GROUPS = [
     { id: 'producao', title: 'Produção', items: ['video', 'audio', 'color'] },
     { id: 'saidas', title: 'Saídas', items: ['recording', 'streaming', 'outputs', 'returns', 'aux', 'encoders'] },
     { id: 'operacao', title: 'Operação', items: ['replay', 'dsk', 'multiview', 'shortcuts', 'patch', 'preflight'] },
-    { id: 'sistema', title: 'Sistema', items: ['workspace', 'modulos', 'performance', 'remote', 'network', 'automation', 'recovery'] },
+    { id: 'sistema', title: 'Sistema', items: ['workspace', 'modulos', 'performance', 'plugins', 'remote', 'network', 'automation', 'recovery'] },
     { id: 'sobre', title: 'Sobre', items: ['about'] },
   ];
   const ICONS = {
@@ -76,6 +76,7 @@
     workspace: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg>',
     modulos: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1" fill="none" stroke-dasharray="2 2"/></svg>',
     performance: '<svg viewBox="0 0 24 24"><path d="M4 18a8 8 0 1 1 16 0"/><path d="m12 14 4-4"/><circle cx="12" cy="14" r="1.5"/></svg>',
+    plugins: '<svg viewBox="0 0 24 24"><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M10 10h4v4h-4z"/></svg>',
     remote: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>',
     automation: '<svg viewBox="0 0 24 24"><path d="M4 6h10M4 12h16M4 18h10"/><circle cx="17" cy="6" r="2"/><circle cx="17" cy="18" r="2"/></svg>',
     recovery: '<svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>',
@@ -93,7 +94,7 @@
     files: 'recording', audioTracks: 'recording', startstop: 'recording', outputAdvanced: 'recording',
     networkOutput: 'streaming', broadcastDelay: 'streaming', streamMultistream: 'streaming', streamExternal: 'streaming',
     appearance: 'workspace', general: 'workspace', advanced: 'performance', diagnostico: 'performance',
-    projectors: 'multiview', plugins: 'performance',
+    projectors: 'multiview',
   };
   // Editor windows of the program, opened on purpose and one route each.
   const OPEN = {
@@ -736,7 +737,8 @@
   }
 
   function drawPlugins() {
-    return '<div class="settings-card"><p class="card-desc">Ferramentas registradas pelos plugins carregados. Abrir uma ferramenta não ativa legendas, automações ou efeitos.</p>'
+    return '<div id="plugin-manager"></div><div class="settings-card"><div class="card-title-row"><h2>Ferramentas dos plugins carregados</h2></div>'
+      + '<p class="card-desc">Ferramentas registradas pelo motor. Algumas janelas nativas dependem da interface do OBS; abrir uma ferramenta não ativa legendas, automações ou efeitos.</p>'
       + '<div id="plugin-tools" class="settings-list">Lendo ferramentas…</div>'
       + '<p class="card-note">Advanced Masks e Move aparecem nos filtros e transições da entrada. Cada plugin usa seus próprios controles.</p></div>';
   }
@@ -820,7 +822,7 @@
     if (embedded) mountEmbed(view.id, view.label);
     if (view.id === 'video') decorateVideo(live);
     if (view.kind === 'encoder') mountEncoder();
-    if (view.kind === 'plugins') loadPluginTools();
+    if (view.kind === 'plugins') { window.FreeMixPluginManager?.mount(E('plugin-manager'), { productionActive: live }); loadPluginTools(); }
     window.FreeMixSettingsHelp?.decorate?.(E('content'));
 
     const supported = isSupported(view, live);

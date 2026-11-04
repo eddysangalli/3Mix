@@ -60,6 +60,16 @@
         : (pgmSlide.svgPreview || `<div style="padding:20px;color:white;font-size:24px;">${pgmSlide.title}</div>`);
       el('program-title').textContent = pgmSlide.title || `Slide ${pgmSlide.index}`;
       el('program-subtitle').textContent = pgmSlide.subtitle || pgmSlide.fullText?.slice(0, 100) || '';
+
+      const warnBox = el('operator-warnings');
+      if (warnBox) {
+        if (pgmSlide.unsupportedFeatures && pgmSlide.unsupportedFeatures.length > 0) {
+          warnBox.style.display = 'block';
+          warnBox.innerHTML = '<strong>⚠️ Aviso ao Operador (Presenter Mode):</strong><br>' + pgmSlide.unsupportedFeatures.map(f => '• ' + f).join('<br>');
+        } else {
+          warnBox.style.display = 'none';
+        }
+      }
     }
 
     // Atualizar controles de animação

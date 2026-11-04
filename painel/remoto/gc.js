@@ -209,3 +209,12 @@ setInterval(()=>{const items=state.gcLibrary?.items||[],sig=JSON.stringify(items
 async function movePreset(delta){try{const chosen=[...presetSelection.selectedOptions];if(chosen.length!==1)throw Error('Selecione um título para mover');const ids=(state.gcLibrary?.items||[]).map(i=>i.id),at=ids.indexOf(chosen[0].value),next=at+delta;if(at<0||next<0||next>=ids.length)return;[ids[at],ids[next]]=[ids[next],ids[at]];await command('gc_library_reorder',{ids});}catch(e){el('status').textContent=e.message;}}
 upPreset.onclick=()=>movePreset(-1);downPreset.onclick=()=>movePreset(1);
 removePresets.onclick=async()=>{try{const ids=[...presetSelection.selectedOptions].map(o=>o.value);if(!ids.length)return;if(!confirm('Excluir '+ids.length+' títulos selecionados? As cenas existentes serão preservadas.'))return;await command('gc_library_remove_many',{ids});if(ids.includes(id))select();}catch(e){el('status').textContent=e.message;}};
+
+const applySelectedStyle=document.createElement('button');applySelectedStyle.type='button';applySelectedStyle.id='apply-selected-title-style';applySelectedStyle.textContent='Aplicar estilo aos selecionados';presetTools.append(applySelectedStyle);
+applySelectedStyle.onclick=async()=>{try{
+ const ids=[...presetSelection.selectedOptions].map(o=>o.value);if(!ids.length)throw Error('Selecione títulos salvos');
+ const data=read(),keys=['accent','secondary','background','foreground','designStyle','opacity','fontSize','letterSpacing','fontFamily','animation','animationInMs','animationOutMs','animationEasing'];
+ const style=Object.fromEntries(keys.filter(k=>Object.hasOwn(data,k)).map(k=>[k,data[k]]));
+ if(!confirm('Aplicar o estilo atual a '+ids.length+' títulos e suas versões vinculadas? Textos e posições serão preservados.'))return;
+ await command('gc_library_style_many',{ids,style});el('status').textContent='Estilo aplicado aos títulos selecionados';
+}catch(e){el('status').textContent=e.message;}};

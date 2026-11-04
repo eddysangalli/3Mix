@@ -15,3 +15,17 @@ test('save failure restores library for reorder and batch removal',async()=>{
  const e=fixture();e.save=async()=>{throw Error('disk failure');};await assert.rejects(e.execute(action,{ids}));assert.deepEqual(e.items.map(i=>i.id),['a','b','c']);
  }
 });
+
+import {models,defaults} from '../painel/gc/biblioteca/modelos.mjs';
+function styledFixture(){const e=fixture();e.items=e.items.map((i,n)=>({...i,template:models[0].id,data:defaults(models[0].id),...(n<2?{syncGroup:'group'}:{})}));return e;}
+test('batch style preserves text/geometry and updates linked versions',async()=>{
+ const e=styledFixture(),before=e.items[0].data.title;await e.execute('gc_library_style_many',{ids:['a'],style:{letterSpacing:3}});
+ assert.equal(e.items[0].data.letterSpacing,3);assert.equal(e.items[1].data.letterSpacing,3);assert.equal(e.items[2].data.letterSpacing,0);assert.equal(e.items[0].data.title,before);
+});
+test('batch style rejects on-air linked sibling and unsafe/invalid properties atomically',async()=>{
+ const e=styledFixture();e.p.state.program='3Mix GC b';await assert.rejects(e.execute('gc_library_style_many',{ids:['a'],style:{letterSpacing:3}}));assert.equal(e.items[0].data.letterSpacing,0);
+ e.p.state.program='';for(const style of [{title:'replace text'},{offsetX:20},{letterSpacing:100}])await assert.rejects(e.execute('gc_library_style_many',{ids:['a'],style}));assert.equal(e.items[0].data.letterSpacing,0);
+});
+test('batch style restores previous records on persistence failure',async()=>{
+ const e=styledFixture();e.save=async()=>{throw Error('disk');};await assert.rejects(e.execute('gc_library_style_many',{ids:['a'],style:{letterSpacing:2}}));assert.equal(e.items[0].data.letterSpacing,0);
+});
