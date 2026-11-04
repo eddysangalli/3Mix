@@ -220,3 +220,8 @@ O coletor de logs do 3Mix possui um filtro de redação automático estrito:
 ---
 
 *A equipe do 3Mix agradece imensamente a dedicação de cada profissional de transmissão que está ajudando a construir o mais moderno switcher broadcast independente.*
+
+
+## Roteiros específicos vMix 30
+
+Consultar [Suplemento de hardware vMix 30](ALPHA-SUPLEMENTO-HARDWARE-VMIX30.md): DeckLink bits/canais, AJA por modelo, NDI entre PCs, SRT entre redes e desentrelaçamento 1080i/576i/480i. Preserva os cinco roteiros originalmente solicitados, sem substituir as missões desta edição do guia.

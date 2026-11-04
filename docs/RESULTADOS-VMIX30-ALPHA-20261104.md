@@ -84,3 +84,8 @@ enabled é validado antes da mutação; falha de save restaura o valor anterior 
 ## Playout — persistência e atalho compartilhado
 
 _normalizeLegacyList preserva enabled e autoNext explícitos, com padrões true para projetos antigos. Teste grava playlist em disco, reabre nova instância e confirma exclusão de desabilitados no total e navegação. Nova ação playout_item_enabled passa pelo normalizador operacional de macros, valida ID/booleano e delega ao mesmo playout_item_update (sem segundo motor). Seletor de macro expõe a ação com parâmetros JSON. Dez testes Playout PASS; ainda sem teste físico de reprodução.
+
+
+## Coordenação de homologação
+
+Outra frente publicou modernização SRT/plugins/Slides (commits 6d2ebe8, 62ae7f3 e 2264064) e alterou os temas das missões 7–11. Não refazer essas implementações nem aceitar a matriz como prova física sem recibos. Criado ALPHA-SUPLEMENTO-HARDWARE-VMIX30.md e link no guia: preserva os cinco roteiros exigidos (DeckLink, AJA, NDI, SRT, entrelaçado) sem apagar missões concorrentes. Numeração original explicitada para evitar confusão. Não representa conclusão dos adaptadores nativos ainda parciais.

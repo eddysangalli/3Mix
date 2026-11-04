@@ -45,3 +45,4 @@
 | **Rollback: Backup `srt.dll.v152.bak` e script `reverter-srt-152.cmd`** | `Testado no Runtime` | Script automatizado testado com restauração instantânea. |
 | **Rollback: Script de reativação `ativar-srt-157.cmd`** | `Testado no Runtime` | Script automatizado testado com reativação para 1.5.7. |
 | **Rollback: Versionamento completo em `main` e `feat/...` no GitHub** | `Implementado` | Commits `6d2ebe8` e `62ae7f3` sincronizados e publicados no GitHub. |
+
