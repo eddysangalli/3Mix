@@ -1,10 +1,9 @@
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { resolve, join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawn } from 'node:child_process';
-import { connect } from 'file:///D:/DRIVE/IA/antigravity/3Mix/3mix-runtime/ferramentas/obsws.mjs';
-import { validateSrtTransport } from 'file:///D:/DRIVE/IA/antigravity/3Mix/3mix-panel/ferramentas/srt-presets.mjs';
+import { validateSrtTransport } from '../../ferramentas/srt-presets.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -89,7 +88,7 @@ class IsolatedTestEnv {
 
   async createScene(name) {
     const fullName = `${this.prefix}_${name}`;
-    await this.obs.req('CreateScene', { sceneName: fullName }).catch(() => {});
+    await this.obs.req('CreateScene', { sceneName: fullName });
     this.createdScenes.push(fullName);
     return fullName;
   }
@@ -101,7 +100,7 @@ class IsolatedTestEnv {
       inputName: fullName,
       inputKind,
       inputSettings
-    }).catch(() => {});
+    });
     this.createdInputs.push(fullName);
     return fullName;
   }
@@ -164,7 +163,7 @@ async function testSrtObsIntegration(obs, env, testName, listenerUrl, callerUrl,
   const connected = await waitForConnection(obs, env, callerName);
   
   if (!connected) {
-    console.log(`   [FAIL] Conexão não estabelecida em ${timeoutMs/1000}s`);
+    console.log('   [FAIL] Conexão não estabelecida em 15s');
     throw new Error(`SRT ${testName}: Falha na conexão - listener/caller não conectaram`);
   }
   
@@ -206,9 +205,11 @@ try {
   
   console.log('\n[1/2] Conectando ao 3Mix Pro (opcional)...');
   try {
+    if (process.env.MIX3_QA_ALLOW_LIVE !== 'YES') throw new Error('Testes integrados com OBS exigem opt-in em instância exclusiva de QA (MIX3_QA_ALLOW_LIVE=YES)');
+    const { connect } = await import(pathToFileURL(resolve(RUNTIME_ROOT, 'ferramentas/obsws.mjs')).href);
     obs = await connect({ root: RUNTIME_ROOT });
     console.log('   [PASS] Conectado ao 3Mix Pro');
-    testEnv = new IsolatedTestEnv(obs, 'SRT_HOMOLOG');
+    testEnv = new IsolatedTestEnv(obs, `SRT_HOMOLOG_${process.pid}_${Date.now()}`);
   } catch (err) {
     console.log('   [SKIPPED] 3Mix Pro não ativo — testes OBS-integrados pulados');
     obs = null;
