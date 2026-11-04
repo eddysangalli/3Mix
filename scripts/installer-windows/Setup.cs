@@ -98,13 +98,11 @@ namespace FreeMixSetup {
     }
 
     // Wizard de 6 passos (Bem-vindo, EULA, Destino, MÓDULOS, Progresso, Conclusão) —
-    // qa-beta/recibos/design-modulos-standby.md seção 2. O backend (Installer.Run,
-    // Options, WriteReceipt, WriteUninstaller) não muda: o wizard só coleta as mesmas
-    // informações que SetupForm coletava (destino, importação opcional), mais a seleção
-    // de módulos, e chama exatamente o mesmo Installer.Run no fim.
+    // Estilo Moderno Broadcast Dark Grafite 3Mix Studio
     internal sealed class WizardForm : Form {
         readonly Options options;
         readonly Panel[] steps; readonly Button back, next; readonly Label stepTitle;
+        readonly PictureBox headerLogo;
         int current; bool running;
         // Passo Destino
         TextBox folder, project; CheckBox importProject;
@@ -113,88 +111,298 @@ namespace FreeMixSetup {
         // Passo Progresso/Conclusão
         Label progressStatus; ProgressBar progressBar; Label doneMessage;
 
+        // Paleta Visual Canônica 3Mix Dark Broadcast
+        static readonly Color BgDark = Color.FromArgb(24, 26, 32);
+        static readonly Color HeaderBg = Color.FromArgb(16, 18, 24);
+        static readonly Color CardBg = Color.FromArgb(30, 34, 44);
+        static readonly Color BorderColor = Color.FromArgb(48, 54, 70);
+        static readonly Color TextWhite = Color.FromArgb(245, 247, 250);
+        static readonly Color TextMuted = Color.FromArgb(160, 170, 185);
+        static readonly Color AccentBlue = Color.FromArgb(0, 122, 255);
+        static readonly Color InputBg = Color.FromArgb(32, 36, 48);
+
         public WizardForm(Options o) {
-            options = o; Text = "Instalar 3Mix Studio " + PayloadInfo.DisplayVersion; try { Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); } catch (Exception) { } ClientSize = new Size(640, 460); FormBorderStyle = FormBorderStyle.FixedDialog; MaximizeBox = false; StartPosition = FormStartPosition.CenterScreen;
-            Font = new Font("Segoe UI", 10); BackColor = Color.FromArgb(246, 248, 252);
-            stepTitle = new Label { Font = new Font("Segoe UI", 16, FontStyle.Bold), Location = new Point(28, 18), Size = new Size(584, 30) };
-            Panel body = new Panel { Location = new Point(28, 56), Size = new Size(584, 352), BorderStyle = BorderStyle.None };
-            back = new Button { Text = "< Voltar", Location = new Point(28, 420), Size = new Size(96, 30) }; back.Click += delegate { Navigate(current - 1); };
-            next = new Button { Text = "Avançar >", Location = new Point(516, 420), Size = new Size(96, 30) }; next.Click += delegate { NextClicked(); };
-            Controls.AddRange(new Control[] { stepTitle, body, back, next });
+            options = o; Text = "Instalador 3Mix Studio — " + PayloadInfo.DisplayVersion;
+            try { Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); } catch (Exception) { }
+            ClientSize = new Size(720, 520); FormBorderStyle = FormBorderStyle.FixedDialog; MaximizeBox = false; StartPosition = FormStartPosition.CenterScreen;
+            Font = new Font("Segoe UI", 10); BackColor = BgDark; ForeColor = TextWhite;
+
+            // Header Superior Broadcast
+            Panel header = new Panel { Location = new Point(0, 0), Size = new Size(720, 72), BackColor = HeaderBg };
+            headerLogo = new PictureBox { Location = new Point(24, 14), Size = new Size(160, 44), SizeMode = PictureBoxSizeMode.Zoom, BackColor = Color.Transparent };
+            Image logo = LoadEmbeddedLogo();
+            if (logo != null) headerLogo.Image = logo;
+            else {
+                Label brand = new Label { Text = "3MIX STUDIO", Font = new Font("Segoe UI", 16, FontStyle.Bold), ForeColor = AccentBlue, Location = new Point(24, 18), AutoSize = true };
+                header.Controls.Add(brand);
+            }
+            header.Controls.Add(headerLogo);
+
+            stepTitle = new Label { Font = new Font("Segoe UI", 13, FontStyle.Bold), ForeColor = TextWhite, Location = new Point(220, 24), Size = new Size(476, 28), TextAlign = ContentAlignment.MiddleRight };
+            header.Controls.Add(stepTitle);
+
+            // Linha de acento ciano/azul neon no rodapé do header
+            Panel headerAccent = new Panel { Location = new Point(0, 70), Size = new Size(720, 2), BackColor = AccentBlue };
+            header.Controls.Add(headerAccent);
+
+            // Área Central de Conteúdo
+            Panel body = new Panel { Location = new Point(32, 88), Size = new Size(656, 355), BackColor = Color.Transparent };
+
+            // Rodapé com botões de navegação
+            Panel footer = new Panel { Location = new Point(0, 458), Size = new Size(720, 62), BackColor = HeaderBg };
+            Panel footerBorder = new Panel { Location = new Point(0, 0), Size = new Size(720, 1), BackColor = BorderColor };
+            footer.Controls.Add(footerBorder);
+
+            back = new Button {
+                Text = "< Voltar", Location = new Point(32, 14), Size = new Size(110, 34),
+                FlatStyle = FlatStyle.Flat, BackColor = CardBg, ForeColor = TextWhite,
+                Font = new Font("Segoe UI", 9.5f, FontStyle.Bold), Cursor = Cursors.Hand
+            };
+            back.FlatAppearance.BorderColor = BorderColor;
+            back.Click += delegate { Navigate(current - 1); };
+
+            next = new Button {
+                Text = "Avançar >", Location = new Point(578, 14), Size = new Size(110, 34),
+                FlatStyle = FlatStyle.Flat, BackColor = AccentBlue, ForeColor = Color.White,
+                Font = new Font("Segoe UI", 9.5f, FontStyle.Bold), Cursor = Cursors.Hand
+            };
+            next.FlatAppearance.BorderSize = 0;
+            next.Click += delegate { NextClicked(); };
+
+            footer.Controls.AddRange(new Control[] { back, next });
+            Controls.AddRange(new Control[] { header, body, footer });
+
             steps = new Panel[] { StepWelcome(), StepEula(), StepDestination(o), StepModules(o), StepProgress(), StepDone() };
             foreach (Panel step in steps) { step.Location = new Point(0, 0); step.Size = body.Size; step.Visible = false; body.Controls.Add(step); }
             FormClosing += delegate(object sender, FormClosingEventArgs e) { if (running) e.Cancel = true; };
             Navigate(0);
         }
 
+        static Image LoadEmbeddedLogo() {
+            try {
+                using (Stream s = Assembly.GetExecutingAssembly().GetManifestResourceStream("FreeMixSetup.logo.png")) {
+                    if (s != null) return Image.FromStream(s);
+                }
+            } catch { }
+            return null;
+        }
+
         Panel StepWelcome() {
             Panel p = new Panel();
-            p.Controls.Add(new Label { Text = "Bem-vindo ao 3Mix Studio " + PayloadInfo.DisplayVersion, Font = new Font("Segoe UI", 14, FontStyle.Bold), Location = new Point(0, 0), AutoSize = true });
-            p.Controls.Add(new Label { Text = "Este assistente instala a suíte broadcast 3Mix de forma completa e\noffline, só para este usuário. Você vai escolher a pasta de destino e quais módulos\nopcionais quer usar — nada disso é definitivo, pode mudar depois.", Location = new Point(0, 44), Size = new Size(584, 72) });
+            p.Controls.Add(new Label { Text = "Bem-vindo ao 3Mix Studio " + PayloadInfo.DisplayVersion, Font = new Font("Segoe UI", 16, FontStyle.Bold), ForeColor = TextWhite, Location = new Point(0, 6), AutoSize = true });
+            
+            Panel card = new Panel { Location = new Point(0, 46), Size = new Size(656, 120), BackColor = CardBg };
+            card.Paint += delegate(object s, PaintEventArgs pe) { ControlPaint.DrawBorder(pe.Graphics, card.ClientRectangle, BorderColor, ButtonBorderStyle.Solid); };
+            
+            Label desc = new Label {
+                Text = "O 3Mix Studio é uma suíte broadcast de produção ao vivo profissional.\n\n" +
+                       "• Instalação offline completa e limpa, exclusiva para este usuário do Windows.\n" +
+                       "• Você escolhe os módulos ativos agora e pode ajustá-los quando quiser.\n" +
+                       "• Seus projetos, mídias, gravações e configurações futuras serão sempre preservados.",
+                Font = new Font("Segoe UI", 10f), ForeColor = TextWhite, Location = new Point(16, 16), Size = new Size(624, 88)
+            };
+            card.Controls.Add(desc);
+            p.Controls.Add(card);
+
+            Panel featureCard = new Panel { Location = new Point(0, 180), Size = new Size(656, 160), BackColor = CardBg };
+            featureCard.Paint += delegate(object s, PaintEventArgs pe) { ControlPaint.DrawBorder(pe.Graphics, featureCard.ClientRectangle, BorderColor, ButtonBorderStyle.Solid); };
+            
+            Label featTitle = new Label { Text = "Recursos Integrados Nesta Versão:", Font = new Font("Segoe UI", 11f, FontStyle.Bold), ForeColor = AccentBlue, Location = new Point(16, 12), AutoSize = true };
+            Label featList = new Label {
+                Text = "✔ Mesa de corte de baixa latência com transições broadcast e DSKs 1 a 4\n" +
+                       "✔ 3Mix Chroma profissional com visualizador alfa e Estúdio Virtual 2.5D (FreeD)\n" +
+                       "✔ 3Mix Social integrado (moderação de chat YouTube/Twitch em tempo real)\n" +
+                       "✔ 3Mix Crew: Tally Web, Intercom móvel e firmware para ESP32/M5StickC\n" +
+                       "✔ MultiCorder Broadcast: gravação concorrente em Sony XDCAM, Avid DNxHD/DNxHR e ProRes",
+                Font = new Font("Segoe UI", 9.5f), ForeColor = TextMuted, Location = new Point(16, 38), Size = new Size(624, 110)
+            };
+            featureCard.Controls.AddRange(new Control[] { featTitle, featList });
+            p.Controls.Add(featureCard);
+
             return p;
         }
+
         Panel StepEula() {
             Panel p = new Panel();
-            p.Controls.Add(new Label { Text = "Termos de uso da versão Beta", Font = new Font("Segoe UI", 13, FontStyle.Bold), Location = new Point(0, 0), AutoSize = true });
-            TextBox eulaText = new TextBox { Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical, Location = new Point(0, 34), Size = new Size(584, 260), Font = new Font("Consolas", 9), Text = EulaText.Replace("\n", "\r\n") };
+            p.Controls.Add(new Label { Text = "Termos de Uso e Licenciamento", Font = new Font("Segoe UI", 14, FontStyle.Bold), ForeColor = TextWhite, Location = new Point(0, 0), AutoSize = true });
+            p.Controls.Add(new Label { Text = "Leia o acordo de licenciamento e condições de teste do 3Mix Studio antes de prosseguir:", Font = new Font("Segoe UI", 9.5f), ForeColor = TextMuted, Location = new Point(0, 26), AutoSize = true });
+
+            TextBox eulaText = new TextBox {
+                Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical,
+                Location = new Point(0, 54), Size = new Size(656, 255),
+                Font = new Font("Consolas", 9.5f), BackColor = InputBg, ForeColor = TextWhite,
+                BorderStyle = BorderStyle.FixedSingle, Text = EulaText.Replace("\n", "\r\n")
+            };
             p.Controls.Add(eulaText);
-            CheckBox accept = new CheckBox { Name = "accept", Text = "Li e aceito os termos de uso acima", Location = new Point(0, 304), Size = new Size(400, 24) };
+
+            CheckBox accept = new CheckBox {
+                Name = "accept", Text = "Li e concordo com os termos de uso e condições desta versão do 3Mix Studio",
+                Location = new Point(0, 320), Size = new Size(656, 26), ForeColor = TextWhite,
+                Font = new Font("Segoe UI", 10f, FontStyle.Bold), Cursor = Cursors.Hand
+            };
             accept.CheckedChanged += delegate { UpdateNextEnabled(); };
             p.Controls.Add(accept);
             return p;
         }
+
         Panel StepDestination(Options o) {
             Panel p = new Panel();
-            p.Controls.Add(new Label { Text = "Pasta de destino", Font = new Font("Segoe UI", 13, FontStyle.Bold), Location = new Point(0, 0), AutoSize = true });
-            p.Controls.Add(new Label { Text = "Escolha uma pasta nova ou completamente vazia.", Location = new Point(0, 34), Size = new Size(570, 24) });
-            folder = new TextBox { Text = o.Destination ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "3Mix Studio"), Location = new Point(0, 64), Size = new Size(461, 28) };
-            Button browse = new Button { Text = "Procurar…", Location = new Point(471, 62), Size = new Size(113, 31) };
-            browse.Click += delegate { using (FolderBrowserDialog picker = new FolderBrowserDialog()) { picker.Description = "Selecione uma pasta nova ou vazia para o 3Mix Studio"; picker.ShowNewFolderButton = true; TryPreselectPicker(folder.Text, delegate(string value) { picker.SelectedPath = value; }); if (picker.ShowDialog(this) == DialogResult.OK) folder.Text = picker.SelectedPath; } };
-            importProject = new CheckBox { Text = "Importar explicitamente uma cópia local .fmx (opcional)", Checked = !String.IsNullOrWhiteSpace(o.ImportProject), Location = new Point(0, 108), Size = new Size(574, 28) };
-            project = new TextBox { Text = o.ImportProject ?? "", Location = new Point(0, 140), Size = new Size(574, 28), Enabled = importProject.Checked };
+            p.Controls.Add(new Label { Text = "Pasta de Destino da Instalação", Font = new Font("Segoe UI", 14, FontStyle.Bold), ForeColor = TextWhite, Location = new Point(0, 0), AutoSize = true });
+            p.Controls.Add(new Label { Text = "Escolha uma pasta nova ou completamente vazia para os arquivos do 3Mix Studio.", Font = new Font("Segoe UI", 9.5f), ForeColor = TextMuted, Location = new Point(0, 26), Size = new Size(656, 22) });
+
+            folder = new TextBox {
+                Text = o.Destination ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "3Mix Studio"),
+                Location = new Point(0, 56), Size = new Size(528, 30), BackColor = InputBg, ForeColor = TextWhite,
+                BorderStyle = BorderStyle.FixedSingle, Font = new Font("Segoe UI", 10.5f)
+            };
+            Button browse = new Button {
+                Text = "Procurar…", Location = new Point(538, 54), Size = new Size(118, 32),
+                FlatStyle = FlatStyle.Flat, BackColor = CardBg, ForeColor = TextWhite,
+                Font = new Font("Segoe UI", 9.5f, FontStyle.Bold), Cursor = Cursors.Hand
+            };
+            browse.FlatAppearance.BorderColor = BorderColor;
+            browse.Click += delegate {
+                using (FolderBrowserDialog picker = new FolderBrowserDialog()) {
+                    picker.Description = "Selecione uma pasta nova ou vazia para o 3Mix Studio";
+                    picker.ShowNewFolderButton = true;
+                    TryPreselectPicker(folder.Text, delegate(string value) { picker.SelectedPath = value; });
+                    if (picker.ShowDialog(this) == DialogResult.OK) folder.Text = picker.SelectedPath;
+                }
+            };
+            p.Controls.Add(folder); p.Controls.Add(browse);
+
+            Panel importCard = new Panel { Location = new Point(0, 105), Size = new Size(656, 122), BackColor = CardBg };
+            importCard.Paint += delegate(object s, PaintEventArgs pe) { ControlPaint.DrawBorder(pe.Graphics, importCard.ClientRectangle, BorderColor, ButtonBorderStyle.Solid); };
+            
+            importProject = new CheckBox {
+                Text = "Importar explicitamente uma produção anterior (.fmx)",
+                Checked = !String.IsNullOrWhiteSpace(o.ImportProject), Location = new Point(16, 14), Size = new Size(624, 26),
+                ForeColor = TextWhite, Font = new Font("Segoe UI", 10f, FontStyle.Bold), Cursor = Cursors.Hand
+            };
+            project = new TextBox {
+                Text = o.ImportProject ?? "", Location = new Point(16, 48), Size = new Size(624, 28),
+                BackColor = InputBg, ForeColor = TextWhite, BorderStyle = BorderStyle.FixedSingle,
+                Font = new Font("Segoe UI", 10f), Enabled = importProject.Checked
+            };
             importProject.CheckedChanged += delegate { project.Enabled = importProject.Checked; };
-            p.Controls.Add(folder); p.Controls.Add(browse); p.Controls.Add(importProject); p.Controls.Add(project);
-            p.Controls.Add(new Label { Text = "Sem importar, começa com a mesa limpa. Cria atalhos e desinstalador.\nA importação remove credenciais e início automático.", Location = new Point(0, 184), Size = new Size(574, 46) });
+            
+            Label importHint = new Label {
+                Text = "A importação é opcional. Se não for informada, o 3Mix iniciará com uma mesa nova e limpa.",
+                Font = new Font("Segoe UI", 8.5f), ForeColor = TextMuted, Location = new Point(16, 84), Size = new Size(624, 24)
+            };
+            importCard.Controls.AddRange(new Control[] { importProject, project, importHint });
+            p.Controls.Add(importCard);
+
+            Panel safetyCard = new Panel { Location = new Point(0, 240), Size = new Size(656, 95), BackColor = CardBg };
+            safetyCard.Paint += delegate(object s, PaintEventArgs pe) { ControlPaint.DrawBorder(pe.Graphics, safetyCard.ClientRectangle, BorderColor, ButtonBorderStyle.Solid); };
+            Label safetyTitle = new Label { Text = "Garantia de Preservação e Segurança:", Font = new Font("Segoe UI", 10.5f, FontStyle.Bold), ForeColor = AccentBlue, Location = new Point(16, 12), AutoSize = true };
+            Label safetyText = new Label {
+                Text = "O instalador cria atalhos oficiais e registra o desinstalador conservador.\n" +
+                       "Suas credenciais e dados privados nunca são enviados para a rede nem misturados com outras versões.",
+                Font = new Font("Segoe UI", 9f), ForeColor = TextMuted, Location = new Point(16, 36), Size = new Size(624, 48)
+            };
+            safetyCard.Controls.AddRange(new Control[] { safetyTitle, safetyText });
+            p.Controls.Add(safetyCard);
+
             return p;
         }
+
         Panel StepModules(Options o) {
             Panel p = new Panel();
-            p.Controls.Add(new Label { Text = "Quais módulos você vai usar?", Font = new Font("Segoe UI", 13, FontStyle.Bold), Location = new Point(0, 0), AutoSize = true });
-            p.Controls.Add(new Label { Text = "Você pode mudar isso depois, em Configurações. Módulos desmarcados ficam em standby:\nnão aparecem na mesa e não consomem recursos em segundo plano.", Location = new Point(0, 30), Size = new Size(584, 36) });
-            Button all = new Button { Text = "Selecionar todos", Location = new Point(0, 72), Size = new Size(140, 28) }; all.Click += delegate { foreach (CheckBox c in moduleChecks.Values) c.Checked = true; };
-            Button none = new Button { Text = "Configuração mínima", Location = new Point(148, 72), Size = new Size(160, 28) }; none.Click += delegate { foreach (CheckBox c in moduleChecks.Values) c.Checked = false; };
+            p.Controls.Add(new Label { Text = "Módulos de Produção Broadcast", Font = new Font("Segoe UI", 14, FontStyle.Bold), ForeColor = TextWhite, Location = new Point(0, 0), AutoSize = true });
+            p.Controls.Add(new Label { Text = "Selecione quais recursos deseja habilitar de fábrica. Módulos desmarcados ficam em standby sem consumir CPU/RAM.", Font = new Font("Segoe UI", 9f), ForeColor = TextMuted, Location = new Point(0, 24), Size = new Size(656, 20) });
+
+            Button all = new Button { Text = "Marcar Todos", Location = new Point(0, 48), Size = new Size(130, 28), FlatStyle = FlatStyle.Flat, BackColor = CardBg, ForeColor = TextWhite, Font = new Font("Segoe UI", 9f, FontStyle.Bold), Cursor = Cursors.Hand };
+            all.FlatAppearance.BorderColor = BorderColor;
+            all.Click += delegate { foreach (CheckBox c in moduleChecks.Values) c.Checked = true; };
+
+            Button none = new Button { Text = "Configuração Mínima", Location = new Point(138, 48), Size = new Size(160, 28), FlatStyle = FlatStyle.Flat, BackColor = CardBg, ForeColor = TextWhite, Font = new Font("Segoe UI", 9f, FontStyle.Bold), Cursor = Cursors.Hand };
+            none.FlatAppearance.BorderColor = BorderColor;
+            none.Click += delegate { foreach (CheckBox c in moduleChecks.Values) c.Checked = false; };
+
             p.Controls.Add(all); p.Controls.Add(none);
-            int y = 108;
+
+            Panel listPanel = new Panel {
+                Location = new Point(0, 84), Size = new Size(656, 225),
+                AutoScroll = true, BackColor = CardBg
+            };
+            listPanel.Paint += delegate(object s, PaintEventArgs pe) { ControlPaint.DrawBorder(pe.Graphics, listPanel.ClientRectangle, BorderColor, ButtonBorderStyle.Solid); };
+
+            int y = 8;
             foreach (ModuleCatalog.Item item in ModuleCatalog.All) {
-                CheckBox box = new CheckBox { Text = item.Label, Checked = !o.DisabledModules.Contains(item.Id), Location = new Point(0, y), Size = new Size(260, 22), Font = new Font("Segoe UI", 9.5f, FontStyle.Bold) };
-                Label desc = new Label { Text = item.Description, Location = new Point(264, y), Size = new Size(320, 36), Font = new Font("Segoe UI", 8.5f), ForeColor = Color.FromArgb(90, 90, 90) };
-                moduleChecks[item.Id] = box; p.Controls.Add(box); p.Controls.Add(desc); y += 40;
+                CheckBox box = new CheckBox {
+                    Text = item.Label, Checked = !o.DisabledModules.Contains(item.Id),
+                    Location = new Point(14, y), Size = new Size(240, 24),
+                    Font = new Font("Segoe UI", 9.5f, FontStyle.Bold), ForeColor = TextWhite, Cursor = Cursors.Hand
+                };
+                Label desc = new Label {
+                    Text = item.Description, Location = new Point(260, y + 2),
+                    Size = new Size(365, 34), Font = new Font("Segoe UI", 8.5f), ForeColor = TextMuted
+                };
+                moduleChecks[item.Id] = box;
+                listPanel.Controls.Add(box); listPanel.Controls.Add(desc);
+                y += 38;
             }
-            p.Controls.Add(new Label { Text = "Nenhum módulo da mesa principal (corte, DSK, áudio, gravação) é afetado por esta tela.\nEsta escolha pode ser revista a qualquer momento depois da instalação, em\nConfigurações → Módulos.", Location = new Point(0, y + 4), Size = new Size(584, 54) });
+            p.Controls.Add(listPanel);
+
+            Label note = new Label {
+                Text = "Nota: Corte principal, transições, DSKs, mixer de áudio e gravação essencial estão sempre ativos.\n" +
+                       "Você pode reconfigurar os módulos opcionais a qualquer momento em Configurações → Módulos.",
+                Location = new Point(0, 314), Size = new Size(656, 34), Font = new Font("Segoe UI", 8.5f), ForeColor = TextMuted
+            };
+            p.Controls.Add(note);
             return p;
         }
+
         Panel StepProgress() {
             Panel p = new Panel();
-            p.Controls.Add(new Label { Text = "Instalando…", Font = new Font("Segoe UI", 13, FontStyle.Bold), Location = new Point(0, 0), AutoSize = true });
-            progressStatus = new Label { Text = "Preparando…", Location = new Point(0, 40), Size = new Size(574, 46) }; p.Controls.Add(progressStatus);
-            progressBar = new ProgressBar { Location = new Point(0, 96), Size = new Size(574, 16), Minimum = 0, Maximum = 100 }; p.Controls.Add(progressBar);
+            p.Controls.Add(new Label { Text = "Instalando o 3Mix Studio…", Font = new Font("Segoe UI", 15, FontStyle.Bold), ForeColor = TextWhite, Location = new Point(0, 20), AutoSize = true });
+
+            Panel card = new Panel { Location = new Point(0, 70), Size = new Size(656, 170), BackColor = CardBg };
+            card.Paint += delegate(object s, PaintEventArgs pe) { ControlPaint.DrawBorder(pe.Graphics, card.ClientRectangle, BorderColor, ButtonBorderStyle.Solid); };
+
+            progressStatus = new Label { Text = "Preparando a extração do pacote broadcast…", Location = new Point(24, 28), Size = new Size(608, 38), Font = new Font("Segoe UI", 11f), ForeColor = TextWhite };
+            card.Controls.Add(progressStatus);
+
+            progressBar = new ProgressBar { Location = new Point(24, 80), Size = new Size(608, 24), Minimum = 0, Maximum = 100 };
+            card.Controls.Add(progressBar);
+
+            Label hint = new Label { Text = "Por favor, aguarde. Os binários nativos do motor e painel web estão sendo descompactados.", Location = new Point(24, 120), Size = new Size(608, 26), Font = new Font("Segoe UI", 9f), ForeColor = TextMuted };
+            card.Controls.Add(hint);
+
+            p.Controls.Add(card);
             return p;
         }
+
         CheckBox openNow;
         Panel StepDone() {
             Panel p = new Panel();
-            p.Controls.Add(new Label { Text = "Concluído", Font = new Font("Segoe UI", 13, FontStyle.Bold), Location = new Point(0, 0), AutoSize = true });
-            doneMessage = new Label { Location = new Point(0, 40), Size = new Size(574, 110) }; p.Controls.Add(doneMessage);
-            openNow = new CheckBox { Text = "Abrir o 3Mix agora", Checked = true, Visible = false, Location = new Point(0, 160), Size = new Size(400, 24) }; p.Controls.Add(openNow);
+            p.Controls.Add(new Label { Text = "Instalação Concluída com Sucesso!", Font = new Font("Segoe UI", 16, FontStyle.Bold), ForeColor = TextWhite, Location = new Point(0, 15), AutoSize = true });
+
+            Panel card = new Panel { Location = new Point(0, 60), Size = new Size(656, 210), BackColor = CardBg };
+            card.Paint += delegate(object s, PaintEventArgs pe) { ControlPaint.DrawBorder(pe.Graphics, card.ClientRectangle, BorderColor, ButtonBorderStyle.Solid); };
+
+            doneMessage = new Label { Location = new Point(24, 20), Size = new Size(608, 120), Font = new Font("Segoe UI", 10.5f), ForeColor = TextWhite };
+            card.Controls.Add(doneMessage);
+
+            openNow = new CheckBox {
+                Text = "Iniciar o 3Mix Studio imediatamente ao fechar o assistente",
+                Checked = true, Visible = false, Location = new Point(24, 155), Size = new Size(608, 30),
+                Font = new Font("Segoe UI", 10.5f, FontStyle.Bold), ForeColor = AccentBlue, Cursor = Cursors.Hand
+            };
+            card.Controls.Add(openNow);
+            p.Controls.Add(card);
+
             return p;
         }
 
         void Navigate(int index) {
             if (index < 0 || index >= steps.Length) return;
             steps[current].Visible = false; current = index; steps[current].Visible = true;
-            string[] titles = { "Bem-vindo", "Termos de uso", "Pasta de destino", "Módulos", "Instalando", "Concluído" };
-            stepTitle.Text = titles[current] + "  (" + (current + 1) + "/" + steps.Length + ")";
-            back.Visible = current > 0 && current < 4; next.Text = current == 3 ? "Instalar" : current == 5 ? "Fechar" : "Avançar >";
+            string[] titles = { "Bem-vindo", "Termos de Uso", "Pasta de Destino", "Módulos em Standby", "Instalando", "Concluído" };
+            stepTitle.Text = titles[current] + "  •  Passo " + (current + 1) + " de " + steps.Length;
+            back.Visible = current > 0 && current < 4;
+            next.Text = current == 3 ? "Instalar Agora" : current == 5 ? "Concluir" : "Avançar >";
             next.Visible = current != 4; UpdateNextEnabled();
         }
         void UpdateNextEnabled() {
@@ -217,7 +425,7 @@ namespace FreeMixSetup {
                 try { WriteModulesFile(Path.GetFullPath(options.Destination), options.DisabledModules); } catch (Exception e) { result = 1; Installer.LastError = "A instalação principal foi concluída, mas a gravação da seleção de módulos falhou: " + e.Message; }
             }
             openNow.Visible = result == 0 && Installer.VcRuntimeReady();
-            doneMessage.Text = result == 0 ? "Instalação concluída." + (Installer.Warning.Length > 0 ? "\n\n" + Installer.Warning : "") : "A instalação falhou. " + Installer.LastError + "\n\nRegistro: " + Installer.LastLog;
+            doneMessage.Text = result == 0 ? "O 3Mix Studio foi instalado com êxito na pasta:\n" + options.Destination + "\n\nOs atalhos foram criados na Área de Trabalho e no Menu Iniciar." + (Installer.Warning.Length > 0 ? "\n\n" + Installer.Warning : "") : "A instalação não foi concluída: " + Installer.LastError + "\n\nRegistro de diagnóstico: " + Installer.LastLog;
             Navigate(5); next.Visible = true; next.Enabled = true;
         }
         internal static void TryPreselectPicker(string value, Action<string> select) {
@@ -385,7 +593,7 @@ namespace FreeMixSetup {
             if (file.Length < 84) throw new Exception("Instalador incompleto."); file.Position = file.Length - 84;
             byte[] footer = new byte[84]; ReadExactly(file, footer, footer.Length);
             length = BitConverter.ToInt64(footer, 0); string hash = Encoding.ASCII.GetString(footer, 8, 64), magic = Encoding.ASCII.GetString(footer, 72, 12);
-            if (magic != "FMXSETUPV001" || length != PayloadInfo.Length || length < 22 || length > 5000000000L || length >= file.Length - 84 || hash != PayloadInfo.Sha256) throw new Exception("Payload ausente ou alterado.");
+            if ((magic != "3MXSETUPV001" && magic != "FMXSETUPV001") || length != PayloadInfo.Length || length < 22 || length > 5000000000L || length >= file.Length - 84 || hash != PayloadInfo.Sha256) throw new Exception("Payload ausente ou alterado.");
             start = file.Length - 84 - length;
         }
         static void ReadExactly(Stream stream, byte[] buffer, int count) { int offset = 0; while (offset < count) { int read = stream.Read(buffer, offset, count - offset); if (read <= 0) throw new Exception("Arquivo truncado."); offset += read; } }
