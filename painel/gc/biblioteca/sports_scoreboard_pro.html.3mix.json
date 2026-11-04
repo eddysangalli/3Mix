@@ -1,0 +1,22 @@
+{
+  "freemixCompatibility": {
+    "version": 1,
+    "animation": true,
+    "clock": true,
+    "style": true,
+    "styleFields": [
+      {
+        "key": "accent",
+        "label": "Cor do Destaque",
+        "type": "color",
+        "default": "#2f6fed"
+      }
+    ]
+  },
+  "title": "3Mix Esportes · Placar Esportivo Pro (DSK 1-4)",
+  "category": "Esportes",
+  "thumbnail": "thumbnails/scoreboard_horizontal.png",
+  "description": "Placar broadcast moderno para transmissões de futebol e esportes com escudos, acréscimos e cronômetro em tempo real.",
+  "author": "3Mix Pro Suite",
+  "version": "1.0.0"
+}

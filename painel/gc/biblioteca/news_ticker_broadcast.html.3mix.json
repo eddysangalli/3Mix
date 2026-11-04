@@ -1,0 +1,28 @@
+{
+  "freemixCompatibility": {
+    "version": 1,
+    "animation": true,
+    "clock": true,
+    "style": true,
+    "styleFields": [
+      {
+        "key": "accent",
+        "label": "Cor do Destaque",
+        "type": "color",
+        "default": "#2f6fed"
+      },
+      {
+        "key": "background",
+        "label": "Cor do Painel",
+        "type": "color",
+        "default": "#11141c"
+      }
+    ]
+  },
+  "title": "3Mix Jornalismo · Ticker Contínuo Broadcast (DSK 1-4)",
+  "category": "Jornalismo",
+  "thumbnail": "thumbnails/social_lowerthird_ticker.png",
+  "description": "Faixa de rodapé contínua estilo CNN e GloboNews com relógio digital em tempo real, badge de editoria e marquee deslizante fluida.",
+  "author": "3Mix Pro Suite",
+  "version": "1.0.0"
+}

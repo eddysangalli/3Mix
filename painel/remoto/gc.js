@@ -61,8 +61,116 @@ el('style').addEventListener('click',e=>{const key=e.target.dataset.removeAsset;
 for(const [button,action] of [['duplicate','duplicate'],['prepare','prepare'],['air','air'],['off','air'],['remove','remove']])el(button).onclick=async()=>{try{const result=await command('gc_library_'+action,{id,...(action==='air'?{on:button==='air'}:{})});if(action==='duplicate')select(state.gcLibrary.items.find(i=>i.id===result.id));if(action==='remove')select();}catch{}};
 el('export').onclick=async()=>{try{const data=await command('gc_library_export');if(data?.kind!=='freemix-gc-library')throw Error('Exportação não confirmada');const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='freemix-gc-biblioteca.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){el('status').textContent=e.message;}};
 el('import').onchange=async()=>{try{const f=el('import').files[0];if(!f)return;if(f.size>6*1024*1024)throw Error('Biblioteca deve ter até 6 MB');const result=await command('gc_library_import',{payload:JSON.parse(await f.text())});select(state.gcLibrary.items.find(i=>i.id===result.ids?.[0]));}catch(e){el('status').textContent=e.message;}finally{el('import').value='';}};
-setInterval(()=>{const next=FreeMixRemote.getState();state=next;const sig=JSON.stringify([next.gcLibrary?.scope,next.gcLibrary?.items,next.connected]);if(sig===fingerprint)return;const previousScope=fingerprint?el('saved').dataset.scope:null;fingerprint=sig;el('saved').dataset.scope=next.gcLibrary?.scope||'';el('saved').innerHTML=(next.gcLibrary?.items||[]).map(i=>`<button data-id="${i.id}" class="${i.onAir?'air':''}">${esc(i.name)}${i.onAir?' · NO AR':''}</button>`).join('');if(previousScope!==null&&previousScope!==(next.gcLibrary?.scope||''))select();buttons();},350);
+setInterval(()=>{const next=FreeMixRemote.getState();state=next;const sig=JSON.stringify([next.gcLibrary?.scope,next.gcLibrary?.items,next.connected,next.dataSources?.length]);if(sig===fingerprint)return;const previousScope=fingerprint?el('saved').dataset.scope:null;fingerprint=sig;el('saved').dataset.scope=next.gcLibrary?.scope||'';el('saved').innerHTML=(next.gcLibrary?.items||[]).map(i=>`<button data-id="${i.id}" class="${i.onAir?'air':''}">${esc(i.name)}${i.onAir?' · NO AR':''}</button>`).join('');if(previousScope!==null&&previousScope!==(next.gcLibrary?.scope||''))select();buttons();updateDataSourcesList();},350);
 select();
+
+// Smart Data Binding Integrado (Inclusão e Navegação Rápida de Planilhas/JSON)
+let activeDataSourceId = null;
+const dataSourceSelect = el('gc-data-source-select');
+const dataNav = el('gc-data-nav');
+const dataRowIndicator = el('gc-data-row-indicator');
+const dataPrev = el('gc-data-prev');
+const dataNext = el('gc-data-next');
+const dataAutoBind = el('gc-data-autobind');
+
+const FIELD_SYNONYMS = {
+  name: ['nome', 'name', 'pessoa', 'palestrante', 'autor', 'apresentador', 'jogador', 'atleta', 'host', 'convidado'],
+  role: ['cargo', 'role', 'funcao', 'posicao', 'especialidade', 'profissao', 'descricao'],
+  company: ['empresa', 'company', 'instituicao', 'organizacao', 'clube'],
+  title: ['titulo', 'title', 'manchete', 'headline', 'assunto', 'tema'],
+  detail: ['detalhe', 'detail', 'subtitulo', 'subtitle', 'apoio', 'descricao', 'texto'],
+  date: ['data', 'date', 'horario', 'hora', 'periodo'],
+  quote: ['citacao', 'quote', 'frase', 'declaracao', 'aspas'],
+  location: ['local', 'location', 'cidade', 'estado', 'praca'],
+  teamA: ['timea', 'time1', 'mandante', 'equipea', 'teama', 'casa'],
+  teamB: ['timeb', 'time2', 'visitante', 'equipeb', 'teamb', 'fora'],
+  scoreA: ['golsa', 'placara', 'scorea', 'pontosa'],
+  scoreB: ['golsb', 'placarb', 'scoreb', 'pontosb'],
+  handle: ['handle', 'arroba', 'social', 'instagram', 'twitter', 'perfil'],
+  message: ['mensagem', 'message', 'comentario', 'texto']
+};
+
+function normalizeStr(s) {
+  return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+}
+
+function updateDataSourcesList() {
+  if (!dataSourceSelect) return;
+  const list = state.dataSources || [];
+  const currentVal = dataSourceSelect.value;
+  dataSourceSelect.innerHTML = '<option value="">Nenhuma (digitação manual)</option>' +
+    list.map(s => `<option value="${esc(s.id)}" ${s.id === currentVal ? 'selected' : ''}>${esc(s.name)} (${s.rowCount || (s.rows ? s.rows.length : 0)} linhas)</option>`).join('');
+}
+
+function applyDataRow(table, rowIndex) {
+  if (!table || !table.rows || !table.rows[rowIndex]) return;
+  const row = table.rows[rowIndex];
+  const m = model(template);
+  if (!m || !m.fields) return;
+
+  let filledCount = 0;
+  for (const f of m.fields) {
+    if (styleKeys.includes(f.key)) continue;
+    const targetInput = el('f-' + f.key);
+    if (!targetInput) continue;
+
+    const syns = FIELD_SYNONYMS[f.key] || [f.key.toLowerCase()];
+    for (const col of Object.keys(row)) {
+      const normCol = normalizeStr(col);
+      if (syns.some(s => normCol.includes(s) || s.includes(normCol))) {
+        targetInput.value = row[col];
+        filledCount++;
+        break;
+      }
+    }
+  }
+
+  if (dataRowIndicator) dataRowIndicator.textContent = `Linha ${rowIndex + 1} de ${table.rows.length}`;
+  dirty = true;
+  preview();
+  buttons();
+  el('status').textContent = `Dados preenchidos da linha ${rowIndex + 1} (${filledCount} campos mapeados)`;
+}
+
+if (dataSourceSelect) {
+  dataSourceSelect.onchange = () => {
+    activeDataSourceId = dataSourceSelect.value;
+    if (!activeDataSourceId) {
+      if (dataNav) dataNav.style.display = 'none';
+      return;
+    }
+    const table = (state.dataSources || []).find(s => s.id === activeDataSourceId);
+    if (table && table.rows && table.rows.length) {
+      if (dataNav) dataNav.style.display = 'inline-flex';
+      applyDataRow(table, table.selected || 0);
+    }
+  };
+
+  if (dataPrev) dataPrev.onclick = async () => {
+    const table = (state.dataSources || []).find(s => s.id === activeDataSourceId);
+    if (!table || !table.rows) return;
+    const cur = table.selected || 0;
+    const nextIdx = Math.max(0, cur - 1);
+    table.selected = nextIdx;
+    await command('data_select', { id: table.id, index: nextIdx }).catch(() => {});
+    applyDataRow(table, nextIdx);
+  };
+
+  if (dataNext) dataNext.onclick = async () => {
+    const table = (state.dataSources || []).find(s => s.id === activeDataSourceId);
+    if (!table || !table.rows) return;
+    const cur = table.selected || 0;
+    const nextIdx = Math.min(table.rows.length - 1, cur + 1);
+    table.selected = nextIdx;
+    await command('data_select', { id: table.id, index: nextIdx }).catch(() => {});
+    applyDataRow(table, nextIdx);
+  };
+
+  if (dataAutoBind) dataAutoBind.onclick = () => {
+    const table = (state.dataSources || []).find(s => s.id === activeDataSourceId);
+    if (table && table.rows) applyDataRow(table, table.selected || 0);
+  };
+}
 
 const restartClock=document.createElement('button');restartClock.textContent='Reiniciar relógio H/V';restartClock.type='button';restartClock.onclick=async()=>{try{if(!id||dirty)throw Error('Salve e selecione um título primeiro');await command('gc_library_clock_restart',{id});el('status').textContent='Relógio reiniciado nas versões vinculadas.';}catch(e){el('status').textContent=e.message;}};el('save').parentElement.append(restartClock);
 import {installGtzipUi} from './gc-gtzip.js';

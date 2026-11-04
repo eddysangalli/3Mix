@@ -8303,5 +8303,175 @@ window.GC_CATALOG = [
     ]
    }
   ]
+ },
+ {
+  "id": "social_chat_stream",
+  "name": "Feed de Chat Broadcast (YouTube/Twitch/TikTok)",
+  "collection": "Eventos",
+  "category": "Social",
+  "thumbnail": "thumbnails/social_lowerthird_card.png",
+  "file": "biblioteca/social_chat_stream.html",
+  "fields": [
+   {
+    "key": "network",
+    "label": "Rede Social",
+    "type": "text",
+    "default": "youtube"
+   },
+   {
+    "key": "author",
+    "label": "Autor",
+    "type": "text",
+    "default": "Espectador"
+   },
+   {
+    "key": "message",
+    "label": "Mensagem",
+    "type": "text",
+    "default": "Parabéns pela transmissão ao vivo!"
+   },
+   {
+    "key": "amount",
+    "label": "SuperChat / Doação",
+    "type": "text",
+    "default": ""
+   }
+  ]
+ },
+ {
+  "id": "social_superchat_pill",
+  "name": "Alerta de SuperChat & PIX",
+  "collection": "Eventos",
+  "category": "Social",
+  "thumbnail": "thumbnails/social_lowerthird_card.png",
+  "file": "biblioteca/social_superchat_pill.html",
+  "fields": [
+   {
+    "key": "author",
+    "label": "Nome do Apoiador",
+    "type": "text",
+    "default": "Apoiador VIP"
+   },
+   {
+    "key": "amount",
+    "label": "Valor do PIX / SuperChat",
+    "type": "text",
+    "default": "R$ 50,00"
+   },
+   {
+    "key": "message",
+    "label": "Mensagem de Apoio",
+    "type": "text",
+    "default": "Excelente conteúdo! Parabéns pela transmissão."
+   }
+  ]
+ },
+ {
+  "id": "news_ticker_broadcast",
+  "name": "Ticker Contínuo CNN / GloboNews com Relógio",
+  "collection": "Jornalismo",
+  "category": "Notícias",
+  "thumbnail": "thumbnails/social_lowerthird_ticker.png",
+  "file": "biblioteca/news_ticker_broadcast.html",
+  "fields": [
+   {
+    "key": "badge",
+    "label": "Etiqueta",
+    "type": "text",
+    "default": "AO VIVO"
+   },
+   {
+    "key": "topic",
+    "label": "Editoria / Urgente",
+    "type": "text",
+    "default": "PLANTÃO"
+   },
+   {
+    "key": "text",
+    "label": "Manchete do Ticker",
+    "type": "text",
+    "default": "3Mix Studio Pro inicia fase de testes Alpha com a comunidade."
+   }
+  ]
+ },
+ {
+  "id": "sports_scoreboard_pro",
+  "name": "Placar Esportivo Premier League / FIFA",
+  "collection": "Esportes",
+  "category": "Placares",
+  "thumbnail": "thumbnails/scoreboard_horizontal.png",
+  "file": "biblioteca/sports_scoreboard_pro.html",
+  "fields": [
+   {
+    "key": "teamHome",
+    "label": "Equipe Mandante",
+    "type": "text",
+    "default": "BRASIL"
+   },
+   {
+    "key": "scoreHome",
+    "label": "Gols Mandante",
+    "type": "number",
+    "default": 2
+   },
+   {
+    "key": "scoreAway",
+    "label": "Gols Visitante",
+    "type": "number",
+    "default": 1
+   },
+   {
+    "key": "teamAway",
+    "label": "Equipe Visitante",
+    "type": "text",
+    "default": "ARGENTINA"
+   },
+   {
+    "key": "minutes",
+    "label": "Minuto Inicial",
+    "type": "number",
+    "default": 78
+   },
+   {
+    "key": "extra",
+    "label": "Acréscimos",
+    "type": "text",
+    "default": "+3'"
+   }
+  ]
+ },
+ {
+  "id": "podcast_split_lower",
+  "name": "Lower Third Duplo Podcast Host & Convidado",
+  "collection": "Eventos",
+  "category": "Entrevistas",
+  "thumbnail": "thumbnails/podcast_host_horizontal.png",
+  "file": "biblioteca/podcast_split_lower.html",
+  "fields": [
+   {
+    "key": "nameHost",
+    "label": "Nome Apresentador",
+    "type": "text",
+    "default": "EDDY SANGALLI"
+   },
+   {
+    "key": "handleHost",
+    "label": "Arroba Apresentador",
+    "type": "text",
+    "default": "@eddysangalli"
+   },
+   {
+    "key": "nameGuest",
+    "label": "Nome Convidado",
+    "type": "text",
+    "default": "DR. ROBERTO ALENCAR"
+   },
+   {
+    "key": "handleGuest",
+    "label": "Arroba Convidado",
+    "type": "text",
+    "default": "@dr.roberto • VP Broadcast"
+   }
+  ]
  }
 ];

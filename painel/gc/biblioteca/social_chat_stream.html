@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>3Mix · Feed de Chat Broadcast (DSK 1-4)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Segoe UI', -apple-system, Roboto, sans-serif;
+    user-select: none;
+  }
+
+  /* Posicionamento Lateral Safe Area */
+  #chat-feed-container {
+    position: absolute;
+    bottom: 80px;
+    left: 60px;
+    width: 440px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    justify-content: flex-end;
+    pointer-events: none;
+  }
+
+  /* Card Individual de Comentário */
+  .chat-item {
+    background: rgba(18, 22, 30, 0.90);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-left: 5px solid #2f6fed;
+    border-radius: 8px;
+    padding: 12px 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+    animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes slideIn {
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .chat-item.leaving {
+    animation: fadeOut 0.4s ease forwards;
+  }
+
+  @keyframes fadeOut {
+    to {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+  }
+
+  /* Cabeçalho do Card */
+  .item-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .item-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid rgba(255, 255, 255, 0.3);
+    background: #2a2f3d;
+  }
+
+  .item-meta {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .item-author {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .item-badge {
+    font-size: 9.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(47, 111, 237, 0.25);
+    color: #70a4ff;
+    border: 1px solid rgba(47, 111, 237, 0.4);
+  }
+
+  .badge-superchat {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #ffffff;
+    border: none;
+  }
+
+  .item-network {
+    font-size: 11px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Corpo da Mensagem */
+  .item-message {
+    font-size: 14px;
+    line-height: 1.35;
+    color: #e2e8f0;
+    word-break: break-word;
+  }
+</style>
+</head>
+<body>
+<div id="chat-feed-container"></div>
+
+<script>
+  // WebSocket para conexão automática com a telemetria e o Social do 3Mix
+  const container = document.getElementById('chat-feed-container');
+  const MAX_ITEMS = 4;
+  let ws = null;
+
+  function addChatMessage(data) {
+    const item = document.createElement('div');
+    item.className = 'chat-item';
+
+    // Cor dinâmica de rede
+    const netColors = {
+      youtube: '#ff0000',
+      twitch: '#9146ff',
+      tiktok: '#00f2fe',
+      instagram: '#e1306c'
+    };
+    const network = (data.network || 'youtube').toLowerCase();
+    item.style.borderLeftColor = netColors[network] || '#2f6fed';
+
+    const header = document.createElement('div');
+    header.className = 'item-header';
+
+    const avatar = document.createElement('img');
+    avatar.className = 'item-avatar';
+    avatar.src = data.avatar || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="%2394a3b8"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>';
+    header.appendChild(avatar);
+
+    const meta = document.createElement('div');
+    meta.className = 'item-meta';
+
+    const author = document.createElement('div');
+    author.className = 'item-author';
+    author.textContent = data.author || 'Espectador';
+
+    if (data.amount) {
+      const scBadge = document.createElement('span');
+      scBadge.className = 'item-badge badge-superchat';
+      scBadge.textContent = data.amount;
+      author.appendChild(scBadge);
+    } else if (data.badge) {
+      const b = document.createElement('span');
+      b.className = 'item-badge';
+      b.textContent = data.badge;
+      author.appendChild(b);
+    }
+    meta.appendChild(author);
+
+    const net = document.createElement('div');
+    net.className = 'item-network';
+    net.textContent = network.toUpperCase();
+    meta.appendChild(net);
+
+    header.appendChild(meta);
+    item.appendChild(header);
+
+    const msg = document.createElement('div');
+    msg.className = 'item-message';
+    msg.textContent = data.message || '';
+    item.appendChild(msg);
+
+    container.appendChild(item);
+
+    // Limitar quantidade máxima na tela
+    while (container.children.length > MAX_ITEMS) {
+      const oldest = container.children[0];
+      oldest.classList.add('leaving');
+      setTimeout(() => oldest.remove(), 400);
+    }
+
+    // Auto-remove após 12 segundos se não houver novas interações
+    setTimeout(() => {
+      if (item.parentNode) {
+        item.classList.add('leaving');
+        setTimeout(() => item.remove(), 400);
+      }
+    }, 12000);
+  }
+
+  function connectWs() {
+    const loc = window.location;
+    const wsUrl = (loc.protocol === 'https:' ? 'wss://' : 'ws://') + (loc.host || '127.0.0.1:4455') + '/ws';
+    try {
+      ws = new WebSocket(wsUrl);
+      ws.onmessage = (e) => {
+        try {
+          const msg = JSON.parse(e.data);
+          if (msg.event === 'SOCIAL_CHAT_MESSAGE' && msg.data) {
+            addChatMessage(msg.data);
+          }
+          if (msg.event === 'SOCIAL_ACTIVATE' && msg.data) {
+            addChatMessage(msg.data);
+          }
+        } catch(err){}
+      };
+      ws.onclose = () => setTimeout(connectWs, 3000);
+    } catch(err) {
+      setTimeout(connectWs, 3000);
+    }
+  }
+
+  // API de teste e injeção direta via janela
+  window.updateFields = function(fields) {
+    addChatMessage(fields);
+  };
+
+  connectWs();
+</script>
+</body>
+</html>

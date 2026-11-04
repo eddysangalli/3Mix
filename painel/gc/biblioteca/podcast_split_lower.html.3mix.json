@@ -1,0 +1,22 @@
+{
+  "freemixCompatibility": {
+    "version": 1,
+    "animation": true,
+    "clock": false,
+    "style": true,
+    "styleFields": [
+      {
+        "key": "accent",
+        "label": "Cor do Destaque",
+        "type": "color",
+        "default": "#2f6fed"
+      }
+    ]
+  },
+  "title": "3Mix Podcast · Lower Third Duplo Host & Convidado (DSK 1-4)",
+  "category": "Eventos",
+  "thumbnail": "thumbnails/podcast_host_horizontal.png",
+  "description": "Identificador duplo para videocasts e mesas-redondas com fotos redondas, arrobas sociais e tags de apresentador/convidado.",
+  "author": "3Mix Pro Suite",
+  "version": "1.0.0"
+}

@@ -3,146 +3,305 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fontes de dados</title>
-<link rel="stylesheet" href="vmix-dialogo.css">
+<title>3Mix · Fontes de Dados (Data Sources)</title>
+<link rel="stylesheet" href="controle.css">
+<link rel="stylesheet" href="3mix-grafite.css">
 <style>
-.vd-status table { width: 100%; border-collapse: collapse; }
-.vd-status th, .vd-status td { padding: 6px 10px; border: 1px solid #2d2d2d; text-align: left; font-size: 12px; }
-.vd-status th { background: #1c1c1c; color: #94a3b8; font-weight: 700; position: sticky; top: 0; z-index: 1; }
-.vd-status td input { background: #101010; color: #f8fafc; border: 1px solid #343434; border-radius: 3px; padding: 4px 8px; font-size: 12px; width: 100%; box-sizing: border-box; }
-.vd-status td input:focus { background: #2d2d2d; border-color: #2f6fed; outline: none; box-shadow: 0 0 0 2px rgba(47, 111, 237, 0.2); }
-#data-mapping label { display: inline-flex; align-items: center; gap: 6px; background: #1c1c1c; padding: 4px 8px; font-size: 12px; border: 1px solid #343434; border-radius: 4px; }
-#data-mapping select, #data-mapping input { height: 26px; font-size: 12px; width: auto; max-width: 160px; background: #101010; color: #fff; border: 1px solid #343434; border-radius: 3px; }
-details summary { cursor: pointer; font-weight: 700; color: #2f6fed; padding: 6px 0; outline: none; }
-details summary:hover { color: #7dd3fc; }
+  body {
+    background: #11141c;
+    color: #f1f5f9;
+    font-family: 'Segoe UI', -apple-system, Roboto, sans-serif;
+    margin: 0;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+  .data-container {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .data-card {
+    background: #181d26;
+    border: 1px solid #283344;
+    border-radius: 6px;
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .data-card h2 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #38bdf8;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .data-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .data-toolbar label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .data-toolbar select, .data-toolbar input, .data-toolbar button {
+    height: 32px;
+    font-size: 13px;
+  }
+  select, input, textarea {
+    background: #0d1117;
+    border: 1px solid #334155;
+    border-radius: 4px;
+    color: #f8fafc;
+    padding: 4px 10px;
+    box-sizing: border-box;
+  }
+  select:focus, input:focus, textarea:focus {
+    border-color: #0284c7;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.25);
+  }
+  button {
+    background: #252e3d;
+    border: 1px solid #384556;
+    border-radius: 4px;
+    color: #f1f5f9;
+    padding: 0 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  button:hover {
+    background: #333f52;
+    border-color: #4b5b70;
+  }
+  button.primary {
+    background: #0284c7;
+    border-color: #0284c7;
+    color: #ffffff;
+  }
+  button.primary:hover {
+    background: #0369a1;
+  }
+  button.danger {
+    background: #b91c1c;
+    border-color: #dc2626;
+    color: #ffffff;
+  }
+  button.danger:hover {
+    background: #991b1b;
+  }
+  button.air {
+    background: #dc2626;
+    border-color: #ef4444;
+    color: #ffffff;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+  button.air:hover {
+    background: #b91c1c;
+  }
+  .table-scroll {
+    max-height: 240px;
+    overflow: auto;
+    background: #090c10;
+    border: 1px solid #202734;
+    border-radius: 4px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  th {
+    background: #141923;
+    color: #94a3b8;
+    font-weight: 700;
+    text-align: left;
+    padding: 8px 12px;
+    position: sticky;
+    top: 0;
+    border-bottom: 2px solid #252e3d;
+    z-index: 1;
+  }
+  td {
+    padding: 6px 12px;
+    border-bottom: 1px solid #1a202c;
+  }
+  td input {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    color: #f8fafc;
+    padding: 2px 6px;
+    width: 100%;
+  }
+  td input:focus {
+    background: #141923;
+    border-color: #0284c7;
+  }
+  details summary {
+    cursor: pointer;
+    font-weight: 700;
+    color: #38bdf8;
+    padding: 4px 0;
+    outline: none;
+  }
+  details summary:hover {
+    color: #7dd3fc;
+  }
 </style>
 </head>
 <body data-page="dados" class="vd">
-<div class="vd-window vd-fill">
-  <div class="vd-strip">
-    <div class="vd-row" style="flex:1;grid-template-columns:80px minmax(180px,1fr) auto">
-      <span>Tabela</span>
-      <select id="data-source"></select>
-      <div class="vd-inline" style="gap:4px">
-        <button id="data-previous" title="Linha anterior">◀</button>
-        <label class="vd-check" style="gap:2px">Linha <input id="data-row" type="number" min="1" value="1" style="width:48px;height:22px;text-align:center"></label>
-        <button id="data-select">Ir</button>
-        <button id="data-next" title="Próxima linha">▶</button>
-        <button id="data-refresh" title="Recarregar dados da fonte">&#8635;</button>
+<div class="data-container">
+  <!-- Barra de Seleção e Navegação Rápida de Linha -->
+  <div class="data-card">
+    <div class="data-toolbar" style="justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <label>Tabela Ativa: <select id="data-source" style="min-width:200px"></select></label>
+        <div style="display:flex;align-items:center;gap:4px">
+          <button type="button" id="data-previous" title="Linha anterior">◀</button>
+          <label style="font-size:12px">Linha <input id="data-row" type="number" min="1" value="1" style="width:54px;height:28px;text-align:center"></label>
+          <button type="button" id="data-select">Ir</button>
+          <button type="button" id="data-next" title="Próxima linha">▶</button>
+          <button type="button" id="data-refresh" title="Recarregar dados da fonte">&#8635; Atualizar</button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span id="data-status" style="font-size:12px;color:#94a3b8"></span>
+        <span id="connection" hidden></span>
       </div>
     </div>
-    <span class="vd-flex"></span>
-    <span id="data-status" class="vd-note" style="font-size:11px"></span>
-    <span id="connection" hidden></span>
   </div>
 
-  <div class="vd-body" style="padding-bottom:2px">
-    <div class="vd-row">
-      <span>Gerenciar</span>
-      <div class="vd-inline" style="gap:6px">
-        <button id="data-people">Nova Lista de Pessoas</button>
-        <button id="data-add-row">+ Registro</button>
-        <button id="data-delete-row" class="vd-warn">Excluir Linha</button>
-        <button id="data-move">Mudar Escopo</button>
-        <button id="data-delete" class="vd-warn">Excluir Tabela</button>
+  <!-- Ações de Gerenciamento e Adição de Fonte -->
+  <div class="data-card">
+    <div class="data-toolbar" style="justify-content:space-between">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" id="data-people">+ Lista de Pessoas</button>
+        <button type="button" id="data-add-row">+ Nova Linha</button>
+        <button type="button" id="data-delete-row" class="danger">Excluir Linha</button>
+        <button type="button" id="data-move">Mudar Escopo</button>
+        <button type="button" id="data-delete" class="danger">Excluir Tabela</button>
       </div>
     </div>
 
-    <details class="vd-advanced">
-      <summary>Adicionar Nova Fonte (Excel, CSV, Google Sheets, URL, JSON)</summary>
-      <div class="vd-row"><span>Nome</span><input id="data-name" value="Tabela" spellcheck="false"></div>
-      <div class="vd-row"><span>Guardar em</span>
-        <select id="data-scope">
-          <option value="project">Esta produção</option>
-          <option value="global">Todas as produções</option>
-        </select>
-      </div>
-      <div class="vd-row"><span>Formato</span>
-        <div class="vd-inline">
-          <select id="data-format" class="vd-short">
-            <option value="csv">CSV</option>
-            <option value="json">JSON</option>
-            <option value="xlsx">Excel XLSX</option>
+    <details style="margin-top:6px">
+      <summary>➕ Conectar Nova Fonte (Excel XLSX, CSV, Google Sheets, REST JSON)</summary>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:12px;margin-top:12px">
+        <label>Nome da Tabela<input id="data-name" value="Tabela" spellcheck="false"></label>
+        <label>Guardar em
+          <select id="data-scope">
+            <option value="project">Esta produção</option>
+            <option value="global">Todas as produções</option>
           </select>
-          <span style="font-weight:700">Separador:</span>
-          <select id="data-delimiter" class="vd-short" style="width:90px">
+        </label>
+        <label>Formato
+          <select id="data-format">
+            <option value="csv">CSV (Texto separado por vírgula)</option>
+            <option value="xlsx">Excel (.xlsx)</option>
+            <option value="json">JSON API</option>
+          </select>
+        </label>
+        <label>Separador (para CSV)
+          <select id="data-delimiter">
             <option value=",">Vírgula (,)</option>
             <option value=";">Ponto e vírgula (;)</option>
+            <option value="&#9;">Tabulação (Tab)</option>
           </select>
+        </label>
+        <label>Aba Excel (opcional)<input id="data-sheet" placeholder="Ex: Planilha1" spellcheck="false"></label>
+        <label>Caminho JSON (opcional)<input id="data-path" placeholder="Ex: dados.linhas" spellcheck="false"></label>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <label>Arquivo Local (CSV / Excel)</label>
+          <div style="display:flex;gap:6px">
+            <input id="data-local" placeholder="C:\Dados\palestrantes.xlsx" style="flex:1" spellcheck="false">
+            <button type="button" id="data-file">Conectar</button>
+            <input id="data-upload" type="file" accept=".csv,.json,.xlsx" style="display:none">
+            <button type="button" onclick="document.getElementById('data-upload').click()">Procurar…</button>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <label>Endereço URL / Google Sheets (CSV Público)</label>
+          <div style="display:flex;gap:6px">
+            <input id="data-url" type="url" placeholder="https://docs.google.com/spreadsheets/.../pub?output=csv" style="flex:1" spellcheck="false">
+            <label style="font-size:11px;display:flex;align-items:center;gap:4px">Polling: <input id="data-interval" type="number" min="1" max="3600" value="5" style="width:48px;height:32px">s</label>
+            <button type="button" id="data-http" class="primary">Conectar URL</button>
+          </div>
         </div>
       </div>
-      <div class="vd-row"><span>Aba / Caminho</span>
-        <div class="vd-inline">
-          <input id="data-sheet" placeholder="Aba Excel (opcional)" spellcheck="false">
-          <input id="data-path" placeholder="Caminho JSON (ex: resultado.linhas)" spellcheck="false">
+
+      <div style="margin-top:12px">
+        <label>Texto Direto (Colar CSV/JSON)</label>
+        <textarea id="data-text" placeholder="nome,cargo&#10;Dr. Roberto Alencar,Diretor de Tecnologia&#10;Marina Costa,Repórter" style="height:60px;width:100%;margin-top:4px;font-family:Consolas,monospace;font-size:12px"></textarea>
+        <div style="display:flex;justify-content:flex-end;margin-top:6px">
+          <button type="button" id="data-import">Importar Texto Colado</button>
         </div>
-      </div>
-      <div class="vd-row"><span>Arquivo Local</span>
-        <div class="vd-inline">
-          <input id="data-local" placeholder="C:\Dados\placar.csv" spellcheck="false">
-          <button id="data-file">Conectar Arquivo</button>
-          <input id="data-upload" type="file" accept=".csv,.json,.xlsx" style="display:none">
-          <button type="button" onclick="document.getElementById('data-upload').click()">Carregar Arquivo...</button>
-        </div>
-      </div>
-      <div class="vd-row"><span>Endereço URL</span>
-        <div class="vd-inline">
-          <input id="data-url" type="url" placeholder="https://... ou exportação CSV pública do Google Sheets" spellcheck="false">
-          <label class="vd-check">A cada <input id="data-interval" type="number" min="1" max="3600" value="5" style="width:48px"> s</label>
-          <button id="data-http">Conectar Endereço</button>
-        </div>
-      </div>
-      <div class="vd-row"><span>Texto Direto</span>
-        <textarea id="data-text" placeholder="nome,cargo&#10;Maria,Apresentadora" style="height:60px;width:100%;font:12px Consolas,monospace;background:#0c0f14;color:#f8fafc;border:1px solid #283340;border-radius:4px;padding:6px;box-sizing:border-box;outline:none"></textarea>
-      </div>
-      <div class="vd-row"><span></span>
-        <div class="vd-right"><button id="data-import">Importar Texto</button></div>
       </div>
     </details>
   </div>
 
-  <div class="vd-status vd-grow" style="margin: 4px 12px; min-height: 160px; overflow: auto;">
-    <div id="data-table"></div>
+  <!-- Tabela Visual de Dados -->
+  <div class="data-card">
+    <h2>Registros da Tabela</h2>
+    <div class="table-scroll">
+      <div id="data-table"></div>
+    </div>
   </div>
 
-  <div class="vd-body" style="padding-top:4px">
-    <div class="vd-row">
-      <span>Vínculo com GC</span>
-      <div class="vd-inline">
-        <select id="data-kind" class="vd-short" style="width:200px">
-          <option value="person">Pessoa → Preview, Call e Tarja</option>
-          <option value="lower">Tarja</option>
-          <option value="score">Placar</option>
-          <option value="text">Fonte de texto</option>
-          <option value="browser">Template HTML</option>
-          <option value="variables">Variáveis da produção</option>
-          <option value="inputName">Nome de entrada</option>
-        </select>
-        <span id="data-target-label" hidden style="display:inline-flex;align-items:center;gap:4px">
-          Destino: <select id="data-target" class="vd-short"></select>
+  <!-- Vínculo com GC e Disparo -->
+  <div class="data-card">
+    <div class="data-toolbar" style="justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <label>Tipo de Vínculo:
+          <select id="data-kind" style="min-width:220px">
+            <option value="person">Pessoa (Nome, Cargo, Foto)</option>
+            <option value="lower">Tarja / Lower Third</option>
+            <option value="score">Placar Esportivo</option>
+            <option value="text">Fonte de Texto</option>
+            <option value="browser">Template HTML</option>
+            <option value="variables">Variáveis Globais</option>
+            <option value="inputName">Nome de Entrada</option>
+          </select>
+        </label>
+        <span id="data-target-label" hidden style="display:inline-flex;align-items:center;gap:6px">
+          Destino: <select id="data-target"></select>
         </span>
-        <label class="vd-check"><input id="data-auto" type="checkbox"> Auto-Publicar</label>
+        <label style="cursor:pointer"><input id="data-auto" type="checkbox"> Auto-Publicar ao Mudar Linha</label>
       </div>
-    </div>
-    <div class="vd-row">
-      <span>Mapeamento</span>
-      <div class="vd-inline" style="flex-wrap:wrap">
-        <div id="data-mapping" class="vd-inline" style="flex-wrap:wrap;gap:6px"></div>
-        <button id="data-add-mapping" hidden>+ Campo</button>
-      </div>
-    </div>
-    <pre id="data-preview" hidden></pre>
-    <p id="message" class="vd-msg" role="status"></p>
-  </div>
 
-  <div class="vd-bar">
-    <button id="data-bind">Salvar Vínculos</button>
-    <button id="data-publish">Enviar ao GC</button>
-    <button id="data-on" class="vd-air">Colocar no Ar</button>
-    <span class="vd-flex"></span>
-    <button id="close-btn" onclick="window.FreeMixClosePanel ? window.FreeMixClosePanel() : window.close()">Fechar</button>
+      <div style="display:flex;gap:8px">
+        <button type="button" id="data-bind">Salvar Mapeamento</button>
+        <button type="button" id="data-publish" class="primary">Enviar ao GC</button>
+        <button type="button" id="data-on" class="air">COLOCAR NO AR</button>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap">
+      <span style="font-size:12.5px;font-weight:700;color:#94a3b8">Mapeamento de Colunas:</span>
+      <div id="data-mapping" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      <button type="button" id="data-add-mapping" hidden>+ Campo</button>
+    </div>
+
+    <pre id="data-preview" hidden style="background:#000;color:#38bdf8;padding:8px;border-radius:4px;font-size:12px"></pre>
+    <p id="message" style="margin:0;font-size:12.5px;color:#94a3b8" role="status"></p>
   </div>
 </div>
+
 <script src="controle.js"></script>
 <script src="fechar-janela.js"></script>
 <script src="dados.js"></script>

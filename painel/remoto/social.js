@@ -76,6 +76,7 @@
     }
     items.forEach(item => {
       const card = createCard(item, [
+        { label: '⚡ No Ar', class: 'btn primary', title: 'Aprova e joga imediatamente no ar no DSK ativo', click: async () => { await approveItem(item.id); await takeItem(item.id); } },
         { label: 'Aprovar', class: 'btn success', click: () => approveItem(item.id) },
         { label: '★', class: 'btn warning', title: 'Favoritar', click: () => favoriteItem(item.id, !item.favorite) },
         { label: 'Rejeitar', class: 'btn', click: () => rejectItem(item.id) },

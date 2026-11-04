@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>3Mix · Ticker Contínuo Broadcast (DSK 1-4)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Segoe UI', -apple-system, Roboto, sans-serif;
+    user-select: none;
+  }
+
+  /* Barra Fixa no Rodapé */
+  #ticker-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    height: 52px;
+    background: #11141c;
+    border-top: 2px solid #2f6fed;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.6);
+    color: #ffffff;
+    opacity: 0;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+  }
+
+  #ticker-bar.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Bloco do Relógio & Logo */
+  .ticker-clock-block {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #090b10;
+    padding: 0 24px;
+    height: 100%;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #ffffff;
+    flex-shrink: 0;
+  }
+
+  .clock-badge {
+    background: #2f6fed;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 3px;
+    letter-spacing: 0.8px;
+  }
+
+  /* Bloco da Editoria / Urgente */
+  .ticker-topic {
+    background: #e11d48;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0 20px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  /* Área de Rolagem do Texto (Marquee fluida acelerada por hardware) */
+  .ticker-scroll-area {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding-left: 20px;
+  }
+
+  .ticker-track {
+    display: inline-block;
+    white-space: nowrap;
+    animation: marquee 25s linear infinite;
+    font-size: 15px;
+    font-weight: 600;
+    color: #f1f5f9;
+  }
+
+  .ticker-track span {
+    margin-right: 60px;
+  }
+
+  .ticker-bullet {
+    color: #2f6fed;
+    font-weight: 900;
+    margin-right: 14px;
+  }
+
+  @keyframes marquee {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+  }
+</style>
+</head>
+<body>
+
+<div id="ticker-bar" class="visible">
+  <div class="ticker-clock-block">
+    <span id="badge" class="clock-badge">AO VIVO</span>
+    <span id="clock">12:00:00</span>
+  </div>
+  <div id="topic" class="ticker-topic">PLANTÃO</div>
+  <div class="ticker-scroll-area">
+    <div id="track" class="ticker-track">
+      <span id="t1"><b class="ticker-bullet">▶</b> 3Mix Studio Pro inicia fase de homologação broadcast com suporte a ST 2110 e MultiCorder</span>
+      <span id="t2"><b class="ticker-bullet">▶</b> Nova suíte broadcast permite corte de vídeo e áudio N-1 com baixíssima latência</span>
+      <span id="t3"><b class="ticker-bullet">▶</b> Integração nativa com FreeD viabiliza estúdios virtuais 2.5D com câmeras PTZ</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Atualização contínua do relógio
+  function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    document.getElementById('clock').textContent = `${h}:${m}:${s}`;
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // Injeção de dados
+  window.updateFields = function(fields) {
+    if (fields.badge) document.getElementById('badge').textContent = fields.badge;
+    if (fields.topic) document.getElementById('topic').textContent = fields.topic;
+    if (fields.text) {
+      document.getElementById('t1').innerHTML = `<b class="ticker-bullet">▶</b> ${fields.text}`;
+    }
+  };
+</script>
+</body>
+</html>

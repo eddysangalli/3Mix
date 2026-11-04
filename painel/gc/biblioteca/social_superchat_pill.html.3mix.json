@@ -1,0 +1,22 @@
+{
+  "freemixCompatibility": {
+    "version": 1,
+    "animation": true,
+    "clock": false,
+    "style": true,
+    "styleFields": [
+      {
+        "key": "accent",
+        "label": "Cor do Destaque",
+        "type": "color",
+        "default": "#f59e0b"
+      }
+    ]
+  },
+  "title": "3Mix Social · Alerta de SuperChat & PIX (DSK 1-4)",
+  "category": "Social",
+  "thumbnail": "thumbnails/social_lowerthird_card.png",
+  "description": "Pill moderna com borda neon e gradiente dourado para destaque de doações, PIX e SuperChats na transmissão.",
+  "author": "3Mix Pro Suite",
+  "version": "1.0.0"
+}

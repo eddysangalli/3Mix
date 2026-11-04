@@ -1,0 +1,28 @@
+{
+  "freemixCompatibility": {
+    "version": 1,
+    "animation": true,
+    "clock": false,
+    "style": true,
+    "styleFields": [
+      {
+        "key": "accent",
+        "label": "Cor do Destaque",
+        "type": "color",
+        "default": "#2f6fed"
+      },
+      {
+        "key": "background",
+        "label": "Cor do Painel",
+        "type": "color",
+        "default": "#12161e"
+      }
+    ]
+  },
+  "title": "3Mix Social · Feed de Chat Broadcast (DSK 1-4)",
+  "category": "Social",
+  "thumbnail": "thumbnails/social_lowerthird_card.png",
+  "description": "Feed vertical contínuo com as mensagens moderadas do chat (YouTube/Twitch/TikTok) com animação suave e expiração automática.",
+  "author": "3Mix Pro Suite",
+  "version": "1.0.0"
+}

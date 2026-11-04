@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>3Mix · Placar Esportivo Pro (DSK 1-4)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Segoe UI', -apple-system, Roboto, sans-serif;
+    user-select: none;
+  }
+
+  /* Safe Area Canto Superior Esquerdo */
+  #scoreboard-wrapper {
+    position: absolute;
+    top: 50px;
+    left: 70px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    border-radius: 6px;
+    overflow: hidden;
+    background: #0f131a;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  #scoreboard-wrapper.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Time Mandante */
+  .team-block {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    background: #181d26;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+  }
+
+  .team-block.away {
+    background: #1f2532;
+  }
+
+  .team-badge {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    background: #2f6fed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 900;
+  }
+
+  .team-badge.away {
+    background: #e11d48;
+  }
+
+  /* Placar Numérico */
+  .score-block {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: #0b0d12;
+    padding: 8px 14px;
+    color: #f8fafc;
+    font-size: 18px;
+    font-weight: 900;
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    min-width: 60px;
+  }
+
+  /* Relógio do Jogo */
+  .time-block {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #0f131a;
+    padding: 8px 16px;
+    color: #94a3b8;
+    font-size: 13.5px;
+    font-weight: 700;
+  }
+
+  .time-block .extra {
+    color: #eab308;
+    font-weight: 800;
+  }
+</style>
+</head>
+<body>
+
+<div id="scoreboard-wrapper" class="visible">
+  <div class="team-block">
+    <div id="badge-home" class="team-badge">BRA</div>
+    <span id="name-home">BRASIL</span>
+  </div>
+  <div class="score-block">
+    <span id="score-home">2</span>
+    <span style="color:#64748b">-</span>
+    <span id="score-away">1</span>
+  </div>
+  <div class="team-block away">
+    <span id="name-away">ARGENTINA</span>
+    <div id="badge-away" class="team-badge away">ARG</div>
+  </div>
+  <div class="time-block">
+    <span id="game-time">78:20</span>
+    <span id="game-extra" class="extra">+3'</span>
+  </div>
+</div>
+
+<script>
+  let seconds = 4700;
+  function updateTimer() {
+    seconds++;
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    document.getElementById('game-time').textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }
+  setInterval(updateTimer, 1000);
+
+  window.updateFields = function(f) {
+    if (f.teamHome) {
+      document.getElementById('name-home').textContent = f.teamHome;
+      document.getElementById('badge-home').textContent = f.teamHome.slice(0, 3).toUpperCase();
+    }
+    if (f.teamAway) {
+      document.getElementById('name-away').textContent = f.teamAway;
+      document.getElementById('badge-away').textContent = f.teamAway.slice(0, 3).toUpperCase();
+    }
+    if (f.scoreHome !== undefined) document.getElementById('score-home').textContent = f.scoreHome;
+    if (f.scoreAway !== undefined) document.getElementById('score-away').textContent = f.scoreAway;
+    if (f.minutes !== undefined) seconds = f.minutes * 60;
+    if (f.extra) document.getElementById('game-extra').textContent = f.extra;
+  };
+</script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>3Mix · Lower Third Duplo Podcast (DSK 1-4)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Segoe UI', -apple-system, Roboto, sans-serif;
+    user-select: none;
+  }
+
+  /* Safe Area Inferior */
+  #split-wrapper {
+    position: absolute;
+    bottom: 60px;
+    left: 80px;
+    right: 80px;
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+
+  /* Card Individual */
+  .speaker-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(16, 20, 28, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 12px 20px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
+    color: #ffffff;
+    max-width: 480px;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .speaker-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .speaker-card.host {
+    border-left: 5px solid #2f6fed;
+  }
+
+  .speaker-card.guest {
+    border-right: 5px solid #10b981;
+    flex-direction: row-reverse;
+    text-align: right;
+  }
+
+  .speaker-avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    background: #252b3b;
+  }
+
+  .speaker-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .speaker-role {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #70a4ff;
+  }
+
+  .speaker-card.guest .speaker-role {
+    color: #34d399;
+  }
+
+  .speaker-name {
+    font-size: 16px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.2;
+  }
+
+  .speaker-handle {
+    font-size: 12.5px;
+    color: #94a3b8;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<div id="split-wrapper">
+  <!-- Host à Esquerda -->
+  <div id="card-host" class="speaker-card host visible">
+    <img id="avatar-host" class="speaker-avatar" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='46' height='46' viewBox='0 0 24 24' fill='%232f6fed'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>">
+    <div class="speaker-info">
+      <span class="speaker-role">APRESENTADOR</span>
+      <span id="name-host" class="speaker-name">EDDY SANGALLI</span>
+      <span id="handle-host" class="speaker-handle">@eddysangalli</span>
+    </div>
+  </div>
+
+  <!-- Convidado à Direita -->
+  <div id="card-guest" class="speaker-card guest visible">
+    <img id="avatar-guest" class="speaker-avatar" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='46' height='46' viewBox='0 0 24 24' fill='%2310b981'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>">
+    <div class="speaker-info">
+      <span class="speaker-role">CONVIDADO ESPECIAL</span>
+      <span id="name-guest" class="speaker-name">DR. ROBERTO ALENCAR</span>
+      <span id="handle-guest" class="speaker-handle">@dr.roberto • VP Broadcast</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.updateFields = function(f) {
+    if (f.nameHost) document.getElementById('name-host').textContent = f.nameHost;
+    if (f.handleHost) document.getElementById('handle-host').textContent = f.handleHost;
+    if (f.nameGuest) document.getElementById('name-guest').textContent = f.nameGuest;
+    if (f.handleGuest) document.getElementById('handle-guest').textContent = f.handleGuest;
+  };
+</script>
+</body>
+</html>
