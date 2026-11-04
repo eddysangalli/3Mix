@@ -480,6 +480,26 @@ body.popup-mode.side-popup #view-mixer { overflow:auto; }
 .b.on,.bot .b.on,.r button.on { background:#006400; }
 .b.live,.bot .b.live { background:#ff0000; }
 
+.tt.pass-pgm .nm::after { content: " [NO AR]"; font-size: 8.5px; opacity: 0.95; margin-left: 4px; color: #ff8080; font-weight: 800; }
+.tt.pass-pvw .nm::after { content: " [PRÉVIA]"; font-size: 8.5px; opacity: 0.95; margin-left: 4px; color: #6ee7b7; font-weight: 800; }
+.tile.pass-pgm { border: 2px dashed #ff0000 !important; box-shadow: 0 0 6px rgba(255, 0, 0, 0.4) !important; }
+.tile.pass-pvw { border: 2px dashed #00b020 !important; box-shadow: 0 0 6px rgba(0, 176, 32, 0.4) !important; }
+.tt.pass-pgm { border-bottom: 2px dashed #ff4040 !important; }
+.tt.pass-pvw { border-bottom: 2px dashed #00e030 !important; }
+
+.tile.has-vset { width: 348px; display: flex; flex-direction: row; }
+.tile.has-vset .tile-main { width: 290px; flex: none; display: flex; flex-direction: column; }
+.tile-vset-col { width: 58px; background: #12161c; border-left: 1px solid #2a323d; display: flex; flex-direction: column; padding: 3px; gap: 4px; }
+.vset-head { display: flex; gap: 2px; height: 18px; }
+.vset-tab { flex: 1; font-size: 8px; font-weight: 700; background: #202630; color: #94a3b8; border: 1px solid #334155; border-radius: 2px; cursor: pointer; padding: 0; line-height: 16px; text-transform: uppercase; }
+.vset-tab.on { background: #008040; color: #fff; border-color: #00a854; }
+.vset-tab:hover:not(.on) { background: #2d3748; color: #fff; }
+.vset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; flex: 1; padding: 2px 0; }
+.vset-p { font-size: 11px; font-weight: 800; background: #1e2530; color: #cbd5e1; border: 1px solid #334155; border-radius: 2px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.1s ease; }
+.vset-p:hover { background: #2d3748; color: #fff; }
+.vset-p.on { background: #008040 !important; color: #fff !important; border-color: #00a854 !important; box-shadow: 0 0 8px rgba(0,168,84,0.6); }
+.vset-dur { height: 18px; line-height: 18px; text-align: center; font-size: 9.5px; font-family: monospace; background: #0a0d12; border: 1px solid #1e2530; color: #94a3b8; border-radius: 2px; }
+
 /* Proportions from the side-by-side vMix reference. */
 .tile{width:290px}.th{height:163px}.tiles{gap:4px;padding:2px 0}.tile.has-speed{width:338px}.tile.has-speed .tile-main{width:290px}body.big .tile{width:340px}body.big .th{height:191px}.tt{height:26px}.bot{padding:0;gap:4px}.bot .g{gap:1px}.bot .gear{width:38px}.bot .b{height:28px}.media-row{grid-template-columns:minmax(0,1fr) 134px minmax(0,1fr)}
 @media(max-width:1100px){.tile{width:236px}.th{height:133px}.bot .gear{width:28px}.bot .b{padding:0 7px}}
@@ -1340,20 +1360,60 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
 
   async function fetchAllDevices() {
     try {
-      const res = await fetch("/api/devices/all").then(r => r.json());
+      const url = new URL("/api/devices/all", replayUrl).href;
+      const res = await fetch(url).then(r => r.json());
       if (res.success) {
-        if (res.video?.length) st.videoDevices = res.video;
-        if (res.audio?.length) st.audioDevices = res.audio;
-        if (res.monitors?.length) st.monitors = res.monitors;
-        if (res.windows?.length) st.windows = res.windows;
+        if (res.video?.length) {
+          st.videoDevices = res.video;
+          const selCam = $("add-cam-device");
+          if (selCam) {
+            const cur = selCam.value;
+            selCam.innerHTML = st.videoDevices.map(d => `<option value="${esc(d.value)}"${d.value === cur ? " selected" : ""}>${esc(d.name)}</option>`).join("");
+          }
+        }
+        if (res.windows?.length) {
+          st.windows = res.windows;
+          const selWin = $("add-window-target");
+          if (selWin) {
+            const cur = selWin.value;
+            selWin.innerHTML = st.windows.map(w => `<option value="${esc(w.value)}"${w.value === cur ? " selected" : ""}>${esc(w.name)}</option>`).join("");
+          }
+        }
+        if (res.monitors?.length) {
+          st.monitors = res.monitors;
+          const selMon = $("add-mon-target");
+          if (selMon) {
+            const cur = selMon.value;
+            selMon.innerHTML = st.monitors.map(m => `<option value="${esc(m.value)}"${m.value === cur ? " selected" : ""}>${esc(m.name)}</option>`).join("");
+          }
+        }
+        if (res.audio?.length) {
+          st.audioDevices = res.audio;
+          const selAud = $("add-aud-device");
+          if (selAud) {
+            const cur = selAud.value;
+            selAud.innerHTML = st.audioDevices.map(a => `<option value="${esc(a.value)}"${a.value === cur ? " selected" : ""}>${esc(a.name)}</option>`).join("");
+          }
+        }
         return res;
       }
-    } catch {}
+    } catch (e) {
+      console.warn("Erro ao buscar devices/all:", e);
+    }
     // Fallback: se api/devices/all falhar, busca /api/devices/video
     try {
-      const resV = await fetch("/api/devices/video").then(r => r.json());
-      if (resV.success && resV.devices?.length) st.videoDevices = resV.devices;
-    } catch {}
+      const urlV = new URL("/api/devices/video", replayUrl).href;
+      const resV = await fetch(urlV).then(r => r.json());
+      if (resV.success && resV.devices?.length) {
+        st.videoDevices = resV.devices;
+        const selCam = $("add-cam-device");
+        if (selCam) {
+          selCam.innerHTML = st.videoDevices.map(d => `<option value="${esc(d.value)}">${esc(d.name)}</option>`).join("");
+        }
+      }
+    } catch (e) {
+      console.warn("Erro ao buscar devices/video fallback:", e);
+    }
     return null;
   }
   const fetchVideoDevices = fetchAllDevices;
@@ -1623,12 +1683,17 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     const items = new Map(), loop = new Map(), iso = new Map(), rp = []; let pl = null;
     for (const name of names) {
       const r = await read("GetSceneItemList", { sceneName: name });
-      const list = (r?.sceneItems || []).filter((i) => i.inputKind).map((i) => ({ name: i.sourceName, kind: i.inputKind, key: i.sourceUuid }));
+      const list = (r?.sceneItems || []).map((i) => ({
+        name: i.sourceName,
+        kind: i.inputKind || (i.isGroup ? 'group' : (i.sourceType === 'OBS_SOURCE_TYPE_SCENE' ? 'scene' : 'item')),
+        isScene: !i.inputKind || i.sourceType === 'OBS_SOURCE_TYPE_SCENE',
+        key: i.sourceUuid
+      }));
       items.set(name, list);
       for (const i of list) {
-        if (isMedia(i.kind) && !loop.has(i.name)) loop.set(i.name, !!(await read("GetInputSettings", { inputName: i.name }))?.inputSettings?.[loopKey(i.kind)]);
+        if (i.kind && isMedia(i.kind) && !loop.has(i.name)) loop.set(i.name, !!(await read("GetInputSettings", { inputName: i.name }))?.inputSettings?.[loopKey(i.kind)]);
         if (i.kind === "replay_source") rp.push({ name: i.name, scene: name });
-        if (isPlaylist(i.kind) && !pl) pl = { name: i.name, kind: i.kind, scene: name, state: st.pl?.state, time: st.pl?.time };
+        if (i.kind && isPlaylist(i.kind) && !pl) pl = { name: i.name, kind: i.kind, scene: name, state: st.pl?.state, time: st.pl?.time };
       }
       const filters = hasIso ? (await read("GetSourceFilterList", { sourceName: name })).filters : [];
       const f = filters.find(filter=>filter.filterName===ISO);
@@ -2851,7 +2916,14 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       }
     })()),
     gtimportinfo: () => openPop("gtimportinfo"),
-    addtype: (d) => { st.addName = $("add-name")?.dataset.edited ? $("add-name").value : ""; st.addType = d.v; renderPop(); },
+    addtype: (d) => {
+      st.addName = $("add-name")?.dataset.edited ? $("add-name").value : "";
+      st.addType = d.v;
+      renderPop();
+      if (["camera", "window", "desktop", "audioin"].includes(d.v)) {
+        fetchAllDevices();
+      }
+    },
     add: () => { if (creatingInput) return; return run((async () => {
       const t = TYPES.find((x) => x.id === st.addType) || TYPES[0];
       if (t.special === "replay") return openPop("replay");
@@ -3061,6 +3133,22 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     })()); },
     menu: (d) => openPop("menu", d.v),
     corentrada: (d) => rpDockOpenWindow("/color?input=" + encodeURIComponent(d.v) + "#qualidade"),
+    vsetzoom: (d) => run((async () => {
+      const preset = d.preset || 'wide';
+      st.vsetPreset = st.vsetPreset || {};
+      st.vsetPreset[d.v] = preset;
+      scheduleMesaPaint('tiles');
+      const res = await fetch(new URL('/api/studio', replayUrl).href, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'studio_zoom', key: st.sceneKeys[d.v] || d.v, presetId: preset })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast(err.error || 'Erro ao mudar enquadramento virtual', true);
+      }
+    })()),
+    vsetsetup: (d) => run(launchPanel('estudio', d.v)),
     calllink: (d) => run((async () => {
       const id = callIdFromUrl((await req("GetInputSettings", { inputName: d.v })).inputSettings?.url);
       if (!id) return toast("Esta fonte não é uma chamada 3Mix Call", true);
@@ -3250,6 +3338,36 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     // The line under the tabs takes the colour of the selected category.
     $("tabs").style.borderBottomColor = st.filter >= 0 ? COLORS[st.filter] : st.filter === -2 ? "#e6ebf2" : "";
   }
+  function isSourceNestedInScene(sourceName, sceneName, visited = new Set()) {
+    if (!sceneName || !sourceName || sceneName === sourceName) return false;
+    if (visited.has(sceneName)) return false;
+    visited.add(sceneName);
+    const items = st.items?.get?.(sceneName);
+    if (!items || !items.length) return false;
+    const baseName = sourceName.replace(/ \(fonte\)$/, '');
+    for (const it of items) {
+      const itName = it.name || it.sourceName || '';
+      const itBase = itName.replace(/ \(fonte\)$/, '');
+      if (itName === sourceName || itBase === baseName) return true;
+      if (itName.startsWith('3Mix Slot ') || st.items?.has?.(itName) || it.kind === 'scene' || !it.kind) {
+        if (isSourceNestedInScene(sourceName, itName, visited)) return true;
+      }
+    }
+    return false;
+  }
+
+  function getTallyStatus(name) {
+    const isOutDirect = name === st.program;
+    const isOutPass = !isOutDirect && (!!st.recursiveTally?.program?.includes(name) || isSourceNestedInScene(name, st.program));
+    const isOut = isOutDirect || isOutPass;
+
+    const isPvDirect = !isOutDirect && st.studio && name === st.preview;
+    const isPvPass = !isOutDirect && !isPvDirect && st.studio && (!!st.recursiveTally?.preview?.includes(name) || isSourceNestedInScene(name, st.preview));
+    const isPv = isPvDirect || isPvPass;
+
+    return { isOut, isPv, isOutDirect, isPvDirect, isOutPass, isPvPass };
+  }
+
   function renderTiles() {
     renderSwitcherBanks();
     const box = $("tiles");
@@ -3266,9 +3384,11 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     }).join("");
     if (st.inputsTab === 'compositions' && !shown().length) { box.innerHTML = '<div class="empty"><b>Nenhuma composição</b><br><button class="b" data-a="pop" data-v="compositions">Criar composição</button></div>'; return; }
     box.innerHTML = shown().map((name) => {
-      const isOut = name === st.program || st.recursiveTally?.program?.includes(name), isPv = st.studio && !isOut && name === st.preview;
-      const cls = isOut ? "out" : isPv ? "pv" : "";
-      const tileCls = isOut ? " is-out" : isPv ? " is-pv" : "";
+      const { isOutDirect, isPvDirect, isOutPass, isPvPass } = getTallyStatus(name);
+      const cls = (isOutDirect ? "out" : isPvDirect ? "pv" : "") + (isOutPass ? " pass-pgm" : isPvPass ? " pass-pvw" : "");
+      const isVSet = name.startsWith('3Mix Estúdio') || name.toLowerCase().includes('estúdio') || name.toLowerCase().includes('studio') || (st.inputTags?.[name] || []).includes('virtualset');
+      const vsetPreset = st.vsetPreset?.[name] || 'wide';
+      const tileCls = (isOutDirect ? " is-out" : isPvDirect ? " is-pv" : "") + (isOutPass ? " pass-pgm" : isPvPass ? " pass-pvw" : "") + (isVSet ? " has-vset" : "");
       const tag = st.tags[name], v = esc(name);
       const isMin = !!st.minimized?.[name];
       const media = (st.items.get(name) || []).filter((i) => isMedia(i.kind)), aud = sceneAudio(name);
@@ -3292,7 +3412,21 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
         <div class="speed-val">${speedVal}%</div>
       </div>` : "";
 
-      const cardHtml = `<div class="${hasSpeed ? "tile-main" : "tile-inner"}">
+      const vsetCol = isVSet ? `<div class="tile-vset-col">
+        <div class="vset-head">
+          <button class="vset-tab on" title="Câmera do Estúdio">Camera</button>
+          <button class="vset-tab" data-a="vsetsetup" data-v="${v}" title="Abrir Studio Virtual 2.5D">Setup</button>
+        </div>
+        <div class="vset-grid">
+          <button class="vset-p ${vsetPreset === 'wide' ? 'on' : ''}" data-a="vsetzoom" data-preset="wide" data-v="${v}" title="Plano Geral (1.0x)">F</button>
+          <button class="vset-p ${vsetPreset === 'medium' ? 'on' : ''}" data-a="vsetzoom" data-preset="medium" data-v="${v}" title="Plano Médio (1.45x)">M</button>
+          <button class="vset-p ${vsetPreset === 'close' ? 'on' : ''}" data-a="vsetzoom" data-preset="close" data-v="${v}" title="Close-Up (2.1x)">S</button>
+          <button class="vset-p ${vsetPreset === 'screen' ? 'on' : ''}" data-a="vsetzoom" data-preset="screen" data-v="${v}" title="Foco Telão (1.7x)">C</button>
+        </div>
+        <div class="vset-dur" title="Tempo de travelling suave">00:01</div>
+      </div>` : "";
+
+      const cardHtml = `<div class="${hasSpeed || isVSet ? "tile-main" : "tile-inner"}">
         <div class="tt ${cls}" draggable="true" title="Arraste para mudar a ordem das entradas">
           <span class="n">${st.scenes.indexOf(name) + 1}</span>
           <span class="nm" title="${v}">${v}</span>
@@ -3314,7 +3448,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
         <div class="r">${ov(name, 4)}${audioB}${media.length ? `<button class="ic" data-a="playpause" data-v="${v}" title="Play / Pause da mídia"><i class="tri"></i></button>` : ""}<button class="ic" data-a="projector" data-v="${v}" title="Abrir em janela">${MON}</button><button class="ic" data-a="menu" data-v="${v}" title="Configurações da entrada (ou clique direito)">${GEAR}</button></div>
       </div>`;
 
-      return `<div class="tile${hasSpeed ? " has-speed" : ""}${tileCls}" data-s="${v}">${cardHtml}${speedCol}</div>`;
+      return `<div class="tile${hasSpeed ? " has-speed" : ""}${isVSet ? " has-vset" : ""}${tileCls}" data-s="${v}">${cardHtml}${speedCol}${vsetCol}</div>`;
     }).join("") || `<div class="empty">Nenhuma entrada nesta cor.</div>`;
   }
   // Number of the tile (scene) that holds this audio input; 0 for the engine's global audio devices.
@@ -5100,12 +5234,17 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     if (!st.on || tiles.length !== names.length || names.some(name => !present.has(name))) return renderTiles();
     for (const tile of tiles) {
       const name = tile.dataset.s;
-      const isOut = name === st.program || !!st.recursiveTally?.program?.includes(name);
-      const isPv = !isOut && st.studio && name === st.preview;
-      tile.classList.toggle('is-out', isOut); tile.classList.toggle('is-pv', !!isPv);
+      const { isOut, isPv, isOutDirect, isPvDirect, isOutPass, isPvPass } = getTallyStatus(name);
+      tile.classList.toggle('is-out', isOutDirect);
+      tile.classList.toggle('is-pv', isPvDirect);
+      tile.classList.toggle('pass-pgm', isOutPass);
+      tile.classList.toggle('pass-pvw', isPvPass);
       const title = tile.querySelector('.tt');
       if (title) {
-        title.classList.toggle('out', isOut); title.classList.toggle('pv', !!isPv);
+        title.classList.toggle('out', isOutDirect);
+        title.classList.toggle('pv', isPvDirect);
+        title.classList.toggle('pass-pgm', isOutPass);
+        title.classList.toggle('pass-pvw', isPvPass);
         const close = title.querySelector('button[data-a="closeask"]');
         if (isOut) close?.remove();
         else if (!tile.classList.contains('min') && !close) {
@@ -5149,12 +5288,13 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     try { ws?.close(1000); } catch {}
   });
   // END isolated visual integration
-  initializeModuleLayout(); renderAll(); connect(); loadMesaWorkspace(); thumbLoop(); slowLoop(); mediaLoop(); productionMetadataLoop(); initMidi(); initSplitter(); initDock2Splitter();
+  initializeModuleLayout(); renderAll(); connect(); loadMesaWorkspace(); fetchAllDevices(); thumbLoop(); slowLoop(); mediaLoop(); productionMetadataLoop(); initMidi(); initSplitter(); initDock2Splitter();
 
   // Suporte a janela destacada independente (pop-up para segundo monitor)
   const qParams = new URLSearchParams(location.search);
   const qPop = qParams.get("pop");
   const qArg = qParams.get("arg");
+  if (qPop === 'add') fetchAllDevices();
   if (qPop === 'replay') {
     // Native menu entries still use mesa.html?pop=replay. Open the full console,
     // whose camera, audio and retention controls are absent from the compact dock.

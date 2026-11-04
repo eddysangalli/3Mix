@@ -52,13 +52,19 @@
       if (targets.length === 0) {
         inputSel.innerHTML = '<option value="">Nenhuma câmera disponível</option>';
       } else {
+        let matchedKey = initialKey;
+        if (initialKey) {
+          const found = targets.find(t => t.key === initialKey || t.name === initialKey);
+          if (found) matchedKey = found.key;
+        }
         targets.forEach(t => {
           const opt = document.createElement('option');
           opt.value = t.key;
           opt.textContent = `${t.name} (${t.kind || 'Input'})`;
-          if (t.key === initialKey) opt.selected = true;
+          if (t.key === matchedKey) opt.selected = true;
           inputSel.appendChild(opt);
         });
+        if (matchedKey) inputSel.value = matchedKey;
       }
 
       // Popula select de presets
@@ -113,6 +119,7 @@
       if (inputSel.value) {
         await selectSource(inputSel.value);
       }
+      startLivePreviewLoop();
     } catch (e) {
       console.error('[Chroma Studio Init]', e);
       $('source-status-badge').textContent = 'Erro ao conectar';
@@ -151,6 +158,23 @@
     try {
       const data = await api(`/api/chroma?key=${encodeURIComponent(key)}`);
       currentState = data.chroma || {};
+      const details = currentState.details || currentState.filter || {};
+
+      // Auto-seleciona a aba do motor ativo na entrada
+      if (details.nvidia?.enabled) {
+        currentEngine = 'nv';
+      } else if (details.enabled) {
+        currentEngine = 'obs';
+      } else if (details.nvidia?.exists && !details.exists) {
+        currentEngine = 'nv';
+      } else {
+        currentEngine = 'obs';
+      }
+      $('tab-engine-obs').classList.toggle('active', currentEngine === 'obs');
+      $('tab-engine-nv').classList.toggle('active', currentEngine === 'nv');
+      $('panel-obs-controls').style.display = currentEngine === 'obs' ? 'block' : 'none';
+      $('card-nvidia-controls').style.display = currentEngine === 'nv' ? 'flex' : 'none';
+
       updateUiFromState();
       await loadPreviewFrame();
     } catch (e) {
@@ -469,24 +493,73 @@
     tip.style.display = isPickingMode ? 'block' : 'none';
   }
 
-  async function loadPreviewFrame() {
-    if (!currentKey) return;
-    const canvas = $('preview-canvas');
-    const ctx = canvas.getContext('2d');
+  let streamLoopActive = true;
+  let isFetchingFrame = false;
 
-    const mode = isBeforeAfterMode ? 'raw' : 'normal';
-    const url = `/api/chroma-frame?key=${encodeURIComponent(currentKey)}&mode=${mode}&t=${Date.now()}`;
+  function drawCheckerboard(ctx, w, h) {
+    const size = 16;
+    for (let y = 0; y < h; y += size) {
+      for (let x = 0; x < w; x += size) {
+        ctx.fillStyle = ((x / size + y / size) % 2 === 0) ? '#222834' : '#181d26';
+        ctx.fillRect(x, y, size, size);
+      }
+    }
+  }
 
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      currentImage = img;
-      canvas.width = img.naturalWidth || 960;
-      canvas.height = img.naturalHeight || 540;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    };
-    img.src = url;
+  function loadPreviewFrame() {
+    if (!currentKey || isFetchingFrame) return Promise.resolve();
+    isFetchingFrame = true;
+    return new Promise((resolve) => {
+      const canvas = $('preview-canvas');
+      const ctx = canvas.getContext('2d');
+
+      const mode = isBeforeAfterMode ? 'raw' : 'normal';
+      const url = `/api/chroma-frame?key=${encodeURIComponent(currentKey)}&mode=${mode}&t=${Date.now()}`;
+
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        currentImage = img;
+        const w = img.naturalWidth || 960;
+        const h = img.naturalHeight || 540;
+        if (canvas.width !== w) canvas.width = w;
+        if (canvas.height !== h) canvas.height = h;
+
+        // Fundo quadriculado broadcast para mostrar transparência do alfa
+        drawCheckerboard(ctx, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+
+        // Indicador de Live Feed / Antes-Depois
+        ctx.save();
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
+        ctx.fillRect(10, 10, isBeforeAfterMode ? 140 : 86, 22);
+        ctx.fillStyle = isBeforeAfterMode ? '#f59e0b' : '#22c55e';
+        ctx.beginPath();
+        ctx.arc(22, 21, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = 'bold 11px system-ui, -apple-system, sans-serif';
+        ctx.fillText(isBeforeAfterMode ? 'ORIGINAL (SEM RECORTE)' : 'AO VIVO', 32, 25);
+        ctx.restore();
+
+        isFetchingFrame = false;
+        resolve();
+      };
+      img.onerror = () => {
+        isFetchingFrame = false;
+        resolve();
+      };
+      img.src = url;
+    });
+  }
+
+  async function startLivePreviewLoop() {
+    while (streamLoopActive) {
+      if (!document.hidden && currentKey) {
+        await loadPreviewFrame().catch(() => {});
+      }
+      await new Promise(r => setTimeout(r, 66));
+    }
   }
 
   function onCanvasMouseMove(e) {

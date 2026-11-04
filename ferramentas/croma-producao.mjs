@@ -151,14 +151,76 @@ export class ChromaEngine{
   return target;
  }
  async filterOf(key){
-  const filters=(await this.p.req('GetSourceFilterList',{sourceUuid:key})).filters;
-  return filters.find(f=>f.filterName===CHROMA_FILTER)||null;
+  try{
+   const filters=(await this.p.req('GetSourceFilterList',{sourceUuid:key})).filters||[];
+   const found=filters.find(f=>f.filterName===CHROMA_FILTER||f.filterKind===CHROMA_KIND||f.filterKind==='chroma_key_filter_v2'||f.filterName==='Chroma Key');
+   if(found){
+    const full=await this.p.req('GetSourceFilter',{sourceUuid:key,filterName:found.filterName}).catch(()=>null);
+    return {
+     filterName:found.filterName,
+     filterKind:found.filterKind||CHROMA_KIND,
+     filterEnabled:full?.filterEnabled??found.filterEnabled??false,
+     filterSettings:full?.filterSettings||{},
+     targetUuid:key
+    };
+   }
+  }catch{}
+  try{
+   const items=(await this.p.req('GetSceneItemList',{sceneUuid:key})).sceneItems||[];
+   for(const it of items){
+    if(it.sourceUuid){
+     const subList=(await this.p.req('GetSourceFilterList',{sourceUuid:it.sourceUuid})).filters||[];
+     const found=subList.find(f=>f.filterName===CHROMA_FILTER||f.filterKind===CHROMA_KIND||f.filterKind==='chroma_key_filter_v2'||f.filterName==='Chroma Key');
+     if(found){
+      const full=await this.p.req('GetSourceFilter',{sourceUuid:it.sourceUuid,filterName:found.filterName}).catch(()=>null);
+      return {
+       filterName:found.filterName,
+       filterKind:found.filterKind||CHROMA_KIND,
+       filterEnabled:full?.filterEnabled??found.filterEnabled??false,
+       filterSettings:full?.filterSettings||{},
+       targetUuid:it.sourceUuid
+      };
+     }
+    }
+   }
+  }catch{}
+  return null;
  }
  async filterNvOf(key){
   try{
    const filters=(await this.p.req('GetSourceFilterList',{sourceUuid:key})).filters||[];
-   return filters.find(f=>f.filterName===NV_CHROMA_FILTER)||null;
-  }catch{return null;}
+   const found=filters.find(f=>f.filterName===NV_CHROMA_FILTER||f.filterKind===NV_CHROMA_KIND);
+   if(found){
+    const full=await this.p.req('GetSourceFilter',{sourceUuid:key,filterName:found.filterName}).catch(()=>null);
+    return {
+     filterName:found.filterName,
+     filterKind:found.filterKind||NV_CHROMA_KIND,
+     filterEnabled:full?.filterEnabled??found.filterEnabled??false,
+     filterSettings:full?.filterSettings||{},
+     targetUuid:key
+    };
+   }
+  }catch{}
+  try{
+   const items=(await this.p.req('GetSceneItemList',{sceneUuid:key})).sceneItems||[];
+   for(const it of items){
+    if(it.sourceUuid){
+     const subList=(await this.p.req('GetSourceFilterList',{sourceUuid:it.sourceUuid})).filters||[];
+     const found=subList.find(f=>f.filterName===NV_CHROMA_FILTER||f.filterKind===NV_CHROMA_KIND);
+     if(found){
+      const full=await this.p.req('GetSourceFilter',{sourceUuid:it.sourceUuid,filterName:found.filterName}).catch(()=>null);
+      return {
+       filterName:found.filterName,
+       filterKind:found.filterKind||NV_CHROMA_KIND,
+       filterEnabled:full?.filterEnabled??found.filterEnabled??false,
+       filterSettings:full?.filterSettings||{},
+       targetUuid:it.sourceUuid
+      };
+     }
+    }
+   }
+  }catch{}
+  return null;
  }
  // Uma fonte aninhada pode receber chroma duas vezes: no próprio input e na cena que o contém.
  // Não bloqueia (o operador pode ter motivo), mas devolve o aviso junto da resposta.
@@ -286,20 +348,20 @@ export class ChromaEngine{
   if(typeof d.enabled!=='boolean')fail('Informe se o chroma fica ativo ou desligado');
   const settings=chromaSettings(d.settings);
   const warning=await this.nestWarning(target.key);
-  const list=(await this.p.req('GetSourceFilterList',{sourceUuid:target.key})).filters;
-  const existing=list.find(f=>f.filterName===CHROMA_FILTER);
-  if(existing&&existing.filterKind!==CHROMA_KIND)fail('O nome "'+CHROMA_FILTER+'" já é usado por outro filtro nesta fonte');
+  const existing=await this.filterOf(target.key);
+  const targetKey=existing?.targetUuid||target.key;
+  const filterName=existing?.filterName||CHROMA_FILTER;
   if(existing){
-   await this.p.req('SetSourceFilterSettings',{sourceUuid:target.key,filterName:CHROMA_FILTER,filterSettings:settings,overlay:false});
+   await this.p.req('SetSourceFilterSettings',{sourceUuid:targetKey,filterName,filterSettings:settings,overlay:false});
   }else{
-   await this.p.req('CreateSourceFilter',{sourceUuid:target.key,filterName:CHROMA_FILTER,filterKind:CHROMA_KIND,filterSettings:settings,filterEnabled:false});
+   await this.p.req('CreateSourceFilter',{sourceUuid:targetKey,filterName:CHROMA_FILTER,filterKind:CHROMA_KIND,filterSettings:settings,filterEnabled:false});
   }
-  await this.p.req('SetSourceFilterEnabled',{sourceUuid:target.key,filterName:CHROMA_FILTER,filterEnabled:d.enabled});
-  const confirmed=await this.p.req('GetSourceFilter',{sourceUuid:target.key,filterName:CHROMA_FILTER});
-  if(confirmed.filterKind!==CHROMA_KIND)fail('O motor registrou outro filtro com este nome');
+  await this.p.req('SetSourceFilterEnabled',{sourceUuid:targetKey,filterName,filterEnabled:d.enabled});
+  const confirmed=await this.p.req('GetSourceFilter',{sourceUuid:targetKey,filterName});
+  if(confirmed.filterKind!==CHROMA_KIND&&confirmed.filterKind!=='chroma_key_filter_v2')fail('O motor registrou outro filtro com este nome');
   if(confirmed.filterEnabled!==d.enabled)fail('O motor não confirmou o estado do chroma');
   if(confirmed.filterSettings?.last_error)fail('Motor recusou o chroma: '+confirmed.filterSettings.last_error);
-  const result={key:target.key,name:target.name,enabled:confirmed.filterEnabled,settings:chromaSettings(confirmed.filterSettings),warning};
+  const result={key:target.key,targetKey,name:target.name,enabled:confirmed.filterEnabled,settings:chromaSettings(confirmed.filterSettings),warning};
   this.last=result;
   return result;
  }
@@ -307,8 +369,9 @@ export class ChromaEngine{
   const target=this.source(d.key);
   const existing=await this.filterOf(target.key);
   if(!existing)return {key:target.key,removed:false};
-  if(existing.filterKind!==CHROMA_KIND)fail('O filtro nesta fonte não é o 3Mix Chroma');
-  await this.p.req('RemoveSourceFilter',{sourceUuid:target.key,filterName:CHROMA_FILTER});
+  const targetKey=existing.targetUuid||target.key;
+  const filterName=existing.filterName||CHROMA_FILTER;
+  await this.p.req('RemoveSourceFilter',{sourceUuid:targetKey,filterName});
   this.last={key:target.key,removed:true};
   return this.last;
  }
@@ -338,11 +401,11 @@ export class ChromaEngine{
  async rawImage(key,wanted=960){
   const target=this.source(key);
   return this.withRawFrame(target.key,async()=>{
-   const shot=await this.rawShot(target.key,wanted);
-   return {contentType:shot.contentType,buffer:shot.buffer,width:shot.image.width,height:shot.image.height};
+   const shot=await this.rawShot(target.key,wanted,false);
+   return {contentType:shot.contentType,buffer:shot.buffer,width:shot.width,height:shot.height};
   });
  }
- async rawShot(key,wanted=960){
+ async rawShot(key,wanted=960,decode=false){
   const video=await this.p.req('GetVideoSettings');
   const scale=Math.min(1,wanted/Math.max(video.baseWidth||1920,video.baseHeight||1080));
   const imageWidth=Math.max(64,Math.round((video.baseWidth||1920)*scale)),imageHeight=Math.max(36,Math.round((video.baseHeight||1080)*scale));
@@ -353,14 +416,14 @@ export class ChromaEngine{
     const data=String(shot.imageData||''),comma=data.indexOf(',');
     if(!data.startsWith('data:image/')||comma<0)fail('O motor devolveu uma imagem em formato inesperado');
     const buffer=Buffer.from(data.slice(comma+1),'base64');
-    const image=imageFormat==='bmp'?decodeBmp(buffer):decodePng(buffer);
+    const image=decode?(imageFormat==='bmp'?decodeBmp(buffer):decodePng(buffer)):null;
     return {buffer,contentType:'image/'+imageFormat,image,imageFormat,width:imageWidth,height:imageHeight};
    }catch(e){lastError=e;}
   }
   fail('Não foi possível ler o quadro da fonte: '+(lastError?.message||'erro desconhecido'));
  }
  async screenshot(key,wanted=480){
-  const shot=await this.rawShot(key,wanted);
+  const shot=await this.rawShot(key,wanted,true);
   return {image:shot.image,imageFormat:shot.imageFormat,width:shot.width,height:shot.height};
  }
  async sample(d){

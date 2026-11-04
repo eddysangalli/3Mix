@@ -7,7 +7,7 @@ import {join,resolve,relative} from 'node:path';
 import {randomUUID,createHash} from 'node:crypto';
 const digest=data=>createHash('sha256').update(data).digest('hex');
 const atomic=async(file,data)=>{await mkdir(join(file,'..'),{recursive:true});await writeFile(file+'.tmp',JSON.stringify(data,null,2));await rename(file+'.tmp',file);};
-const load=async file=>{try{return JSON.parse(await readFile(file,'utf8'));}catch(e){if(e.code==='ENOENT')return null;throw e;}};
+const load=async file=>{try{return JSON.parse(await readFile(file,'utf8'));}catch(e){if(e.code==='ENOENT')return null;console.warn('3Mix: aviso ao ler arquivo JSON, descartando corrompido:',file,e.message);return null;}};
 const replayActions=new Set(['preview','active','cut','fade','overlay','audio_mute','audio_volume','audio_bus','media',...operationalActions]);
 const harmless=action=>action.startsWith('recovery_')||['session_start','session_closed','api_stopped','checkpoint','autosave','recovery_dismiss','macro_run','controller_fire','controller_adapter_fire','controller_event','controller_adapter_read','settings_export','settings_import','settings_defaults','settings_plugin_tools','settings_pick_image','native_unchanged'].includes(action)||/_get$|_read$|_list$|_status$|_ping$|_release$/.test(action);
 export class SessionRecovery {

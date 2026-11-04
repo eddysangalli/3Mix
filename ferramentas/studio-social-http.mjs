@@ -17,7 +17,15 @@ export async function handleStudioSocial(ctx){
  if(!module){json(res,503,{success:false,error:'Módulo Studio & Social não carregado neste processo'});return true;}
  const u=parseUrl(req);
  const isLocal=local(req);
- const key=u.searchParams.get('key')||'';
+ const rawKey=u.searchParams.get('key')||'';
+ const resolveKey=(k)=>{
+  if(!k)return '';
+  if(UUID.test(k))return k;
+  const target=module.chroma?.targets?.()?.find(t=>t.name===k||t.key===k)||
+               module.estudio?.targets?.()?.find(t=>t.name===k||t.key===k);
+  return target?.key||(production.state?.inputs||[]).find(i=>i.name===k)?.key||'';
+ };
+ const key=resolveKey(rawKey);
  const method=req.method;
  const deny=(message,code=403)=>{json(res,code,{success:false,error:message});return true;};
  const image=(buffer,contentType)=>{res.writeHead(200,{'Content-Type':contentType,'Cache-Control':'no-store','Content-Length':buffer.length});res.end(buffer);return true;};
@@ -26,12 +34,13 @@ export async function handleStudioSocial(ctx){
  if(path==='/api/chroma'){
   if(!isLocal)return deny('Chroma disponível somente neste computador');
   if(method==='GET'){
-   if(key&&!UUID.test(key))return deny('Entrada inválida',400);
+   if(rawKey&&!key)return deny('Entrada inválida',400);
    if(!module.chroma)return deny('Chroma indisponível: '+(module.errors?.chroma||'módulo não montado'),503);
    return json(res,200,{success:true,chroma:await module.chroma.summary(key||undefined)}),true;
   }
   if(method==='POST'){
    const d=await body(req);
+   if(d.key&&!UUID.test(d.key))d.key=resolveKey(d.key)||d.key;
    const result=await module.execute(String(d.action||''),d);
    return json(res,200,{success:true,chroma:result,state:await module.chroma?.summary(d.key)}),true;
   }
@@ -40,7 +49,7 @@ export async function handleStudioSocial(ctx){
  if(path==='/api/chroma-frame'){
   if(!isLocal)return deny('Chroma disponível somente neste computador');
   if(method!=='GET')return deny('Método não suportado',405);
-  if(!UUID.test(key))return deny('Entrada inválida',400);
+  if(!key)return deny('Entrada inválida',400);
   if(!module.chroma)return deny('Chroma indisponível',503);
   if(u.searchParams.get('mode')==='raw'){
    const raw=await module.chroma.rawImage(key,960);
@@ -77,11 +86,12 @@ export async function handleStudioSocial(ctx){
   if(!isLocal)return deny('Estúdio virtual disponível somente neste computador');
   if(!module.estudio)return deny('Estúdio virtual indisponível: '+(module.errors?.estudio||'módulo não montado'),503);
   if(method==='GET'){
-   if(key&&!UUID.test(key))return deny('Entrada inválida',400);
+   if(rawKey&&!key)return deny('Entrada inválida',400);
    return json(res,200,{success:true,studio:await module.estudio.summary(key||undefined)}),true;
   }
   if(method==='POST'){
    const d=await body(req);
+   if(d.key&&!UUID.test(d.key))d.key=resolveKey(d.key)||d.key;
    const action=String(d.action||'');
    if(!action.startsWith('studio_'))return deny('Ação de estúdio virtual inválida',400);
    const result=await module.estudio.execute(action,d);
@@ -92,7 +102,7 @@ export async function handleStudioSocial(ctx){
  if(path==='/api/studio-frame'){
   if(!isLocal)return deny('Estúdio virtual disponível somente neste computador');
   if(method!=='GET')return deny('Método não suportado',405);
-  if(!UUID.test(key))return deny('Entrada inválida',400);
+  if(!key)return deny('Entrada inválida',400);
   if(!module.estudio)return deny('Estúdio virtual indisponível',503);
   const shot=await module.estudio.shot(await module.estudio.frameTarget(key),960);
   return image(shot.buffer,shot.contentType);

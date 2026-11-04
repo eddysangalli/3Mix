@@ -336,6 +336,12 @@ export class StudioEngine{
    positionX:0,positionY:0,alignment:5,rotation:0,cropLeft:0,cropRight:0,cropTop:0,cropBottom:0,
    boundsType:'OBS_BOUNDS_STRETCH',boundsAlignment:5,boundsWidth:W,boundsHeight:H}});
  }
+ async fitInner(scene,itemId){
+  const video=await this.p.req('GetVideoSettings'),W=video.baseWidth||1920,H=video.baseHeight||1080;
+  await this.p.req('SetSceneItemTransform',{sceneName:scene,sceneItemId:itemId,sceneItemTransform:{
+   positionX:W/2,positionY:H/2,alignment:0,rotation:0,cropLeft:0,cropRight:0,cropTop:0,cropBottom:0,
+   boundsType:'OBS_BOUNDS_SCALE_INNER',boundsAlignment:0,boundsWidth:W,boundsHeight:H}});
+ }
  async indexOf(scene,itemId){
   const items=(await this.p.req('GetSceneItemList',{sceneName:scene})).sceneItems||[];
   const found=items.find(i=>i.sceneItemId===itemId);
@@ -385,7 +391,7 @@ export class StudioEngine{
      name:pack.nome,
      description:pack.tipo,
      pack:true,
-     slots:[{label:'A',quad:quad(.20,.05,.80,.05,.82,.98,.18,.98)}]
+     slots:[{label:'A',quad:quad(.28,.20,.72,.20,.72,.66,.28,.66)}]
     };
    }
   }
@@ -468,7 +474,8 @@ export class StudioEngine{
     const wrapperName=SLOT_PREFIX+randomUUID();
     await this.p.req('CreateScene',{sceneName:wrapperName});
     created.slotScenes.push(wrapperName);
-    await this.p.req('CreateSceneItem',{sceneName:wrapperName,sourceName:camera.name,sceneItemEnabled:true});
+    const camItem=await this.p.req('CreateSceneItem',{sceneName:wrapperName,sourceName:camera.name,sceneItemEnabled:true});
+    await this.fitInner(wrapperName,camItem.sceneItemId).catch(()=>{});
     const wrapper=await this.resolve(wrapperName);
     const filtered=await this.applyFilter(wrapper.uuid,camera.quad,true,true);
     const item=await this.p.req('CreateSceneItem',{sceneName:name,sourceName:wrapperName,sceneItemEnabled:true});

@@ -76,6 +76,7 @@ function scheduleConnection() { if (!stopping && !reconnectTimer) reconnectTimer
 const clients = new Set();
 const broadcast = msg => { const s = JSON.stringify(msg); for (const c of clients) if (c.readyState === WebSocket.OPEN) c.send(s); if (msg?.type === 'state' && typeof vmixTcp !== 'undefined') vmixTcp.notifyTallyChange(); };
 const production = new Production({ root: ROOT, panel: PANEL, getObs: () => obs, publish: data => broadcast({ type: 'state', data: clean(data) }), publishRaw: broadcast });
+production.tryReq = (...args) => production.optional(...args);
 production.gtTickerAck = new TickerAckBroker({ endpoint: 'http://127.0.0.1:' + PORT + '/api/ticker-ack' });
 const onlineUpdate = new OnlineUpdateEngine(ROOT);
 const diagnostics = new DiagnosticCollector(ROOT);
@@ -462,25 +463,33 @@ async function handleHttp(req, res) {
       if (path === '/api/devices/all' && req.method === 'GET') {
         try {
           const result = { video: [], audio: [], monitors: [], windows: [] };
-          const probeScene = '__3mix_probe_all_sc__';
-          await production.req('CreateScene', { sceneName: probeScene });
+          const uid = Math.random().toString(36).slice(2, 8);
+          const probeScene = '__3mix_probe_' + uid;
+          let sceneCreated = false;
+          const ensureProbeScene = async () => {
+            if (!sceneCreated) {
+              await production.req('CreateScene', { sceneName: probeScene });
+              sceneCreated = true;
+            }
+          };
           try {
             // Video (dshow_input)
-            const inVideo = '__3mix_probe_dshow__';
+            const inVideo = '__3mix_p_vid_' + uid;
+            await ensureProbeScene();
             await production.req('CreateInput', { sceneName: probeScene, inputName: inVideo, inputKind: 'dshow_input', inputSettings: {} });
             const pVid = await production.tryReq('GetInputPropertiesListPropertyItems', { inputName: inVideo, propertyName: 'video_device_id' });
             if (pVid?.propertyItems) result.video = pVid.propertyItems.map(p => ({ name: p.itemName, value: p.itemValue, enabled: p.itemEnabled }));
             await production.tryReq('RemoveInput', { inputName: inVideo });
 
             // Audio (wasapi_input_capture)
-            const inAud = '__3mix_probe_wasapi__';
+            const inAud = '__3mix_p_aud_' + uid;
             await production.req('CreateInput', { sceneName: probeScene, inputName: inAud, inputKind: 'wasapi_input_capture', inputSettings: {} });
             const pAud = await production.tryReq('GetInputPropertiesListPropertyItems', { inputName: inAud, propertyName: 'device_id' });
             if (pAud?.propertyItems) result.audio = pAud.propertyItems.map(p => ({ name: p.itemName, value: p.itemValue, enabled: p.itemEnabled }));
             await production.tryReq('RemoveInput', { inputName: inAud });
 
             // Monitors (monitor_capture)
-            const inMon = '__3mix_probe_monitor__';
+            const inMon = '__3mix_p_mon_' + uid;
             await production.req('CreateInput', { sceneName: probeScene, inputName: inMon, inputKind: 'monitor_capture', inputSettings: {} });
             const pMon = (await production.tryReq('GetInputPropertiesListPropertyItems', { inputName: inMon, propertyName: 'monitor' }))
               || (await production.tryReq('GetInputPropertiesListPropertyItems', { inputName: inMon, propertyName: 'monitor_id' }));
@@ -488,13 +497,15 @@ async function handleHttp(req, res) {
             await production.tryReq('RemoveInput', { inputName: inMon });
 
             // Windows (window_capture)
-            const inWin = '__3mix_probe_window__';
+            const inWin = '__3mix_p_win_' + uid;
             await production.req('CreateInput', { sceneName: probeScene, inputName: inWin, inputKind: 'window_capture', inputSettings: {} });
             const pWin = await production.tryReq('GetInputPropertiesListPropertyItems', { inputName: inWin, propertyName: 'window' });
             if (pWin?.propertyItems) result.windows = pWin.propertyItems.filter(p => p.itemValue).map(p => ({ name: p.itemName, value: p.itemValue, enabled: p.itemEnabled }));
             await production.tryReq('RemoveInput', { inputName: inWin });
           } finally {
-            await production.tryReq('RemoveScene', { sceneName: probeScene });
+            if (sceneCreated) {
+              await production.tryReq('RemoveScene', { sceneName: probeScene });
+            }
           }
           return json(res, 200, { success: true, ...result });
         } catch (err) {
