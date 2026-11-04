@@ -19,23 +19,24 @@ Nesta fase Alpha, o software é **100% gratuito e liberado** para que vocês est
 
 ---
 
-## 2. O QUE JÁ ESTÁ PRONTO E LIBERADO PARA VOCÊS USAREM
+## 2. INVENTÁRIO EXATO DE COMPONENTES INSTALADOS NO RUNTIME ALPHA
 
-| Módulo | Recursos Prontos para Operação |
-|---|---|
-| **Motor Broadcast 3Mix** | Fork OBS Studio modernizado com Multi-M/E nativo (1 a 4), DSK 1 a 4 com suporte a transparência e SRT 1.5.7 oficial com criptografia AES 128/192/256 bits. |
-| **Gerenciador de Plugins OBS** | Gerenciador integrado na Mesa com 4 abas: módulos instalados, catálogo da comunidade, instalação por ZIP em sandbox PE x64 isolada (`3mix-plugins/%module%`) e diagnóstico com Modo de Segurança defensivo. |
-| **SlideEngine Pro** | Importação direta de arquivos PPTX (16:9 e 4:3) sem dependência de Microsoft Office, Presenter Mode, avanço de animações por clique, extração de vídeos incorporados com controle de áudio independente no mixer e transições de slide. |
-| **3Mix Chroma** | Keyer profissional com conta-gotas de precisão, supressão de spill ajustável, visualização em checkerboard para conferir transparência, comparação A/B e compatibilidade com shaders de recorte fino. |
-| **3Mix Virtual Studio** | Cenários virtuais 2D e 2.5D, ajuste fino de perspectiva, presets de enquadramento de câmera, zoom virtual suave por software, suporte a múltiplas câmeras em posições independentes e conector UDP nativo **FreeD** para estúdios 3D externos (Unreal Engine). |
-| **3Mix Social** | Central de moderação ao vivo com busca e aprovação em tempo real, comentários do YouTube, Twitch e TikTok, ativação com 1 clique nos DSKs 1 a 4 e templates HTML5 animados de Lower Third. |
-| **3Mix Crew** | Tally e Intercom móvel para a equipe técnica no celular (`/crew`): tela no celular com Programa (vermelho), Preview (verde), botão PTT (segurar para falar) e prioridade da direção, com pareamento rápido por **QR Code dinâmico**. |
-| **MultiCorder Multi-SSD** | Gravação independente por câmera (ISO) com suporte a contêineres **MXF OP1a** e **MOV**, detecção física de SSDs/NVMes para alertar colisão de gravação e telemetria de vazão em tempo real (MB/s e GB/h). |
-| **Automação & Protocolos** | Controle nativo via Bitfocus Companion / protocolo **OSC 1.0** na porta 18188, comandos MIDI, suporte a fluxos **SRT**, **NDI / OMT**, e bridge vMix TCP segura em loopback. |
+Para garantir total transparência técnica aos engenheiros e operadores que estão testando esta versão, segue o inventário dos binários reais presentes no runtime de execução:
+
+| Componente | Versão Real Instalada | Arquivo / Binário PE x64 | Status Operacional |
+|---|---|---|---|
+| **Motor Broadcast (OBS)** | `32.2.2 Pro` (Fork 3Mix) | `3mix-runtime/bin/64bit/3Mix.exe`<br/>`3mix-runtime/bin/64bit/obs.dll` | **HOMOLOGADO NO RUNTIME** (Multi-M/E, DSK 1-4, FreeD, DeckLink) |
+| **Biblioteca de Transporte SRT** | `1.5.7.0` (Oficial Haivision) | `3mix-runtime/bin/64bit/srt.dll` | **HOMOLOGADO NO RUNTIME** (CVE-2026-55869 corrigida, AES-128/192/256) |
+| **Chromium / CEF** | `127.145.7` (Chromium 127) | `3mix-runtime/obs-plugins/64bit/libcef.dll` | **HOMOLOGADO NO RUNTIME** (Base homologada estável; transição para CEF 150/156 em andamento) |
+| **FFmpeg Integrado (DLLs)** | `n8.1.2` (libavcodec 62) | `3mix-runtime/bin/64bit/avcodec-62.dll`<br/>`3mix-runtime/bin/64bit/avformat-62.dll` | **HOMOLOGADO NO RUNTIME** (Retenção defensiva da ABI do motor) |
+| **FFmpeg Externo (CLI)** | `8.1.1` (gyan.dev) / Dual 9.0.2 | `3mix-runtime/runtime/ffmpeg.exe`<br/>(Fallback para PATH do sistema) | **HOMOLOGADO NO RUNTIME** (Replay, transcodificação e slides) |
+| **NDI Broadcast** | `6.3.2` / `distroav 6.2.1` | `3mix-runtime/obs-plugins/64bit/distroav.dll` | **HOMOLOGADO NO RUNTIME** |
+| **OMT Native** | `1.0.0.19` | `3mix-runtime/obs-plugins/64bit/omtplugin.dll`<br/>`3mix-runtime/bin/64bit/libomt.dll` | **HOMOLOGADO NO RUNTIME** |
+| **Gerenciador de Plugins OBS** | `1.0.0 Pro` | `3mix-plugins/%module%` isolado<br/>Interface na Mesa `/settings` | **HOMOLOGADO NO RUNTIME** (Sandbox PE x64 e Safe Mode) |
 
 ---
 
-## 3. MISSÕES DE TESTE — O QUE PRECISAMOS QUE VOCÊS TESTEM
+## 3. O QUE JÁ ESTÁ PRONTO E O QUE DEPENDE DE TESTE FÍSICO (ALPHA TESTERS)
 
 Pedimos que os testers da comunidade escolham uma ou mais missões abaixo, de acordo com o equipamento disponível no seu estúdio:
 
