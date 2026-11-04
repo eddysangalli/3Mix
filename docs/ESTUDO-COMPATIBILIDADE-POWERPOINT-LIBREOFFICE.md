@@ -95,3 +95,4 @@ sequenceDiagram
      > *"Aviso: O modo externo utiliza o aplicativo Microsoft PowerPoint instalado no sistema operacional. Para evitar interrupções no ar, desative avisos de segurança e notificações do Windows."*
 3. **Detecção e Sinalização:**
    - Como implementado com sucesso na Prioridade 3, o SlideEngine já inspeciona o arquivo e, ao detectar recursos complexos não suportados (como Morph de malha 3D), aplica a interpolação mais suave possível e estampa o badge informativo no Presenter Mode para o operador.
+

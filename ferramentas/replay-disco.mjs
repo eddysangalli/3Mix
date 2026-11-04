@@ -529,6 +529,7 @@ export class DiskReplay {
     return this.exportEventsTo([event],d.directory);
   }
   async exportEvents(d){
+  async exportEvents(d){
     let pool = this.state.events;
     if(Array.isArray(d.tags) && d.tags.length){
       const filterTags = new Set(d.tags.map(t => String(t).toLowerCase()));
@@ -550,8 +551,9 @@ export class DiskReplay {
       if(events.some(e=>!e))throw Error('Um dos lances selecionados não existe mais');
       return this.exportEventsTo(events,d.directory);
     }
-    // Sem eventIds: "exportar todos" do conjunto filtrado
+    // Sem eventIds: "exportar todos" do conjunto filtrado (compatível com ReplayExportAllEvents do vMix)
     return this.exportEventsTo(pool,d.directory);
+  }
   }
   async recoverMarkedEvent() {
     if(this.recordingFolder!=='replay'||this.state.rec||!this.state.session||!this.state.markIn||this.state.markIn.sessionId!==this.state.session.id)throw Error('Nenhum IN interrompido recuperável');

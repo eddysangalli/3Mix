@@ -26,9 +26,14 @@ try {
   await mesa.ev(`document.getElementById("ck-s2").value = ${JSON.stringify(hhmm(-120000))}; document.getElementById("ck-e2").value = ${JSON.stringify(hhmm(600000))}`);
   await choose("ck-t1", "remaining"); await sleep(400);
   await mesa.ev(`document.getElementById("ck-s2").value = ${JSON.stringify(hhmm(-120000))}; document.getElementById("ck-e2").value = ${JSON.stringify(hhmm(600000))}`);
+  await choose("ck-t0", "message"); await sleep(400);
+  check("mensagem abre campo curto no primeiro relógio", (await mesa.ev(`document.getElementById("ck-m0")?.maxLength`)) === 40);
+  await mesa.ev(`document.getElementById("ck-m0").value = "FALTAM 2 MINUTOS"`);
   await mesa.ev(`document.querySelector('.pop [data-a="clockssave"]').click()`); await sleep(1200);
   const stored = (await obs.req("GetPersistentData", SLOT)).slotValue;
-  check("a escolha fica gravada no programa", Array.isArray(stored) && stored[1].type === "remaining" && stored[2].type === "event" && !!stored[2].start, JSON.stringify(stored.map((x) => x.type)));
+  check("a escolha fica gravada no programa", Array.isArray(stored) && stored[0].type === "message" && stored[0].message === "FALTAM 2 MINUTOS" && stored[1].type === "remaining" && stored[2].type === "event" && !!stored[2].start, JSON.stringify(stored.map((x) => x.type)));
+  await sleep(1500);
+  check("mensagem no relógio é transmitida ao topo", (await slot(0)).t === "FALTAM 2 MINUTOS", (await slot(0)).t);
   await sleep(1500);
   const ev1 = await slot(2); await sleep(2100); const ev2 = await slot(2);
   check("evento em andamento: contagem até o fim, em verde, andando", ev1.t.startsWith("EVENTO 00:0") && ev1.c === "green" && ev1.t !== ev2.t, `${ev1.t} -> ${ev2.t}`);
