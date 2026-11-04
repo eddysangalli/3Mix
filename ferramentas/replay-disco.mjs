@@ -3,7 +3,7 @@
 import { existsSync } from "node:fs";
 import { spawn } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
-import { mkdir, readFile, writeFile, rename, stat, unlink, readdir, lstat } from "node:fs/promises";
+import { mkdir, readFile, writeFile, rename, stat, unlink, readdir, lstat, copyFile } from "node:fs/promises";
 import { join, resolve, relative, basename } from "node:path";
 import { frameRate, replayCameraOptions, frameTargets, seekTargets, estimateAudioOffset } from './replay-sincronia.mjs';
 import {ReplayCadence} from './replay-cadence.mjs';
@@ -212,6 +212,8 @@ export class DiskReplay {
         case "stop": await this.stop(); break;
         case "recover": if(this.state.rec)throw Error('Pare REC antes de recuperar arquivos');await this.finalizeSafeIso();break;
         case "import": await this.importClip(data);break;
+        case "export-event": return { ...await this.status(), export: await this.exportEvent(data) };
+        case "export-events": return { ...await this.status(), export: await this.exportEvents(data) };
         case "reorder": await this.reorderEvents(data);break;
         case "recover-in": await this.recoverMarkedEvent();break;
         case "retention": await this.retention(data); break;
@@ -469,6 +471,65 @@ export class DiskReplay {
   async reorderEvents(d) {
     if(!Array.isArray(d.ids)||d.ids.length!==this.state.events.length||new Set(d.ids).size!==d.ids.length||d.ids.some(id=>!this.state.events.some(e=>e.id===id)))throw Error('Envie cada lance exatamente uma vez na ordem desejada');
     const events=new Map(this.state.events.map(e=>[e.id,e]));this.state.events=d.ids.map(id=>events.get(id));await this.save();
+  }
+
+  // vMix 30 ("ReplaySelectedEventsExport"/"Export All Events"): copia os clipes já prontos de
+  // um ou mais lances para uma pasta escolhida pelo operador. Não recodifica -- cada clipe do
+  // Replay já é um .mp4 independente e tocável (makeEvent/importClip/repairClip os produzem
+  // assim); exportar é só copiar com nome legível, igual a "Salvar como" de um arquivo que já
+  // existe, nunca reabrir o FFmpeg para isso. Mantém o arquivo original intacto em
+  // gravacoes/replay/ -- a cópia é sempre adicional, nunca move nem apaga o clipe fonte.
+  exportDestination(diretorio) {
+    const pasta=String(diretorio||'').trim();
+    if(pasta){
+      if(pasta.length>500||/[\x00-\x1f]/.test(pasta)||!/^([a-z]:[\\/]|\\\\[^\\]+\\[^\\]+)/i.test(pasta))throw Error('Pasta de exportação deve ser um caminho absoluto');
+      return resolve(pasta);
+    }
+    return join(this.root,'gravacoes/replay/exportados',new Date().toISOString().replace(/[:.]/g,'-'));
+  }
+  // Nome de arquivo seguro a partir do título do lance + câmera, sem depender de regras de
+  // nome de arquivo do sistema operacional além do que já é proibido em qualquer plataforma.
+  exportFileName(event,clip,indice){
+    const base=String(event.name||'Lance').replace(/[\\/:*?"<>|\x00-\x1f]+/g,' ').trim().slice(0,80)||'Lance';
+    const cam=String(clip.cam||'CAM').replace(/[\\/:*?"<>|\x00-\x1f]+/g,' ').trim().slice(0,40)||'CAM';
+    const ext=String(clip.file||'').toLowerCase().endsWith('.mkv')?'.mkv':'.mp4';
+    return `${String(indice+1).padStart(2,'0')} - ${base} - ${cam}${ext}`;
+  }
+  async exportEventsTo(events,diretorio){
+    if(!events.length)throw Error('Nenhum lance para exportar');
+    const destino=this.exportDestination(diretorio);
+    await mkdir(destino,{recursive:true});
+    const exportados=[];
+    for(const event of events){
+      const clips=Array.isArray(event.clips)?event.clips:[];
+      if(!clips.length){exportados.push({eventId:event.id,name:event.name,arquivos:[],erro:'Lance sem clipe gravado'});continue;}
+      const arquivos=[];
+      for(const [indice,clip] of clips.entries()){
+        if(!clip.file||!existsSync(clip.file)){arquivos.push({cam:clip.cam,erro:'Arquivo original não encontrado no disco'});continue;}
+        const nome=this.exportFileName(event,clip,indice),caminho=join(destino,nome);
+        await copyFile(clip.file,caminho);
+        arquivos.push({cam:clip.cam,path:caminho});
+      }
+      exportados.push({eventId:event.id,name:event.name,arquivos});
+    }
+    return {directory:destino,events:exportados};
+  }
+  async exportEvent(d){
+    const event=this.state.events.find(e=>e.id===d.eventId);
+    if(!event)throw Error('Lance não encontrado');
+    return this.exportEventsTo([event],d.directory);
+  }
+  async exportEvents(d){
+    const ids=Array.isArray(d.eventIds)?d.eventIds:null;
+    if(ids){
+      if(!ids.length||ids.length>500)throw Error('Selecione de 1 a 500 lances para exportar');
+      const byId=new Map(this.state.events.map(e=>[e.id,e]));
+      const events=ids.map(id=>byId.get(id));
+      if(events.some(e=>!e))throw Error('Um dos lances selecionados não existe mais');
+      return this.exportEventsTo(events,d.directory);
+    }
+    // Sem eventIds: "exportar todos", igual ao ReplayExportAllEvents do vMix.
+    return this.exportEventsTo(this.state.events,d.directory);
   }
   async recoverMarkedEvent() {
     if(this.recordingFolder!=='replay'||this.state.rec||!this.state.session||!this.state.markIn||this.state.markIn.sessionId!==this.state.session.id)throw Error('Nenhum IN interrompido recuperável');
