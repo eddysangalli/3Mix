@@ -787,6 +787,7 @@ export class SlideEngine extends EventEmitter {
 
   /**
    * Avança um passo de animação no slide no ar (NEXT ANIMATION) com disparo fluido a 60fps
+   * ATUALIZAÇÃO VIA SSE APENAS - NÃO RECARREGA O BROWSER SOURCE!
    */
   async nextAnimation(deckId) {
     const deck = this.decks.get(deckId || this.activeDeckId);
@@ -808,14 +809,16 @@ export class SlideEngine extends EventEmitter {
         effect: currentStepObj?.effect || 'appear'
       });
 
-      // Também sincroniza com o OBS sem sobrescrever o evento de animação
-      await this.presentSlide(deck.id, deck.currentSlide, { emitEvent: false });
+      // NOTA: NÃO chamamos presentSlide() aqui para evitar refresh do Browser Source
+      // O visualizador SSE recebe o evento e atualiza o DOM via CSS transitions a 60fps
+      this.emit('state_changed', this.summary());
     }
     return deck;
   }
 
   /**
    * Retrocede um passo de animação no slide no ar
+   * ATUALIZAÇÃO VIA SSE APENAS - NÃO RECARREGA O BROWSER SOURCE!
    */
   async previousAnimation(deckId) {
     const deck = this.decks.get(deckId || this.activeDeckId);
@@ -832,7 +835,8 @@ export class SlideEngine extends EventEmitter {
         step: slide.currentAnimationStep
       });
 
-      await this.presentSlide(deck.id, deck.currentSlide, { emitEvent: false });
+      // NOTA: NÃO chamamos presentSlide() aqui para evitar refresh do Browser Source
+      this.emit('state_changed', this.summary());
     }
     return deck;
   }

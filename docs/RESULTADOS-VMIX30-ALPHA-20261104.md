@@ -89,3 +89,8 @@ _normalizeLegacyList preserva enabled e autoNext explícitos, com padrões true 
 ## Coordenação de homologação
 
 Outra frente publicou modernização SRT/plugins/Slides (commits 6d2ebe8, 62ae7f3 e 2264064) e alterou os temas das missões 7–11. Não refazer essas implementações nem aceitar a matriz como prova física sem recibos. Criado ALPHA-SUPLEMENTO-HARDWARE-VMIX30.md e link no guia: preserva os cinco roteiros exigidos (DeckLink, AJA, NDI, SRT, entrelaçado) sem apagar missões concorrentes. Numeração original explicitada para evitar confusão. Não representa conclusão dos adaptadores nativos ainda parciais.
+
+
+## Segurança da distribuição — processo 3Mix e rollback
+
+Defeito no guard Windows de atualizar-3mix.mjs: regex de tasklist reconhecia FreeMix.exe/obs64.exe mas não 3Mix.exe. Incluído nome oficial; teste extrai regex real e verifica 3Mix/legados/auxiliares versus processo alheio. Teste isolado de update assinado executado: 6 verificações PASS com apply/rollback reais em instalação sintética, hash adulterado recusado antes de escrita, mesma versão recusada e recuperação de falha. Chaves QA, nunca chave de produção; instalação do operador intocada. Correção ainda precisa integrar o pacote/runtime antes de uso como proteção efetiva instalada.

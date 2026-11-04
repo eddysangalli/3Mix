@@ -11,7 +11,7 @@ export function safe(root,name){
 }
 async function noLinks(root,path){for(let p=path;;p=dirname(p)){const s=await lstat(p).catch(e=>{if(e.code==='ENOENT')return null;throw e;});if(s?.isSymbolicLink())throw Error('Link recusado na atualização');if(p===root)break;if(dirname(p)===p)throw Error('Caminho fora da raiz');}}
 async function closed(root){if(process.platform!=='win32')return;
-  const ids=execFileSync('tasklist.exe',['/FO','CSV','/NH'],{encoding:'utf8',windowsHide:true,timeout:10000}).split(/\r?\n/).map(line=>line.match(/^"(?:FreeMix|obs64|node|powershell|pwsh)\.exe","(\d+)"/i)?.[1]).filter(id=>id&&Number(id)!==process.pid);
+  const ids=execFileSync('tasklist.exe',['/FO','CSV','/NH'],{encoding:'utf8',windowsHide:true,timeout:10000}).split(/\r?\n/).map(line=>line.match(/^"(?:3Mix|FreeMix|obs64|node|powershell|pwsh)\.exe","(\d+)"/i)?.[1]).filter(id=>id&&Number(id)!==process.pid);
   if(!ids.length)return;
   const rows=JSON.parse(execFileSync(join(root,'runtime/freemix-process-info.exe'),ids,{encoding:'utf8',windowsHide:true,timeout:10000}));
   if(rows.some(p=>!p.exited&&(!p.path||resolve(p.path).toLowerCase().startsWith(root.toLowerCase()+ '\\'))))throw Error('Feche o 3Mix e seu ajudante antes de atualizar');

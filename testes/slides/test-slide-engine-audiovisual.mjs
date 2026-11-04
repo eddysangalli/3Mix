@@ -1,16 +1,16 @@
 import assert from 'node:assert';
 import path from 'node:path';
 import fs from 'node:fs';
-import { SlideEngine } from '../../3mix-panel/ferramentas/apresentacao-slides.mjs';
-import { connect } from '../../3mix-runtime/ferramentas/obsws.mjs';
+import { SlideEngine } from '../../ferramentas/apresentacao-slides.mjs';
+import { connect } from '../../../../3mix-runtime/ferramentas/obsws.mjs';
 
-const QA_DIR = path.join(process.cwd(), 'qa-replay/evidencias-powerpoint');
+const QA_DIR = path.join(process.cwd(), '../../../../qa-replay/evidencias-powerpoint');
 
 async function runAudioVisualTests() {
   console.log('=== SUÍTE DE TESTES: SLIDEENGINE — REPRODUÇÃO AUDIOVISUAL, ÁUDIO & CONTROLES ===\n');
 
   console.log('[1/4] Conectando ao motor 3Mix / OBS WebSocket...');
-  const obs = await connect({ root: path.join(process.cwd(), '3mix-runtime') });
+  const obs = await connect({ root: path.join(process.cwd(), '../../../../3Mix/3mix-runtime') });
   console.log('✓ Conectado ao OBS WebSocket.');
 
   const productionAdapter = {
@@ -19,12 +19,12 @@ async function runAudioVisualTests() {
   };
 
   const engine = new SlideEngine({
-    root: path.join(process.cwd(), '3mix-runtime'),
+    root: path.join(process.cwd(), '../../../../3Mix/3mix-runtime'),
     production: productionAdapter
   });
   await engine.ready;
 
-  const pptxPath = path.join(process.cwd(), 'scratch/apresentacao-rica-broadcast.pptx');
+  const pptxPath = path.join(process.cwd(), '../../../../3Mix/scratch/apresentacao-rica-broadcast.pptx');
   const deck = await engine.importPptx(pptxPath, 'Apresentação Broadcast Rica');
 
   // -------------------------------------------------------------

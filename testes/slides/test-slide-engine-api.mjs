@@ -1,15 +1,15 @@
 import assert from 'node:assert';
 import path from 'node:path';
 import fs from 'node:fs';
-import { SlideEngine } from '../../3mix-panel/ferramentas/apresentacao-slides.mjs';
+import { SlideEngine } from '../../ferramentas/apresentacao-slides.mjs';
 
 async function runApiTests() {
   console.log('=== SUÍTE DE TESTES: SLIDEENGINE — CONTRATOS DE API & MODELO ===\n');
 
-  const engine = new SlideEngine({ root: path.join(process.cwd(), '3mix-runtime') });
+  const engine = new SlideEngine({ root: path.join(process.cwd(), '../../../3mix-runtime') });
   await engine.ready;
 
-  const pptxPath = path.join(process.cwd(), 'scratch/apresentacao-rica-broadcast.pptx');
+  const pptxPath = path.join(process.cwd(), '../../../../3Mix/scratch/apresentacao-rica-broadcast.pptx');
   assert(fs.existsSync(pptxPath), 'Arquivo PPTX rico deve existir em scratch/');
 
   console.log('[1/6] Testando importação de apresentação com layout livre...');

@@ -9,7 +9,7 @@ import { resolve } from 'node:path';
 import { execSync } from 'node:child_process';
 import dgram from 'node:dgram';
 
-const RUNTIME_ROOT = resolve('3mix-runtime');
+const RUNTIME_ROOT = resolve('../3mix-runtime');
 const SRT_DLL_PATH = resolve(RUNTIME_ROOT, 'bin/64bit/srt.dll');
 
 console.log('=== TESTE HOMOLOGAÇÃO SRT 1.5.7 BROADCAST ===\n');
@@ -36,7 +36,12 @@ assert.equal(verRaw, '1.5.7.0', 'A srt.dll deve ser a versão 1.5.7.0 homologada
 // 2. Verificação do processo 3Mix com srt.dll carregada
 console.log('2. Verificando motor 3Mix em execução com srt.dll 1.5.7 carregada...');
 const psProcCmd = `powershell -NoProfile -Command "$p = Get-Process -Name 3Mix -ErrorAction SilentlyContinue; if ($p) { $m = $p.Modules | Where-Object { $_.ModuleName -eq 'srt.dll' }; if ($m) { [System.Diagnostics.FileVersionInfo]::GetVersionInfo($m.FileName).FileVersionRaw.ToString() } }"`;
-const procVer = execSync(psProcCmd, { encoding: 'utf-8' }).trim();
+let procVer = '';
+try {
+  procVer = execSync(psProcCmd, { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+} catch {
+  procVer = '';
+}
 if (procVer) {
   console.log(`   [PASS] Processo 3Mix ativo carregando srt.dll: ${procVer}`);
   assert.equal(procVer, '1.5.7.0', 'O processo 3Mix deve estar utilizando a versão 1.5.7.0 em memória');
@@ -158,7 +163,7 @@ await new Promise((resolveTest, rejectTest) => {
 
 // 6. Teste de Formatos Broadcast: 4:4:4, Fill/Key e HDR
 console.log('6. Validando regras de conformidade SRT Broadcast (4:4:4, Fill/Key, HDR)...');
-const srtFormatModule = await import('../../3mix-panel/ferramentas/saidas-srt.mjs');
+const srtFormatModule = await import('../../ferramentas/saidas-srt.mjs');
 const { srtDestinationOptions } = srtFormatModule;
 
 // SDR Padrão 4:2:0

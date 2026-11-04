@@ -2,11 +2,11 @@ import assert from 'node:assert';
 import path from 'node:path';
 import fs from 'node:fs';
 import { createHash } from 'node:crypto';
-import { SlideEngine } from '../../3mix-panel/ferramentas/apresentacao-slides.mjs';
-import { connect } from '../../3mix-runtime/ferramentas/obsws.mjs';
+import { SlideEngine } from '../../ferramentas/apresentacao-slides.mjs';
+import { connect } from '../../../../3mix-runtime/ferramentas/obsws.mjs';
 
 const sha = (buf) => createHash('sha256').update(buf).digest('hex');
-const QA_DIR = path.join(process.cwd(), 'qa-replay/evidencias-powerpoint');
+const QA_DIR = path.join(process.cwd(), '../../../../qa-replay/evidencias-powerpoint');
 const ARTIFACT_DIR = 'C:\\Users\\eddyr\\.gemini\\antigravity\\brain\\53afe648-b1c6-4bdb-99a3-222ed40f3874';
 
 async function runCompositorTests() {
@@ -24,12 +24,12 @@ async function runCompositorTests() {
   };
 
   const engine = new SlideEngine({
-    root: path.join(process.cwd(), '3mix-runtime'),
+    root: path.join(process.cwd(), '../../../../3Mix/3mix-runtime'),
     production: productionAdapter
   });
   await engine.ready;
 
-  const pptxPath = path.join(process.cwd(), 'scratch/apresentacao-rica-broadcast.pptx');
+  const pptxPath = path.join(process.cwd(), '../../../../3Mix/scratch/apresentacao-rica-broadcast.pptx');
   const deck = await engine.importPptx(pptxPath, 'Apresentação Rica Broadcast');
 
   // -------------------------------------------------------------
@@ -101,7 +101,7 @@ async function runCompositorTests() {
   // TESTE 4: APRESENTAÇÃO LEGADA 4:3 (PILARBOX BROADCAST)
   // -------------------------------------------------------------
   console.log('\n[5/5] Testando proporção 4:3 com pilarbox lateral...');
-  const pptx43Path = path.join(process.cwd(), 'scratch/apresentacao-4x3.pptx');
+  const pptx43Path = path.join(process.cwd(), '../../../../3Mix/scratch/apresentacao-4x3.pptx');
   const deck43 = await engine.importPptx(pptx43Path, 'Apresentação Legada 4:3');
   assert.strictEqual(deck43.aspect, '4:3');
 

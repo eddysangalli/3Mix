@@ -13,10 +13,10 @@
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync, mkdirSync, rmSync, copyFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
-import { inspectPe } from '../../3mix-panel/ferramentas/plugin-manager-pe.mjs';
-import { PluginManager, applyPendingPlugins } from '../../3mix-panel/ferramentas/plugin-manager.mjs';
+import { inspectPe } from '../../ferramentas/plugin-manager-pe.mjs';
+import { PluginManager, applyPendingPlugins } from '../../ferramentas/plugin-manager.mjs';
 
-const RUNTIME_ROOT = resolve('3mix-runtime');
+const RUNTIME_ROOT = resolve('../../../3mix-runtime');
 const OBS_PLUGINS_DIR = join(RUNTIME_ROOT, 'obs-plugins/64bit');
 const OBS_BIN_DIR = join(RUNTIME_ROOT, 'bin/64bit');
 
