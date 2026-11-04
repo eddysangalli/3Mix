@@ -227,7 +227,25 @@
     if (e.detail && !e.detail.active) show(false);
   });
 })();
+
+  function play(data) {
+    if (data) update(data);
+    const wrap = document.getElementById('wrapper');
+    if (wrap) wrap.classList.add('visible');
+  }
+  function stop() {
+    const wrap = document.getElementById('wrapper');
+    if (wrap) wrap.classList.remove('visible');
+  }
+  function update(data) {
+    if (!data) return;
+    if (typeof updateContent === 'function') {
+      updateContent(data);
+    }
+  }
+  window.GC = { play, stop, update };
 </script>
+<script src="../gc.js"></script>
 </body>
 </html>
 

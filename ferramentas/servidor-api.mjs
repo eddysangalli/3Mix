@@ -437,6 +437,70 @@ async function handleHttp(req, res) {
         if (d.action === 'ptt_stop') { crewIntercom.stopPtt(d.memberId, d.lease); return json(res, 200, { success: true }); }
         return json(res, 400, { success: false, error: 'Ação de Intercom desconhecida' });
       }
+      if (path === '/api/devices/video' && req.method === 'GET') {
+        try {
+          const list = await production.req('GetInputList', {});
+          const dshow = (list.inputs || []).filter(i => i.inputKind === 'dshow_input');
+          let target = dshow[0]?.inputName, tempCreated = false;
+          if (!target) {
+            tempCreated = true;
+            target = '__3mix_probe_dshow__';
+            await production.req('CreateScene', { sceneName: '__3mix_probe_scene__' });
+            await production.req('CreateInput', { sceneName: '__3mix_probe_scene__', inputName: target, inputKind: 'dshow_input', inputSettings: {} });
+          }
+          const props = await production.req('GetInputPropertiesListPropertyItems', { inputName: target, propertyName: 'video_device_id' });
+          if (tempCreated) {
+            await production.tryReq('RemoveInput', { inputName: target });
+            await production.tryReq('RemoveScene', { sceneName: '__3mix_probe_scene__' });
+          }
+          const devices = (props.propertyItems || []).map(p => ({ name: p.itemName, value: p.itemValue, enabled: p.itemEnabled }));
+          return json(res, 200, { success: true, devices });
+        } catch (err) {
+          return json(res, 200, { success: true, devices: [], error: err.message });
+        }
+      }
+      if (path === '/api/devices/all' && req.method === 'GET') {
+        try {
+          const result = { video: [], audio: [], monitors: [], windows: [] };
+          const probeScene = '__3mix_probe_all_sc__';
+          await production.req('CreateScene', { sceneName: probeScene });
+          try {
+            // Video (dshow_input)
+            const inVideo = '__3mix_probe_dshow__';
+            await production.req('CreateInput', { sceneName: probeScene, inputName: inVideo, inputKind: 'dshow_input', inputSettings: {} });
+            const pVid = await production.tryReq('GetInputPropertiesListPropertyItems', { inputName: inVideo, propertyName: 'video_device_id' });
+            if (pVid?.propertyItems) result.video = pVid.propertyItems.map(p => ({ name: p.itemName, value: p.itemValue, enabled: p.itemEnabled }));
+            await production.tryReq('RemoveInput', { inputName: inVideo });
+
+            // Audio (wasapi_input_capture)
+            const inAud = '__3mix_probe_wasapi__';
+            await production.req('CreateInput', { sceneName: probeScene, inputName: inAud, inputKind: 'wasapi_input_capture', inputSettings: {} });
+            const pAud = await production.tryReq('GetInputPropertiesListPropertyItems', { inputName: inAud, propertyName: 'device_id' });
+            if (pAud?.propertyItems) result.audio = pAud.propertyItems.map(p => ({ name: p.itemName, value: p.itemValue, enabled: p.itemEnabled }));
+            await production.tryReq('RemoveInput', { inputName: inAud });
+
+            // Monitors (monitor_capture)
+            const inMon = '__3mix_probe_monitor__';
+            await production.req('CreateInput', { sceneName: probeScene, inputName: inMon, inputKind: 'monitor_capture', inputSettings: {} });
+            const pMon = (await production.tryReq('GetInputPropertiesListPropertyItems', { inputName: inMon, propertyName: 'monitor' }))
+              || (await production.tryReq('GetInputPropertiesListPropertyItems', { inputName: inMon, propertyName: 'monitor_id' }));
+            if (pMon?.propertyItems) result.monitors = pMon.propertyItems.filter(p => p.itemValue !== 'DUMMY').map(p => ({ name: p.itemName, value: p.itemValue, enabled: p.itemEnabled }));
+            await production.tryReq('RemoveInput', { inputName: inMon });
+
+            // Windows (window_capture)
+            const inWin = '__3mix_probe_window__';
+            await production.req('CreateInput', { sceneName: probeScene, inputName: inWin, inputKind: 'window_capture', inputSettings: {} });
+            const pWin = await production.tryReq('GetInputPropertiesListPropertyItems', { inputName: inWin, propertyName: 'window' });
+            if (pWin?.propertyItems) result.windows = pWin.propertyItems.filter(p => p.itemValue).map(p => ({ name: p.itemName, value: p.itemValue, enabled: p.itemEnabled }));
+            await production.tryReq('RemoveInput', { inputName: inWin });
+          } finally {
+            await production.tryReq('RemoveScene', { sceneName: probeScene });
+          }
+          return json(res, 200, { success: true, ...result });
+        } catch (err) {
+          return json(res, 200, { success: true, video: [], audio: [], monitors: [], windows: [], error: err.message });
+        }
+      }
       if (path === '/api/srt-hdr') { if (req.method !== 'GET') return json(res, 405, { success: false }); if (!local(req)) return json(res, 403, { success: false, error: 'Consulta HDR disponível somente neste computador' }); const id = u.searchParams.get('senderId') ?? '0'; if (!/^[0-3]$/.test(id)) throw Error('Envio HDR inválido'); return json(res, 200, { success: true, outputs: await production.outputEngine.readSrtHdr(Number(id)) }); }
       if (path === '/api/network' && req.method === 'GET') { if (!local(req)) return json(res, 403, { success: false, error: 'Rede disponível somente neste computador' }); return json(res, 200, await production.networkEngine.read()); }
       if (path === '/api/gc-compatible' && req.method === 'GET') { if (!local(req)) return json(res, 403, { success: false, error: 'Editor HTML apenas local' }); return json(res, 200, { success: true, gcCompatible: await production.gcCompatible.summary() }); }

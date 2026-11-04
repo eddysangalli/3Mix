@@ -242,7 +242,24 @@
   };
 
   connectWs();
+
+  function play(data) {
+    if (data && (data.user || data.text)) {
+      addChatMessage(data);
+    }
+  }
+  function stop() {
+    const container = document.getElementById('chat-feed-container');
+    if (container) container.innerHTML = '';
+  }
+  function update(data) {
+    if (data && (data.user || data.text)) {
+      addChatMessage(data);
+    }
+  }
+  window.GC = { play, stop, update };
 </script>
+<script src="../gc.js"></script>
 </body>
 </html>
 

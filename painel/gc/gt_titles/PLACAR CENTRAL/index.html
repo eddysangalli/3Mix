@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0">
+  <title>PLACAR CENTRAL - 3Mix Broadcast GC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;600;700;800&family=Oswald:wght@400;600;700&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: transparent;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #gc-root {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      transform-origin: top left;
+    }
+    
+    /* Animações Padrão de Transição In / Out */
+    @keyframes ticker-scroll {
+      0% { transform: translateX(1920px); }
+      100% { transform: translateX(-100%); }
+    }
+
+    @keyframes anim-in-Layer1_X {
+      0% { opacity: 0; }
+      100% { opacity: 1; transform: translate(0, 0); }
+    }
+    .animate-in #obj-Layer1_X,
+    .animate-in [data-name="X"] {
+      animation: anim-in-Layer1_X 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+    }
+  </style>
+</head>
+<body>
+  <div id="gc-root" class="animate-in">
+    <div id="layer-Layer1" class="gt-layer" style="position: absolute; left: 0px; top: 0px; width: 1920px; height: 1080px; pointer-events: none" data-name="Layer1">
+    <div id="obj-Layer1_SETA_BAIXO_1" class="gt-object gt-rect" style="position: absolute; left: 354px; top: 934px; width: 287px; height: 49px; background-image: url('PLACAR CENTRAL.psd.0.png'); background-size: 100% 100%; background-repeat: no-repeat; background-position: center; background-color: transparent; opacity: 1" data-name="SETA BAIXO 1"></div>
+    <div id="obj-Layer1_SETA_CIMA_1" class="gt-object gt-rect" style="position: absolute; left: 354px; top: 765px; width: 287px; height: 49px; background-image: url('PLACAR CENTRAL.psd.1.png'); background-size: 100% 100%; background-repeat: no-repeat; background-position: center; background-color: transparent; opacity: 1" data-name="SETA CIMA 1"></div>
+    <div id="obj-Layer1_SETA_BAIXO_2" class="gt-object gt-rect" style="position: absolute; left: 1318px; top: 934px; width: 287px; height: 49px; background-image: url('PLACAR CENTRAL.psd.2.png'); background-size: 100% 100%; background-repeat: no-repeat; background-position: center; background-color: transparent; opacity: 1" data-name="SETA BAIXO 2"></div>
+    <div id="obj-Layer1_SETA_CIMA_2" class="gt-object gt-rect" style="position: absolute; left: 1318px; top: 765px; width: 287px; height: 49px; background-image: url('PLACAR CENTRAL.psd.3.png'); background-size: 100% 100%; background-repeat: no-repeat; background-position: center; background-color: transparent; opacity: 1" data-name="SETA CIMA 2"></div>
+    <div id="obj-Layer1_BG" class="gt-object gt-rect" style="position: absolute; left: 356px; top: 778px; width: 1248px; height: 193px; background-image: url('PLACAR CENTRAL.psd.4.png'); background-size: 100% 100%; background-repeat: no-repeat; background-position: center; background-color: transparent; opacity: 1" data-name="BG"></div>
+    <div id="obj-Layer1_BASE_NOMES" class="gt-object gt-rect" style="position: absolute; left: 594px; top: 798px; width: 773px; height: 157px; background-image: url('PLACAR CENTRAL.psd.5.png'); background-size: 100% 100%; background-repeat: no-repeat; background-position: center; background-color: transparent; opacity: 1" data-name="BASE NOMES"></div>
+    <div id="obj-Layer1_X" class="gt-object gt-rect" style="position: absolute; left: 909px; top: 770px; width: 137px; height: 213px; background-image: url('PLACAR CENTRAL.psd.6.png'); background-size: 100% 100%; background-repeat: no-repeat; background-position: center; background-color: transparent; opacity: 1" data-name="X"></div>
+    <div id="obj-Layer1_CASA" class="gt-object gt-rect" style="position: absolute; left: 362px; top: 778px; width: 230px; height: 193px; background-image: url('PLACAR CENTRAL.psd.7.png'); background-size: 100% 100%; background-repeat: no-repeat; background-position: center; background-color: transparent; opacity: 1" data-name="CASA"></div>
+    <div id="obj-Layer1_FORA" class="gt-object gt-rect" style="position: absolute; left: 1371px; top: 778px; width: 227px; height: 193px; background-image: url('PLACAR CENTRAL.psd.8.png'); background-size: 100% 100%; background-repeat: no-repeat; background-position: center; background-color: transparent; opacity: 1" data-name="FORA"></div>
+    <div id="obj-Layer1_BASE_IINTERVALO" class="gt-object gt-rect" style="position: absolute; left: 641px; top: 732px; width: 670px; height: 42px; background-image: url('PLACAR CENTRAL.psd.5.png'); background-size: 100% 100%; background-repeat: no-repeat; background-position: center; background-color: transparent; opacity: 1" data-name="BASE IINTERVALO"></div>
+    <div id="field-NOME_CASA" class="gt-object gt-text " style="position: absolute; left: 592px; top: 806px; width: 333px; height: 54px; display: flex; align-items: center; justify-content: center; font-family: 'StratumNo1', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 30px; font-weight: DemiBold; color: rgba(1, 7, 50, 1); overflow: hidden; white-space: nowrap" data-name="NOME CASA" data-format="MANCHESTER CITY">MANCHESTER CITY</div>
+    <div id="field-NOME_FORA" class="gt-object gt-text " style="position: absolute; left: 1034px; top: 806px; width: 333px; height: 54px; display: flex; align-items: center; justify-content: center; font-family: 'StratumNo1', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 30px; font-weight: DemiBold; color: rgba(1, 7, 50, 1); overflow: hidden; white-space: nowrap" data-name="NOME FORA" data-format="PARIS SAINT GERMAN">PARIS SAINT GERMAN</div>
+    <div id="field-SCORE_CASA" class="gt-object gt-text " style="position: absolute; left: 665px; top: 860px; width: 146px; height: 95px; display: flex; align-items: flex-end; justify-content: center; font-family: 'StratumNo1', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 96px; font-weight: DemiBold; color: rgba(1, 7, 50, 1); overflow: hidden; white-space: nowrap" data-name="SCORE CASA" data-format="01">01</div>
+    <div id="field-SCORE_FORA" class="gt-object gt-text " style="position: absolute; left: 1131px; top: 860px; width: 146px; height: 95px; display: flex; align-items: flex-end; justify-content: center; font-family: 'StratumNo1', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 96px; font-weight: DemiBold; color: rgba(1, 7, 50, 1); overflow: hidden; white-space: nowrap" data-name="SCORE FORA" data-format="01">01</div>
+    <div id="field-INTERVALO" class="gt-object gt-text " style="position: absolute; left: 641px; top: 732px; width: 670px; height: 38px; display: flex; align-items: center; justify-content: center; font-family: 'StratumNo1', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 30px; font-weight: DemiBold; color: rgba(1, 7, 50, 1); overflow: hidden; white-space: nowrap" data-name="INTERVALO" data-format="INTERVALO">INTERVALO</div>
+    <div id="img-ESCUDO_CASA" class="gt-object gt-image" style="position: absolute; left: 302px; top: 758px; width: 352px; height: 233px; background-image: url('Manchester_City_Football_Club.png'); background-size: 100% 100%; background-repeat: no-repeat; background-position: center" data-name="ESCUDO CASA"></div>
+    <div id="img-ESCUDO_FOFRA" class="gt-object gt-image" style="position: absolute; left: 1311px; top: 758px; width: 352px; height: 233px; background-image: url('PSG.png'); background-size: 100% 100%; background-repeat: no-repeat; background-position: center" data-name="ESCUDO FOFRA"></div>
+  </div>
+  </div>
+
+  <script>
+    /**
+     * Motor de Runtime do FreeMix Broadcast Title
+     * Fornece API padronizada para Overlays, Title Editor e Data Sources
+     */
+    window.FreeMixTitle = {
+      data: [
+  {
+    "id": "NOME CASA",
+    "label": "NOME CASA",
+    "type": "text",
+    "default": "MANCHESTER CITY",
+    "isClock": false
+  },
+  {
+    "id": "NOME FORA",
+    "label": "NOME FORA",
+    "type": "text",
+    "default": "PARIS SAINT GERMAN",
+    "isClock": false
+  },
+  {
+    "id": "SCORE CASA",
+    "label": "SCORE CASA",
+    "type": "text",
+    "default": "01",
+    "isClock": false
+  },
+  {
+    "id": "SCORE FORA",
+    "label": "SCORE FORA",
+    "type": "text",
+    "default": "01",
+    "isClock": false
+  },
+  {
+    "id": "INTERVALO",
+    "label": "INTERVALO",
+    "type": "text",
+    "default": "INTERVALO",
+    "isClock": false
+  },
+  {
+    "id": "ESCUDO CASA",
+    "label": "ESCUDO CASA",
+    "type": "image",
+    "default": "Manchester_City_Football_Club.png"
+  },
+  {
+    "id": "ESCUDO FOFRA",
+    "label": "ESCUDO FOFRA",
+    "type": "image",
+    "default": "PSG.png"
+  }
+],
+      
+      // Atualizar campos de texto / imagens dinamicamente
+      updateFields(dataObj) {
+        if (!dataObj) return;
+        for (const [key, val] of Object.entries(dataObj)) {
+          const fieldEl = document.querySelector('[data-name="' + key + '"]');
+          if (fieldEl) {
+            if (fieldEl.classList.contains('gt-text')) {
+              fieldEl.textContent = val;
+            } else if (fieldEl.classList.contains('gt-image')) {
+              fieldEl.style.backgroundImage = 'url("' + val + '")';
+            } else if (fieldEl.classList.contains('gt-ticker-wrapper')) {
+              const tc = fieldEl.querySelector('.gt-ticker-content');
+              if (tc) tc.textContent = val;
+            }
+          }
+        }
+      },
+
+      // Disparar Animação de Entrada
+      transitionIn() {
+        const root = document.getElementById('gc-root');
+        root.classList.remove('animate-out');
+        root.classList.add('animate-in');
+      },
+
+      // Disparar Animação de Saída
+      transitionOut() {
+        const root = document.getElementById('gc-root');
+        root.classList.remove('animate-in');
+        root.classList.add('animate-out');
+      },
+
+      // Conectar a uma Data Source (CSV, JSON, URL)
+      async loadDataSource(url) {
+        try {
+          const res = await fetch(url);
+          const json = await res.json();
+          this.updateFields(json);
+        } catch (err) {
+          console.warn('[FreeMixTitle] Erro ao carregar DataSource:', err);
+        }
+      }
+    };
+
+    // Suporte ao relógio em tempo real caso existam campos de hora
+    function initClocks() {
+      const clocks = document.querySelectorAll('.gt-clock');
+      if (clocks.length === 0) return;
+      function tick() {
+        const now = new Date();
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mm = String(now.getMinutes()).padStart(2, '0');
+        const ss = String(now.getSeconds()).padStart(2, '0');
+        clocks.forEach(c => {
+          c.textContent = hh + ':' + mm;
+        });
+      }
+      tick();
+      setInterval(tick, 1000);
+    }
+    initClocks();
+
+    // Integração com o protocolo nativo de GC do FreeMix (painel/gc/gc.js)
+    window.GC = {
+      play(data) {
+        if (data) window.FreeMixTitle.updateFields(data);
+        window.FreeMixTitle.transitionIn();
+      },
+      stop() {
+        window.FreeMixTitle.transitionOut();
+      },
+      update(data) {
+        if (data) window.FreeMixTitle.updateFields(data);
+      }
+    };
+
+    // Ouvinte para mensagens vindas do painel pai (postMessage)
+    window.addEventListener('message', (event) => {
+      if (!event.data || !event.data.action) return;
+      if (event.data.action === 'UPDATE_FIELDS') {
+        window.FreeMixTitle.updateFields(event.data.payload);
+      } else if (event.data.action === 'TRANSITION_IN') {
+        window.FreeMixTitle.transitionIn();
+      } else if (event.data.action === 'TRANSITION_OUT') {
+        window.FreeMixTitle.transitionOut();
+      }
+    });
+  </script>
+  <script src="../../gc.js" onerror="this.onerror=null;this.src='../gc.js'"></script>
+</body>
+</html>

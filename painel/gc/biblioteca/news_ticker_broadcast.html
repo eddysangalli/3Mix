@@ -152,7 +152,28 @@
       document.getElementById('t1').innerHTML = `<b class="ticker-bullet">▶</b> ${fields.text}`;
     }
   };
+
+  function play(data) {
+    if (data) update(data);
+    const bar = document.getElementById('ticker-bar');
+    if (bar) bar.classList.add('visible');
+  }
+  function stop() {
+    const bar = document.getElementById('ticker-bar');
+    if (bar) bar.classList.remove('visible');
+  }
+  function update(data) {
+    if (!data) return;
+    if (data.badge) document.getElementById('badge').textContent = data.badge;
+    if (data.topic) document.getElementById('topic').textContent = data.topic;
+    if (data.text || data.title) {
+      const el = document.getElementById('t1');
+      if (el) el.innerHTML = '<b class="ticker-bullet">▶</b> ' + (data.text || data.title);
+    }
+  }
+  window.GC = { play, stop, update };
 </script>
+<script src="../gc.js"></script>
 </body>
 </html>
 

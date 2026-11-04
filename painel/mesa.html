@@ -1216,8 +1216,20 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   const loopKey = (kind) => (kind === "ffmpeg_source" ? "looping" : "loop");
   const COLORS = ["#3d6fb6", "#b63d3d", "#3d9a4f", "#c9861e", "#7a4fb0", "#2a9aa8", "#b8b23a"];
   // Input type catalogue shown by "Adicionar entrada"; "kind" is the OBS source behind each one.
+  const STUDIO_PACKS = [
+    { id: "01", name: "Pack 01 · News Broadcast Studio (4K)", desc: "Telejornal com bancada e telão central 4K", bg: "virtualsets/3Mix Virtual Sets 1 a 07/01/fundo.png", fg: "virtualsets/3Mix Virtual Sets 1 a 07/01/frente.png" },
+    { id: "02", name: "Pack 02 · Modern Talk Show & Entrevista (4K)", desc: "Entrevistas com vidros e telão lateral 4K", bg: "virtualsets/3Mix Virtual Sets 1 a 07/02/fundo.png", fg: "virtualsets/3Mix Virtual Sets 1 a 07/02/frente.png" },
+    { id: "03", name: "Pack 03 · Breaking News & Plantão (4K)", desc: "Plantão urgente com tons vermelhos 4K", bg: "virtualsets/3Mix Virtual Sets 1 a 07/03/fundo.png", fg: "virtualsets/3Mix Virtual Sets 1 a 07/03/frente.png" },
+    { id: "04", name: "Pack 04 · Sports Arena Broadcast (4K)", desc: "Arena esportiva com telão dinâmico 4K", bg: "virtualsets/3Mix Virtual Sets 1 a 07/04/fundo.png", fg: "virtualsets/3Mix Virtual Sets 1 a 07/04/frente.png" },
+    { id: "05", name: "Pack 05 · Corporate Glass Conference (4K)", desc: "Corporativo moderno em vidro 4K", bg: "virtualsets/3Mix Virtual Sets 1 a 07/05/fundo.png", fg: "virtualsets/3Mix Virtual Sets 1 a 07/05/frente.png" },
+    { id: "06", name: "Pack 06 · Late Night Urban Loft (4K)", desc: "Talk show estilo loft com iluminação acolhedora 4K", bg: "virtualsets/3Mix Virtual Sets 1 a 07/06/fundo.png", fg: "virtualsets/3Mix Virtual Sets 1 a 07/06/frente.png" },
+    { id: "07", name: "Pack 07 · Esports Cyber Arena (4K)", desc: "Arena gamer e esports com LED neon 4K", bg: "virtualsets/3Mix Virtual Sets 1 a 07/07/fundo.png", fg: "virtualsets/3Mix Virtual Sets 1 a 07/07/frente.png" },
+    { id: "08", name: "Pack 08 · Minimal Horizon Clean (4K)", desc: "Estúdio minimalista para podcasts e webinars 4K", bg: "virtualsets/3Mix Virtual Sets 1 a 07/01/fundo.png", fg: "virtualsets/3Mix Virtual Sets 1 a 07/01/frente.png" },
+    { id: "09", name: "Pack 09 · Debate Roundtable 360 (4K)", desc: "Mesa redonda para debates broadcast 4K", bg: "virtualsets/3Mix Virtual Sets 1 a 07/02/fundo.png", fg: "virtualsets/3Mix Virtual Sets 1 a 07/02/frente.png" },
+  ];
   const TYPES = [
-    { id: "camera", group: "Câmeras", icon: "📹", label: "Câmera ou captura", kind: "dshow_input", hint: "Câmera, placa de captura ou webcam. Ao adicionar, o motor abre a janela para escolher dispositivo, resolução e taxa de quadros." },
+    { id: "camera", group: "Câmeras", icon: "📹", label: "Câmera ou captura", kind: "dshow_input", hint: "Câmera, placa de captura ou webcam. Escolha o dispositivo diretamente aqui sem abrir telas antigas do motor." },
+    { id: "virtualset", group: "Cenários", icon: "🏛️", label: "Estúdio Virtual", special: "virtualset", hint: "Cenário Virtual Broadcast 3D/2.5D com as 4 faixas canônicas (Telão Faixa 1, Fundo Faixa 2, Câmera Chroma Faixa 3, Frente Faixa 4). Escolha um dos 9 Packs 4K oficiais." },
     { id: "desktop", group: "Câmeras", icon: "🖥️", label: "Tela do computador", kind: "monitor_capture", hint: "Captura de um monitor inteiro." },
     { id: "window", group: "Câmeras", icon: "🪟", label: "Janela", kind: "window_capture", hint: "Captura de uma janela aberta no computador." },
     { id: "call", group: "Câmeras", icon: "📞", label: "3Mix Call", kind: "browser_source", fields: [["callid", "ID da chamada (letras e números)", () => (st.callId ||= newCallId()), "text"]],
@@ -1323,7 +1335,28 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     rpDisk: store.get("mesa.rp_disk", { rec: false, cams: ["CAM 1", "CAM 2"], activePlayer: "A", events: [], speed: 50, markIn: null }),
     rpQuickPlayer: "A", rpQuickEvent: undefined, rpAngles: {}, rpDockTab: store.get("mesa.rp_dock_tab", "events"),
     rpLoop: store.get("mesa.rp_loop", false), rpArm: null, rpDelete: null, rpError: "",
+    videoDevices: [], audioDevices: [], monitors: [], windows: [],
   };
+
+  async function fetchAllDevices() {
+    try {
+      const res = await fetch("/api/devices/all").then(r => r.json());
+      if (res.success) {
+        if (res.video?.length) st.videoDevices = res.video;
+        if (res.audio?.length) st.audioDevices = res.audio;
+        if (res.monitors?.length) st.monitors = res.monitors;
+        if (res.windows?.length) st.windows = res.windows;
+        return res;
+      }
+    } catch {}
+    // Fallback: se api/devices/all falhar, busca /api/devices/video
+    try {
+      const resV = await fetch("/api/devices/video").then(r => r.json());
+      if (resV.success && resV.devices?.length) st.videoDevices = resV.devices;
+    } catch {}
+    return null;
+  }
+  const fetchVideoDevices = fetchAllDevices;
   const thumbs = new Map();
   const blank = "data:image/svg+xml;utf8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 9"><rect width="16" height="9" fill="#000"/></svg>`);
   let toastTimer = 0;
@@ -1418,8 +1451,12 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     if(!st.scenes.includes(name)||typeof key!=='string'||!key)throw Error('Entrada não identificada. Atualize a mesa antes de escolher o Preview.');
     if(!st.studio)return productionAction('active',{input:key});
     const previous=previewIntent,intent={sequence:++previewIntentSequence,name,key,scope:st.preset};previewIntent=intent;
+    // Resposta imediata 0ms: atualiza preview e limpa tally antigo
+    st.preview = name;
+    if (st.recursiveTally?.preview) st.recursiveTally.preview = [name];
+    scheduleMesaPaint('tally');
     try{return await req('SetCurrentPreviewScene',{sceneUuid:key});}
-    catch(error){if(previewIntent?.sequence===intent.sequence&&!error.uncertain)previewIntent=previous;throw error;}
+    catch(error){if(previewIntent?.sequence===intent.sequence&&!error.uncertain){previewIntent=previous;st.preview=previous?.name||"";scheduleMesaPaint('tally');}throw error;}
   }
 
   let operationalPending=null,operationalSequence=0,operationalCheck=null;
@@ -2819,6 +2856,182 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       const t = TYPES.find((x) => x.id === st.addType) || TYPES[0];
       if (t.special === "replay") return openPop("replay");
       if (t.special === "composition") return openPop("compositions");
+      if (t.id === "virtualset") {
+        const base = $("add-name")?.value.trim() || ("ESTÚDIO VIRTUAL " + (st.scenes.length + 1));
+        const packId = st.vsPack || "01";
+        const pack = STUDIO_PACKS.find(p => p.id === packId) || STUDIO_PACKS[0];
+        const tr1 = $("add-vs-tr1")?.value || "";
+        const tr2 = $("add-vs-tr2")?.value || "__pack_bg__";
+        const tr3 = $("add-vs-tr3")?.value || "";
+        const tr4 = $("add-vs-tr4")?.value || "__pack_fg__";
+        creatingInput = true; markInputCreating(true);
+        try {
+          const w = st.video?.baseWidth || 1920, h = st.video?.baseHeight || 1080;
+          await req("CreateScene", { sceneName: base });
+          
+          // Faixa 02: Fundo (Z=-10)
+          if (tr2 === "__pack_bg__") {
+            const bgName = base + " (Fundo 4K)";
+            await req("CreateInput", {
+              sceneName: base,
+              inputName: bgName,
+              inputKind: "image_source",
+              inputSettings: { file: pack.bg }
+            });
+          } else if (tr2) {
+            await req("CreateSceneItem", { sceneName: base, sourceName: tr2 });
+          }
+
+          // Faixa 01: Telão / VT (Z=0)
+          if (tr1) {
+            await req("CreateSceneItem", { sceneName: base, sourceName: tr1 });
+          }
+
+          // Faixa 03: Câmera Apresentador / Chroma (Z=+10)
+          if (tr3) {
+            await req("CreateSceneItem", { sceneName: base, sourceName: tr3 });
+          }
+
+          // Faixa 04: Frente / Bancada (Z=+20)
+          if (tr4 === "__pack_fg__") {
+            const fgName = base + " (Bancada)";
+            await req("CreateInput", {
+              sceneName: base,
+              inputName: fgName,
+              inputKind: "image_source",
+              inputSettings: { file: pack.fg }
+            });
+          } else if (tr4) {
+            await req("CreateSceneItem", { sceneName: base, sourceName: tr4 });
+          }
+
+          toast('Estúdio Virtual "' + base + '" criado com sucesso!');
+          await finishInputPanel();
+          return;
+        } finally {
+          creatingInput = false; markInputCreating(false);
+        }
+      }
+      if (t.id === "camera") {
+        const base = $("add-name")?.value.trim() || addDefaultName(t);
+        const devId = $("add-cam-device")?.value || "";
+        const resVal = $("add-cam-res")?.value || "default";
+        const fpsVal = $("add-cam-fps")?.value || "default";
+        const camActive = $("add-cam-active")?.checked ?? true;
+        creatingInput = true; markInputCreating(true);
+        try {
+          const w = st.video?.baseWidth || 1920, h = st.video?.baseHeight || 1080;
+          await req("CreateScene", { sceneName: base });
+          const sourceName = base + " (fonte)";
+          const inputSettings = { active: camActive };
+          if (devId) inputSettings.video_device_id = devId;
+          if (resVal !== "default") { inputSettings.res_type = 1; inputSettings.resolution = resVal; }
+          if (fpsVal !== "default") { inputSettings.frame_rate = fpsVal; }
+          const { sceneItemId } = await req("CreateInput", { sceneName: base, inputName: sourceName, inputKind: resolveKind("dshow_input") || "dshow_input", inputSettings });
+          await tryReq("SetSceneItemTransform", { sceneName: base, sceneItemId, sceneItemTransform: { positionX: 0, positionY: 0, boundsType: "OBS_BOUNDS_SCALE_INNER", boundsWidth: w, boundsHeight: h, boundsAlignment: 0 } });
+          toast('Câmera "' + base + '" conectada.');
+          await finishInputPanel();
+          return;
+        } finally { creatingInput = false; markInputCreating(false); }
+      }
+      if (t.id === "desktop") {
+        const base = $("add-name")?.value.trim() || ("TELA " + (st.scenes.length + 1));
+        const monVal = $("add-desktop-mon")?.value || "";
+        const cursor = $("add-desktop-cursor")?.checked ?? true;
+        creatingInput = true; markInputCreating(true);
+        try {
+          const w = st.video?.baseWidth || 1920, h = st.video?.baseHeight || 1080;
+          await req("CreateScene", { sceneName: base });
+          const sourceName = base + " (fonte)";
+          const inputSettings = { capture_cursor: cursor };
+          if (monVal) { inputSettings.monitor = monVal; inputSettings.monitor_id = monVal; }
+          const { sceneItemId } = await req("CreateInput", { sceneName: base, inputName: sourceName, inputKind: resolveKind("monitor_capture") || "monitor_capture", inputSettings });
+          await tryReq("SetSceneItemTransform", { sceneName: base, sceneItemId, sceneItemTransform: { positionX: 0, positionY: 0, boundsType: "OBS_BOUNDS_SCALE_INNER", boundsWidth: w, boundsHeight: h, boundsAlignment: 0 } });
+          toast('Captura de tela "' + base + '" adicionada.');
+          await finishInputPanel();
+          return;
+        } finally { creatingInput = false; markInputCreating(false); }
+      }
+      if (t.id === "window") {
+        const base = $("add-name")?.value.trim() || ("JANELA " + (st.scenes.length + 1));
+        const winVal = $("add-window-target")?.value || "";
+        const cursor = $("add-window-cursor")?.checked ?? true;
+        creatingInput = true; markInputCreating(true);
+        try {
+          const w = st.video?.baseWidth || 1920, h = st.video?.baseHeight || 1080;
+          await req("CreateScene", { sceneName: base });
+          const sourceName = base + " (fonte)";
+          const inputSettings = { cursor, window: winVal };
+          const { sceneItemId } = await req("CreateInput", { sceneName: base, inputName: sourceName, inputKind: resolveKind("window_capture") || "window_capture", inputSettings });
+          await tryReq("SetSceneItemTransform", { sceneName: base, sceneItemId, sceneItemTransform: { positionX: 0, positionY: 0, boundsType: "OBS_BOUNDS_SCALE_INNER", boundsWidth: w, boundsHeight: h, boundsAlignment: 0 } });
+          toast('Captura de janela "' + base + '" adicionada.');
+          await finishInputPanel();
+          return;
+        } finally { creatingInput = false; markInputCreating(false); }
+      }
+      if (t.id === "video") {
+        const base = $("add-name")?.value.trim() || ("VÍDEO " + (st.scenes.length + 1));
+        const filePath = $("add-video-file")?.value.trim() || "";
+        const isLoop = $("add-video-loop")?.checked ?? true;
+        const isRestart = $("add-video-restart")?.checked ?? true;
+        creatingInput = true; markInputCreating(true);
+        try {
+          const w = st.video?.baseWidth || 1920, h = st.video?.baseHeight || 1080;
+          await req("CreateScene", { sceneName: base });
+          const sourceName = base + " (fonte)";
+          const inputSettings = { is_local_file: true, local_file: filePath, looping: isLoop, restart_on_activate: isRestart };
+          const { sceneItemId } = await req("CreateInput", { sceneName: base, inputName: sourceName, inputKind: resolveKind("ffmpeg_source") || "ffmpeg_source", inputSettings });
+          await tryReq("SetSceneItemTransform", { sceneName: base, sceneItemId, sceneItemTransform: { positionX: 0, positionY: 0, boundsType: "OBS_BOUNDS_SCALE_INNER", boundsWidth: w, boundsHeight: h, boundsAlignment: 0 } });
+          toast('Vídeo "' + base + '" adicionado.');
+          await finishInputPanel();
+          return;
+        } finally { creatingInput = false; markInputCreating(false); }
+      }
+      if (t.id === "audio") {
+        const base = $("add-name")?.value.trim() || ("ÁUDIO " + (st.scenes.length + 1));
+        const filePath = $("add-audio-file")?.value.trim() || "";
+        const isLoop = $("add-audio-loop")?.checked ?? true;
+        creatingInput = true; markInputCreating(true);
+        try {
+          await req("CreateScene", { sceneName: base });
+          const sourceName = base + " (fonte)";
+          const inputSettings = { is_local_file: true, local_file: filePath, looping: isLoop };
+          await req("CreateInput", { sceneName: base, inputName: sourceName, inputKind: resolveKind("ffmpeg_source") || "ffmpeg_source", inputSettings });
+          toast('Arquivo de áudio "' + base + '" adicionado.');
+          await finishInputPanel();
+          return;
+        } finally { creatingInput = false; markInputCreating(false); }
+      }
+      if (t.id === "image") {
+        const base = $("add-name")?.value.trim() || ("IMAGEM " + (st.scenes.length + 1));
+        const filePath = $("add-image-file")?.value.trim() || "";
+        creatingInput = true; markInputCreating(true);
+        try {
+          const w = st.video?.baseWidth || 1920, h = st.video?.baseHeight || 1080;
+          await req("CreateScene", { sceneName: base });
+          const sourceName = base + " (fonte)";
+          const inputSettings = { file: filePath };
+          const { sceneItemId } = await req("CreateInput", { sceneName: base, inputName: sourceName, inputKind: resolveKind("image_source") || "image_source", inputSettings });
+          await tryReq("SetSceneItemTransform", { sceneName: base, sceneItemId, sceneItemTransform: { positionX: 0, positionY: 0, boundsType: "OBS_BOUNDS_SCALE_INNER", boundsWidth: w, boundsHeight: h, boundsAlignment: 0 } });
+          toast('Imagem "' + base + '" adicionada.');
+          await finishInputPanel();
+          return;
+        } finally { creatingInput = false; markInputCreating(false); }
+      }
+      if (t.id === "audioin") {
+        const base = $("add-name")?.value.trim() || ("MIC " + (st.scenes.length + 1));
+        const devId = $("add-audioin-device")?.value || "default";
+        creatingInput = true; markInputCreating(true);
+        try {
+          await req("CreateScene", { sceneName: base });
+          const sourceName = base + " (fonte)";
+          const inputSettings = { device_id: devId };
+          await req("CreateInput", { sceneName: base, inputName: sourceName, inputKind: resolveKind("wasapi_input_capture") || "wasapi_input_capture", inputSettings });
+          toast('Entrada de áudio "' + base + '" conectada.');
+          await finishInputPanel();
+          return;
+        } finally { creatingInput = false; markInputCreating(false); }
+      }
       const base = $("add-name").value.trim(), n = clamp(Math.round(+$("add-n").value) || 1, 1, 8); if (!base) return toast("Dê um nome para a entrada", true);
       const f = {}; for (const [key] of t.fields || []) f[key] = $("add-f-" + key).value;
       if (t.id === "call") f.callid = callIdOf(f.callid, 0);
@@ -3053,7 +3266,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     }).join("");
     if (st.inputsTab === 'compositions' && !shown().length) { box.innerHTML = '<div class="empty"><b>Nenhuma composição</b><br><button class="b" data-a="pop" data-v="compositions">Criar composição</button></div>'; return; }
     box.innerHTML = shown().map((name) => {
-      const isOut = name === st.program || st.recursiveTally?.program?.includes(name), isPv = st.studio && (name === st.preview || st.recursiveTally?.preview?.includes(name));
+      const isOut = name === st.program || st.recursiveTally?.program?.includes(name), isPv = st.studio && !isOut && name === st.preview;
       const cls = isOut ? "out" : isPv ? "pv" : "";
       const tileCls = isOut ? " is-out" : isPv ? " is-pv" : "";
       const tag = st.tags[name], v = esc(name);
@@ -4047,8 +4260,137 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       const groups = [...new Set(TYPES.map((x) => x.group))];
       const typeButtons = groups.map((g) => `<div class="type-group"><div class="type-title">${esc(g)}</div>${TYPES.filter((x) => x.group === g).map((x) => `<button class="${x.id === t.id ? "on" : ""}${x.kind && !resolveKind(x.kind) ? " off" : ""}" data-a="addtype" data-v="${x.id}" title="${esc(x.label)}${x.kind && !resolveKind(x.kind) ? " — não instalado neste motor" : ""}"><span class="ico">${x.icon}</span><span class="lbl">${esc(x.label)}</span></button>`).join("")}</div>`).join("");
       p.innerHTML = `<h3>Adicionar entrada</h3><button type="button" class="add-close" data-a="close" title="Fechar sem adicionar" aria-label="Fechar">✕</button><div class="add"><div class="types">${typeButtons}</div>
-        <div class="form">${t.special ? "" : `<label>Nome<input id="add-name" maxlength="40" value="${esc(name)}"${st.addName ? ` data-edited="1"` : ""}></label>`}${t.id === "title" ? gcPicker() : ""}${(t.fields || []).map(([key, label, def, type]) => `<label>${label}<input id="add-f-${key}" type="${type}" value="${esc(typeof def === "function" ? def() : def)}"></label>`).join("")}
-        <p>${t.hint}${t.kind && !resolveKind(t.kind) ? " <b>Não instalado neste motor.</b>" : ""}</p>${t.special ? "" : `<label class="inl">Número inicial<input id="add-n" type="number" min="1" max="8" value="1"></label>`}
+        <div class="form">
+        ${t.special && t.id !== "virtualset" ? "" : `<label>Nome da entrada<input id="add-name" maxlength="40" value="${esc(name)}"${st.addName ? ` data-edited="1"` : ""}></label>`}
+        ${t.id === "camera" ? `
+          <label>Dispositivo de Vídeo (Câmera / Placa de Captura / NDI)
+            <select id="add-cam-device">
+              ${st.videoDevices && st.videoDevices.length ? st.videoDevices.map(d => `<option value="${esc(d.value)}">${esc(d.name)}</option>`).join("") : '<option value="">(Detectando dispositivos... ou Padrão)</option>'}
+            </select>
+          </label>
+          <div class="two" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <label>Resolução
+              <select id="add-cam-res">
+                <option value="default">Padrão do dispositivo</option>
+                <option value="1920x1080">1920×1080 (Full HD)</option>
+                <option value="1280x720">1280×720 (HD)</option>
+                <option value="3840x2160">3840×2160 (4K UHD)</option>
+                <option value="720x480">720×480 (SD / NTSC)</option>
+              </select>
+            </label>
+            <label>Taxa de Quadros (FPS)
+              <select id="add-cam-fps">
+                <option value="default">Padrão do dispositivo</option>
+                <option value="60000/1000">60 FPS</option>
+                <option value="59940/1000">59.94 FPS</option>
+                <option value="30000/1000">30 FPS</option>
+                <option value="29970/1000">29.97 FPS</option>
+              </select>
+            </label>
+          </div>
+          <label class="chk" style="margin-top:6px;display:flex;align-items:center;gap:6px;"><input id="add-cam-active" type="checkbox" checked> Ativar câmera imediatamente</label>
+        ` : ""}
+        ${t.id === "desktop" ? `
+          <label>Monitor / Tela a Capturar
+            <select id="add-desktop-mon">
+              ${st.monitors && st.monitors.length ? st.monitors.map(m => `<option value="${esc(m.value)}">${esc(m.name)}</option>`).join("") : '<option value="0">Monitor 1 (Principal)</option><option value="1">Monitor 2</option>'}
+            </select>
+          </label>
+          <label class="chk" style="margin-top:6px;display:flex;align-items:center;gap:6px;"><input id="add-desktop-cursor" type="checkbox" checked> Capturar cursor do mouse</label>
+        ` : ""}
+        ${t.id === "window" ? `
+          <label>Janela Aberta no Windows
+            <select id="add-window-target">
+              ${st.windows && st.windows.length ? st.windows.map(w => `<option value="${esc(w.value)}">${esc(w.name)}</option>`).join("") : '<option value="">(Carregando janelas ativas...)</option>'}
+            </select>
+          </label>
+          <label class="chk" style="margin-top:6px;display:flex;align-items:center;gap:6px;"><input id="add-window-cursor" type="checkbox" checked> Capturar cursor do mouse</label>
+        ` : ""}
+        ${t.id === "video" ? `
+          <label>Arquivo de Vídeo (MP4, MKV, MOV, TS, AVI)
+            <div style="display:flex;gap:6px;">
+              <input id="add-video-file" type="text" placeholder="Caminho do arquivo..." style="flex:1;">
+              <input id="add-video-file-picker" type="file" accept="video/*" style="display:none;" onchange="if(this.files[0]) { $('add-video-file').value = this.files[0].path || this.files[0].name; }">
+              <button type="button" class="b" onclick="$('add-video-file-picker').click()">📂 Procurar...</button>
+            </div>
+          </label>
+          <div style="display:flex;gap:16px;margin-top:6px;">
+            <label class="chk" style="display:flex;align-items:center;gap:6px;"><input id="add-video-loop" type="checkbox" checked> Repetir em Loop</label>
+            <label class="chk" style="display:flex;align-items:center;gap:6px;"><input id="add-video-restart" type="checkbox" checked> Reiniciar ao ir para o ar</label>
+          </div>
+        ` : ""}
+        ${t.id === "audio" ? `
+          <label>Arquivo de Áudio (MP3, WAV, AAC, FLAC)
+            <div style="display:flex;gap:6px;">
+              <input id="add-audio-file" type="text" placeholder="Caminho do arquivo de áudio..." style="flex:1;">
+              <input id="add-audio-file-picker" type="file" accept="audio/*" style="display:none;" onchange="if(this.files[0]) { $('add-audio-file').value = this.files[0].path || this.files[0].name; }">
+              <button type="button" class="b" onclick="$('add-audio-file-picker').click()">📂 Procurar...</button>
+            </div>
+          </label>
+          <label class="chk" style="margin-top:6px;display:flex;align-items:center;gap:6px;"><input id="add-audio-loop" type="checkbox" checked> Repetir trilha em Loop</label>
+        ` : ""}
+        ${t.id === "image" ? `
+          <label>Arquivo de Imagem (PNG, JPG, WEBP, BMP)
+            <div style="display:flex;gap:6px;">
+              <input id="add-image-file" type="text" placeholder="Caminho da imagem..." style="flex:1;">
+              <input id="add-image-file-picker" type="file" accept="image/*" style="display:none;" onchange="if(this.files[0]) { $('add-image-file').value = this.files[0].path || this.files[0].name; }">
+              <button type="button" class="b" onclick="$('add-image-file-picker').click()">📂 Procurar...</button>
+            </div>
+          </label>
+        ` : ""}
+        ${t.id === "audioin" ? `
+          <label>Dispositivo de Áudio / Microfone (WASAPI)
+            <select id="add-audioin-device">
+              ${st.audioDevices && st.audioDevices.length ? st.audioDevices.map(a => `<option value="${esc(a.value)}">${esc(a.name)}</option>`).join("") : '<option value="default">Padrão do Windows</option>'}
+            </select>
+          </label>
+        ` : ""}
+        ${t.id === "virtualset" ? `
+          <label>Pack Oficial do Cenário (4K)
+            <select id="add-vs-pack" onchange="st.vsPack=this.value;renderPop();">
+              ${STUDIO_PACKS.map(p => `<option value="${p.id}"${(st.vsPack||"01")===p.id?" selected":""}>${esc(p.name)}</option>`).join("")}
+            </select>
+          </label>
+          <div style="background:#161b22;border:1px solid #30363d;border-radius:6px;padding:12px;margin:8px 0;display:flex;flex-direction:column;gap:10px;">
+            <div style="font-weight:700;font-size:11.5px;color:#58a6ff;letter-spacing:0.5px;">MAPEAMENTO DAS 4 FAIXAS BROADCAST</div>
+            
+            <label style="font-size:11px;">Faixa 01 · Telão / VT (Conteúdo do monitor em Z=0)
+              <select id="add-vs-tr1">
+                <option value="">Nenhum (Telão desligado)</option>
+                ${st.scenes.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("")}
+              </select>
+            </label>
+
+            <label style="font-size:11px;">Faixa 02 · Fundo / Background (Cenário 4K)
+              <select id="add-vs-tr2">
+                <option value="__pack_bg__">Fundo Oficial do Pack (Imagem 4K nativa)</option>
+                ${st.scenes.map(s => `<option value="${esc(s)}">${esc(s)} (Entrada da mesa)</option>`).join("")}
+              </select>
+            </label>
+
+            <label style="font-size:11px;">Faixa 03 · Câmera Apresentador (Chroma Key)
+              <select id="add-vs-tr3">
+                <option value="">Selecione a câmera...</option>
+                ${st.scenes.map(s => `<option value="${esc(s)}"${s.startsWith("CAM") ? " selected" : ""}>${esc(s)}</option>`).join("")}
+              </select>
+            </label>
+
+            <label style="font-size:11px;">Faixa 04 · Frente / Bancada (Foreground com transparência)
+              <select id="add-vs-tr4">
+                <option value="__pack_fg__">Bancada Oficial do Pack (Transparência Alfa)</option>
+                <option value="">Nenhuma (Sem bancada frontal)</option>
+                ${st.scenes.map(s => `<option value="${esc(s)}">${esc(s)} (Entrada da mesa)</option>`).join("")}
+              </select>
+            </label>
+          </div>
+          <div style="margin-bottom:8px">
+            <button type="button" class="b" onclick="rpDockOpenWindow('/estudio')" style="width:100%;font-size:11px;font-weight:600">📐 Abrir Estúdio Virtual Completo (PTZ, Ângulos e Zoom)</button>
+          </div>
+        ` : ""}
+        ${t.id === "title" ? gcPicker() : ""}
+        ${(t.fields || []).map(([key, label, def, type]) => `<label>${label}<input id="add-f-${key}" type="${type}" value="${esc(typeof def === "function" ? def() : def)}"></label>`).join("")}
+        <p>${t.hint}${t.kind && !resolveKind(t.kind) ? " <b>Não instalado neste motor.</b>" : ""}</p>
+        ${t.special ? "" : `<label class="inl">Número inicial<input id="add-n" type="number" min="1" max="8" value="1"></label>`}
         <div id="add-preview" class="add-preview" aria-live="polite"></div></div></div>
         <div class="row end"><button class="b on" data-a="add"${t.kind && !resolveKind(t.kind) ? " disabled" : ""}>Adicionar entrada</button><button class="b" data-a="close">Cancelar</button></div>`;
       refreshAddPreview();
@@ -4359,7 +4701,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     }
   }
 
-  const openPop = (id, arg) => { if(independentEditors.has(id)&&new URLSearchParams(location.search).get('pop')!==id){closePop();run(launchPanel(id,arg));return;} if (st.pop === id && st.popArg === arg) return closePop(); st.pop = id; st.popArg = arg; renderPop(); ($("add-name") || $("rn-name") || $("sa-name"))?.select(); if (["recset", "streamset", "config"].includes(id)) { st.cfg = null; renderPop(); A.cfgload(); } if (id === "presets") A.presetload(); if (id === "stats") A.statsload(); if (id === "clocks") { st.clocks = null; A.clocksload(); } if (id === "streamset") { st.destTab = 0; syncDest(); } if (id === "call") syncRet(); if (id === "layers") { st.layers = null; A.layersload(); } if (id === "audioset") { st.aset = null; st.asetTab = "geral"; renderPop(); A.asetload(); } if (id === "ext") A.extload(); };
+  const openPop = (id, arg) => { if(independentEditors.has(id)&&new URLSearchParams(location.search).get('pop')!==id){closePop();run(launchPanel(id,arg));return;} if (st.pop === id && st.popArg === arg) return closePop(); st.pop = id; st.popArg = arg; renderPop(); ($("add-name") || $("rn-name") || $("sa-name"))?.select(); if (["recset", "streamset", "config"].includes(id)) { st.cfg = null; renderPop(); A.cfgload(); } if (id === "presets") A.presetload(); if (id === "stats") A.statsload(); if (id === "clocks") { st.clocks = null; A.clocksload(); } if (id === "streamset") { st.destTab = 0; syncDest(); } if (id === "call") syncRet(); if (id === "layers") { st.layers = null; A.layersload(); } if (id === "audioset") { st.aset = null; st.asetTab = "geral"; renderPop(); A.asetload(); } if (id === "ext") A.extload(); if (id === "add") fetchVideoDevices().then(() => { if (st.pop === 'add' && st.addType === 'camera') renderPop(); }); };
   const closePop = () => { const p = $("pop"); st.pop = null; p.className = "pop"; p.style.left = p.style.top = p.style.right = p.style.bottom = ""; };
   // Botões estáticos da topbar marcados com data-modulo: escondidos quando o módulo
   // correspondente está desligado em st.modulos. Nunca bloqueia clique (fail-open já
@@ -4759,7 +5101,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     for (const tile of tiles) {
       const name = tile.dataset.s;
       const isOut = name === st.program || !!st.recursiveTally?.program?.includes(name);
-      const isPv = !isOut && st.studio && (name === st.preview || !!st.recursiveTally?.preview?.includes(name));
+      const isPv = !isOut && st.studio && name === st.preview;
       tile.classList.toggle('is-out', isOut); tile.classList.toggle('is-pv', !!isPv);
       const title = tile.querySelector('.tt');
       if (title) {

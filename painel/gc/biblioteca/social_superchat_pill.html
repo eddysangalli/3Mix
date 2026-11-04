@@ -158,7 +158,26 @@
   };
 
   connectWs();
+
+  function play(data) {
+    if (data && (data.user || data.author || data.amount)) {
+      showSuperchat(data);
+    } else {
+      pill.classList.add('visible');
+    }
+  }
+  function stop() {
+    pill.classList.remove('visible');
+  }
+  function update(data) {
+    if (!data) return;
+    if (data.user || data.author) author.textContent = data.user || data.author;
+    if (data.amount) amount.textContent = data.amount;
+    if (data.message) message.textContent = data.message;
+  }
+  window.GC = { play, stop, update };
 </script>
+<script src="../gc.js"></script>
 </body>
 </html>
 

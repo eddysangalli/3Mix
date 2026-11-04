@@ -1,0 +1,68 @@
+{
+  "title": "PLACAR CENTRAL",
+  "sourceFormat": "vMix GT Title (.gtzip)",
+  "resolution": {
+    "width": 1920,
+    "height": 1080
+  },
+  "thumbnail": "thumbnail.png",
+  "entrypoint": "index.html",
+  "layersCount": 1,
+  "storyboards": [
+    {
+      "type": "TransitionIn",
+      "count": 1
+    },
+    {
+      "type": "TransitionOut",
+      "count": 0
+    }
+  ],
+  "fields": [
+    {
+      "name": "NOME CASA",
+      "type": "TextBlock",
+      "default": "MANCHESTER CITY",
+      "font": "StratumNo1",
+      "size": 30
+    },
+    {
+      "name": "NOME FORA",
+      "type": "TextBlock",
+      "default": "PARIS SAINT GERMAN",
+      "font": "StratumNo1",
+      "size": 30
+    },
+    {
+      "name": "SCORE CASA",
+      "type": "TextBlock",
+      "default": "01",
+      "font": "StratumNo1",
+      "size": 96
+    },
+    {
+      "name": "SCORE FORA",
+      "type": "TextBlock",
+      "default": "01",
+      "font": "StratumNo1",
+      "size": 96
+    },
+    {
+      "name": "INTERVALO",
+      "type": "TextBlock",
+      "default": "INTERVALO",
+      "font": "StratumNo1",
+      "size": 30
+    },
+    {
+      "name": "ESCUDO CASA",
+      "type": "Image",
+      "default": "3de6dee3-27a7-474f-b178-7b01b674b8bd\\Manchester_City_Football_Club.png"
+    },
+    {
+      "name": "ESCUDO FOFRA",
+      "type": "Image",
+      "default": "035c8d1c-26d6-4696-8df9-fe9c0dd9a4da\\PSG.png"
+    }
+  ]
+}

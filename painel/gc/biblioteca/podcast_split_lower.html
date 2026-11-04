@@ -131,7 +131,24 @@
     if (f.nameGuest) document.getElementById('name-guest').textContent = f.nameGuest;
     if (f.handleGuest) document.getElementById('handle-guest').textContent = f.handleGuest;
   };
+
+  function play(data) {
+    if (data) update(data);
+    document.querySelectorAll('.speaker-card').forEach(el => el.classList.add('visible'));
+  }
+  function stop() {
+    document.querySelectorAll('.speaker-card').forEach(el => el.classList.remove('visible'));
+  }
+  function update(f) {
+    if (!f) return;
+    if (f.nameHost) document.getElementById('name-host').textContent = f.nameHost;
+    if (f.handleHost) document.getElementById('handle-host').textContent = f.handleHost;
+    if (f.nameGuest) document.getElementById('name-guest').textContent = f.nameGuest;
+    if (f.handleGuest) document.getElementById('handle-guest').textContent = f.handleGuest;
+  }
+  window.GC = { play, stop, update };
 </script>
+<script src="../gc.js"></script>
 </body>
 </html>
 

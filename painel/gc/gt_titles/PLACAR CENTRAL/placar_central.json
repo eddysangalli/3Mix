@@ -1,0 +1,52 @@
+{
+  "id": "gt_placar_central",
+  "name": "PLACAR CENTRAL",
+  "collection": "Importados",
+  "category": "Importados",
+  "htmlFile": "index.html",
+  "thumbnail": "thumbnail.png",
+  "fields": [
+    {
+      "key": "NOME CASA",
+      "label": "NOME CASA",
+      "type": "text",
+      "default": "MANCHESTER CITY"
+    },
+    {
+      "key": "NOME FORA",
+      "label": "NOME FORA",
+      "type": "text",
+      "default": "PARIS SAINT GERMAN"
+    },
+    {
+      "key": "SCORE CASA",
+      "label": "SCORE CASA",
+      "type": "text",
+      "default": "01"
+    },
+    {
+      "key": "SCORE FORA",
+      "label": "SCORE FORA",
+      "type": "text",
+      "default": "01"
+    },
+    {
+      "key": "INTERVALO",
+      "label": "INTERVALO",
+      "type": "text",
+      "default": "INTERVALO"
+    },
+    {
+      "key": "ESCUDO CASA",
+      "label": "ESCUDO CASA",
+      "type": "text",
+      "default": "Manchester_City_Football_Club.png"
+    },
+    {
+      "key": "ESCUDO FOFRA",
+      "label": "ESCUDO FOFRA",
+      "type": "text",
+      "default": "PSG.png"
+    }
+  ]
+}

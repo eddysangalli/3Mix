@@ -169,7 +169,7 @@ window.GC_CATALOG = [
   "name": "Feed de Chat Broadcast (YouTube/Twitch/TikTok)",
   "collection": "Eventos",
   "category": "Social",
-  "thumbnail": "thumbnails/social_lowerthird_card.png",
+  "thumbnail": "biblioteca/thumbnails/social_lowerthird_card.png",
   "file": "biblioteca/social_chat_stream.html",
   "fields": [
    {
@@ -203,7 +203,7 @@ window.GC_CATALOG = [
   "name": "Alerta de SuperChat & PIX",
   "collection": "Eventos",
   "category": "Social",
-  "thumbnail": "thumbnails/social_lowerthird_card.png",
+  "thumbnail": "biblioteca/thumbnails/social_lowerthird_card.png",
   "file": "biblioteca/social_superchat_pill.html",
   "fields": [
    {
@@ -231,7 +231,7 @@ window.GC_CATALOG = [
   "name": "Ticker Contínuo CNN / GloboNews com Relógio",
   "collection": "Jornalismo",
   "category": "Notícias",
-  "thumbnail": "thumbnails/social_lowerthird_ticker.png",
+  "thumbnail": "biblioteca/thumbnails/social_lowerthird_ticker.png",
   "file": "biblioteca/news_ticker_broadcast.html",
   "fields": [
    {
@@ -259,7 +259,7 @@ window.GC_CATALOG = [
   "name": "Placar Esportivo Premier League / FIFA",
   "collection": "Esportes",
   "category": "Placares",
-  "thumbnail": "thumbnails/scoreboard_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/scoreboard_horizontal.png",
   "file": "biblioteca/sports_scoreboard_pro.html",
   "fields": [
    {
@@ -305,7 +305,7 @@ window.GC_CATALOG = [
   "name": "Lower Third Duplo Podcast Host & Convidado",
   "collection": "Eventos",
   "category": "Entrevistas",
-  "thumbnail": "thumbnails/podcast_host_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/podcast_host_horizontal.png",
   "file": "biblioteca/podcast_split_lower.html",
   "fields": [
    {

@@ -149,7 +149,34 @@
     if (f.minutes !== undefined) seconds = f.minutes * 60;
     if (f.extra) document.getElementById('game-extra').textContent = f.extra;
   };
+
+  function play(data) {
+    if (data) update(data);
+    const box = document.getElementById('scoreboard');
+    if (box) box.style.opacity = '1';
+  }
+  function stop() {
+    const box = document.getElementById('scoreboard');
+    if (box) box.style.opacity = '0';
+  }
+  function update(f) {
+    if (!f) return;
+    if (f.teamHome) {
+      document.getElementById('name-home').textContent = f.teamHome;
+      document.getElementById('badge-home').textContent = f.teamHome.slice(0, 3).toUpperCase();
+    }
+    if (f.teamAway) {
+      document.getElementById('name-away').textContent = f.teamAway;
+      document.getElementById('badge-away').textContent = f.teamAway.slice(0, 3).toUpperCase();
+    }
+    if (f.scoreHome !== undefined) document.getElementById('score-home').textContent = f.scoreHome;
+    if (f.scoreAway !== undefined) document.getElementById('score-away').textContent = f.scoreAway;
+    if (f.minutes !== undefined) seconds = f.minutes * 60;
+    if (f.extra) document.getElementById('game-extra').textContent = f.extra;
+  }
+  window.GC = { play, stop, update };
 </script>
+<script src="../gc.js"></script>
 </body>
 </html>
 
