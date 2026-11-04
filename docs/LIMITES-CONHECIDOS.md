@@ -249,3 +249,10 @@ Auditado e validado em 04/11/2026 com suíte de testes E2E contra o motor nativo
 ## 9. O que este documento não afirma
 
 Seguindo a mesma prática de honestidade do levantamento de origem: este documento não afirma que os itens fora destas listas estão aprovados, não afirma que a interface nova está funcional no motor real do operador (ela está visualmente pronta, mas funcionalmente parcial, segundo `LEVANTAMENTO-BETA-20261030.md` seção 11), e não substitui os recibos de QA específicos já existentes em `qa-portatil/` e pastas `qa-*/` do projeto — cada um vale pelo escopo que declara.
+
+
+## Gate de distribuição e homologação vMix 30
+
+As missões 7–11 de PEDIDO-COMUNIDADE-ALPHA.md exigem confirmação da capacidade no pacote instalado. Não anunciar 10 bits, 16 canais, modelos AJA ou MKV NDI com metadados por existência de opção genérica. Código/compilação/mock e teste físico são estados distintos. Sem evidência de ensaio por modelo, driver e modo, não marcar Homologado.
+
+Inclusão de alterações desta auditoria no instalador/runtime ainda não verificada: nenhum pacote novo está sendo declarado distribuído por esta nota. Antes de enviar: versão/hash, dependências e licenças, manifesto de arquivos, compatibilidade de projetos, backup/rollback e coleta de logs sanitizados. Replay de 16 câmeras e 3Mix IO ficam fora do escopo.

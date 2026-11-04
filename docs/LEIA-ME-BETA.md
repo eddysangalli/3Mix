@@ -150,3 +150,10 @@ Use o desinstalador incluído na pasta instalada. Ele:
 - [`LIMITES-CONHECIDOS.md`](LIMITES-CONHECIDOS.md) — o que não funciona ou não foi provado, com fontes.
 - [`SOLICITAR-SUPORTE.md`](SOLICITAR-SUPORTE.md) — como gerar o pacote de diagnóstico.
 - [`CHANGELOG.md`](CHANGELOG.md) — novidades de cada versão.
+
+
+## Gate de distribuição e homologação vMix 30
+
+As missões 7–11 de PEDIDO-COMUNIDADE-ALPHA.md exigem confirmação da capacidade no pacote instalado. Não anunciar 10 bits, 16 canais, modelos AJA ou MKV NDI com metadados por existência de opção genérica. Código/compilação/mock e teste físico são estados distintos. Sem evidência de ensaio por modelo, driver e modo, não marcar Homologado.
+
+Inclusão de alterações desta auditoria no instalador/runtime ainda não verificada: nenhum pacote novo está sendo declarado distribuído por esta nota. Antes de enviar: versão/hash, dependências e licenças, manifesto de arquivos, compatibilidade de projetos, backup/rollback e coleta de logs sanitizados. Replay de 16 câmeras e 3Mix IO ficam fora do escopo.

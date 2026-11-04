@@ -1,6 +1,6 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
-import { join, basename, extname } from 'node:path';
+import { join, basename, extname, resolve } from 'node:path';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
@@ -421,7 +421,8 @@ export class SlideEngine {
 
     const safeTitle = String(title).replace(/[&<>"']/g, '');
     const safeLines = lines.map(l => String(l).replace(/[&<>"']/g, '')).slice(0, 5);
-    const safeFont = fontFamily.includes(',') ? fontFamily : `"${fontFamily}", "Segoe UI", Arial, sans-serif`;
+    const cleanFont = String(fontFamily || 'Segoe UI, Arial, sans-serif').replace(/["'\\]/g, '');
+    const safeFont = `${cleanFont}, Arial, sans-serif`;
 
     // Incorpora imagem local em Base64 para total independência de arquivo
     let imageSvg = '';
@@ -490,7 +491,7 @@ export class SlideEngine {
         bulletsSvg = animationSteps.map((b, idx) => {
           const isVisible = currentStep >= b.step;
           const effectClass = b.effect === 'fly' ? 'anim-fly' : (b.effect === 'zoom' ? 'anim-zoom' : 'anim-fade');
-          return `<g class="anim-step ${effectClass} ${isVisible ? 'anim-visible' : 'anim-hidden'}" data-anim-step="${b.step}" transform="translate(${aspect === '4:3' ? 80 : 100}, ${320 + idx * 75})">
+          return `<g class="anim-step ${effectClass} ${isVisible ? 'anim-visible' : 'anim-hidden'}" data-anim-step="${b.step}" opacity="${isVisible ? 1 : 0}" ${isVisible ? '' : 'display="none"'} transform="translate(${aspect === '4:3' ? 80 : 100}, ${320 + idx * 75})">
             <circle cx="8" cy="-10" r="5" fill="#38bdf8"/>
             <text x="28" y="0" font-family=${JSON.stringify(safeFont)} font-size="${aspect === '4:3' ? 34 : 36}" fill="#cbd5e1">${b.text}</text>
           </g>`;
@@ -591,9 +592,10 @@ export class SlideEngine {
     const slide = deck.slides[deck.currentSlide - 1];
     if (slide && this.p?.req) {
       try {
-        const localFilePath = slide.renderedPath;
+        const localFilePath = resolve(slide.renderedPath);
+        const fileName = basename(slide.renderedPath);
         const apiPort = process.env.FREEMIX_API_PORT ? Number(process.env.FREEMIX_API_PORT) : 18188;
-        const slideUrl = `http://localhost:${apiPort}/api/slides/media/${deck.id}/slide_${deck.currentSlide}.svg`;
+        const slideUrl = `http://localhost:${apiPort}/api/slides/media/${deck.id}/${fileName}?t=${Date.now()}`;
         const browserSettings = {
           is_local_file: true,
           local_file: localFilePath,
