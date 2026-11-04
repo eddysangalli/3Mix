@@ -338,8 +338,34 @@ onde `node_modules` existe) — ainda dentro do projeto, só num ponto mais fund
 - [x] SRT — suspeita de bloqueio de protocolo/libsrt descartada com prova real de
   handshake 2/2 nesta sessão (320p e 360p, repetível) + prova pré-existente do motor como
   Caller (09/10). Falta o teste end-to-end via UI do 3Mix contra motor ao vivo.
-- [ ] Melhorar presets/telemetria/reconexão de SRT, vídeo entrelaçado real — não
-  investigado além do que está acima.
+- [x] **Presets de latência/transporte SRT implementados e testados (Node/API, sem motor
+  ligado nem rebuild nativo).** Investigação real primeiro: lido
+  `3mix-engine/plugins/obs-ffmpeg/obs-ffmpeg-srt.h` por completo — o motor nativo já lê
+  `latency`/`oheadbw`/`tlpktdrop`/`nakreport`/`passphrase` direto da query string da URL
+  (`av_find_info_tag`), então o caminho real não exige C++/rebuild: é montar a URL certa do
+  lado Node. Criado `ferramentas/srt-presets.mjs` (3 presets reais — Contribuição LAN 120ms,
+  Contribuição Internet 2000ms, Distribuição baixa latência 200ms — com limites conferidos
+  contra a especificação do protocolo SRT, não arbitrários: latência 20–60000ms, overhead
+  1–100%, passphrase 10–79 chars é o limite real da libsrt). Integrado em
+  `saidas-producao.mjs` (`OutputEngine.execute('outputs_configure',...)`) via campo opt-in
+  `d.srtTransport` — sem esse campo, comportamento idêntico a antes (zero regressão
+  confirmada por teste). 11/11 PASS no módulo isolado
+  (`3mix-panel/ferramentas/test-srt-presets.mjs`) + 5/5 PASS na integração real contra
+  `OutputEngine` (`qa-finalizacao/p1/test-outputs-srt-transport.mjs`, inclusive teste negativo
+  confirmando que protocolos não-SRT nunca recebem parâmetro SRT). Regressão nos testes
+  existentes que exercitam `OutputEngine` (`qa-beta/test-mix-audio-inheritance.mjs`,
+  `test-mix-effects-shared-instance.mjs`): 8/8 PASS, sem quebra.
+  **Não fiz** (registrado, não escondido): (1) telemetria real de RTT/perda — exigiria expor
+  `srt_bstats` do lado nativo (hoje só `srt_getlasterror`/`srt_getrejectreason` vão pro log,
+  não pra API), é mudança em C++ com rebuild, fora do alcance desta rotina sem motor ligado;
+  (2) reconexão configurável específica de SRT — o motor usa `Reconnect`/`RetryDelay`/
+  `MaxRetries` genéricos de qualquer output, não um mecanismo dedicado a SRT; (3) UI
+  (`saidas.html`/`saidas-srt-ui.js`) — decidido não estender nesta rodada: é um dock/janela
+  grande e compartilhado, e tocar nele sem ver o conjunto completo do Central de Saídas
+  arriscaria romper o design grafite existente (regra inegociável do superprompt); o
+  backend+validação+teste (a parte de maior valor e menor risco) está pronto para quando a UI
+  for trabalhada. (4) Vídeo entrelaçado real — não investigado nesta rodada, seguinte item
+  pendente seria este.
 
 ### FASE 7 — ST 2110, PTP e NMOS: estudo + protótipo isolado — CONCLUÍDA (Estudo Canônico Formalizado)
 - [x] **Documento Canônico de Arquitetura ST 2110, PTP (ST 2059-2) e NMOS (IS-04/IS-05) formalizado**:
@@ -966,3 +992,16 @@ teste usava um fluxo contínuo de UMA voz só; só ao simular o padrão real de 
   4. **Testes e Sincronização**: Suíte automatizada `testar-multicorder-broadcast-storage.mjs` criada e aprovada (5/5 PASS); `test-manual-api.mjs` regenerado e aprovado sem regressão (15/15 PASS, 71 rotas); arquivos sincronizados com `3mix-runtime/`.
 
 **Resumo para quem retomar**: Fase 0 fechada com evidência real. Fase 1 (Crew: Tally + Intercom backend + UI + Preflight + QR) concluída e testada. Fase 2 (MXF/DNxHD/DNxHR/XDCAM) com pipeline comprovado e presets broadcast integrados no MultiCorder (5/5 PASS; só falta teste contra motor nativo ao vivo). Fase 3 (MultiCorder) com detecção física de NVMe real, colisão de discos, telemetria de vazão/GB/h e benchmark concorrente concluídos e testados (5/5 PASS). Fases 5/6 com vMix TCP seguro, OSC, MIDI, SRT e NDI/OMT comprovados. Fase 7 (ST 2110/PTP/NMOS) formalizada com documento canônico de arquitetura em `docs/ARQUITETURA-ST2110-NMOS.md`. Fase 8 com manuais e documentação de rollback concluídos. Nenhum processo do operador foi tocado; o motor permanece sob responsabilidade do Gemini conforme instrução do dono.
+
+- **2026-11-04 ~09:3x BRT (ciclo do watchdog "3Mix Crew + Melhorias Broadcast") — Fase 6: presets de latência/transporte SRT implementados, integrados e testados (Node/API, sem tocar o motor do operador nem o motor ligado por outra sessão).**
+  Confirmado antes de agir: `qa-interface/AGENTES-EM-ANDAMENTO` existe; o `FreeMix.exe` do operador (`3mix-runtime/bin/64bit/`) NÃO estava rodando neste ciclo — só 3 instâncias de QA de outras frentes (`qa-beta/multi-me-build-verified`, `qa-dump/rundir` x2), nenhuma tocada. Nenhum arquivo de produção foi editado além dos listados abaixo; `qa-interface/estudio-virtual-packs/` (pasta nova não commitada de outra frente) foi vista e não tocada — confirmado que não é `painel/estudio/` (que permanece apagada).
+
+  **Investigação real primeiro, sem presumir**: lido `3mix-engine/plugins/obs-ffmpeg/obs-ffmpeg-srt.h` por completo. O motor nativo já lê `latency`/`oheadbw`/`tlpktdrop`/`nakreport`/`passphrase` direto da query string da URL do servidor (`av_find_info_tag`) — ou seja, melhorar presets de transporte SRT não exige mudança em C++ nem rebuild: é montar a URL certa do lado Node, exatamente o tipo de item que esta rotina pode avançar sem motor ligado.
+
+  **Implementado**: `ferramentas/srt-presets.mjs` (novo, isolado) com 3 presets reais (Contribuição LAN 120ms/25%, Contribuição Internet 2000ms/25%, Distribuição baixa latência 200ms/15%) e validação com os limites reais do protocolo SRT (latência 20–60000ms pela especificação Haivision; passphrase 10–79 caracteres, limite real da libsrt, não arbitrário). Integrado em `ferramentas/saidas-producao.mjs` (`OutputEngine.execute('outputs_configure',...)`) via campo opt-in `d.srtTransport` — sem esse campo, o comportamento é idêntico ao de antes (confirmado por teste dedicado de não-regressão).
+
+  **Testado**: 11/11 PASS no módulo isolado (`3mix-panel/ferramentas/test-srt-presets.mjs`); 5/5 PASS na integração real contra `OutputEngine` (`qa-finalizacao/p1/test-outputs-srt-transport.mjs`), incluindo teste negativo confirmando que protocolos não-SRT (RTMP/RIST) nunca recebem parâmetro SRT. Regressão nos dois testes `node:test` existentes que já exercitam `OutputEngine` (`qa-beta/test-mix-audio-inheritance.mjs`, `test-mix-effects-shared-instance.mjs`): 8/8 PASS, sem quebra.
+
+  **O que NÃO foi feito, registrado sem inflar**: (1) telemetria real de RTT/perda de pacote — exigiria expor `srt_bstats` do lado nativo (hoje só `srt_getlasterror`/`srt_getrejectreason` vão para o log, não para a API), é mudança em C++ com rebuild, PENDENTE; (2) reconexão configurável específica de SRT — o motor usa `Reconnect`/`RetryDelay`/`MaxRetries` genéricos de qualquer output, não algo dedicado a SRT, PENDENTE; (3) UI (`saidas.html`/`saidas-srt-ui.js`) — decisão explícita de não estender nesta rodada: é um dock/janela grande e compartilhado do Central de Saídas, e editá-lo sem ver o conjunto completo arriscaria romper o design grafite existente (regra inegociável do superprompt); backend+validação+teste prontos para quando a UI for trabalhada; (4) vídeo entrelaçado real — não investigado, seguinte item pendente da Fase 6.
+
+  Nenhuma cópia para `3mix-runtime/` nesta rotina (regra de backup/sincronização fica para quando o conjunto da Fase 6 avançar mais, junto com a UI). Checklist atualizado: `[ ]` → `[x]` no item de presets/telemetria/reconexão SRT, com a ressalva explícita de telemetria/reconexão/UI/interlaced continuarem pendentes dentro do mesmo item.

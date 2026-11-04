@@ -1,0 +1,330 @@
+[
+  {
+    "pack": "Pack_01_Jornalismo_e_Atualidades",
+    "alpha_dominantes": [
+      [
+        252,
+        2321313
+      ],
+      [
+        251,
+        157870
+      ],
+      [
+        250,
+        36950
+      ],
+      [
+        253,
+        20583
+      ],
+      [
+        249,
+        16260
+      ],
+      [
+        248,
+        9391
+      ],
+      [
+        1,
+        8741
+      ],
+      [
+        247,
+        6825
+      ]
+    ],
+    "percentual_opaco_na_area_ocupada": 0.079,
+    "classificacao_tecnica": "REQUER RECONSTRUÇÃO",
+    "aprovacao_visual": "NÃO AVALIADA",
+    "nota": "Transparência medida não prova qualidade artística. Não corrigir alfa indiscriminadamente: sombras e vidro podem exigir transparência."
+  },
+  {
+    "pack": "Pack_02_Esportes_e_Placares",
+    "alpha_dominantes": [
+      [
+        252,
+        2373606
+      ],
+      [
+        251,
+        290561
+      ],
+      [
+        250,
+        48465
+      ],
+      [
+        249,
+        16757
+      ],
+      [
+        253,
+        9420
+      ],
+      [
+        248,
+        8284
+      ],
+      [
+        1,
+        7953
+      ],
+      [
+        247,
+        5742
+      ]
+    ],
+    "percentual_opaco_na_area_ocupada": 0.098,
+    "classificacao_tecnica": "REQUER RECONSTRUÇÃO",
+    "aprovacao_visual": "NÃO AVALIADA",
+    "nota": "Transparência medida não prova qualidade artística. Não corrigir alfa indiscriminadamente: sombras e vidro podem exigir transparência."
+  },
+  {
+    "pack": "Pack_03_Podcasts_e_Entrevistas",
+    "alpha_dominantes": [
+      [
+        252,
+        2594238
+      ],
+      [
+        251,
+        261406
+      ],
+      [
+        250,
+        52897
+      ],
+      [
+        249,
+        26961
+      ],
+      [
+        248,
+        15693
+      ],
+      [
+        253,
+        12666
+      ],
+      [
+        247,
+        11317
+      ],
+      [
+        1,
+        8055
+      ]
+    ],
+    "percentual_opaco_na_area_ocupada": 0.116,
+    "classificacao_tecnica": "REQUER RECONSTRUÇÃO",
+    "aprovacao_visual": "NÃO AVALIADA",
+    "nota": "Transparência medida não prova qualidade artística. Não corrigir alfa indiscriminadamente: sombras e vidro podem exigir transparência."
+  },
+  {
+    "pack": "Pack_04_Eleicoes_e_Politica",
+    "alpha_dominantes": [
+      [
+        252,
+        2321313
+      ],
+      [
+        251,
+        157870
+      ],
+      [
+        250,
+        36950
+      ],
+      [
+        253,
+        20583
+      ],
+      [
+        249,
+        16260
+      ],
+      [
+        248,
+        9391
+      ],
+      [
+        1,
+        8741
+      ],
+      [
+        247,
+        6825
+      ]
+    ],
+    "percentual_opaco_na_area_ocupada": 0.079,
+    "classificacao_tecnica": "REQUER RECONSTRUÇÃO",
+    "aprovacao_visual": "NÃO AVALIADA",
+    "nota": "Transparência medida não prova qualidade artística. Não corrigir alfa indiscriminadamente: sombras e vidro podem exigir transparência."
+  },
+  {
+    "pack": "Pack_05_Negocios_e_Economia",
+    "alpha_dominantes": [
+      [
+        252,
+        2373606
+      ],
+      [
+        251,
+        290561
+      ],
+      [
+        250,
+        48465
+      ],
+      [
+        249,
+        16757
+      ],
+      [
+        253,
+        9420
+      ],
+      [
+        248,
+        8284
+      ],
+      [
+        1,
+        7953
+      ],
+      [
+        247,
+        5742
+      ]
+    ],
+    "percentual_opaco_na_area_ocupada": 0.098,
+    "classificacao_tecnica": "REQUER RECONSTRUÇÃO",
+    "aprovacao_visual": "NÃO AVALIADA",
+    "nota": "Transparência medida não prova qualidade artística. Não corrigir alfa indiscriminadamente: sombras e vidro podem exigir transparência."
+  },
+  {
+    "pack": "Pack_06_Variedades_e_Entretenimento",
+    "alpha_dominantes": [
+      [
+        252,
+        2594238
+      ],
+      [
+        251,
+        261406
+      ],
+      [
+        250,
+        52897
+      ],
+      [
+        249,
+        26961
+      ],
+      [
+        248,
+        15693
+      ],
+      [
+        253,
+        12666
+      ],
+      [
+        247,
+        11317
+      ],
+      [
+        1,
+        8055
+      ]
+    ],
+    "percentual_opaco_na_area_ocupada": 0.116,
+    "classificacao_tecnica": "REQUER RECONSTRUÇÃO",
+    "aprovacao_visual": "NÃO AVALIADA",
+    "nota": "Transparência medida não prova qualidade artística. Não corrigir alfa indiscriminadamente: sombras e vidro podem exigir transparência."
+  },
+  {
+    "pack": "Pack_10_Jornalismo_Meio_Corpo",
+    "alpha_dominantes": [
+      [
+        252,
+        396268
+      ],
+      [
+        251,
+        26158
+      ],
+      [
+        250,
+        5858
+      ],
+      [
+        253,
+        3601
+      ],
+      [
+        249,
+        2574
+      ],
+      [
+        248,
+        1555
+      ],
+      [
+        247,
+        1143
+      ],
+      [
+        246,
+        917
+      ]
+    ],
+    "percentual_opaco_na_area_ocupada": 0.147,
+    "classificacao_tecnica": "REQUER RECONSTRUÇÃO",
+    "aprovacao_visual": "NÃO AVALIADA",
+    "nota": "Transparência medida não prova qualidade artística. Não corrigir alfa indiscriminadamente: sombras e vidro podem exigir transparência."
+  },
+  {
+    "pack": "Pack_11_Entrevistas_Standing_Ambar",
+    "alpha_dominantes": [
+      [
+        252,
+        440807
+      ],
+      [
+        251,
+        30395
+      ],
+      [
+        250,
+        4241
+      ],
+      [
+        253,
+        2080
+      ],
+      [
+        249,
+        1690
+      ],
+      [
+        255,
+        1070
+      ],
+      [
+        248,
+        942
+      ],
+      [
+        247,
+        883
+      ]
+    ],
+    "percentual_opaco_na_area_ocupada": 0.219,
+    "classificacao_tecnica": "REQUER RECONSTRUÇÃO",
+    "aprovacao_visual": "NÃO AVALIADA",
+    "nota": "Transparência medida não prova qualidade artística. Não corrigir alfa indiscriminadamente: sombras e vidro podem exigir transparência."
+  }
+]

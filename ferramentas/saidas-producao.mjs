@@ -5,6 +5,7 @@ import {omtRead,omtStart,omtStop,omtCreateInput} from './omt-producao.mjs';
 import {omtHdrRead,omtHdrExecute} from './omt-hdr-producao.mjs';
 import {srtHdrRead,srtHdrExecute} from './srt-hdr-producao.mjs';
 import {srtDestinationOptions} from './saidas-srt.mjs';
+import {validateSrtTransport,applySrtTransportToServer} from './srt-presets.mjs';
 import {sdiConfig} from './saidas-sdi.mjs';
 import {assertSdrOutputRequest,outputHdrContracts} from './saidas-hdr.mjs';
 import {MultiRTMPAdapter} from './multi-rtmp-adapter.mjs';
@@ -71,7 +72,12 @@ export class OutputEngine {
    const inheritedTrack=inheritedBus==='busA'?1:inheritedBus==='busB'?2:undefined;
    const audioSourceUuid=await this.audioUuid(inheritedUuid??d.audioSourceUuid);if(audioSourceUuid&&!before.audioSourceSelectable)throw Error('Motor sem áudio independente por UUID');
    const width=Number(d.width),height=Number(d.height),bitrate=Number(d.bitrate),audioTrack=inheritedTrack??Number(d.audioTrack);if(![width,height].every(v=>Number.isInteger(v)&&v>=240&&v<=3840&&v%2===0)||!Number.isInteger(bitrate)||bitrate<200||bitrate>50000||![0,1,2].includes(audioTrack))throw Error('Resolução, bitrate ou áudio inválidos');
-    const name=String(d.name||'').trim(),server=String(d.server||'').trim();const protocol=String(d.protocol||'auto');if(!['auto','rtmp','rtmps','srt','rist','hls'].includes(protocol))throw Error('Protocolo inválido');if(!name||name.length>80||server&&!/^(rtmps?|srt|rist|https?):\/\/[^\s]+$/i.test(server)||server.length>1000||server&&(/^(http|https):/.test(server))!==(protocol==='hls'))throw Error('Nome ou servidor inválido; HTTP/HTTPS precisa selecionar HLS');if(d.autoStart&&!server)throw Error('Informe o servidor antes de ativar início automático');
+    const name=String(d.name||'').trim();let server=String(d.server||'').trim();const protocol=String(d.protocol||'auto');if(!['auto','rtmp','rtmps','srt','rist','hls'].includes(protocol))throw Error('Protocolo inválido');if(!name||name.length>80||server&&!/^(rtmps?|srt|rist|https?):\/\/[^\s]+$/i.test(server)||server.length>1000||server&&(/^(http|https):/.test(server))!==(protocol==='hls'))throw Error('Nome ou servidor inválido; HTTP/HTTPS precisa selecionar HLS');if(d.autoStart&&!server)throw Error('Informe o servidor antes de ativar início automático');
+   // Fase 6 do superprompt (presets/telemetria de SRT): opt-in explícito via d.srtTransport.
+   // Sem esse campo, o servidor segue exatamente como o operador digitou -- zero mudança de
+   // comportamento para quem já usa SRT hoje. Com ele, aplica latência/overhead/pacote-drop
+   // conhecidos pelo motor nativo (ver srt-presets.mjs) direto na query string da URL.
+   if(d.srtTransport!==undefined&&/^srt:\/\//i.test(server)){const transport=validateSrtTransport(d.srtTransport,d.srtTransport.preset);server=applySrtTransportToServer(server,transport);}
    if(d.key!==undefined&&(typeof d.key!=='string'||d.key.length>2000))throw Error('Chave inválida');
    const encoder=d.encoder||'obs_x264',fpsDivisor=Number(d.fpsDivisor??1),overlaysMask=Number(d.overlaysMask??0);if(!before.encoders?.some(e=>e.id===encoder)||!Number.isInteger(fpsDivisor)||fpsDivisor<1||fpsDivisor>8||!Number.isInteger(overlaysMask)||overlaysMask<0||overlaysMask>255)throw Error('Codificador indisponível, FPS ou overlays inválidos');
    const srt=srtDestinationOptions({...d,protocol,server,encoder,width},all[index],before);
