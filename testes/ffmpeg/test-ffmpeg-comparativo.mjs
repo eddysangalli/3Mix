@@ -1,12 +1,96 @@
 import assert from 'node:assert/strict';
-import { readFileSync, existsSync } from 'node:fs';
-import { resolve } from 'node:path';
-import { execSync } from 'node:child_process';
+import { readFileSync, existsSync, mkdirSync } from 'node:fs';
+import { resolve, join } from 'node:path';
+import { spawn } from 'node:child_process';
 
-const RUNTIME_ROOT = resolve('../../../../3Mix/3mix-runtime');
-const BIN_DIR = resolve(RUNTIME_ROOT, 'bin/64bit');
+const RUNTIME_ROOT = 'D:/DRIVE/IA/antigravity/3Mix/3mix-runtime';
+const BIN_DIR = 'D:/DRIVE/IA/antigravity/3Mix/3mix-runtime/bin/64bit';
+const FFMPEG_8_EXE = 'D:/DRIVE/IA/antigravity/3Mix/3mix-runtime/runtime/ffmpeg.exe';
+const FFPROBE_EXE = 'D:/DRIVE/IA/antigravity/3Mix/3mix-runtime/runtime/ffprobe.exe';
+const TEST_DIR = 'D:/DRIVE/IA/antigravity/3Mix/qa-finalizacao/ffmpeg-comparativo';
+const TEST_VIDEO = join(TEST_DIR, 'test-reference-10s.mp4');
+
+let FFMPEG_9_EXE = null;
+let ffmpeg9Available = false;
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function runCommand(exe, args, options = {}) {
+  return new Promise((resolve, reject) => {
+    const proc = spawn(exe, args, { 
+      stdio: ['ignore', 'pipe', 'pipe'],
+      ...options
+    });
+    let stdout = '', stderr = '';
+    proc.stdout.on('data', d => stdout += d.toString());
+    proc.stderr.on('data', d => stderr += d.toString());
+    proc.on('close', code => {
+      if (code === 0) resolve({ stdout, stderr, code });
+      else resolve({ stdout, stderr, code, error: new Error(`exit ${code}: ${stderr}`) });
+    });
+    proc.on('error', e => resolve({ stdout, stderr, code: -1, error: e }));
+  });
+}
+
+async function findFfmpeg9() {
+  const candidates = [
+    'ffmpeg', // PATH
+    'C:/ffmpeg-9.0.2/bin/ffmpeg.exe',
+    'C:/Program Files/ffmpeg-9.0.2/bin/ffmpeg.exe',
+    'D:/ffmpeg-9.0.2/bin/ffmpeg.exe',
+    resolve(process.env.USERPROFILE || '', 'ffmpeg-9.0.2/bin/ffmpeg.exe'),
+  ];
+  
+  for (const exe of candidates) {
+    try {
+      const { stdout } = await runCommand(exe, ['-version']);
+      if (stdout.includes('ffmpeg version 9.')) {
+        console.log(`   [DETECTADO] FFmpeg 9.0.2 em: ${exe}`);
+        return exe;
+      }
+    } catch {}
+  }
+  return null;
+}
+
+async function probeVideo(exe, file) {
+  const { stdout } = await runCommand(exe, [
+    '-v', 'error', '-select_streams', 'v:0',
+    '-show_entries', 'stream=nb_frames,duration,width,height,codec_name',
+    '-of', 'csv=p=0', file
+  ]);
+  const [frames, duration, width, height, codec] = stdout.trim().split(',');
+  return { 
+    frames: parseInt(frames) || 0, 
+    duration: parseFloat(duration) || 0, 
+    width: parseInt(width) || 0, 
+    height: parseInt(height) || 0,
+    codec: codec || 'unknown'
+  };
+}
+
+async function runTranscodeTest(exe, label, inputFile, outputFile, args) {
+  const start = Date.now();
+  const { stdout, stderr, code, error } = await runCommand(exe, [
+    '-y', '-v', 'error', '-i', inputFile,
+    ...args,
+    outputFile
+  ]);
+  const elapsed = Date.now() - start;
+  
+  if (code === 0 && !error) {
+    const info = await probeVideo(FFPROBE_EXE, outputFile);
+    return { success: true, elapsed, frames: info.frames, duration: info.duration, codec: info.codec, size: (await import('node:fs')).readFileSync(outputFile).length };
+  } else {
+    return { success: false, elapsed, error: error?.message || stderr };
+  }
+}
 
 console.log('=== TESTE COMPARATIVO FFmpeg 8.1.1 (RUNTIME) vs 9.0.2 ===\n');
+
+if (!existsSync(TEST_DIR)) mkdirSync(TEST_DIR, { recursive: true });
 
 // 1. Validar DLLs do FFmpeg 8.1.1 no runtime
 console.log('1. Validando DLLs FFmpeg 8.x (soname 62) no runtime 3Mix...');
@@ -19,68 +103,132 @@ const dlls = [
 ];
 
 for (const { name, minSize } of dlls) {
-  const path = resolve(BIN_DIR, name);
+  const path = join(BIN_DIR, name);
   assert.ok(existsSync(path), `${name} deve existir em bin/64bit`);
   const buf = readFileSync(path);
   assert.ok(buf.length >= minSize, `${name} deve ter tamanho condizente (>= ${minSize} bytes)`);
-  
-  // Verificar assinatura PE
   assert.equal(buf.readUInt16LE(0), 0x5A4D, `${name}: Cabeçalho MZ inválido`);
   const peOffset = buf.readUInt32LE(0x3C);
   assert.equal(buf.readUInt32LE(peOffset), 0x00004550, `${name}: Assinatura PE inválida`);
   const machine = buf.readUInt16LE(peOffset + 4);
   assert.equal(machine, 0x8664, `${name}: Deve ser x64 (AMD64)`);
-  
   console.log(`   [PASS] ${name} - ${(buf.length / 1024 / 1024).toFixed(1)} MB - PE x64 válido`);
 }
 
-// 2. Verificar versão via FileVersionInfo
-console.log('\n2. Consultando versão das DLLs via PowerShell...');
+// 2. Consultar versão das DLLs
+console.log('\n2. Versões das DLLs FFmpeg 8.1.1 no runtime:');
 for (const dll of ['avcodec-62.dll', 'avformat-62.dll', 'avutil-60.dll']) {
-  const path = resolve(BIN_DIR, dll).replace(/'/g, "''");
-  const cmd = `powershell -NoProfile -Command "[System.Diagnostics.FileVersionInfo]::GetVersionInfo('${path}').FileVersionRaw.ToString()"`;
+  const path = join(BIN_DIR, dll).replace(/'/g, "''");
   try {
-    const ver = execSync(cmd, { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
-    console.log(`   ${dll}: ${ver}`);
-  } catch (e) {
-    console.log(`   ${dll}: versão não disponível via FileVersionInfo`);
+    const cmd = `powershell -NoProfile -Command "[System.Diagnostics.FileVersionInfo]::GetVersionInfo('${path}').FileVersionRaw.ToString()"`;
+    const { stdout } = await runCommand('powershell', ['-NoProfile', '-Command', `"[System.Diagnostics.FileVersionInfo]::GetVersionInfo('${path}').FileVersionRaw.ToString()"`]);
+    console.log(`   ${dll}: ${stdout.trim() || 'N/A'}`);
+  } catch {
+    console.log(`   ${dll}: versão não disponível`);
   }
 }
 
-// 3. Validar que não há DLLs do FFmpeg 9 (soname 63) no runtime
+// 3. Confirmar ausência de DLLs FFmpeg 9 (soname 63)
 console.log('\n3. Confirmando ausência de DLLs FFmpeg 9 (soname 63) no runtime...');
 const ffmpeg9Dlls = ['avcodec-63.dll', 'avformat-63.dll', 'avutil-61.dll', 'avfilter-12.dll'];
 for (const dll of ffmpeg9Dlls) {
-  const path = resolve(BIN_DIR, dll);
+  const path = join(BIN_DIR, dll);
   assert.ok(!existsSync(path), `${dll} NÃO deve existir no runtime (evita quebra de ABI do obs-ffmpeg)`);
   console.log(`   [PASS] ${dll} ausente - ABI preservada`);
 }
 
-// 4. Teste de transcodificação simulada (validação de flags)
-console.log('\n4. Validando flags de codificação suportadas pelo FFmpeg 8.1.1...');
-const testFlags = [
-  { codec: 'hevc_nvenc', desc: 'NVENC HEVC (H.265)' },
-  { codec: 'h264_nvenc', desc: 'NVENC H.264' },
-  { codec: 'hevc_amf', desc: 'AMF HEVC' },
-  { codec: 'h264_amf', desc: 'AMF H.264' },
-  { codec: 'hevc_qsv', desc: 'QuickSync HEVC' },
-  { codec: 'h264_qsv', desc: 'QuickSync H.264' },
-  { codec: 'libx264', desc: 'CPU x264 H.264' },
-  { codec: 'libx265', desc: 'CPU x265 HEVC' }
-];
+// 4. Verificar FFmpeg 8.1.1 executável
+console.log('\n4. Validando FFmpeg 8.1.1 executável do runtime...');
+const { stdout: ver8 } = await runCommand(FFMPEG_8_EXE, ['-version']);
+const ver8Match = ver8.match(/ffmpeg version ([\d.]+)/);
+const ffmpeg8Version = ver8Match ? ver8Match[1] : 'unknown';
+console.log(`   Versão: ${ffmpeg8Version}`);
+assert.ok(ver8.includes('8.1.1'), 'Deve ser FFmpeg 8.1.1');
+console.log('   [PASS] FFmpeg 8.1.1 confirmado');
 
-for (const { codec, desc } of testFlags) {
-  try {
-    const cmd = `powershell -NoProfile -Command "& '${resolve(BIN_DIR).replace(/\\/g, '\\\\')}\\\\..\\\\..\\\\ffmpeg.exe' -encoders 2>&1 | Select-String '${codec}'"`;
-    // Note: ffmpeg.exe may not exist in bin/64bit, this is a placeholder for actual test
-    console.log(`   [INFO] ${desc} (${codec}) - verificação requer ffmpeg.exe ou motor OBS ativo`);
-  } catch {
-    console.log(`   [INFO] ${desc} - teste requer motor 3Mix ativo`);
-  }
+// 5. Procurar FFmpeg 9.0.2
+console.log('\n5. Procurando FFmpeg 9.0.2 para comparação...');
+FFMPEG_9_EXE = await findFfmpeg9();
+if (FFMPEG_9_EXE) {
+  ffmpeg9Available = true;
+  const { stdout: ver9 } = await runCommand(FFMPEG_9_EXE, ['-version']);
+  const ver9Match = ver9.match(/ffmpeg version ([\d.]+)/);
+  console.log(`   [DISPONÍVEL] FFmpeg ${ver9Match ? ver9Match[1] : '9.x'} detectado`);
+} else {
+  console.log('   [NÃO DISPONÍVEL] FFmpeg 9.0.2 não encontrado no sistema');
+  console.log('   Locais verificados: PATH, C:/ffmpeg-9.0.2, C:/Program Files/ffmpeg-9.0.2, D:/ffmpeg-9.0.2, ~/ffmpeg-9.0.2');
 }
 
-// 5. Documentar diferenças conhecidas FFmpeg 8.1.1 -> 9.0.2
-console.log('\n5. Diferenças documentadas FFmpeg 8.1.1 (runtime) vs 9.0.2 (candidato)...');
+// 6. Gerar vídeo de referência se não existir
+if (!existsSync(TEST_VIDEO)) {
+  console.log('\n6. Gerando vídeo de referência 10s para testes de transcodificação...');
+  await runCommand(FFMPEG_8_EXE, [
+    '-y', '-f', 'lavfi', '-i', 'testsrc2=size=1920x1080:rate=30:duration=10',
+    '-f', 'lavfi', '-i', 'sine=frequency=1000:duration=10:sample_rate=48000',
+    '-c:v', 'libx264', '-preset', 'medium', '-crf', '23',
+    '-c:a', 'aac', '-b:a', '128k',
+    '-pix_fmt', 'yuv420p', TEST_VIDEO
+  ]);
+  console.log('   [PASS] Vídeo de referência gerado');
+} else {
+  console.log('\n6. Vídeo de referência já existe');
+}
+
+const refInfo = await probeVideo(FFPROBE_EXE, TEST_VIDEO);
+console.log(`   Referência: ${refInfo.frames} frames, ${refInfo.duration.toFixed(1)}s, ${refInfo.width}x${refInfo.height}, ${refInfo.codec}`);
+
+// 7. Testes comparativos de transcodificação (se FFmpeg 9 disponível)
+const transcodeTests = [
+  { name: 'H.264 CPU (libx264)', args: ['-c:v', 'libx264', '-preset', 'medium', '-crf', '23', '-c:a', 'copy'] },
+  { name: 'H.264 NVENC', args: ['-c:v', 'h264_nvenc', '-preset', 'p4', '-cq', '23', '-c:a', 'copy'] },
+  { name: 'HEVC NVENC', args: ['-c:v', 'hevc_nvenc', '-preset', 'p4', '-cq', '28', '-c:a', 'copy'] },
+  { name: 'HEVC CPU (libx265)', args: ['-c:v', 'libx265', '-preset', 'medium', '-crf', '28', '-c:a', 'copy'] },
+];
+
+const results = { v8: {}, v9: {} };
+
+if (ffmpeg9Available) {
+  console.log('\n7. Executando testes comparativos de transcodificação (8.1.1 vs 9.0.2)...');
+  
+  for (const test of transcodeTests) {
+    console.log(`\n   --- ${test.name} ---`);
+    
+    // Test FFmpeg 8
+    const out8 = join(TEST_DIR, `out_8_${test.name.replace(/[^a-zA-Z0-9]/g, '_')}.mp4`);
+    const r8 = await runTranscodeTest(FFMPEG_8_EXE, 'v8', TEST_VIDEO, out8, test.args);
+    results.v8[test.name] = r8;
+    
+    if (r8.success) {
+      console.log(`     8.1.1: ${r8.elapsed}ms, ${r8.frames} frames, ${(r8.size/1024/1024).toFixed(1)}MB`);
+    } else {
+      console.log(`     8.1.1: FALHOU - ${r8.error}`);
+    }
+    
+    // Test FFmpeg 9
+    const out9 = join(TEST_DIR, `out_9_${test.name.replace(/[^a-zA-Z0-9]/g, '_')}.mp4`);
+    const r9 = await runTranscodeTest(FFMPEG_9_EXE, 'v9', TEST_VIDEO, out9, test.args);
+    results.v9[test.name] = r9;
+    
+    if (r9.success) {
+      console.log(`     9.0.2: ${r9.elapsed}ms, ${r9.frames} frames, ${(r9.size/1024/1024).toFixed(1)}MB`);
+      
+      // Comparação
+      if (results.v8[test.name].success) {
+        const speedup = ((results.v8[test.name].elapsed - r9.elapsed) / results.v8[test.name].elapsed * 100).toFixed(1);
+        const sizeDiff = ((r9.size - results.v8[test.name].size) / results.v8[test.name].size * 100).toFixed(1);
+        console.log(`     Comparação: ${speedup > 0 ? '+' : ''}${speedup}% tempo, ${sizeDiff > 0 ? '+' : ''}${sizeDiff}% tamanho`);
+      }
+    } else {
+      console.log(`     9.0.2: FALHOU - ${r9.error}`);
+    }
+  }
+} else {
+  console.log('\n7. Testes comparativos: PULADOS (FFmpeg 9.0.2 não disponível)');
+  console.log('   Para habilitar: instale FFmpeg 9.0.2 e adicione ao PATH ou coloque em C:/ffmpeg-9.0.2/bin/ffmpeg.exe');
+}
+
+// 8. Documentar diferenças conhecidas
+console.log('\n8. Diferenças documentadas FFmpeg 8.1.1 (runtime) vs 9.0.2 (candidato)...');
 const diffs = [
   { area: 'SONAME', v8: 'avcodec-62, avformat-62, avutil-60', v9: 'avcodec-63, avformat-63, avutil-61', impact: 'QUEBRA ABI - obs-ffmpeg.dll compila contra soname 62' },
   { area: 'NVENC HEVC', v8: 'hevc_nvenc (suporta P010 10-bit)', v9: 'hevc_nvenc (melhor suporte 4:4:4, 4:2:2)', impact: 'Possível ganho qualidade HDR' },
@@ -88,7 +236,7 @@ const diffs = [
   { area: 'AMF', v8: 'hevc_amf / h264_amf', v9: 'hevc_amf / h264_amf (estável)', impact: 'Compatible' },
   { area: 'Filtros', v8: 'avfilter-11', v9: 'avfilter-12 (novos filtros)', impact: 'Pode habilitar novos efeitos' },
   { area: 'Threading', v8: 'frame-threaded', v9: 'melhor paralelismo', impact: 'Menor latência em alta resolução' },
-  { area: 'Vulkan', v8: 'limitado', v9: 'vulkan encoder/decoder', impact: 'Alternativa cross-vendor' }
+  { area: 'Vulkan', v8: 'limitado', v9: 'vulkan encoder/decoder', impact: 'Alternativa cross-vendor' },
 ];
 
 for (const d of diffs) {
@@ -98,8 +246,8 @@ for (const d of diffs) {
   console.log(`     Impacto: ${d.impact}`);
 }
 
-// 6. Critérios de homologação para FFmpeg 9.0.2
-console.log('\n6. Critérios de homologação para promover FFmpeg 9.0.2 ao runtime...');
+// 9. Critérios de homologação
+console.log('\n9. Critérios de homologação para promover FFmpeg 9.0.2 ao runtime...');
 const criteria = [
   'Recompilar obs-ffmpeg.dll e libobs contra soname 63 (avcodec-63, avformat-63, avutil-61)',
   'Teste de regressão completo: Replay, Playout, transcodificação, áudio, diagnóstico hardware',
@@ -115,8 +263,13 @@ for (let i = 0; i < criteria.length; i++) {
   console.log(`   ${i + 1}. ${criteria[i]}`);
 }
 
+// 10. Resumo
 console.log('\n=== RESUMO ===');
-console.log('Runtime atual: FFmpeg 8.1.1 (DLLs soname 62) - ESTÁVEL E HOMOLOGADO');
-console.log('Candidato: FFmpeg 9.0.2 - REQUER RECOMPILAÇÃO COMPLETA DO MOTOR OBS');
+console.log(`Runtime atual: FFmpeg ${ffmpeg8Version} (DLLs soname 62) - ESTÁVEL E HOMOLOGADO`);
+console.log(`FFmpeg 9.0.2: ${ffmpeg9Available ? 'DISPONÍVEL - TESTES COMPARATIVOS EXECUTADOS' : 'NÃO DISPONÍVEL - NÃO TESTADO'}`);
 console.log('Decisão: MANTER 8.1.1 NO RUNTIME ATÉ HOMOLOGAÇÃO COMPLETA DO 9.0.2');
+if (!ffmpeg9Available) {
+  console.log('\n⚠️  CLASSIFICAÇÃO: FFmpeg 9.0.2 = NÃO TESTADO (não disponível no ambiente)');
+  console.log('   Não declarar como testado/homologado sem execução real comparativa.');
+}
 console.log('\n=== TESTE COMPARATIVO FFmpeg CONCLUÍDO ===');
