@@ -28,7 +28,7 @@ const FILTER = "3Mix Replay Rec";
 // Source Record forwards this OBS enum; DISABLE (0) bypasses GPU rescaling.
 const GPU_SCALE_BICUBIC = 2;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const empty = () => ({ rec: false, speed: 50, activePlayer: "A", events: [], players: {}, markIn: null, session: null, back: null, backPreview: null, linked: false, cameraOptions: {}, audioEnabled: true, retention: { minutes: 30, segmentSeconds: 60, enabled: false } });
+const empty = () => ({ rec: false, speed: 50, activePlayer: "A", selectedEventId: null, events: [], players: {}, markIn: null, session: null, back: null, backPreview: null, linked: false, cameraOptions: {}, audioEnabled: true, retention: { minutes: 30, segmentSeconds: 60, enabled: false } });
 
 function execute(executable, args, timeout = 60000, binary = false) {
   return new Promise((resolve, reject) => {
@@ -223,6 +223,14 @@ export class DiskReplay {
         case "trim-event": await this.trimEvent(data);break;
         case "unload": await this.unloadPlayer(data.player);break;
         case "link": await this.link(data.enabled); break;
+        case "swap": await this.swap(); break;
+        case "jump": await this.jump(data); break;
+        case "jump-to-now": await this.jumpToNow(data); break;
+        case "play-event": await this.playEvent(data); break;
+        case "select-event": await this.selectEvent(data); break;
+        case "select-camera": await this.selectCamera(data); break;
+        case "play-pause": await this.playPause(data); break;
+        case "mark-in-out": await this.markInOut(data); break;
         case "transport": await this.transport(data); break;
         case "seek": await this.seekPlayer(data); break;
         case "frame": await this.stepFrame(data); break;
@@ -1208,5 +1216,131 @@ export class DiskReplay {
     }
     this.state.speed = value;
     await this.save();
+  }
+
+  async swap() {
+    const list = await this.req("GetSceneList");
+    const program = list.currentProgramSceneName;
+    if (program === "REPLAY A") {
+      if (!this.state.players["B"]) throw Error("Player B não está carregado para swap");
+      await this.air("B");
+    } else if (program === "REPLAY B") {
+      if (!this.state.players["A"]) throw Error("Player A não está carregado para swap");
+      await this.air("A");
+    } else {
+      this.state.activePlayer = this.state.activePlayer === "A" ? "B" : "A";
+      const targetScene = `REPLAY ${this.state.activePlayer}`;
+      if (this.state.players[this.state.activePlayer] && list.scenes.some(s => s.sceneName === targetScene)) {
+        await this.req("SetCurrentPreviewScene", { sceneName: targetScene }).catch(() => {});
+      }
+      await this.save();
+    }
+  }
+
+  async jump(d = {}) {
+    await this.hydratePlayers();
+    const player = d.player || this.state.activePlayer;
+    if (!REPLAY_PLAYERS.includes(player) || !this.state.players[player]) throw Error("Player inválido");
+    const media = await this.req("GetMediaInputStatus", { inputName: `Replay Player ${player}` });
+    const currentMs = Number.isFinite(media.mediaCursor) ? media.mediaCursor : 0;
+    let deltaMs = Number(d.seconds || 0) * 1000;
+    if (d.frames) {
+      const rate = frameRate(this.state.players[player].frameRate);
+      deltaMs += Number(d.frames) * rate.frameMs;
+    }
+    const maxMs = (this.state.players[player].duration || 0) * 1000;
+    const targetMs = Math.max(0, Math.min(maxMs, currentMs + deltaMs));
+    await this.seekPlayer({ player, cursor: targetMs });
+  }
+
+  async jumpToNow(d = {}) {
+    const player = d.player || this.state.activePlayer;
+    if (!REPLAY_PLAYERS.includes(player) || !this.state.players[player]) throw Error("Player inválido");
+    const durationMs = (this.state.players[player].duration || 0) * 1000;
+    if (durationMs > 0) {
+      await this.seekPlayer({ player, cursor: Math.max(0, durationMs - 150) });
+    }
+  }
+
+  async playEvent(d = {}) {
+    const player = d.player || this.state.activePlayer;
+    let event = null;
+    if (d.eventId) {
+      event = this.state.events.find(e => e.id === d.eventId);
+    } else if (d.index !== undefined) {
+      const idx = Number(d.index);
+      event = this.state.events[idx >= 0 ? idx : 0];
+    } else if (this.state.selectedEventId) {
+      event = this.state.events.find(e => e.id === this.state.selectedEventId);
+    } else {
+      event = this.state.events[0];
+    }
+    if (!event) throw Error("Lance não encontrado");
+    this.state.selectedEventId = event.id;
+    await this.load(player, event.id, d.cam);
+    if (d.toOutput === true) {
+      await this.air(player);
+    }
+  }
+
+  async selectEvent(d = {}) {
+    if (!this.state.events.length) throw Error("Nenhum lance gravado");
+    let currentIdx = this.state.selectedEventId ? this.state.events.findIndex(e => e.id === this.state.selectedEventId) : 0;
+    if (currentIdx < 0) currentIdx = 0;
+    let targetIdx = currentIdx;
+    if (d.offset === "next") targetIdx = Math.min(this.state.events.length - 1, currentIdx + 1);
+    else if (d.offset === "prev") targetIdx = Math.max(0, currentIdx - 1);
+    else if (d.offset === "first") targetIdx = 0;
+    else if (d.offset === "last") targetIdx = this.state.events.length - 1;
+    else if (d.index !== undefined) targetIdx = Math.max(0, Math.min(this.state.events.length - 1, Number(d.index)));
+    else if (d.eventId) {
+      const found = this.state.events.findIndex(e => e.id === d.eventId);
+      if (found >= 0) targetIdx = found;
+    }
+    const event = this.state.events[targetIdx];
+    this.state.selectedEventId = event.id;
+    if (d.load === true) {
+      const player = d.player || this.state.activePlayer;
+      await this.load(player, event.id, d.cam);
+    }
+    await this.save();
+    return event;
+  }
+
+  async selectCamera(d = {}) {
+    const player = d.player || this.state.activePlayer;
+    if (!REPLAY_PLAYERS.includes(player) || !this.state.players[player]) throw Error("Player inválido");
+    const current = this.state.players[player];
+    const event = this.state.events.find(e => e.id === current.eventId);
+    if (!event) throw Error("Nenhum evento ativo neste player");
+    let targetCam = d.cam;
+    if (d.camIndex !== undefined) {
+      const idx = Number(d.camIndex) - 1;
+      if (idx >= 0 && idx < event.clips.length) {
+        targetCam = event.clips[idx].cam;
+      }
+    }
+    if (!targetCam || !event.clips.some(c => c.cam === targetCam)) {
+      throw Error("Câmera selecionada não existe no lance");
+    }
+    const status = await this.req("GetMediaInputStatus", { inputName: `Replay Player ${player}` }).catch(() => ({}));
+    const cursor = Number.isFinite(status?.mediaCursor) ? status.mediaCursor : 0;
+    await this.load(player, event.id, targetCam);
+    await this.seekPlayer({ player, cursor });
+  }
+
+  async playPause(d = {}) {
+    const player = d.player || this.state.activePlayer;
+    if (!REPLAY_PLAYERS.includes(player) || !this.state.players[player]) throw Error("Player inválido");
+    const media = await this.req("GetMediaInputStatus", { inputName: `Replay Player ${player}` });
+    const isPlaying = media.mediaState === "OBS_MEDIA_STATE_PLAYING";
+    await this.transport({ player, command: isPlaying ? "PAUSE" : "PLAY" });
+  }
+
+  async markInOut(d = {}) {
+    const seconds = Number(d.seconds ?? 10);
+    if (!Number.isFinite(seconds) || seconds < 0.2 || seconds > 120) throw Error("A duração do lance deve ser entre 0,2 e 120 segundos");
+    const positions = await this.positions();
+    await this.makeEvent(positions.map((cam) => ({ ...cam, start: Math.max(cam.earliest || 0, cam.end - seconds) })));
   }
 }

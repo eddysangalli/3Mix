@@ -206,8 +206,82 @@ async function vmix(fn, p) {
   else if (name === 'gcupdate') { action = 'gc'; data = { kind: 'lower', data: { title: get('title') ?? '', subtitle: get('subtitle') ?? '' } }; }
   else if (name === 'scoregoal') { action = 'score'; data = { team: get('team'), delta: value ?? 1 }; }
   else if (name.startsWith('replay')) {
-    const a = { replayplay: 'air', replaylive: 'live', replaymarkin: 'mark-in', replaymarkout: 'mark-out', replaysetspeed: 'speed' }[name]; if (!a) throw new Error('Comando de replay não implementado');
-    await replay.command(a, { player: input || replay.state.activePlayer, speed: Number(value) * 100 }); return;
+    const targetPlayer = input || (['a', 'b'].includes(String(value).toLowerCase()) ? String(value).toUpperCase() : replay.state.activePlayer);
+    if (name === 'replayplay') {
+      await replay.command('transport', { player: targetPlayer, command: 'PLAY' });
+    } else if (name === 'replaypause') {
+      await replay.command('transport', { player: targetPlayer, command: 'PAUSE' });
+    } else if (['replayplaypause', 'replaytoggleplayforward'].includes(name)) {
+      await replay.command('play-pause', { player: targetPlayer });
+    } else if (name === 'replaylive') {
+      await replay.command('live', {});
+    } else if (['replaysetspeed', 'replayplaybackspeed'].includes(name)) {
+      const spd = Number(value);
+      await replay.command('speed', { speed: spd > 1 ? spd : Math.round(spd * 100) });
+    } else if (name === 'replaysetspeedchannela' || name === 'replayplaybackspeedchannela') {
+      const spd = Number(value);
+      await replay.command('speed', { speed: spd > 1 ? spd : Math.round(spd * 100), player: 'A' });
+    } else if (name === 'replaysetspeedchannelb' || name === 'replayplaybackspeedchannelb') {
+      const spd = Number(value);
+      await replay.command('speed', { speed: spd > 1 ? spd : Math.round(spd * 100), player: 'B' });
+    } else if (name === 'replayjumpframes') {
+      await replay.command('jump', { player: targetPlayer, frames: Number(value || 0) });
+    } else if (name === 'replayjumpseconds') {
+      await replay.command('jump', { player: targetPlayer, seconds: Number(value || 0) });
+    } else if (name === 'replayjumptonow') {
+      await replay.command('jump-to-now', { player: targetPlayer });
+    } else if (['replayswap', 'replayswapchannel', 'replayswapchannels'].includes(name)) {
+      await replay.command('swap', {});
+    } else if (name === 'replayselectchannela') {
+      replay.state.activePlayer = 'A'; await replay.save();
+    } else if (name === 'replayselectchannelb') {
+      replay.state.activePlayer = 'B'; await replay.save();
+    } else if (name === 'replayselectchannel') {
+      const ch = String(value || input || 'A').toUpperCase();
+      if (['A', 'B'].includes(ch)) { replay.state.activePlayer = ch; await replay.save(); }
+    } else if (name === 'replayselectcamera') {
+      await replay.command('select-camera', { player: targetPlayer, camIndex: Number(value || 1) });
+    } else if (/^replayselectcamera[1-4]$/.test(name)) {
+      const camIdx = Number(name.replace('replayselectcamera', ''));
+      await replay.command('select-camera', { player: targetPlayer, camIndex: camIdx });
+    } else if (name === 'replaymarkin') {
+      await replay.command('mark-in', {});
+    } else if (name === 'replaymarkout') {
+      await replay.command('mark-out', {});
+    } else if (['replaymarkinout', 'replaymarkinoutlive'].includes(name)) {
+      await replay.command('mark-in-out', { seconds: Number(value || 10) });
+    } else if (name === 'replayselectfirstevent') {
+      await replay.command('select-event', { offset: 'first', player: targetPlayer });
+    } else if (name === 'replayselectlastevent') {
+      await replay.command('select-event', { offset: 'last', player: targetPlayer });
+    } else if (name === 'replayselectnextevent') {
+      await replay.command('select-event', { offset: 'next', player: targetPlayer });
+    } else if (name === 'replayselectpreviousevent') {
+      await replay.command('select-event', { offset: 'prev', player: targetPlayer });
+    } else if (name === 'replayselectevent') {
+      await replay.command('select-event', { index: Number.isInteger(Number(value)) ? Number(value) : undefined, eventId: !Number.isInteger(Number(value)) ? value : undefined, player: targetPlayer });
+    } else if (name === 'replayplayevent') {
+      await replay.command('play-event', { eventId: value, index: Number.isInteger(Number(value)) ? Number(value) : undefined, player: targetPlayer, toOutput: false });
+    } else if (name === 'replayplayselectedevent') {
+      await replay.command('play-event', { eventId: replay.state.selectedEventId, player: targetPlayer, toOutput: false });
+    } else if (name === 'replayplayselectedeventtooutput' || name === 'replayplayeventstooutput') {
+      await replay.command('play-event', { eventId: replay.state.selectedEventId, player: targetPlayer, toOutput: true });
+    } else if (name === 'replaystartrecording') {
+      if (!replay.state.rec) await replay.command('start', {});
+    } else if (name === 'replaystoprecording') {
+      if (replay.state.rec) await replay.command('stop', {});
+    } else if (name === 'replaystartstoprecording') {
+      await replay.command(replay.state.rec ? 'stop' : 'start', {});
+    } else if (name === 'replaydeleteevent') {
+      await replay.command('delete', { eventId: value || replay.state.selectedEventId });
+    } else if (name === 'replaysetselectedeventcategory') {
+      await replay.command('update-event', { eventId: replay.state.selectedEventId || replay.state.events[0]?.id, category: value });
+    } else if (name === 'replaysetselectedeventtext') {
+      await replay.command('update-event', { eventId: replay.state.selectedEventId || replay.state.events[0]?.id, name: value });
+    } else {
+      throw new Error('Comando de replay vMix não implementado: ' + fn);
+    }
+    return;
   } else throw new Error('Comando não implementado: ' + fn);
   await production.run(action, data);
 }
