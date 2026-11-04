@@ -1898,8 +1898,6 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     if (!m) { m = new (window.PeakHoldMeter?.PeakHoldMeter || function(){ return { update: (v) => v, clipped: () => false }; })(); meterPeaks.set(bar, m); }
     return m;
   }
-    return m;
-  }
   function onMeters(inputs) {
     const agora = Date.now();
     for (const i of inputs) {
