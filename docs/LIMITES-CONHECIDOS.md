@@ -222,27 +222,27 @@ confirmado".
 
 ---
 
-## 8. PowerPoint & Slide Engine (3Mix Presenter)
+## 8. PowerPoint & Slide Engine (3Mix SlideEngine Pro)
 
-Auditado e validado em 04/11/2026 com suíte de testes E2E contra o motor nativo OBS (`qa-replay/evidencias-powerpoint/`):
+Auditado e revisado em 04/11/2026 com suíte de 3 baterias de testes automatizados reproduzíveis no repositório (`testes/slides/`):
+- `node testes/slides/test-slide-engine-api.mjs` (Contratos de API, parsing OpenXML e modelos)
+- `node testes/slides/test-slide-engine-compositor.mjs` (Compositor OBS, proporções 16:9/4:3 e isolamento Program/Preview)
+- `node testes/slides/test-slide-engine-audiovisual.mjs` (Roteamento de áudio real, faders/mute e Play/Pause contínuo)
 
-### O que funciona e está homologado:
+### O que funciona e está homologado (Suporte Total):
 - **Zero Dependência do Office**: Importação nativa de arquivos `.pptx` (formato padrão OpenXML / ECMA-376) e imagens locais sem necessidade de instalação do Microsoft Office, LibreOffice ou visualizadores externos no Windows.
 - **Suporte a Proporções**: Detecção automática de proporções em `ppt/presentation.xml` — suporte completo a 16:9 widescreen (1920×1080) e 4:3 legado com pilarbox limpo automático.
-- **Diagramação e Tipografia**: Extração e preservação estruturada de caixas de texto, famílias de fontes (`Segoe UI`, `Georgia`, `Calibri`, `Arial`), tamanhos de fonte escalados e cores RGB sólidas (`<a:srgbClr>`).
-- **Tabelas Estruturadas**: Renderização completa de tabelas (`<a:tbl>`), com grid, células e alinhamentos preservados.
-- **Imagens Embutidas**: Extração automática de todas as mídias em `ppt/media/*` (PNG, JPG, JPEG) e incorporação via Base64 nos vetores de exibição.
-- **Notas do Apresentador**: Leitura isolada das anotações em `ppt/notesSlides/*` para exibição exclusiva na tela do operador (Presenter Mode).
-- **Isolamento Preview ≠ Program**: Seleção e prévia de slides na interface não vazam para o Program do ar (confirmado bit-a-bit por hash de frame).
-- **Integração com o Compositor**: Renderização no motor OBS através de `browser_source` (Chromium acelerado por hardware GPU), entregando buffers nativos de 1920×1080.
+- **Diagramação Livre e Elementos**: Extração completa de formas (`<p:sp>`), cards com cantos arredondados, preenchimentos coloridos, bordas, múltiplas imagens simultâneas e tabelas (`<a:tbl>`). Suporta qualquer número de tópicos (sem teto artificial) em coordenadas livres.
+- **Vídeos Incorporados com Áudio Real**: Extração de `.mp4` e `.webm` de `ppt/media/*`, com roteamento de áudio dedicado (`reroute_audio: true`) para o mixer 3Mix, com controle de fader em dB, mute/unmute e medidores de pico.
+- **Controle de Playback Contínuo**: Comandos de Play, Pause e Seek sem recriar a fonte do OBS e sem reiniciar o vídeo do início, preservando a posição em tempo real.
+- **Isolamento de Segurança (Zero Warnings no Program)**: Avisos de recursos técnicos e limitações são exibidos **estritamente no Presenter Mode** (`slides.html`) para o operador. A saída de vídeo final para os telespectadores permanece 100% limpa de badges ou mensagens técnicas.
 - **DSK e Multi-M/E**: Homologado para sobreposição gráfica em DSK 1–4 e roteamento no Program do M/E 2.
 - **Persistência**: Cache em disco e índice `decks.json` recuperam decks, apresentações e slides preparados após reinicialização completa do sistema.
 
-### Limitações Conhecidas de Transmissão:
-- **Animações de Elementos**: Animações passo a passo internas de slides (como entradas por fade, fly-in, ênfases ou caminhos de animação) não são executadas; o slide é exibido diretamente em seu estado final consolidado.
-- **Transições Proprietárias**: Efeitos de transição exclusivos do PowerPoint (como Morph ou Cortina) não são emulados pelo motor de slides; a transição entre slides na mesa de corte utiliza os efeitos de transição nativos do 3Mix (Cut, Fade, Stinger, Move).
-- **Vídeos e Áudios Embutidos**: Arquivos multimídia embutidos diretamente no `.pptx` não são reproduzidos na camada de slides. No padrão operacional broadcast do 3Mix, clipes de vídeo devem ser adicionados ao Playout DDR para controle independente de ganho pré-fader, trim e mix-minus.
-- **Formas 3D e Gradientes Complexos**: Gradientes de preenchimento volumétrico ou efeitos de relevo 3D são convertidos para cores planas ou gradientes lineares de fundo.
+### Classificação de Recursos Parciais e Limitações Conhecidas:
+- **Animações Nativas (`p:timing`) — Suporte Parcial**: Suporte às etapas por clique com interpolação contínua a 60 fps para efeitos **Fade**, **Fly-In** e **Zoom**. Quando o efeito não é identificado no XML, aplica corte direto (`appear`) fiel ao padrão sequencial, sem efeitos arbitrários. Deformações vetoriais 3D complexas não são aplicadas.
+- **Transição Morph — Suporte Parcial (Adaptado)**: Reconhecimento da tag `<p:morph>`. Aplica interpolação suave 2D de posicionamento e escala com transição nativa do 3Mix. A malha poligonal 3D proprietária da Microsoft não é reproduzida.
+- **Modo de Compatibilidade Externa (Opcional)**: Estudo técnico completo disponível em `docs/ESTUDO-COMPATIBILIDADE-POWERPOINT-LIBREOFFICE.md` avaliando automação COM de Microsoft PowerPoint e LibreOffice Impress via Window Capture/NDI.
 
 ---
 

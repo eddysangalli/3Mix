@@ -210,6 +210,7 @@
 
   function mount(element, options = {}) {
     if (!element) return;
+    const changed = productionActive !== !!options.productionActive;
     productionActive = !!options.productionActive;
     if (root !== element) {
       root = element;
@@ -222,7 +223,7 @@
       });
       render();
       if (Date.now() - lastRead > 5000) refresh();
-    }
+    } else if (changed) render();
   }
 
   window.FreeMixPluginManager = { mount, refresh };
