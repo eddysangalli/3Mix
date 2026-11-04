@@ -138,8 +138,43 @@ export const STUDIO_ZOOM_PRESETS=[
 ];
 
 // ---------------------------------------------------------------------------------------------
-// Biblioteca de cenários
+// Biblioteca de cenários e Packs Oficiais 3Mix
 // ---------------------------------------------------------------------------------------------
+
+export async function findVirtualSetsDir(root){
+ const candidates=[
+  process.env.FREEMIX_VIRTUALSETS_DIR,
+  join(root,'..','virtualsets','3Mix Virtual Sets 1 a 07'),
+  join(root,'virtualsets','3Mix Virtual Sets 1 a 07'),
+  join(root,'..','virtualsets'),
+  join(root,'virtualsets'),
+  'D:\\DRIVE\\IA\\antigravity\\3Mix\\virtualsets\\3Mix Virtual Sets 1 a 07'
+ ].filter(Boolean);
+
+ for(const dir of candidates){
+  try{
+   const s=await stat(dir);
+   if(s.isDirectory()){
+    const cat=join(dir,'CATALOGO_SETS.json');
+    const sCat=await stat(cat).catch(()=>null);
+    if(sCat&&sCat.isFile())return dir;
+   }
+  }catch{}
+ }
+ return null;
+}
+
+export async function loadVirtualSetsCatalog(root){
+ const dir=await findVirtualSetsDir(root);
+ if(!dir)return {packs:[],dir:null};
+ try{
+  const raw=await readFile(join(dir,'CATALOGO_SETS.json'),'utf8');
+  const packs=JSON.parse(raw);
+  return {packs,dir};
+ }catch{
+  return {packs:[],dir};
+ }
+}
 
 const quad=(tlx,tly,trx,try_,brx,bry,blx,bly)=>({tl:[tlx,tly],tr:[trx,try_],br:[brx,bry],bl:[blx,bly]});
 const BUILTIN=[
@@ -167,15 +202,16 @@ const BUILTIN=[
   {label:'C',quad:quad(.70,.22,1.00,.16,1.01,.93,.69,.99)}]}
 ];
 const BUILTIN_IDS=new Set(BUILTIN.map(x=>x.id));
-const BACKGROUND_TYPES=['color','input'];
+const BACKGROUND_TYPES=['color','input','image'];
 const HEX=/^#[a-f\d]{6}$/i;
 
-// Normaliza a definição de fundo. Cor é criada como color_source_v3 (o mesmo tipo que as
-// composições já usam); fonte é uma entrada existente do 3Mix.
+// Normaliza a definição de fundo. Cor é criada como color_source_v3; imagem aponta para o
+// arquivo do pack; fonte é uma entrada existente do 3Mix.
 function backgroundSpec(input){
  const spec=input||{type:'color',color:'#101820'};
- if(!BACKGROUND_TYPES.includes(spec.type))fail('Fundo inválido: use cor ou entrada');
+ if(!BACKGROUND_TYPES.includes(spec.type))fail('Fundo inválido: use cor, entrada ou imagem');
  if(spec.type==='color'){const color=String(spec.color||'');if(!HEX.test(color))fail('Cor de fundo inválida');return {type:'color',color:color.toUpperCase()};}
+ if(spec.type==='image'){if(!spec.file)fail('Arquivo de imagem de fundo não informado');return {type:'image',file:String(spec.file)};}
  if(!spec.key)fail('Escolha a entrada de fundo');
  return {type:'input',key:String(spec.key)};
 }
@@ -306,7 +342,7 @@ export class StudioEngine{
   return found?found.sceneItemIndex:0;
  }
 
- // Cria o fundo e devolve o que precisa ser removido depois (item e eventual fonte de cor).
+ // Cria o fundo e devolve o que precisa ser removido depois (item e eventual fonte de cor ou imagem).
  async createBackground(scene,spec){
   const video=await this.p.req('GetVideoSettings'),W=video.baseWidth||1920,H=video.baseHeight||1080;
   if(spec.type==='input'){
@@ -314,6 +350,15 @@ export class StudioEngine{
    const item=await this.p.req('CreateSceneItem',{sceneName:scene,sourceName:source.name,sceneItemEnabled:true});
    await this.fit(scene,item.sceneItemId);
    return {itemId:item.sceneItemId,inputName:null,sourceName:source.name};
+  }
+  if(spec.type==='image'){
+   const inputName='3Mix Fundo '+randomUUID();
+   await this.p.req('CreateInput',{sceneName:scene,inputName,inputKind:'image_source',inputSettings:{file:spec.file,unload:false},sceneItemEnabled:true});
+   const items=(await this.p.req('GetSceneItemList',{sceneName:scene})).sceneItems||[];
+   const item=items.find(i=>i.sourceName===inputName);
+   if(!item)fail('O motor não criou o fundo do cenário a partir da imagem');
+   await this.fit(scene,item.sceneItemId);
+   return {itemId:item.sceneItemId,inputName,sourceName:inputName};
   }
   const inputName='Fundo '+randomUUID();
   await this.p.req('CreateInput',{sceneName:scene,inputName,inputKind:'color_source_v3',inputSettings:{color:abgr(spec.color),width:W,height:H},sceneItemEnabled:true});
@@ -324,16 +369,39 @@ export class StudioEngine{
   return {itemId:item.sceneItemId,inputName};
  }
 
- // Constrói o cenário inteiro. Tudo é desfeito se qualquer passo falhar: uma cena pela metade
- // apareceria na lista de entradas como um cenário quebrado.
+  // Constrói o cenário inteiro com arquitetura canônica das 4 Faixas.
+  // Tudo é desfeito se qualquer passo falhar: uma cena pela metade
+  // apareceria na lista de entradas como um cenário quebrado.
  async build(d){
   if(!await this.support())fail('Este motor não tem Shaderfilter com corner-pin.shader; o estúdio virtual não pode ser montado');
-  const preset=d.presetId?this.preset(d.presetId):null;
+  let preset=d.presetId?this.preset(d.presetId):null;
+  let pack=null;
+  if(!preset&&d.presetId){
+   const catalogData=await loadVirtualSetsCatalog(this.p.root).catch(()=>({packs:[]}));
+   pack=catalogData.packs?.find(p=>p.id===d.presetId||p.pasta===d.presetId)||null;
+   if(pack){
+    preset={
+     id:pack.id,
+     name:pack.nome,
+     description:pack.tipo,
+     pack:true,
+     slots:[{label:'A',quad:quad(.20,.05,.80,.05,.82,.98,.18,.98)}]
+    };
+   }
+  }
   if(!preset)fail('Cenário não encontrado');
   const slots=Array.isArray(d.slots)&&d.slots.length?d.slots:preset.slots;
   if(slots.length!==preset.slots.length)fail(`O cenário "${preset.name}" precisa de ${preset.slots.length} câmera(s)`);
   const background=backgroundSpec(d.background);
 
+  // Faixa 01: Telão multimídia (opcional, posicionado em Z=0 no fundo)
+  let screen=null;
+  if(d.screen?.key){
+   const source=await this.resolve(d.screen.key);
+   screen={key:source.uuid,name:source.name,bounds:d.screen.bounds||null};
+  }
+
+  // Faixa 03: Câmeras nos slots
   const cameras=[];
   for(const [n,slot] of slots.entries()){
    if(!slot.key)fail('Escolha a câmera do slot '+preset.slots[n].label);
@@ -343,16 +411,20 @@ export class StudioEngine{
   }
   if(new Set(cameras.map(c=>c.key)).size!==cameras.length)fail('A mesma câmera não pode ocupar dois slots do mesmo cenário');
 
+  // Faixa 04: Primeiro plano / Bancada
   let foreground=null;
-  if(d.foreground?.key){
+  if(d.foreground?.file){
+   foreground={type:'image',file:String(d.foreground.file)};
+  } else if(d.foreground?.key){
    const source=await this.resolve(d.foreground.key);
    if(cameras.some(c=>c.key===source.uuid))fail('O primeiro plano não pode ser uma das câmeras');
-   foreground={key:source.uuid,name:source.name};
+   foreground={type:'input',key:source.uuid,name:source.name};
   }
+
   if(background.type==='input'){
    const source=await this.resolve(background.key);
    if(cameras.some(c=>c.key===source.uuid))fail('O fundo não pode ser uma das câmeras');
-   if(foreground&&foreground.key===source.uuid)fail('Fundo e primeiro plano são a mesma fonte');
+   if(foreground&&foreground.type==='input'&&foreground.key===source.uuid)fail('Fundo e primeiro plano são a mesma fonte');
    background.sourceName=source.name;
   }
 
@@ -361,16 +433,36 @@ export class StudioEngine{
   if(requested.startsWith(SLOT_PREFIX))fail('Nome reservado ao módulo');
   const name=await this.uniqueSceneName(requested);
 
-  const created={scene:false,inputs:[],slotScenes:[],items:[],backgroundItem:null,backgroundInput:null,foregroundItem:null};
+  const created={scene:false,inputs:[],slotScenes:[],items:[],backgroundItem:null,backgroundInput:null,foregroundItem:null,foregroundInput:null,screenItem:null};
   try{
    await this.p.req('CreateScene',{sceneName:name});created.scene=true;
 
-   // 1) fundo
+   // 1) Faixa 01: Telão Multimídia (Z = 0, no fundo de tudo)
+   if(screen){
+    const item=await this.p.req('CreateSceneItem',{sceneName:name,sourceName:screen.name,sceneItemEnabled:true});
+    if(screen.bounds){
+     const video=await this.p.req('GetVideoSettings');
+     const W=video.baseWidth||1920,H=video.baseHeight||1080;
+     const b=screen.bounds;
+     const px=b.x<=1?Math.round(b.x*W):Math.round(b.x);
+     const py=b.y<=1?Math.round(b.y*H):Math.round(b.y);
+     const pw=b.largura<=1?Math.round(b.largura*W):(b.largura||b.w||W);
+     const ph=b.altura<=1?Math.round(b.altura*H):(b.altura||b.h||H);
+     await this.p.req('SetSceneItemTransform',{sceneName:name,sceneItemId:item.sceneItemId,sceneItemTransform:{
+      positionX:px,positionY:py,alignment:5,rotation:0,cropLeft:0,cropRight:0,cropTop:0,cropBottom:0,
+      boundsType:'OBS_BOUNDS_STRETCH',boundsAlignment:5,boundsWidth:pw,boundsHeight:ph}});
+    } else {
+     await this.fit(name,item.sceneItemId);
+    }
+    created.screenItem=item.sceneItemId;
+   }
+
+   // 2) Faixa 02: Cenário de Fundo (Z = 1, com recorte alfa do telão)
    const bg=await this.createBackground(name,background);
    created.backgroundItem=bg.itemId;
    created.backgroundInput=bg.inputName;
 
-   // 2) câmeras: cena privada por slot + corner pin na cena privada
+   // 3) Faixa 03: Câmeras nos slots (Z = 2, apresentador com chroma key)
    const wrappers=[];
    for(const camera of cameras){
     const wrapperName=SLOT_PREFIX+randomUUID();
@@ -384,21 +476,37 @@ export class StudioEngine{
     wrappers.push({label:camera.label,inputKey:camera.key,inputName:camera.name,wrapperKey:wrapper.uuid,wrapperName,itemId:item.sceneItemId,quad:filtered.quad,baseQuad:filtered.quad,enabled:true,antialias:filtered.antialias});
    }
 
-   // 3) primeiro plano (mesa/objeto com alfa) por cima de tudo
+   // 4) Faixa 04: Frente / Bancada (Z = 3, mesa de primeiro plano com alfa cobrindo a base)
    if(foreground){
-    const item=await this.p.req('CreateSceneItem',{sceneName:name,sourceName:foreground.name,sceneItemEnabled:true});
-    await this.fit(name,item.sceneItemId);
-    created.foregroundItem=item.sceneItemId;
+    if(foreground.type==='image'){
+     const fgInputName='3Mix Bancada '+randomUUID();
+     await this.p.req('CreateInput',{sceneName:name,inputName:fgInputName,inputKind:'image_source',inputSettings:{file:foreground.file,unload:false},sceneItemEnabled:true});
+     const items=(await this.p.req('GetSceneItemList',{sceneName:name})).sceneItems||[];
+     const item=items.find(i=>i.sourceName===fgInputName);
+     if(!item)fail('O motor não criou o primeiro plano da bancada');
+     await this.fit(name,item.sceneItemId);
+     created.foregroundItem=item.sceneItemId;
+     created.foregroundInput=fgInputName;
+     foreground.name=fgInputName;
+    } else {
+     const item=await this.p.req('CreateSceneItem',{sceneName:name,sourceName:foreground.name,sceneItemEnabled:true});
+     await this.fit(name,item.sceneItemId);
+     created.foregroundItem=item.sceneItemId;
+    }
    }
 
-   // 4) ordem das camadas: fundo (0), câmeras na ordem dos slots, primeiro plano no topo.
-   const order=[bg.itemId,...wrappers.map(w=>w.itemId)];
+   // 5) Ordem canônica das camadas (baixo para cima):
+   // Faixa 01 (Telão Z=0) -> Faixa 02 (Fundo Z=1) -> Faixa 03 (Câmeras Z=2) -> Faixa 04 (Bancada Z=3)
+   const order=[];
+   if(created.screenItem)order.push(created.screenItem);
+   order.push(bg.itemId);
+   order.push(...wrappers.map(w=>w.itemId));
    if(created.foregroundItem)order.push(created.foregroundItem);
    for(const [index,itemId] of order.entries())await this.p.req('SetSceneItemIndex',{sceneName:name,sceneItemId:itemId,sceneItemIndex:index});
 
    const scene=await this.resolve(name);
-   const record={id:scene.uuid,name,presetId:preset.id,presetName:preset.name,background,backgroundInput:bg.inputName,
-    foreground,slots:wrappers,createdAt:Date.now(),revision:1};
+   const record={id:scene.uuid,name,presetId:preset.id,presetName:preset.name,screen,background,backgroundInput:bg.inputName,
+    foreground,foregroundInput:created.foregroundInput||null,slots:wrappers,createdAt:Date.now(),revision:1};
    if(Object.keys(this.sets).length>=SET_LIMIT&&!this.sets[scene.uuid])fail('Limite de '+SET_LIMIT+' cenários salvos neste projeto; remova um antes de criar outro');
    this.sets[scene.uuid]=record;
    await this.save();
@@ -407,6 +515,7 @@ export class StudioEngine{
   }catch(e){
    // Reverte na ordem inversa; o que já não existir, ignora.
    for(const sceneName of created.slotScenes.slice().reverse())await this.p.optional('RemoveScene',{sceneName});
+   if(created.foregroundInput)await this.p.optional('RemoveInput',{inputName:created.foregroundInput});
    if(created.backgroundInput)await this.p.optional('RemoveInput',{inputName:created.backgroundInput});
    if(created.scene)await this.p.optional('RemoveScene',{sceneName:name});
    throw e;
@@ -479,6 +588,7 @@ export class StudioEngine{
   await this.p.optional('RemoveScene',{sceneName:record.name});
   for(const slot of record.slots)await this.p.optional('RemoveScene',{sceneName:slot.wrapperName||slot.wrapperKey});
   if(record.backgroundInput)await this.p.optional('RemoveInput',{inputName:record.backgroundInput});
+  if(record.foregroundInput)await this.p.optional('RemoveInput',{inputName:record.foregroundInput});
   delete this.sets[key];
   await this.save();
   this.last={removed:key};
@@ -596,7 +706,8 @@ export class StudioEngine{
   const targets=this.targets().map(x=>({key:x.key,name:x.name,kind:x.kind||''}));
   const sets=Object.values(this.sets).map(record=>({id:record.id,name:record.name,presetId:record.presetId,presetName:record.presetName,
    slots:record.slots.map(s=>({label:s.label,inputKey:s.inputKey,inputName:s.inputName,quad:s.quad,enabled:s.enabled!==false})),
-   background:record.background,foreground:record.foreground||null,revision:record.revision||1}));
+   background:record.background,foreground:record.foreground||null,screen:record.screen||null,revision:record.revision||1}));
+  const catalogData=await loadVirtualSetsCatalog(this.p.root).catch(()=>({packs:[],dir:null}));
   let details=null;
   if(key&&targets.some(x=>x.key===key)){
    // A fonte pode ter sido removida entre a leitura da lista e esta consulta; o resumo responde
@@ -613,6 +724,7 @@ export class StudioEngine{
   return {
    supported,filterName:STUDIO_FILTER,kind:STUDIO_KIND,shader:STUDIO_SHADER,
    presets:this.presetsAll(),zoomPresets:STUDIO_ZOOM_PRESETS,targets,sets,details,scope:this.scope,
+   packs:catalogData.packs||[],packsDir:catalogData.dir||null,
    limits:{presets:PRESET_LIMIT,sets:SET_LIMIT},
    limitations:[
     'Cenários 2D/2.5D: planos 2D posicionados em perspectiva; não é motor de malhas 3D nem tem paralaxe verdadeira.',
@@ -648,6 +760,7 @@ export class StudioEngine{
 
  async execute(action,d={}){
   if(action==='studio_read')return this.summary(d.key);
+  if(action==='studio_packs')return loadVirtualSetsCatalog(this.p.root);
   if(action==='studio_preset_save')return this.savePreset(d);
   if(action==='studio_preset_remove')return this.removePreset(d);
   if(action==='studio_set_remove')return this.destroy(d);

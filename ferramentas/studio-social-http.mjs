@@ -4,6 +4,8 @@
 // arquivo não existir ou falhar ao importar, o servidor continua subindo sem as três trilhas.
 // Toda rota de escrita é local (127.0.0.1). Nada aqui roda dentro do processo do motor: um erro de
 // chroma, de cenário ou de rede social vira resposta HTTP, nunca queda do Programa.
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
 const UUID=/^[a-f\d]{8}(?:-[a-f\d]{4}){3}-[a-f\d]{12}$/i;
 const parseUrl=req=>new URL(req.url||'/', 'http://127.0.0.1');
 const MODULE_PATHS=['/api/chroma','/api/chroma-frame','/api/studio','/api/studio-frame','/api/social'];
@@ -49,6 +51,28 @@ export async function handleStudioSocial(ctx){
  }
 
  // ---------- 3Mix Virtual Studio ----------
+ if(path==='/api/studio/packs'){
+  if(!isLocal)return deny('Estúdio virtual disponível somente neste computador');
+  if(!module.estudio)return deny('Estúdio virtual indisponível',503);
+  const catalog=await module.estudio.execute('studio_packs');
+  return json(res,200,{success:true,...catalog}),true;
+ }
+ if(path==='/api/studio/pack-image'){
+  if(!isLocal)return deny('Acesso restrito');
+  const pack=u.searchParams.get('pack')||'';
+  const file=u.searchParams.get('file')||'';
+  if(!pack||!file||pack.includes('..')||file.includes('..')||pack.includes('/')||file.includes('\\'))return deny('Parâmetro inválido',400);
+  const catalog=await module.estudio.execute('studio_packs');
+  if(!catalog.dir)return deny('Diretório de packs não localizado',404);
+  const fullPath=join(catalog.dir,pack,file);
+  try{
+   const buf=await readFile(fullPath);
+   const ct=file.endsWith('.png')?'image/png':(file.endsWith('.jpg')||file.endsWith('.jpeg'))?'image/jpeg':'application/octet-stream';
+   return image(buf,ct);
+  }catch{
+   return deny('Imagem do pack não encontrada',404);
+  }
+ }
  if(path==='/api/studio'){
   if(!isLocal)return deny('Estúdio virtual disponível somente neste computador');
   if(!module.estudio)return deny('Estúdio virtual indisponível: '+(module.errors?.estudio||'módulo não montado'),503);

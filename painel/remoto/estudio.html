@@ -65,18 +65,18 @@
   .workspace {
     flex: 1;
     display: grid;
-    grid-template-columns: 420px 1fr;
+    grid-template-columns: 460px 1fr;
     min-height: 0;
     overflow: hidden;
   }
   aside.controls-panel {
     background: var(--bg-panel);
     border-right: 1px solid var(--border-dim);
-    padding: 16px;
+    padding: 14px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
   }
   .section-card {
     background: var(--bg-card);
@@ -99,7 +99,7 @@
   }
   .nav-tabs {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1.2fr 1fr 1fr;
     gap: 4px;
     background: #1e1e1e;
     padding: 3px;
@@ -107,17 +107,102 @@
     border: 1px solid var(--border-dim);
   }
   .nav-tab {
-    padding: 6px 0;
+    padding: 7px 0;
     text-align: center;
     border: none;
     border-radius: 3px;
     background: transparent;
     color: var(--text-muted);
-    font-size: 11.5px;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 700;
     cursor: pointer;
   }
   .nav-tab.active { background: var(--accent); color: #fff; }
+
+  /* Grade de Packs Oficiais */
+  .packs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    max-height: 240px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  .pack-item {
+    background: #191c22;
+    border: 1px solid var(--border-dim);
+    border-radius: 5px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    flex-direction: column;
+  }
+  .pack-item:hover {
+    border-color: #666;
+    transform: translateY(-1px);
+  }
+  .pack-item.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(47, 111, 237, 0.45);
+    background: #1f2736;
+  }
+  .pack-thumb {
+    width: 100%;
+    height: 75px;
+    object-fit: cover;
+    background: #111;
+    display: block;
+  }
+  .pack-info {
+    padding: 6px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .pack-name {
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pack-cat {
+    font-size: 9.5px;
+    color: var(--text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Cartões das 4 Faixas Canônicas */
+  .faixa-card {
+    background: #181b20;
+    border: 1px solid var(--border-dim);
+    border-radius: 6px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .faixa-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .faixa-badge {
+    font-size: 9.5px;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .faixa-1 { background: rgba(0, 180, 216, 0.18); color: #00d2f7; border: 1px solid rgba(0, 180, 216, 0.45); }
+  .faixa-2 { background: rgba(140, 150, 170, 0.18); color: #b8ccf0; border: 1px solid rgba(140, 150, 170, 0.45); }
+  .faixa-3 { background: rgba(46, 204, 113, 0.18); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.45); }
+  .faixa-4 { background: rgba(230, 126, 34, 0.18); color: #f39c12; border: 1px solid rgba(230, 126, 34, 0.45); }
 
   .layer-row {
     display: flex;
@@ -173,13 +258,13 @@
   main.preview-area {
     display: flex;
     flex-direction: column;
-    background: #141414;
+    background: #121417;
     position: relative;
     overflow: hidden;
   }
   .preview-toolbar {
     height: 42px;
-    background: rgba(32,32,32,0.95);
+    background: rgba(28,31,36,0.96);
     border-bottom: 1px solid var(--border-dim);
     display: flex;
     align-items: center;
@@ -199,7 +284,7 @@
   canvas#studio-canvas {
     max-width: 100%;
     max-height: 100%;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.85);
     border: 1px solid #333;
     cursor: default;
   }
@@ -240,27 +325,130 @@
 <header class="topbar">
   <div class="top-left">
     <div class="logo">3Mix <span>VIRTUAL STUDIO</span></div>
-    <div style="display:flex;align-items:center;gap:8px;">
-      <label for="template-select" style="font-size:11.5px;color:var(--text-muted);">Modelo:</label>
+    <div id="top-template-selector" style="display:none;align-items:center;gap:8px;">
+      <label for="template-select" style="font-size:11.5px;color:var(--text-muted);">Modelo Corner-Pin:</label>
       <select id="template-select"><option value="">Carregando modelos…</option></select>
+    </div>
+    <div id="top-pack-status" style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:12px;color:var(--text-dim);">Pack Selecionado:</span>
+      <strong id="top-pack-name" style="color:#00d2f7;font-size:12.5px;">Carregando packs…</strong>
     </div>
   </div>
   <div class="top-right" style="display:flex;align-items:center;gap:10px;">
-    <span id="studio-status-badge" class="btn active" style="cursor:default;font-size:11px;padding:4px 8px;">Corner-Pin 2.5D OK</span>
-    <button type="button" class="btn primary" id="btn-build-scene">Montar Cenário no Switcher</button>
+    <span id="studio-status-badge" class="btn active" style="cursor:default;font-size:11px;padding:4px 8px;">Estúdio Virtual 2.5D OK</span>
+    <button type="button" class="btn primary" id="btn-build-scene">🚀 Montar Cenário no Switcher</button>
   </div>
 </header>
 
 <div class="workspace">
   <aside class="controls-panel">
-    <!-- Abas de Navegação do Painel: [Montador de Cenários] | [Câmera Virtual & Zoom] -->
+    <!-- Abas de Navegação do Painel: [Packs Oficiais] | [Corner-Pin Livre] | [Câmera & Zoom] -->
     <div class="nav-tabs">
-      <button type="button" class="nav-tab active" id="tab-builder">Montador de Cenário</button>
-      <button type="button" class="nav-tab" id="tab-camera">Câmera & Zoom Virtual</button>
+      <button type="button" class="nav-tab active" id="tab-packs">🏛️ Packs Oficiais 3Mix</button>
+      <button type="button" class="nav-tab" id="tab-builder">📐 Corner-Pin Livre</button>
+      <button type="button" class="nav-tab" id="tab-camera">🎥 Câmera & Zoom</button>
     </div>
 
-    <!-- SEÇÃO 1: MONTADOR DE CENÁRIO (BUILDER) -->
-    <div id="panel-builder" style="display:flex;flex-direction:column;gap:16px;">
+    <!-- SEÇÃO 1: PACKS OFICIAIS 3MIX COM AS 4 FAIXAS -->
+    <div id="panel-packs" style="display:flex;flex-direction:column;gap:14px;">
+      <!-- Galeria dos 9 Packs -->
+      <div class="section-card">
+        <div class="section-title">
+          <span>1. Escolha o Cenário (9 Packs 4K)</span>
+          <span id="pack-count-badge" style="font-size:10.5px;color:var(--accent);font-weight:700;">9 Packs</span>
+        </div>
+        <div class="packs-grid" id="packs-grid-container">
+          <!-- Injetado dinamicamente via JS -->
+        </div>
+      </div>
+
+      <!-- Arquitetura das 4 Faixas Canônicas -->
+      <div class="section-card">
+        <div class="section-title">
+          <span>2. Montagem Canônica (Layer Stack)</span>
+          <span style="font-size:10px;color:#aaa;">Z-Order 0 → 3</span>
+        </div>
+
+        <!-- FAIXA 01: TELÃO MULTIMÍDIA -->
+        <div class="faixa-card">
+          <div class="faixa-header">
+            <span class="faixa-badge faixa-1">Faixa 01 · Z = 0 (Base)</span>
+            <span style="font-size:10.5px;color:#aaa;" id="telao-coords-info">Telão 16:9</span>
+          </div>
+          <div style="font-size:11.5px;font-weight:700;color:#fff;">📺 Telão de Fundo (Conteúdo Multimídia)</div>
+          <p style="font-size:10.5px;color:var(--text-dim);line-height:1.3;">
+            VT de reportagem, GC animado, slides, replay ou feed remoto que aparece através do recorte do telão.
+          </p>
+          <select id="pack-screen-select">
+            <option value="">(Selecione a entrada do Telão · VT, Replay, GC…)</option>
+          </select>
+          <label style="font-size:10.5px;color:#aaa;display:flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="checkbox" id="pack-screen-fit-rect" checked> Enquadrar exatamente na moldura do telão
+          </label>
+        </div>
+
+        <!-- FAIXA 02: CENÁRIO DE FUNDO -->
+        <div class="faixa-card">
+          <div class="faixa-header">
+            <span class="faixa-badge faixa-2">Faixa 02 · Z = 1 (Meio)</span>
+            <span style="font-size:10px;color:#2ecc71;font-weight:700;">✓ Recorte Alfa Direto</span>
+          </div>
+          <div style="font-size:11.5px;font-weight:700;color:#fff;">🏛️ Cenário do Estúdio (`01_FUNDO.png`)</div>
+          <p style="font-size:10.5px;color:var(--text-dim);line-height:1.3;">
+            Paredes e iluminação 4K. O telão da Faixa 01 vaza perfeitamente pelo canal alfa sem necessidade de máscaras.
+          </p>
+        </div>
+
+        <!-- FAIXA 03: CÂMERA DO APRESENTADOR COM CHROMA -->
+        <div class="faixa-card">
+          <div class="faixa-header">
+            <span class="faixa-badge faixa-3">Faixa 03 · Z = 2 (Apresentador)</span>
+            <a href="/chroma" target="_blank" style="font-size:10.5px;color:var(--accent);text-decoration:none;font-weight:600;">Calibrar Chroma ↗</a>
+          </div>
+          <div style="font-size:11.5px;font-weight:700;color:#fff;">🎙️ Câmera com Chroma Key</div>
+          <p style="font-size:10.5px;color:var(--text-dim);line-height:1.3;">
+            Entrada da câmera física do apresentador. Fica à frente do cenário e atrás da bancada frontal.
+          </p>
+          <select id="pack-camera-select">
+            <option value="">(Selecione a câmera do apresentador)</option>
+          </select>
+        </div>
+
+        <!-- FAIXA 04: BANCADA / PRIMEIRO PLANO -->
+        <div class="faixa-card">
+          <div class="faixa-header">
+            <span class="faixa-badge faixa-4">Faixa 04 · Z = 3 (Topo)</span>
+            <label style="font-size:10.5px;color:#fff;display:flex;align-items:center;gap:4px;cursor:pointer;">
+              <input type="checkbox" id="pack-fg-enable" checked> Ativar Bancada
+            </label>
+          </div>
+          <div style="font-size:11.5px;font-weight:700;color:#fff;">🪵 Frente / Bancada (`03_BANCADA_FRENTE.png`)</div>
+          <p style="font-size:10.5px;color:var(--text-dim);line-height:1.3;">
+            Mesa frontal com canal alfa sobreposta ao apresentador, garantindo a oclusão física realista de bancada.
+          </p>
+        </div>
+      </div>
+
+      <!-- Configuração da Cena e Switcher -->
+      <div class="section-card">
+        <div class="section-title">3. Nome da Cena no Switcher</div>
+        <input type="text" id="pack-scene-name-input" value="3Mix Estúdio · Jornalismo e Atualidades">
+        <button type="button" class="btn primary" id="btn-build-pack-scene" style="justify-content:center;padding:9px;font-size:12.5px;">
+          🚀 Montar Cenário Oficial no Switcher
+        </button>
+      </div>
+
+      <!-- Cenários Criados no Switcher -->
+      <div class="section-card">
+        <div class="section-title">Cenários Montados no Switcher</div>
+        <div id="built-sets-list-packs" style="display:flex;flex-direction:column;gap:6px;">
+          <div style="font-size:11px;color:var(--text-dim);font-style:italic;">Nenhum cenário montado ainda.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEÇÃO 2: MONTADOR LIVRE (CORNER-PIN BUILDER) -->
+    <div id="panel-builder" style="display:none;flex-direction:column;gap:16px;">
       <!-- Descrição do Cenário Selecionado -->
       <div class="section-card">
         <div class="section-title">
@@ -349,17 +537,9 @@
           Arraste os vértices no canvas ou digite valores numéricos normalizados.
         </div>
       </div>
-
-      <!-- Cenários Criados no Switcher -->
-      <div class="section-card">
-        <div class="section-title">Cenários Montados no Switcher</div>
-        <div id="built-sets-list" style="display:flex;flex-direction:column;gap:6px;">
-          <div style="font-size:11px;color:var(--text-dim);font-style:italic;">Nenhum cenário montado ainda.</div>
-        </div>
-      </div>
     </div>
 
-    <!-- SEÇÃO 2: CÂMERA VIRTUAL & ZOOM BROADCAST -->
+    <!-- SEÇÃO 3: CÂMERA VIRTUAL & ZOOM BROADCAST -->
     <div id="panel-camera" style="display:none;flex-direction:column;gap:16px;">
       <div class="section-card">
         <div class="section-title">Enquadramentos Rápidos (Câmera Virtual)</div>
@@ -371,7 +551,7 @@
           <button type="button" class="zoom-pill" data-zoom="guest">Convidado (1.5x)</button>
         </div>
         <p style="font-size:11px;color:var(--text-dim);line-height:1.4;margin-top:6px;">
-          Simula pedestais e gruas de estúdio com movimento suave e natural de aproximação ou travelling.
+          Simula gruas e pedestais de estúdio com movimento suave e natural de aproximação ou travelling.
         </p>
       </div>
 
@@ -414,11 +594,11 @@
   <main class="preview-area">
     <div class="preview-toolbar">
       <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:12.5px;font-weight:700;color:#fff;">Composição do Estúdio em Tempo Real</span>
+        <span style="font-size:12.5px;font-weight:700;color:#fff;" id="canvas-header-title">Composição do Estúdio em Tempo Real</span>
         <button type="button" class="btn" id="btn-refresh-preview" style="font-size:11px;padding:3px 8px;">Atualizar</button>
       </div>
       <div style="font-size:11px;color:var(--text-dim);" id="canvas-status">
-        Shader: corner-pin.shader · Bilinear Inversa
+        4 Faixas Canônicas · Canal Alfa Direto
       </div>
     </div>
     <div class="preview-viewport">
@@ -427,6 +607,6 @@
   </main>
 </div>
 
-<script src="estudio.js?v=20261103b"></script>
+<script src="estudio.js?v=20261104a"></script>
 </body>
 </html>
