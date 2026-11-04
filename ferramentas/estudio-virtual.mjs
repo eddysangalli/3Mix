@@ -743,7 +743,8 @@ export class StudioEngine{
   };
  }
  async zoomSet(d){
-  const key=d.key,record=this.sets[key];
+  const key=d.key;
+  let record=this.sets[key] || Object.values(this.sets).find(s=>s.id===key || s.name===key || s.name===d.scene || s.name===d.v);
   if(!record)fail('Este cenário não foi montado pelo 3Mix Estúdio');
   let zoom=Number(d.zoom)||1.0;
   let panX=Number(d.panX)||0.0;
@@ -752,12 +753,71 @@ export class StudioEngine{
    const p=STUDIO_ZOOM_PRESETS.find(x=>x.id===d.presetId);
    if(p){zoom=p.zoom;panX=p.panX;panY=p.panY;}
   }
+
+  // 1) Restaura os slots (câmeras) para o enquadramento de perspectiva original
   for(const slot of record.slots){
-   if(!slot.baseQuad)slot.baseQuad=slot.quad;
-   const newQuad=applyVirtualZoom(slot.baseQuad,zoom,panX,panY);
-   await this.applyFilter(slot.wrapperKey,newQuad,slot.enabled!==false,slot.antialias!==false);
-   slot.quad=newQuad;
+   const targetQuad=slot.baseQuad||slot.quad;
+   if(targetQuad){
+    await this.applyFilter(slot.wrapperKey,targetQuad,slot.enabled!==false,slot.antialias!==false).catch(()=>{});
+    slot.quad=targetQuad;
+   }
   }
+
+  // 2) Obtém todos os itens da cena do cenário virtual
+  const items=(await this.p.req('GetSceneItemList',{sceneName:record.name})).sceneItems||[];
+  const video=await this.p.req('GetVideoSettings');
+  const W=video.baseWidth||1920,H=video.baseHeight||1080;
+
+  const sb=record.screen?.bounds;
+  const screenName=record.screen?.name;
+
+  // 3) Interpolação suave de Travelling Broadcast (dolly zoom cinematográfico)
+  const zoomStart=record.currentZoom?.zoom||1.0;
+  const panXStart=record.currentZoom?.panX||0.0;
+  const panYStart=record.currentZoom?.panY||0.0;
+  const zoomEnd=zoom,panXEnd=panX,panYEnd=panY;
+  const duration=Math.min(5000,Math.max(0,Number(d.duration)||0));
+  const steps=duration<=50?1:Math.max(1,Math.round(duration/33));
+  const interval=steps>1?duration/steps:0;
+
+  for(let s=1;s<=steps;s++){
+   const progress=s/steps;
+   const ease=0.5-0.5*Math.cos(Math.PI*progress);
+   const curZ=zoomStart+(zoomEnd-zoomStart)*ease;
+   const curPX=panXStart+(panXEnd-panXStart)*ease;
+   const curPY=panYStart+(panYEnd-panYStart)*ease;
+   const curCX=W*(0.5+curPX);
+   const curCY=H*(0.5+curPY);
+
+   for(const item of items){
+    const isScreen=screenName&&item.sourceName===screenName;
+    const origX=isScreen&&sb?(sb.x<=1?Math.round(sb.x*W):sb.x):0;
+    const origY=isScreen&&sb?(sb.y<=1?Math.round(sb.y*H):sb.y):0;
+    const origW=isScreen&&sb?(sb.largura<=1?Math.round(sb.largura*W):(sb.largura||W)):W;
+    const origH=isScreen&&sb?(sb.altura<=1?Math.round(sb.altura*H):(sb.altura||H)):H;
+
+    const newW=Math.round(origW*curZ);
+    const newH=Math.round(origH*curZ);
+    const newX=Math.round((origX-curCX)*curZ + W/2);
+    const newY=Math.round((origY-curCY)*curZ + H/2);
+
+    await this.p.req('SetSceneItemTransform',{
+     sceneName:record.name,
+     sceneItemId:item.sceneItemId,
+     sceneItemTransform:{
+      boundsType:'OBS_BOUNDS_STRETCH',
+      boundsAlignment:5,
+      boundsWidth:newW,
+      boundsHeight:newH,
+      positionX:newX,
+      positionY:newY,
+      alignment:5
+     }
+    }).catch(()=>{});
+   }
+   if(s<steps&&interval>0)await new Promise(r=>setTimeout(r,interval));
+  }
+
   record.currentZoom={zoom,panX,panY,presetId:d.presetId||null};
   await this.save();
   this.last={set:record,zoom:{zoom,panX,panY}};

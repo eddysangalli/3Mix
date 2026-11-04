@@ -77,12 +77,12 @@ body.dock1-off.no-inputs #side-panel-2.on { flex: 1 1 auto; }
 body.no-inputs:not(:has(#side-panel.on)):not(:has(#side-panel-2.on)) .mid-empty { display: flex; }
 
 /* Rodapé: informações + botões de módulos. */
-.stat { gap: 10px; }
-.stat-info { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; overflow: hidden; }
-.view-toggles { display: flex; align-items: center; gap: 3px; flex: none; }
-.view-toggles .lt { height: 22px; padding: 0 9px; font: 600 12px/20px 'Segoe UI'; background: #242424; border: 1px solid #3d3d3d; border-radius: 3px; color: #8f8f8f; cursor: pointer; }
-.view-toggles .lt:hover { border-color: #777; color: #eee; }
-.view-toggles .lt.on { background: #3a3a3a; border-color: #6a6a6a; color: #f0f0f0; }
+.stat { gap: 16px; }
+.stat-info { display: flex; align-items: center; gap: 14px; flex: none; min-width: 0; }
+.view-toggles { display: inline-flex; align-items: center; gap: 4px; flex: none; }
+.view-toggles .lt { height: 28px; padding: 0 9px; font: 700 11px/26px 'Segoe UI'; background: #232832; border: 1px solid #374151; border-radius: 3px; color: #94a3b8; cursor: pointer; transition: all 0.12s ease; }
+.view-toggles .lt:hover { border-color: #4b5563; color: #f1f5f9; background: #333b49; }
+.view-toggles .lt.on { background: #0284c7; border-color: #38bdf8; color: #ffffff; box-shadow: 0 0 6px rgba(56,189,248,0.35); }
 
 /* ===== Dock de Áudio no idioma da janela completa (mockup) =====
    Mesma paleta por categoria do Áudio (MIC vermelho, CAM verde, VT amarelo,

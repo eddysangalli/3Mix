@@ -148,6 +148,8 @@
   .strip .bd { flex: 1; min-height: 52px; display: flex; gap: 3px; align-items: stretch; }
   .mt { width: 6px; background: #0a0a0a; position: relative; border-radius: 1px; }
   .mt::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, #2fd13a 0 70%, #e8d21d 70% 88%, #e0352b 88%); clip-path: inset(calc((1 - var(--l, 0)) * 100%) 0 0 0); }
+  .mt::before { content: ""; position: absolute; left: 0; right: 0; height: 1.5px; background: #fff; bottom: calc(var(--p, 0) * (100% - 1.5px)); box-shadow: 0 0 3px rgba(255,255,255,0.7); pointer-events: none; }
+  .mt.clip::after { background: #ff2a2a !important; }
   .fd { width: 18px; position: relative; touch-action: none; cursor: ns-resize; }
   .fd::before { content: ""; position: absolute; left: 50%; top: 4px; bottom: 4px; width: 2px; margin-left: -1px; background: #505966; }
   .fd i { position: absolute; left: 0; right: 0; height: 10px; bottom: calc(var(--v, 0) * (100% - 10px)); background: linear-gradient(180deg, #d8e0ea, #9ea8b5); border: 1px solid #232323; border-radius: 1px; }
@@ -161,7 +163,9 @@
   .bot .tc { font: 700 12px Consolas, monospace; padding: 0 6px; color: #ffad99; background: #261715; border-radius: 2px; margin-left: 2px; }
   .b.add-input { background: linear-gradient(180deg, #1d4e28, #13391d); border-color: #2e8243; color: #8ef5ab; font-weight: 700; height: 26px; padding: 0 14px; font-size: 12px; }
   .b.add-input:hover { background: linear-gradient(180deg, #276b37, #1b4d27); border-color: #3ec75e; color: #fff; }
-  .stat { display: flex; align-items: center; gap: 14px; padding: 0 10px; background: #121212; font-size: 11px; white-space: nowrap; overflow: hidden; border-top: 1px solid #212121; }
+  .stat { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 0 12px; background: #121212; font-size: 11px; white-space: nowrap; overflow: hidden; border-top: 1px solid #212121; }
+  .stat .stat-info { display: flex; align-items: center; gap: 12px; flex: none; }
+  .stat .stat-spacer { flex: 1; min-width: 16px; }
   .stat b { font-weight: 700; } .stat .res { color: #00e676; font-weight: 700; font-family: Consolas, monospace; } .stat .sp { flex: 1; }
   .stat .ok { color: #00e676; } .stat .bad { color: #ff5252; }
   .stat .clock { font-family: Consolas, monospace; color: #c0cad8; font-weight: 600; }
@@ -198,6 +202,70 @@
   .pop-close-btn { width: 22px; height: 22px; font-size: 13px; font-weight: 700; color: #8d9baa; background: transparent; border: 1px solid transparent; border-radius: 3px; display: grid; place-items: center; cursor: pointer; line-height: 1; }
   .pop-close-btn:hover { background: #d92418; border-color: #ff5247; color: #fff; }
   .pop-body { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 14px; }
+
+  /* Modal de Opções e Configurações de Entrada (Estilo vMix Broadcast) */
+  .pop:not(.on) { display: none !important; }
+  .pop[data-panel="inputsettings"] {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(1040px, calc(100vw - 20px));
+    height: min(720px, calc(100vh - 20px));
+    padding: 0;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 6px;
+    background: #14181f;
+    box-shadow: 0 28px 80px rgba(0,0,0,0.95), 0 0 0 1px rgba(255,255,255,0.1);
+    z-index: 2500;
+  }
+  .pop.on[data-panel="inputsettings"] { display: flex !important; }
+  .inset-wrap { display: flex; flex-direction: column; height: 100%; overflow: hidden; background: #14181f; color: #e2e8f0; }
+  .inset-topbar { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: #1e242d; border-bottom: 1px solid #2d3748; flex: none; cursor: grab; user-select: none; }
+  .inset-topbar:active { cursor: grabbing; }
+  .inset-title { margin: 0; font-size: 14px; font-weight: 700; color: #f8fafc; display: flex; align-items: center; gap: 8px; }
+  .inset-badge { background: #0284c7; color: white; padding: 2px 7px; border-radius: 3px; font-size: 11px; font-weight: 800; }
+  .inset-topbar-actions { display: flex; align-items: center; gap: 8px; }
+  .inset-body { display: grid; grid-template-columns: 180px minmax(0, 1fr); flex: 1 1 auto; min-height: 0; overflow: hidden; }
+  .inset-tabs { background: #0b0f14; border-right: 1px solid #232c3b; display: flex; flex-direction: column; justify-content: space-between; overflow-y: auto; }
+  .inset-tabs-list { display: flex; flex-direction: column; }
+  .inset-tab-btn { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 10px 14px; border: none; background: transparent; color: #94a3b8; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+  .inset-tab-btn:hover { background: #151d27; color: #f8fafc; }
+  .inset-tab-btn.on { background: #166534; color: #ffffff; font-weight: 700; }
+  .inset-sidebar-footer { padding: 10px; border-top: 1px solid #1f2937; background: #070a0e; }
+  .inset-sidebar-footer button { width: 100%; height: 28px; font-size: 11.5px; font-weight: 600; }
+  .inset-content { padding: 14px 18px; overflow-y: auto; background: #14181f; display: flex; flex-direction: column; gap: 12px; }
+  
+  /* Layout de Duas Colunas da Aba Geral */
+  .inset-two-cols { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 20px; }
+  .inset-col { display: flex; flex-direction: column; gap: 10px; }
+  .inset-field-row { display: grid; grid-template-columns: 100px 1fr; gap: 10px; align-items: center; font-size: 12.5px; }
+  .inset-field-row label { font-weight: 600; color: #cbd5e1; margin: 0; }
+  .inset-swatch-list { display: flex; gap: 6px; align-items: center; }
+  .inset-swatch { width: 22px; height: 22px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.25); cursor: pointer; }
+  .inset-swatch.active { outline: 2px solid #ffffff; }
+  .inset-checkboxes { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: #cbd5e1; margin-top: 4px; }
+  .inset-checkboxes label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  .inset-info-box { background: #0c1017; border: 1px solid #232c3b; border-radius: 4px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: #94a3b8; }
+  .inset-info-box b { color: #e2e8f0; }
+
+  /* Preview Inferior Amplo da Entrada */
+  .inset-preview-row { display: grid; grid-template-columns: minmax(0, 1fr) 42px; gap: 8px; background: #070a0e; border-top: 1px solid #232c3b; padding: 10px 14px; align-items: center; flex: none; height: 200px; }
+  .inset-screen-box { height: 100%; aspect-ratio: 16/9; margin: 0 auto; background: #000; border: 1px solid #334155; border-radius: 4px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; }
+  .inset-screen-box img { width: 100%; height: 100%; object-fit: contain; }
+  .inset-screen-badge { position: absolute; top: 6px; left: 6px; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 2px; }
+  .inset-preview-tools { display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: center; }
+  .inset-preview-tools button { width: 32px; height: 32px; padding: 0; display: grid; place-items: center; font-size: 14px; }
+
+  .inset-footer { display: flex; justify-content: space-between; align-items: center; padding: 8px 14px; background: #11151c; border-top: 1px solid #283344; flex: none; }
+
+  /* Estilo da Barra Inferior e Badges do Ar */
+  .estado-ar { display: flex; align-items: center; gap: 6px; flex: none; }
+  .estado-ar .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 3px; background: #1c2026; color: #7e8794; border: 1px solid #2e3540; letter-spacing: 0.3px; cursor: pointer; transition: all 0.12s ease; outline: none; }
+  .estado-ar .badge:hover { background: #262c35; color: #d1d5db; border-color: #3f4756; }
+  .estado-ar .badge.live { background: #b91c1c !important; color: #ffffff !important; border-color: #ef4444 !important; box-shadow: 0 0 8px rgba(239,68,68,0.5) !important; }
 
   /* Modo Pop-up / Janela Flutuante Independente (para segundo monitor) */
   body.popup-mode { display: flex !important; flex-direction: column !important; height: 100vh !important; width: 100vw !important; background: var(--bg) !important; overflow: hidden !important; }
@@ -272,7 +340,7 @@
   .bot .b:disabled { color: #6b7480; background: #222222; border-color: #353535; }
   .bot .g.l { display: flex; align-items: center; gap: 0; } .bot .g.r { display: flex; align-items: center; gap: 3px; }
   .bot .pair { display: inline-flex; align-items: center; margin-left: 28px; } .bot .pair .cg { width: 38px; padding: 0; margin: 0 1px 0 0; border-right: 1px solid #4b5967; }
-  .bot .dd { width: 16px; padding: 0; margin-left: -1px; font-size: 7px; } .bot .ib { width: 28px; padding: 0; } .bot .ib svg { width: 14px; height: 14px; }
+  .bot .dd { width: 16px; padding: 0; margin-left: -1px; font-size: 7px; } .bot .ib { width: auto; min-width: 28px; padding: 0 8px; gap: 5px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; white-space: nowrap; } .bot .ib svg { width: 14px; height: 14px; flex: none; }
   body.locked .tt .x { display: none; } body.list .th { display: none; } body.big .tile { width: 236px; }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .add .form select { background: #151515; color: #ededed; border: 1px solid #4a4a4a; } .add .form input:disabled, .add .form select:disabled { background: #1a1a1a; color: #6f6f6f; border-color: #363636; }
   .add .form input[type="color"] { padding: 1px; width: 54px; height: 27px; }
@@ -486,19 +554,6 @@ body.popup-mode.side-popup #view-mixer { overflow:auto; }
 .tile.pass-pvw { border: 2px dashed #00b020 !important; box-shadow: 0 0 6px rgba(0, 176, 32, 0.4) !important; }
 .tt.pass-pgm { border-bottom: 2px dashed #ff4040 !important; }
 .tt.pass-pvw { border-bottom: 2px dashed #00e030 !important; }
-
-.tile.has-vset { width: 348px; display: flex; flex-direction: row; }
-.tile.has-vset .tile-main { width: 290px; flex: none; display: flex; flex-direction: column; }
-.tile-vset-col { width: 58px; background: #12161c; border-left: 1px solid #2a323d; display: flex; flex-direction: column; padding: 3px; gap: 4px; }
-.vset-head { display: flex; gap: 2px; height: 18px; }
-.vset-tab { flex: 1; font-size: 8px; font-weight: 700; background: #202630; color: #94a3b8; border: 1px solid #334155; border-radius: 2px; cursor: pointer; padding: 0; line-height: 16px; text-transform: uppercase; }
-.vset-tab.on { background: #008040; color: #fff; border-color: #00a854; }
-.vset-tab:hover:not(.on) { background: #2d3748; color: #fff; }
-.vset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; flex: 1; padding: 2px 0; }
-.vset-p { font-size: 11px; font-weight: 800; background: #1e2530; color: #cbd5e1; border: 1px solid #334155; border-radius: 2px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.1s ease; }
-.vset-p:hover { background: #2d3748; color: #fff; }
-.vset-p.on { background: #008040 !important; color: #fff !important; border-color: #00a854 !important; box-shadow: 0 0 8px rgba(0,168,84,0.6); }
-.vset-dur { height: 18px; line-height: 18px; text-align: center; font-size: 9.5px; font-family: monospace; background: #0a0d12; border: 1px solid #1e2530; color: #94a3b8; border-radius: 2px; }
 
 /* Proportions from the side-by-side vMix reference. */
 .tile{width:290px}.th{height:163px}.tiles{gap:4px;padding:2px 0}.tile.has-speed{width:338px}.tile.has-speed .tile-main{width:290px}body.big .tile{width:340px}body.big .th{height:191px}.tt{height:26px}.bot{padding:0;gap:4px}.bot .g{gap:1px}.bot .gear{width:38px}.bot .b{height:28px}.media-row{grid-template-columns:minmax(0,1fr) 134px minmax(0,1fr)}
@@ -1054,6 +1109,12 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
 
     <!-- PÍLULAS DE AÇÃO RÁPIDA & INOVAÇÕES 3MIX -->
     <div class="topbar-actions">
+      <div class="topbar-pill-pair" style="display:inline-flex;align-items:center;">
+        <button class="topbar-pill" data-a="top_fullscreen" title="🖥️ Fullscreen (Tela Cheia): Exibir saída no monitor secundário">
+          <span class="pill-icon">🖥️</span> FULLSCREEN
+        </button>
+        <button class="topbar-pill dd-pill" data-a="pop" data-v="ext" title="Configurar saídas Fullscreen 1, Fullscreen 2 e MultiView" style="margin-left:-2px;min-width:18px;padding:0 5px;font-size:10px;">▾</button>
+      </div>
       <button class="topbar-pill" data-a="preflight" title="🛡️ Pre-Flight Check: Auditoria em tempo real de hardware, encoders e encoders">
         <span class="pill-icon">🛡️</span> PRE-FLIGHT
       </button>
@@ -1206,7 +1267,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     <div class="mid-empty" id="mid-empty" aria-live="polite"><b>Nada aberto na mesa</b><span><button class="b" data-a="ui_toggle" data-v="inputs">Abrir entradas</button><button class="b" data-a="ui_toggle" data-v="dock">Abrir dock</button><button class="b" data-a="ui_reset">Voltar ao padrão</button></span></div>
   </div>
   <div class="bot" id="bot"></div>
-  <div class="stat" id="stat-bar"><div class="stat-info" id="stat"></div><div class="estado-ar" id="estado-ar" role="status" aria-label="O que está no ar"></div><div class="view-toggles" id="view-toggles" aria-label="Mostrar ou ocultar módulos"></div></div>
+  <div class="stat" id="stat-bar"><div class="stat-info" id="stat"></div><div class="stat-spacer"></div><div class="estado-ar" id="estado-ar" role="status" aria-label="O que está no ar"></div></div>
   <div class="pop" id="pop"></div>
   <div id="operation-status" hidden style="position:fixed;top:4px;left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 24px);box-sizing:border-box;z-index:2000;background:#27313c;color:white;padding:6px;border:1px solid #8aa1b7">Comando aguardando confirmação · <button data-a="operationcheck">Conferir motor</button> <button id="operation-release" data-a="operationrelease" hidden>Liberar controles sem repetir</button></div>
   <div id="input-editor-status" role="status" hidden style="position:fixed;bottom:46px;left:12px;right:12px;z-index:1999;background:#27313c;color:white;padding:8px;border:1px solid #8aa1b7"><span id="input-editor-message"></span> <button data-a="editorcheck">Conferir janela</button> <button data-a="editorrelease">Liberar controle sem repetir</button> <button data-a="editordismiss">Ocultar aviso</button></div>
@@ -1219,6 +1280,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
 <script src="gc/catalogo.js"></script>
 <script src="gc/catalogo-biblioteca.js"></script>
 <script src="remoto/codecs-mesa.js"></script>
+<script src="remoto/peak-hold.js"></script>
 <script>
   "use strict";
   const $ = (id) => document.getElementById(id);
@@ -1262,6 +1324,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     { id: "audio", group: "Mídias", icon: "🎵", label: "Áudio (arquivo)", kind: "ffmpeg_source", hint: "Arquivo de áudio para trilha ou vinheta." },
     { id: "image", group: "Mídias", icon: "🖼️", label: "Imagem", kind: "image_source", hint: "Imagem parada (PNG, JPG…)." },
     { id: "photos", group: "Mídias", icon: "🖼️", label: "Fotos", kind: "slideshow", hint: "Sequência de imagens." },
+    { id: "powerpoint", group: "Mídias", icon: "📊", label: "PowerPoint / Slides", special: "slides", hint: "Apresentações PPTX sem Office com Presenter Mode, miniaturas e controle de slides." },
     { id: "replay", group: "Mídias", icon: "⏪", label: "Replay", kind: "replay_source", special: "replay", hint: "Abre a janela Replay para criar um ângulo a partir de uma câmera." },
     { id: "stream", group: "Rede", icon: "📡", label: "Fluxo de rede", kind: "ffmpeg_source", fields: [["url", "Endereço (rtmp://, srt://, rtsp://, http://)", "", "text"]], settings: (f) => ({ is_local_file: false, input: f.url }), hint: "Recebe um fluxo de rede." },
     { id: "web", group: "Rede", icon: "🌐", label: "Navegador", kind: "browser_source", fields: [["url", "URL", "https://", "text"]], settings: (f, w, h) => ({ url: f.url, width: w, height: h }), hint: "Página web ou HTML local: placar, GC. Para convidado remoto use 3Mix Call." },
@@ -1348,7 +1411,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     uiBanksBottom: store.get("mesa.ui_banks_bottom", false) === true, uiInputs: store.get("mesa.ui_inputs", true) !== false,
     uiDock2: store.get("mesa.ui_dock2", false) === true, uiDock1Off: store.get("mesa.ui_dock1_off", false) === true, dockSplit: clamp(Number(store.get("mesa.docksplit", 0.5)) || 0.5, 0.05, 0.95), side2Tab: store.get("mesa.side2tab", "replay"),
     dockTabs: dockTabsIniciais(),
-    minimized: {}, showSpeed: store.get("mesa.showSpeed", {}), inputSpeed: store.get("mesa.inputSpeed", {}), sideWidth: store.get("mesa.sidewidth", null), side2Width: store.get("mesa.side2width", null),
+    minimized: {}, showSpeed: store.get("mesa.showSpeed", {}), inputSpeed: store.get("mesa.inputSpeed", {}), vsetSpeed: store.get("mesa.vsetSpeed", {}), vsetSpeedMode: store.get("mesa.vsetSpeedMode", {}), vsetPreset: {}, sideWidth: store.get("mesa.sidewidth", null), side2Width: store.get("mesa.side2width", null),
     dskAssign: store.get("mesa.dskAssign", {}), dskPending: {}, dskReplaceReady: {}, dskMenu: null, dskTransitions: store.get("mesa.dskTransitions", {}), dskTransition: store.get("mesa.dskTransition", { name: "", duration: 500 }),
     shortcuts: store.get("mesa.shortcuts", DEFAULT_SHORTCUTS), capturingShortcut: false, capturedKey: null,
     inputHealth: null, outputWatchdog: null, inputHealthSnapshot: {},
@@ -1356,7 +1419,28 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     rpQuickPlayer: "A", rpQuickEvent: undefined, rpAngles: {}, rpDockTab: store.get("mesa.rp_dock_tab", "events"),
     rpLoop: store.get("mesa.rp_loop", false), rpArm: null, rpDelete: null, rpError: "",
     videoDevices: [], audioDevices: [], monitors: [], windows: [],
+    inputProps: store.get("mesa.inputProps", {}),
   };
+
+  function goTitle(act) {
+    const map = {
+      quickplay: "leva ao ar com a transição padrão",
+      cut: "corte seco para o programa (CUT)",
+      fade: "fade suave de 500ms para o programa",
+      fade1000: "fade suave de 1000ms para o programa",
+      merge: "transição merge para o programa",
+      wipe: "transição wipe para o programa",
+      preview: "preparar no monitor de Preview",
+      playpause: "reproduzir mídia e levar ao ar",
+      dsk1: "acionar canal DSK 1 (Overlay 1)",
+      dsk2: "acionar canal DSK 2 (Overlay 2)",
+      dsk3: "acionar canal DSK 3 (Overlay 3)",
+      dsk4: "acionar canal DSK 4 (Overlay 4)"
+    };
+    return map[act] || `executar comando '${act}'`;
+  }
+
+  const replayUrl = LOCAL.replayUrl || "http://" + new URL(LOCAL.url || "ws://127.0.0.1:4466").hostname + ":8088/api/replay";
 
   async function fetchAllDevices() {
     try {
@@ -1498,8 +1582,6 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       if (!mesaDisposed) { renderAll(); setTimeout(connect, 2500); }
     };
   }
-
-  const replayUrl = LOCAL.replayUrl || "http://" + new URL(LOCAL.url || "ws://127.0.0.1:4466").hostname + ":8088/api/replay";
 
 
   async function readSettingsForConfig(){const expected=st.preset,url=new URL('/api/settings',replayUrl),response=await fetch(url.href,{cache:'no-store',signal:AbortSignal.timeout(10000)}),data=await response.json();if(!response.ok||data.success!==true)throw Error(data.error||'Não foi possível ler configurações');if((expected&&data.preset!==expected)||(st.preset&&st.preset!==data.preset))throw Error('O projeto mudou durante a consulta. Confira novamente.');return data;}
@@ -1743,11 +1825,43 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     } catch { st.modulos = null; }
   }
   const moduloAtivo = (id) => !st.modulos || st.modulos[id] !== false;
+  function fireInputTriggers(inputName, eventType) {
+    if (!inputName) return;
+    const inCfg = (st.inputProps && st.inputProps[inputName]);
+    const triggers = inCfg?.triggers || [];
+    for (const trg of triggers) {
+      if (trg.event !== eventType) continue;
+      const delay = Math.max(0, Number(trg.delayMs) || 0);
+      setTimeout(() => {
+        try {
+          if (trg.action === "OverlayInput1In") A.ov({ v: trg.target || inputName, k: 0 });
+          else if (trg.action === "OverlayInput1Out") dskExit(0);
+          else if (trg.action === "OverlayInput2In") A.ov({ v: trg.target || inputName, k: 1 });
+          else if (trg.action === "Play") A.playpause({ v: inputName });
+          else if (trg.action === "Pause") A.playpause({ v: inputName });
+          else if (trg.action === "Cut") productionAction("cut", { input: trg.target || inputName });
+          else if (trg.action === "Fade") productionAction("transition", { input: trg.target || inputName, transition: "Fade", duration: 500 });
+          else if (trg.action === "Preview") A.preview({ v: trg.target || inputName });
+          else if (trg.action === "Alert") toast(`⚡ Gatilho disparado: ${eventType} em ${inputName}`);
+        } catch (e) {
+          console.warn("Falha ao executar trigger:", e);
+        }
+      }, delay);
+    }
+  }
+
   function onEvent(type, d) {
     if(type==='CustomEvent'&&d.freemix?.workspace){receiveMesaWorkspace(d.freemix.workspace);return;}
     if (type === "CustomEvent") { const f = d.freemix; if(f&&new URLSearchParams(location.search).has('pop')&&(f.open||f.do))return; if (f && f.open === "config") openPop('settings'); else if (f && f.open) { st.pop = null; st.popAt = { x: innerWidth, y: 0 }; openPop(f.open, f.arg || undefined); } else if (f && f.do && A["top_" + f.do]) A["top_" + f.do](); return; } // pedido vindo da barra de cima
     if (type === "CurrentSceneCollectionChanged") { if (st.preset && st.preset !== d.sceneCollectionName) store.set("mesa.lastPreset", st.preset); st.preset = d.sceneCollectionName; updateTopProjectName(); setTimeout(() => syncAll().catch(() => {}), 900); }
-    if (type === "CurrentProgramSceneChanged") { st.program = d.sceneName; scheduleMesaPaint('tally'); scheduleMesaPaint('bot'); if (st.pop === "replay") renderPop(); if (dockShows("replay")) renderSideReplay(); }
+    if (type === "CurrentProgramSceneChanged") {
+      const prevProgram = st.program;
+      st.program = d.sceneName;
+      if (prevProgram && prevProgram !== d.sceneName) fireInputTriggers(prevProgram, "OnTransitionOut");
+      fireInputTriggers(d.sceneName, "OnTransitionIn");
+      scheduleMesaPaint('tally'); scheduleMesaPaint('bot'); if (st.pop === "replay") renderPop(); if (dockShows("replay")) renderSideReplay();
+    }
+    else if (type === "MediaInputPlaybackEnded") { fireInputTriggers(d.inputName, "OnCompletion"); }
     else if (type === "CurrentPreviewSceneChanged") { st.preview = d.sceneName; scheduleMesaPaint('tally'); }
     else if (type === "SceneListChanged") { setScenes(d.scenes); scheduleMesaPaint('tiles'); laterItems(); }
     else if (type === "SceneItemCreated" || type === "SceneItemRemoved") laterItems();
@@ -1755,9 +1869,9 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     else if (type === "SceneNameChanged" || type === "SceneCreated" || type === "SceneRemoved" || type === "CurrentSceneCollectionChanged") syncScenes().catch(() => {});
     else if (type === "StudioModeStateChanged") { st.studio = d.studioModeEnabled; syncScenes().catch(() => {}); }
     else if (type === "CurrentSceneTransitionChanged") st.cur = d.transitionName;
-    else if (type === "RecordStateChanged") { st.rec = d.outputActive; scheduleMesaPaint('bot'); }
-    else if (type === "StreamStateChanged") { st.stream = d.outputActive; scheduleMesaPaint('bot'); }
-    else if (type === "VirtualcamStateChanged") { st.vcam = d.outputActive; scheduleMesaPaint('bot'); }
+    else if (type === "RecordStateChanged") { st.rec = d.outputActive; scheduleMesaPaint('bot'); scheduleMesaPaint('stat'); }
+    else if (type === "StreamStateChanged") { st.stream = d.outputActive; scheduleMesaPaint('bot'); scheduleMesaPaint('stat'); }
+    else if (type === "VirtualcamStateChanged") { st.vcam = d.outputActive; scheduleMesaPaint('bot'); scheduleMesaPaint('stat'); }
     else if (type === "InputAudioTracksChanged") { const a = st.audio.get(d.inputName); if (a) { a.tracks = d.inputAudioTracks; scheduleMesaPaint('mixer'); if (st.pop === "busman") renderPop(); } }
     else if (type === "InputAudioMonitorTypeChanged") { const a = st.audio.get(d.inputName); if (a) { a.mon = d.monitorType; scheduleMesaPaint('mixer'); } }
     else if (type === "InputAudioBalanceChanged") { const a = st.audio.get(d.inputName); if (a) { a.bal = d.inputAudioBalance; const el = document.querySelector(`[data-pan="${CSS.escape(d.inputName)}"]`); if (el && document.activeElement !== el) el.value = a.bal; } }
@@ -1766,12 +1880,25 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     else if (type === "InputVolumeChanged") { const a = st.audio.get(d.inputName); if (a && dragging !== d.inputName) { a.mul = d.inputVolumeMul; a.db = d.inputVolumeDb; paintFader(d.inputName); } }
     else if (type === "InputCreated" || type === "InputRemoved" || type === "InputNameChanged") syncAudio().catch(() => {});
   }
+  const meterPeaks = new WeakMap();
+  function peakFor(bar) {
+    let m = meterPeaks.get(bar);
+    if (!m) { m = new (window.PeakHoldMeter?.PeakHoldMeter || function(){ return { update: (v) => v, clipped: () => false }; })(); meterPeaks.set(bar, m); }
+    return m;
+  }
   function onMeters(inputs) {
+    const agora = Date.now();
     for (const i of inputs) {
       const el = document.querySelector(`.strip[data-n="${CSS.escape(i.inputName)}"]`); if (!el) continue;
       const peak = (ch) => { const mul = ch?.[1] ?? 0; return mul > 0 ? clamp((20 * Math.log10(mul) + 60) / 60, 0, 1) : 0; };
       const l = peak(i.inputLevelsMul[0]), r = i.inputLevelsMul[1] ? peak(i.inputLevelsMul[1]) : l, bars = el.querySelectorAll(".mt");
       bars[0].style.setProperty("--l", l.toFixed(3)); bars[1].style.setProperty("--l", r.toFixed(3));
+      [[bars[0], l], [bars[1], r]].forEach(([bar, nivel]) => {
+        if (!bar) return;
+        const m = peakFor(bar);
+        bar.style.setProperty("--p", m.update(nivel, agora).toFixed(3));
+        bar.classList.toggle("clip", m.clipped(agora));
+      });
     }
   }
 
@@ -2117,6 +2244,68 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     },
     preview: (d) => run(choosePreview(d.v)),
     quick: (d) => run(productionAction(st.studio ? "transition" : "active", {input:st.sceneKeys[d.v]||d.v})),
+    go: (d) => {
+      const name = d.v;
+      const now = Date.now();
+      st.lastGoAt = st.lastGoAt || {};
+      if (st.lastGoAt[name] && now - st.lastGoAt[name] < 350) return;
+      st.lastGoAt[name] = now;
+      const inCfg = (st.inputProps && st.inputProps[name]) || {};
+      const act = inCfg.goAction || "quickplay";
+      if (act === "cut") {
+        return run(productionAction(st.studio ? "cut" : "active", { input: st.sceneKeys[name] || name }));
+      } else if (act === "fade") {
+        return run(productionAction("transition", { input: st.sceneKeys[name] || name, transition: "Fade", duration: 500 }));
+      } else if (act === "fade1000") {
+        return run(productionAction("transition", { input: st.sceneKeys[name] || name, transition: "Fade", duration: 1000 }));
+      } else if (act === "preview") {
+        return run(A.preview({ v: name }));
+      } else if (act === "playpause") {
+        A.playpause({ v: name });
+        return run(productionAction(st.studio ? "transition" : "active", { input: st.sceneKeys[name] || name }));
+      } else if (act.startsWith("dsk")) {
+        const k = parseInt(act.replace("dsk", "")) - 1;
+        return A.ov({ v: name, k });
+      } else if (["merge", "wipe", "slide", "cube"].includes(act)) {
+        return run(productionAction("transition", { input: st.sceneKeys[name] || name, transition: act }));
+      } else {
+        return run(productionAction(st.studio ? "transition" : "active", { input: st.sceneKeys[name] || name }));
+      }
+    },
+    insetgoact: (d, el) => {
+      const val = el ? el.value : $("inset-go-act")?.value;
+      if (!val) return;
+      st.inputProps = st.inputProps || {};
+      st.inputProps[d.v] = st.inputProps[d.v] || {};
+      st.inputProps[d.v].goAction = val;
+      store.set("mesa.inputProps", st.inputProps);
+      renderTiles();
+      toast(`Ação GO atualizada para '${val}'`);
+    },
+    triggeradd: (d) => {
+      const name = d.v;
+      st.inputProps = st.inputProps || {};
+      st.inputProps[name] = st.inputProps[name] || {};
+      st.inputProps[name].triggers = st.inputProps[name].triggers || [];
+      st.inputProps[name].triggers.push({
+        id: "trg_" + Date.now().toString(36),
+        event: "OnTransitionIn",
+        action: "OverlayInput1In",
+        target: "DSK 1",
+        delayMs: 0
+      });
+      store.set("mesa.inputProps", st.inputProps);
+      renderPop();
+      toast("Gatilho adicionado");
+    },
+    triggerremove: (d) => {
+      const { name, trgId } = d;
+      if (!st.inputProps?.[name]?.triggers) return;
+      st.inputProps[name].triggers = st.inputProps[name].triggers.filter(t => t.id !== trgId);
+      store.set("mesa.inputProps", st.inputProps);
+      renderPop();
+      toast("Gatilho removido");
+    },
     cut: (d) => run(productionAction(st.studio ? "cut" : "active", {input:st.sceneKeys[d.v]||d.v})),
     ov: (d) => run((async () => {
       const index = +d.k, k = st.keyers?.[index]; if (!k) return toast("Canal de DSK não configurado no Downstream Keyer", true);
@@ -2928,6 +3117,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       const t = TYPES.find((x) => x.id === st.addType) || TYPES[0];
       if (t.special === "replay") return openPop("replay");
       if (t.special === "composition") return openPop("compositions");
+      if (t.special === "slides") { closePop(); return launchPanel('slides'); }
       if (t.id === "virtualset") {
         const base = $("add-name")?.value.trim() || ("ESTÚDIO VIRTUAL " + (st.scenes.length + 1));
         const packId = st.vsPack || "01";
@@ -3131,17 +3321,78 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
         throw Error((complete ? 'Entrada criada; a próxima janela não foi confirmada. ' : '') + error.message + note);
       } finally { creatingInput = false; markInputCreating(false); }
     })()); },
-    menu: (d) => openPop("menu", d.v),
+    menu: (d) => openPop("inputsettings", d.v),
+    inputsettings: (d) => openPop("inputsettings", d.v),
+    insettab: (d) => { st.insetTab = d.v; renderPop(); },
+    insetrename: (d) => run((async () => {
+      const from = d.v, to = $("inset-name-inp")?.value.trim();
+      if (!to || to === from) return;
+      try {
+        await req("SetSceneName", { sceneName: from, newSceneName: to });
+        if (st.tags[from] !== undefined) {
+          st.tags[to] = st.tags[from];
+          delete st.tags[from];
+          store.set("mesa.tags", st.tags);
+        }
+        st.popArg = to;
+        toast(`Entrada renomeada para "${to}"`);
+        renderTiles();
+        renderPop();
+      } catch (e) {
+        toast("Erro ao renomear: " + e.message, true);
+      }
+    })()),
+    insetvirtual: (d) => run(createVirtualInput(d.v)),
+    insettag: (d) => { st.tags[d.owner] = +d.v; store.set("mesa.tags", st.tags); renderTiles(); renderPop(); },
+    insetnotag: (d) => { delete st.tags[d.owner]; store.set("mesa.tags", st.tags); renderTiles(); renderPop(); },
+    insetcopyfrom: (d) => {
+      const target = d.v;
+      const others = st.scenes.filter(s => s !== target);
+      if (!others.length) return toast("Não há outras entradas disponíveis para copiar.", true);
+      const chosen = prompt(`Copiar configurações para "${target}".\nDigite o nome ou número de uma das seguintes entradas:\n` + others.map((s, i) => `${i+1}: ${s}`).join("\n"));
+      if (!chosen) return;
+      let src = others.find(s => s.toLowerCase() === chosen.toLowerCase().trim());
+      if (!src && !isNaN(chosen)) {
+        const idx = parseInt(chosen, 10) - 1;
+        if (others[idx]) src = others[idx];
+      }
+      if (!src) return toast("Entrada selecionada inválida.", true);
+      if (st.tags[src] !== undefined) {
+        st.tags[target] = st.tags[src];
+        store.set("mesa.tags", st.tags);
+      }
+      toast(`Configurações de "${src}" copiadas para "${target}"!`);
+      renderTiles();
+      renderPop();
+    },
+    insetmute: (d) => run(productionAction("audio_mute", { input: d.v })),
+    insetchromaopen: (d) => { closePop(); openPop("chroma", d.v); },
+    insetcoloropen: (d) => { closePop(); rpDockOpenWindow("/color?input=" + encodeURIComponent(d.v) + "#qualidade"); },
     corentrada: (d) => rpDockOpenWindow("/color?input=" + encodeURIComponent(d.v) + "#qualidade"),
+    vsetmode: (d) => {
+      const mode = d.mode || 'M';
+      st.vsetSpeedMode = st.vsetSpeedMode || {};
+      st.vsetSpeedMode[d.v] = mode;
+      st.vsetSpeed = st.vsetSpeed || {};
+      if (mode === 'C') st.vsetSpeed[d.v] = 0;
+      else if (mode === 'F') st.vsetSpeed[d.v] = 500;
+      else if (mode === 'M') st.vsetSpeed[d.v] = 1500;
+      else if (mode === 'S') st.vsetSpeed[d.v] = 3500;
+      store.set("mesa.vsetSpeedMode", st.vsetSpeedMode);
+      store.set("mesa.vsetSpeed", st.vsetSpeed);
+      scheduleMesaPaint('tiles');
+    },
     vsetzoom: (d) => run((async () => {
       const preset = d.preset || 'wide';
       st.vsetPreset = st.vsetPreset || {};
       st.vsetPreset[d.v] = preset;
       scheduleMesaPaint('tiles');
+      const mode = st.vsetSpeedMode?.[d.v] || 'S';
+      let dur = mode === 'C' ? 0 : ((st.vsetSpeed && st.vsetSpeed[d.v] !== undefined) ? Number(st.vsetSpeed[d.v]) : (mode === 'F' ? 500 : mode === 'S' ? 3500 : 1500));
       const res = await fetch(new URL('/api/studio', replayUrl).href, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'studio_zoom', key: st.sceneKeys[d.v] || d.v, presetId: preset })
+        body: JSON.stringify({ action: 'studio_zoom', key: st.sceneKeys[d.v] || d.v, presetId: preset, duration: dur })
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -3384,11 +3635,14 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     }).join("");
     if (st.inputsTab === 'compositions' && !shown().length) { box.innerHTML = '<div class="empty"><b>Nenhuma composição</b><br><button class="b" data-a="pop" data-v="compositions">Criar composição</button></div>'; return; }
     box.innerHTML = shown().map((name) => {
-      const { isOutDirect, isPvDirect, isOutPass, isPvPass } = getTallyStatus(name);
+      const { isOut, isPv, isOutDirect, isPvDirect, isOutPass, isPvPass } = getTallyStatus(name);
       const cls = (isOutDirect ? "out" : isPvDirect ? "pv" : "") + (isOutPass ? " pass-pgm" : isPvPass ? " pass-pvw" : "");
       const isVSet = name.startsWith('3Mix Estúdio') || name.toLowerCase().includes('estúdio') || name.toLowerCase().includes('studio') || (st.inputTags?.[name] || []).includes('virtualset');
       const vsetPreset = st.vsetPreset?.[name] || 'wide';
-      const tileCls = (isOutDirect ? " is-out" : isPvDirect ? " is-pv" : "") + (isOutPass ? " pass-pgm" : isPvPass ? " pass-pvw" : "") + (isVSet ? " has-vset" : "");
+      const curSpeedMode = st.vsetSpeedMode?.[name] || 'S';
+      const curDur = (st.vsetSpeed?.[name] !== undefined) ? st.vsetSpeed[name] : (curSpeedMode === 'C' ? 0 : curSpeedMode === 'F' ? 500 : curSpeedMode === 'M' ? 1500 : 3500);
+      const formattedTime = curSpeedMode === 'C' ? '00:00' : curDur <= 500 ? '00:00.5' : curDur <= 1500 ? '00:01.5' : '00:04';
+      const tileCls = (isOutDirect ? " is-out" : isPvDirect ? " is-pv" : "") + (isOutPass ? " pass-pgm" : isPvPass ? " pass-pvw" : "");
       const tag = st.tags[name], v = esc(name);
       const isMin = !!st.minimized?.[name];
       const media = (st.items.get(name) || []).filter((i) => isMedia(i.kind)), aud = sceneAudio(name);
@@ -3414,16 +3668,36 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
 
       const vsetCol = isVSet ? `<div class="tile-vset-col">
         <div class="vset-head">
-          <button class="vset-tab on" title="Câmera do Estúdio">Camera</button>
+          <button class="vset-tab on" title="Câmera do Estúdio Virtual">Camera</button>
           <button class="vset-tab" data-a="vsetsetup" data-v="${v}" title="Abrir Studio Virtual 2.5D">Setup</button>
         </div>
-        <div class="vset-grid">
-          <button class="vset-p ${vsetPreset === 'wide' ? 'on' : ''}" data-a="vsetzoom" data-preset="wide" data-v="${v}" title="Plano Geral (1.0x)">F</button>
-          <button class="vset-p ${vsetPreset === 'medium' ? 'on' : ''}" data-a="vsetzoom" data-preset="medium" data-v="${v}" title="Plano Médio (1.45x)">M</button>
-          <button class="vset-p ${vsetPreset === 'close' ? 'on' : ''}" data-a="vsetzoom" data-preset="close" data-v="${v}" title="Close-Up (2.1x)">S</button>
-          <button class="vset-p ${vsetPreset === 'screen' ? 'on' : ''}" data-a="vsetzoom" data-preset="screen" data-v="${v}" title="Foco Telão (1.7x)">C</button>
+        <div class="vset-speed-row">
+          <div class="vset-speeds">
+            <button class="vset-sp-btn ${curSpeedMode === 'F' ? 'on' : ''}" data-a="vsetmode" data-mode="F" data-v="${v}" title="Fast (Travelling rápido: 0.5s)">F</button>
+            <button class="vset-sp-btn ${curSpeedMode === 'M' ? 'on' : ''}" data-a="vsetmode" data-mode="M" data-v="${v}" title="Medium (Travelling médio: 1.5s)">M</button>
+            <button class="vset-sp-btn ${curSpeedMode === 'S' ? 'on' : ''}" data-a="vsetmode" data-mode="S" data-v="${v}" title="Slow (Travelling lento: 3.5s)">S</button>
+            <button class="vset-sp-btn ${curSpeedMode === 'C' ? 'on' : ''}" data-a="vsetmode" data-mode="C" data-v="${v}" title="Cut (Corte seco direto sem movimento)">C</button>
+          </div>
+          <div class="vset-time-val" title="Duração do travelling">${formattedTime}</div>
         </div>
-        <div class="vset-dur" title="Tempo de travelling suave">00:01</div>
+        <div class="vset-shots-grid">
+          <button class="vset-shot-btn ${vsetPreset === 'wide' ? 'on' : ''}" data-a="vsetzoom" data-preset="wide" data-v="${v}" title="Enquadramento 1: Geral (1.0x)">
+            <span class="vset-shot-num">1</span>
+            <span class="vset-shot-lbl">Geral</span>
+          </button>
+          <button class="vset-shot-btn ${vsetPreset === 'medium' ? 'on' : ''}" data-a="vsetzoom" data-preset="medium" data-v="${v}" title="Enquadramento 2: Médio (1.45x)">
+            <span class="vset-shot-num">2</span>
+            <span class="vset-shot-lbl">Médio</span>
+          </button>
+          <button class="vset-shot-btn ${vsetPreset === 'close' ? 'on' : ''}" data-a="vsetzoom" data-preset="close" data-v="${v}" title="Enquadramento 3: Close (2.1x)">
+            <span class="vset-shot-num">3</span>
+            <span class="vset-shot-lbl">Close</span>
+          </button>
+          <button class="vset-shot-btn ${vsetPreset === 'screen' ? 'on' : ''}" data-a="vsetzoom" data-preset="screen" data-v="${v}" title="Enquadramento 4: Telão (1.7x)">
+            <span class="vset-shot-num">4</span>
+            <span class="vset-shot-lbl">Telão</span>
+          </button>
+        </div>
       </div>` : "";
 
       const cardHtml = `<div class="${hasSpeed || isVSet ? "tile-main" : "tile-inner"}">
@@ -3444,8 +3718,8 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
             <div class="pl-next" style="color:#d0d7e2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></div>
           </div>
         </button>
-        <div class="r">${ov(name, 0)}<button class="w2" data-a="quick" data-v="${v}" title="GO: leva ao ar com a transição atual">GO</button><button class="w2" data-a="cut" data-v="${v}" title="Corte seco para o programa">Cut</button>${media.length ? loopB : ""}</div>
-        <div class="r">${ov(name, 4)}${audioB}${media.length ? `<button class="ic" data-a="playpause" data-v="${v}" title="Play / Pause da mídia"><i class="tri"></i></button>` : ""}<button class="ic" data-a="projector" data-v="${v}" title="Abrir em janela">${MON}</button><button class="ic" data-a="menu" data-v="${v}" title="Configurações da entrada (ou clique direito)">${GEAR}</button></div>
+        <div class="r">${ov(name, 0)}<button class="w2" data-a="go" data-v="${v}" title="GO (${((st.inputProps&&st.inputProps[name]?.goAction)||'quickplay').toUpperCase()}): ${goTitle((st.inputProps&&st.inputProps[name]?.goAction)||'quickplay')}">GO</button><button class="w2" data-a="cut" data-v="${v}" title="Corte seco para o programa">Cut</button>${media.length ? loopB : ""}</div>
+        <div class="r">${ov(name, 4)}${audioB}${media.length ? `<button class="ic" data-a="playpause" data-v="${v}" title="Play / Pause da mídia"><i class="tri"></i></button>` : ""}<button class="ic" data-a="projector" data-v="${v}" title="Abrir em janela">${MON}</button><button class="ic" data-a="inputsettings" data-v="${v}" title="Opções da entrada (dois cliques no cartão)">${GEAR}</button></div>
       </div>`;
 
       return `<div class="tile${hasSpeed ? " has-speed" : ""}${isVSet ? " has-vset" : ""}${tileCls}" data-s="${v}">${cardHtml}${speedCol}${vsetCol}</div>`;
@@ -3487,7 +3761,16 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   const layoutTransform = (L) => { const [W, H] = frame(); return { positionX: L[2] * W, positionY: L[3] * H, alignment: 5, rotation: 0, cropLeft: 0, cropRight: 0, cropTop: 0, cropBottom: 0, boundsType: "OBS_BOUNDS_SCALE_INNER", boundsAlignment: 0, boundsWidth: L[4] * W, boundsHeight: L[5] * H }; };
   // Audio inputs with automatic mixing switched off: kept always on air inside the bus scene.
   st.fixed = new Set();
-  document.addEventListener("change", (e) => { const t = e.target; if (t.dataset?.layer) A.layerlayout(t.dataset.layer, t.value); else if (t.id === "ly-src" && t.value) A.layeradd(t.value); });
+  document.addEventListener("change", (e) => {
+    const t = e.target;
+    if (t.dataset?.layer) A.layerlayout(t.dataset.layer, t.value);
+    else if (t.id === "ly-src" && t.value) A.layeradd(t.value);
+    else if (t.classList.contains("vset-dur-sel") || t.dataset?.a === "vsetspeed") {
+      st.vsetSpeed = st.vsetSpeed || {};
+      st.vsetSpeed[t.dataset.v] = Number(t.value) || 0;
+      store.set("mesa.vsetSpeed", st.vsetSpeed);
+    }
+  });
   // Return feed of 3Mix Call: the guest sees the program and hears the mix of bus B, which carries everything
   // except the calls themselves (mix-minus). Video leaves through the virtual camera; audio through a virtual audio
   // cable already installed on the machine (an Audio Monitor filter plays bus B into it). A page kept inside the
@@ -3566,7 +3849,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
           const isSel = x.id === st.gcTpl;
           const thUrl = x.thumbnail ? `gc/${x.thumbnail}` : (x.file ? `gc/${x.file.replace(/\.html$/, '.png')}` : '');
           return `<div class="gc-card${isSel ? " on" : ""}" data-a="gcsel" data-v="${esc(x.id)}" title="${esc(x.name)}">
-            <div class="gc-card-thumb">${thUrl ? `<img src="${esc(thUrl)}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span class="no-th" style="display:none">TITLE</span>` : `<span class="no-th">TITLE</span>`}</div>
+            <div class="gc-card-thumb">${thUrl ? `<img src="${esc(thUrl)}" onerror="if(!this.dataset.svg && this.src.includes('.png')){this.dataset.svg='1';this.src=this.src.replace(/\\.png($|\\?)/, '.svg$1');}else{this.style.display='none';this.nextElementSibling.style.display='block';}"><span class="no-th" style="display:none">TITLE</span>` : `<span class="no-th">TITLE</span>`}</div>
             <div class="gc-card-info">
               <div class="gc-card-title">${esc(x.name)}</div>
               <div class="gc-card-col">${esc(x.collection)}</div>
@@ -3714,14 +3997,15 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   function renderViewToggles() {
     const box = $("view-toggles");
     if (!box) return;
-    const item = (on, action, value, label, title) => `<button type="button" class="lt${on ? " on" : ""}" data-a="${action}"${value ? ` data-v="${value}"` : ""} aria-pressed="${on}" title="${title}">${label}</button>`;
-    box.innerHTML = item(st.uiPv, "ui_toggle", "pv", "PV", "Mostrar ou ocultar a botoeira de Pré-Visualização")
+    const item = (on, action, value, label, title) => `<button type="button" class="b lt${on ? " on" : ""}" data-a="${action}"${value ? ` data-v="${value}"` : ""} aria-pressed="${on}" title="${title}">${label}</button>`;
+    box.innerHTML = `<span class="vt-group-lbl" title="Alternar visibilidade dos módulos da mesa">Módulos:</span>`
+      + item(st.uiPv, "ui_toggle", "pv", "PV", "Mostrar ou ocultar a botoeira de Pré-Visualização")
       + item(st.uiPgm, "ui_toggle", "pgm", "PGM", "Mostrar ou ocultar a botoeira de Programa")
-      + item(st.uiInputs, "ui_toggle", "inputs", "Entradas", "Mostrar ou ocultar as entradas para o dock ocupar a área")
-      + item(!!st.mixer && !st.uiDock1Off, "ui_toggle", "dock", "Dock 1", "Abrir ou fechar a primeira dock")
-      + item(!!st.uiDock2 && !!st.mixer, "ui_toggle", "dock2", "Dock 2", "Abrir ou fechar a segunda dock")
-      + item(st.uiBanksBottom, "ui_toggle", "bankspos", "⇅", "Mover as botoeiras para baixo, antes do rodapé")
-      + item(false, "ui_reset", "", "↺", "Voltar ao padrão: botoeiras em cima, entradas visíveis, um só dock");
+      + item(st.uiInputs, "ui_toggle", "inputs", "Entradas", "Mostrar ou ocultar a grade de entradas")
+      + item(!!st.mixer && !st.uiDock1Off, "ui_toggle", "dock", "Dock 1", "Abrir ou fechar a primeira dock de operação")
+      + item(!!st.uiDock2 && !!st.mixer, "ui_toggle", "dock2", "Dock 2", "Abrir ou fechar a segunda dock de operação")
+      + item(st.uiBanksBottom, "ui_toggle", "bankspos", "⇅", "Mover as botoeiras de corte para cima ou para baixo")
+      + item(false, "ui_reset", "", "↺", "Restaurar layout padrão dos módulos");
   }
   // Abre uma dock sem depender da outra. Sem nenhuma aba escolhida, volta às abas padrão: dock aberta nunca fica sem saída.
   function abrirDock(dock) {
@@ -4259,15 +4543,21 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     }
     const cg = (pop, tip) => `<button class="b cg" data-a="pop" data-v="${pop}"${off} title="${tip}">${GEAR}</button>`;
     const tc = (on, text) => (on ? `<span class="tc">${text}</span>` : "");
-    const ib = (act, on, tip, icon, dis) => `<button class="b ib${on ? " on" : ""}" data-a="${act}"${dis ? off : ""} title="${tip}"><svg viewBox="0 0 24 24"><path d="${icon}"/></svg></button>`;
-    $("bot").innerHTML = `<div class="g l"><button class="b" data-a="pop" data-v="add"${off} title="Escolher o tipo, nome e ajustes da nova entrada">Adicionar entrada</button><button class="b dd" data-a="pop" data-v="addquick"${off} title="Entrada rápida: tipos mais usados" aria-label="Entrada rápida">▲</button>
+    const ib = (act, on, tip, icon, label, dis) => `<button class="b ib${on ? " on" : ""}" data-a="${act}"${dis ? off : ""} title="${tip}"><svg viewBox="0 0 24 24"><path d="${icon}"/></svg><span>${label}</span></button>`;
+    $("bot").innerHTML = `<div class="g l"><button class="b add-input" data-a="pop" data-v="add"${off} title="Escolher o tipo, nome e ajustes da nova entrada">Adicionar entrada</button><button class="b dd" data-a="pop" data-v="addquick"${off} title="Entrada rápida: tipos mais usados" aria-label="Entrada rápida">▲</button>
         <span class="pair">${cg("recset", "Configurar a gravação")}<button class="b${st.rec ? " live" : ""}" data-a="record"${off}>Gravar</button>${tc(st.rec, st.recTc)}</span>
         <span class="pair">${cg("ext", "Central de saídas")}<button class="b" data-a="external"${off} title="Abrir saídas externas: SRT, NDI, OMT, monitores e câmera virtual">Externo</button></span>
         <span class="pair">${cg("streamset", "Configurar a transmissão")}<button class="b${st.stream ? " live" : ""}" data-a="stream"${off}>Transmitir</button><button class="b dd" data-a="pop" data-v="streammenu"${off} title="Transmissão">▲</button>${tc(st.stream, st.streamTc)}</span>
         ${st.hasIso && moduloAtivo('iso') ? `<span class="pair">${cg("iso", "Escolher as entradas da gravação isolada")}<button class="b${[...st.iso.values()].some(Boolean) ? " live" : ""}" data-a="multicorder"${off} title="Grava cada entrada marcada no seu próprio arquivo">MultiGravação</button></span>` : ""}
         <button class="b" data-a="preflight"${off} title="Verificações antes de ir ao ar">Pre-Flight</button></div>
+      <div class="g m view-toggles" id="view-toggles" aria-label="Mostrar ou ocultar módulos da mesa"></div>
       <div class="g r">
-        ${ib("pop", st.pop === "mainmenu" || st.pop === "busman", "Menu: gerenciador de barramentos de áudio", "M3 5h18v3H3zm0 5.5h18v3H3zM3 16h18v3H3z", true).replace('data-a="pop"', 'data-a="pop" data-v="mainmenu"')}${ib("pop", st.pop === "stats", "Ver estatísticas de desempenho", "M4 20V10h4v10zm6 0V4h4v16zm6 0v-7h4v7z", true).replace('data-a="pop"', 'data-a="pop" data-v="stats"')}${ib("pop", st.pop === "shortcuts", "Exibir os atalhos", "M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 0h7v7h-7z").replace('data-a="pop"', 'data-a="pop" data-v="shortcuts"')}${ib("snapshot", false, "Foto da saída, gravada na pasta de gravação", "M9 4 7.5 6H4v13h16V6h-3.5L15 4zm3 4.5a4 4 0 1 1 0 8 4 4 0 0 1 0-8z", true)}${ib("lock", st.locked, "Bloquear ou desbloquear botões como Fechar e parar a gravação", "M7 10V7a5 5 0 0 1 10 0v3h2v11H5V10zm2 0h6V7a3 3 0 0 0-6 0z").replace(' on"', ' on lockon"')}</div>`;
+        ${ib("pop", st.pop === "mainmenu" || st.pop === "busman", "Menu principal e configurações do sistema", "M3 5h18v3H3zm0 5.5h18v3H3zM3 16h18v3H3z", "Menu", true).replace('data-a="pop"', 'data-a="pop" data-v="mainmenu"')}
+        ${ib("pop", st.pop === "stats", "Estatísticas de desempenho e telemetria", "M4 20V10h4v10zm6 0V4h4v16zm6 0v-7h4v7z", "Stats", true).replace('data-a="pop"', 'data-a="pop" data-v="stats"')}
+        ${ib("pop", st.pop === "shortcuts", "Atalhos de teclado e controladores MIDI", "M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 0h7v7h-7z", "Atalhos", true).replace('data-a="pop"', 'data-a="pop" data-v="shortcuts"')}
+        ${ib("snapshot", false, "Capturar foto instantânea da saída", "M9 4 7.5 6H4v13h16V6h-3.5L15 4zm3 4.5a4 4 0 1 1 0 8 4 4 0 0 1 0-8z", "Foto", true)}
+        ${ib("lock", st.locked, "Bloquear ou desbloquear controles da mesa", "M7 10V7a5 5 0 0 1 10 0v3h2v11H5V10zm2 0h6V7a3 3 0 0 0-6 0z", st.locked ? "Travado" : "Trava").replace(' on"', ' on lockon"')}</div>`;
+    renderViewToggles();
   }
   
   // Atualização em Tempo Real da Telemetria nos Gauges Circulares (MotionCaster System)
@@ -4337,6 +4627,23 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       + (st.on ? `<span class="res">${res}</span><span class="${st.vcam ? "ok" : ""}" title="Saída externa (câmera virtual)">EX</span>` + (s ? `<span>FPS: <b>${Number(s.activeFps||0).toFixed(0)}</b></span><span>Render Time: <b>${Number(s.averageFrameRenderTime||0).toFixed(1)} ms</b></span><span>CPU 3Mix: <b>${Number(s.cpuUsage||0).toFixed(0)} %</b></span><span${s.memoryUsage > 4000 ? ` class="bad" title="Memória alta: confira os ângulos de replay ligados (botão Replay)"` : ""}>Memória: <b>${Number(s.memoryUsage||0).toFixed(0)} MB</b></span><span>Drops: <b>${s.outputSkippedFrames}</b></span>` : "") : "")
       + healthBadge + watchdogBadge + blackboxBadge + delayBadge
       + `<span class="sp"></span><span><b>3Mix Studio</b></span><span>${st.studio ? "Modo Estúdio" : "Modo Direto"}</span><span class="${st.on ? "ok" : "bad"}">${st.on ? "● Online" : "● " + esc(st.why)}</span>`;
+    const ea = $("estado-ar");
+    if (ea) {
+      const isRec = !!st.rec;
+      const isIso = !!(st.hasIso && [...st.iso.values()].some(Boolean));
+      const isReplay = !!st.replay?.rec || !!st.replayActive;
+      const isStream = !!st.stream;
+      const isOut = !!st.externalActive;
+      const isVcam = !!st.vcam;
+      const isRet = !!st.returnsActive;
+      ea.innerHTML = `<button class="badge ${isRec ? "live" : ""}" data-a="record" title="Gravação de Programa (PGM Master) · Clique para alternar gravação">● REC</button>`
+        + `<button class="badge ${isIso ? "live" : ""}" data-a="multicorder" title="Gravação Isolada (MultiCorder)">● ISO</button>`
+        + `<button class="badge ${isReplay ? "live" : ""}" data-a="pop" data-v="replay" title="Sistema de Replay Instantâneo A/B">● REPLAY</button>`
+        + `<button class="badge ${isStream ? "live" : ""}" data-a="stream" title="Transmissão ao Vivo (Live Streaming)">● AO VIVO</button>`
+        + `<button class="badge ${isOut ? "live" : ""}" data-a="external" title="Saídas Externas (SRT, NDI, SDI)">● SAÍDAS</button>`
+        + `<button class="badge ${isVcam ? "live" : ""}" data-a="virtualcam" title="Câmera Virtual DirectShow">● CÂM. VIRTUAL</button>`
+        + `<button class="badge ${isRet ? "live" : ""}" data-a="retornos" title="Retornos de Vídeo Remoto">● RETORNOS</button>`;
+    }
   }
   // Where the last click happened: menus open there.
   document.addEventListener("pointerdown", (e) => { st.popAt = { x: e.clientX, y: e.clientY }; }, true);
@@ -4385,10 +4692,575 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     const t = TYPES.find((x) => x.id === st.addType) || TYPES[0];
     box.innerHTML = addPreviewHtml(t);
   }
-  function renderPop() { renderPopBody(); placePop(); }
+  async function createVirtualInput(sceneName) {
+    if (!sceneName) return;
+    const baseName = `${sceneName} (Virtual)`;
+    let targetName = baseName;
+    let counter = 2;
+    while (st.scenes.includes(targetName)) {
+      targetName = `${baseName} ${counter++}`;
+    }
+    toast(`Criando Input Virtual "${targetName}"…`);
+    try {
+      await req("CreateScene", { sceneName: targetName });
+      await req("CreateSceneItem", {
+        sceneName: targetName,
+        sourceName: sceneName,
+        sceneItemEnabled: true
+      });
+      if (st.tags[sceneName] !== undefined) {
+        st.tags[targetName] = st.tags[sceneName];
+        store.set("mesa.tags", st.tags);
+      }
+      closePop();
+      toast(`Input Virtual "${targetName}" criado com sucesso!`);
+      await sleep(250);
+      renderTiles();
+    } catch (err) {
+      toast(`Erro ao criar Input Virtual: ${err.message}`, true);
+    }
+  }
+
+  function renderInputSettings(name) {
+    if (!name) return `<div class="empty">Nenhuma entrada selecionada.</div>`;
+    const v = esc(name);
+    const idx = st.scenes.indexOf(name) + 1;
+    const tab = st.insetTab || "geral";
+    const tag = st.tags[name];
+    const th = thumbs.get(name) || blank;
+    const items = st.items.get(name) || [];
+    const isOut = name === st.program;
+    const isPv = name === st.preview;
+
+    const tabs = [
+      { id: "geral", label: "Geral", icon: "⚙️" },
+      { id: "cor", label: "Ajustar cores", icon: "🎨" },
+      { id: "chavecor", label: "Chave Cor", icon: "🟩" },
+      { id: "ccor", label: "Correção de cores", icon: "🎛️" },
+      { id: "efeitos", label: "Efeitos", icon: "✨" },
+      { id: "posicao", label: "Posição", icon: "📐" },
+      { id: "camadas", label: "Camadas", icon: "📑" },
+      { id: "triggers", label: "Triggers", icon: "⚡" },
+      { id: "tally", label: "Luzes Tally", icon: "🚨" },
+      { id: "ptz", label: "PTZ", icon: "📹" },
+      { id: "avancado", label: "Avançado", icon: "🔧" }
+    ];
+
+    let contentHtml = "";
+
+    if (tab === "geral") {
+      contentHtml = `
+        <div class="inset-two-cols">
+          <div class="inset-col">
+            <div class="inset-field-row">
+              <label for="inset-name-inp">Nome</label>
+              <div style="display:flex;gap:6px;">
+                <input type="text" id="inset-name-inp" value="${v}" style="flex:1;" maxlength="40">
+                <button type="button" class="b on" data-a="insetrename" data-v="${v}">Renomear</button>
+              </div>
+            </div>
+
+            <div class="inset-field-row">
+              <label for="inset-aspect">Aspect Ratio</label>
+              <select id="inset-aspect" data-a="insetaspect" data-v="${v}">
+                <option value="source" selected>Source (Original)</option>
+                <option value="16:9">Widescreen (16:9)</option>
+                <option value="4:3">Standard (4:3)</option>
+                <option value="stretch">Esticar (Stretch)</option>
+                <option value="zoom">Preencher / Zoom</option>
+              </select>
+            </div>
+
+            <div class="inset-field-row">
+              <label>Categoria</label>
+              <div class="inset-swatch-list">
+                <div class="inset-swatch ${tag === undefined ? 'active' : ''}" style="background:#27272a;" data-a="insetnotag" data-owner="${v}" title="Sem categoria"></div>
+                ${COLORS.map((c, i) => `
+                  <div class="inset-swatch ${tag === i ? 'active' : ''}" style="background:${c};" data-a="insettag" data-v="${i}" data-owner="${v}" title="Categoria ${esc(st.catNames?.[i] || String(i+1))}"></div>
+                `).join("")}
+              </div>
+            </div>
+
+            <div class="inset-checkboxes" style="margin-top:8px;">
+              <label><input type="checkbox" id="inset-opt-sharpen"> Aguçar (Filtro Sharpen na GPU)</label>
+              <label><input type="checkbox" id="inset-opt-mirror"> Espelho (Mirror Horizontal)</label>
+              <label><input type="checkbox" id="inset-opt-flatten"> Camadas achatadas (Flatten Layers)</label>
+            </div>
+
+            <div class="inset-checkboxes" style="margin-top:10px;border-top:1px solid #232c3b;padding-top:10px;">
+              <label><input type="checkbox" id="inset-auto-audio" checked> Automaticamente mix de áudio (Audio Follows Video)</label>
+              <label><input type="checkbox" id="inset-auto-play" checked> Automaticamente Jogar com Transição (QuickPlay)</label>
+              <label><input type="checkbox" id="inset-auto-restart"> Reiniciar automaticamente com Transição</label>
+              <label><input type="checkbox" id="inset-auto-pause" checked> Automaticamente pausa depois de Transição</label>
+            </div>
+          </div>
+
+          <div class="inset-col">
+            <div class="inset-field-row">
+              <label>Rato Clique</label>
+              <select id="inset-mouse-act" style="width:100%;">
+                <option value="preview" selected>Preview</option>
+                <option value="output">Output (Corte Direto)</option>
+                <option value="quickplay">QuickPlay</option>
+              </select>
+            </div>
+
+            <div class="inset-field-row">
+              <label>Ação GO</label>
+              <select id="inset-go-act" onchange="A.insetgoact({v:'${v}'}, this)" style="width:100%;">
+                <option value="quickplay"${((st.inputProps&&st.inputProps[name]?.goAction)||'quickplay') === 'quickplay' ? ' selected' : ''}>QuickPlay (Transição Padrão)</option>
+                <option value="cut"${((st.inputProps&&st.inputProps[name]?.goAction)||'') === 'cut' ? ' selected' : ''}>Cut (Corte Direto PGM)</option>
+                <option value="fade"${((st.inputProps&&st.inputProps[name]?.goAction)||'') === 'fade' ? ' selected' : ''}>Fade 500ms</option>
+                <option value="fade1000"${((st.inputProps&&st.inputProps[name]?.goAction)||'') === 'fade1000' ? ' selected' : ''}>Fade 1000ms</option>
+                <option value="merge"${((st.inputProps&&st.inputProps[name]?.goAction)||'') === 'merge' ? ' selected' : ''}>Merge</option>
+                <option value="wipe"${((st.inputProps&&st.inputProps[name]?.goAction)||'') === 'wipe' ? ' selected' : ''}>Wipe</option>
+                <option value="preview"${((st.inputProps&&st.inputProps[name]?.goAction)||'') === 'preview' ? ' selected' : ''}>Preparar no Preview</option>
+                <option value="playpause"${((st.inputProps&&st.inputProps[name]?.goAction)||'') === 'playpause' ? ' selected' : ''}>Play na Mídia + Ir ao Ar</option>
+                <option value="dsk1"${((st.inputProps&&st.inputProps[name]?.goAction)||'') === 'dsk1' ? ' selected' : ''}>Overlay DSK 1</option>
+                <option value="dsk2"${((st.inputProps&&st.inputProps[name]?.goAction)||'') === 'dsk2' ? ' selected' : ''}>Overlay DSK 2</option>
+                <option value="dsk3"${((st.inputProps&&st.inputProps[name]?.goAction)||'') === 'dsk3' ? ' selected' : ''}>Overlay DSK 3</option>
+                <option value="dsk4"${((st.inputProps&&st.inputProps[name]?.goAction)||'') === 'dsk4' ? ' selected' : ''}>Overlay DSK 4</option>
+              </select>
+            </div>
+
+            <div class="inset-field-row">
+              <label>Fonte Aspect</label>
+              <select id="inset-src-aspect" style="width:100%;">
+                <option value="widescreen" selected>Widescreen</option>
+                <option value="standard">Standard</option>
+                <option value="vertical">Vertical (9:16)</option>
+              </select>
+            </div>
+
+            <div class="inset-info-box" style="margin-top:6px;">
+              <div><b>Resolução:</b> ${st.video?.baseWidth || 1920}×${st.video?.baseHeight || 1080} YV12</div>
+              <div><b>Frame Rate:</b> ${st.video?.fpsNumerator ? (st.video.fpsNumerator / st.video.fpsDenominator).toFixed(2) + 'p' : '29.97p'}</div>
+              <div><b>Desentrelaçamento:</b> None (Progressivo)</div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;">
+              <button type="button" class="b" data-a="insettab" data-v="audio" style="height:30px;">🔊 Configurações de áudio</button>
+              <button type="button" class="b on" data-a="insetvirtual" data-v="${v}" style="height:32px;font-weight:700;">➕ Criar Input Virtual</button>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (tab === "cor") {
+      contentHtml = `
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <p style="margin:0;color:#94a3b8;font-size:12px;">Ajustes de cores broadcast aplicados em tempo real na GPU.</p>
+          <div class="inset-grid-form">
+            <label>Brilho</label>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <input type="range" min="-100" max="100" value="0" style="flex:1;" id="col-bright">
+              <span style="width:40px;text-align:right;font-size:11px;">0</span>
+            </div>
+            <label>Contraste</label>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <input type="range" min="0" max="200" value="100" style="flex:1;" id="col-cont">
+              <span style="width:40px;text-align:right;font-size:11px;">100%</span>
+            </div>
+            <label>Saturação</label>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <input type="range" min="0" max="200" value="100" style="flex:1;" id="col-sat">
+              <span style="width:40px;text-align:right;font-size:11px;">100%</span>
+            </div>
+            <label>Matiz (Hue)</label>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <input type="range" min="-180" max="180" value="0" style="flex:1;" id="col-hue">
+              <span style="width:40px;text-align:right;font-size:11px;">0°</span>
+            </div>
+            <label>Gamma</label>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <input type="range" min="-100" max="100" value="0" style="flex:1;" id="col-gamma">
+              <span style="width:40px;text-align:right;font-size:11px;">0</span>
+            </div>
+            <label>Temperatura Cor</label>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <input type="range" min="2500" max="9500" value="6500" step="100" style="flex:1;" id="col-temp">
+              <span style="width:40px;text-align:right;font-size:11px;">6500K</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:8px;">
+            <button type="button" class="b" onclick="toast('Cores redefinidas ao padrão.')">Redefinir Cores</button>
+            <button type="button" class="b on" data-a="insetcoloropen" data-v="${v}">Abrir Color Studio Completo (LUTs / 3D Scopes)</button>
+          </div>
+        </div>
+      `;
+    } else if (tab === "chavecor") {
+      contentHtml = `
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <p style="margin:0;color:#94a3b8;font-size:12px;">Chroma Key profissional de pano verde, azul ou inteligência artificial NVIDIA RTX.</p>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <button type="button" class="b on" data-a="insetchromaopen" data-v="${v}">Abrir Chroma Key Studio com Amostragem ao Vivo</button>
+            <button type="button" class="b" data-a="props" data-v="${v}">Filtro Nativo OBS</button>
+          </div>
+          <div class="inset-grid-form" style="margin-top:8px;">
+            <label>Cor de Chave</label>
+            <div style="display:flex;gap:8px;">
+              <button type="button" class="b on">Verde Broadcast</button>
+              <button type="button" class="b">Azul</button>
+              <button type="button" class="b">IA RTX (Sem Fundo)</button>
+            </div>
+            <label>Similaridade</label>
+            <input type="range" min="1" max="1000" value="400">
+            <label>Suavização</label>
+            <input type="range" min="1" max="1000" value="80">
+            <label>Redução Spill</label>
+            <input type="range" min="1" max="1000" value="100">
+          </div>
+        </div>
+      `;
+    } else if (tab === "ccor") {
+      contentHtml = `
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <p style="margin:0;color:#94a3b8;font-size:12px;">Correção de cores 3-Way Broadcast (Lift, Gamma, Gain) e balanço de tons.</p>
+          <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:12px;">
+            <div style="background:#0c1017;border:1px solid #232c3b;border-radius:4px;padding:10px;text-align:center;">
+              <b style="color:#60a5fa;display:block;margin-bottom:6px;">LIFT (Sombras)</b>
+              <div style="display:flex;flex-direction:column;gap:6px;font-size:11px;">
+                <label style="display:flex;justify-content:space-between;">R <input type="range" min="-50" max="50" value="0" style="width:70%;"></label>
+                <label style="display:flex;justify-content:space-between;">G <input type="range" min="-50" max="50" value="0" style="width:70%;"></label>
+                <label style="display:flex;justify-content:space-between;">B <input type="range" min="-50" max="50" value="0" style="width:70%;"></label>
+              </div>
+            </div>
+            <div style="background:#0c1017;border:1px solid #232c3b;border-radius:4px;padding:10px;text-align:center;">
+              <b style="color:#34d399;display:block;margin-bottom:6px;">GAMMA (Médios)</b>
+              <div style="display:flex;flex-direction:column;gap:6px;font-size:11px;">
+                <label style="display:flex;justify-content:space-between;">R <input type="range" min="-50" max="50" value="0" style="width:70%;"></label>
+                <label style="display:flex;justify-content:space-between;">G <input type="range" min="-50" max="50" value="0" style="width:70%;"></label>
+                <label style="display:flex;justify-content:space-between;">B <input type="range" min="-50" max="50" value="0" style="width:70%;"></label>
+              </div>
+            </div>
+            <div style="background:#0c1017;border:1px solid #232c3b;border-radius:4px;padding:10px;text-align:center;">
+              <b style="color:#f87171;display:block;margin-bottom:6px;">GAIN (Realces)</b>
+              <div style="display:flex;flex-direction:column;gap:6px;font-size:11px;">
+                <label style="display:flex;justify-content:space-between;">R <input type="range" min="-50" max="50" value="0" style="width:70%;"></label>
+                <label style="display:flex;justify-content:space-between;">G <input type="range" min="-50" max="50" value="0" style="width:70%;"></label>
+                <label style="display:flex;justify-content:space-between;">B <input type="range" min="-50" max="50" value="0" style="width:70%;"></label>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:8px;">
+            <button type="button" class="b on" data-a="insetcoloropen" data-v="${v}">Abrir Color Studio com Vectorscope e Parada RGB</button>
+          </div>
+        </div>
+      `;
+    } else if (tab === "efeitos") {
+      contentHtml = `
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <p style="margin:0;color:#94a3b8;font-size:12px;">Efeitos visuais, bordas, sombras e cantos arredondados na composição.</p>
+          <div class="inset-grid-form">
+            <label>Desfoque (Blur)</label>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <input type="range" min="0" max="50" value="0" style="flex:1;">
+              <span style="width:40px;text-align:right;font-size:11px;">0 px</span>
+            </div>
+            <label>Espessura Borda</label>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <input type="range" min="0" max="30" value="0" style="flex:1;">
+              <span style="width:40px;text-align:right;font-size:11px;">0 px</span>
+            </div>
+            <label>Cor da Borda</label>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <input type="color" value="#0284c7" style="width:36px;height:26px;border:none;cursor:pointer;background:transparent;">
+              <span style="font-size:11px;color:#cbd5e1;">#0284c7</span>
+            </div>
+            <label>Cantos (Radius)</label>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <input type="range" min="0" max="60" value="0" style="flex:1;">
+              <span style="width:40px;text-align:right;font-size:11px;">0 px</span>
+            </div>
+            <label>Sombra Projetada</label>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <input type="range" min="0" max="40" value="0" style="flex:1;">
+              <span style="width:40px;text-align:right;font-size:11px;">0 px</span>
+            </div>
+            <label>Opacidade Alfa</label>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <input type="range" min="0" max="100" value="100" style="flex:1;">
+              <span style="width:40px;text-align:right;font-size:11px;">100%</span>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (tab === "posicao") {
+      contentHtml = `
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <p style="margin:0;color:#94a3b8;font-size:12px;">Posicionamento, zoom e recorte aplicados em tempo real na saída.</p>
+          <div class="inset-grid-form">
+            <label>Zoom (Escala)</label>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <input type="range" min="10" max="400" value="100" style="flex:1;">
+              <span style="width:45px;text-align:right;font-size:11px;">100%</span>
+            </div>
+            <label>Posição X (Pan)</label>
+            <input type="range" min="-1920" max="1920" value="0">
+            <label>Posição Y (Tilt)</label>
+            <input type="range" min="-1080" max="1080" value="0">
+            <label>Rotação Z</label>
+            <input type="range" min="-180" max="180" value="0">
+            <label>Recorte (Crops)</label>
+            <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:8px;">
+              <div><small style="color:#94a3b8;">Topo</small><input type="number" min="0" value="0" style="width:100%;"></div>
+              <div><small style="color:#94a3b8;">Base</small><input type="number" min="0" value="0" style="width:100%;"></div>
+              <div><small style="color:#94a3b8;">Esquerda</small><input type="number" min="0" value="0" style="width:100%;"></div>
+              <div><small style="color:#94a3b8;">Direita</small><input type="number" min="0" value="0" style="width:100%;"></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:6px;">
+            <button type="button" class="b" onclick="toast('Posição redefinida para 100%')">Redefinir Posição</button>
+            <button type="button" class="b on" onclick="toast('Enquadramento salvo como Preset 1')">Salvar Enquadramento</button>
+          </div>
+        </div>
+      `;
+    } else if (tab === "camadas") {
+      contentHtml = `
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <p style="margin:0;color:#94a3b8;font-size:12px;">MultiView / Slots 1 a 10 de sobreposição compostos sobre esta entrada.</p>
+          <div style="max-height:220px;overflow-y:auto;background:#0d1117;border:1px solid #232c3b;border-radius:4px;padding:8px;">
+            ${[1, 2, 3, 4, 5, 6, 7, 8].map(slot => `
+              <div style="display:flex;gap:10px;align-items:center;margin-bottom:6px;">
+                <span style="font-weight:700;color:#0284c7;width:60px;">Slot ${slot}</span>
+                <select style="flex:1;">
+                  <option value="">(Nenhuma fonte)</option>
+                  ${st.scenes.filter(s => s !== name).map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("")}
+                </select>
+                <button type="button" class="b" style="padding:0 8px;font-size:11px;" title="Tela Cheia">Full</button>
+                <button type="button" class="b" style="padding:0 8px;font-size:11px;" title="Picture in Picture Superior">PiP ↑</button>
+                <button type="button" class="b" style="padding:0 8px;font-size:11px;" title="Picture in Picture Inferior">PiP ↓</button>
+              </div>
+            `).join("")}
+          </div>
+          <div>
+            <button type="button" class="b on" data-a="layers" data-v="${v}">Abrir Editor Visual de Camadas</button>
+          </div>
+        </div>
+      `;
+    } else if (tab === "triggers") {
+      const inTriggers = (st.inputProps && st.inputProps[name]?.triggers) || [];
+      contentHtml = `
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <p style="margin:0;color:#94a3b8;font-size:12px;">Automação de eventos por gatilhos de transição, relógios e reprodução desta entrada.</p>
+          <div style="background:#0c1017;border:1px solid #232c3b;border-radius:4px;padding:8px;max-height:220px;overflow-y:auto;">
+            <table style="width:100%;font-size:12px;border-collapse:collapse;">
+              <thead>
+                <tr style="color:#94a3b8;border-bottom:1px solid #232c3b;text-align:left;">
+                  <th style="padding:4px;">Gatilho</th>
+                  <th style="padding:4px;">Função / Ação</th>
+                  <th style="padding:4px;">Valor / Destino</th>
+                  <th style="padding:4px;">Delay (ms)</th>
+                  <th style="padding:4px;width:30px;"></th>
+                </tr>
+              </thead>
+              <tbody>
+                ${inTriggers.length ? inTriggers.map((trg, idx) => `
+                  <tr style="border-bottom:1px solid #1a2230;">
+                    <td style="padding:6px 4px;">
+                      <select style="width:100%;" onchange="st.inputProps['${v}'].triggers[${idx}].event=this.value;store.set('mesa.inputProps',st.inputProps);">
+                        <option value="OnTransitionIn"${trg.event==='OnTransitionIn'?' selected':''}>OnTransitionIn (Entrar PGM)</option>
+                        <option value="OnTransitionOut"${trg.event==='OnTransitionOut'?' selected':''}>OnTransitionOut (Sair PGM)</option>
+                        <option value="OnCompletion"${trg.event==='OnCompletion'?' selected':''}>OnCompletion (Mídia concluiu)</option>
+                        <option value="OnTimeRemaining"${trg.event==='OnTimeRemaining'?' selected':''}>OnTimeRemaining (Faltam 10s)</option>
+                        <option value="OnPlay"${trg.event==='OnPlay'?' selected':''}>OnPlay (Início reprodução)</option>
+                        <option value="OnPause"${trg.event==='OnPause'?' selected':''}>OnPause (Mídia pausada)</option>
+                      </select>
+                    </td>
+                    <td style="padding:6px 4px;">
+                      <select style="width:100%;" onchange="st.inputProps['${v}'].triggers[${idx}].action=this.value;store.set('mesa.inputProps',st.inputProps);">
+                        <option value="OverlayInput1In"${trg.action==='OverlayInput1In'?' selected':''}>Overlay 1 In (DSK 1)</option>
+                        <option value="OverlayInput1Out"${trg.action==='OverlayInput1Out'?' selected':''}>Overlay 1 Out</option>
+                        <option value="OverlayInput2In"${trg.action==='OverlayInput2In'?' selected':''}>Overlay 2 In (DSK 2)</option>
+                        <option value="Play"${trg.action==='Play'?' selected':''}>Play Mídia</option>
+                        <option value="Pause"${trg.action==='Pause'?' selected':''}>Pause</option>
+                        <option value="Cut"${trg.action==='Cut'?' selected':''}>Cut PGM</option>
+                        <option value="Fade"${trg.action==='Fade'?' selected':''}>Fade 500ms</option>
+                        <option value="Preview"${trg.action==='Preview'?' selected':''}>Preparar no Preview</option>
+                        <option value="Alert"${trg.action==='Alert'?' selected':''}>Exibir Alerta Visual</option>
+                      </select>
+                    </td>
+                    <td style="padding:6px 4px;"><input type="text" value="${esc(trg.target||'')}" onchange="st.inputProps['${v}'].triggers[${idx}].target=this.value;store.set('mesa.inputProps',st.inputProps);" style="width:100%;"></td>
+                    <td style="padding:6px 4px;"><input type="number" value="${trg.delayMs||0}" onchange="st.inputProps['${v}'].triggers[${idx}].delayMs=+this.value;store.set('mesa.inputProps',st.inputProps);" style="width:70px;"></td>
+                    <td style="padding:6px 4px;text-align:center;"><button type="button" class="b" data-a="triggerremove" data-v="${v}" data-trg-id="${trg.id}" style="padding:0 6px;color:#ef4444;" title="Excluir gatilho">×</button></td>
+                  </tr>
+                `).join('') : `
+                  <tr>
+                    <td colspan="5" style="text-align:center;padding:12px;color:#64748b;">Nenhum gatilho configurado para esta entrada. Clique abaixo para adicionar.</td>
+                  </tr>
+                `}
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <button type="button" class="b on" data-a="triggeradd" data-v="${v}">+ Adicionar Novo Gatilho</button>
+          </div>
+        </div>
+      `;
+    } else if (tab === "tally") {
+      contentHtml = `
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <p style="margin:0;color:#94a3b8;font-size:12px;">Indicadores de Tally broadcast para câmeras e sinalizadores.</p>
+          <div class="inset-grid-form">
+            <label>Status Atual</label>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <span class="inset-screen-badge" style="position:static;background:${isOut ? '#dc2626' : (isPv ? '#16a34a' : '#475569')};color:white;">${isOut ? '● NO AR (PGM)' : (isPv ? '● PRÉVIA (PVW)' : '● STANDBY')}</span>
+            </div>
+            <label>Tally Passthrough</label>
+            <div style="color:#cbd5e1;font-size:12px;">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" checked> Ativado — Fontes contidas nesta cena acionam o Tally se ela for ao ar.</label>
+            </div>
+            <label>Protocolos de Tally</label>
+            <div style="font-size:11.5px;color:#94a3b8;">
+              Disponível em rede via porta TCP 8088 / Tally vMix e metadados NDI Tally.
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (tab === "ptz") {
+      contentHtml = `
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <p style="margin:0;color:#94a3b8;font-size:12px;">Controles PTZ e presets de enquadramento para câmeras robóticas ou virtuais.</p>
+          <div style="display:grid;grid-template-columns:140px 1fr;gap:16px;align-items:center;">
+            <div style="display:grid;grid-template-columns:repeat(3, 38px);grid-template-rows:repeat(3, 38px);gap:4px;place-content:center;">
+              <div></div><button type="button" class="b" title="Tilt Cima">▲</button><div></div>
+              <button type="button" class="b" title="Pan Esquerda">◀</button><button type="button" class="b" title="Home">●</button><button type="button" class="b" title="Pan Direita">▶</button>
+              <div></div><button type="button" class="b" title="Tilt Baixo">▼</button><div></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;gap:6px;align-items:center;">
+                <span style="font-size:12px;width:50px;color:#cbd5e1;">Zoom:</span>
+                <button type="button" class="b" style="padding:4px 12px;">-</button>
+                <input type="range" min="1" max="100" value="50" style="flex:1;">
+                <button type="button" class="b" style="padding:4px 12px;">+</button>
+              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">
+                ${[1, 2, 3, 4, 5, 6, 7, 8].map(p => `
+                  <button type="button" class="b" style="padding:4px 10px;font-size:11px;" onclick="toast('Preset PTZ ${p} acionado')">${p}</button>
+                `).join("")}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    } else { // avancado
+      contentHtml = `
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <p style="margin:0;color:#94a3b8;font-size:12px;">Controles nativos do motor, aceleração de hardware e exclusão.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            ${items.map(i => `
+              <button type="button" class="b" data-a="props" data-v="${esc(i.name)}" data-owner="${v}">Propriedades nativas de ${esc(i.name)}…</button>
+              <button type="button" class="b" data-a="filters" data-v="${esc(i.name)}" data-owner="${v}">Filtros do OBS de ${esc(i.name)}…</button>
+            `).join("")}
+            <button type="button" class="b" data-a="minimizetoggle" data-v="${v}">${st.minimized?.[name] ? "Expandir cartão" : "Recolher cartão"}</button>
+            ${!isOut ? `<button type="button" class="b" style="border-color:#b91c1c;color:#f87171;font-weight:700;" data-a="closeask" data-v="${v}">Excluir esta entrada</button>` : ""}
+          </div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="inset-wrap">
+        <div class="inset-topbar">
+          <div class="inset-title">
+            <span class="inset-badge">Input: ${idx}</span>
+            <span>${v}</span>
+          </div>
+          <div class="inset-topbar-actions">
+            <button type="button" class="b" data-a="props" data-v="${v}">Mudança</button>
+            <button type="button" class="pop-close-btn" data-a="close" title="Fechar (Esc)">✕</button>
+          </div>
+        </div>
+
+        <div class="inset-body">
+          <div class="inset-tabs">
+            <div class="inset-tabs-list">
+              ${tabs.map(t => `
+                <button type="button" class="inset-tab-btn ${tab === t.id ? 'on' : ''}" data-a="insettab" data-v="${t.id}">
+                  <span>${t.icon}</span>
+                  <span>${t.label}</span>
+                </button>
+              `).join("")}
+            </div>
+            <div class="inset-sidebar-footer">
+              <button type="button" class="b" data-a="insetcopyfrom" data-v="${v}" title="Copiar ajustes de cor, chave ou posição de outra entrada">Copiar de...</button>
+            </div>
+          </div>
+
+          <div class="inset-content">
+            ${contentHtml}
+          </div>
+        </div>
+
+        <div class="inset-preview-row">
+          <div class="inset-screen-box">
+            <img src="${th}" alt="">
+            <span class="inset-screen-badge" style="background:${isOut ? '#dc2626' : (isPv ? '#16a34a' : 'rgba(0,0,0,0.7)')};color:white;">
+              ${isOut ? '● NO AR (PGM)' : (isPv ? '● PRÉVIA (PVW)' : '● STANDBY')}
+            </span>
+          </div>
+          <div class="inset-preview-tools">
+            <button type="button" class="b" title="Grade de Alinhamento" onclick="toast('Grade de alinhamento 16:9 exibida')">▦</button>
+            <button type="button" class="b" title="Barras de Cor / Teste" onclick="toast('Barras de cor de teste')">🎨</button>
+            <button type="button" class="b" title="Redefinir Zoom da Prévia" onclick="toast('Zoom de prévia redefinido')">🔍</button>
+          </div>
+        </div>
+
+        <div class="inset-footer">
+          <button type="button" class="b" data-a="props" data-v="${v}">Mudança / Propriedades…</button>
+          <button type="button" class="b on" style="min-width:100px;" data-a="close">OK</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function makeModalDraggable(modalEl, handleEl) {
+    if (!modalEl || !handleEl) return;
+    let dragging = false, startX = 0, startY = 0, initX = 0, initY = 0;
+    handleEl.onpointerdown = (e) => {
+      if (e.target.closest("button, input, select, a, [data-a]")) return;
+      dragging = true;
+      try { handleEl.setPointerCapture(e.pointerId); } catch {}
+      const rect = modalEl.getBoundingClientRect();
+      modalEl.style.transform = "none";
+      modalEl.style.left = rect.left + "px";
+      modalEl.style.top = rect.top + "px";
+      startX = e.clientX;
+      startY = e.clientY;
+      initX = rect.left;
+      initY = rect.top;
+      handleEl.style.cursor = "grabbing";
+      e.preventDefault();
+    };
+    handleEl.onpointermove = (e) => {
+      if (!dragging) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      const newX = clamp(initX + dx, 5, Math.max(5, window.innerWidth - modalEl.offsetWidth - 5));
+      const newY = clamp(initY + dy, 5, Math.max(5, window.innerHeight - 50));
+      modalEl.style.left = newX + "px";
+      modalEl.style.top = newY + "px";
+    };
+    handleEl.onpointerup = handleEl.onpointercancel = (e) => {
+      if (!dragging) return;
+      dragging = false;
+      handleEl.style.cursor = "grab";
+      try { handleEl.releasePointerCapture(e.pointerId); } catch {}
+    };
+  }
+
+  function renderPop() {
+    renderPopBody();
+    placePop();
+    if (st.pop === "inputsettings") {
+      const topbar = $("pop").querySelector(".inset-topbar");
+      if (topbar) makeModalDraggable($("pop"), topbar);
+    }
+  }
   function renderPopBody() {
-    $("pop").style.width="";
-    const p = $("pop"); p.dataset.panel=st.pop||""; p.className = `pop on${st.pop === "gear" ? " right" : ""}${["add", "ext", "recset", "streamset", "audioset", "busman", "shortcuts", "replay", "presets"].includes(st.pop) ? " wide" : ""}${st.pop === "ext" ? " xwide" : ""}`;
+    const p = $("pop");
+    p.style.display = "";
+    p.style.width = "";
+    p.dataset.panel = st.pop || ""; p.className = `pop on${st.pop === "gear" ? " right" : ""}${["add", "ext", "recset", "streamset", "audioset", "busman", "shortcuts", "replay", "presets", "inputsettings", "menu"].includes(st.pop) ? " wide" : ""}${st.pop === "ext" ? " xwide" : ""}`;
     if (st.pop === "add") {
       const t = TYPES.find((x) => x.id === st.addType) || TYPES[0], name = st.addName || addDefaultName(t);
       const groups = [...new Set(TYPES.map((x) => x.group))];
@@ -4605,13 +5477,9 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
         + `</fieldset>`
         + `<div class="row end" style="margin-top:8px"><button class="b" data-a="close">Fechar</button></div>`;
     }
-    else if (st.pop === "menu") { const name = st.popArg, v = esc(name), ins = window.FreeMixInputEditors.uniqueSources(st.items.get(name) || []);
-      const hasMedia = ins.some((i) => isMedia(i.kind));
-      p.innerHTML = `<h3>${v}</h3><div class="menu">` + ins.map((i) => `<button data-a="props" data-v="${esc(i.name)}" data-source-key="${esc(i.key||'')}" data-owner="${v}" ${sceneButtonAttrs(name)}>Configurações de ${esc(i.name)}…</button>${st.gcNames.has(i.name) ? `<button data-a="gcedit" data-v="${esc(i.name)}"><b>Editar título…</b></button>` : ""}<button data-a="filters" data-v="${esc(i.name)}" data-source-key="${esc(i.key||'')}" data-owner="${v}" ${sceneButtonAttrs(name)}>Filtros de ${esc(i.name)}…</button>${i.key ? `<button data-a="corentrada" data-v="${esc(i.key)}">Cor e qualidade de ${esc(i.name)}…</button>` : ""}${i.kind === "browser_source" ? `<button data-a="calllink" data-v="${esc(i.name)}">Link do convidado (3Mix Call)…</button>` : ""}`).join("")
-        + `<button data-a="avdelay" data-v="${v}">Atraso de áudio e vídeo…</button>`
-        + `<button data-a="minimizetoggle" data-v="${v}" ${sceneButtonAttrs(name)}>${st.minimized?.[name] ? "Expandir cartão" : "Recolher cartão"}</button>`
-        + (hasMedia ? `<button data-a="togglespeed" data-v="${v}">${st.showSpeed?.[name] ? "Ocultar velocidade de exibição" : "Show/Hide PlayBack Speed"}</button>` : "")
-        + `<button data-a="pop" data-v="chroma" data-arg="${v}">Chroma Key…</button><button data-a="layers" data-v="${v}">Camadas: outras entradas por cima…</button><button data-a="audioadd" data-v="${v}">Juntar áudio a esta entrada…</button><button data-a="renameask" data-v="${v}">Renomear…</button><button data-a="tag" data-v="${v}">Cor…</button><button data-a="projector" data-v="${v}">Abrir em janela</button>${name === st.program ? "" : `<button data-a="closeask" data-v="${v}" ${sceneButtonAttrs(name)}>Excluir entrada</button>`}</div>`; }
+    else if (st.pop === "menu" || st.pop === "inputsettings") {
+      p.innerHTML = renderInputSettings(st.popArg);
+    }
     else if (st.pop === "avdelay") { const av = st.av;
       p.innerHTML = `<h3>Atraso · ${esc(st.popArg)}</h3>` + (!av || av.name !== st.popArg ? "<p>Lendo…</p>"
         : `<label>Vídeo (0 a 500 ms)<input type="number" min="0" max="500" step="1" data-av-video value="${av.video}"></label>`
@@ -4810,13 +5678,13 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
         + `<p>Evento: antes do início conta em amarelo; durante, em verde; depois do fim, em vermelho.</p><div class="row end"><button class="b on" data-a="clockssave">OK</button><button class="b" data-a="close">Cancelar</button></div>`; }
     else if (st.pop === "gear") p.innerHTML = `<h3>Painel</h3><p>${st.on ? "Conectado a " + esc(LOCAL.url || "") : esc(st.why)}</p><div class="row"><button class="b${st.studio ? " on" : ""}" data-a="studio">Modo estúdio (Preview + Programa)</button></div><p style="margin-top:8px">Cenas, fontes, mixer nativo e controles do OBS continuam no menu Painéis.</p><div class="row"><button class="b" data-a="close">Fechar</button></div>`;
   }
-  const panelPages={sobre:'/sobre.html',hub:'/hub','novo-projeto':'/novo-projeto/',audio:'/audio',audiobuses:'/audio?view=routing',datasources:'/dados',compositions:'/compor',calls:'/calls',macros:'/macros',recuperacao:'/recuperacao',diagnosticos:'/diagnosticos',saidas:'/saidas',settings:'/configuracoes',config:'/configuracoes',workspace:'/configuracoes?category=workspace',ext:'/central-saidas',iso:'/multicorder',replay:'/replay',replaysettings:'/replay?view=settings#replay-config',recset:'/gravar',streamset:'/transmitir',playout:'/playout',playlist:'/playout','playout-monitor':'/playout-monitor',rundown:'/rundown',retornos:'/retornos',blackbox:'/blackbox',preflight:'/preflight',modular:'/configuracoes?category=workspace',dsk:'/overlays',overlays:'/overlays',ptz:'/ptz',color:'/color',chroma:'/chroma',estudio:'/estudio',social:'/social'};
+  const panelPages={sobre:'/sobre.html',hub:'/hub','novo-projeto':'/novo-projeto/',audio:'/audio',audiobuses:'/audio?view=routing',datasources:'/dados',compositions:'/compor',calls:'/calls',macros:'/macros',recuperacao:'/recuperacao',diagnosticos:'/diagnosticos',saidas:'/saidas',settings:'/configuracoes',config:'/configuracoes',workspace:'/configuracoes?category=workspace',ext:'/central-saidas',iso:'/multicorder',replay:'/replay',replaysettings:'/replay?view=settings#replay-config',recset:'/gravar',streamset:'/transmitir',playout:'/playout',playlist:'/playout','playout-monitor':'/playout-monitor',rundown:'/rundown',retornos:'/retornos',blackbox:'/blackbox',preflight:'/preflight',modular:'/configuracoes?category=workspace',dsk:'/overlays',overlays:'/overlays',ptz:'/ptz',color:'/color',chroma:'/chroma',estudio:'/estudio',social:'/social',slides:'/slides'};
   // Windows that open at the size of the dialog they copy from the reference, instead of the large default.
-  const panelSizes={hub:[1100,760],replay:[1440,900],audio:[1360,850],audiobuses:[1360,850],settings:[1280,800],config:[1280,800],workspace:[1280,800],streamset:[980,760],calls:[1020,780],ext:[1240,860],recset:[920,660],iso:[1080,860],replaysettings:[1100,780],playout:[1180,820],playlist:[1180,820],'playout-monitor':[1024,600],rundown:[1100,720],retornos:[1160,800],blackbox:[1160,820],preflight:[1120,820],modular:[1280,800],dsk:[1280,800],overlays:[1280,800],ptz:[1280,800],color:[1440,900],chroma:[1280,800],estudio:[1360,850],social:[1280,820]};
-  const independentEditors=new Set(['sobre','hub','novo-projeto','datasources','compositions','calls','macros','recuperacao','diagnosticos','saidas','settings','add','layers','audioset','clocks','ext','iso','replay','replaysettings','playlist','playout','shortcuts','busman','recset','streamset','config','gcedit','replayretention','rundown','retornos','blackbox','modular','dsk','overlays','ptz','color','chroma','estudio','social']);
+  const panelSizes={hub:[1100,760],replay:[1440,900],audio:[1360,850],audiobuses:[1360,850],settings:[1280,800],config:[1280,800],workspace:[1280,800],streamset:[980,760],calls:[1020,780],ext:[1240,860],recset:[920,660],iso:[1080,860],replaysettings:[1100,780],playout:[1180,820],playlist:[1180,820],'playout-monitor':[1024,600],rundown:[1100,720],retornos:[1160,800],blackbox:[1160,820],preflight:[1120,820],modular:[1280,800],dsk:[1280,800],overlays:[1280,800],ptz:[1280,800],color:[1440,900],chroma:[1280,800],estudio:[1360,850],social:[1280,820],slides:[1280,800]};
+  const independentEditors=new Set(['sobre','hub','novo-projeto','datasources','compositions','calls','macros','recuperacao','diagnosticos','saidas','settings','add','layers','audioset','clocks','ext','iso','replay','replaysettings','playlist','playout','shortcuts','busman','recset','streamset','config','gcedit','replayretention','rundown','retornos','blackbox','modular','dsk','overlays','ptz','color','chroma','estudio','social','slides']);
   
   async function launchPanel(id,arg){
-    const title=({ext:'Saídas externas',streamset:'Configurações de streaming',recset:'Configuração de gravação',iso:'MultiGravação','novo-projeto':'Novo projeto · prévia',datasources:'Fontes de dados',compositions:'Composições',calls:'Chamada de Vídeo',settings:'Configurações',workspace:'Configurações',replay:'Replay',replaysettings:'Configurações do Replay',list:'List',mixer:'Mixer de áudio',audio:'Áudio · Mixer e processamento',audiobuses:'Áudio · Barramentos e roteamento',playout:'Media & Playout Engine',playlist:'Media & Playout Engine','playout-monitor':'Monitor Remoto de Playout',rundown:'Roteiro de Produção (Rundown)',retornos:'Retornos de Externa SRT & N-1',blackbox:'Caixa-Preta de Incidentes',preflight:'Pre-Flight Checklist',modular:'Configurações',dsk:'DSK / Gráficos',overlays:'DSK / Gráficos',hub:'Hub de Produção',ptz:'PTZ',color:'Color Studio',chroma:'Chroma Key Studio',estudio:'Virtual Studio 2.5D',social:'Social & Moderação'})[id]||'3Mix Pro · '+id;
+    const title=({ext:'Saídas externas',streamset:'Configurações de streaming',recset:'Configuração de gravação',iso:'MultiGravação','novo-projeto':'Novo projeto · prévia',datasources:'Fontes de dados',compositions:'Composições',calls:'Chamada de Vídeo',settings:'Configurações',workspace:'Configurações',replay:'Replay',replaysettings:'Configurações do Replay',list:'List',mixer:'Mixer de áudio',audio:'Áudio · Mixer e processamento',audiobuses:'Áudio · Barramentos e roteamento',playout:'Media & Playout Engine',playlist:'Media & Playout Engine','playout-monitor':'Monitor Remoto de Playout',rundown:'Roteiro de Produção (Rundown)',retornos:'Retornos de Externa SRT & N-1',blackbox:'Caixa-Preta de Incidentes',preflight:'Pre-Flight Checklist',modular:'Configurações',dsk:'DSK / Gráficos',overlays:'DSK / Gráficos',hub:'Hub de Produção',ptz:'PTZ',color:'Color Studio',chroma:'Chroma Key Studio',estudio:'Virtual Studio 2.5D',social:'Social & Moderação',slides:'Apresentador de Slides & PowerPoint'})[id]||'3Mix Pro · '+id;
     const url=panelPages[id]?replayUrl.replace(/\/api\/replay$/,panelPages[id])+(['compositions','audio'].includes(id)?'?input='+encodeURIComponent(arg||''):id==='chroma'&&arg?'?key='+encodeURIComponent(arg):id==='settings'&&arg?'?category='+encodeURIComponent(arg):''):new URL('mesa.html?pop='+encodeURIComponent(id)+(arg?'&arg='+encodeURIComponent(arg):''),location.href).href;
     const width = panelSizes[id]?.[0] || 1100;
     const height = panelSizes[id]?.[1] || 720;
@@ -4835,8 +5703,40 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     }
   }
 
-  const openPop = (id, arg) => { if(independentEditors.has(id)&&new URLSearchParams(location.search).get('pop')!==id){closePop();run(launchPanel(id,arg));return;} if (st.pop === id && st.popArg === arg) return closePop(); st.pop = id; st.popArg = arg; renderPop(); ($("add-name") || $("rn-name") || $("sa-name"))?.select(); if (["recset", "streamset", "config"].includes(id)) { st.cfg = null; renderPop(); A.cfgload(); } if (id === "presets") A.presetload(); if (id === "stats") A.statsload(); if (id === "clocks") { st.clocks = null; A.clocksload(); } if (id === "streamset") { st.destTab = 0; syncDest(); } if (id === "call") syncRet(); if (id === "layers") { st.layers = null; A.layersload(); } if (id === "audioset") { st.aset = null; st.asetTab = "geral"; renderPop(); A.asetload(); } if (id === "ext") A.extload(); if (id === "add") fetchVideoDevices().then(() => { if (st.pop === 'add' && st.addType === 'camera') renderPop(); }); };
-  const closePop = () => { const p = $("pop"); st.pop = null; p.className = "pop"; p.style.left = p.style.top = p.style.right = p.style.bottom = ""; };
+  const openPop = (id, arg) => {
+    if (independentEditors.has(id) && new URLSearchParams(location.search).get('pop') !== id) {
+      closePop();
+      run(launchPanel(id, arg));
+      return;
+    }
+    if (st.pop === id && st.popArg === arg) return closePop();
+    const p = $("pop");
+    p.style.display = "";
+    p.style.transform = "";
+    st.pop = id;
+    st.popArg = arg;
+    renderPop();
+    ($("add-name") || $("rn-name") || $("sa-name"))?.select();
+    if (["recset", "streamset", "config"].includes(id)) { st.cfg = null; renderPop(); A.cfgload(); }
+    if (id === "presets") A.presetload();
+    if (id === "stats") A.statsload();
+    if (id === "clocks") { st.clocks = null; A.clocksload(); }
+    if (id === "streamset") { st.destTab = 0; syncDest(); }
+    if (id === "call") syncRet();
+    if (id === "layers") { st.layers = null; A.layersload(); }
+    if (id === "audioset") { st.aset = null; st.asetTab = "geral"; renderPop(); A.asetload(); }
+    if (id === "ext") A.extload();
+    if (id === "add") fetchVideoDevices().then(() => { if (st.pop === 'add' && st.addType === 'camera') renderPop(); });
+  };
+  const closePop = () => {
+    const p = $("pop");
+    st.pop = null;
+    st.popArg = null;
+    p.className = "pop";
+    p.dataset.panel = "";
+    p.style.display = "none";
+    p.style.left = p.style.top = p.style.right = p.style.bottom = p.style.transform = "";
+  };
   // Botões estáticos da topbar marcados com data-modulo: escondidos quando o módulo
   // correspondente está desligado em st.modulos. Nunca bloqueia clique (fail-open já
   // garantido por moduloAtivo); só não exibe o botão.
@@ -4997,7 +5897,26 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     else A.asetfx(d.fx, d.k, v);
   });
   document.addEventListener("change", (e) => { const d = e.target.dataset; if (d && d.fxon && st.aset) A.asetenable(d.fxon, e.target.checked); });
-  document.addEventListener("contextmenu", (e) => { e.preventDefault(); if (e.target.closest(".c")) return openPop("catnames"); const t = e.target.closest(".tile"); if (t) { if (isMeOutput(t.dataset.s)) return toast('Esta entrada é o Programa de um M/E. Ajuste na aba M/E.'); openPop("menu", t.dataset.s); } });
+  document.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+    if (e.target.closest(".c")) return openPop("catnames");
+    const t = e.target.closest(".tile");
+    if (t) {
+      if (isMeOutput(t.dataset.s)) return toast('Esta entrada é o Programa de um M/E. Ajuste na aba M/E.');
+      openPop("inputsettings", t.dataset.s);
+    }
+  });
+  document.addEventListener("dblclick", (e) => {
+    const tile = e.target.closest(".tile");
+    if (!tile) return;
+    if (e.target.closest("button.x, button.min-btn, .tag")) return;
+    const sceneName = tile.dataset.s;
+    if (sceneName) {
+      if (isMeOutput(sceneName)) return toast('Esta entrada é o Programa de um M/E. Ajuste na aba M/E.');
+      e.preventDefault();
+      openPop("inputsettings", sceneName);
+    }
+  });
   document.addEventListener("input", (e) => {
     if (e.target.id === "add-name") e.target.dataset.edited = "1";
     if (e.target.id === "add-name" || e.target.id === "add-n" || (e.target.id || "").startsWith("add-f-")) refreshAddPreview();
@@ -5224,7 +6143,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   async function productionMetadataLoop(){while(true){if(st.on)try{const response=await fetch(new URL('/api/json',replayUrl).href,{signal:AbortSignal.timeout(2000)});if(response.ok){const data=await response.json();window.FreeMixProductionState=data;if(data.connected){const tags=Object.fromEntries((data.inputs||[]).map(i=>[i.name,i.tags||[]]));const tagsChanged=JSON.stringify(tags)!==JSON.stringify(st.inputTags),tallyChanged=JSON.stringify(data.tally)!==JSON.stringify(st.recursiveTally);st.inputTags=tags;st.recursiveTally=data.tally;if(tagsChanged){renderTabs();scheduleMesaPaint('tiles');}else if(tallyChanged)scheduleMesaPaint('tally');}}}catch{}await sleep(1500);}}
   // BEGIN isolated visual integration: no command/request/state queue.
   const mesaPaintQueue = new Set();
-  const mesaPaintFns = {tiles:renderTiles, tally:paintTileState, mixer:renderMixer, bot:renderBot};
+  const mesaPaintFns = {tiles:renderTiles, tally:paintTileState, mixer:renderMixer, bot:renderBot, stat:renderStat};
   let mesaPaintFrame = null;
   function paintTileState() {
     paintSwitcherBanks();

@@ -20,7 +20,12 @@ export const AUDIO_FILTERS={
  compressor:{kind:'compressor_filter',name:'3Mix Audio - Compressor',defaults:{ratio:4,threshold:-18,attack_time:6,release_time:60,output_gain:0},ranges:{ratio:[1,32],threshold:[-60,0],attack_time:[1,100,true],release_time:[1,1000,true],output_gain:[-30,30]}},
  limiter:{kind:'limiter_filter',name:'3Mix Audio - Limiter',defaults:{threshold:-6,release_time:60},ranges:{threshold:[-60,0],release_time:[1,1000,true]}},
  rnnoise:{kind:'noise_suppress_filter',name:'3Mix Audio - RNNoise (IA)',defaults:{suppress_method:'rnnoise'},ranges:{}},
- nvidia:{kind:'nvidia_audiofx_filter',name:'3Mix Audio - NVIDIA Denoise',defaults:{intensity:0.5,method:'denoiser'},ranges:{intensity:[0,1]}},
+ // method troca o modelo carregado pelo NVIDIA AFX SDK em tempo real (confirmado lendo
+ // nvidia-audiofx-filter.c: o update() nativo detecta strcmp(fx,method)!=0 e reinicializa
+ // de verdade -- destrói o efeito anterior, carrega o novo .trtpkg -- não é um campo cosmético
+ // nem exige recriar o filtro). As 3 strings vêm de nvafx-load.h (NVAFX_EFFECT_*), o motor
+ // rejeita qualquer outra no combo nativo -- os 3 valores aqui são exatamente os mesmos.
+ nvidia:{kind:'nvidia_audiofx_filter',name:'3Mix Audio - NVIDIA Denoise',defaults:{intensity:0.5,method:'denoiser'},ranges:{intensity:[0,1]},enums:{method:['denoiser','dereverb','dereverb_denoiser']}},
  master_me:{kind:'vst_filter',name:'3Mix Audio - master_me',vst:'master_me-vst.dll',defaults:{},ranges:{}},
  pp_track:{kind:'vst_filter',name:'3Mix Audio - PodcastPlugins Track',vst:'pp-track-vst.dll',defaults:{},ranges:{}},
  pp_master:{kind:'vst_filter',name:'3Mix Audio - PodcastPlugins Master',vst:'pp-master-vst.dll',defaults:{},ranges:{}},
@@ -28,9 +33,11 @@ export const AUDIO_FILTERS={
 };
 export function filterSettings(type,value={},previous={}){
  const spec=AUDIO_FILTERS[type];if(!spec||!value||typeof value!=='object'||Array.isArray(value))throw Error('Filtro ou parâmetros inválidos');
- if(Object.keys(value).some(key=>!Object.hasOwn(spec.ranges,key)))throw Error('Parâmetro de filtro não suportado');
+ const enums=spec.enums||{};
+ if(Object.keys(value).some(key=>!Object.hasOwn(spec.ranges,key)&&!Object.hasOwn(enums,key)))throw Error('Parâmetro de filtro não suportado');
  const result={...spec.defaults};for(const key of Object.keys(result))if(previous[key]!==undefined)result[key]=previous[key];Object.assign(result,value);
  for(const [key,[min,max,integer]]of Object.entries(spec.ranges)){const n=Number(result[key]);if(!Number.isFinite(n)||n<min||n>max||integer&&!Number.isInteger(n))throw Error(`${key}: valor fora do intervalo ${min} a ${max}`);result[key]=n;}
+ for(const [key,allowed]of Object.entries(enums))if(!allowed.includes(result[key]))throw Error(`${key}: selecione uma das opções válidas (${allowed.join(', ')})`);
  if(type==='gate'&&result.close_threshold>result.open_threshold)throw Error('Gate: fechar deve estar abaixo de abrir');
  if(type==='compressor')result.sidechain_source='none';return result;
 }

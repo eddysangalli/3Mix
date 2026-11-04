@@ -45,6 +45,8 @@ import { AudioTapRegistry } from './audio-tap-registry.mjs';
 import { CrewIntercomEngine } from './crew-intercom-producao.mjs';
 import { CrewIntercomWsTransport } from './crew-intercom-transport-ws.mjs';
 import { lerMontagens, salvarMontagens } from './multiview-montagens.mjs';
+import { SlideEngine } from './apresentacao-slides.mjs';
+import { LiveLanDistribution } from './livelan-distribuicao.mjs';
 
 const ROOT = process.env.FREEMIX_ROOT || fileURLToPath(new URL('../', import.meta.url));
 const PANEL = process.env.FREEMIX_PANEL_DIR || join(ROOT, 'painel'), PORT = Number(process.env.FREEMIX_API_PORT || 8088);
@@ -78,6 +80,8 @@ const broadcast = msg => { const s = JSON.stringify(msg); for (const c of client
 const production = new Production({ root: ROOT, panel: PANEL, getObs: () => obs, publish: data => broadcast({ type: 'state', data: clean(data) }), publishRaw: broadcast });
 production.tryReq = (...args) => production.optional(...args);
 production.gtTickerAck = new TickerAckBroker({ endpoint: 'http://127.0.0.1:' + PORT + '/api/ticker-ack' });
+const slideEngine = new SlideEngine({ root: ROOT, production });
+const liveLanDistribution = new LiveLanDistribution({ port: PORT });
 const onlineUpdate = new OnlineUpdateEngine(ROOT);
 const diagnostics = new DiagnosticCollector(ROOT);
 // Retrato leve do programa para o pacote: valores simples, listas viram contagem.
@@ -102,6 +106,7 @@ auxOutputRouter.on('aux_source_change', data => broadcast({ type: 'aux_source_ch
 auxOutputRouter.on('aux_cut', data => broadcast({ type: 'aux_cut', data }));
 auxOutputRouter.on('output_routed', data => broadcast({ type: 'output_routed', data }));
 production.auxOutputRouter = auxOutputRouter;
+let lastDevicesCache = { video: [], audio: [], monitors: [], windows: [] };
 // 3Mix Crew — Tally (Fase 1 do superprompt de Melhorias Broadcast + Crew). Engine
 // SOMENTE LEITURA (nunca muta o motor); clientes de Tally entram por um WebSocket próprio
 // (/api/crew/tally), nunca pelo /ws principal, para nenhum dispositivo de Tally conseguir
@@ -286,7 +291,7 @@ async function vmix(fn, p) {
   } else throw new Error('Comando não implementado: ' + fn);
   await production.run(action, data);
 }
-const routes = { '/novo-projeto/': 'novo-projeto/index', '/': 'hub', '/hub': 'hub', '/corte': 'corte', '/playout': 'playout', '/playout-monitor': 'playout-monitor', '/gc-html': 'gc-html', '/gc': 'gc', '/audio': 'audio', '/replay': 'replay', '/iso': 'iso', '/multicorder': 'multicorder', '/dados': 'dados', '/compor': 'compor', '/chroma': 'chroma', '/estudio': 'estudio', '/social': 'social', '/settings': 'settings', '/configuracoes': 'configuracoes', '/calls': 'calls', '/crew': 'crew', '/macros': 'macros', '/recuperacao': 'recuperacao', '/saidas': 'saidas', '/externo': 'externo', '/gravar': 'gravar', '/transmitir': 'transmitir', '/srt-hdr': 'srt-hdr', '/rede': 'rede', '/atalhos': 'atalhos', '/efeitos': 'efeitos', '/sinais': 'sinais', '/atualizacao': 'atualizacao', '/diagnosticos': 'diagnosticos', '/overlays': 'overlays', '/multiview': 'multiview', '/aux': 'aux-router', '/me': 'me', '/central-saidas': 'central-saidas', '/patch': 'patch-registry', '/primeira-transmissao': 'checklist-primeira-transmissao', '/rundown': 'rundown', '/retornos': 'retornos', '/blackbox': 'blackbox', '/preflight': 'preflight', '/primeira-execucao': 'primeira-execucao', '/modular': 'modular', '/modulos': 'modulos', '/ptz': 'ptz', '/color': 'color' };
+const routes = { '/novo-projeto/': 'novo-projeto/index', '/': 'hub', '/hub': 'hub', '/corte': 'corte', '/playout': 'playout', '/playout-monitor': 'playout-monitor', '/gc-html': 'gc-html', '/gc': 'gc', '/audio': 'audio', '/replay': 'replay', '/iso': 'iso', '/multicorder': 'multicorder', '/dados': 'dados', '/compor': 'compor', '/chroma': 'chroma', '/estudio': 'estudio', '/social': 'social', '/settings': 'settings', '/configuracoes': 'configuracoes', '/calls': 'calls', '/crew': 'crew', '/macros': 'macros', '/recuperacao': 'recuperacao', '/saidas': 'saidas', '/externo': 'externo', '/gravar': 'gravar', '/transmitir': 'transmitir', '/srt-hdr': 'srt-hdr', '/rede': 'rede', '/atalhos': 'atalhos', '/efeitos': 'efeitos', '/sinais': 'sinais', '/atualizacao': 'atualizacao', '/diagnosticos': 'diagnosticos', '/overlays': 'overlays', '/multiview': 'multiview', '/aux': 'aux-router', '/me': 'me', '/central-saidas': 'central-saidas', '/patch': 'patch-registry', '/primeira-transmissao': 'checklist-primeira-transmissao', '/rundown': 'rundown', '/retornos': 'retornos', '/blackbox': 'blackbox', '/preflight': 'preflight', '/primeira-execucao': 'primeira-execucao', '/modular': 'modular', '/modulos': 'modulos', '/ptz': 'ptz', '/color': 'color', '/slides': 'slides' };
 const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.gif': 'image/gif', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.bmp': 'image/bmp', '.woff2': 'font/woff2', '.woff': 'font/woff', '.ttf': 'font/ttf', '.otf': 'font/otf', '.json': 'application/json; charset=utf-8', '.txt': 'text/plain; charset=utf-8', '.md': 'text/markdown; charset=utf-8' };
 
 function controlReceipt(request) {
@@ -440,8 +445,8 @@ async function handleHttp(req, res) {
       }
       if (path === '/api/devices/video' && req.method === 'GET') {
         try {
-          const list = await production.req('GetInputList', {});
-          const dshow = (list.inputs || []).filter(i => i.inputKind === 'dshow_input');
+          const list = await production.tryReq('GetInputList', {});
+          const dshow = (list?.inputs || []).filter(i => i.inputKind === 'dshow_input');
           let target = dshow[0]?.inputName, tempCreated = false;
           if (!target) {
             tempCreated = true;
@@ -449,20 +454,28 @@ async function handleHttp(req, res) {
             await production.req('CreateScene', { sceneName: '__3mix_probe_scene__' });
             await production.req('CreateInput', { sceneName: '__3mix_probe_scene__', inputName: target, inputKind: 'dshow_input', inputSettings: {} });
           }
-          const props = await production.req('GetInputPropertiesListPropertyItems', { inputName: target, propertyName: 'video_device_id' });
+          const props = await production.tryReq('GetInputPropertiesListPropertyItems', { inputName: target, propertyName: 'video_device_id' });
           if (tempCreated) {
             await production.tryReq('RemoveInput', { inputName: target });
             await production.tryReq('RemoveScene', { sceneName: '__3mix_probe_scene__' });
           }
-          const devices = (props.propertyItems || []).map(p => ({ name: p.itemName, value: p.itemValue, enabled: p.itemEnabled }));
-          return json(res, 200, { success: true, devices });
+          const devices = (props?.propertyItems || []).map(p => ({ name: p.itemName, value: p.itemValue, enabled: p.itemEnabled }));
+          if (devices.length) lastDevicesCache.video = devices;
+          return json(res, 200, { success: true, devices: devices.length ? devices : lastDevicesCache.video });
         } catch (err) {
-          return json(res, 200, { success: true, devices: [], error: err.message });
+          return json(res, 200, { success: true, devices: lastDevicesCache.video || [], error: err.message });
         }
       }
       if (path === '/api/devices/all' && req.method === 'GET') {
         try {
-          const result = { video: [], audio: [], monitors: [], windows: [] };
+          const result = {
+            video: [...(lastDevicesCache.video || [])],
+            audio: [...(lastDevicesCache.audio || [])],
+            monitors: [...(lastDevicesCache.monitors || [])],
+            windows: [...(lastDevicesCache.windows || [])]
+          };
+          const inputList = await production.tryReq('GetInputList', {});
+          const inputs = inputList?.inputs || [];
           const uid = Math.random().toString(36).slice(2, 8);
           const probeScene = '__3mix_probe_' + uid;
           let sceneCreated = false;
@@ -474,34 +487,69 @@ async function handleHttp(req, res) {
           };
           try {
             // Video (dshow_input)
-            const inVideo = '__3mix_p_vid_' + uid;
-            await ensureProbeScene();
-            await production.req('CreateInput', { sceneName: probeScene, inputName: inVideo, inputKind: 'dshow_input', inputSettings: {} });
-            const pVid = await production.tryReq('GetInputPropertiesListPropertyItems', { inputName: inVideo, propertyName: 'video_device_id' });
-            if (pVid?.propertyItems) result.video = pVid.propertyItems.map(p => ({ name: p.itemName, value: p.itemValue, enabled: p.itemEnabled }));
-            await production.tryReq('RemoveInput', { inputName: inVideo });
-
-            // Audio (wasapi_input_capture)
-            const inAud = '__3mix_p_aud_' + uid;
-            await production.req('CreateInput', { sceneName: probeScene, inputName: inAud, inputKind: 'wasapi_input_capture', inputSettings: {} });
-            const pAud = await production.tryReq('GetInputPropertiesListPropertyItems', { inputName: inAud, propertyName: 'device_id' });
-            if (pAud?.propertyItems) result.audio = pAud.propertyItems.map(p => ({ name: p.itemName, value: p.itemValue, enabled: p.itemEnabled }));
-            await production.tryReq('RemoveInput', { inputName: inAud });
-
-            // Monitors (monitor_capture)
-            const inMon = '__3mix_p_mon_' + uid;
-            await production.req('CreateInput', { sceneName: probeScene, inputName: inMon, inputKind: 'monitor_capture', inputSettings: {} });
-            const pMon = (await production.tryReq('GetInputPropertiesListPropertyItems', { inputName: inMon, propertyName: 'monitor' }))
-              || (await production.tryReq('GetInputPropertiesListPropertyItems', { inputName: inMon, propertyName: 'monitor_id' }));
-            if (pMon?.propertyItems) result.monitors = pMon.propertyItems.filter(p => p.itemValue !== 'DUMMY').map(p => ({ name: p.itemName, value: p.itemValue, enabled: p.itemEnabled }));
-            await production.tryReq('RemoveInput', { inputName: inMon });
+            const exVid = inputs.find(i => i.inputKind === 'dshow_input');
+            let vidTarget = exVid?.inputName, vidTemp = false;
+            if (!vidTarget) {
+              vidTemp = true;
+              vidTarget = '__3mix_p_vid_' + uid;
+              await ensureProbeScene();
+              await production.req('CreateInput', { sceneName: probeScene, inputName: vidTarget, inputKind: 'dshow_input', inputSettings: {} });
+            }
+            const pVid = await production.tryReq('GetInputPropertiesListPropertyItems', { inputName: vidTarget, propertyName: 'video_device_id' });
+            if (pVid?.propertyItems?.length) {
+              result.video = pVid.propertyItems.map(p => ({ name: p.itemName, value: p.itemValue, enabled: p.itemEnabled }));
+              lastDevicesCache.video = result.video;
+            }
+            if (vidTemp) await production.tryReq('RemoveInput', { inputName: vidTarget });
 
             // Windows (window_capture)
-            const inWin = '__3mix_p_win_' + uid;
-            await production.req('CreateInput', { sceneName: probeScene, inputName: inWin, inputKind: 'window_capture', inputSettings: {} });
-            const pWin = await production.tryReq('GetInputPropertiesListPropertyItems', { inputName: inWin, propertyName: 'window' });
-            if (pWin?.propertyItems) result.windows = pWin.propertyItems.filter(p => p.itemValue).map(p => ({ name: p.itemName, value: p.itemValue, enabled: p.itemEnabled }));
-            await production.tryReq('RemoveInput', { inputName: inWin });
+            const exWin = inputs.find(i => i.inputKind === 'window_capture');
+            let winTarget = exWin?.inputName, winTemp = false;
+            if (!winTarget) {
+              winTemp = true;
+              winTarget = '__3mix_p_win_' + uid;
+              await ensureProbeScene();
+              await production.req('CreateInput', { sceneName: probeScene, inputName: winTarget, inputKind: 'window_capture', inputSettings: {} });
+            }
+            const pWin = await production.tryReq('GetInputPropertiesListPropertyItems', { inputName: winTarget, propertyName: 'window' });
+            if (pWin?.propertyItems?.length) {
+              result.windows = pWin.propertyItems.filter(p => p.itemValue).map(p => ({ name: p.itemName, value: p.itemValue, enabled: p.itemEnabled }));
+              lastDevicesCache.windows = result.windows;
+            }
+            if (winTemp) await production.tryReq('RemoveInput', { inputName: winTarget });
+
+            // Monitors (monitor_capture)
+            const exMon = inputs.find(i => i.inputKind === 'monitor_capture');
+            let monTarget = exMon?.inputName, monTemp = false;
+            if (!monTarget) {
+              monTemp = true;
+              monTarget = '__3mix_p_mon_' + uid;
+              await ensureProbeScene();
+              await production.req('CreateInput', { sceneName: probeScene, inputName: monTarget, inputKind: 'monitor_capture', inputSettings: {} });
+            }
+            const pMon = (await production.tryReq('GetInputPropertiesListPropertyItems', { inputName: monTarget, propertyName: 'monitor' }))
+              || (await production.tryReq('GetInputPropertiesListPropertyItems', { inputName: monTarget, propertyName: 'monitor_id' }));
+            if (pMon?.propertyItems?.length) {
+              result.monitors = pMon.propertyItems.filter(p => p.itemValue !== 'DUMMY').map(p => ({ name: p.itemName, value: p.itemValue, enabled: p.itemEnabled }));
+              lastDevicesCache.monitors = result.monitors;
+            }
+            if (monTemp) await production.tryReq('RemoveInput', { inputName: monTarget });
+
+            // Audio (wasapi_input_capture)
+            const exAud = inputs.find(i => i.inputKind === 'wasapi_input_capture');
+            let audTarget = exAud?.inputName, audTemp = false;
+            if (!audTarget) {
+              audTemp = true;
+              audTarget = '__3mix_p_aud_' + uid;
+              await ensureProbeScene();
+              await production.req('CreateInput', { sceneName: probeScene, inputName: audTarget, inputKind: 'wasapi_input_capture', inputSettings: {} });
+            }
+            const pAud = await production.tryReq('GetInputPropertiesListPropertyItems', { inputName: audTarget, propertyName: 'device_id' });
+            if (pAud?.propertyItems?.length) {
+              result.audio = pAud.propertyItems.map(p => ({ name: p.itemName, value: p.itemValue, enabled: p.itemEnabled }));
+              lastDevicesCache.audio = result.audio;
+            }
+            if (audTemp) await production.tryReq('RemoveInput', { inputName: audTarget });
           } finally {
             if (sceneCreated) {
               await production.tryReq('RemoveScene', { sceneName: probeScene });
@@ -509,7 +557,7 @@ async function handleHttp(req, res) {
           }
           return json(res, 200, { success: true, ...result });
         } catch (err) {
-          return json(res, 200, { success: true, video: [], audio: [], monitors: [], windows: [], error: err.message });
+          return json(res, 200, { success: true, ...lastDevicesCache, error: err.message });
         }
       }
       if (path === '/api/srt-hdr') { if (req.method !== 'GET') return json(res, 405, { success: false }); if (!local(req)) return json(res, 403, { success: false, error: 'Consulta HDR disponível somente neste computador' }); const id = u.searchParams.get('senderId') ?? '0'; if (!/^[0-3]$/.test(id)) throw Error('Envio HDR inválido'); return json(res, 200, { success: true, outputs: await production.outputEngine.readSrtHdr(Number(id)) }); }
@@ -517,6 +565,51 @@ async function handleHttp(req, res) {
       if (path === '/api/gc-compatible' && req.method === 'GET') { if (!local(req)) return json(res, 403, { success: false, error: 'Editor HTML apenas local' }); return json(res, 200, { success: true, gcCompatible: await production.gcCompatible.summary() }); }
       if ((path === '/gc-html' || path === '/gc-html.html') && !local(req)) return json(res, 403, { success: false, error: 'Editor HTML apenas local' });
       if (path === '/api/control' && req.method === 'POST') { const d = await body(req); if (String(d.action).startsWith('update_')) { if (!local(req)) return json(res, 403, { success: false, error: 'Atualização disponível somente neste computador' }); await onlineUpdate.execute(d.action, d); return json(res, 200, { success: true, state: clean(), update: onlineUpdate.last }); } if ((String(d.action).startsWith('gc_html_') || d.action === 'data_file' || ['gc_library_save', 'gc_library_duplicate', 'gc_library_remove', 'gc_library_import', 'gc_library_export', 'gc_library_asset', 'gc_library_variant', 'gc_library_unlink', 'gc_library_clock_restart'].includes(d.action) || String(d.action).startsWith('settings_') || String(d.action).startsWith('call_') || String(d.action).startsWith('recovery_') || (String(d.action).startsWith('macro_') && !['macro_run', 'macro_cancel'].includes(d.action)) || String(d.action).startsWith('outputs_') || String(d.action).startsWith('network_') || String(d.action).startsWith('audio_routing_') || String(d.action).startsWith('effects_') || String(d.action).startsWith('ptz_') || d.action === 'signal_configure' || d.action === 'patch_set' || d.action === 'mix_audio_set' || ['controller_save', 'controller_remove', 'controller_enable', 'controller_osc_configure', 'controller_osc_start', 'controller_osc_stop', 'delay_set', 'delay_enable', 'delay_disable', 'preflight_bypass', 'preflight_process_close', 'preflight_process_ignore', 'preflight_process_unignore', 'blackbox_clear'].includes(d.action)) && !local(req)) return json(res, 403, { success: false, error: 'Configuração local só no computador do 3Mix' }); controlOperation = { id: d.operationId, scope: d.expectedScope }; const state = await production.run(d.action, d); return json(res, 200, { success: true, state: clean(state), ...(String(d.action).startsWith('effects_') ? { effects: production.effectsResult } : {}), ...(String(d.action).startsWith('ptz_') ? { ptz: production.ptzResult } : {}), ...(String(d.action).startsWith('signal_') ? { signals: production.signalEngine.last } : {}), ...(String(d.action).startsWith('call_') ? { call: production.callResult } : {}), ...(String(d.action).startsWith('gc_html_') ? { gcCompatible: { last: production.gcCompatible.last } } : {}), ...(String(d.action).startsWith('gc_library_') ? { gcLibrary: production.gcLibrary.last } : {}), ...(String(d.action).startsWith('audio_routing_') ? { audioRouting: production.audioRoutingEngine.last } : {}), ...(String(d.action).startsWith('settings_') ? { settings: production.settingsEngine.last } : {}), ...(String(d.action).startsWith('recovery_') ? { recovery: production.recoveryResult } : {}), ...(String(d.action).startsWith('outputs_') ? { outputs: production.outputEngine.last } : {}), ...(String(d.action).startsWith('network_') ? { network: production.networkEngine.last } : {}), ...(String(d.action).startsWith('controller_') ? { controllers: production.controllerEngine.last } : {}), ...(String(d.action).startsWith('overlay_') ? { overlays: production.overlayResult || production.overlayEngine.summary() } : {}) }); }
+            if (path === '/livelan') {
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        return res.end(liveLanDistribution.renderViewerPage());
+      }
+      if (path === '/api/livelan/status') {
+        return json(res, 200, { success: true, ...liveLanDistribution.getStatus() });
+      }
+      if (path === '/api/slides') {
+        if (req.method === 'GET') return json(res, 200, { success: true, ...slideEngine.summary() });
+        if (req.method === 'POST') {
+          const d = await body(req);
+          if (d.action === 'import_pptx') {
+            const src = d.bufferBase64 ? Buffer.from(d.bufferBase64, 'base64') : d.filePath;
+            await slideEngine.importPptx(src, d.name);
+          }
+          else if (d.action === 'import_images') await slideEngine.importImages(d.images, d.name);
+          else if (d.action === 'prepare_slide') slideEngine.prepareSlide(d.deckId, d.slideIndex);
+          else if (d.action === 'present_slide') await slideEngine.presentSlide(d.deckId, d.slideIndex);
+          else if (d.action === 'next_slide') slideEngine.nextSlide(d.deckId);
+          else if (d.action === 'previous_slide') slideEngine.previousSlide(d.deckId);
+          else if (d.action === 'next_animation') await slideEngine.nextAnimation(d.deckId);
+          else if (d.action === 'previous_animation') await slideEngine.previousAnimation(d.deckId);
+          else if (d.action === 'play_video') await slideEngine.playVideo(d.deckId);
+          else if (d.action === 'pause_video') await slideEngine.pauseVideo(d.deckId);
+          else if (d.action === 'restart_video') await slideEngine.restartVideo(d.deckId);
+          return json(res, 200, { success: true, ...slideEngine.summary() });
+        }
+        return json(res, 405, { success: false });
+      }
+      if (path.startsWith('/api/slides/media/')) {
+        const parts = path.replace('/api/slides/media/', '').split('/');
+        const deckId = parts[0], fileName = parts[1];
+        let filePath = join(ROOT, 'downloads/slides_cache', deckId, fileName);
+        if (!existsSync(filePath)) {
+          const alt1 = join(ROOT, '../3mix-panel/downloads/slides_cache', deckId, fileName);
+          const alt2 = join(ROOT, '../3mix-runtime/downloads/slides_cache', deckId, fileName);
+          if (existsSync(alt1)) filePath = alt1;
+          else if (existsSync(alt2)) filePath = alt2;
+        }
+        if (!existsSync(filePath)) return json(res, 404, { error: 'Arquivo não encontrado' });
+        const ext = extname(fileName).toLowerCase();
+        const contentType = mime[ext] || 'application/octet-stream';
+        res.writeHead(200, { 'Content-Type': contentType });
+        return res.end(await readFile(filePath));
+      }
       if (path === '/api/overlays') { if (req.method === 'GET') { try { await production.overlayEngine.refreshScenes(); } catch { } return json(res, 200, { success: true, ...production.overlayEngine.summary(), inputs: production.state.inputs.map(i => i.name) }); } if (req.method === 'POST') { const d = await body(req); const result = await production.overlayEngine.execute(d.action, d); return json(res, 200, { success: true, result, ...production.overlayEngine.summary() }); } return json(res, 405, { success: false }); }
       if (path === '/api/replay') { if (!['GET', 'POST'].includes(req.method)) return json(res, 405, { success: false }); const d = req.method === 'POST' ? await body(req) : {}; const result = await replay.command(req.method === 'GET' ? 'status' : d.action, d); return json(res, 200, { success: true, replay: result }); }
       if (path === '/api/playout') { if (!['GET', 'POST'].includes(req.method)) return json(res, 405, { success: false }); const d = req.method === 'POST' ? await body(req) : {}; if (req.method === 'POST' && !local(req)) return json(res, 403, { success: false, error: 'Controle de playout só no computador do 3Mix' }); const result = req.method === 'GET' ? production.playoutEngine.summary() : await production.playoutEngine.execute(d.action || 'playout_take', d); return json(res, 200, { success: true, playout: result }); }

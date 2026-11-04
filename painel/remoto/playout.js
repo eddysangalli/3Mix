@@ -92,6 +92,42 @@
       : 'Avanço, repetição e congelamento ficam em “Ao terminar” de cada clipe.';
   }
 
+  
+  function updatePlaylistTotals(s, livePos = null) {
+    if (!plTotalInfo || !Array.isArray(s?.activeList?.items)) return;
+    const items = s.activeList.items;
+    let totalDur = 0;
+    const netDurs = items.map((it) => {
+      const d = Math.max(0, (it.outMs || it.durationMs || 0) - (it.inMs || 0));
+      totalDur += d;
+      return d;
+    });
+
+    const pgmItemId = s.program?.item?.id;
+    const pgmIdx = items.findIndex((i) => i.id === pgmItemId);
+
+    let totalPos = 0;
+    let totalRem = totalDur;
+
+    if (pgmIdx >= 0) {
+      const curItem = items[pgmIdx];
+      const curNetDur = netDurs[pgmIdx];
+      let pgmPos = livePos !== null ? livePos : (s.program.positionMs || 0);
+      const curNetPos = Math.max(0, Math.min(curNetDur, pgmPos - (curItem.inMs || 0)));
+      const curNetRem = Math.max(0, curNetDur - curNetPos);
+
+      let prevDur = 0;
+      for (let i = 0; i < pgmIdx; i++) prevDur += netDurs[i];
+      totalPos = prevDur + curNetPos;
+
+      let postDur = 0;
+      for (let i = pgmIdx + 1; i < items.length; i++) postDur += netDurs[i];
+      totalRem = curNetRem + postDur;
+    }
+
+    plTotalInfo.innerHTML = `<span class="pos-chip" title="Tempo total decorrido na playlist"><b>POS:</b> ${formatTCShort(totalPos)}</span> <span class="rem-chip live" title="Tempo total restante da playlist"><b>REM:</b> -${formatTCShort(totalRem)}</span> <span class="dur-chip" title="Duração total da playlist"><b>DUR:</b> ${formatTCShort(totalDur)}</span> <span style="color:#94a3b8;font-size:12px;margin-left:4px;">· <b>${items.length}</b> ${items.length === 1 ? 'item' : 'itens'}</span>`;
+  }
+
   // ---- state ----
   function applyState(s) {
     if (!s) return;
@@ -101,8 +137,7 @@
     renderProgram(s.program);
     renderTable(s.activeList?.items || []);
     if (plTotalInfo && Array.isArray(s.activeList?.items)) {
-      const total = s.activeList.items.reduce((acc, it) => acc + Math.max(0, (it.outMs || it.durationMs || 0) - (it.inMs || 0)), 0);
-      plTotalInfo.textContent = s.activeList.items.length + (s.activeList.items.length === 1 ? ' item' : ' itens') + ' · Total: ' + formatTC(total);
+      updatePlaylistTotals(s);
     }
   }
 
@@ -178,9 +213,13 @@
     let pos = pgm.positionMs || 0;
     const dur = pgm.durationMs || 0;
     if (pgm.status === 'playing' && pgm.startedAt) pos = Math.min(dur, (pgm.positionMs || 0) + (Date.now() - pgm.startedAt));
+    const rem = Math.max(0, dur - pos);
     pgmCur.textContent = formatTC(pos);
-    pgmRem.textContent = formatNegative(Math.max(0, dur - pos));
+    pgmRem.textContent = formatNegative(rem);
     pgmProgress.style.width = (dur > 0 ? Math.min(100, Math.max(0, pos / dur * 100)) : 0) + '%';
+    const trRem = $('table-pgm-rem');
+    if (trRem) trRem.textContent = formatNegative(rem);
+    updatePlaylistTotals(state, pos);
   }
 
   // ---- table ----
@@ -216,9 +255,13 @@
       tdTitle.innerHTML = `<b style="color:#fff">${esc(item.title || 'Sem título')}</b><br><small style="color:#8f9aa6;font-size:10px">${esc(item.file || item.input || 'Sem origem')}</small>`;
       tr.append(tdTitle);
 
+      const durNet = Math.max(0, (item.outMs || item.durationMs || 0) - (item.inMs || 0));
       tr.append(cell(formatTC(item.inMs || 0), '', 'tc-cell'));
       tr.append(cell(formatTC(item.outMs && item.outMs > 0 ? item.outMs : item.durationMs || 0), '', 'tc-cell'));
-      tr.append(cell(formatTC(Math.max(0, (item.outMs || item.durationMs || 0) - (item.inMs || 0))), '', 'tc-cell'));
+      tr.append(cell(formatTC(durNet), '', 'tc-cell dur-col'));
+      const tdRem = cell(isPgm ? formatNegative(state.program.remainingMs ?? durNet) : formatTC(durNet), '', 'tc-cell rem-col' + (isPgm ? ' live-rem' : ''));
+      if (isPgm) tdRem.id = 'table-pgm-rem';
+      tr.append(tdRem);
 
       const tdTrans = document.createElement('td');
       tdTrans.textContent = `${String(item.transitionIn || 'cut').toUpperCase()} (${item.transitionMs || 500}ms)`;

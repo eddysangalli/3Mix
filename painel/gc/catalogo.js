@@ -169,7 +169,7 @@ window.GC_CATALOG = [
   "name": "Feed de Chat Broadcast (YouTube/Twitch/TikTok)",
   "collection": "Eventos",
   "category": "Social",
-  "thumbnail": "biblioteca/thumbnails/social_lowerthird_card.png",
+  "thumbnail": "biblioteca/thumbnails/social_lowerthird_card.svg",
   "file": "biblioteca/social_chat_stream.html",
   "fields": [
    {
@@ -203,7 +203,7 @@ window.GC_CATALOG = [
   "name": "Alerta de SuperChat & PIX",
   "collection": "Eventos",
   "category": "Social",
-  "thumbnail": "biblioteca/thumbnails/social_lowerthird_card.png",
+  "thumbnail": "biblioteca/thumbnails/social_lowerthird_card.svg",
   "file": "biblioteca/social_superchat_pill.html",
   "fields": [
    {
@@ -231,7 +231,7 @@ window.GC_CATALOG = [
   "name": "Ticker Contínuo CNN / GloboNews com Relógio",
   "collection": "Jornalismo",
   "category": "Notícias",
-  "thumbnail": "biblioteca/thumbnails/social_lowerthird_ticker.png",
+  "thumbnail": "biblioteca/thumbnails/social_lowerthird_ticker.svg",
   "file": "biblioteca/news_ticker_broadcast.html",
   "fields": [
    {
@@ -259,7 +259,7 @@ window.GC_CATALOG = [
   "name": "Placar Esportivo Premier League / FIFA",
   "collection": "Esportes",
   "category": "Placares",
-  "thumbnail": "biblioteca/thumbnails/scoreboard_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/scoreboard_horizontal.svg",
   "file": "biblioteca/sports_scoreboard_pro.html",
   "fields": [
    {
@@ -305,7 +305,7 @@ window.GC_CATALOG = [
   "name": "Lower Third Duplo Podcast Host & Convidado",
   "collection": "Eventos",
   "category": "Entrevistas",
-  "thumbnail": "biblioteca/thumbnails/podcast_host_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/podcast_host_horizontal.svg",
   "file": "biblioteca/podcast_split_lower.html",
   "fields": [
    {
@@ -344,7 +344,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/headline_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/headline_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/headline_horizontal.svg",
   "fields": [
    {
     "key": "tag",
@@ -570,7 +570,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/headline_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/headline_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/headline_vertical.svg",
   "fields": [
    {
     "key": "tag",
@@ -796,7 +796,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/lowerthird_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/lowerthird_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/lowerthird_horizontal.svg",
   "fields": [
    {
     "key": "name",
@@ -1022,7 +1022,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/lowerthird_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/lowerthird_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/lowerthird_vertical.svg",
   "fields": [
    {
     "key": "name",
@@ -1248,7 +1248,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/two_names_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/two_names_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/two_names_horizontal.svg",
   "fields": [
    {
     "key": "nameA",
@@ -1480,7 +1480,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/two_names_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/two_names_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/two_names_vertical.svg",
   "fields": [
    {
     "key": "nameA",
@@ -1712,7 +1712,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/breaking_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/breaking_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/breaking_horizontal.svg",
   "fields": [
    {
     "key": "badge",
@@ -1938,7 +1938,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/breaking_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/breaking_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/breaking_vertical.svg",
   "fields": [
    {
     "key": "badge",
@@ -2164,7 +2164,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/quote_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/quote_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/quote_horizontal.svg",
   "fields": [
    {
     "key": "author",
@@ -2390,7 +2390,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/quote_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/quote_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/quote_vertical.svg",
   "fields": [
    {
     "key": "author",
@@ -2616,7 +2616,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/credits_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/credits_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/credits_horizontal.svg",
   "fields": [
    {
     "key": "title",
@@ -2836,7 +2836,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/credits_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/credits_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/credits_vertical.svg",
   "fields": [
    {
     "key": "title",
@@ -3056,7 +3056,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/agenda_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/agenda_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/agenda_horizontal.svg",
   "fields": [
    {
     "key": "title",
@@ -3282,7 +3282,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/agenda_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/agenda_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/agenda_vertical.svg",
   "fields": [
    {
     "key": "title",
@@ -3508,7 +3508,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/countdown_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/countdown_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/countdown_horizontal.svg",
   "fields": [
    {
     "key": "title",
@@ -3736,7 +3736,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/countdown_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/countdown_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/countdown_vertical.svg",
   "fields": [
    {
     "key": "title",
@@ -3964,7 +3964,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/scoreboard_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/scoreboard_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/scoreboard_horizontal.svg",
   "fields": [
    {
     "key": "teamA",
@@ -4214,7 +4214,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/scoreboard_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/scoreboard_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/scoreboard_vertical.svg",
   "fields": [
    {
     "key": "teamA",
@@ -4464,7 +4464,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/stats_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/stats_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/stats_horizontal.svg",
   "fields": [
    {
     "key": "teamA",
@@ -4696,7 +4696,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/stats_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/stats_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/stats_vertical.svg",
   "fields": [
    {
     "key": "teamA",
@@ -4928,7 +4928,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/lineup_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/lineup_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/lineup_horizontal.svg",
   "fields": [
    {
     "key": "team",
@@ -5160,7 +5160,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/lineup_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/lineup_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/lineup_vertical.svg",
   "fields": [
    {
     "key": "team",
@@ -5392,7 +5392,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/bug_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/bug_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/bug_horizontal.svg",
   "fields": [
    {
     "key": "brand",
@@ -5612,7 +5612,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/bug_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/bug_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/bug_vertical.svg",
   "fields": [
    {
     "key": "brand",
@@ -5832,7 +5832,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/social_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/social_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/social_horizontal.svg",
   "fields": [
    {
     "key": "network",
@@ -6064,7 +6064,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/social_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/social_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/social_vertical.svg",
   "fields": [
    {
     "key": "network",
@@ -6296,7 +6296,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/podcast_host_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/podcast_host_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/podcast_host_horizontal.svg",
   "fields": [
    {
     "key": "name",
@@ -6522,7 +6522,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/podcast_host_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/podcast_host_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/podcast_host_vertical.svg",
   "fields": [
    {
     "key": "name",
@@ -6748,7 +6748,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/superchat_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/superchat_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/superchat_horizontal.svg",
   "fields": [
    {
     "key": "sender",
@@ -6974,7 +6974,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/superchat_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/superchat_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/superchat_vertical.svg",
   "fields": [
    {
     "key": "sender",
@@ -7200,7 +7200,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/speaker_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/speaker_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/speaker_horizontal.svg",
   "fields": [
    {
     "key": "name",
@@ -7426,7 +7426,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/speaker_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/speaker_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/speaker_vertical.svg",
   "fields": [
    {
     "key": "name",
@@ -7652,7 +7652,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/product_deal_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/product_deal_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/product_deal_horizontal.svg",
   "fields": [
    {
     "key": "badge",
@@ -7890,7 +7890,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/product_deal_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/product_deal_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/product_deal_vertical.svg",
   "fields": [
    {
     "key": "badge",
@@ -8128,7 +8128,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/fullscreen_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/fullscreen_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/fullscreen_horizontal.svg",
   "fields": [
    {
     "key": "tag",
@@ -8360,7 +8360,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/fullscreen_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/fullscreen_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/fullscreen_vertical.svg",
   "fields": [
    {
     "key": "tag",
@@ -10496,7 +10496,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/breaking_banner_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/breaking_banner_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/breaking_banner_horizontal.svg",
   "fields": [
    {
     "key": "badge",
@@ -10728,7 +10728,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/breaking_banner_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/breaking_banner_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/breaking_banner_vertical.svg",
   "fields": [
    {
     "key": "badge",
@@ -10960,7 +10960,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/lowerthird_chanfro_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/lowerthird_chanfro_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/lowerthird_chanfro_horizontal.svg",
   "fields": [
    {
     "key": "name",
@@ -11186,7 +11186,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/lowerthird_chanfro_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/lowerthird_chanfro_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/lowerthird_chanfro_vertical.svg",
   "fields": [
    {
     "key": "name",
@@ -11412,7 +11412,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/lowerthird_pill_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/lowerthird_pill_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/lowerthird_pill_horizontal.svg",
   "fields": [
    {
     "key": "name",
@@ -11638,7 +11638,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/lowerthird_pill_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/lowerthird_pill_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/lowerthird_pill_vertical.svg",
   "fields": [
    {
     "key": "name",
@@ -11864,7 +11864,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/lowerthird_glass_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/lowerthird_glass_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/lowerthird_glass_horizontal.svg",
   "fields": [
    {
     "key": "name",
@@ -12090,7 +12090,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/lowerthird_glass_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/lowerthird_glass_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/lowerthird_glass_vertical.svg",
   "fields": [
    {
     "key": "name",
@@ -12316,7 +12316,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/crypto_ticker_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/crypto_ticker_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/crypto_ticker_horizontal.svg",
   "fields": [
    {
     "key": "title",
@@ -12554,7 +12554,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/crypto_ticker_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/crypto_ticker_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/crypto_ticker_vertical.svg",
   "fields": [
    {
     "key": "title",
@@ -12792,7 +12792,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/poll_bar_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/poll_bar_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/poll_bar_horizontal.svg",
   "fields": [
    {
     "key": "question",
@@ -13034,7 +13034,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/poll_bar_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/poll_bar_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/poll_bar_vertical.svg",
   "fields": [
    {
     "key": "question",
@@ -13276,7 +13276,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/gaming_esports_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/gaming_esports_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/gaming_esports_horizontal.svg",
   "fields": [
    {
     "key": "teamA",
@@ -13524,7 +13524,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/gaming_esports_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/gaming_esports_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/gaming_esports_vertical.svg",
   "fields": [
    {
     "key": "teamA",
@@ -13772,7 +13772,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/speaker_bio_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/speaker_bio_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/speaker_bio_horizontal.svg",
   "fields": [
    {
     "key": "name",
@@ -13998,7 +13998,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/speaker_bio_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/speaker_bio_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/speaker_bio_vertical.svg",
   "fields": [
    {
     "key": "name",
@@ -14224,7 +14224,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/side_panel_info_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/side_panel_info_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/side_panel_info_horizontal.svg",
   "fields": [
    {
     "key": "title",
@@ -14462,7 +14462,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/side_panel_info_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/side_panel_info_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/side_panel_info_vertical.svg",
   "fields": [
    {
     "key": "title",
@@ -14700,7 +14700,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/corner_bug_pro_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/corner_bug_pro_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/corner_bug_pro_horizontal.svg",
   "fields": [
    {
     "key": "brand",
@@ -14932,7 +14932,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/corner_bug_pro_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/corner_bug_pro_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/corner_bug_pro_vertical.svg",
   "fields": [
    {
     "key": "brand",
@@ -15164,7 +15164,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/music_nowplaying_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/music_nowplaying_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/music_nowplaying_horizontal.svg",
   "fields": [
    {
     "key": "track",
@@ -15396,7 +15396,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/music_nowplaying_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/music_nowplaying_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/music_nowplaying_vertical.svg",
   "fields": [
    {
     "key": "track",
@@ -15628,7 +15628,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/topbar_headline_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/topbar_headline_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/topbar_headline_horizontal.svg",
   "fields": [
    {
     "key": "category",
@@ -15854,7 +15854,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/topbar_headline_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/topbar_headline_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/topbar_headline_vertical.svg",
   "fields": [
    {
     "key": "category",
@@ -16080,7 +16080,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/versus_match_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/versus_match_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/versus_match_horizontal.svg",
   "fields": [
    {
     "key": "title",
@@ -16324,7 +16324,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/versus_match_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/versus_match_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/versus_match_vertical.svg",
   "fields": [
    {
     "key": "title",
@@ -16568,7 +16568,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/product_card_shop_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/product_card_shop_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/product_card_shop_horizontal.svg",
   "fields": [
    {
     "key": "badge",
@@ -16806,7 +16806,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/product_card_shop_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/product_card_shop_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/product_card_shop_vertical.svg",
   "fields": [
    {
     "key": "badge",
@@ -17044,7 +17044,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/citation_quote_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/citation_quote_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/citation_quote_horizontal.svg",
   "fields": [
    {
     "key": "quote",
@@ -17270,7 +17270,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/citation_quote_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/citation_quote_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/citation_quote_vertical.svg",
   "fields": [
    {
     "key": "quote",
@@ -17496,7 +17496,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/podcast_minimal_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/podcast_minimal_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/podcast_minimal_horizontal.svg",
   "fields": [
    {
     "key": "name",
@@ -17722,7 +17722,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/podcast_minimal_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/podcast_minimal_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/podcast_minimal_vertical.svg",
   "fields": [
    {
     "key": "name",
@@ -17948,7 +17948,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/stats_versus_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/stats_versus_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/stats_versus_horizontal.svg",
   "fields": [
    {
     "key": "playerA",
@@ -18186,7 +18186,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/stats_versus_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/stats_versus_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/stats_versus_vertical.svg",
   "fields": [
    {
     "key": "playerA",
@@ -18424,7 +18424,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/social_card_highlight_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/social_card_highlight_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/social_card_highlight_horizontal.svg",
   "fields": [
    {
     "key": "author",
@@ -18662,7 +18662,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/social_card_highlight_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/social_card_highlight_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/social_card_highlight_vertical.svg",
   "fields": [
    {
     "key": "author",
@@ -18900,7 +18900,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/countdown_circle_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/countdown_circle_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/countdown_circle_horizontal.svg",
   "fields": [
    {
     "key": "title",
@@ -19128,7 +19128,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/countdown_circle_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/countdown_circle_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/countdown_circle_vertical.svg",
   "fields": [
    {
     "key": "title",
@@ -19356,7 +19356,7 @@ window.GC_CATALOG = [
   "width": 1920,
   "height": 1080,
   "file": "biblioteca/church_service_horizontal.html",
-  "thumbnail": "biblioteca/thumbnails/church_service_horizontal.png",
+  "thumbnail": "biblioteca/thumbnails/church_service_horizontal.svg",
   "fields": [
    {
     "key": "title",
@@ -19588,7 +19588,7 @@ window.GC_CATALOG = [
   "width": 1080,
   "height": 1920,
   "file": "biblioteca/church_service_vertical.html",
-  "thumbnail": "biblioteca/thumbnails/church_service_vertical.png",
+  "thumbnail": "biblioteca/thumbnails/church_service_vertical.svg",
   "fields": [
    {
     "key": "title",

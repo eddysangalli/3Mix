@@ -3,58 +3,170 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>3Mix · DSK</title>
+  <title>3Mix · Editor Visual de DSK & Overlays</title>
   <script src="3mix-padrao.js"></script>
   <link rel="stylesheet" href="3mix-grafite.css">
   <link rel="stylesheet" href="3mix-padrao.css">
   <style>
-    .dsk { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 16px; align-items: start; }
+    .dsk { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 16px; align-items: start; }
     .dsk-channels { padding: 12px; gap: 10px; position: sticky; top: 0; }
     .dsk-channels > button { width: 100%; }
     #channel-tabs { display: flex; flex-direction: column; gap: 4px; }
     .p3 #channel-tabs button {
-      height: 46px; width: 100%; padding: 0 10px; justify-content: flex-start; gap: 10px; text-align: left;
+      height: 44px; width: 100%; padding: 0 10px; justify-content: flex-start; gap: 10px; text-align: left;
       background: var(--p3-field); border-color: var(--p3-line-soft);
     }
     .p3 #channel-tabs button.selected { background: #2f3436; border-color: var(--p3-accent); box-shadow: inset 3px 0 var(--p3-accent); }
     .dsk-num { flex: none; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 3px; background: #333; color: #ddd; font-size: 13px; font-weight: 800; }
-    .dsk-who { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--p3-dim); font-weight: 600; }
+    .dsk-who { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--p3-dim); font-weight: 600; font-size: 13px; }
     .p3 #channel-tabs button.on-air .dsk-num { background: var(--p3-pgm); color: #fff; }
     .p3 #channel-tabs button.on-air .dsk-who { color: #fff; }
 
-    .dsk-source { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: end; }
-    .p3 .dsk-source button { height: 42px; min-width: 128px; font-size: 14px; }
-    .p3 .dsk-source select { height: 42px; font-size: 15px; }
+    /* Visual Editor Canvas 16:9 */
+    .editor-viewport-wrap {
+      background: #090c10;
+      border: 1px solid #232c3b;
+      border-radius: 6px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .editor-canvas-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .editor-canvas-container {
+      position: relative;
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border: 1px solid #334155;
+      border-radius: 4px;
+      overflow: hidden;
+      user-select: none;
+      touch-action: none;
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
+    }
+    /* Safe Areas */
+    .safe-action {
+      position: absolute;
+      top: 5%; left: 5%; width: 90%; height: 90%;
+      border: 1px dashed rgba(255,255,255,0.15);
+      pointer-events: none;
+    }
+    .safe-title {
+      position: absolute;
+      top: 10%; left: 10%; width: 80%; height: 80%;
+      border: 1px dashed rgba(56, 189, 248, 0.2);
+      pointer-events: none;
+    }
+    .canvas-center-cross {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 16px; height: 16px;
+      pointer-events: none;
+      opacity: 0.3;
+    }
+    .canvas-center-cross::before { content: ""; position: absolute; left: 7px; top: 0; width: 2px; height: 16px; background: #fff; }
+    .canvas-center-cross::after { content: ""; position: absolute; top: 7px; left: 0; height: 2px; width: 16px; background: #fff; }
 
-    .dsk-transition { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px 20px; }
+    /* Interactive Overlay Box */
+    .interactive-box {
+      position: absolute;
+      border: 2px solid #0284c7;
+      background: rgba(2, 132, 199, 0.25);
+      cursor: move;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      text-shadow: 0 1px 3px #000;
+      box-sizing: border-box;
+      transition: box-shadow 0.1s;
+    }
+    .interactive-box.on-air-box {
+      border-color: #ef4444;
+      background: rgba(239, 68, 68, 0.3);
+    }
+    .interactive-box:hover {
+      box-shadow: 0 0 10px rgba(2, 132, 199, 0.6);
+    }
+    .box-handle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #ffffff;
+      border: 1px solid #0284c7;
+      border-radius: 2px;
+      pointer-events: auto;
+    }
+    .box-handle.nw { top: -5px; left: -5px; cursor: nwse-resize; }
+    .box-handle.n  { top: -5px; left: calc(50% - 5px); cursor: ns-resize; }
+    .box-handle.ne { top: -5px; right: -5px; cursor: nesw-resize; }
+    .box-handle.e  { top: calc(50% - 5px); right: -5px; cursor: ew-resize; }
+    .box-handle.se { bottom: -5px; right: -5px; cursor: nwse-resize; }
+    .box-handle.s  { bottom: -5px; left: calc(50% - 5px); cursor: ns-resize; }
+    .box-handle.sw { bottom: -5px; left: -5px; cursor: nesw-resize; }
+    .box-handle.w  { top: calc(50% - 5px); left: -5px; cursor: ew-resize; }
 
-    .dsk-pos { display: grid; grid-template-columns: 208px minmax(0, 1fr); gap: 16px; align-items: start; }
-    .dsk-frame { position: relative; width: 208px; aspect-ratio: 16 / 9; background: var(--p3-sunken); border: 1px solid var(--p3-line); border-radius: 3px; overflow: hidden; }
-    .dsk-frame i { position: absolute; background: var(--p3-accent-soft); border: 1px solid var(--p3-accent-strong); }
-    .dve-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 6px; }
-    .p3 .dve-grid button { height: 36px; padding: 0 8px; font-size: 12.5px; background: var(--p3-field); }
+    /* Controls Grid */
+    .dsk-source-bar {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) auto auto auto;
+      gap: 10px;
+      align-items: end;
+      background: #11151c;
+      padding: 10px 14px;
+      border-radius: 4px;
+      border: 1px solid #232c3b;
+    }
+    .dsk-source-bar select { height: 38px; font-size: 13.5px; }
+    .dsk-source-bar button { height: 38px; min-width: 110px; font-size: 13px; font-weight: 700; }
+
+    .dve-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 6px; }
+    .p3 .dve-grid button { height: 32px; padding: 0 8px; font-size: 12px; background: var(--p3-field); }
     .p3 .dve-grid button.active { background: #2f3436; border-color: var(--p3-accent); color: #fff; box-shadow: inset 0 -2px var(--p3-accent); }
-    .dsk-xywh { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
-    #dve-status { color: var(--p3-dim); font-size: 12.5px; }
-    #dve-status:empty { display: none; }
+    
+    .dsk-xywh-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .dsk-xywh-grid input { height: 32px; font-size: 12.5px; }
 
-    .dsk-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .dsk-preset-bar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: #0e1219;
+      padding: 8px 12px;
+      border-radius: 4px;
+      border: 1px solid #1f2937;
+      flex-wrap: wrap;
+    }
 
     @media (max-width: 960px) {
       .dsk { grid-template-columns: 1fr; }
       .dsk-channels { position: static; }
       #channel-tabs { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
-      .dsk-pos { grid-template-columns: 1fr; }
-      .dsk-source { grid-template-columns: 1fr 1fr; }
-      .dsk-source > .p3-field { grid-column: 1 / -1; }
-      .dsk-xywh { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .dsk-source-bar { grid-template-columns: 1fr; }
+      .dsk-xywh-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
   </style>
 </head>
 <body data-page="overlays" class="p3">
   <header class="p3-head">
     <a href="/" title="3Mix"><img class="p3-logo" src="/img/3mix-logo.png" alt="3Mix"></a>
-    <h1>DSK</h1>
+    <h1>Editor Visual de DSK & Overlays</h1>
     <span class="p3-flex"></span>
     <span id="connection">Conectando…</span>
   </header>
@@ -64,6 +176,7 @@
 
     <div class="dsk">
       <aside class="p3-card dsk-channels" aria-label="Canais de DSK">
+        <div style="font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:4px;">CANAIS DSK (1 A 8)</div>
         <div id="channel-tabs" role="tablist">
           <button type="button" role="tab" data-channel="1" class="selected"><span class="dsk-num">1</span><span class="dsk-who">Livre</span></button>
           <button type="button" role="tab" data-channel="2"><span class="dsk-num">2</span><span class="dsk-who">Livre</span></button>
@@ -74,53 +187,108 @@
           <button type="button" role="tab" data-channel="7"><span class="dsk-num">7</span><span class="dsk-who">Livre</span></button>
           <button type="button" role="tab" data-channel="8"><span class="dsk-num">8</span><span class="dsk-who">Livre</span></button>
         </div>
-        <button type="button" id="btn-kill-all" class="danger" title="Tira do ar todos os canais de DSK">Tirar todos do ar</button>
+        <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px;">
+          <button type="button" id="btn-kill-all" class="danger" title="Tira do ar todos os canais de DSK instantaneamente">Tirar todos do ar (ALL OFF)</button>
+        </div>
       </aside>
 
-      <section id="channel-editor" class="p3-card">
-        <div class="p3-card-head">
-          <h2 id="channel-heading">DSK 1</h2>
-          <div id="channel-status-badge"><span class="p3-badge">Fora do ar</span></div>
-        </div>
-
-        <div class="dsk-source">
-          <label class="p3-field">Entrada
-            <select id="channel-input"><option value="">Escolha a entrada…</option></select>
-          </label>
-          <button type="button" id="btn-channel-take" class="air">Colocar no ar</button>
-          <button type="button" id="btn-channel-off">Tirar do ar</button>
-        </div>
-
-        <div class="dsk-transition">
-          <label class="p3-field">Transição
-            <select id="channel-transition"></select>
-          </label>
-          <label class="p3-field">Duração: <b id="val-duration">500 ms</b>
-            <input type="range" id="channel-duration" min="50" max="5000" step="50" value="500">
-          </label>
-        </div>
-
-        <div class="p3-field">Posição</div>
-        <div class="dsk-pos">
-          <div class="dsk-frame" aria-hidden="true"><i id="dve-frame"></i></div>
-          <div class="dve-grid">
-            <button type="button" data-dve="fullscreen" class="active">Tela cheia</button>
-            <button type="button" data-dve="lower-third">Tarja</button>
-            <button type="button" data-dve="pip-top-right">PIP ↗</button>
-            <button type="button" data-dve="pip-top-left">PIP ↖</button>
-            <button type="button" data-dve="pip-bottom-right">PIP ↘</button>
-            <button type="button" data-dve="pip-bottom-left">PIP ↙</button>
-            <button type="button" data-dve="split-left">Metade esq.</button>
-            <button type="button" data-dve="split-right">Metade dir.</button>
+      <section id="channel-editor" class="p3-card" style="gap:14px;display:flex;flex-direction:column;">
+        <div class="p3-card-head" style="margin-bottom:0;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <h2 id="channel-heading" style="margin:0;">DSK 1</h2>
+            <div id="channel-status-badge"><span class="p3-badge">Fora do ar</span></div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button type="button" id="btn-channel-take" class="air" style="height:34px;padding:0 18px;font-weight:700;">TAKE / NO AR</button>
+            <button type="button" id="btn-channel-cut" class="b on" style="height:34px;padding:0 14px;font-weight:700;">CUT</button>
+            <button type="button" id="btn-channel-off" style="height:34px;padding:0 14px;">OFF</button>
           </div>
         </div>
-        <p id="dve-status" role="status"></p>
 
+        <!-- Fonte & Controles Rápidos -->
+        <div class="dsk-source-bar">
+          <label class="p3-field" style="margin:0;">Entrada Selecionada
+            <select id="channel-input"><option value="">Escolha a entrada…</option></select>
+          </label>
+          <label class="p3-field" style="margin:0;">Transição
+            <select id="channel-transition"></select>
+          </label>
+          <label class="p3-field" style="margin:0;">Duração: <b id="val-duration">500 ms</b>
+            <input type="range" id="channel-duration" min="0" max="3000" step="50" value="500" style="width:120px;">
+          </label>
+          <button type="button" id="btn-channel-apply" class="primary" style="height:38px;">Salvar Ajustes</button>
+        </div>
+
+        <!-- Viewport do Editor Visual Interativo 16:9 -->
+        <div class="editor-viewport-wrap">
+          <div class="editor-canvas-header">
+            <span><b>EDITOR VISUAL 16:9 (PREVIEW DO DSK)</b> · Arraste para mover ou puxe as bordas para redimensionar</span>
+            <div style="display:flex;gap:12px;align-items:center;">
+              <label style="cursor:pointer;display:flex;align-items:center;gap:4px;"><input type="checkbox" id="chk-safe-areas" checked> Áreas Seguras</label>
+              <label style="cursor:pointer;display:flex;align-items:center;gap:4px;"><input type="checkbox" id="chk-lock-ratio"> Travar Proporção (16:9)</label>
+              <button type="button" id="btn-center-box" class="b" style="padding:2px 8px;font-size:11px;">Centralizar</button>
+            </div>
+          </div>
+
+          <div class="editor-canvas-container" id="canvas-container">
+            <div class="safe-action" id="safe-action"></div>
+            <div class="safe-title" id="safe-title"></div>
+            <div class="canvas-center-cross"></div>
+
+            <!-- Caixa Interativa com 8 Handles -->
+            <div class="interactive-box" id="interactive-box">
+              <span id="box-label">DSK 1</span>
+              <div class="box-handle nw" data-handle="nw"></div>
+              <div class="box-handle n"  data-handle="n"></div>
+              <div class="box-handle ne" data-handle="ne"></div>
+              <div class="box-handle e"  data-handle="e"></div>
+              <div class="box-handle se" data-handle="se"></div>
+              <div class="box-handle s"  data-handle="s"></div>
+              <div class="box-handle sw" data-handle="sw"></div>
+              <div class="box-handle w"  data-handle="w"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Presets Geométricos Rápidos -->
+        <div class="dve-grid">
+          <button type="button" data-dve="fullscreen" class="active">Tela cheia</button>
+          <button type="button" data-dve="lower-third">Tarja / GC</button>
+          <button type="button" data-dve="pip-top-right">PIP Sup. Dir.</button>
+          <button type="button" data-dve="pip-top-left">PIP Sup. Esq.</button>
+          <button type="button" data-dve="pip-bottom-right">PIP Inf. Dir.</button>
+          <button type="button" data-dve="pip-bottom-left">PIP Inf. Esq.</button>
+          <button type="button" data-dve="split-left">Metade Esq.</button>
+          <button type="button" data-dve="split-right">Metade Dir.</button>
+        </div>
+
+        <!-- Coordenadas Numéricas e Recorte -->
+        <div class="dsk-xywh-grid">
+          <label class="p3-field">X (px)<input type="number" id="dve-x" value="0"></label>
+          <label class="p3-field">Y (px)<input type="number" id="dve-y" value="0"></label>
+          <label class="p3-field">Largura (px)<input type="number" id="dve-w" value="1920"></label>
+          <label class="p3-field">Altura (px)<input type="number" id="dve-h" value="1080"></label>
+          <label class="p3-field">Opacidade<input type="number" id="dve-opacity" min="0" max="1" step="0.05" value="1"></label>
+        </div>
+
+        <!-- Barra de Presets Salváveis de DSK -->
+        <div class="dsk-preset-bar">
+          <b style="font-size:12px;color:#94a3b8;">Presets DSK:</b>
+          <button type="button" class="b" data-a="load_preset" data-v="gc_padrao">Tarja GC Padrão</button>
+          <button type="button" class="b" data-a="load_preset" data-v="pip_comentarista">PiP Comentarista</button>
+          <button type="button" class="b" data-a="load_preset" data-v="split_debate">Split Debate 50/50</button>
+          <button type="button" class="b" data-a="load_preset" data-v="logo_canto">Bug / Logo Canto</button>
+          <span style="flex:1;"></span>
+          <button type="button" id="btn-save-custom-preset" class="b on" style="font-size:11px;">Salvar Posição como Preset…</button>
+          <button type="button" id="btn-dve-restore" class="quiet" style="font-size:11px;">Restaurar Posição Original</button>
+        </div>
+
+        <!-- Opções Avançadas e Automação -->
         <details>
-          <summary>Mais opções</summary>
-          <div class="p3-card" style="padding:0;border:0;background:none">
+          <summary style="font-size:12.5px;color:#94a3b8;cursor:pointer;">Automação, Transição e Aparência Fina</summary>
+          <div style="display:flex;flex-direction:column;gap:12px;margin-top:10px;">
             <div class="p3-grid">
-              <label class="p3-field">Sair do ar sozinho
+              <label class="p3-field">Sair do ar sozinho (Auto-Off)
                 <select id="channel-hide-after">
                   <option value="0" selected>Não, só manual</option>
                   <option value="3">Em 3 s</option>
@@ -131,15 +299,15 @@
                   <option value="30">Em 30 s</option>
                 </select>
               </label>
-              <label class="p3-field">Usar a transição
+              <label class="p3-field">Transição
                 <select id="channel-trans-type">
                   <option value="match" selected>Ao entrar e ao sair</option>
                   <option value="show">Só ao entrar</option>
                   <option value="hide">Só ao sair</option>
                 </select>
               </label>
-              <label class="p3-check" style="align-self:end;height:38px" title="Entra e sai junto com o corte do Programa">
-                <input type="checkbox" id="channel-tie"> Acompanhar o corte (TIE)
+              <label class="p3-check" style="align-self:end;height:38px" title="Entra e sai sincronizado com o corte do Programa">
+                <input type="checkbox" id="channel-tie"> Acompanhar corte do PGM (TIE)
               </label>
             </div>
 
@@ -151,28 +319,13 @@
                 <input type="checkbox" id="stinger-audio" checked> Som do stinger só no retorno
               </label>
             </div>
-
-            <div class="dsk-xywh">
-              <label class="p3-field">X<input type="number" id="dve-x" value="0"></label>
-              <label class="p3-field">Y<input type="number" id="dve-y" value="0"></label>
-              <label class="p3-field">Largura<input type="number" id="dve-w" value="1920"></label>
-              <label class="p3-field">Altura<input type="number" id="dve-h" value="1080"></label>
-              <label class="p3-field">Opacidade<input type="number" id="dve-opacity" min="0" max="1" step="0.05" value="1"></label>
-            </div>
-            <div class="p3-row">
-              <button type="button" id="btn-dve-restore" class="quiet" title="Devolve a entrada à posição original">Restaurar posição original</button>
-            </div>
           </div>
         </details>
-
-        <div class="dsk-actions">
-          <button type="button" id="btn-channel-apply" class="primary">Salvar canal</button>
-        </div>
       </section>
     </div>
   </main>
 
   <script src="controle.js"></script>
-  <script src="overlays.js?v=20261101p"></script>
+  <script src="overlays.js?v=20261104visual"></script>
 </body>
 </html>

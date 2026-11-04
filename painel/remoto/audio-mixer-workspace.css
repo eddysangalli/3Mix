@@ -1357,7 +1357,8 @@ body.header-colors .channel-strip.master .strip-head { background: #303030; box-
   letter-spacing: .3px;
 }
 
-.filter-fields input {
+.filter-fields input,
+.filter-fields select {
   width: 84px;
   height: 30px;
   padding: 0 6px;
@@ -2912,7 +2913,7 @@ body.header-colors .a-strip[data-visual="aux"] .a-strip-head { background: linea
 .a-dsp-row .filter-select { flex: 1; min-width: 0; width: 100%; height: 34px; border: 1px solid var(--am-line); border-radius: 4px; background: var(--am-field); color: var(--am-text); font-size: 12.5px; }
 .a-dsp .filter-fields { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; border: 1px solid var(--am-line); border-radius: 4px; background: var(--am-deep); }
 .a-dsp .filter-fields label { display: flex; flex-direction: column; gap: 3px; font-size: 10px; font-weight: 700; letter-spacing: .3px; text-transform: uppercase; color: var(--am-mute); }
-.a-dsp .filter-fields input { width: 80px; height: 30px; padding: 0 6px; border: 1px solid var(--am-line); border-radius: 3px; background: var(--am-field); color: var(--am-text); font: 12px var(--font-mono); }
+.a-dsp .filter-fields input, .a-dsp .filter-fields select { width: 80px; height: 30px; padding: 0 6px; border: 1px solid var(--am-line); border-radius: 3px; background: var(--am-field); color: var(--am-text); font: 12px var(--font-mono); }
 .a-dsp .dsp-actions { display: flex; flex-wrap: wrap; gap: 6px; }
 .a-dsp .dsp-actions .btn-hardware { flex: 1 1 calc(50% - 3px); min-width: 0; height: 32px; padding: 0 6px; font-size: 11.5px; white-space: normal; }
 .a-dsp .dsp-actions #open-native-filters { flex-basis: 100%; }
@@ -3076,7 +3077,7 @@ body.header-colors .a-strip[data-visual="aux"] .a-strip-head { background: linea
 .a-fx-editor { display: flex; flex-direction: column; gap: 6px; margin: 2px 0 3px; padding: 7px; border: 1px solid var(--am-line); border-radius: 3px; background: var(--am-deep); }
 .a-fx-editor .filter-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
 .a-fx-editor .filter-fields label { display: flex; flex-direction: column; justify-content: flex-end; gap: 3px; min-width: 0; font-size: 10.5px; color: var(--am-dim); }
-.a-fx-editor .filter-fields input { width: 100%; height: 26px; padding: 0 5px; border: 1px solid var(--am-line); border-radius: 3px; background: var(--am-field); color: var(--am-text); font: 600 12px var(--font-mono); }
+.a-fx-editor .filter-fields input, .a-fx-editor .filter-fields select { width: 100%; height: 26px; padding: 0 5px; border: 1px solid var(--am-line); border-radius: 3px; background: var(--am-field); color: var(--am-text); font: 600 12px var(--font-mono); }
 .a-fx-editor .btn-hardware { height: 26px; font-size: 12px; }
 .a-fx-add { display: flex; gap: 5px; }
 .a-fx-add select { flex: 1; min-width: 0; height: 30px; padding: 0 6px; border: 1px solid var(--am-line); border-radius: 3px; background: var(--am-field); color: var(--am-text); font-size: 12.5px; }

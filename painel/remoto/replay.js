@@ -893,5 +893,12 @@ async function poll() {
   }
 }
 
+// Conectar botoes de captura rapida (-5s, -10s, -20s) e marcadores IN / OUT
+document.querySelectorAll('[data-capture]').forEach((btn) => {
+  btn.addEventListener('click', () => quickClip(Number(btn.dataset.capture)));
+});
+el('btn-mark-in')?.addEventListener('click', () => markIn());
+el('btn-mark-out')?.addEventListener('click', () => markOut());
+
 poll();
 setInterval(poll, 1500);

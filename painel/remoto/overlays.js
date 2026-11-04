@@ -9,6 +9,13 @@ const DVE_PRESETS = {
   'split-right': { name: 'Metade dir.', x: 960, y: 0, width: 960, height: 1080, opacity: 1.0 }
 };
 
+const BROADCAST_PRESETS = {
+  gc_padrao: { name: 'Tarja GC Padrão', x: 80, y: 780, width: 1760, height: 220, opacity: 1.0 },
+  pip_comentarista: { name: 'PiP Comentarista', x: 1240, y: 80, width: 600, height: 338, opacity: 1.0 },
+  split_debate: { name: 'Split Debate 50/50', x: 0, y: 0, width: 960, height: 1080, opacity: 1.0 },
+  logo_canto: { name: 'Bug / Logo Canto', x: 1620, y: 60, width: 220, height: 124, opacity: 1.0 }
+};
+
 let currentChannel = 1;
 let overlaysState = {
   channels: Array.from({ length: 8 }, (_, i) => ({
@@ -26,12 +33,11 @@ let overlaysState = {
 };
 let availableInputs = [];
 
-// Entrada escolhida para cada canal enquanto ele está fora do ar. O motor só conhece a entrada no ar;
-// sem isto a escolha do operador era apagada na atualização seguinte da tela.
 const CHOICE_KEY = '3mix.dsk.escolha';
+const PRESETS_KEY = '3mix.dsk.custom_presets';
 const readChoices = () => { try { return JSON.parse(localStorage.getItem(CHOICE_KEY) || '{}') || {}; } catch { return {}; } };
 const choices = readChoices();
-const saveChoices = () => { try { localStorage.setItem(CHOICE_KEY, JSON.stringify(choices)); } catch { /* sem armazenamento local */ } };
+const saveChoices = () => { try { localStorage.setItem(CHOICE_KEY, JSON.stringify(choices)); } catch { /* sem armazenamento */ } };
 
 const E = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -79,21 +85,131 @@ function populateTransitions() {
   if (options.includes(current)) sel.value = current;
 }
 
-function paintFrame() {
-  const box = E('dve-frame');
+/* =========================================================================
+   EDITOR VISUAL INTERATIVO 16:9
+   ========================================================================= */
+function paintVisualBox() {
+  const box = E('interactive-box');
   if (!box) return;
   const num = (id, fallback) => { const v = Number(E(id).value); return Number.isFinite(v) ? v : fallback; };
-  box.style.left = (num('dve-x', 0) / 1920 * 100) + '%';
-  box.style.top = (num('dve-y', 0) / 1080 * 100) + '%';
-  box.style.width = (num('dve-w', 1920) / 1920 * 100) + '%';
-  box.style.height = (num('dve-h', 1080) / 1080 * 100) + '%';
+  const x = num('dve-x', 0);
+  const y = num('dve-y', 0);
+  const w = Math.max(1, num('dve-w', 1920));
+  const h = Math.max(1, num('dve-h', 1080));
+  const op = num('dve-opacity', 1.0);
+
+  box.style.left = (x / 1920 * 100) + '%';
+  box.style.top = (y / 1080 * 100) + '%';
+  box.style.width = (w / 1920 * 100) + '%';
+  box.style.height = (h / 1080 * 100) + '%';
+  box.style.opacity = op;
+
+  const ch = channelOf(currentChannel);
+  const onAir = Boolean(ch?.scene);
+  box.classList.toggle('on-air-box', onAir);
+  const inputName = ch?.scene || choices[currentChannel] || `DSK ${currentChannel}`;
+  E('box-label').textContent = `${onAir ? '● NO AR: ' : 'PREVIEW: '} ${inputName}`;
 }
 
-function paintDveStatus(ch) {
-  const box = E('dve-status');
-  if (!box || !ch) return;
-  box.textContent = ch.dveError || '';
-  box.style.color = ch.dveError ? '#ffb4a8' : '';
+let isDragging = false;
+let dragMode = 'move'; // 'move' ou 'nw', 'ne', 'se', 'sw', etc.
+let startPointer = { x: 0, y: 0 };
+let startGeom = { x: 0, y: 0, w: 1920, h: 1080 };
+
+function initInteractiveEditor() {
+  const container = E('canvas-container');
+  const box = E('interactive-box');
+  if (!container || !box) return;
+
+  box.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    const handle = e.target.dataset.handle;
+    dragMode = handle ? handle : 'move';
+    isDragging = true;
+    startPointer = { x: e.clientX, y: e.clientY };
+    startGeom = {
+      x: Number(E('dve-x').value) || 0,
+      y: Number(E('dve-y').value) || 0,
+      w: Number(E('dve-w').value) || 1920,
+      h: Number(E('dve-h').value) || 1080
+    };
+    box.setPointerCapture(e.pointerId);
+  });
+
+  box.addEventListener('pointermove', (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const rect = container.getBoundingClientRect();
+    const scaleX = 1920 / rect.width;
+    const scaleY = 1080 / rect.height;
+    const dx = (e.clientX - startPointer.x) * scaleX;
+    const dy = (e.clientY - startPointer.y) * scaleY;
+    const lockRatio = E('chk-lock-ratio')?.checked;
+
+    let nx = startGeom.x;
+    let ny = startGeom.y;
+    let nw = startGeom.w;
+    let nh = startGeom.h;
+
+    if (dragMode === 'move') {
+      nx = Math.round(startGeom.x + dx);
+      ny = Math.round(startGeom.y + dy);
+    } else {
+      if (dragMode.includes('e')) nw = Math.max(50, Math.round(startGeom.w + dx));
+      if (dragMode.includes('s')) nh = Math.max(30, Math.round(startGeom.h + dy));
+      if (dragMode.includes('w')) {
+        const potentialW = Math.max(50, Math.round(startGeom.w - dx));
+        nx = Math.round(startGeom.x + (startGeom.w - potentialW));
+        nw = potentialW;
+      }
+      if (dragMode.includes('n')) {
+        const potentialH = Math.max(30, Math.round(startGeom.h - dy));
+        ny = Math.round(startGeom.y + (startGeom.h - potentialH));
+        nh = potentialH;
+      }
+
+      if (lockRatio) {
+        if (dragMode.includes('e') || dragMode.includes('w')) {
+          nh = Math.round(nw * 9 / 16);
+        } else {
+          nw = Math.round(nh * 16 / 9);
+        }
+      }
+    }
+
+    E('dve-x').value = nx;
+    E('dve-y').value = ny;
+    E('dve-w').value = nw;
+    E('dve-h').value = nh;
+    document.querySelectorAll('.dve-grid button').forEach((b) => b.classList.remove('active'));
+    paintVisualBox();
+  });
+
+  const stopDrag = (e) => {
+    if (isDragging) {
+      isDragging = false;
+      try { box.releasePointerCapture(e.pointerId); } catch {}
+    }
+  };
+  box.addEventListener('pointerup', stopDrag);
+  box.addEventListener('pointercancel', stopDrag);
+
+  // Safe Areas toggle
+  E('chk-safe-areas')?.addEventListener('change', (e) => {
+    const show = e.target.checked;
+    E('safe-action').style.display = show ? 'block' : 'none';
+    E('safe-title').style.display = show ? 'block' : 'none';
+  });
+
+  // Centralizar
+  E('btn-center-box')?.addEventListener('click', () => {
+    const w = Number(E('dve-w').value) || 1920;
+    const h = Number(E('dve-h').value) || 1080;
+    E('dve-x').value = Math.round((1920 - w) / 2);
+    E('dve-y').value = Math.round((1080 - h) / 2);
+    paintVisualBox();
+    showMsg('Overlay centralizado na área de composição.');
+  });
 }
 
 function paintBadge(ch) {
@@ -132,13 +248,6 @@ function renderEditor() {
   E('channel-hide-after').value = String(ch.hideAfter || 0);
   E('channel-tie').checked = Boolean(ch.tie);
 
-  E('stinger-box').hidden = !String(ch.transition).startsWith('Stinger');
-  if (ch.stinger) {
-    E('stinger-cutpoint').value = ch.stinger.cutPointMs || 250;
-    E('val-cutpoint').textContent = `${ch.stinger.cutPointMs || 250} ms`;
-    E('stinger-audio').checked = ch.stinger.audio !== false;
-  }
-
   const dve = ch.dve || DVE_PRESETS.fullscreen;
   E('dve-x').value = dve.x ?? 0;
   E('dve-y').value = dve.y ?? 0;
@@ -146,8 +255,7 @@ function renderEditor() {
   E('dve-h').value = dve.height ?? 1080;
   E('dve-opacity').value = dve.opacity ?? 1.0;
   document.querySelectorAll('.dve-grid button').forEach((btn) => btn.classList.toggle('active', btn.dataset.dve === dve.preset));
-  paintFrame();
-  paintDveStatus(ch);
+  paintVisualBox();
 }
 
 async function sendRequest(action, data) {
@@ -177,60 +285,10 @@ async function loadState() {
         updateInputs();
       }
     }
-  } catch { /* mantém a última leitura */ }
-  applyLiveHardware();
+  } catch { /* mantém local */ }
   populateTransitions();
   updateTabs();
   renderEditor();
-}
-
-let refreshing = false;
-function liveHardware() {
-  const live = window.FreeMixRemote?.getState?.()?.overlays;
-  return Array.isArray(live) ? live : null;
-}
-
-function applyLiveHardware() {
-  const live = liveHardware();
-  if (!live) return false;
-  let changed = false;
-  for (const item of live) {
-    const local = channelOf(Number(item.number));
-    const scene = item.scene || '';
-    if (local && local.scene !== scene) { local.scene = scene; changed = true; }
-  }
-  return changed;
-}
-
-function paintLive() {
-  const ch = channelOf(currentChannel);
-  updateTabs();
-  paintBadge(ch);
-  paintInputChoice(ch);
-  paintDveStatus(ch);
-}
-
-async function refreshStatus() {
-  if (refreshing) return;
-  refreshing = true;
-  try {
-    if (liveHardware()) {
-      applyLiveHardware();
-    } else {
-      const res = await fetch('/api/overlays', { cache: 'no-store' });
-      if (!res.ok) return;
-      const data = await res.json();
-      if (Array.isArray(data.channels)) {
-        for (const incoming of data.channels) {
-          const local = channelOf(incoming.id);
-          if (local && typeof incoming.scene === 'string' && local.scene !== incoming.scene) local.scene = incoming.scene;
-        }
-      }
-    }
-    paintLive();
-  } catch { /* tenta de novo no próximo ciclo */ } finally {
-    refreshing = false;
-  }
 }
 
 function configFromForm() {
@@ -244,7 +302,7 @@ function configFromForm() {
     transitionType: E('channel-trans-type').value,
     hideAfter: Number(E('channel-hide-after').value),
     tie: E('channel-tie').checked,
-    stinger: { enabled: isStinger, name: transition, cutPointMs: Number(E('stinger-cutpoint').value), audio: E('stinger-audio').checked },
+    stinger: { enabled: isStinger, name: transition, cutPointMs: Number(E('stinger-cutpoint')?.value || 250), audio: E('stinger-audio')?.checked !== false },
     dve: {
       preset: activeDveBtn ? activeDveBtn.dataset.dve : 'custom',
       x: Number(E('dve-x').value),
@@ -256,24 +314,29 @@ function configFromForm() {
   };
 }
 
-async function take() {
+async function take(forceCut = false) {
   const channel = currentChannel;
   const scene = E('channel-input').value;
   if (!scene) { showMsg(`Escolha a entrada do DSK ${channel}.`, true); E('channel-input').focus(); return; }
   try {
-    // O que está na tela é o que entra no ar: antes o TAKE ignorava transição e posição ainda não salvas.
-    await sendRequest('overlay_configure', configFromForm());
+    const cfg = configFromForm();
+    if (forceCut) {
+      cfg.transition = 'Cortar';
+      cfg.transitionDuration = 0;
+    }
+    await sendRequest('overlay_configure', cfg);
     await sendRequest('overlay_take', { channel, scene });
     await loadState();
-    showMsg(`DSK ${channel} no ar com ${scene}.`);
+    showMsg(`DSK ${channel} no ar com ${scene}${forceCut ? ' (CUT direto)' : ''}.`);
   } catch (err) {
     showMsg(err.message, true);
   }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  initInteractiveEditor();
   loadState();
-  setInterval(() => { if (!document.hidden) refreshStatus(); }, 1000);
+  setInterval(() => { if (!document.hidden) loadState(); }, 2000);
 
   document.querySelectorAll('#channel-tabs button').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -288,12 +351,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (value) choices[currentChannel] = value; else delete choices[currentChannel];
     saveChoices();
     updateTabs();
+    paintVisualBox();
   });
 
   E('channel-duration').addEventListener('input', (e) => { E('val-duration').textContent = `${e.target.value} ms`; });
-  E('stinger-cutpoint').addEventListener('input', (e) => { E('val-cutpoint').textContent = `${e.target.value} ms`; });
-  E('channel-transition').addEventListener('change', (e) => { E('stinger-box').hidden = !e.target.value.startsWith('Stinger'); });
 
+  // DVE Presets
   document.querySelectorAll('.dve-grid button').forEach((btn) => {
     btn.addEventListener('click', () => {
       const preset = DVE_PRESETS[btn.dataset.dve];
@@ -305,23 +368,62 @@ document.addEventListener('DOMContentLoaded', () => {
       E('dve-opacity').value = preset.opacity;
       document.querySelectorAll('.dve-grid button').forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
-      paintFrame();
+      paintVisualBox();
     });
   });
-  for (const id of ['dve-x', 'dve-y', 'dve-w', 'dve-h']) {
+
+  for (const id of ['dve-x', 'dve-y', 'dve-w', 'dve-h', 'dve-opacity']) {
     E(id).addEventListener('input', () => {
       document.querySelectorAll('.dve-grid button').forEach((b) => b.classList.remove('active'));
-      paintFrame();
+      paintVisualBox();
     });
   }
+
+  // Presets Rápidos Broadcast
+  document.querySelectorAll('[data-a="load_preset"]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.v;
+      const p = BROADCAST_PRESETS[key];
+      if (!p) return;
+      E('dve-x').value = p.x;
+      E('dve-y').value = p.y;
+      E('dve-w').value = p.width;
+      E('dve-h').value = p.height;
+      E('dve-opacity').value = p.opacity;
+      paintVisualBox();
+      showMsg(`Preset "${p.name}" aplicado na prévia.`);
+    });
+  });
+
+  // Salvar Preset Personalizado
+  E('btn-save-custom-preset')?.addEventListener('click', () => {
+    const nome = prompt('Nome do novo preset de posicionamento DSK:');
+    if (!nome) return;
+    try {
+      const saved = JSON.parse(localStorage.getItem(PRESETS_KEY) || '{}');
+      saved[nome] = {
+        x: Number(E('dve-x').value),
+        y: Number(E('dve-y').value),
+        width: Number(E('dve-w').value),
+        height: Number(E('dve-h').value),
+        opacity: Number(E('dve-opacity').value)
+      };
+      localStorage.setItem(PRESETS_KEY, JSON.stringify(saved));
+      showMsg(`Preset "${nome}" salvo no sistema!`);
+    } catch {
+      showMsg('Erro ao salvar preset.', true);
+    }
+  });
+
+  // Ações
+  E('btn-channel-take').addEventListener('click', () => take(false));
+  E('btn-channel-cut').addEventListener('click', () => take(true));
 
   E('btn-channel-apply').addEventListener('click', async () => {
     try {
       await sendRequest('overlay_configure', configFromForm());
       await loadState();
-      const updated = channelOf(currentChannel);
-      if (updated?.dveError) showMsg(`DSK ${currentChannel} salvo. Posição: ${updated.dveError}`, true);
-      else showMsg(`DSK ${currentChannel} salvo.`);
+      showMsg(`DSK ${currentChannel} configurado com sucesso.`);
     } catch (err) {
       showMsg(err.message, true);
     }
@@ -337,8 +439,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  E('btn-channel-take').addEventListener('click', take);
-
   E('btn-channel-off').addEventListener('click', async () => {
     try {
       await sendRequest('overlay_off', { channel: currentChannel });
@@ -353,7 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       await sendRequest('overlay_kill_all', {});
       await loadState();
-      showMsg('Todos os DSK fora do ar.');
+      showMsg('Todos os DSK retirados do ar.');
     } catch (err) {
       showMsg(err.message, true);
     }

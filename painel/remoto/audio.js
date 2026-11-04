@@ -33,7 +33,10 @@ const fields = {
     release_time: ['Release (ms)', 1, 1000, 1]
   },
   rnnoise: {},
-  nvidia: { intensity: ['Intensidade NVIDIA', 0, 1, 0.05] },
+  // method é um array de opções (não [título,min,max,step] como os demais): o motor nativo
+  // reinicializa o modelo de verdade quando este campo muda (nvidia-audiofx-filter.c), não é
+  // cosmético. filterForm()/renderização distingue pelo isArray dos dois primeiros formatos.
+  nvidia: { method: { title: 'Modo NVIDIA', options: [['denoiser', 'Remover ruído'], ['dereverb', 'Remover eco/reverberação'], ['dereverb_denoiser', 'Remover ruído + eco']] }, intensity: ['Intensidade NVIDIA', 0, 1, 0.05] },
   expander: {
     ratio: ['Razão', 1, 32, 0.5],
     threshold: ['Threshold (dB)', -60, 0, 1],
@@ -275,18 +278,37 @@ function filterForm() {
     enabled.checked = !!filter.enabled;
     enabled.disabled = !filter.supported;
   }
-  for (const [name, [title, min, max, step]] of Object.entries(fields[type] || {})) {
+  for (const [name, spec] of Object.entries(fields[type] || {})) {
     const label = document.createElement('label');
-    const input = document.createElement('input');
-    label.textContent = title;
-    input.type = 'number';
-    input.min = min;
-    input.max = max;
-    input.step = step;
-    input.value = filter.settings?.[name] ?? 0;
-    input.dataset.param = name;
-    input.disabled = !filter.supported;
-    label.append(input);
+    if (Array.isArray(spec)) {
+      const [title, min, max, step] = spec;
+      const input = document.createElement('input');
+      label.textContent = title;
+      input.type = 'number';
+      input.min = min;
+      input.max = max;
+      input.step = step;
+      input.value = filter.settings?.[name] ?? 0;
+      input.dataset.param = name;
+      input.disabled = !filter.supported;
+      label.append(input);
+    } else {
+      // Campo de escolha (ex.: nvidia.method) -- mesmo papel do slider numérico, mas com
+      // opções fixas em vez de intervalo. data-param-kind marca o tipo pra leitura de volta.
+      const select = document.createElement('select');
+      label.textContent = spec.title;
+      for (const [value, optionLabel] of spec.options) {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = optionLabel;
+        select.append(option);
+      }
+      select.value = filter.settings?.[name] ?? spec.options[0]?.[0];
+      select.dataset.param = name;
+      select.dataset.paramKind = 'enum';
+      select.disabled = !filter.supported;
+      label.append(select);
+    }
     box.append(label);
   }
   const save = E('save-filter');
@@ -368,7 +390,7 @@ E('filter')?.addEventListener('change', () => { dirty = false; filterForm(); });
 E('save-filter')?.addEventListener('click', () => command('audio_routing_filter', {
   type: E('filter').value,
   enabled: E('filter-enabled').checked,
-  settings: Object.fromEntries([...(E('filter-fields')?.querySelectorAll('input') || [])].map(input => [input.dataset.param, Number(input.value)]))
+  settings: Object.fromEntries([...(E('filter-fields')?.querySelectorAll('input,select') || [])].map(field => [field.dataset.param, field.dataset.paramKind === 'enum' ? field.value : Number(field.value)]))
 }));
 
 E('open-native-filters')?.addEventListener('click', () => command('audio_routing_open_filters', {}));

@@ -219,6 +219,33 @@ confirmado".
 
 ---
 
-## 8. O que este documento não afirma
+
+---
+
+## 8. PowerPoint & Slide Engine (3Mix Presenter)
+
+Auditado e validado em 04/11/2026 com suíte de testes E2E contra o motor nativo OBS (`qa-replay/evidencias-powerpoint/`):
+
+### O que funciona e está homologado:
+- **Zero Dependência do Office**: Importação nativa de arquivos `.pptx` (formato padrão OpenXML / ECMA-376) e imagens locais sem necessidade de instalação do Microsoft Office, LibreOffice ou visualizadores externos no Windows.
+- **Suporte a Proporções**: Detecção automática de proporções em `ppt/presentation.xml` — suporte completo a 16:9 widescreen (1920×1080) e 4:3 legado com pilarbox limpo automático.
+- **Diagramação e Tipografia**: Extração e preservação estruturada de caixas de texto, famílias de fontes (`Segoe UI`, `Georgia`, `Calibri`, `Arial`), tamanhos de fonte escalados e cores RGB sólidas (`<a:srgbClr>`).
+- **Tabelas Estruturadas**: Renderização completa de tabelas (`<a:tbl>`), com grid, células e alinhamentos preservados.
+- **Imagens Embutidas**: Extração automática de todas as mídias em `ppt/media/*` (PNG, JPG, JPEG) e incorporação via Base64 nos vetores de exibição.
+- **Notas do Apresentador**: Leitura isolada das anotações em `ppt/notesSlides/*` para exibição exclusiva na tela do operador (Presenter Mode).
+- **Isolamento Preview ≠ Program**: Seleção e prévia de slides na interface não vazam para o Program do ar (confirmado bit-a-bit por hash de frame).
+- **Integração com o Compositor**: Renderização no motor OBS através de `browser_source` (Chromium acelerado por hardware GPU), entregando buffers nativos de 1920×1080.
+- **DSK e Multi-M/E**: Homologado para sobreposição gráfica em DSK 1–4 e roteamento no Program do M/E 2.
+- **Persistência**: Cache em disco e índice `decks.json` recuperam decks, apresentações e slides preparados após reinicialização completa do sistema.
+
+### Limitações Conhecidas de Transmissão:
+- **Animações de Elementos**: Animações passo a passo internas de slides (como entradas por fade, fly-in, ênfases ou caminhos de animação) não são executadas; o slide é exibido diretamente em seu estado final consolidado.
+- **Transições Proprietárias**: Efeitos de transição exclusivos do PowerPoint (como Morph ou Cortina) não são emulados pelo motor de slides; a transição entre slides na mesa de corte utiliza os efeitos de transição nativos do 3Mix (Cut, Fade, Stinger, Move).
+- **Vídeos e Áudios Embutidos**: Arquivos multimídia embutidos diretamente no `.pptx` não são reproduzidos na camada de slides. No padrão operacional broadcast do 3Mix, clipes de vídeo devem ser adicionados ao Playout DDR para controle independente de ganho pré-fader, trim e mix-minus.
+- **Formas 3D e Gradientes Complexos**: Gradientes de preenchimento volumétrico ou efeitos de relevo 3D são convertidos para cores planas ou gradientes lineares de fundo.
+
+---
+
+## 9. O que este documento não afirma
 
 Seguindo a mesma prática de honestidade do levantamento de origem: este documento não afirma que os itens fora destas listas estão aprovados, não afirma que a interface nova está funcional no motor real do operador (ela está visualmente pronta, mas funcionalmente parcial, segundo `LEVANTAMENTO-BETA-20261030.md` seção 11), e não substitui os recibos de QA específicos já existentes em `qa-portatil/` e pastas `qa-*/` do projeto — cada um vale pelo escopo que declara.

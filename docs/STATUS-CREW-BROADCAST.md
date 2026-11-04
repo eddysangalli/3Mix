@@ -315,9 +315,27 @@ onde `node_modules` existe) — ainda dentro do projeto, só num ponto mais fund
   tempo — ainda não feito nesta rodada (exigiria o motor ao vivo gravando de verdade, não
   só a detecção de disco em si, que já está testada).
 
-### FASE 4 — Áudio profissional e ASIO — NÃO INICIADA (investigação feita na Fase 0; implementação zero)
-- [ ] UI de mapeamento de canais físicos; testes de drift/hotplug — tudo depende de
-  driver/interface ASIO física, BLOQUEADO.
+### FASE 4 — Áudio profissional e ASIO — PARCIAL (implementação e UI já existiam; faltava só o teste — agora testado em unidade; handshake físico continua bloqueado)
+- [x] **Correção de classificação (04/11): "UI de mapeamento de canais físicos" NÃO é
+  implementação zero — já existe, completa, desde antes desta sessão.** A entrada anterior
+  desta fase ("NÃO INICIADA... implementação zero") e a linha correspondente da
+  `MATRIZ-INVENTARIO-CREW-BROADCAST.md` ("não investigado a fundo") estavam imprecisas;
+  corrigidas nesta rodada, não apagadas (ver a própria matriz, linha "Roteamento de canais
+  físicos", com a nota de correção). `AudioBusesEngine` (`ferramentas/audio-buses-producao.mjs`)
+  já tem `audio_routing_asio_output_configure/start/stop/control-panel` e
+  `audio_routing_asio_create`, com a mesma validação de canal/buffer/ganho que o C++ nativo
+  (`AsioSession::Configure`, `FreeMixAudioRouting.cpp`) exige, persistência e confirmação pelo
+  motor antes de salvar. UI real em `painel/remoto/audio-buses.js` (seção ASIO completa, não
+  mock). O que realmente faltava era só o teste — nunca existia nenhum, nem de unidade.
+  **Testado**: `3mix-panel/ferramentas/test-audio-buses-asio.mjs`, 11/11 PASS — funções puras
+  (`normalizeAsioRoutes`/`normalizeMembers`/`publicAudio`) e integração real contra
+  `AudioBusesEngine.command()` com motor falso que segue o mesmo contrato de
+  `vendor('audio_capabilities',...)` confirmado no C++. Regressão combinada de toda a sessão:
+  **110/110 PASS**, sem quebra. Nenhum arquivo de produção foi editado — só o teste novo.
+- [ ] Testes de drift/hotplug e handshake real OPEN/START/callback contra driver ASIO físico
+  — isso sim depende genuinamente de hardware ASIO físico ausente nesta máquina, continua
+  BLOQUEADO. Licença do SDK ASIO já estava resolvida antes desta sessão (GPLv3, ver matriz) —
+  não é mais pendência jurídica.
 
 ### FASE 5 — API nativa, compatibilidade vMix e Tally físico — PARCIAL
 - [x] vMix TCP corrigido (desligado por padrão, API própria como caminho oficial) — ver
@@ -366,6 +384,47 @@ onde `node_modules` existe) — ainda dentro do projeto, só num ponto mais fund
   backend+validação+teste (a parte de maior valor e menor risco) está pronto para quando a UI
   for trabalhada. (4) Vídeo entrelaçado real — não investigado nesta rodada, seguinte item
   pendente seria este.
+- [x] **Vídeo entrelaçado (interlaced) real: desentrelaçamento exposto para as entradas de
+  captura física, pelo contrato padrão do próprio obs-websocket (Node/API, sem motor ligado
+  nem rebuild nativo — o protocolo já existe em libobs/obs-websocket, não é exclusivo do fork
+  3Mix).** Investigação real primeiro: confirmado em
+  `3mix-engine/plugins/obs-websocket/src/requesthandler/RequestHandler_Inputs.cpp` que
+  `GetInputDeinterlaceMode`/`SetInputDeinterlaceMode` e
+  `Get/SetInputDeinterlaceFieldOrder` já existem como requests padrão (desde a versão 5.6.0
+  do protocolo), restritos a fontes `OBS_SOURCE_ASYNC` (câmeras de captura reais —
+  confirmado por grep nos plugins nativos: `win-dshow`, `decklink-source`, `aja-source`,
+  `obs-ffmpeg-source` para arquivo 50i/59.94i — nunca cenas/composições/browser_source, o
+  próprio motor recusa esses casos). Os 9 modos reais (`OBS_DEINTERLACE_MODE_DISABLE` até
+  `YADIF_2X`) e as 2 ordens de campo confirmados em `utils/Json.h`
+  (`NLOHMANN_JSON_SERIALIZE_ENUM`), não inventados.
+
+  **Implementado**: `ferramentas/deinterlace-producao.mjs` (novo, isolado) com os 9 modos e 2
+  ordens de campo reais, rótulos em português, e duas funções (`readDeinterlace`/
+  `setDeinterlace`) que confirmam por releitura — nunca retornam sucesso sem o motor
+  confirmar, mesmo padrão de `SetInputMute`/`GetInputMute` já usado no resto do projeto.
+  Integrado em `entradas-producao.mjs` (`InputEngine`) como o novo comando
+  `input_deinterlace`, resolvendo a fonte nativa real via `state.sourceInputs` (não a
+  cena/composição que a contém — são coisas diferentes, câmera vs. composição).
+
+  **Testado**: 11/11 PASS no módulo isolado
+  (`3mix-panel/ferramentas/test-deinterlace-producao.mjs`), incluindo o caso de fonte não-
+  async (ex. `browser_source`) sendo recusada antes de qualquer chamada ao motor, e o caso de
+  motor não confirmar a mudança (não finge sucesso). 4/4 PASS na integração real contra
+  `InputEngine.execute()` (`3mix-panel/ferramentas/test-input-deinterlace.mjs`). Regressão
+  combinada de toda a sessão (SRT + NVIDIA Dereverb + este item + suíte anterior): **99/99
+  PASS**, sem quebra em nenhum teste pré-existente.
+
+  **O que NÃO foi feito, registrado sem inflar**: (1) nenhuma UI oferece esse controle ainda
+  — é um comando de API funcional, não uma tela; a tela de entradas (`patch-inputs.mjs`/UI de
+  câmera) teria que ganhar o controle, decisão de UX/layout fora do escopo desta rotina; (2)
+  nenhuma prova real contra motor ligado com uma fonte 1080i/576i/480i de verdade — a Fase 0
+  já registrava isso como pendente, continua pendente aqui: a validação `OBS_SOURCE_ASYNC`
+  e os nomes de modo foram confirmados por leitura de código, não por execução; (3)
+  `async-delay-filter.c`/`gpu-delay.c` (também `OBS_SOURCE_ASYNC`) não foram investigados
+  quanto a interação com deinterlace — fora do escopo desta mudança específica.
+
+  Nenhuma cópia para `3mix-runtime/`; nenhum processo tocado; motor permanece desligado nesta
+  rotina.
 
 ### FASE 7 — ST 2110, PTP e NMOS: estudo + protótipo isolado — CONCLUÍDA (Estudo Canônico Formalizado)
 - [x] **Documento Canônico de Arquitetura ST 2110, PTP (ST 2059-2) e NMOS (IS-04/IS-05) formalizado**:
@@ -1005,3 +1064,39 @@ teste usava um fluxo contínuo de UMA voz só; só ao simular o padrão real de 
   **O que NÃO foi feito, registrado sem inflar**: (1) telemetria real de RTT/perda de pacote — exigiria expor `srt_bstats` do lado nativo (hoje só `srt_getlasterror`/`srt_getrejectreason` vão para o log, não para a API), é mudança em C++ com rebuild, PENDENTE; (2) reconexão configurável específica de SRT — o motor usa `Reconnect`/`RetryDelay`/`MaxRetries` genéricos de qualquer output, não algo dedicado a SRT, PENDENTE; (3) UI (`saidas.html`/`saidas-srt-ui.js`) — decisão explícita de não estender nesta rodada: é um dock/janela grande e compartilhado do Central de Saídas, e editá-lo sem ver o conjunto completo arriscaria romper o design grafite existente (regra inegociável do superprompt); backend+validação+teste prontos para quando a UI for trabalhada; (4) vídeo entrelaçado real — não investigado, seguinte item pendente da Fase 6.
 
   Nenhuma cópia para `3mix-runtime/` nesta rotina (regra de backup/sincronização fica para quando o conjunto da Fase 6 avançar mais, junto com a UI). Checklist atualizado: `[ ]` → `[x]` no item de presets/telemetria/reconexão SRT, com a ressalva explícita de telemetria/reconexão/UI/interlaced continuarem pendentes dentro do mesmo item.
+
+- **2026-11-04 ~10:0x BRT (ciclo do watchdog "3Mix Crew + Melhorias Broadcast") — Fase 6 (continuação): vídeo entrelaçado real exposto via Node/API, e Fase 5.1 (áudio): NVIDIA Dereverb exposto no mesmo gerenciador de efeitos que já tinha RNNoise/Denoiser.**
+  Confirmado antes de agir: `qa-interface/AGENTES-EM-ANDAMENTO` existe; `FreeMix.exe` do operador NÃO estava rodando (só as mesmas 3 instâncias de QA de outra frente, intocadas); `controle-producao.mjs` estável (comitado 10h atrás, sem edição concorrente); `entradas-producao.mjs`/`audio-routing-producao.mjs` estáveis (comitados há 2 dias).
+
+  **1) Vídeo entrelaçado (item que minha própria entrada anterior, de ~09:3x, deixou registrado como "seguinte item pendente").** Detalhe completo já escrito no item correspondente da checklist (Fase 6, acima). Resumo: `GetInputDeinterlaceMode`/`SetInputDeinterlaceMode`/`Get/SetInputDeinterlaceFieldOrder` já existem no protocolo obs-websocket padrão (não são do fork 3Mix, não exigem rebuild); criei `ferramentas/deinterlace-producao.mjs` com os 9 modos/2 ordens reais e validação por releitura, integrado em `InputEngine` como `input_deinterlace`. 11/11 + 4/4 PASS.
+
+  **2) NVIDIA Dereverb (seção 5.1 do superprompt, pedido explícito do dono nesta rodada): RNNoise localizado, confirmado que NÃO há duplicação — é um gerenciador único (`AUDIO_FILTERS`/`filterSettings()`), e o motor nativo já suporta Dereverb, só não estava exposto.** Lendo `3mix-engine/plugins/nv-filters/nvidia-audiofx-filter.c`: a troca de `method` em tempo real já reinicializa o modelo de verdade (`strcmp(ng->fx,method)!=0` dispara destruição+reinicialização do efeito), não é campo cosmético. Adicionado `enums:{method:[...]}` em `AUDIO_FILTERS.nvidia` e validação de enum em `filterSettings()` (`audio-routing-producao.mjs`); UI (`audio.js`) ganhou um `<select>` para esse campo (sliders numéricos existentes intocados); CSS (`audio-mixer-workspace.css`) estendido nas 3 regras existentes de `.filter-fields input` para cobrir `select`, reaproveitando o estilo grafite de outro `select` já existente na mesma tela — nenhuma identidade visual nova. 8/8 PASS no módulo, visual real no browser NÃO verificado (depende de motor conectado; registrado como pendente, não inflado).
+
+  **Regressão final da rotina, tudo combinado**: `node --test` nas 2 novas suítes + todas as suítes `node:test` de sessões anteriores (SRT, Replay, Calls, mix-minus, FTB/qualificação, Signal Registry/tally, mix-effects) → **99/99 PASS**, zero quebra.
+
+  Arquivos desta rotina: criados `ferramentas/deinterlace-producao.mjs`,
+  `ferramentas/test-deinterlace-producao.mjs`, `ferramentas/test-input-deinterlace.mjs`,
+  `ferramentas/test-audio-filters-nvidia-method.mjs`; editados `ferramentas/entradas-producao.mjs`
+  (+2 linhas: import e método `deinterlace`/dispatch), `ferramentas/audio-routing-producao.mjs`
+  (enum em `AUDIO_FILTERS.nvidia` + validação em `filterSettings`), `painel/remoto/audio.js`
+  (renderização condicional array-vs-objeto), `painel/remoto/audio-mixer-workspace.css` (3
+  seletores estendidos). Nenhuma cópia para `3mix-runtime/`; nenhum processo tocado; sem
+  commit (nenhuma instrução desta rotina pediu publicação).
+
+  **Itens restantes da checklist mestre, todos bloqueados por dependência real e não
+  tocados**: Fase 2 (confirmação MXF com motor nativo ligado), Fase 3 (carga de múltiplas ISOs
+  com motor ligado), Fase 4 (ASIO, hardware físico). Nenhum dos três foi contornado nem
+  simulado nesta rotina.
+
+- **2026-11-04 ~10:2x BRT (ciclo do watchdog "3Mix Crew + Melhorias Broadcast") — Fase 4: correção de classificação (roteamento ASIO já implementado, não "zero") e lacuna real de teste fechada.**
+  Confirmado antes de agir: `qa-interface/AGENTES-EM-ANDAMENTO` existe; `FreeMix.exe` do operador NÃO estava rodando (mesmas 3 instâncias de QA de outra frente, intocadas); `audio-buses-producao.mjs` estável, sem edição concorrente.
+
+  Com os 3 itens `[ ]` restantes da checklist (confirmação MXF, carga de ISOs, UI de ASIO) todos aparentando depender de motor/hardware, reli a Fase 4 do superprompt canônico com mais cuidado antes de aceitar "nada a fazer". Achei uma frase da Fase 4 que não exige hardware: "política de distribuição" de ASIO — já resolvida antes desta sessão (licença GPLv3, documentada). Ao verificar a UI de mapeamento de canais citada no mesmo item, descobri que ela **já existe por completo**: `AudioBusesEngine` (`ferramentas/audio-buses-producao.mjs`) tem rotas de saída ASIO, criação de entrada de captura ASIO com validação de canal real contra o driver, tudo com a mesma validação que o C++ nativo (`AsioSession::Configure`, que tem até um "test seam" `StartInjected(IASIO*)` para testes com driver falso, não explorado nesta rotina por exigir build/toolchain nativo). A classificação anterior ("implementação zero", "não investigado a fundo") estava errada — corrigida nesta rodada, com a imprecisão registrada, não escondida.
+
+  O que realmente faltava não era implementação, era teste: nunca existia nenhum, nem de unidade, para `normalizeAsioRoutes`/`normalizeMembers`/`AudioBusesEngine`. Criado `3mix-panel/ferramentas/test-audio-buses-asio.mjs`: 11/11 PASS (8 testes de unidade das funções puras de validação + 3 de integração real contra `AudioBusesEngine.command()`). Regressão combinada de toda a sessão (SRT + NVIDIA Dereverb + deinterlace + este item + suíte anterior): **110/110 PASS**, zero quebra.
+
+  **Nenhum arquivo de produção editado nesta rotina** — só o arquivo de teste novo e as duas correções de documentação (`MATRIZ-INVENTARIO-CREW-BROADCAST.md`, esta entrada). Nenhuma cópia para `3mix-runtime/`; nenhum processo tocado; sem commit.
+
+  **Itens genuinamente bloqueados, confirmados de novo, nenhum contornado**: (1) confirmação MXF contra motor nativo ligado; (2) carga de múltiplas ISOs simultâneas, também exige motor ligado; (3) handshake real ASIO contra driver físico — hardware ausente nesta máquina, e o "test seam" nativo (`StartInjected`) exigiria escrever e compilar um teste C++ com driver IASIO falso, fora do alcance desta rotina sem coordenação de build nativo.
+
+  **Resumo para quem retomar**: dos 9 itens que restavam marcados `[ ]` há 2 ciclos, 6 foram fechados nesta sessão (SRT, NVIDIA Dereverb, deinterlace, correção ASIO) sem depender de motor/hardware. Os 3 que restam (MXF contra motor real, carga de ISOs, handshake ASIO físico) dependem genuinamente de motor ligado ou hardware físico ausente — nenhum decidido/contornado por conta própria, todos registrados com o motivo exato. Não há mais item avançável nesta rotina sem um desses dois recursos.
