@@ -202,3 +202,42 @@ Estados: Compatibilidade prevista; Implementado sem teste físico; Em homologaç
 - **Passos:** Para cada formato: comparar desligado/ligado em movimento, conferir ordem superior/inferior, taxa real, drops e offset A/V; salvar/reabrir e repetir perda/retorno de sinal.
 - **Resultado esperado:** Movimento e ordem corretos, sincronismo medido e taxa confirmada. Captura desentrelaçada não prova saída entrelaçada; saída ausente fica indisponível.
 - **Falhas, logs e evidências:** Formato/taxa/ordem/método, offset A/V e drops, vídeo antes/depois, captura do analisador e diagnóstico sanitizado. Homologar separadamente cada formato.
+
+---
+
+### MISSÃO 12 — Estúdio Virtual Unificado (Câmera, Zoom e Presets)
+
+- **Equipamento:** Entrada de vídeo ao vivo (Câmera HDMI/SDI ou NDI/Webcam recortada por Croma Key) e tela de alta resolução para conferência visual dos quatro planos de profundidade.
+- **Configuração do 3Mix:** Criar ou selecionar um Input configurado como Estúdio Virtual (`Virtual Set`). Conectar a câmera ao slot Z=2 (Apresentador), Z=0 (Telão de fundo), Z=1 (Cenário 3D) e Z=3 (Bancada/Mesa frontal).
+- **Passos de reprodução:**
+  1. No card da entrada na Mesa de Corte, inspecionar a coluna lateral de enquadramentos de câmera (botões `1 GERAL`, `2 MÉDIO`, `3 CLOSE`, `4 TELÃO`).
+  2. Acionar a transição de câmera de `GERAL` (1.0x) para `MÉDIO` (1.45x) e `CLOSE` (2.05x).
+  3. Ajustar as velocidades de transição (`F` Rápido, `M` Médio, `S` Lento, `C` Cut instantâneo).
+  4. Observar a movimentação em tempo real no monitor de Preview e PGM.
+- **Critérios de aprovação:**
+  - Todas as 4 camadas devem escalar e transladar em bloco rigorosamente sincronizado, sem descolamento de perspectiva entre o apresentador e a bancada.
+  - A transição dinâmica de câmera deve respeitar o tempo configurado (ex: 1.5s em Slow) com aceleração e desaceleração suaves (curva sinusoidal de easing).
+  - O corte instantâneo (`Cut`) deve saltar de posição imediatamente sem flicker ou quadros pretos.
+
+---
+
+### MISSÃO 13 — Apresentações de Slides Nativos (Vetor SVG com Cache-Busting)
+
+- **Equipamento:** Qualquer estação Windows com saída secundária de vídeo (Projetor, LED Wall ou retorno de palco/confiança).
+- **Configuração do 3Mix:** Adicionar entrada do tipo `Apresentação de Slides` através do painel de criação de entradas ou via API `/api/slides`.
+- **Passos de reprodução:**
+  1. Carregar um arquivo de slides ou conjunto de tópicos com bullets animados.
+  2. Navegar entre slides usando atalhos de teclado (Next/Prev) ou o painel remoto `/remoto/slides.html`.
+  3. Acionar o avanço progressivo de bullets (revelação sequencial de tópicos).
+  4. Modificar o texto ou a formatação de um slide em tempo real durante a execução.
+- **Critérios de aprovação:**
+  - O slide deve renderizar com nitidez vetorial perfeita na resolução nativa de PGM (1080p ou 4K), sem artefatos de compressão de bitmap.
+  - O avanço de tópicos deve revelar os itens com transição de opacidade limpa.
+  - As atualizações de conteúdo devem refletir imediatamente no navegador de cena OBS sem reter cache antigo (validação do parâmetro de cache-busting `?t=timestamp`).
+
+- **Equipamento:** Fontes/padrões 1080i, 576i e 480i, captura e monitor/analisador apropriados; marcador A/V.
+- **Driver e sistema:** Drivers e modos enumerados, taxa racional e ordem de campos conhecidas; não confundir campos/s com quadros/s.
+- **Configuração do 3Mix:** Selecionar fonte nativa de captura, ordem de campo e método exposto; usar saída física já implementada.
+- **Passos:** Para cada formato: comparar desligado/ligado em movimento, conferir ordem superior/inferior, taxa real, drops e offset A/V; salvar/reabrir e repetir perda/retorno de sinal.
+- **Resultado esperado:** Movimento e ordem corretos, sincronismo medido e taxa confirmada. Captura desentrelaçada não prova saída entrelaçada; saída ausente fica indisponível.
+- **Falhas, logs e evidências:** Formato/taxa/ordem/método, offset A/V e drops, vídeo antes/depois, captura do analisador e diagnóstico sanitizado. Homologar separadamente cada formato.

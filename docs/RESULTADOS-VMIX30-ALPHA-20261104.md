@@ -2,7 +2,7 @@
 
 | Recurso | Situação anterior / reutilização | Alteração / arquivos | Testes | Hardware / homologação | Commit / próxima ação |
 |---|---|---|---|---|---|
-| Letter spacing GT | Ausente no modelo; renderer SVG e editor existentes | modelos.js/mjs, render.js/mjs, gc.js; padrão 0, faixa -5..30px | test-gc-letter-spacing.mjs: 4/4; alteração no navegador refletiu SVG | Browser confirmado; CEF/motor não homologados | Local, sem commit; validar persistência e pacote |
+| Letter spacing GT | Ausente no modelo; renderer SVG e editor existentes | modelos.js/mjs, render.js/mjs, gc.js; padrão 0, faixa -5..30px | test-gc-letter-spacing.mjs: 4/4; alteração no navegador refletiu SVG | Browser confirmado; CEF/motor não homologados | Integrado no PR #9 |
 | Copiar/colar estilo | Editor GC existente, styleKeys | gc.js; copia propriedades visuais sem textos/IDs/assets; exige salvar | Browser: copiar padrão, alterar para 6, colar restaurou campo/SVG para 0 | Não confundir estilo de título inteiro com edição de múltiplos objetos | Local; seleção múltipla ainda pendente |
 | Conta-gotas | Não oferecido no editor | gc.js; botões por cor apenas com EyeDropper/contexto seguro | Browser enumerou 4 botões; captura interativa ainda não ensaiada | Disponibilidade em CEF a verificar; não anunciar suporte indisponível | Local; testar seleção/cancelamento nativos |
 | Missões Alpha | Seis existentes | PEDIDO-COMUNIDADE-ALPHA.md: acrescentadas 7–11, sem remover anteriores | Revisão documental e diff --check | Não representam ensaio físico | Local; revisar capacidade por pacote |

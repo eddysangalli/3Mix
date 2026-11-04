@@ -196,3 +196,16 @@ if(typeof window.EyeDropper==='function'&&window.isSecureContext){
  }};
  new MutationObserver(addPickers).observe(el('style'),{childList:true});addPickers();
 }
+
+// Organização dos títulos salvos usa o mesmo contrato backend da biblioteca.
+const presetTools=document.createElement('div');presetTools.className='row';
+const presetSelection=document.createElement('select');presetSelection.multiple=true;presetSelection.size=5;presetSelection.setAttribute('aria-label','Títulos para organizar');
+const upPreset=document.createElement('button');upPreset.type='button';upPreset.textContent='Subir';
+const downPreset=document.createElement('button');downPreset.type='button';downPreset.textContent='Descer';
+const removePresets=document.createElement('button');removePresets.type='button';removePresets.textContent='Excluir selecionados';
+presetTools.append(presetSelection,upPreset,downPreset,removePresets);el('saved').after(presetTools);
+let presetSignature='';
+setInterval(()=>{const items=state.gcLibrary?.items||[],sig=JSON.stringify(items.map(i=>[i.id,i.name]));if(sig===presetSignature)return;presetSignature=sig;const chosen=new Set([...presetSelection.selectedOptions].map(o=>o.value));presetSelection.replaceChildren(...items.map(i=>{const o=document.createElement('option');o.value=i.id;o.textContent=i.name;o.selected=chosen.has(i.id);return o;}));},500);
+async function movePreset(delta){try{const chosen=[...presetSelection.selectedOptions];if(chosen.length!==1)throw Error('Selecione um título para mover');const ids=(state.gcLibrary?.items||[]).map(i=>i.id),at=ids.indexOf(chosen[0].value),next=at+delta;if(at<0||next<0||next>=ids.length)return;[ids[at],ids[next]]=[ids[next],ids[at]];await command('gc_library_reorder',{ids});}catch(e){el('status').textContent=e.message;}}
+upPreset.onclick=()=>movePreset(-1);downPreset.onclick=()=>movePreset(1);
+removePresets.onclick=async()=>{try{const ids=[...presetSelection.selectedOptions].map(o=>o.value);if(!ids.length)return;if(!confirm('Excluir '+ids.length+' títulos selecionados? As cenas existentes serão preservadas.'))return;await command('gc_library_remove_many',{ids});if(ids.includes(id))select();}catch(e){el('status').textContent=e.message;}};
