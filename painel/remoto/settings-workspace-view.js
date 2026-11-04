@@ -36,9 +36,10 @@
     <div class="settings-transfer">
       <label class="settings-scope" title="Escopo do arquivo de configurações">Escopo
         <select id="transfer-scope">
-          <option value="view">Categoria aberta</option>
+          <option value="backup" selected>Tudo (Configurações + Atalhos + Macros + Módulos)</option>
+          <option value="all">Todas as categorias de configuração</option>
+          <option value="view">Somente a categoria aberta</option>
           <option value="drafts">Somente o que está em rascunho</option>
-          <option value="all">Todas as categorias</option>
         </select>
       </label>
       <button id="import" type="button">Importar</button>

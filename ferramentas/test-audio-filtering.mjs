@@ -77,7 +77,7 @@ assert.strictEqual(cam.category, 'mic', 'WASAPI capture deve ser categorizado co
 console.log('  -> PASS: Categorias de áudio (media, mic, web, camera) identificadas com precisão.');
 
 console.log(`[3/3] Verificando integridade das interfaces de áudio...`);
-const audioHtml = readFileSync('3mix-panel/painel/remoto/audio.html', 'utf8');
+const audioHtml = readFileSync(new URL('../painel/remoto/audio.html', import.meta.url), 'utf8');
 assert(!audioHtml.includes('Padrão vMix'), 'Não deve conter "Padrão vMix"');
 assert(!audioHtml.includes('FreeMix Studio'), 'Não deve conter "FreeMix Studio"');
 assert(audioHtml.includes('3Mix'), 'Deve conter identidade 3Mix');

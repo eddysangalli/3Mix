@@ -199,17 +199,14 @@ body.popup-mode > .switcher-banks,body.popup-mode > #dsk-bar-strip { display:non
 .r button.replace-ready { box-shadow:inset 0 0 0 2px #e3b341; color:#ffe08a; }
 .tile.drop-before { box-shadow: inset 4px 0 0 #e6e6e6 !important; border-color:#e6e6e6 !important; }
 .module-drop-target { outline:2px solid #aaa; outline-offset:-2px; }
-.media-row { height:32px; }
-.media-time-row { display:none; }
+.media-row { height:44px; }
 .dsk-slot .dsk-checker { width:84px !important; }
 .dsk-slot button { min-width:39px; height:23px !important; }
 .dsk-slot.live { box-shadow:inset 3px 0 #ed181d; }
 .dsk-slot .dsk-checker span { max-width:82px; font-size:9px; }
-body.native-switcher { grid-template-rows:32px 152px minmax(0,1fr) 40px 22px; }
+body.native-switcher { grid-template-rows:44px 152px minmax(0,1fr) 40px 22px; }
 #dsk-bar-strip { display:none !important; }
 #media-trans-ctrl { visibility:hidden !important; }
-body.native-switcher:not(:has(.media-bar:not(.disabled))) { grid-template-rows:152px minmax(0,1fr) 40px 22px; }
-body.native-switcher:not(:has(.media-bar:not(.disabled))) #media-row { display:none; }
 .replay-quick-dock{display:flex;flex-direction:column;gap:7px;padding:8px;overflow:auto;width:100%;font-size:11px}.replay-quick-dock header,.replay-quick-dock footer,.replay-quick-dock .quick-group{display:flex;align-items:center;gap:5px;flex-wrap:wrap}.replay-quick-dock header{padding-bottom:6px;border-bottom:1px solid #444}.replay-quick-dock header .b{margin-left:auto}.replay-quick-dock .b{height:28px;padding:0 8px}.replay-quick-dock .quick-group{padding-bottom:6px;border-bottom:1px solid #383838}.replay-quick-dock .quick-group>span{color:#aaa;flex:1}.replay-quick-dock .recording{color:#ff555b}.replay-quick-dock label{display:flex;gap:5px;align-items:center}.replay-quick-dock select{max-width:200px;background:#292929;color:#eee;border:1px solid #555;height:27px}.replay-quick-dock footer{margin-top:auto}
 .switcher-bank h2 { font-size:10px; }
 @media(max-height:400px) { body:not(.popup-mode) { grid-template-rows:28px 30px 110px minmax(0,1fr) 34px 20px; } }
@@ -222,20 +219,21 @@ body.native-switcher:not(:has(.media-bar:not(.disabled))) #media-row { display:n
    o scale factor do Windows (100/125/150%).
    ========================================================================== */
 
-/* A topbar nativa substitui o cabeçalho HTML: a grade tem cinco faixas.
-   (As regras antigas ainda reservavam uma faixa para .studio-topbar, que é
-   display:none fora do popup-mode, e por isso o rodapé recebia o 1fr.) */
+/* A topbar nativa substitui o cabeçalho HTML: a grade tem cinco faixas fixas.
+   A faixa #media-row (44px) permanece sempre reservada entre os monitores e a
+   Mesa para não deslocar os bancos de corte quando alterna entre câmera e VT. */
 body { grid-template-columns:minmax(0,1fr); grid-template-rows:44px auto minmax(0,1fr) 46px 28px; }
 body.native-switcher { grid-template-columns:minmax(0,1fr); grid-template-rows:44px auto minmax(0,1fr) 46px 28px; }
-body.native-switcher:not(:has(.media-bar:not(.disabled))) { grid-template-columns:minmax(0,1fr); grid-template-rows:auto minmax(0,1fr) 46px 28px; }
 .bot,.stat { min-width:0; }
 
 /* --- barra de mídia abaixo dos monitores --------------------------------- */
 .media-row { height:44px; padding:0 8px; }
-.media-ctrl-row,.vmix-track-wrap { height:28px; }
-.vmix-btn { height:28px; padding:0 8px; font-size:12px; }
-.vmix-btn.pp { width:36px; font-size:15px; }
-.vmix-thumb { width:12px; height:18px; }
+.media-bar, .media-bar.pv, .media-bar.pgm { justify-content:center; gap:2px; padding:2px 0; }
+.media-time-row { display:flex; font-size:11.5px; line-height:14px; color:#e6ebf2; font-variant-numeric:tabular-nums; }
+.media-ctrl-row,.vmix-track-wrap { height:24px; }
+.vmix-btn { height:24px; padding:0 8px; font-size:11.5px; }
+.vmix-btn.pp { width:34px; font-size:14px; }
+.vmix-thumb { width:12px; height:16px; }
 
 /* --- switcher PV / PGM --------------------------------------------------- */
 .switcher-banks { gap:8px; padding:4px 8px; }

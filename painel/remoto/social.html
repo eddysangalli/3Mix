@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3Mix · Social & Moderação ao Vivo</title>
+<link rel="stylesheet" href="3mix-grafite.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg-app);
+    color: var(--text-main);
+    font-family: 'Segoe UI', -apple-system, sans-serif;
+    font-size: 13px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    user-select: none;
+  }
+  header.topbar {
+    height: 48px;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border-dim);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    flex-shrink: 0;
+  }
+  .top-left { display: flex; align-items: center; gap: 14px; }
+  .logo { font-size: 16px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+  .logo span { color: var(--accent); }
+  select, input[type="text"], input[type="number"] {
+    background: var(--bg-input);
+    border: 1px solid var(--border-dim);
+    color: var(--text-main);
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    outline: none;
+  }
+  select:focus, input:focus { border-color: var(--accent); }
+  .btn {
+    background: #353535;
+    border: 1px solid #505050;
+    color: #eee;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .btn:hover { background: #444; border-color: #666; color: #fff; }
+  .btn.primary { background: var(--accent); border-color: var(--accent-strong); color: #fff; }
+  .btn.primary:hover { background: var(--accent-strong); }
+  .btn.success { background: #16752c; border-color: #3ea853; color: #fff; }
+  .btn.success:hover { background: #1f8b36; }
+  .btn.danger { background: #b91c1c; border-color: #ef4444; color: #fff; }
+  .btn.danger:hover { background: #dc2626; }
+  .btn.warning { background: #855b00; border-color: #dca900; color: #fff; }
+
+  .workspace {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    padding: 12px;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .col-panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-dim);
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .col-header {
+    height: 38px;
+    background: #25282d;
+    border-bottom: 1px solid var(--border-dim);
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #ccc;
+  }
+  .col-counter {
+    background: #353535;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .cards-list {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .comment-card {
+    background: #1e1e1e;
+    border: 1px solid #383838;
+    border-radius: 5px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: transform 0.1s, border-color 0.1s;
+  }
+  .comment-card:hover { border-color: #555; }
+  .comment-card.favorite { border-left: 4px solid #ffd324; }
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .user-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .platform-icon {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+  .platform-twitch { background: #9146ff; color: #fff; }
+  .platform-youtube { background: #ff0000; color: #fff; }
+  .platform-manual { background: #2f6fed; color: #fff; }
+
+  .author-name { font-weight: 700; font-size: 12.5px; color: #fff; }
+  .author-handle { font-size: 11px; color: #888; }
+  .comment-text {
+    font-size: 13px;
+    color: #eee;
+    line-height: 1.35;
+    word-break: break-word;
+  }
+  .card-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    padding-top: 4px;
+    border-top: 1px solid #282828;
+  }
+
+  /* Painel NO AR (Coluna 3) */
+  .onair-container {
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .live-box {
+    background: #141414;
+    border: 2px solid #333;
+    border-radius: 6px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  }
+  .live-box.active {
+    border-color: #ef4444;
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.35);
+  }
+  .live-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    font-size: 12px;
+    color: #888;
+  }
+  .live-box.active .live-indicator { color: #ef4444; }
+  .live-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #555;
+  }
+  .live-box.active .live-dot {
+    background: #ef4444;
+    box-shadow: 0 0 8px #ef4444;
+    animation: livePulse 1s infinite alternate;
+  }
+  @keyframes livePulse { from { opacity: 0.6; } to { opacity: 1; } }
+
+  .live-preview-gc {
+    background: linear-gradient(135deg, rgba(20,24,30,0.95), rgba(10,12,16,0.98));
+    border-left: 5px solid var(--accent);
+    border-radius: 4px;
+    padding: 12px 14px;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="top-left">
+    <div class="logo">3Mix <span>SOCIAL</span></div>
+    
+    <!-- Conexão Twitch -->
+    <div style="display:flex;align-items:center;gap:6px;background:#181818;padding:3px 8px;border-radius:4px;border:1px solid #333;">
+      <span style="font-size:11px;color:#9146ff;font-weight:700;">Twitch:</span>
+      <input type="text" id="twitch-channel" placeholder="canal (ex: gaules)" style="width:130px;padding:3px 6px;font-size:11px;">
+      <button type="button" class="btn" id="btn-twitch-connect" style="font-size:11px;padding:3px 8px;">Conectar</button>
+      <span id="twitch-status" style="font-size:10px;color:#888;">Desconectado</span>
+    </div>
+
+    <!-- Auto Cycle -->
+    <div style="display:flex;align-items:center;gap:6px;background:#181818;padding:3px 8px;border-radius:4px;border:1px solid #333;">
+      <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:#ccc;cursor:pointer;">
+        <input type="checkbox" id="chk-autocycle">
+        Auto-Cycle:
+      </label>
+      <input type="number" id="num-cycle-interval" value="10" min="4" max="60" style="width:46px;padding:3px 4px;font-size:11px;">
+      <span style="font-size:10.5px;color:#888;">seg</span>
+    </div>
+  </div>
+
+  <div class="top-right" style="display:flex;align-items:center;gap:8px;">
+    <button type="button" class="btn primary" id="btn-manual-comment">+ Comentário Manual</button>
+    <button type="button" class="btn" id="btn-refresh">Atualizar</button>
+  </div>
+</header>
+
+<div class="workspace">
+  <!-- Coluna 1: Buffer de Entrada (Pendentes) -->
+  <section class="col-panel">
+    <div class="col-header">
+      <span>1. Pendentes para Moderação</span>
+      <span class="col-counter" id="cnt-pending">0</span>
+    </div>
+    <div class="cards-list" id="list-pending">
+      <!-- Injetado dinamicamente -->
+    </div>
+  </section>
+
+  <!-- Coluna 2: Fila de Transmissão (Aprovados) -->
+  <section class="col-panel">
+    <div class="col-header">
+      <span>2. Fila Pronta (Aprovados)</span>
+      <span class="col-counter" id="cnt-approved">0</span>
+    </div>
+    <div class="cards-list" id="list-approved">
+      <!-- Injetado dinamicamente -->
+    </div>
+  </section>
+
+  <!-- Coluna 3: NO AR AGORA (Active On-Air) -->
+  <section class="col-panel">
+    <div class="col-header">
+      <span>3. Transmissão (No Ar)</span>
+      <span style="font-size:11px;color:#888;">Lower Third</span>
+    </div>
+    <div class="onair-container">
+      <div class="live-box" id="live-box">
+        <div class="live-indicator">
+          <div class="live-dot"></div>
+          <span id="live-status-text">FORA DO AR</span>
+        </div>
+
+        <div class="live-preview-gc" id="live-preview">
+          <div class="user-badge">
+            <span class="platform-icon platform-manual" id="live-platform">3Mix</span>
+            <span class="author-name" id="live-author">Nenhum comentário no ar</span>
+          </div>
+          <div class="comment-text" id="live-text">
+            Aprove comentários na coluna ao lado e clique em TAKE para colocar no ar.
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <button type="button" class="btn danger" id="btn-clear-air" style="flex:1;padding:10px 0;font-size:13px;" disabled>
+            TIRAR DO AR (CLEAR)
+          </button>
+          <button type="button" class="btn" id="btn-next-air" style="flex:1;padding:10px 0;font-size:13px;">
+            PRÓXIMO (TAKE)
+          </button>
+        </div>
+      </div>
+
+      
+        <!-- Links Rápidos de Templates Lower Third para DSK 1 a 4 -->
+        <div style="background:#181b20;border:1px solid #282f3a;border-radius:6px;padding:10px;display:flex;flex-direction:column;gap:6px;margin-top:8px;">
+          <div style="font-size:10.5px;font-weight:700;color:var(--accent);text-transform:uppercase;">Templates Lower Third WebSocket (DSKs 1..4)</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <a href="/gc/biblioteca/social_lowerthird_glass.html" target="_blank" class="btn" style="font-size:10.5px;padding:3px 8px;text-decoration:none;">Glassmorphism</a>
+            <a href="/gc/biblioteca/social_lowerthird_ticker.html" target="_blank" class="btn" style="font-size:10.5px;padding:3px 8px;text-decoration:none;">Ticker News</a>
+            <a href="/gc/biblioteca/social_lowerthird_card.html" target="_blank" class="btn" style="font-size:10.5px;padding:3px 8px;text-decoration:none;">Floating Card</a>
+          </div>
+        </div>
+
+      <!-- Histórico Recente -->
+      <div style="display:flex;flex-direction:column;gap:8px;flex:1;min-height:0;overflow:hidden;">
+        <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;">Histórico Recente de Exibidos</div>
+        <div class="cards-list" id="list-history" style="padding:0;"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="social.js?v=20261103a"></script>
+</body>
+</html>
+

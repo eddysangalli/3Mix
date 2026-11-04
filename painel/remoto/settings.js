@@ -52,7 +52,7 @@
     { id: 'producao', title: 'Produção', items: ['video', 'audio', 'color'] },
     { id: 'saidas', title: 'Saídas', items: ['recording', 'streaming', 'outputs', 'returns', 'aux', 'encoders'] },
     { id: 'operacao', title: 'Operação', items: ['replay', 'dsk', 'multiview', 'shortcuts', 'patch', 'preflight'] },
-    { id: 'sistema', title: 'Sistema', items: ['workspace', 'modulos', 'diagnostico', 'performance', 'remote', 'network', 'automation', 'recovery'] },
+    { id: 'sistema', title: 'Sistema', items: ['workspace', 'modulos', 'performance', 'remote', 'network', 'automation', 'recovery'] },
     { id: 'sobre', title: 'Sobre', items: ['about'] },
   ];
   const ICONS = {
@@ -87,12 +87,12 @@
     recording: [['recording', 'Básico'], ['files', 'Arquivos'], ['audioTracks', 'Trilhas'], ['startstop', 'Ao iniciar/parar'], ['outputAdvanced', 'Avançado']],
     streaming: [['streaming', 'Básico'], ['streamMultistream', 'MultiStream'], ['streamExternal', 'Saídas de rede'], ['networkOutput', 'Rede'], ['broadcastDelay', 'Atraso e DUMP'], ['audioTracks', 'Trilhas'], ['startstop', 'Ao iniciar/parar'], ['outputAdvanced', 'Avançado']],
     workspace: [['workspace', 'Layout da mesa'], ['appearance', 'Texto e densidade'], ['general', 'Janela e encaixe']],
-    performance: [['performance', 'Geral'], ['advanced', 'Motor e prioridade']],
+    performance: [['performance', 'Geral'], ['advanced', 'Motor e prioridade'], ['diagnostico', 'Diagnóstico do computador']],
   };
   const PARENT = {
     files: 'recording', audioTracks: 'recording', startstop: 'recording', outputAdvanced: 'recording',
     networkOutput: 'streaming', broadcastDelay: 'streaming', streamMultistream: 'streaming', streamExternal: 'streaming',
-    appearance: 'workspace', general: 'workspace', advanced: 'performance',
+    appearance: 'workspace', general: 'workspace', advanced: 'performance', diagnostico: 'performance',
     projectors: 'multiview', plugins: 'performance',
   };
   // Editor windows of the program, opened on purpose and one route each.
@@ -265,6 +265,10 @@
       html.embed-3mix .vd-footer-right { display:none !important; }
     `,
     dsk: '', multiview: '', shortcuts: '', remote: '', network: '', automation: '', modulos: '', recovery: '', about: '', patch: '', preflight: '', returns: '',
+    diagnostico: `
+      html.embed-3mix body.p3 { grid-template-rows: 1fr auto !important; height: 100% !important; }
+      html.embed-3mix .pe-top { display: none !important; }
+    `,
     // Monitores (saidas.html?transport=monitors): só monitores e câmera virtual. MultiStream pertence a Transmissão e a
     // Matriz AUX tem entrada própria; a navegação e os links de outras seções não aparecem aqui.
     outputs: `
@@ -312,6 +316,7 @@
     workspace: { kind: 'workspace' },
     streamMultistream: { kind: 'embed' },
     streamExternal: { kind: 'embed' },
+    diagnostico: { kind: 'embed' },
     appearance: { engine: 'appearance', kind: 'native' },
     general: { engine: 'general', kind: 'native', except: ['warnStartStream', 'warnStopStream', 'warnStopRecord', 'recordWhenStreaming', 'keepRecording', 'replayWhileStreaming', 'keepReplay'] },
     performance: { engine: 'performance', kind: 'native', plus: 'about' },
@@ -595,6 +600,12 @@
     return '<div class="settings-card"><div class="card-title-row"><h2>Desempenho agora</h2>' + badge('leitura do motor', 'quiet') + '</div>'
       + '<div class="metrics">' + metrics.map(([k, t]) => '<div><span>' + esc(k) + '</span><strong>' + esc(t) + '</strong></div>').join('') + '</div>'
       + '<p class="card-desc">Quadro ' + esc(v.baseWidth + ' × ' + v.baseHeight) + ' · saída ' + esc(v.outputWidth + ' × ' + v.outputHeight) + ' · ' + esc(displayFps()) + '.</p></div>'
+      + '<div class="settings-card"><div class="card-title-row"><h2>Diagnóstico do computador</h2>' + badge('integrado em Desempenho', 'quiet') + '</div>'
+      + '<p class="card-desc">Inspeciona GPU, encoders de hardware, discos de gravação/Replay, interfaces de rede e perfil recomendado sem sair desta seção.</p>'
+      + '<div class="row settings-inline-actions">'
+      + '<button type="button" class="settings-primary" data-subtab="diagnostico" data-parent="performance">Ver diagnóstico do computador</button>'
+      + '<button type="button" data-open-window="/primeira-execucao">Abrir em janela própria</button>'
+      + '</div></div>'
       + '<div class="settings-card"><div class="card-title-row"><h2>Preferências de desempenho</h2></div>'
       + '<p class="card-desc">Aplicam-se ao motor e entram em vigor quando o 3Mix for reiniciado fora do ar.</p>'
       + fieldsGrid(fieldsOf('performance'), 'performance', locked) + '</div>';
@@ -813,12 +824,15 @@
     window.FreeMixSettingsHelp?.decorate?.(E('content'));
 
     const supported = isSupported(view, live);
-    for (const id of ['apply', 'ok', 'defaults']) E(id).disabled = busy || !supported || !totalDrafts();
+    const canApplyAny = !busy && totalDrafts() > 0 && (!live || onlyStreamKeyPending());
+    for (const id of ['apply', 'ok']) E(id).disabled = !canApplyAny;
     E('defaults').disabled = busy || !supported;
-    E('transfer-note').hidden = !supported;
+    E('import').disabled = busy;
+    E('export').disabled = busy;
+    E('transfer-note').hidden = false;
     E('transfer-note').textContent = supported
-      ? (view.kind === 'native' || view.kind === 'workspace' ? 'Exportar/Importar usa o escopo escolhido e não inclui credenciais. Padrões e Importar apenas preenchem os campos; Aplicar confirma.' : 'O arquivo desta categoria não inclui servidor, chave nem tokens. Padrões e Importar apenas preenchem os campos; Aplicar confirma.')
-      : 'Esta categoria tem controles próprios ou está bloqueada enquanto houver saída ativa.';
+      ? 'Exportar "Tudo" salva configurações, atalhos, MIDI/OSC, macros, módulos e Multiview num único JSON para backup completo (sem senhas/chaves).'
+      : 'Use o escopo "Tudo" no rodapé para exportar ou importar o backup completo (configurações, atalhos, macros e módulos) a qualquer momento.';
     E('settings-dirty').hidden = totalDrafts() === 0;
     E('settings-dirty').textContent = '● ' + totalDrafts() + (totalDrafts() === 1 ? ' alteração não aplicada' : ' alterações não aplicadas');
     updateSummary();
@@ -1041,13 +1055,51 @@
     });
   }
 
-  // ---- transfer (import / export with an explicit scope) ----
+  // ---- transfer (import / export with an explicit scope, including Full Backup) ----
   function scopeViews() {
-    const scope = E('transfer-scope')?.value || 'view';
-    if (scope === 'all') return ORDER.filter((v) => !v.open && v.kind !== 'encoder' && v.kind !== 'plugins');
+    const scope = E('transfer-scope')?.value || 'backup';
+    if (scope === 'backup' || scope === 'all') return ORDER.filter((v) => !v.open && v.kind !== 'encoder' && v.kind !== 'plugins');
     if (scope === 'drafts') return ORDER.filter((v) => isDirty(v.id));
     return [VIEW(selected)];
   }
+  const triggerKeyOf = (t) => !t ? '' : JSON.stringify(t.type === 'keyboard'
+    ? { type: t.type, code: t.code, ctrl: !!t.ctrl, alt: !!t.alt, shift: !!t.shift, meta: !!t.meta }
+    : { type: t.type, deviceId: t.deviceId, channel: t.channel, message: t.message, number: t.number });
+
+  function enrichStepsWithInputNames(steps, inputMap) {
+    if (!Array.isArray(steps)) return [];
+    return steps.map((s) => {
+      const copy = JSON.parse(JSON.stringify(s));
+      if (copy.action === 'if') {
+        if (copy.condition?.input && inputMap.has(copy.condition.input)) copy.condition.inputName = inputMap.get(copy.condition.input);
+        copy.then = enrichStepsWithInputNames(copy.then, inputMap);
+        copy.else = enrichStepsWithInputNames(copy.else, inputMap);
+      } else if (copy.data?.input && inputMap.has(copy.data.input)) {
+        copy.data.inputName = inputMap.get(copy.data.input);
+      }
+      return copy;
+    });
+  }
+
+  function resolveStepsInputs(steps, resolveInput) {
+    if (!Array.isArray(steps)) return [];
+    return steps.map((s) => {
+      const copy = JSON.parse(JSON.stringify(s));
+      if (copy.action === 'if') {
+        if (copy.condition?.input || copy.condition?.inputName) {
+          copy.condition.input = resolveInput(copy.condition.input, copy.condition.inputName);
+          delete copy.condition.inputName;
+        }
+        copy.then = resolveStepsInputs(copy.then, resolveInput);
+        copy.else = resolveStepsInputs(copy.else, resolveInput);
+      } else if (copy.data && (copy.data.input || copy.data.inputName)) {
+        copy.data.input = resolveInput(copy.data.input, copy.data.inputName);
+        delete copy.data.inputName;
+      }
+      return copy;
+    });
+  }
+
   async function exportOne(view) {
     if (view.kind === 'workspace') {
       const w = config.workspace;
@@ -1064,33 +1116,97 @@
     delete copy.values?.key; delete copy.values?.server; delete copy.values?.password; delete copy.values?.token; delete copy.values?.secret;
     return copy;
   }
+
   async function doExport() {
     try {
+      const scope = E('transfer-scope')?.value || 'backup';
       const views = scopeViews();
       if (!views.length) throw Error('Não há rascunho para exportar. Escolha outro escopo.');
+      if (scope === 'view' && VIEW(selected).open) {
+        throw Error('Esta categoria usa controles próprios. Escolha "Tudo (Configurações + Atalhos + Macros + Módulos)" no Escopo para exportar o backup completo.');
+      }
       const docs = [];
-      for (const view of views) docs.push({ view: view.id, document: await exportOne(view) });
-      const payload = docs.length === 1 ? { ...docs[0].document, view: docs[0].view } : { format: '3Mix Settings Bundle', schema: 1, exportedAt: new Date().toISOString(), entries: docs };
-      const scopeName = views.length === 1 ? views[0].id : views.length + '-categorias';
+      for (const view of views) {
+        try { docs.push({ view: view.id, document: await exportOne(view) }); }
+        catch (err) { if (scope === 'view') throw err; }
+      }
+      let payload, filename, summaryNote;
+      if (scope === 'backup') {
+        let stateJson = {}, modulosData = null, mvData = null;
+        try { stateJson = await getJson('/api/json'); } catch {}
+        try { const m = await getJson('/api/modulos'); modulosData = m.modulos || null; } catch {}
+        try { const mv = await getJson('/api/multiview-montagens'); mvData = mv.montagens || null; } catch {}
+        const inputMap = new Map((stateJson.inputs || []).map((i) => [i.key, i.name]));
+        const macroMap = new Map((stateJson.macros?.items || []).map((m) => [m.id, m.name]));
+        const controllersItems = (stateJson.controllers?.items || []).map((item) => {
+          const copy = JSON.parse(JSON.stringify(item));
+          const d = copy.target?.data || {};
+          if (d.input && inputMap.has(d.input)) d.inputName = inputMap.get(d.input);
+          if (copy.target?.action === 'macro_run' && d.id && macroMap.has(d.id)) d.macroName = macroMap.get(d.id);
+          return copy;
+        });
+        const macrosItems = (stateJson.macros?.items || []).map((m) => ({
+          ...JSON.parse(JSON.stringify(m)),
+          steps: enrichStepsWithInputNames(m.steps, inputMap),
+        }));
+        const macrosTriggers = (stateJson.macros?.triggers || []).map((t) => {
+          const copy = JSON.parse(JSON.stringify(t));
+          if (copy.macroId && macroMap.has(copy.macroId)) copy.macroName = macroMap.get(copy.macroId);
+          if (copy.condition?.input && inputMap.has(copy.condition.input)) copy.condition.inputName = inputMap.get(copy.condition.input);
+          return copy;
+        });
+        payload = {
+          format: '3Mix Full Backup',
+          schema: 1,
+          exportedAt: new Date().toISOString(),
+          preset: preset || stateJson.preset || '',
+          entries: docs,
+          controllers: {
+            items: controllersItems,
+            osc: stateJson.controllers?.osc ? { port: stateJson.controllers.osc.port } : { port: 19120 },
+          },
+          macros: {
+            items: macrosItems,
+            triggers: macrosTriggers,
+          },
+          modulos: modulosData,
+          multiviewMontagens: mvData,
+        };
+        const day = new Date().toISOString().slice(0, 10);
+        filename = '3Mix-backup-completo-' + day + '.json';
+        summaryNote = 'Backup completo exportado (' + docs.length + ' categorias, ' + controllersItems.length + ' atalhos, ' + macrosItems.length + ' macros). Senhas e chaves de transmissão não entram no arquivo.';
+      } else {
+        payload = docs.length === 1 ? { ...docs[0].document, view: docs[0].view } : { format: '3Mix Settings Bundle', schema: 1, exportedAt: new Date().toISOString(), entries: docs };
+        const scopeName = views.length === 1 ? views[0].id : views.length + '-categorias';
+        filename = '3Mix-configuracoes-' + scopeName + '.json';
+        summaryNote = docs.length + (docs.length === 1 ? ' categoria exportada.' : ' categorias exportadas.') + ' Servidor, chave, senha e tokens não entram no arquivo.';
+      }
       const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob), a = document.createElement('a');
-      a.href = url; a.download = '3Mix-configuracoes-' + scopeName + '.json'; a.click();
+      a.href = url; a.download = filename; a.click();
       setTimeout(() => URL.revokeObjectURL(url), 1500);
-      note(docs.length + (docs.length === 1 ? ' categoria exportada.' : ' categorias exportadas.') + ' Servidor, chave, senha e tokens não entram no arquivo.', 'ok');
+      note(summaryNote, 'ok');
     } catch (e) { note(e.message, 'error'); }
   }
+
   function acceptedView(category) {
     return ORDER.find((v) => v.engine === category && !v.open) || VIEW(selected);
   }
-  async function importOne(document, fallbackView) {
+  async function importOne(document, fallbackView, isBundle = false) {
     const category = document?.category;
-    const view = ORDER.find((v) => v.id === fallbackView && v.engine === category)
+    const view = ORDER.find((v) => v.id === fallbackView && (v.engine === category || v.kind === category))
       || ORDER.find((v) => v.id === selected && v.engine === category)
       || acceptedView(category);
-    if (!view || view.open) throw Error('Este arquivo é de uma categoria que não está aberta nesta janela.');
+    if (!view || view.open) {
+      if (isBundle) return null;
+      throw Error('Este arquivo é de uma categoria que não está aberta nesta janela.');
+    }
     let draft;
     if (view.kind === 'workspace') {
-      if (document?.format !== '3Mix Workspace' || document.schema !== 1 || document.category !== 'workspace') throw Error('Arquivo de layout inválido.');
+      if (document?.format !== '3Mix Workspace' || document.schema !== 1 || document.category !== 'workspace') {
+        if (isBundle) return null;
+        throw Error('Arquivo de layout inválido.');
+      }
       const w = document.values || {}; draft = w;
     } else {
       const doc = { ...document }; delete doc.view;
@@ -1100,31 +1216,185 @@
     const values = {};
     const allowed = fieldsOf(view.id);
     for (const [k, v] of Object.entries(draft || {})) if (allowed.some((f) => f.name === k)) values[k] = v;
-    if (!Object.keys(values).length) throw Error('O arquivo não tem campos desta categoria.');
-    selected = view.id;
-    draw();
+    if (!Object.keys(values).length) {
+      if (isBundle) return null;
+      throw Error('O arquivo não tem campos desta categoria.');
+    }
     for (const [k, v] of Object.entries(values)) {
+      setDraft(view.id, k, v);
       const el = E('f-' + view.id + '-' + k);
-      if (!el) continue;
-      if (el.type === 'checkbox') el.checked = v === true || v === 'true'; else el.value = v;
-      el.dataset.dirty = 'true'; setDraft(view.id, k, el.type === 'checkbox' ? el.checked : el.value);
+      if (el) {
+        if (el.type === 'checkbox') el.checked = v === true || v === 'true'; else el.value = v;
+        el.dataset.dirty = 'true';
+      }
     }
     return view;
   }
+
+  async function importOperationalBundle(document) {
+    const stats = { shortcuts: 0, macros: 0, triggers: 0, modulos: false, multiview: false };
+    if (document.modulos && typeof document.modulos === 'object') {
+      try {
+        const r = await fetch('/api/modulos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ modulos: document.modulos }), signal: AbortSignal.timeout(8000) });
+        if (r.ok) stats.modulos = true;
+      } catch {}
+    }
+    if (Array.isArray(document.multiviewMontagens) && document.multiviewMontagens.length) {
+      try {
+        const r = await fetch('/api/multiview-montagens', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ montagens: document.multiviewMontagens }), signal: AbortSignal.timeout(8000) });
+        if (r.ok) stats.multiview = true;
+      } catch {}
+    }
+    const hasMacros = Array.isArray(document.macros?.items) || Array.isArray(document.macros?.triggers);
+    const hasControllers = Array.isArray(document.controllers?.items) || document.controllers?.osc;
+    if (!hasMacros && !hasControllers) return stats;
+
+    let stateJson = {};
+    try { stateJson = await getJson('/api/json'); } catch {}
+    const inputs = stateJson.inputs || [];
+    const resolveInput = (key, name) => {
+      if (key && inputs.some((i) => i.key === key)) return key;
+      if (name) {
+        const byName = inputs.find((i) => String(i.name || '').toLowerCase() === String(name).toLowerCase());
+        if (byName) return byName.key;
+      }
+      if (key) {
+        const byName2 = inputs.find((i) => String(i.name || '').toLowerCase() === String(key).toLowerCase());
+        if (byName2) return byName2.key;
+      }
+      return key || '';
+    };
+
+    const macroIdMap = new Map();
+    if (Array.isArray(document.macros?.items)) {
+      for (const m of document.macros.items) {
+        if (!m?.name || !Array.isArray(m.steps)) continue;
+        try {
+          const existing = (stateJson.macros?.items || []).find((x) => x.id === m.id || x.name === m.name);
+          const steps = resolveStepsInputs(m.steps, resolveInput);
+          const res = await send('macro_save', {
+            ...(existing ? { id: existing.id } : {}),
+            name: m.name,
+            steps,
+            rollbackPreviewOnFailure: m.rollbackPreviewOnFailure === true,
+          });
+          if (res?.state) stateJson = res.state;
+          const saved = (stateJson.macros?.items || []).find((x) => x.name === m.name);
+          if (saved && m.id) macroIdMap.set(m.id, saved.id);
+          stats.macros++;
+        } catch {}
+      }
+    }
+    if (Array.isArray(document.macros?.triggers)) {
+      for (const t of document.macros.triggers) {
+        if (!t?.name || !t?.event) continue;
+        try {
+          const mappedMacroId = macroIdMap.get(t.macroId)
+            || (t.macroName ? (stateJson.macros?.items || []).find((x) => x.name === t.macroName)?.id : null)
+            || t.macroId;
+          if (!mappedMacroId) continue;
+          const existing = (stateJson.macros?.triggers || []).find((x) => x.id === t.id || (x.name === t.name && x.event === t.event));
+          const condition = t.condition ? { ...t.condition } : undefined;
+          if (condition) {
+            if (condition.input || condition.inputName) condition.input = resolveInput(condition.input, condition.inputName);
+            delete condition.inputName;
+          }
+          const res = await send('macro_trigger_save', {
+            ...(existing ? { id: existing.id } : {}),
+            name: t.name,
+            event: t.event,
+            macroId: mappedMacroId,
+            enabled: t.enabled === true,
+            group: t.group || '',
+            debounce: t.debounce ?? 250,
+            cooldown: t.cooldown ?? 1000,
+            ...(condition ? { condition } : {}),
+          });
+          if (res?.state) stateJson = res.state;
+          stats.triggers++;
+        } catch {}
+      }
+    }
+    if (document.controllers?.osc?.port) {
+      try { await send('controller_osc_configure', { port: Number(document.controllers.osc.port) }); } catch {}
+    }
+    if (Array.isArray(document.controllers?.items)) {
+      for (const item of document.controllers.items) {
+        if (!item?.trigger || !item?.target?.action) continue;
+        try {
+          const existing = (stateJson.controllers?.items || []).find((x) => x.id === item.id || triggerKeyOf(x.trigger) === triggerKeyOf(item.trigger));
+          const target = JSON.parse(JSON.stringify(item.target));
+          if (target.data) {
+            if (target.data.input || target.data.inputName) {
+              target.data.input = resolveInput(target.data.input, target.data.inputName);
+              delete target.data.inputName;
+            }
+            if (target.action === 'macro_run') {
+              target.data.id = macroIdMap.get(target.data.id)
+                || (target.data.macroName ? (stateJson.macros?.items || []).find((x) => x.name === target.data.macroName)?.id : null)
+                || target.data.id;
+              delete target.data.macroName;
+            }
+          }
+          const res = await send('controller_save', {
+            ...(existing ? { id: existing.id } : {}),
+            name: item.name,
+            trigger: item.trigger,
+            target,
+            enabled: item.enabled !== false,
+            midiFeedback: item.midiFeedback || null,
+          });
+          if (res?.state) stateJson = res.state;
+          stats.shortcuts++;
+        } catch {}
+      }
+    }
+    return stats;
+  }
+
   async function doImport(file) {
     if (!file) return;
     busy = true; note('Importando…');
     try {
-      if (file.size > 262144) throw Error('O arquivo passa de 256 KB.');
+      if (file.size > 2 * 1024 * 1024) throw Error('O arquivo passa de 2 MB.');
       let document; try { document = JSON.parse(await file.text()); } catch { throw Error('O arquivo não é um JSON válido.'); }
-      const parts = document?.format === '3Mix Settings Bundle' ? document.entries : [{ view: document.view, document }];
-      if (!Array.isArray(parts) || !parts.length) throw Error('Arquivo de configuração sem categorias.');
+      const isFull = document?.format === '3Mix Full Backup';
+      const isShortcutsOnly = document?.format === '3Mix Shortcuts Bundle';
+      const isSettingsBundle = document?.format === '3Mix Settings Bundle';
+      const isBundle = isFull || isSettingsBundle;
+
+      const opStats = (isFull || isShortcutsOnly || document?.controllers || document?.macros || document?.modulos)
+        ? await importOperationalBundle(document)
+        : { shortcuts: 0, macros: 0, triggers: 0, modulos: false, multiview: false };
+
+      const parts = isBundle ? (document.entries || []) : (isShortcutsOnly ? [] : [{ view: document.view, document }]);
       const staged = [];
-      for (const part of parts) staged.push(await importOne(part.document, part.view));
+      for (const part of parts) {
+        const v = await importOne(part.document, part.view, isBundle);
+        if (v) staged.push(v);
+      }
+      if (staged.length && VIEW(selected).open) {
+        selected = staged[0].id;
+        activeParent = PARENT[selected] || selected;
+      }
       E('content')._html = null; draw();
-      note(staged.length + (staged.length === 1 ? ' categoria preparada' : ' categorias preparadas') + ' nos campos. Confira o resumo e clique em Aplicar. Destino e chave atuais são preservados.', 'ok');
+      const extraParts = [];
+      if (opStats.shortcuts) extraParts.push(opStats.shortcuts + (opStats.shortcuts === 1 ? ' atalho restaurado' : ' atalhos restaurados'));
+      if (opStats.macros) extraParts.push(opStats.macros + (opStats.macros === 1 ? ' macro restaurada' : ' macros restauradas'));
+      if (opStats.modulos) extraParts.push('módulos restaurados');
+      if (opStats.multiview) extraParts.push('montagens de Multiview restauradas');
+      const extraText = extraParts.length ? ' (' + extraParts.join(', ') + ' já salvos).' : '.';
+
+      if (staged.length) {
+        note(staged.length + (staged.length === 1 ? ' categoria preparada' : ' categorias preparadas') + ' nos campos' + extraText + ' Confira o resumo e clique em Aplicar para gravar no motor.', 'ok');
+      } else if (extraParts.length) {
+        reloadEmbed();
+        note('Importação concluída: ' + extraParts.join(', ') + '.', 'ok');
+      } else {
+        note('Nenhuma alteração diferente da configuração atual foi encontrada no arquivo.', 'ok');
+      }
     } catch (e) { note(e.message, 'error'); }
-    finally { busy = false; }
+    finally { busy = false; draw(); }
   }
 
   // ---- encoder panel and plugin tools ----

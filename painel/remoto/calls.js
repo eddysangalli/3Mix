@@ -107,6 +107,18 @@
     E('conference').checked = c.conference !== false; E('conference').disabled = off || !list.length;
 
     // Advanced options
+    if (E('voice-proc')) {
+      const p = g?.processing || {};
+      for (const cb of E('voice-proc').querySelectorAll('input[data-proc]')) {
+        cb.checked = !!p[cb.dataset.proc];
+        cb.disabled = off || !g;
+      }
+      if (E('proc-podcast')) {
+        const allOn = !!(g && p.gate && p.compressor && p.agc && p.limiter);
+        E('proc-podcast').disabled = off || !g;
+        E('proc-podcast').classList.toggle('vd-on', allOn);
+      }
+    }
     if (active !== E('gain')) E('gain').value = g ? Math.round(cur.gain * 100) : ''; E('gain').disabled = off || !g;
     E('reconnect').disabled = off || !g || !individual();
     const mics = (st.audioInputs || []).filter((i) => ['wasapi_input_capture', 'ffmpeg_source'].includes(i.kind));
@@ -169,6 +181,31 @@
   E('apply').onclick = () => { const g = selectedGuest(); if (g) run('Aplicando o retorno', async () => { await apply(g); return `Retorno de “${label(g)}” salvo no programa.`; }); };
   E('conference').onchange = (e) => { const enabled = e.target.checked; run('Atualizando', async () => { await send('call_conference', { enabled }); return enabled ? 'Os convidados ouvem uns aos outros.' : 'Os convidados não ouvem uns aos outros.'; }); };
   E('show-advanced').onchange = (e) => { E('advanced').hidden = !e.target.checked; };
+  if (E('voice-proc')) {
+    E('voice-proc').onchange = (e) => {
+      const cb = e.target.closest('input[data-proc]');
+      const g = selectedGuest();
+      if (!cb || !g) return;
+      const filter = cb.dataset.proc, enabled = cb.checked;
+      run(`${enabled ? 'Ligando' : 'Desligando'} ${filter.toUpperCase()}`, async () => {
+        await send('call_audio_processing', { key: g.key, filter, enabled });
+        return `Processamento ${filter.toUpperCase()} ${enabled ? 'ligado' : 'desligado'} em “${label(g)}”.`;
+      });
+    };
+  }
+  if (E('proc-podcast')) {
+    E('proc-podcast').onclick = () => {
+      const g = selectedGuest();
+      if (!g) return;
+      const p = g.processing || {};
+      const allOn = !!(p.gate && p.compressor && p.agc && p.limiter);
+      const enabled = !allOn;
+      run(`${enabled ? 'Ativando' : 'Desativando'} Preset Podcast`, async () => {
+        await send('call_audio_processing', { key: g.key, preset: 'podcast', enabled });
+        return `Preset Podcast (Gate + Compressor + AGC + Limiter) ${enabled ? 'ativado' : 'desativado'} em “${label(g)}”.`;
+      });
+    };
+  }
   E('reconnect').onclick = () => { const g = selectedGuest(); if (g) run('Reconectando', async () => { await send('call_reconnect', { key: g.key }); return `Reconexão do retorno de “${label(g)}” pedida.`; }); };
   E('mic-use').onclick = () => { const input = E('mic').value; if (input) run('Preparando o microfone', async () => { await send('call_director', { input }); return 'Microfone do diretor: ' + input + '.'; }); };
   E('mic-create').onclick = () => run('Criando o microfone', async () => { await send('call_director_create'); return 'Microfone privado criado com o dispositivo padrão do Windows.'; });

@@ -29,6 +29,15 @@
     <div class="vd-row"><span></span><div class="vd-note" id="talk-status"></div></div>
     <div class="vd-row"><span></span><label class="vd-check"><input id="show-advanced" type="checkbox"> Mostrar opções avançadas</label></div>
     <div class="vd-advanced" id="advanced" hidden>
+      <div class="vd-row"><span>Voz (Podcast)</span>
+        <div class="vd-checks" id="voice-proc">
+          <label class="vd-check" title="Corta ruído de fundo quando o convidado está em silêncio"><input type="checkbox" data-proc="gate"> Gate</label>
+          <label class="vd-check" title="Controla picos de dinâmica da voz"><input type="checkbox" data-proc="compressor"> Compressor</label>
+          <label class="vd-check" title="Nivelamento automático de voz (AGC)"><input type="checkbox" data-proc="agc"> AGC</label>
+          <label class="vd-check" title="Limitador de picos (-3 dB)"><input type="checkbox" data-proc="limiter"> Limiter</label>
+          <button type="button" id="proc-podcast" title="Liga ou desliga Gate + Compressor + AGC + Limiter nesta chamada">Preset Podcast</button>
+        </div>
+      </div>
       <div class="vd-row"><span>Nível do retorno</span>
         <div class="vd-inline"><label class="vd-check"><input id="gain" type="number" min="0" max="200" step="5" style="width:60px"> %</label>
           <button id="reconnect" title="Refaz a conexão do retorno deste convidado">Reconectar</button></div></div>

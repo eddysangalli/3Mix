@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-label="3Mix Social · Lower Third Card (DSK 1-4)">
+  <defs>
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="20" flood-color="#000000" flood-opacity="0.7"/>
+    </filter>
+  </defs>
+  <g font-family="Segoe UI, -apple-system, BlinkMacSystemFont, sans-serif">
+    <!-- Floating Card -->
+    <rect x="120" y="700" width="720" height="280" rx="20" fill="#161b22" stroke="#1f7233" stroke-width="2" filter="url(#cardShadow)"/>
+    <!-- Avatar Card -->
+    <circle cx="185" cy="760" r="38" fill="#1f7233"/>
+    <text x="185" y="774" font-size="28" font-weight="900" fill="#ffffff" text-anchor="middle">TC</text>
+    <!-- Header Card -->
+    <text x="240" y="752" font-size="28" font-weight="800" fill="#ffffff">Tech Creator</text>
+    <text x="240" y="780" font-size="18" font-weight="500" fill="#8b949e">@tech_creator · agora</text>
+    <!-- Badge TikTok -->
+    <rect x="680" y="730" width="130" height="30" rx="6" fill="#fe2c55"/>
+    <text x="745" y="750" font-size="14" font-weight="900" fill="#ffffff" text-anchor="middle">TIKTOK LIVE</text>
+    <!-- Card Text -->
+    <text x="145" y="835" font-size="24" font-weight="400" fill="#ffffff">Essa integração direta via DSK 1-4 sem delay</text>
+    <text x="145" y="870" font-size="24" font-weight="400" fill="#ffffff">ficou surreal! Testando aqui com baixa latência.</text>
+    <!-- Footer Reactions -->
+    <text x="145" y="945" font-size="18" font-weight="700" fill="#2ecc71">❤️ 1.4k   💬 284   🔄 92</text>
+  </g>
+</svg>

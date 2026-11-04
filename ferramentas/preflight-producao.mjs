@@ -17,8 +17,8 @@ import { simpleEncoderChoices, streamProtocol, validateStreamTarget } from './ca
  */
 export const NIVEL = { OK: 'APROVADO', ATENCAO: 'ATENÇÃO', BLOQUEIO: 'BLOQUEIO', NAO: 'NÃO VERIFICADO' };
 const STATUS = { APROVADO: 'PASS', 'ATENÇÃO': 'WARN', BLOQUEIO: 'FAIL', 'NÃO VERIFICADO': 'NOT_VERIFIED' };
-const ORDEM = ['motor', 'programa', 'ftb', 'entradas', 'audio', 'calls', 'encoder', 'destino', 'atraso', 'saidas', 'gravacao', 'desempenho', 'maquina', 'processos', 'perfil'];
-const GRUPO = { motor: 'Motor', programa: 'Vídeo', ftb: 'Vídeo', entradas: 'Vídeo', audio: 'Áudio', calls: 'Áudio', encoder: 'Transmissão', destino: 'Transmissão', atraso: 'Transmissão', saidas: 'Transmissão', gravacao: 'Gravação', desempenho: 'Computador', maquina: 'Computador', processos: 'Computador', perfil: 'Computador' };
+const ORDEM = ['motor', 'programa', 'ftb', 'entradas', 'audio', 'calls', 'crew', 'encoder', 'destino', 'atraso', 'saidas', 'gravacao', 'desempenho', 'maquina', 'processos', 'perfil'];
+const GRUPO = { motor: 'Motor', programa: 'Vídeo', ftb: 'Vídeo', entradas: 'Vídeo', audio: 'Áudio', calls: 'Áudio', crew: 'Áudio', encoder: 'Transmissão', destino: 'Transmissão', atraso: 'Transmissão', saidas: 'Transmissão', gravacao: 'Gravação', desempenho: 'Computador', maquina: 'Computador', processos: 'Computador', perfil: 'Computador' };
 const HISTORICO_MAX = 40;
 
 const item = (id, nome, nivel, valor, extra = {}) => ({ id, nome, nivel, valor: valor == null ? '' : String(valor), alvo: 'geral', ...extra });
@@ -109,6 +109,49 @@ export class PreflightEngine {
           return item(id, '3Mix Call', NIVEL.OK, `${guests.length} convidado(s)`);
         }
 
+        // 3Mix Crew — Tally + Intercom (Fase 1 do superprompt de Melhorias Broadcast + Crew).
+        // crewTally/crewIntercom NÃO moram dentro de Production (são anexados de fora, em
+        // servidor-api.mjs, só quando o módulo está ativo) — por isso sempre opcional (?.),
+        // nunca presumido presente. O ponto central desta verificação é a colisão REAL já
+        // documentada no código-fonte (audio-tap-registry.mjs/servidor-api.mjs): CallReturns
+        // (Calls) ainda chama call_audio DIRETO, fora do AudioTapRegistry compartilhado — se
+        // Calls e Crew Intercom estiverem ativos ao mesmo tempo, um deles perde a captura
+        // (Set único substituído inteiro no motor, não união). Isso é o que a regra 5 do
+        // superprompt pede para nunca passar despercebido ("áudio do Crew nunca pode chegar
+        // ao PGM por engano ou queda de serviço") — aqui é a metade estática/config que dá
+        // para checar sem motor ao vivo; o teste negativo de runtime já existe isolado em
+        // testar-crew-intercom-isolamento-pgm.mjs. Headset/mic físico e latência real de rede
+        // exigem hardware/motor ao vivo — ficam NÃO VERIFICADO explícito, nunca fabricados.
+        case 'crew': {
+          const tally = p.crewTally, intercom = p.crewIntercom;
+          if (!tally && !intercom) return item(id, '3Mix Crew', NIVEL.NAO, 'Módulo não carregado nesta instância');
+          const partes = [];
+          let nivel = NIVEL.OK;
+          if (tally) {
+            const resumo = await tally.summary();
+            const semEstado = (resumo.entradas || []).filter((e) => !e.resumo);
+            if (semEstado.length) { nivel = NIVEL.ATENCAO; partes.push(`Tally sem estado: ${semEstado.map((e) => e.name).join(', ')}`); }
+            else partes.push(`Tally ok · ${(resumo.entradas || []).length} entrada(s) · ${(resumo.destinosDisponiveis || []).length} destino(s)`);
+          } else partes.push('Tally indisponível nesta instância');
+          if (intercom) {
+            const resumoIntercom = intercom.summary();
+            const membros = resumoIntercom.membros || [];
+            const conectados = membros.filter((m) => m.connected).length;
+            partes.push(`Intercom · ${conectados}/${membros.length} membro(s) conectado(s)${resumoIntercom.pttAtivos?.length ? ` · ${resumoIntercom.pttAtivos.length} PTT ativo(s)` : ''}`);
+            // Colisão real de call_audio: Calls ativo (timer rodando) + Crew com membros
+            // cadastrados no registry ao mesmo tempo — ver nota acima, não é suposição.
+            const callsAtivo = !!p.callEngine?.returns?.timer && !p.callEngine?.returns?.usesSharedRegistry;
+            const crewReivindicado = (intercom.registry?.consumers?.get('crew')?.size || 0) > 0;
+            if (callsAtivo && crewReivindicado) {
+              nivel = NIVEL.BLOQUEIO;
+              partes.push('Calls e Crew Intercom disputando a mesma captura de áudio nativa (call_audio) ao mesmo tempo');
+              return item(id, '3Mix Crew', nivel, partes.join(' · '), { motivo: 'CallReturns (Calls) ainda chama call_audio fora do AudioTapRegistry compartilhado — com os dois ativos, um perde a captura (recurso nativo exclusivo, não união).', acao: 'Encerre o 3Mix Calls antes de usar o Crew Intercom, ou vice-versa, até a migração do Calls para o registry compartilhado.' });
+            }
+          } else partes.push('Intercom indisponível nesta instância');
+          partes.push('headset/mic físico e latência real: não verificado (exige motor ao vivo/hardware)');
+          return item(id, '3Mix Crew', nivel, partes.join(' · '));
+        }
+
         case 'encoder': {
           const modo = await this.lerPerfil(['Output', 'Mode'], 'Simple');
           const encoder = modo === 'Advanced' ? await this.lerPerfil(['AdvOut', 'Encoder'], '') : await this.lerPerfil(['SimpleOutput', 'StreamEncoder'], '');
@@ -180,7 +223,11 @@ export class PreflightEngine {
           if (!disco.supported) return item(id, 'Gravação', NIVEL.NAO, `${pasta} · espaço não lido`, { alvo: 'gravação' });
           const kbps = Number(await this.lerPerfil(['SimpleOutput', 'VBitrate'], 0)) + Number(await this.lerPerfil(['SimpleOutput', 'ABitrate'], 0));
           const horas = kbps > 0 ? Number((disco.freeGb * 1024 * 8 / (kbps / 1000) / 3600).toFixed(1)) : disco.estRecordingHours;
-          const valor = `${disco.freeGb} GB livres · ~${horas} h · escrita ${escrita}`;
+          let valor = `${disco.freeGb} GB livres · ~${horas} h · escrita ${escrita}`;
+          const isoOpts = p.iso?.state?.recordOptions;
+          if (isoOpts?.format && isoOpts.format !== 'mpegts') {
+            valor += ` · Formato ${String(isoOpts.format).toUpperCase()}`;
+          }
           if (disco.severity === 'CRITICAL') return item(id, 'Gravação', NIVEL.BLOQUEIO, valor, { alvo: 'gravação', motivo: 'Disco quase cheio: a gravação pode parar no meio.', acao: 'Libere espaço ou troque a pasta.' });
           if (disco.severity === 'WARN') return item(id, 'Gravação', NIVEL.ATENCAO, valor, { alvo: 'gravação', acao: 'Confira se cabe a duração prevista.' });
           return item(id, 'Gravação', NIVEL.OK, valor, { alvo: 'gravação' });

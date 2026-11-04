@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-label="3Mix Social · Lower Third Glass (DSK 1-4)">
+  <defs>
+    <linearGradient id="glassGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#182230" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#0e131a" stop-opacity="0.98"/>
+    </linearGradient>
+    <filter id="glassShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+  <g font-family="Segoe UI, -apple-system, BlinkMacSystemFont, sans-serif">
+    <!-- Container Glass -->
+    <rect x="96" y="860" width="1728" height="144" rx="16" fill="url(#glassGrad)" stroke="#2f6fed" stroke-width="2" filter="url(#glassShadow)"/>
+    <rect x="96" y="860" width="12" height="144" rx="6" fill="#00d2d3"/>
+    <!-- Avatar -->
+    <circle cx="180" cy="932" r="48" fill="#2f6fed"/>
+    <text x="180" y="946" font-size="36" font-weight="800" fill="#ffffff" text-anchor="middle">RS</text>
+    <!-- Textos -->
+    <text x="250" y="915" font-size="34" font-weight="700" fill="#ffffff">@rodrigo_silva</text>
+    <text x="520" y="915" font-size="22" font-weight="800" fill="#00d2d3" letter-spacing="1">TWITCH CHAT</text>
+    <text x="250" y="965" font-size="26" font-weight="400" fill="#c8d6e5">Excelente transmissão! Qualidade broadcast impecável no 3Mix Pro.</text>
+    <!-- Badge DSK -->
+    <rect x="1640" y="888" width="140" height="34" rx="4" fill="#f39c12"/>
+    <text x="1710" y="911" font-size="16" font-weight="900" fill="#000000" text-anchor="middle">DSK GLASS</text>
+  </g>
+</svg>

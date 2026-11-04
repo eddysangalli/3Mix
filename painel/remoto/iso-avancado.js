@@ -5,12 +5,13 @@
   'use strict';
   const E = (id) => document.getElementById(id), esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const BUS_SCENE = '3Mix Barramentos';
-  const FORMAT_LABEL = { mpegts: 'MPEG-TS', mkv: 'MKV', mp4_safe: 'MP4 seguro' };
+  const FORMAT_LABEL = { mpegts: 'MPEG-TS', mkv: 'MKV', mp4_safe: 'MP4 seguro', mxf: 'MXF OP1a', mov: 'QuickTime MOV' };
   const AUDIO_LABEL = { input: 'Entrada', master: 'Master', 'bus-a': 'Bus A', 'bus-b': 'Bus B', 'all-tracks': 'Todas as trilhas', source: 'Fonte pública' };
   const fmtTime = (ms) => { const s = Math.max(0, Math.floor(ms / 1000)); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
 
   let state = null, live = null, loaded = false, caps = null, busy = false, dirty = false;
   let selected = new Set(), overrides = {}, errors = {}, filter = '';
+  let disksMap = new Map(), collisionsSet = new Set(), lastDiskCheck = 0;
   let lastSignature = '';
 
   const say = (text, kind = '') => { const box = E('iso-message'); box.textContent = text; box.className = 'vd-msg' + (kind ? ' vd-' + kind : ''); box.style.marginLeft = '0'; };
@@ -43,6 +44,7 @@
     const audio = E('iso-audio').value;
     return {
       format: E('iso-format').value,
+      broadcastProfile: E('iso-broadcast-profile')?.value || '',
       directory: E('iso-directory').value.trim(),
       prefix: E('iso-prefix').value.trim(),
       encoder: E('iso-encoder').value || 'default',
@@ -54,7 +56,7 @@
     };
   }
   function validOptions(o) {
-    if (!['mpegts', 'mkv', 'mp4_safe'].includes(o.format)) throw Error('Escolha um formato de gravação.');
+    if (!['mpegts', 'mkv', 'mp4_safe', 'mxf', 'mov'].includes(o.format)) throw Error('Escolha um formato de gravação.');
     if (!/^[-\w ]{1,40}$/.test(o.prefix) || !o.prefix) throw Error('Prefixo: 1 a 40 letras, números, espaços, hífen ou sublinhado.');
     if (o.directory && !/^([a-z]:[\\/]|\\\\[^\\]+\\[^\\]+)/i.test(o.directory)) throw Error('A pasta base precisa ser um caminho absoluto do Windows.');
     if (!Number.isInteger(o.crf) || o.crf < 0 || o.crf > 51) throw Error('Qualidade CRF: inteiro de 0 a 51.');
@@ -71,6 +73,7 @@
   function syncForm() {
     const o = state?.recordOptions || {};
     E('iso-format').value = o.format || 'mpegts';
+    if (E('iso-broadcast-profile')) E('iso-broadcast-profile').value = o.broadcastProfile || '';
     E('iso-encoder').value = o.encoder || 'default';
     E('iso-crf').value = o.crf ?? 23;
     E('iso-audio').value = o.audio || 'input';
@@ -85,7 +88,43 @@
   // ---- table ----
   function optionSet(values, current, inheritLabel) {
     return `<option value=""${!current ? ' selected' : ''}>${esc(inheritLabel)}</option>` + values.map(([v, l]) => `<option value="${esc(v)}"${String(current) === String(v) ? ' selected' : ''}>${esc(l)}</option>`).join('');
-  }  function rowHtml(name, isEligible) {
+  }  async function updateDisks() {
+    try {
+      const res = await fetch('/api/multicorder/discos', { signal: AbortSignal.timeout(5000) });
+      const data = await res.json();
+      if (!data?.success) return;
+      disksMap.clear();
+      for (const item of data.entradas || []) {
+        if (item.disco?.supported) disksMap.set(item.nome, item.disco);
+      }
+      collisionsSet.clear();
+      for (const col of data.colisoes || []) {
+        for (const n of col.nomes) collisionsSet.add(n);
+      }
+      const box = E('iso-disk-summary');
+      if (box) {
+        if (data.colisoes?.length > 0) {
+          box.hidden = false;
+          box.className = 'iso-help warn';
+          box.textContent = '⚠️ Alerta MultiCorder: ' + data.colisoes.map((c) => c.nomes.join(' e ') + ' gravam no mesmo Disco ' + c.numero).join('; ') + '. Para taxas altas (4K), use SSDs separados.';
+        } else if (disksMap.size > 0) {
+          box.hidden = false;
+          box.className = 'iso-help ok';
+          box.textContent = '✓ Discos verificados: gravações mapeadas em unidades físicas reconhecidas.';
+        } else {
+          box.hidden = true;
+        }
+      }
+      const telem = E('iso-throughput-telemetry');
+      if (telem && data.estimativa) {
+        const est = data.estimativa;
+        telem.hidden = false;
+        telem.textContent = `📊 Vazão e Armazenamento: ${est.nomePerfil} · ${est.mbPerSecPerCam} MB/s (${est.gbPerHourPerCam} GB/h) por cam | Total (${est.totalCams} cams): ${est.totalMbPerSec} MB/s (${est.totalGbPerHour} GB/h)${est.estHoursRemaining !== null ? ` | ~${est.estHoursRemaining} h livres` : ''}`;
+      }
+    } catch {}
+  }
+
+  function rowHtml(name, isEligible) {
     const o = overrides[name] || {}, cam = sessionCam(name), isSel = selected.has(name), error = errors[name];
     const liveState = !isEligible ? '<span>Não elegível</span>'
       : recording() && cam ? '<span class="rec">Gravando · ' + fmtTime(Date.now() - (state.session.startedAt || Date.now())) + '</span>'
@@ -98,11 +137,18 @@
       <td class="iso-name">${esc(name)}${!isEligible ? '<br><small>Replay e barramentos não entram na multigravação</small>' : ''}</td>
       <td class="iso-cell-state" data-live="${esc(name)}">${liveState}</td>
       <td><select class="iso-row-select" data-row="audio" data-name="${esc(name)}"${disabled}>${optionSet([['input', 'Entrada'], ['master', 'Master'], ['bus-a', 'Bus A'], ['bus-b', 'Bus B'], ['all-tracks', 'Todas as trilhas'], ['source', 'Fonte pública']], o.audio, 'Herdar')}</select></td>
-      <td><select class="iso-row-select" data-row="format" data-name="${esc(name)}"${disabled}>${optionSet([['mpegts', 'MPEG-TS'], ['mkv', 'MKV'], ['mp4_safe', 'MP4 seguro']], o.format, 'Herdar')}</select></td>
+      <td><select class="iso-row-select" data-row="format" data-name="${esc(name)}"${disabled}>${optionSet([['mpegts', 'MPEG-TS'], ['mkv', 'MKV'], ['mp4_safe', 'MP4 seguro'], ['mxf', 'MXF OP1a'], ['mov', 'QuickTime MOV']], o.format, 'Herdar')}</select></td>
       <td><input class="iso-row-input" type="number" min="0" max="1440" step="1" placeholder="—" title="Duração deste arquivo em minutos; vazio herda o padrão" value="${o.splitSeconds !== undefined ? Math.round(o.splitSeconds / 60) : ''}" data-row="split" data-name="${esc(name)}"${disabled}></td>
           <td><div class="iso-file-row"><input class="iso-row-input iso-row-dir" type="text" placeholder="Pasta base" value="${esc(o.directory || '')}" data-row="directory" data-name="${esc(name)}"${disabled}>
           <input class="iso-row-input iso-row-prefix" type="text" maxlength="40" placeholder="Prefixo" value="${esc(o.prefix || '')}" data-row="prefix" data-name="${esc(name)}"${disabled}></div>
-          <span class="iso-file" title="${esc(fullFile)}">${esc(file || (isSel ? 'Arquivo definido ao iniciar' : '—'))}</span></td>
+          <span class="iso-file" title="${esc(fullFile)}">${esc(file || (isSel ? 'Arquivo definido ao iniciar' : '—'))}</span>${(() => {
+            const disco = disksMap.get(name);
+            if (!disco) return '';
+            const col = collisionsSet.has(name);
+            const lbl = (disco.barramento ? disco.barramento + ': ' : '') + disco.nome + ' (' + disco.letra + ':)';
+            return '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:2px"><span class="iso-disk-tag" title="Disco ' + disco.numero + ' · ' + esc(disco.nome) + '">💾 ' + esc(lbl) + '</span>'
+              + (col ? '<span class="iso-disk-collision" title="Mesmo disco físico que outra entrada">⚠️ Mesmo disco físico</span>' : '') + '</div>';
+          })()}</td>
       <td>${error ? `<span class="iso-error">${esc(error)}<button type="button" data-retry="${esc(name)}" title="Remover esta entrada e tentar as demais">Sem esta</button></span>` : ''}</td>
     </tr>`;
   }
@@ -243,14 +289,15 @@
     busy = true; updateCounts(); say('Parando e finalizando os arquivos…');
     try { const r = await request({ action: 'stop' }); state = r.iso || state; errors = {}; say('Multigravação parada; arquivos fechados.', 'ok'); }
     catch (e) { say(e.message, 'error'); }
-    finally { busy = false; render(); }
+    finally { busy = false; updateDisks().then(() => render()); }
   }
 
   // ---- events ----
-  E('iso-format').onchange = () => { dirty = true; updateHelp(); };
+  E('iso-format').onchange = () => { dirty = true; updateHelp(); updateDisks(); };
   for (const id of ['iso-encoder', 'iso-crf', 'iso-audio', 'iso-split', 'iso-prefix', 'iso-directory']) E(id).addEventListener('input', () => { dirty = true; if (id === 'iso-audio') updateHelp(); });
   E('iso-audio').addEventListener('change', () => { dirty = true; updateHelp(); });
-  E('iso-format').addEventListener('change', () => { dirty = true; updateHelp(); });
+  E('iso-format').addEventListener('change', () => { dirty = true; updateHelp(); updateDisks(); });
+  E('iso-broadcast-profile')?.addEventListener('change', () => { dirty = true; updateDisks(); });
   E('iso-browse').onclick = () => { E('iso-folder-picker').value = ''; E('iso-folder-picker').click(); };
   E('iso-folder-picker').onchange = () => {
     const file = E('iso-folder-picker').files?.[0]; if (!file) return;
@@ -324,13 +371,13 @@
           caps = (v.outputs?.encoders || []).filter((c) => c && c.id);
           renderEncoderOptions();
         } catch { /* encoder list is optional */ }
-        render(); say('');
+        render(); say(''); updateDisks().then(() => render());
         return;
       }
       if (!dirty) syncForm();
       const signature = JSON.stringify({ names: eligible(), others: notEligible(), rec: recording(), errors: Object.keys(errors) });
       if (signature !== lastSignature) render(); else { updateLive(); renderSession(); updateCounts(); }
-      if (++poll % 4 === 0) updateHelp();
+      if (++poll % 4 === 0) { updateHelp(); updateDisks().then(() => { if (disksMap.size) render(); }); }
     } catch (e) {
       E('iso-state-text').textContent = 'Reconectando…';
       E('iso-state').classList.remove('rec');

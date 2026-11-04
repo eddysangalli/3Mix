@@ -120,10 +120,10 @@ async function runTests() {
   assert.equal(engine.state.program.audioGainDb, 3.0, 'Program deve refletir +3 dB de ganho');
 
   // Verifica criação do filtro no mock OBS
-  const createdFilter = mockProd.filterState['VT Playout Audio']?.find(f => f.filterName === 'FreeMix Clip Gain');
-  assert(createdFilter, 'Filtro FreeMix Clip Gain deve ter sido criado no OBS');
+  const createdFilter = mockProd.filterState['VT Playout Audio']?.find(f => f.filterName === '3Mix Clip Gain');
+  assert(createdFilter, 'Filtro 3Mix Clip Gain deve ter sido criado no OBS');
   assert.equal(createdFilter.filterSettings.db, 3.0, 'Configuração db do filtro deve ser +3.0');
-  console.log('✓ Teste 2 PASS: TAKE do Clipe 1 aplicou +3.0 dB via filtro FreeMix Clip Gain');
+  console.log('✓ Teste 2 PASS: TAKE do Clipe 1 aplicou +3.0 dB via filtro 3Mix Clip Gain');
 
   // 3. Executar TAKE no Clipe 2 (-6 dB)
   await engine.take({ item: activeList.items[1] });

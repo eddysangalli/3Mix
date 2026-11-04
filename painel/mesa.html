@@ -713,6 +713,37 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   .topbar-pill.pill-accent { border-color: #0984e3; color: #70d6ff; }
   .topbar-pill.pill-accent:hover { background: #0d3b66; color: #fff; }
 
+  /* Seletor e Gestão Rápida de Projetos Broadcast na Topbar */
+  .topbar-project-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #14171d;
+    border: 1px solid #232b36;
+    border-radius: 4px;
+    padding: 2px 6px;
+    box-sizing: border-box;
+  }
+  .topbar-pill.pill-proj {
+    background: #182332;
+    border-color: #2b4566;
+    color: #4da3ff;
+    max-width: 180px;
+  }
+  .topbar-pill.pill-proj #top-project-name {
+    display: inline-block;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+  .topbar-pill.pill-proj:hover {
+    background: #203147;
+    border-color: #4da3ff;
+    color: #fff;
+  }
+
   /* Módulo Central: MotionCaster DSK 1..4 + Switcher ATEM Cut/Auto/FTB */
   .media-center-trans {
     grid-column: 2;
@@ -917,7 +948,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
 </style>
 <link rel="stylesheet" href="remoto/3mix-tipografia.css">
 <link rel="stylesheet" href="remoto/input-menu-ui.css">
-<link rel="stylesheet" href="mesa-grafite.css">
+<link rel="stylesheet" href="mesa-grafite.css?v=20261103b">
 <link rel="stylesheet" href="mesa-modular.css">
 <link rel="stylesheet" href="remoto/replay-dock.css">
 </head>
@@ -929,6 +960,22 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       <span class="dot-live"></span>
       <img class="brand-logo" src="/img/3mix-logo.png" alt="3Mix Pro">
       <span class="brand-badge">BROADCAST SUITE</span>
+    </div>
+
+    <!-- GESTÃO RÁPIDA DE PROJETOS BROADCAST -->
+    <div class="topbar-project-group" id="topbar-project-group">
+      <button class="topbar-pill pill-proj" id="top-project-pill" data-a="pop" data-v="presets" title="Central de Projetos: Alternar produções salvas, abrir modelos ou gerenciar">
+        <span class="pill-icon">📁</span> <span id="top-project-name">Produção</span> <span style="font-size:9px;opacity:0.7">▾</span>
+      </button>
+      <button class="topbar-pill" data-a="top_presetsave" title="💾 Salvar Projeto (grava na hora o projeto atual)">
+        <span class="pill-icon">💾</span> SALVAR
+      </button>
+      <button class="topbar-pill" data-a="pop" data-v="saveas" title="📋 Salvar Como… (duplicar produção atual com outro nome)">
+        <span class="pill-icon">📋</span> COMO…
+      </button>
+      <button class="topbar-pill" data-a="pop" data-v="novo-projeto" title="✨ Assistente de Novo Projeto e Modelos Broadcast">
+        <span class="pill-icon">✨</span> NOVO / MODELOS…
+      </button>
     </div>
 
     <div class="topbar-timers">
@@ -1597,7 +1644,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   function onEvent(type, d) {
     if(type==='CustomEvent'&&d.freemix?.workspace){receiveMesaWorkspace(d.freemix.workspace);return;}
     if (type === "CustomEvent") { const f = d.freemix; if(f&&new URLSearchParams(location.search).has('pop')&&(f.open||f.do))return; if (f && f.open === "config") openPop('settings'); else if (f && f.open) { st.pop = null; st.popAt = { x: innerWidth, y: 0 }; openPop(f.open, f.arg || undefined); } else if (f && f.do && A["top_" + f.do]) A["top_" + f.do](); return; } // pedido vindo da barra de cima
-    if (type === "CurrentSceneCollectionChanged") { if (st.preset && st.preset !== d.sceneCollectionName) store.set("mesa.lastPreset", st.preset); st.preset = d.sceneCollectionName; setTimeout(() => syncAll().catch(() => {}), 900); }
+    if (type === "CurrentSceneCollectionChanged") { if (st.preset && st.preset !== d.sceneCollectionName) store.set("mesa.lastPreset", st.preset); st.preset = d.sceneCollectionName; updateTopProjectName(); setTimeout(() => syncAll().catch(() => {}), 900); }
     if (type === "CurrentProgramSceneChanged") { st.program = d.sceneName; scheduleMesaPaint('tally'); scheduleMesaPaint('bot'); if (st.pop === "replay") renderPop(); if (dockShows("replay")) renderSideReplay(); }
     else if (type === "CurrentPreviewSceneChanged") { st.preview = d.sceneName; scheduleMesaPaint('tally'); }
     else if (type === "SceneListChanged") { setScenes(d.scenes); scheduleMesaPaint('tiles'); laterItems(); }
@@ -2124,7 +2171,21 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       run(replayAction("retention", { enabled, minutes, segmentSeconds: 60 }));
     },
     rpdockaudio: () => run(replayAction("audio", { enabled: st.rpDisk?.audioEnabled === false })),
-    presetload: () => run((async () => { const r = await req("GetSceneCollectionList"); st.presets = r.sceneCollections; st.preset = r.currentSceneCollectionName; if (st.pop === "presets") { renderPop(); if (st.popArg === "new") $("ps-name")?.focus(); } })()),
+    presetload: () => run((async () => {
+      const r = await req("GetSceneCollectionList");
+      st.presets = r.sceneCollections;
+      st.preset = r.currentSceneCollectionName;
+      const localTpls = store.get("mesa.projectTemplates", []);
+      let apiTpls = [];
+      try {
+        const resp = await fetch(new URL("/api/projects-copy", replayUrl).href, { cache: "no-store" });
+        if (resp.ok) { const d = await resp.json(); if (Array.isArray(d.templates)) apiTpls = d.templates; }
+      } catch {}
+      const byId = new Map();
+      for (const t of [...apiTpls, ...localTpls]) if (t && t.id) byId.set(t.id, t);
+      st.projectTemplates = [...byId.values()];
+      if (st.pop === "presets") { renderPop(); if (st.popArg === "new") $("ps-name")?.focus(); }
+    })()),
     presetopen: (d) => { if (d.v === st.preset) return closePop(); if (st.locked) return A.lockmsg(); if (st.rec || st.stream) return toast("Pare a gravação e a transmissão antes de trocar de preset", true); closePop(); run(req("SetCurrentSceneCollection", { sceneCollectionName: d.v })); },
     presetnew: () => run((async () => { const name = $("ps-name").value.trim(); if (!name) return toast("Dê um nome ao preset", true); if (st.rec || st.stream) return toast("Pare a gravação e a transmissão antes de criar um preset", true); closePop(); await req("CreateSceneCollection", { sceneCollectionName: name }); toast(`Preset "${name}" criado`); })()),
     cfgload: () => run((async () => {
@@ -2224,7 +2285,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     top_basic: () => { st.basic = !st.basic; document.body.classList.toggle("basic", st.basic); A.top_state(); },
     top_fullscreen: () => A.projopen({ v: "PROGRAM_FULL" }),
     top_presetsave: () => run((async () => {
-      const c = await req("GetSceneCollectionList"); st.preset = c.currentSceneCollectionName;
+      const c = await req("GetSceneCollectionList"); st.preset = c.currentSceneCollectionName; updateTopProjectName();
       // Saving makes the preset as it is now the state that "discard changes" goes back to on exit.
       const r = await tryReq("CallVendorRequest", { vendorName: "freemix", requestType: "save_preset", requestData: {} });
       toast(r?.responseData?.success ? `Preset "${st.preset}" está gravado` : `Preset "${st.preset}" está gravado: o 3Mix grava cada alteração na hora`);
@@ -2237,22 +2298,181 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       await req("SetCurrentSceneCollection", { sceneCollectionName: last });
     })()),
     saveasgo: () => run((async () => {
-      const name = $("sa-name").value.trim(), c = await req("GetSceneCollectionList");
+      const name = ($("sa-name")?.value || "").trim(), c = await req("GetSceneCollectionList");
       if (!name) return toast("Dê um nome ao preset", true);
       if (c.sceneCollections.includes(name)) return toast("Já existe um preset com esse nome", true);
       if (st.rec || st.stream) return toast("Pare a gravação e a transmissão antes de salvar com outro nome", true);
       closePop();
       const from = c.currentSceneCollectionName, before = st.scenes.length;
       toast("Salvando a cópia…");
+      await tryReq("CallVendorRequest", { vendorName: "freemix", requestType: "save_preset", requestData: {} });
       await req("CreateSceneCollection", { sceneCollectionName: name }); await sleep(1500);
-      await req("SetCurrentSceneCollection", { sceneCollectionName: from }); await sleep(2200);
-      await req("SetPersistentData", { realm: "OBS_WEBSOCKET_DATA_REALM_GLOBAL", slotName: "freemix_cmd", slotValue: { id: Date.now(), cmd: "saveas", from, name } });
-      await sleep(2500);
-      await req("SetCurrentSceneCollection", { sceneCollectionName: name }); await sleep(2800);
+      await req("SetCurrentSceneCollection", { sceneCollectionName: from }); await sleep(1800);
+      let apiCopied = false;
+      try {
+        const resp = await fetch(new URL("/api/projects-copy", replayUrl).href, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "saveas", from, name })
+        });
+        const d = await resp.json().catch(() => ({}));
+        if (resp.ok && d.success) apiCopied = true;
+      } catch {}
+      if (!apiCopied) {
+        await req("SetPersistentData", { realm: "OBS_WEBSOCKET_DATA_REALM_GLOBAL", slotName: "freemix_cmd", slotValue: { id: Date.now(), cmd: "saveas", from, name } });
+        await sleep(2500);
+      } else {
+        await sleep(600);
+      }
+      await req("SetCurrentSceneCollection", { sceneCollectionName: name }); await sleep(2200);
       const now = (await req("GetSceneList")).scenes.length;
-      if (now >= before && now > 1) return toast(`Preset salvo como "${name}"`);
+      if (now >= before && now >= 1) return toast(`Preset salvo como "${name}"`);
       await req("SetCurrentSceneCollection", { sceneCollectionName: from });
       toast("A cópia ficou vazia: o ajudante do 3Mix não respondeu. Abra o programa pelo atalho Iniciar Mesa.", true);
+    })()),
+    savetemplate: () => run((async () => {
+      const templateName = ($("tpl-name")?.value || `${st.preset || "Produção"} - Modelo`).trim();
+      if (!templateName) return toast("Informe um nome para o modelo", true);
+      await tryReq("CallVendorRequest", { vendorName: "freemix", requestType: "save_preset", requestData: {} });
+      const sceneNames = [...(st.scenes || [])];
+      const video = st.video || null;
+      const localRecord = {
+        kind: "3Mix Project Template",
+        schema: 1,
+        id: "tpl_" + Date.now().toString(36),
+        name: templateName,
+        fromProject: st.preset || "",
+        createdAt: new Date().toISOString(),
+        sceneNames,
+        video
+      };
+      try {
+        const resp = await fetch(new URL("/api/projects-copy", replayUrl).href, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "save_template", from: st.preset, templateName, sceneNames, video })
+        });
+        const d = await resp.json().catch(() => ({}));
+        if (resp.ok && d.success && d.template?.id) localRecord.id = d.template.id;
+      } catch {}
+      const list = store.get("mesa.projectTemplates", []).filter((t) => t && t.name !== templateName);
+      list.unshift(localRecord);
+      store.set("mesa.projectTemplates", list);
+      toast(`Modelo "${templateName}" salvo nos seus modelos`);
+      A.presetload();
+    })()),
+    exporttemplate: () => run((async () => {
+      const templateName = ($("tpl-name")?.value || `${st.preset || "Produção"} - Modelo`).trim() || "Modelo 3Mix";
+      const sceneNames = [...(st.scenes || [])];
+      const v = st.video || {};
+      const payload = {
+        kind: "FreeMix Project Template",
+        schema: 1,
+        name: templateName,
+        fromProject: st.preset || "",
+        createdAt: new Date().toISOString(),
+        sceneNames,
+        video: {
+          format: v.baseWidth === 1080 && v.baseHeight === 1920 ? "vertical" : "horizontal",
+          fps: v.fpsNumerator && v.fpsDenominator ? Math.round(v.fpsNumerator / v.fpsDenominator) : 30,
+          baseWidth: v.baseWidth || 1920,
+          baseHeight: v.baseHeight || 1080
+        },
+        cameras: [0, 1, 2, 3].map((i) => ({ slot: i + 1, label: sceneNames[i] || `CAM ${i + 1}`, mode: "placeholder", explicit: true })),
+        audio: { mode: "none" }
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2) + "\n"], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `3Mix-Modelo-${templateName.replace(/[^a-zA-Z0-9_-]+/g, "_")}.json`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      toast(`Arquivo de modelo "${templateName}" exportado (.json)`);
+    })()),
+    importtemplate: () => {
+      const inp = document.createElement("input");
+      inp.type = "file";
+      inp.accept = ".json,application/json";
+      inp.onchange = () => run((async () => {
+        const f = inp.files?.[0];
+        if (!f) return;
+        const data = JSON.parse(await f.text());
+        const name = String(data.name || f.name.replace(/\.json$/i, "")).trim().slice(0, 40) || "Modelo Importado";
+        const sceneNames = Array.isArray(data.sceneNames) ? data.sceneNames : Array.isArray(data.cameras) ? data.cameras.map((c, i) => c.label || `CAM ${i + 1}`) : ["CAM 1", "CAM 2", "CAM 3", "CAM 4"];
+        const rec = {
+          kind: "3Mix Project Template",
+          schema: 1,
+          id: "tpl_" + Date.now().toString(36),
+          name,
+          fromProject: data.fromProject || "Importado",
+          createdAt: new Date().toISOString(),
+          sceneNames,
+          video: data.video || null
+        };
+        try {
+          const resp = await fetch(new URL("/api/projects-copy", replayUrl).href, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "save_template", templateName: name, importedTemplate: { ...data, name, sceneNames } })
+          });
+          const d = await resp.json().catch(() => ({}));
+          if (resp.ok && d.template?.id) rec.id = d.template.id;
+        } catch {}
+        const list = store.get("mesa.projectTemplates", []).filter((t) => t && t.name !== name);
+        list.unshift(rec);
+        store.set("mesa.projectTemplates", list);
+        toast(`Modelo "${name}" importado`);
+        A.presetload();
+      })());
+      inp.click();
+    },
+    applytemplate: (d) => run((async () => {
+      if (st.rec || st.stream) return toast("Pare a gravação e a transmissão antes de criar projeto por modelo", true);
+      const tpl = (st.projectTemplates || []).find((t) => t.id === d.v);
+      if (!tpl) return toast("Modelo não encontrado", true);
+      const c = await req("GetSceneCollectionList");
+      const baseName = tpl.name.replace(/ - Modelo$/i, "").trim() || "Produção";
+      let name = ($("ps-name")?.value || "").trim() || `${baseName} Novo`;
+      let seq = 2;
+      while (c.sceneCollections.includes(name)) { name = `${baseName} ${seq++}`; }
+      closePop();
+      const from = c.currentSceneCollectionName;
+      toast(`Criando projeto "${name}" a partir do modelo "${tpl.name}"…`);
+      await req("CreateSceneCollection", { sceneCollectionName: name }); await sleep(1200);
+      let fullApplied = false;
+      try {
+        await req("SetCurrentSceneCollection", { sceneCollectionName: from }); await sleep(1200);
+        const resp = await fetch(new URL("/api/projects-copy", replayUrl).href, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "apply_template", templateId: tpl.id, name })
+        });
+        const resJson = await resp.json().catch(() => ({}));
+        if (resp.ok && resJson.appliedFullCollection) fullApplied = true;
+      } catch {}
+      await req("SetCurrentSceneCollection", { sceneCollectionName: name }); await sleep(1800);
+      if (!fullApplied && Array.isArray(tpl.sceneNames) && tpl.sceneNames.length) {
+        const curScenes = (await req("GetSceneList")).scenes.map((s) => s.sceneName);
+        for (const sc of tpl.sceneNames) {
+          if (!curScenes.includes(sc)) await tryReq("CreateScene", { sceneName: sc });
+        }
+      }
+      await tryReq("SetStudioModeEnabled", { studioModeEnabled: true });
+      toast(`Projeto "${name}" criado a partir do modelo "${tpl.name}"`);
+    })()),
+    deltemplate: (d) => run((async () => {
+      const list = store.get("mesa.projectTemplates", []).filter((t) => t && t.id !== d.v);
+      store.set("mesa.projectTemplates", list);
+      try {
+        await fetch(new URL("/api/projects-copy", replayUrl).href, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "delete_template", templateId: d.v })
+        });
+      } catch {}
+      toast("Modelo removido");
+      A.presetload();
     })()),
     viewlist: () => { st.listMode = !st.listMode; document.body.classList.toggle("list", st.listMode); store.set("mesa.list", st.listMode); renderBot(); },
     viewsize: () => setInputCardWidth(inputCardWidth >= 260 ? 140 : inputCardWidth + 40),
@@ -3821,7 +4041,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   function renderPop() { renderPopBody(); placePop(); }
   function renderPopBody() {
     $("pop").style.width="";
-    const p = $("pop"); p.dataset.panel=st.pop||""; p.className = `pop on${st.pop === "gear" ? " right" : ""}${["add", "ext", "recset", "streamset", "audioset", "busman", "shortcuts", "replay"].includes(st.pop) ? " wide" : ""}${st.pop === "ext" ? " xwide" : ""}`;
+    const p = $("pop"); p.dataset.panel=st.pop||""; p.className = `pop on${st.pop === "gear" ? " right" : ""}${["add", "ext", "recset", "streamset", "audioset", "busman", "shortcuts", "replay", "presets"].includes(st.pop) ? " wide" : ""}${st.pop === "ext" ? " xwide" : ""}`;
     if (st.pop === "add") {
       const t = TYPES.find((x) => x.id === st.addType) || TYPES[0], name = st.addName || addDefaultName(t);
       const groups = [...new Set(TYPES.map((x) => x.group))];
@@ -3915,7 +4135,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
         + `<button data-a="avdelay" data-v="${v}">Atraso de áudio e vídeo…</button>`
         + `<button data-a="minimizetoggle" data-v="${v}" ${sceneButtonAttrs(name)}>${st.minimized?.[name] ? "Expandir cartão" : "Recolher cartão"}</button>`
         + (hasMedia ? `<button data-a="togglespeed" data-v="${v}">${st.showSpeed?.[name] ? "Ocultar velocidade de exibição" : "Show/Hide PlayBack Speed"}</button>` : "")
-        + `<button data-a="layers" data-v="${v}">Camadas: outras entradas por cima…</button><button data-a="audioadd" data-v="${v}">Juntar áudio a esta entrada…</button><button data-a="renameask" data-v="${v}">Renomear…</button><button data-a="tag" data-v="${v}">Cor…</button><button data-a="projector" data-v="${v}">Abrir em janela</button>${name === st.program ? "" : `<button data-a="closeask" data-v="${v}" ${sceneButtonAttrs(name)}>Excluir entrada</button>`}</div>`; }
+        + `<button data-a="pop" data-v="chroma" data-arg="${v}">Chroma Key…</button><button data-a="layers" data-v="${v}">Camadas: outras entradas por cima…</button><button data-a="audioadd" data-v="${v}">Juntar áudio a esta entrada…</button><button data-a="renameask" data-v="${v}">Renomear…</button><button data-a="tag" data-v="${v}">Cor…</button><button data-a="projector" data-v="${v}">Abrir em janela</button>${name === st.program ? "" : `<button data-a="closeask" data-v="${v}" ${sceneButtonAttrs(name)}>Excluir entrada</button>`}</div>`; }
     else if (st.pop === "avdelay") { const av = st.av;
       p.innerHTML = `<h3>Atraso · ${esc(st.popArg)}</h3>` + (!av || av.name !== st.popArg ? "<p>Lendo…</p>"
         : `<label>Vídeo (0 a 500 ms)<input type="number" min="0" max="500" step="1" data-av-video value="${av.video}"></label>`
@@ -3934,7 +4154,50 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
         + `<p style="font-size:11px;color:#00e676;font-weight:600">✓ Convertido instantaneamente e disponível na galeria sem reiniciar o programa.</p>`
         + `<div class="row end"><button class="b" data-a="close">Fechar</button></div>`;
     }
-    else if (st.pop === "presets") p.innerHTML = `<h3>Presets</h3><p>Cada preset é uma produção inteira: entradas, overlays, transições. O motor grava as alterações sozinho.</p><div class="menu" style="max-height:140px;overflow:auto">${(st.presets || []).map((n) => `<button data-a="presetopen" data-v="${esc(n)}">${n === st.preset ? "● " : ""}${esc(n)}${n === st.preset ? " (em uso)" : ""}</button>`).join("")}</div><label style="margin-top:8px">Novo preset<input id="ps-name" maxlength="40" placeholder="Nome da produção"></label><div class="row"><button class="b on" data-a="presetnew">Criar</button><button class="b" data-a="close">Fechar</button></div>`;
+    else if (st.pop === "presets") {
+      const cur = st.preset || "Produção";
+      const tpls = st.projectTemplates || [];
+      p.innerHTML = `<h3>Central de Projetos e Modelos</h3>`
+        + `<div class="rp-box" style="margin-bottom:8px">`
+        + `<h4><span>Projeto em uso: <b style="color:#3fd145">${esc(cur)}</b></span><span class="bdg on">ATIVO</span></h4>`
+        + `<div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px">`
+        + `<button class="b on" data-a="top_presetsave" title="Grava imediatamente o estado atual do projeto">💾 Salvar projeto agora</button>`
+        + `<button class="b" data-a="top_presetlast" title="Alterna para o último projeto aberto anteriormente">↩ Voltar ao último projeto</button>`
+        + `<button class="b" data-a="pop" data-v="novo-projeto" title="Abre o Assistente de Novo Projeto com os 7 modelos broadcast e diagrama de sinais">✨ Assistente de Novo Projeto…</button>`
+        + `<button class="b" data-a="pop" data-v="recuperacao" title="Exportar ou importar arquivo completo de projeto (.fmx) e pontos de restauração">📦 Backup / Importar (.fmx)…</button>`
+        + `</div></div>`
+        + `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">`
+        + `<div class="rp-box" style="margin:0">`
+        + `<h4>1. Abrir projeto salvo (${(st.presets || []).length})</h4>`
+        + `<p style="font-size:11px;color:var(--mut);margin:2px 0 6px">Clique em um projeto salvo para abri-lo na mesa (com gravação e transmissão paradas).</p>`
+        + `<div class="menu" style="max-height:175px;overflow:auto;border:1px solid #2b333d;border-radius:3px">${(st.presets || []).map((n) => `<button data-a="presetopen" data-v="${esc(n)}" style="display:flex;justify-content:space-between;align-items:center"><span>${n === st.preset ? "● " : ""}${esc(n)}</span><small style="color:${n === st.preset ? "#3fd145" : "#8f9cb0"}">${n === st.preset ? "Em uso" : "Abrir"}</small></button>`).join("") || `<div style="padding:8px;color:var(--mut)">Nenhum projeto listado</div>`}</div>`
+        + `</div>`
+        + `<div style="display:flex;flex-direction:column;gap:8px">`
+        + `<div class="rp-box" style="margin:0">`
+        + `<h4>2. Salvar como (duplicar produção atual)</h4>`
+        + `<p style="font-size:11px;color:var(--mut);margin:2px 0 6px">Grava uma cópia completa do projeto atual com outro nome e já passa a trabalhar nela.</p>`
+        + `<div class="row" style="gap:6px;margin:0"><input id="sa-name" maxlength="40" value="${esc(cur + " 2")}" placeholder="Nome da cópia" style="flex:1"><button class="b on" data-a="saveasgo">Salvar como</button></div>`
+        + `</div>`
+        + `<div class="rp-box" style="margin:0">`
+        + `<h4>3. Criar projeto em branco</h4>`
+        + `<div class="row" style="gap:6px;margin:0"><input id="ps-name" maxlength="40" placeholder="Nome do novo projeto" style="flex:1"><button class="b" data-a="presetnew">Criar em branco</button></div>`
+        + `</div>`
+        + `</div></div>`
+        + `<div class="rp-box" style="margin-bottom:8px">`
+        + `<h4>4. Salvar como modelo e Meus Modelos (${tpls.length})</h4>`
+        + `<p style="font-size:11px;color:var(--mut);margin:2px 0 6px">Salve a estrutura desta produção como modelo reutilizável ou exporte/importe um arquivo <code>.json</code> de modelo.</p>`
+        + `<div class="row" style="gap:6px;margin-bottom:8px;flex-wrap:wrap">`
+        + `<input id="tpl-name" maxlength="40" value="${esc(cur + " - Modelo")}" placeholder="Nome do modelo" style="flex:1;min-width:180px">`
+        + `<button class="b on" data-a="savetemplate">📋 Salvar como modelo</button>`
+        + `<button class="b" data-a="exporttemplate" title="Baixar arquivo .json deste modelo para usar em outro PC ou no Assistente">⬇ Exportar modelo (.json)</button>`
+        + `<button class="b" data-a="importtemplate" title="Importar arquivo .json de modelo salvo no computador">⬆ Importar modelo (.json)</button>`
+        + `</div>`
+        + (tpls.length ? `<div style="max-height:120px;overflow:auto"><table class="rp-events-table"><tr><th>Modelo salvo</th><th>Origem</th><th>Entradas</th><th style="text-align:right">Ações</th></tr>`
+          + tpls.map((t) => `<tr><td><b>${esc(t.name)}</b></td><td>${esc(t.fromProject || "—")}</td><td>${Array.isArray(t.sceneNames) ? t.sceneNames.length + " cenas" : "—"}</td><td style="text-align:right"><button class="b on" data-a="applytemplate" data-v="${esc(t.id)}" style="height:20px;padding:0 8px" title="Cria um novo projeto baseado neste modelo">Usar modelo</button><button class="b" data-a="deltemplate" data-v="${esc(t.id)}" style="height:20px;padding:0 6px;margin-left:4px" title="Remover modelo">×</button></td></tr>`).join("")
+          + `</table></div>` : `<p style="font-size:11px;color:var(--mut);margin:0">Nenhum modelo personalizado salvo ainda. Clique em "Salvar como modelo" acima para guardar a produção atual como modelo.</p>`)
+        + `</div>`
+        + `<div class="row end"><button class="b" data-a="close">Fechar</button></div>`;
+    }
     else if (["recset", "streamset", "config"].includes(st.pop)) { const c = st.cfg, opt = (list, cur) => list.map(([v, l]) => `<option value="${v}"${v === cur ? " selected" : ""}>${l}</option>`).join("");
       const RES = [["1920x1080", "1920×1080"], ["1280x720", "1280×720"], ["3840x2160", "3840×2160"], ["1080x1920", "1080×1920 (vertical)"]], FPS = [["24000/1001", "23,976"], ["25/1", "25"], ["30000/1001", "29,97"], ["30/1", "30"], ["50/1", "50"], ["60000/1001", "59,94"], ["60/1", "60"]], FMT = ["mkv", "mp4", "hybrid_mp4", "mov", "flv", "ts"].map((f) => [f, f]);
       const withCur = (list, cur) => (list.some(([v]) => v === cur) ? list : [[cur, cur], ...list]);
@@ -4031,6 +4294,9 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   ${moduloAtivo('calls') ? `<button data-a="retornos">Retornos SRT e N-1…</button>` : ""}
   ${moduloAtivo('blackbox') ? `<button data-a="blackbox">Caixa-preta…</button>` : ""}
   <button data-a="pop" data-v="color">Color Studio…</button>
+  <button data-a="pop" data-v="chroma">Chroma Key Studio…</button>
+  <button data-a="pop" data-v="estudio">Virtual Studio 2.5D…</button>
+  <button data-a="pop" data-v="social">Social & Moderação…</button>
   <button data-a="pop" data-v="hub">Hub de produção…</button>
   <button data-a="pop" data-v="diagnosticos">Relatar problema…</button>
 </div><div class="row"><button class="b" data-a="close">Fechar</button></div>`;
@@ -4068,14 +4334,14 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
         + `<p>Evento: antes do início conta em amarelo; durante, em verde; depois do fim, em vermelho.</p><div class="row end"><button class="b on" data-a="clockssave">OK</button><button class="b" data-a="close">Cancelar</button></div>`; }
     else if (st.pop === "gear") p.innerHTML = `<h3>Painel</h3><p>${st.on ? "Conectado a " + esc(LOCAL.url || "") : esc(st.why)}</p><div class="row"><button class="b${st.studio ? " on" : ""}" data-a="studio">Modo estúdio (Preview + Programa)</button></div><p style="margin-top:8px">Cenas, fontes, mixer nativo e controles do OBS continuam no menu Painéis.</p><div class="row"><button class="b" data-a="close">Fechar</button></div>`;
   }
-  const panelPages={sobre:'/sobre.html',hub:'/hub','novo-projeto':'/novo-projeto/',audio:'/audio',audiobuses:'/audio?view=routing',datasources:'/dados',compositions:'/compor',calls:'/calls',macros:'/macros',recuperacao:'/recuperacao',diagnosticos:'/diagnosticos',saidas:'/saidas',settings:'/configuracoes',config:'/configuracoes',workspace:'/configuracoes?category=workspace',ext:'/central-saidas',iso:'/multicorder',replay:'/replay',replaysettings:'/replay?view=settings#replay-config',recset:'/gravar',streamset:'/transmitir',playout:'/playout',playlist:'/playout','playout-monitor':'/playout-monitor',rundown:'/rundown',retornos:'/retornos',blackbox:'/blackbox',preflight:'/preflight',modular:'/configuracoes?category=workspace',dsk:'/overlays',overlays:'/overlays',ptz:'/ptz',color:'/color'};
+  const panelPages={sobre:'/sobre.html',hub:'/hub','novo-projeto':'/novo-projeto/',audio:'/audio',audiobuses:'/audio?view=routing',datasources:'/dados',compositions:'/compor',calls:'/calls',macros:'/macros',recuperacao:'/recuperacao',diagnosticos:'/diagnosticos',saidas:'/saidas',settings:'/configuracoes',config:'/configuracoes',workspace:'/configuracoes?category=workspace',ext:'/central-saidas',iso:'/multicorder',replay:'/replay',replaysettings:'/replay?view=settings#replay-config',recset:'/gravar',streamset:'/transmitir',playout:'/playout',playlist:'/playout','playout-monitor':'/playout-monitor',rundown:'/rundown',retornos:'/retornos',blackbox:'/blackbox',preflight:'/preflight',modular:'/configuracoes?category=workspace',dsk:'/overlays',overlays:'/overlays',ptz:'/ptz',color:'/color',chroma:'/chroma',estudio:'/estudio',social:'/social'};
   // Windows that open at the size of the dialog they copy from the reference, instead of the large default.
-  const panelSizes={hub:[1100,760],replay:[1440,900],audio:[1360,850],audiobuses:[1360,850],settings:[1280,800],config:[1280,800],workspace:[1280,800],streamset:[980,760],calls:[1020,780],ext:[1240,860],recset:[920,660],iso:[1080,860],replaysettings:[1100,780],playout:[1180,820],playlist:[1180,820],'playout-monitor':[1024,600],rundown:[1100,720],retornos:[1160,800],blackbox:[1160,820],preflight:[1120,820],modular:[1280,800],dsk:[1280,800],overlays:[1280,800],ptz:[1280,800],color:[1440,900]};
-  const independentEditors=new Set(['sobre','hub','novo-projeto','datasources','compositions','calls','macros','recuperacao','diagnosticos','saidas','settings','add','layers','audioset','clocks','ext','iso','replay','replaysettings','playlist','playout','shortcuts','busman','recset','streamset','config','gcedit','presets','saveas','replayretention','rundown','retornos','blackbox','modular','dsk','overlays','ptz','color']);
+  const panelSizes={hub:[1100,760],replay:[1440,900],audio:[1360,850],audiobuses:[1360,850],settings:[1280,800],config:[1280,800],workspace:[1280,800],streamset:[980,760],calls:[1020,780],ext:[1240,860],recset:[920,660],iso:[1080,860],replaysettings:[1100,780],playout:[1180,820],playlist:[1180,820],'playout-monitor':[1024,600],rundown:[1100,720],retornos:[1160,800],blackbox:[1160,820],preflight:[1120,820],modular:[1280,800],dsk:[1280,800],overlays:[1280,800],ptz:[1280,800],color:[1440,900],chroma:[1280,800],estudio:[1360,850],social:[1280,820]};
+  const independentEditors=new Set(['sobre','hub','novo-projeto','datasources','compositions','calls','macros','recuperacao','diagnosticos','saidas','settings','add','layers','audioset','clocks','ext','iso','replay','replaysettings','playlist','playout','shortcuts','busman','recset','streamset','config','gcedit','replayretention','rundown','retornos','blackbox','modular','dsk','overlays','ptz','color','chroma','estudio','social']);
   
   async function launchPanel(id,arg){
-    const title=({ext:'Saídas externas',streamset:'Configurações de streaming',recset:'Configuração de gravação',iso:'MultiGravação','novo-projeto':'Novo projeto · prévia',datasources:'Fontes de dados',compositions:'Composições',calls:'Chamada de Vídeo',settings:'Configurações',workspace:'Configurações',replay:'Replay',replaysettings:'Configurações do Replay',list:'List',mixer:'Mixer de áudio',audio:'Áudio · Mixer e processamento',audiobuses:'Áudio · Barramentos e roteamento',playout:'Media & Playout Engine',playlist:'Media & Playout Engine','playout-monitor':'Monitor Remoto de Playout',rundown:'Roteiro de Produção (Rundown)',retornos:'Retornos de Externa SRT & N-1',blackbox:'Caixa-Preta de Incidentes',preflight:'Pre-Flight Checklist',modular:'Configurações',dsk:'DSK / Gráficos',overlays:'DSK / Gráficos',hub:'Hub de Produção',ptz:'PTZ',color:'Color Studio'})[id]||'3Mix Pro · '+id;
-    const url=panelPages[id]?replayUrl.replace(/\/api\/replay$/,panelPages[id])+(['compositions','audio'].includes(id)?'?input='+encodeURIComponent(arg||''):id==='settings'&&arg?'?category='+encodeURIComponent(arg):''):new URL('mesa.html?pop='+encodeURIComponent(id)+(arg?'&arg='+encodeURIComponent(arg):''),location.href).href;
+    const title=({ext:'Saídas externas',streamset:'Configurações de streaming',recset:'Configuração de gravação',iso:'MultiGravação','novo-projeto':'Novo projeto · prévia',datasources:'Fontes de dados',compositions:'Composições',calls:'Chamada de Vídeo',settings:'Configurações',workspace:'Configurações',replay:'Replay',replaysettings:'Configurações do Replay',list:'List',mixer:'Mixer de áudio',audio:'Áudio · Mixer e processamento',audiobuses:'Áudio · Barramentos e roteamento',playout:'Media & Playout Engine',playlist:'Media & Playout Engine','playout-monitor':'Monitor Remoto de Playout',rundown:'Roteiro de Produção (Rundown)',retornos:'Retornos de Externa SRT & N-1',blackbox:'Caixa-Preta de Incidentes',preflight:'Pre-Flight Checklist',modular:'Configurações',dsk:'DSK / Gráficos',overlays:'DSK / Gráficos',hub:'Hub de Produção',ptz:'PTZ',color:'Color Studio',chroma:'Chroma Key Studio',estudio:'Virtual Studio 2.5D',social:'Social & Moderação'})[id]||'3Mix Pro · '+id;
+    const url=panelPages[id]?replayUrl.replace(/\/api\/replay$/,panelPages[id])+(['compositions','audio'].includes(id)?'?input='+encodeURIComponent(arg||''):id==='chroma'&&arg?'?key='+encodeURIComponent(arg):id==='settings'&&arg?'?category='+encodeURIComponent(arg):''):new URL('mesa.html?pop='+encodeURIComponent(id)+(arg?'&arg='+encodeURIComponent(arg):''),location.href).href;
     const width = panelSizes[id]?.[0] || 1100;
     const height = panelSizes[id]?.[1] || 720;
     
@@ -4098,10 +4364,18 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   // Botões estáticos da topbar marcados com data-modulo: escondidos quando o módulo
   // correspondente está desligado em st.modulos. Nunca bloqueia clique (fail-open já
   // garantido por moduloAtivo); só não exibe o botão.
+  function updateTopProjectName() {
+    const el = $("top-project-name");
+    if (el) {
+      const cur = st.preset || "Produção";
+      el.textContent = cur;
+      el.title = `Projeto em uso: ${cur} (clique para alternar ou gerenciar)`;
+    }
+  }
   function renderModulos() {
     for (const el of document.querySelectorAll('[data-modulo]')) el.style.display = moduloAtivo(el.dataset.modulo) ? "" : "none";
   }
-  const renderAll = () => { renderTabs(); applyUiLayout(); renderTiles(); renderSideDock(); renderBot(); renderStat(); renderModulos(); };
+  const renderAll = () => { renderTabs(); applyUiLayout(); renderTiles(); renderSideDock(); renderBot(); renderStat(); renderModulos(); updateTopProjectName(); };
 
   function initSplitter() {
     const sp = $("side-panel"), splitter = $("splitter-side");
@@ -4274,8 +4548,9 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     if (Date.now() - mediaGeometryAt < 3000 || document.body.classList.contains('popup-mode')) return;
     mediaGeometryAt = Date.now();
     const native = await tryReq('CallVendorRequest', {vendorName:'freemix', requestType:'get_interface', requestData:{}});
-    const preview = native?.responseData?.layout?.find(w => w.name === 'preview' && w.visible);
-    document.body.classList.toggle('native-switcher',native?.responseData?.switcherLayoutVersion===2);
+    if (!native?.responseData) return;
+    const preview = native.responseData.layout?.find(w => w.name === 'preview' && w.visible);
+    document.body.classList.toggle('native-switcher', native.responseData.switcherLayoutVersion === 2);
     const row = $('media-row'), available = row.clientWidth - 10;
     // Use the native screen widths when this is the embedded desk. A separate browser uses the symmetric fallback.
     if (preview && available - 2 * preview.width >= 120 && available - 2 * preview.width <= 420) {

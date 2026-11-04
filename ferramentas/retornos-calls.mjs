@@ -29,7 +29,7 @@ export function mixReturn(packets,{own,sources,director,lease,targets,key,window
  return Buffer.concat([header,output]);
 }
 export class CallReturns{
- constructor(engine){this.videoController=null;this.videoExperimental=false;this.videoScope=null;this.engine=engine;this.clients=new Map();this.routes=[];this.sources=[];this.program=[];this.conference=true;this.token=randomBytes(32).toString('base64url');this.timer=null;this.busy=false;this.error=null;this.targets=new Set();this.lease=null;this.pending=[];this.cursor=null;}
+ constructor(engine){this.videoController=null;this.videoExperimental=false;this.videoScope=null;this.engine=engine;this.clients=new Map();this.routes=[];this.sources=[];this.program=[];this.conference=true;this.token=randomBytes(32).toString('base64url');this.timer=null;this.busy=false;this.error=null;this.targets=new Set();this.lease=null;this.pending=[];this.cursor=null;this.usesSharedRegistry=false;this._onRegistryPackets=(consumer,packets)=>{if(consumer==='calls'){this.pending.push(...packets);if(this.pending.length>1000)this.pending.splice(0,this.pending.length-1000);}};}
  status(){return this.routes.map(r=>{const c=this.clients.get(r.key);const stale=c&&Date.now()-(c.updated||0)>10000;return {key:r.key,stream:r.stream,video:r.video||'program',audio:r.audio||'program',audioSources:r.audioSources||[],gain:r.gain??1,publisher:stale?'stale':c?.status||'offline',peers:stale?0:c?.peers||0,peerConnectionVerified:!stale&&(c?.peers||0)>0,diagnostics:c?.diagnostics||null,videoTransport:c?.videoTransport||{mode:(r.video||'program')==='program'?'virtual-camera':'jpeg5',audioIncluded:false,avSyncProven:false},error:stale?'Publicador sem heartbeat':c?.error||this.error};});}
  configure({routes,sources,program,conference,experimentalContinuousVideo=this.videoExperimental,videoScope=this.videoScope}){this.routes=routes;this.sources=sources;this.program=program;this.conference=conference;this.videoExperimental=experimentalContinuousVideo===true;this.videoScope=videoScope;this.videoController?.setEnabled(this.videoExperimental);this.syncVideo();}
  // Default off. Future owner must pass an explicit persisted opt-in + scope; reading state never enables it.
@@ -38,10 +38,31 @@ export class CallReturns{
  sendVideoConfig(client){const route=this.routes.find(r=>r.key===client.key);if(!route||this.clients.get(client.key)!==client||client.ws.readyState!==1)return;const transport=client.videoTransport||{mode:(route.video||'program')==='program'?'virtual-camera':'jpeg5',audioIncluded:false,avSyncProven:false};const config={type:'config',stream:route.stream,video:route.video||'program',ice:this.engine.ice||null,videoTransport:transport};const identity=JSON.stringify({...config,videoTransport:{...transport,reason:undefined}});if(client.videoConfigIdentity===identity)return;client.videoConfigIdentity=identity;client.ws.send(JSON.stringify(config));}
  async start(){
   this.pending=[];this.cursor=null;
-  await this.engine.p.vendor('call_audio',{action:'configure',sources:this.sources.map(i=>({uuid:i.inputUuid}))},'freemix');
+  const reg=this.engine.p?.audioTapRegistry;
+  if(reg){
+   this.usesSharedRegistry=true;
+   reg.off('packets',this._onRegistryPackets);
+   reg.on('packets',this._onRegistryPackets);
+   await reg.claim('calls',this.sources.map(i=>i.inputUuid).filter(Boolean));
+  }else{
+   this.usesSharedRegistry=false;
+   await this.engine.p.vendor('call_audio',{action:'configure',sources:this.sources.map(i=>({uuid:i.inputUuid}))},'freemix');
+  }
   if(!this.timer){this.timer=setInterval(()=>this.pump(),50);this.timer.unref();}this.syncVideo();
  }
- async stop(){clearInterval(this.timer);this.timer=null;this.lease=null;this.targets.clear();for(const {ws} of this.clients.values())ws.close();this.clients.clear();const controller=this.videoController;this.videoController=null;await controller?.dispose();await this.engine.p.optional('CallVendorRequest',{vendorName:'freemix',requestType:'call_audio',requestData:{action:'stop'}});}
+ async stop(){
+  clearInterval(this.timer);this.timer=null;this.lease=null;this.targets.clear();
+  for(const {ws} of this.clients.values())ws.close();this.clients.clear();
+  const controller=this.videoController;this.videoController=null;await controller?.dispose();
+  const reg=this.engine.p?.audioTapRegistry;
+  if(reg&&this.usesSharedRegistry){
+   reg.off('packets',this._onRegistryPackets);
+   this.usesSharedRegistry=false;
+   await reg.release('calls').catch(()=>{});
+  }else{
+   await this.engine.p.optional('CallVendorRequest',{vendorName:'freemix',requestType:'call_audio',requestData:{action:'stop'}});
+  }
+ }
  accept(ws,key){
   if(!this.routes.some(r=>r.key===key)){ws.close();return;}
   this.clients.get(key)?.ws.close();const client={key,ws,status:'connecting',peers:0,updated:Date.now()};this.clients.set(key,client);
@@ -56,12 +77,14 @@ export class CallReturns{
  async pump(){
   if(this.busy)return;this.busy=true;
   try{
-   const batch=await this.engine.p.vendor('call_audio',{action:'drain'},'freemix');
+   if(!this.usesSharedRegistry){
+    const batch=await this.engine.p.vendor('call_audio',{action:'drain'},'freemix');
+    this.pending.push(...batch.packets||[]);if(this.pending.length>1000)this.pending.splice(0,this.pending.length-1000);
+   }
    const calls=new Set(this.routes.map(r=>r.key));
    const common=new Set(this.program.filter(key=>!calls.has(key)));
    if(this.conference)for(const key of calls)common.add(key);
    if(this.engine.director)common.add(this.engine.director.key);
-   this.pending.push(...batch.packets||[]);if(this.pending.length>1000)this.pending.splice(0,this.pending.length-1000);
    if(this.pending.length){
     const rate=this.pending[0].rate,block=Math.round(rate*.05);
     const pos=p=>typeof p.timestamp==='bigint'?Number(p.timestamp*BigInt(rate)/1000000000n):Math.round(Number(p.timestamp)*rate/1e9);

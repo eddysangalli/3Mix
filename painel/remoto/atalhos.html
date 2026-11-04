@@ -39,7 +39,13 @@
     <section class="p3-card">
       <div class="p3-card-head">
         <h2>Atalhos desta produção</h2>
-        <button type="button" id="new" class="primary">Novo atalho</button>
+        <div class="sc-actions">
+          <span id="transfer-msg" style="font-size:12px;color:#9bc3a1"></span>
+          <button type="button" id="import-shortcuts">Importar JSON</button>
+          <button type="button" id="export-shortcuts">Exportar JSON</button>
+          <button type="button" id="new" class="primary">Novo atalho</button>
+          <input id="import-shortcuts-file" type="file" accept="application/json,.json" hidden>
+        </div>
       </div>
       <div class="p3-table-wrap">
         <table>

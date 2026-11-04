@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>3Mix Crew</title>
+<link rel="stylesheet" href="3mix-grafite.css">
+<link rel="stylesheet" href="3mix-padrao.css">
+<style>
+  /* Mobile-first (celular do operador de câmera/repórter) — o padrão p3 já é responsivo
+     via grid auto-fit; aqui só o necessário para caber confortavelmente numa tela de
+     celular em pé, com o botão de PTT grande o bastante para o dedo (mínimo 56px). */
+  body.crew-page { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  .crew-main { max-width: 480px; margin: 0 auto; padding: 14px 14px calc(14px + env(safe-area-inset-bottom)); gap: 14px; }
+  .crew-escolha { display: flex; flex-direction: column; gap: 10px; }
+  .crew-escolha select { height: 44px; font-size: 15px; }
+
+  /* --- Pareamento QR (no computador do 3Mix) & Código PIN (no celular) --- */
+  .crew-qr-box { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .crew-qr-img { width: 148px; height: 148px; padding: 6px; background: #fff; border-radius: 6px; display: block; flex-shrink: 0; }
+  .crew-qr-info { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 180px; }
+  .crew-pin-badge { display: inline-flex; align-items: baseline; gap: 8px; padding: 6px 10px; background: var(--p3-field); border: 1px solid var(--p3-line); border-radius: 6px; }
+  .crew-pin-badge b { font-size: 20px; letter-spacing: 2px; color: #fff; font-family: Consolas, monospace; }
+  .crew-qr-url { font-size: 12px; color: var(--p3-accent); word-break: break-all; text-decoration: none; }
+  .crew-pair-form { display: flex; gap: 8px; align-items: center; }
+  .crew-pair-form input { flex: 1; height: 44px; font-size: 18px; letter-spacing: 2px; text-align: center; font-family: Consolas, monospace; }
+  .crew-pair-form button { height: 44px; padding: 0 18px; font-weight: 700; }
+
+  /* --- Tally --- */
+  .crew-tally-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
+  .crew-cam { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 64px; padding: 8px; border-radius: 6px; border: 2px solid var(--p3-line); background: var(--p3-panel); font-weight: 700; }
+  .crew-cam .n { font-size: 11px; color: var(--p3-dim); }
+  .crew-cam .nome { font-size: 13px; color: var(--p3-text); text-align: center; }
+  .crew-cam.program { border-color: var(--p3-pgm); background: #2a1512; box-shadow: 0 0 0 1px var(--p3-pgm) inset; }
+  .crew-cam.program .nome { color: #ffb4a8; }
+  .crew-cam.preview { border-color: var(--p3-pvw); background: #122a19; }
+  .crew-cam.preview .nome { color: #bdf3ce; }
+  .crew-cam.desconectado { opacity: .4; }
+
+  /* --- Intercom / PTT --- */
+  .crew-ptt-alvo { display: flex; flex-direction: column; gap: 8px; }
+  .crew-alvo-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
+  .crew-alvo { min-height: 44px; border-radius: 6px; border: 2px solid var(--p3-line); background: var(--p3-field); color: var(--p3-text); font-weight: 600; font-size: 13px; cursor: pointer; }
+  .crew-alvo.selected { border-color: var(--p3-accent); background: var(--p3-accent-soft); color: #fff; }
+  .crew-ptt-btn { height: 96px; border-radius: 12px; border: 3px solid var(--p3-line); background: var(--p3-panel); color: var(--p3-text); font-size: 20px; font-weight: 800; letter-spacing: .5px; cursor: pointer; user-select: none; }
+  .crew-ptt-btn.active { border-color: var(--p3-pgm); background: var(--p3-pgm); color: #fff; animation: crew-pulso 1s ease-in-out infinite; }
+  @keyframes crew-pulso { 50% { box-shadow: 0 0 0 8px rgba(176,42,31,.25); } }
+  .crew-ptt-btn:disabled { opacity: .4; cursor: default; animation: none; }
+  .crew-falando-lista { display: flex; flex-direction: column; gap: 4px; min-height: 20px; }
+  .crew-falando { font-size: 12px; color: var(--p3-dim); }
+  .crew-falando.director { color: #ffb4a8; font-weight: 700; }
+</style>
+</head>
+<body data-page="crew" class="p3 crew-page">
+<header class="p3-head">
+  <a href="/" title="3Mix"><img class="p3-logo" src="/img/3mix-logo.png" alt="3Mix"></a>
+  <h1>3Mix Crew</h1>
+  <span class="p3-flex"></span>
+  <span id="connection">Conectando…</span>
+</header>
+
+<main class="p3-main crew-main">
+  <!-- Pareamento por PIN: aparece somente em celular/tablet ainda não autorizado -->
+  <section class="p3-card" id="card-pair" hidden>
+    <div class="p3-card-head"><h2>Autorizar Dispositivo</h2></div>
+    <p class="p3-note">Digite o código exibido na tela do computador do 3Mix para liberar o Tally e Intercom neste aparelho.</p>
+    <form class="crew-pair-form" id="form-pair">
+      <input type="text" id="inp-pin" inputmode="numeric" autocomplete="one-time-code" maxlength="12" placeholder="Código PIN">
+      <button type="submit" class="p3-btn primary">Conectar</button>
+    </form>
+  </section>
+
+  <!-- QR Code Dedicado: aparece somente quando aberto no computador do 3Mix -->
+  <section class="p3-card" id="card-qr" hidden>
+    <div class="p3-card-head">
+      <h2>QR para Celular da Equipe</h2>
+      <select id="sel-rede-qr" style="height:28px;font-size:12px" hidden></select>
+    </div>
+    <div class="crew-qr-box">
+      <img class="crew-qr-img" id="crew-qr-img" alt="QR Code 3Mix Crew">
+      <div class="crew-qr-info">
+        <div class="crew-pin-badge"><span class="p3-note">Código PIN:</span><b id="crew-qr-pin">----</b></div>
+        <span class="p3-note" id="crew-qr-hint">Aponte a câmera do celular para abrir direto no 3Mix Crew.</span>
+        <a class="crew-qr-url" id="crew-qr-url" target="_blank" rel="noopener"></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="p3-card crew-escolha" id="escolha-identidade">
+    <div class="p3-card-head"><h2>Quem é você</h2></div>
+    <p class="p3-note">Escolhido uma vez por dispositivo; fica salvo neste celular.</p>
+    <select id="sel-membro"><option value="">Carregando…</option></select>
+  </section>
+
+  <section class="p3-card" id="card-tally" hidden>
+    <div class="p3-card-head"><h2>Tally</h2><span id="tally-destino" class="p3-note"></span></div>
+    <div class="crew-tally-grid" id="tally-grid"></div>
+  </section>
+
+  <section class="p3-card" id="card-intercom" hidden>
+    <div class="p3-card-head"><h2>Intercom</h2></div>
+    <div class="crew-ptt-alvo">
+      <span class="p3-note">Falar para:</span>
+      <div class="crew-alvo-lista" id="alvo-lista"></div>
+    </div>
+    <button type="button" class="crew-ptt-btn" id="btn-ptt" disabled>Segure para falar</button>
+    <div class="crew-falando-lista" id="falando-lista"></div>
+  </section>
+
+  <p id="erro" class="p3-note" role="alert" style="display:none;color:#ffb4a8"></p>
+</main>
+
+<script src="crew.js"></script>
+</body>
+</html>

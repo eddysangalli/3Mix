@@ -35,6 +35,7 @@ import { ReturnFeedManager } from './return-feed-producao.mjs';
 import { AudioDuckingEngine } from './audio-ducking-engine.mjs';
 import { RundownEngine } from './rundown-producao.mjs';
 import { PTZManager } from './ptz-manager.mjs';
+import { createStudioSocial } from './studio-social-engine.mjs';
 import { createHash } from 'node:crypto';
 import { basename } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -59,8 +60,8 @@ export class Production {
     this.projectIsolationHooks=installIsolationHooks(binding.gate,owners);
     return binding;
   }
-  constructor({root,panel,getObs,publish=()=>{},finalProgramGateQualified=false}) {
-    this.finalProgramGateQualified=finalProgramGateQualified===true; this.root=root; this.panel=panel; this.getObs=getObs; this.publish=publish; this.tail=Promise.resolve(); this.levels=new Map(); this.generation=0;
+  constructor({root,panel,getObs,publish=()=>{},publishRaw=null,finalProgramGateQualified=false}) {
+    this.finalProgramGateQualified=finalProgramGateQualified===true; this.root=root; this.panel=panel; this.getObs=getObs; this.publish=publish; this.publishRaw=publishRaw; this.broadcast=msg=>{if(typeof this.publishRaw==="function")this.publishRaw(msg);else if(typeof this.publish==="function")this.publish(msg);}; this.tail=Promise.resolve(); this.levels=new Map(); this.generation=0;
     // Módulos opcionais em standby: servidor-api.mjs substitui esta função pela leitura
     // real de modulos-config.mjs; por padrão (aqui e em qualquer outro host que não a
     // configure) todo módulo conta como ativo, preservando o comportamento de hoje.
@@ -82,6 +83,10 @@ export class Production {
     this.mixEffects=new MixEffectsEngine(this);
     this.outputEngine=new OutputEngine(this,this.mixEffects);this.audioRoutingEngine=new AudioRoutingEngine(this);this.overlayEngine=new OverlayEngine(this);
     this.gcCompatible=new GCCompatibleEngine(this);this.gcLibrary=new GCLibraryEngine(this);this.effectsEngine=new EffectsEngine(this);this.signalEngine=new SignalEngine(this);this.signalRegistry=new SignalRegistryEngine(this,this.mixEffects);this.patchRegistry=new PatchRegistryEngine(this);this.mixAudio=new MixAudioEngine(this);this.preflightEngine=new PreflightEngine(this);this.blackboxEngine=new IncidentBlackboxEngine(this);this.broadcastDelayEngine=new BroadcastDelayEngine(this);this.returnFeedManager=new ReturnFeedManager(this);this.audioDuckingEngine=new AudioDuckingEngine(this);this.rundownEngine=new RundownEngine(this);this.ptzManager=new PTZManager(this);
+    // Frente 3MIX STUDIO & SOCIAL: chroma, estudio virtual e social em um agregador próprio.
+    // Falha ao montar não derruba a mesa: as três trilhas ficam indisponíveis e o resto segue.
+    try{this.studioSocial=createStudioSocial(this);}catch(e){this.studioSocial=null;this.studioSocialError=e.message;}
+
   }
   req(type,data={}) { const obs=this.getObs(); if(!obs) throw new Error('Sem conexão com o motor 3Mix'); return obs.req(type,data); }
   async optional(type,data) { try { return await this.req(type,data); } catch { return null; } }
@@ -315,6 +320,7 @@ export class Production {
     if(this.privateSceneFingerprint!==sceneFingerprint){await this.inputEngine.prunePrivateScenes();this.privateSceneFingerprint=sceneFingerprint;}
     await this.queueEngine.setScope(this.scope);
     await this.controllerEngine.setScope(this.scope);
+    if(this.studioSocial)await this.studioSocial.setScope(this.scope).catch(e=>{this.studioSocialError=e.message;});
     await this.callEngine.setScope(this.scope);const callProgramNames=this.callEngine.individual?[...await this.visibleTree(sc.currentProgramSceneName)]:null;await this.callEngine.enforce({programNames:callProgramNames,inputSnapshot:ins.inputs});
     const audio=[],media=[];
     for(const inp of ins.inputs){

@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "3Mix Social Live Stream Capture",
+  "version": "1.0.0",
+  "description": "Captura em tempo real de chats ao vivo do YouTube e TikTok sem limites de cota para o switcher broadcast 3Mix.",
+  "icons": {
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "*://*.youtube.com/*",
+    "*://*.tiktok.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.youtube.com/live_chat*",
+        "*://*.youtube.com/watch*"
+      ],
+      "js": ["content-youtube.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "*://*.tiktok.com/@*/live*",
+        "*://*.tiktok.com/live*"
+      ],
+      "js": ["content-tiktok.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "3Mix Social Stream Capture"
+  }
+}
+

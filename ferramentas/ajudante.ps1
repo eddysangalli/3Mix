@@ -8,7 +8,7 @@ $cfg = Join-Path $root 'config\obs-studio'
 $scenes = Join-Path $cfg 'basic\scenes'
 $utf8 = New-Object System.Text.UTF8Encoding $false
 $seen = 0
-function Running { [bool](Get-Process obs64, FreeMix -ErrorAction SilentlyContinue | Where-Object { $_.Path -like "$root\*" }) }
+function Running { [bool](Get-Process obs64, FreeMix, 3Mix -ErrorAction SilentlyContinue | Where-Object { $_.Path -like "$root\*" }) }
 $deadline = (Get-Date).AddSeconds(90)
 while (-not (Running) -and (Get-Date) -lt $deadline) { Start-Sleep -Milliseconds 500 }
 

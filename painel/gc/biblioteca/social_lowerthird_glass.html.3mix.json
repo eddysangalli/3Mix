@@ -1,0 +1,28 @@
+{
+  "freemixCompatibility": {
+    "version": 1,
+    "animation": true,
+    "clock": false,
+    "style": true,
+    "styleFields": [
+      {
+        "key": "accent",
+        "label": "Cor do Destaque",
+        "type": "color",
+        "default": "#2f6fed"
+      },
+      {
+        "key": "background",
+        "label": "Cor do Painel",
+        "type": "color",
+        "default": "#12161c"
+      }
+    ]
+  },
+  "title": "3Mix Social · Lower Third Glass (DSK 1-4)",
+  "category": "Social",
+  "thumbnail": "biblioteca/thumbnails/social_lowerthird_glass.png",
+  "description": "Lower Third broadcast estilo Glassmorphism com desfoque de fundo e WebSocket direto para o evento SOCIAL_ACTIVATE nos DSKs 1 a 4.",
+  "author": "3Mix Pro Suite",
+  "version": "1.0.0"
+}

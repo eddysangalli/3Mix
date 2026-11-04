@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>3Mix · Lower Third Glass (DSK 1-4)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Segoe UI', -apple-system, Roboto, sans-serif;
+    user-select: none;
+  }
+
+  /* Posicionamento Broadcast Safe Area (1080p) */
+  #lowerthird-wrapper {
+    position: absolute;
+    bottom: 64px;
+    left: 80px;
+    max-width: 780px;
+    min-width: 440px;
+    perspective: 1000px;
+  }
+
+  /* Card com Efeito Glassmorphism Broadcast */
+  .social-card {
+    background: rgba(18, 22, 28, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-left: 6px solid #2f6fed; /* Cor dinâmica da rede */
+    border-radius: 8px;
+    padding: 16px 20px;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.75), 0 2px 10px rgba(0, 0, 0, 0.5);
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    /* Estado oculto */
+    opacity: 0;
+    transform: translateY(40px) scale(0.96);
+    transition: opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1), transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
+
+  .social-card.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+
+  /* Cabeçalho: Avatar, Autor, Rede e Doação */
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .author-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #2a2e37;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    object-fit: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .names {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .author-name {
+    font-size: 16px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.2px;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  }
+
+  .author-handle {
+    font-size: 12px;
+    font-weight: 600;
+    color: #a0a6b5;
+  }
+
+  /* Badges de Rede e Doação */
+  .badges-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .network-badge {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #ffffff;
+    background: #2f6fed;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  }
+
+  .donation-badge {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11.5px;
+    font-weight: 800;
+    color: #111;
+    background: linear-gradient(135deg, #ffd700, #ffae00);
+    box-shadow: 0 2px 8px rgba(255, 174, 0, 0.5);
+    display: none;
+    animation: pulse 1.5s infinite alternate;
+  }
+  @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.04); } }
+
+  /* Corpo do Comentário */
+  .comment-body {
+    font-size: 15px;
+    line-height: 1.45;
+    color: #f0f3f8;
+    font-weight: 500;
+    word-break: break-word;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+  }
+</style>
+</head>
+<body>
+
+<div id="lowerthird-wrapper">
+  <div class="social-card" id="social-card">
+    <div class="card-header">
+      <div class="author-info">
+        <div class="avatar" id="avatar-box">3M</div>
+        <div class="names">
+          <span class="author-name" id="author-name">Nome do Telespectador</span>
+          <span class="author-handle" id="author-handle">@usuario</span>
+        </div>
+      </div>
+      <div class="badges-row">
+        <span class="donation-badge" id="donation-badge">R$ 50,00</span>
+        <span class="network-badge" id="network-badge">YOUTUBE</span>
+      </div>
+    </div>
+    <div class="comment-body" id="comment-text">
+      Comentário transmitido em tempo real pelo módulo 3Mix Social no DSK.
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const card = $('social-card');
+  const authorName = $('author-name');
+  const authorHandle = $('author-handle');
+  const commentText = $('comment-text');
+  const networkBadge = $('network-badge');
+  const donationBadge = $('donation-badge');
+  const avatarBox = $('avatar-box');
+
+  const NETWORK_COLORS = {
+    youtube: '#ff0000',
+    twitch: '#9146ff',
+    tiktok: '#00f2fe',
+    instagram: '#e1306c',
+    twitter: '#1da1f2',
+    x: '#1da1f2',
+    manual: '#2f6fed'
+  };
+
+  function updateContent(item) {
+    if (!item) return;
+
+    authorName.textContent = item.author || 'Anônimo';
+    authorHandle.textContent = item.handle ? (item.handle.startsWith('@') ? item.handle : '@' + item.handle) : ('@' + (item.author || ''));
+    commentText.textContent = item.text || '';
+
+    // Rede Social & Cor
+    const net = (item.network || 'manual').toLowerCase();
+    const netColor = item.color || NETWORK_COLORS[net] || '#2f6fed';
+    networkBadge.textContent = net.toUpperCase();
+    networkBadge.style.backgroundColor = netColor;
+    card.style.borderLeftColor = netColor;
+
+    // Doação / Super Chat
+    if (item.donation) {
+      donationBadge.textContent = item.donation;
+      donationBadge.style.display = 'inline-block';
+    } else {
+      donationBadge.style.display = 'none';
+    }
+
+    // Avatar
+    if (item.avatar) {
+      avatarBox.innerHTML = `<img src="${item.avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.remove()">`;
+    } else {
+      const initial = (item.author || '3M').charAt(0).toUpperCase();
+      avatarBox.textContent = initial;
+      avatarBox.style.backgroundColor = netColor;
+    }
+  }
+
+  function show(on) {
+    if (on) {
+      card.classList.add('visible');
+    } else {
+      card.classList.remove('visible');
+    }
+  }
+
+  // --- Conexão WebSocket Direta com 3Mix ---
+  let ws = null;
+  function connectWs() {
+    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = location.host || '127.0.0.1:3000';
+    const url = `${proto}//${host}/ws`;
+
+    ws = new WebSocket(url);
+
+    ws.onmessage = ev => {
+      try {
+        const msg = JSON.parse(ev.data);
+        if (msg.type === 'SOCIAL_ACTIVATE' || msg.event === 'SOCIAL_ACTIVATE' || msg.action === 'social_take') {
+          updateContent(msg.item);
+          show(true);
+        } else if (msg.type === 'SOCIAL_CLEAR' || msg.event === 'SOCIAL_CLEAR' || msg.action === 'social_clear') {
+          show(false);
+        }
+      } catch {}
+    };
+
+    ws.onclose = () => {
+      setTimeout(connectWs, 2000);
+    };
+
+    ws.onerror = () => {
+      ws.close();
+    };
+  }
+
+  // Conecta ao carregar
+  connectWs();
+
+  // Compatibilidade com eventos do OBS Studio Browser Source
+  window.addEventListener('obsSourceActiveChanged', e => {
+    if (e.detail && !e.detail.active) {
+      show(false);
+    }
+  });
+
+  // Compatibilidade com motor legado freemix-gc
+  window.addEventListener('freemix-gc', e => {
+    const d = e.detail;
+    if (d?.action === 'social_update' && d?.item) {
+      updateContent(d.item);
+      show(true);
+    } else if (d?.action === 'social_clear') {
+      show(false);
+    }
+  });
+})();
+</script>
+</body>
+</html>
+

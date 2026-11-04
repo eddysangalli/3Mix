@@ -6,6 +6,12 @@ import {validateCallIce,callIceSummary} from './calls-ice.mjs';
 const tracks=on=>Object.fromEntries([1,2,3,4,5,6].map(n=>[n===6?'6':String(n),n===6&&on]));
 // The call id is what the guest link carries ("password" of the call): unguessable, letters and digits only.
 const newCallId=()=>'fm'+randomUUID().replaceAll('-','').slice(0,12);
+export const CALL_AUDIO_SPECS=Object.freeze({
+ gate:{kind:'noise_gate_filter',name:'3Mix Audio - Gate',settings:{open_threshold:-26,close_threshold:-32,attack_time:25,hold_time:200,release_time:150}},
+ compressor:{kind:'compressor_filter',name:'3Mix Audio - Compressor',settings:{ratio:4,threshold:-18,attack_time:6,release_time:60,output_gain:0,sidechain_source:'none'}},
+ agc:{kind:'compressor_filter',name:'3Mix Call - AGC',settings:{ratio:3,threshold:-24,attack_time:12,release_time:250,output_gain:6,sidechain_source:'none'}},
+ limiter:{kind:'limiter_filter',name:'3Mix Audio - Limiter',settings:{threshold:-3,release_time:60}}
+});
 export function validateReturnRoute(data,{guests,inputs,audio,director}){
  const route=guests.find(g=>g.key===data.key);if(!route)throw Error('Convidado inválido');
  const video=data.video||'program',mode=data.audio||'program',gain=Number(data.gain??1);
@@ -65,13 +71,36 @@ export class CallEngine{
  async route(on){const s=await this.source();if(!s){this.lease=null;return;}await this.p.req('SetInputMute',{inputName:s.inputName,inputMuted:true});await this.p.req('SetInputAudioMonitorType',{inputName:s.inputName,monitorType:'OBS_MONITORING_TYPE_NONE'});await this.p.req('SetInputAudioTracks',{inputName:s.inputName,inputAudioTracks:tracks(on&&!this.individual)});if(on)await this.p.req('SetInputMute',{inputName:s.inputName,inputMuted:false});}
  async enforce({programNames=null,inputSnapshot=null}={}){if(this.individual){const names=programNames??this.p.state.inputs.find(i=>i.name===this.p.state.program)?.sources??[];this.returns.program=this.returns.sources.filter(i=>names.includes(i.inputName)&&i.inputUuid!==this.director?.key&&!/^3Mix (?:Retorno|N1)/.test(i.inputName)&&(!inputSnapshot||inputSnapshot.some(s=>s.inputUuid===i.inputUuid&&s.inputName===i.inputName))).map(i=>i.inputUuid);}const source=await this.source();if(!source)return;const r=await this.p.req('GetInputAudioTracks',{inputName:source.inputName}),mute=await this.p.req('GetInputMute',{inputName:source.inputName}),monitor=await this.p.req('GetInputAudioMonitorType',{inputName:source.inputName});const on=!!this.lease&&Date.now()<this.deadline;const expected=tracks(on&&!this.individual);if(Object.entries(expected).some(([k,v])=>r.inputAudioTracks[k]!==v)||mute.inputMuted===on||monitor.monitorType!=='OBS_MONITORING_TYPE_NONE')await this.serial(()=>this.route(on));}
  async release(){this.lease=null;this.deadline=0;this.returns.lease=null;this.returns.targets.clear();if(this.director)await this.p.optional('CallVendorRequest',{vendorName:'freemix',requestType:'talkback',requestData:{action:'stop'}});await this.serial(()=>this.route(false));}
- async summary(inputs){const people=this.p.dataSources?.people?.()||[];const ins=(await this.p.req('GetInputList')).inputs,guests=[];for(const i of ins.filter(i=>i.inputKind==='browser_source')){const settings=(await this.p.req('GetInputSettings',{inputName:i.inputName})).inputSettings;let url;try{url=new URL(settings.url);}catch{continue;}if(!['vdo.ninja','www.vdo.ninja'].includes(url.hostname)||!url.searchParams.get('view'))continue;const id=url.searchParams.get('view');if(!/^[A-Za-z0-9_]{1,100}$/.test(id))continue;const person=people.find(p=>p.callKey===i.inputUuid);guests.push({key:i.inputUuid,name:i.inputName,...(person?{person:{sourceId:person.sourceId,name:person.name,updatedAt:person.updatedAt}}:{}),entries:inputs.filter(e=>e.sources.includes(i.inputName)).map(e=>e.key),id,guest:'https://vdo.ninja/?push='+id+'&webcam&label=Convidado&view='+id+'_ret'});}
+ async summary(inputs){const people=this.p.dataSources?.people?.()||[];const ins=(await this.p.req('GetInputList')).inputs,guests=[];for(const i of ins.filter(i=>i.inputKind==='browser_source')){const settings=(await this.p.req('GetInputSettings',{inputName:i.inputName})).inputSettings;let url;try{url=new URL(settings.url);}catch{continue;}if(!['vdo.ninja','www.vdo.ninja'].includes(url.hostname)||!url.searchParams.get('view'))continue;const id=url.searchParams.get('view');if(!/^[A-Za-z0-9_]{1,100}$/.test(id))continue;const person=people.find(p=>p.callKey===i.inputUuid);const flist=(await this.p.optional('GetSourceFilterList',{sourceName:i.inputName}))?.filters||[];const processing=Object.fromEntries(Object.entries(CALL_AUDIO_SPECS).map(([k,spec])=>[k,flist.some(f=>f.filterName===spec.name&&f.filterEnabled===true)]));guests.push({key:i.inputUuid,name:i.inputName,...(person?{person:{sourceId:person.sourceId,name:person.name,updatedAt:person.updatedAt}}:{}),entries:inputs.filter(e=>e.sources.includes(i.inputName)).map(e=>e.key),id,processing,guest:'https://vdo.ninja/?push='+id+'&webcam&label=Convidado&view='+id+'_ret'});}
   for(const guest of guests){const route=this.returnRoutes.find(r=>r.key===guest.key);if(route){guest.returnStream=route.stream;guest.route={video:route.video||'program',audio:route.audio||'program',audioSources:route.audioSources||[],gain:route.gain??1};guest.guest='https://vdo.ninja/?push='+guest.id+'&webcam&label=Convidado&view='+route.stream;}}
   const ret=await this.p.optional('GetInputSettings',{inputName:'3Mix Retorno'}),filter=await this.p.optional('GetSourceFilter',{sourceName:'3Mix Bus B',filterName:'3Mix Retorno (áudio)'}),id=/[?&]push=([A-Za-z0-9_]+)_ret/.exec(ret?.inputSettings?.url||'')?.[1];
   const ready=!!id&&filter?.filterEnabled===true&&!!filter.filterSettings?.device&&/[?&]ad=CABLE_Output/.test(ret.inputSettings.url);
   const native=await this.p.optional('CallVendorRequest',{vendorName:'freemix',requestType:'talkback',requestData:{action:'state'}}),mic=await this.source();const returns=this.returns.status();for(const guest of guests){const r=returns.find(r=>r.key===guest.key);guest.connected=r?.peerConnectionVerified===true;guest.transport={state:guest.connected?'connected':'disconnected',evidence:'return-peer',rttMs:r?.diagnostics?.rttMs??null};}return {ice:callIceSummary(this.ice),guests,rapidTargets:this.rapidTargets??null,returnId:id||null,returnAudio:ready,nativeWatchdog:!!native?.responseData?.watchdog,director:mic?{key:mic.inputUuid,name:mic.inputName}:null,talking:!!native?.responseData?.talking,capability:this.individual?'individual-PCM-WebRTC':'shared-return-B',conference:this.conference,returns,peerConnectionVerified:returns.some(r=>r.peerConnectionVerified),experimentalContinuousVideo:this.experimentalContinuousVideo===true,videoReturnAvSyncProven:false,videoReturnLimit:this.experimentalContinuousVideo?'Entrada/composição: captura contínua experimental640×360; requer navegador compatível, até2fontes; sincronismo A/V ainda não homologado. Fallback JPEG até5fps. Programa: câmera virtual.':'Programa: câmera virtual; entrada/composição: JPEG local640×360 até5fps',audioChoices:ins.filter(i=>this.p.state.audioInputs.some(a=>a.name===i.inputName&&!a.bus)&&i.inputUuid!==mic?.inputUuid&&!/^3Mix (?:Retorno|N1)/.test(i.inputName)).map(i=>({key:i.inputUuid,name:i.inputName}))};
  }
+ async applyAudioFilter(sourceName,key,enabled){
+  const spec=CALL_AUDIO_SPECS[key];if(!spec)throw Error('Processamento de áudio inválido');
+  if(typeof enabled!=='boolean')throw Error('Informe ligado ou desligado para o filtro de voz');
+  const list=(await this.p.req('GetSourceFilterList',{sourceName}))?.filters||[];
+  const existing=list.find(f=>f.filterName===spec.name);
+  if(existing&&existing.filterKind!==spec.kind)throw Error('Nome de filtro já em uso por outro tipo');
+  if(!existing){
+   if(!enabled)return;
+   await this.p.req('CreateSourceFilter',{sourceName,filterName:spec.name,filterKind:spec.kind,filterSettings:spec.settings});
+  }
+  await this.p.req('SetSourceFilterEnabled',{sourceName,filterName:spec.name,filterEnabled:enabled});
+ }
  async execute(action,d){
+  if(action==='call_audio_processing'){
+   const guest=(await this.summary(this.p.state.inputs)).guests.find(g=>g.key===d.key);if(!guest)throw Error('Convidado inválido');
+   const enabled=d.enabled!==false;
+   if(d.preset==='podcast'){
+    for(const k of ['gate','compressor','agc','limiter'])await this.applyAudioFilter(guest.name,k,enabled);
+   }else{
+    await this.applyAudioFilter(guest.name,d.filter,d.enabled);
+   }
+   const flist=(await this.p.optional('GetSourceFilterList',{sourceName:guest.name}))?.filters||[];
+   return {key:guest.key,processing:Object.fromEntries(Object.entries(CALL_AUDIO_SPECS).map(([k,spec])=>[k,flist.some(f=>f.filterName===spec.name&&f.filterEnabled===true)]))};
+  }
   if(action==='call_ice_import'||action==='call_ice_reset'){const next=action==='call_ice_import'?validateCallIce(d.document):null;await this.release();await this.returns.stop();this.individual=false;this.ice=next;await this.save();return {ice:callIceSummary(next),requiresPrepare:true};}
 
   if(action==='call_return_route'){await this.release();const guests=(await this.summary(this.p.state.inputs)).guests,all=(await this.p.req('GetInputList')).inputs;const next=validateReturnRoute(d,{guests,inputs:this.p.state.inputs,audio:all.filter(i=>this.p.state.audioInputs.some(a=>a.name===i.inputName&&!a.bus)),director:this.director?.key});const previous=this.returnRoutes.map(r=>({...r}));let route=this.returnRoutes.find(r=>r.key===d.key);if(!route){route={key:d.key,stream:'FMX'+randomUUID().replaceAll('-','')};this.returnRoutes.push(route);}Object.assign(route,next);try{await this.save();if(this.individual)await this.prepareReturns();}catch(e){this.returnRoutes=previous;await this.save();throw e;}return;}

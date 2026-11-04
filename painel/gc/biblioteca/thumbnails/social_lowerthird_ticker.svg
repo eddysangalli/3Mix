@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-label="3Mix Social · Lower Third Ticker (DSK 1-4)">
+  <g font-family="Segoe UI, -apple-system, BlinkMacSystemFont, sans-serif">
+    <!-- Ticker Bar inferior -->
+    <rect x="0" y="980" width="1920" height="100" fill="#0d141e" opacity="0.98"/>
+    <line x1="0" y1="980" x2="1920" y2="980" stroke="#e74c3c" stroke-width="4"/>
+    <!-- Ticker Badge YouTube -->
+    <rect x="0" y="980" width="260" height="100" fill="#e74c3c"/>
+    <text x="130" y="1025" font-size="28" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="1">YOUTUBE</text>
+    <text x="130" y="1058" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="0.9">COMENTÁRIOS AO VIVO</text>
+    <!-- Ticker Text Content -->
+    <text x="290" y="1042" font-size="30" font-weight="800" fill="#feca57">@mariana_souza:</text>
+    <text x="590" y="1042" font-size="28" font-weight="500" fill="#ffffff">Parabéns pelo estúdio virtual e pelo chroma key ao vivo! Ficou cinematográfico.</text>
+    <!-- Badge DSK -->
+    <rect x="1760" y="1005" width="120" height="34" rx="4" fill="#1f7233"/>
+    <text x="1820" y="1028" font-size="16" font-weight="900" fill="#ffffff" text-anchor="middle">DSK TICKER</text>
+  </g>
+</svg>

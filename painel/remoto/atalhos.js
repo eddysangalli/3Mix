@@ -259,3 +259,102 @@ E('osc-configure').onclick = () => FreeMixControllers.command('controller_osc_co
 E('osc-start').onclick = () => FreeMixControllers.command('controller_osc_start').catch(() => {});
 E('osc-stop').onclick = () => FreeMixControllers.command('controller_osc_stop').catch(() => {});
 E('connect-midi-feedback').onclick = () => E('connect-midi').onclick();
+
+const sayTransfer = (msg, isErr = false) => {
+  const el = E('transfer-msg');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = isErr ? '#ffb4a8' : '#9bc3a1';
+};
+
+const triggerKeyOf = (t) => !t ? '' : JSON.stringify(t.type === 'keyboard'
+  ? { type: t.type, code: t.code, ctrl: !!t.ctrl, alt: !!t.alt, shift: !!t.shift, meta: !!t.meta }
+  : { type: t.type, deviceId: t.deviceId, channel: t.channel, message: t.message, number: t.number });
+
+if (E('export-shortcuts')) {
+  E('export-shortcuts').onclick = () => {
+    const inputMap = new Map((state.inputs || []).map((i) => [i.key, i.name]));
+    const macroMap = new Map((state.macros?.items || []).map((m) => [m.id, m.name]));
+    const items = (state.controllers?.items || []).map((item) => {
+      const copy = structuredClone(item);
+      const d = copy.target?.data || {};
+      if (d.input && inputMap.has(d.input)) d.inputName = inputMap.get(d.input);
+      if (copy.target?.action === 'macro_run' && d.id && macroMap.has(d.id)) d.macroName = macroMap.get(d.id);
+      return copy;
+    });
+    const payload = {
+      format: '3Mix Shortcuts Bundle',
+      schema: 1,
+      exportedAt: new Date().toISOString(),
+      preset: state.preset || '',
+      controllers: {
+        items,
+        osc: state.controllers?.osc ? { port: state.controllers.osc.port } : { port: 19120 },
+      },
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url;
+    a.download = '3Mix-atalhos-' + new Date().toISOString().slice(0, 10) + '.json';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+    sayTransfer(items.length + (items.length === 1 ? ' atalho exportado.' : ' atalhos exportados.'));
+  };
+}
+
+if (E('import-shortcuts') && E('import-shortcuts-file')) {
+  E('import-shortcuts').onclick = () => { E('import-shortcuts-file').value = ''; E('import-shortcuts-file').click(); };
+  E('import-shortcuts-file').onchange = async () => {
+    const file = E('import-shortcuts-file').files?.[0];
+    if (!file) return;
+    try {
+      const doc = JSON.parse(await file.text());
+      const list = doc?.controllers?.items || (Array.isArray(doc?.items) ? doc.items : null);
+      if (!Array.isArray(list)) throw Error('O arquivo JSON não contém atalhos do 3Mix.');
+      const inputs = state.inputs || [];
+      const macros = state.macros?.items || [];
+      const resolveInput = (key, name) => {
+        if (key && inputs.some((i) => i.key === key)) return key;
+        if (name) {
+          const hit = inputs.find((i) => String(i.name || '').toLowerCase() === String(name).toLowerCase());
+          if (hit) return hit.key;
+        }
+        return key || '';
+      };
+      if (doc?.controllers?.osc?.port) {
+        try { await FreeMixControllers.command('controller_osc_configure', { port: Number(doc.controllers.osc.port) }); } catch {}
+      }
+      let count = 0;
+      for (const item of list) {
+        if (!item?.trigger || !item?.target?.action) continue;
+        const existing = (state.controllers?.items || []).find((x) => x.id === item.id || triggerKeyOf(x.trigger) === triggerKeyOf(item.trigger));
+        const target = structuredClone(item.target);
+        if (target.data) {
+          if (target.data.input || target.data.inputName) {
+            target.data.input = resolveInput(target.data.input, target.data.inputName);
+            delete target.data.inputName;
+          }
+          if (target.action === 'macro_run') {
+            if (!macros.some((m) => m.id === target.data.id) && target.data.macroName) {
+              const mHit = macros.find((m) => m.name === target.data.macroName);
+              if (mHit) target.data.id = mHit.id;
+            }
+            delete target.data.macroName;
+          }
+        }
+        await FreeMixControllers.command('controller_save', {
+          ...(existing ? { id: existing.id } : {}),
+          name: item.name,
+          trigger: item.trigger,
+          target,
+          enabled: item.enabled !== false,
+          midiFeedback: item.midiFeedback || null,
+        });
+        count++;
+      }
+      sayTransfer(count + (count === 1 ? ' atalho importado.' : ' atalhos importados.'));
+    } catch (e) {
+      sayTransfer(e.message, true);
+    }
+  };
+}

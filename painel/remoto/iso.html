@@ -69,6 +69,8 @@
   .iso-cell-state .ok { color: #8fd6a9; }
   .iso-cell-state .err { color: #ffb3a9; }
   .iso-file { display: block; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #9fa9b4; font-size: 10.5px; }
+  .iso-disk-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; color: #70d6ff; background: #132230; border: 1px solid #1f4260; border-radius: 3px; padding: 1px 5px; margin-top: 3px; }
+  .iso-disk-collision { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; color: #ffbe76; background: #332011; border: 1px solid #663e1e; border-radius: 3px; padding: 1px 5px; margin-top: 3px; }
   .iso-error { display: flex; align-items: center; gap: 6px; color: #ffb3a9; font-size: 10.5px; }
   .iso-error button { height: 22px; padding: 0 7px; background: #3a2222; border: 1px solid #7a3a3a; border-radius: 3px; color: #ffc9c2; font-size: 10px; cursor: pointer; white-space: nowrap; }
   .iso-summary { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 11px; color: #a5a5a5; }
@@ -100,9 +102,27 @@
       <div class="iso-global">
         <label class="iso-field"><span>Formato</span>
           <select id="iso-format">
-            <option value="mpegts">MPEG-TS · tolerante</option>
-            <option value="mkv">MKV · multi-trilhas</option>
+            <option value="mpegts">MPEG-TS · tolerante a falhas</option>
+            <option value="mkv">MKV · multi-trilhas aberto</option>
             <option value="mp4_safe">MP4 seguro · MKV + remux</option>
+            <option value="mxf">MXF OP1a · Broadcast (DNxHD / XDCAM)</option>
+            <option value="mov">QuickTime MOV · NLE (ProRes / DNxHD)</option>
+          </select>
+        </label>
+        <label class="iso-field" id="iso-field-profile"><span>Perfil Broadcast</span>
+          <select id="iso-broadcast-profile">
+            <option value="">Automático pelo formato</option>
+            <option value="xdcam_hd422">Sony XDCAM HD422 (50 Mbps 4:2:2)</option>
+            <option value="dnxhd_145">Avid DNxHD 145 / SQ (145 Mbps 4:2:2)</option>
+            <option value="dnxhd_220">Avid DNxHD 220 / HQ (220 Mbps 4:2:2)</option>
+            <option value="dnxhr_444">Avid DNxHR 444 (440 Mbps 10-bit 4:4:4)</option>
+            <option value="prores_422">Apple ProRes 422 (147 Mbps 10-bit)</option>
+            <option value="prores_hq">Apple ProRes 422 HQ (220 Mbps 10-bit)</option>
+            <option value="h264_broadcast">H.264 Broadcast CBR (50 Mbps)</option>
+            <option value="h264_hq">H.264 Alta Qualidade (CRF 18 / ~20 Mbps)</option>
+            <option value="h264_default">H.264 Padrão (CRF 23 / ~12 Mbps)</option>
+            <option value="hevc_default">HEVC / H.265 Eficiente (~10 Mbps)</option>
+            <option value="av1_default">AV1 Broadcast (~8 Mbps)</option>
           </select>
         </label>
         <label class="iso-field"><span>Codificador</span><select id="iso-encoder"><option value="default">H.264 CPU (padrão)</option></select></label>
@@ -124,7 +144,7 @@
           <span class="iso-folder"><input id="iso-directory" maxlength="500" placeholder="Vazio: pasta do perfil"><button id="iso-browse" type="button">Procurar…</button></span>
         </label>
       </div>
-      <p class="iso-help" id="iso-format-help">MPEG-TS é tolerante a quedas. MKV aceita várias trilhas. MP4 seguro grava em MKV e finaliza em MP4 ao parar.</p>
+      <p class="iso-help" id="iso-format-help">MPEG-TS é tolerante a quedas. MKV aceita várias trilhas. MP4 seguro grava em MKV e finaliza em MP4 ao parar. MXF OP1a grava no padrão broadcast de emissoras (DNxHD / XDCAM). QuickTime MOV grava direto para NLE (ProRes / DNxHD).</p>
       <p class="iso-help" id="iso-audio-help"></p>
     </section>
 
@@ -136,6 +156,8 @@
         <button id="iso-clear" type="button">Limpar seleção</button>
         <span class="iso-count" id="iso-count">0 selecionadas</span>
       </div>
+      <div id="iso-disk-summary" class="iso-help" style="margin:4px 0 2px" hidden></div>
+      <div id="iso-throughput-telemetry" class="iso-help" style="margin:2px 0 4px; color:#70d6ff;" hidden></div>
       <div class="iso-table-wrap">
         <table class="iso-table" aria-label="Entradas da multigravação">
           <thead><tr>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>3Mix · Lower Third Ticker News (DSK 1-4)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Segoe UI', -apple-system, Roboto, sans-serif;
+    user-select: none;
+  }
+
+  /* Full Width Ticker no rodapé */
+  #ticker-wrapper {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 72px;
+    display: flex;
+    flex-direction: column;
+
+    opacity: 0;
+    transform: translateY(100%);
+    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
+
+  #ticker-wrapper.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  /* Barra de Topo do Ticker: Tag AO VIVO e Rede */
+  .ticker-top-bar {
+    height: 22px;
+    background: #101216;
+    display: flex;
+    align-items: center;
+    padding: 0 40px;
+    gap: 16px;
+    border-top: 2px solid #2f6fed;
+  }
+
+  .tag-live {
+    font-size: 10px;
+    font-weight: 800;
+    color: #ff3333;
+    letter-spacing: 0.8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .tag-live::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #ff3333;
+    display: inline-block;
+    animation: blink 1s infinite alternate;
+  }
+  @keyframes blink { from { opacity: 0.4; } to { opacity: 1; } }
+
+  .network-tag {
+    font-size: 10px;
+    font-weight: 700;
+    color: #fff;
+    text-transform: uppercase;
+    background: #2f6fed;
+    padding: 1px 6px;
+    border-radius: 2px;
+  }
+
+  /* Barra Principal do Ticker */
+  .ticker-main-bar {
+    flex: 1;
+    background: rgba(18, 22, 28, 0.95);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    padding: 0 40px;
+    gap: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .author-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 4px 12px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .author-name {
+    font-size: 15px;
+    font-weight: 800;
+    color: #ffcc00;
+  }
+
+  .author-handle {
+    font-size: 12px;
+    color: #a0a6b5;
+  }
+
+  .comment-content {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+  }
+
+  .donation-tag {
+    background: #ffd700;
+    color: #000;
+    font-weight: 800;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 3px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="ticker-wrapper">
+  <div class="ticker-top-bar" id="ticker-top">
+    <span class="tag-live">AO VIVO</span>
+    <span class="network-tag" id="net-tag">YOUTUBE</span>
+  </div>
+  <div class="ticker-main-bar">
+    <div class="author-badge">
+      <span class="author-name" id="author-name">Autor</span>
+      <span class="author-handle" id="author-handle">@handle</span>
+    </div>
+    <span class="donation-tag" id="donation-tag">R$ 20,00</span>
+    <div class="comment-content" id="comment-text">Mensagem em tempo real via 3Mix DSK.</div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const wrapper = $('ticker-wrapper');
+  const authorName = $('author-name');
+  const authorHandle = $('author-handle');
+  const commentText = $('comment-text');
+  const netTag = $('net-tag');
+  const tickerTop = $('ticker-top');
+  const donationTag = $('donation-tag');
+
+  const NETWORK_COLORS = {
+    youtube: '#ff0000',
+    twitch: '#9146ff',
+    tiktok: '#00f2fe',
+    instagram: '#e1306c',
+    twitter: '#1da1f2',
+    x: '#1da1f2',
+    manual: '#2f6fed'
+  };
+
+  function updateContent(item) {
+    if (!item) return;
+    authorName.textContent = item.author || 'Anônimo';
+    authorHandle.textContent = item.handle ? (item.handle.startsWith('@') ? item.handle : '@' + item.handle) : ('@' + (item.author || ''));
+    commentText.textContent = item.text || '';
+
+    const net = (item.network || 'manual').toLowerCase();
+    const netColor = item.color || NETWORK_COLORS[net] || '#2f6fed';
+    netTag.textContent = net.toUpperCase();
+    netTag.style.backgroundColor = netColor;
+    tickerTop.style.borderTopColor = netColor;
+
+    if (item.donation) {
+      donationTag.textContent = item.donation;
+      donationTag.style.display = 'inline-block';
+    } else {
+      donationTag.style.display = 'none';
+    }
+  }
+
+  function show(on) {
+    if (on) wrapper.classList.add('visible');
+    else wrapper.classList.remove('visible');
+  }
+
+  // Conexão WebSocket
+  function connectWs() {
+    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = location.host || '127.0.0.1:3000';
+    const ws = new WebSocket(`${proto}//${host}/ws`);
+
+    ws.onmessage = ev => {
+      try {
+        const msg = JSON.parse(ev.data);
+        if (msg.type === 'SOCIAL_ACTIVATE' || msg.event === 'SOCIAL_ACTIVATE' || msg.action === 'social_take') {
+          updateContent(msg.item);
+          show(true);
+        } else if (msg.type === 'SOCIAL_CLEAR' || msg.event === 'SOCIAL_CLEAR' || msg.action === 'social_clear') {
+          show(false);
+        }
+      } catch {}
+    };
+
+    ws.onclose = () => setTimeout(connectWs, 2000);
+    ws.onerror = () => ws.close();
+  }
+
+  connectWs();
+
+  window.addEventListener('obsSourceActiveChanged', e => {
+    if (e.detail && !e.detail.active) show(false);
+  });
+})();
+</script>
+</body>
+</html>
+

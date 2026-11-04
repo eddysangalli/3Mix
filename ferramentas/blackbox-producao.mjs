@@ -41,6 +41,11 @@ export class IncidentBlackboxEngine {
       program: p.state?.program || null,
       preview: p.state?.preview || null,
       audioMuted: (p.state?.audioInputs || []).find(a => a.name === 'Master')?.muted ?? false,
+      crew: p.crewIntercom ? {
+        connected: p.crewIntercom.summary()?.connectedCount ?? 0,
+        total: p.crewIntercom.summary()?.totalMembers ?? 0,
+        activePtt: p.crewIntercom.summary()?.activePttCount ?? 0
+      } : null,
       inputsStatus: (p.state?.inputs || []).map(i => ({
         key: i.key,
         name: i.name,

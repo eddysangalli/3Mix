@@ -126,7 +126,7 @@ main{overflow:auto;scroll-behavior:smooth;padding:26px 34px 90px}
     <div class="results" id="results"></div>
   </div>
   <div class="tools">
-    <button class="btn" id="toggle-nav">Ãndice</button>
+    <button class="btn" id="toggle-nav">Índice</button>
     <button class="btn" id="toggle-theme">Tema</button>
     <button class="btn" id="print">Imprimir</button>
   </div>
@@ -136,9 +136,9 @@ main{overflow:auto;scroll-behavior:smooth;padding:26px 34px 90px}
     <p class="nav-hint">Abrir, cortar e montar cena</p>
     <ul><li><a href="#inicio" data-nav="inicio"><span class="dot dot-vigente"></span>Início — o 3Mix na sua mesa</a></li><li><a href="#01-primeiros-passos" data-nav="01-primeiros-passos"><span class="dot dot-vigente"></span>Primeiros 5 minutos</a></li><li><a href="#02-entrada-programa-preview" data-nav="02-entrada-programa-preview"><span class="dot dot-vigente"></span>Entradas, Preview e Programa</a></li><li><a href="#03-cenas-e-fontes" data-nav="03-cenas-e-fontes"><span class="dot dot-vigente"></span>Cenas e fontes: como criar do jeito certo</a></li></ul></div><div class="nav-cat"><div class="nav-cat-title">Cor<span>1</span></div>
     <p class="nav-hint">Color Studio e Superfície</p>
-    <ul><li><a href="#05-cor" data-nav="05-cor"><span class="dot dot-vigente"></span>Cor: Color Studio e Superfície</a></li></ul></div><div class="nav-cat"><div class="nav-cat-title">Produção<span>6</span></div>
-    <p class="nav-hint">GC, áudio, replay, overlays, macros, calls</p>
-    <ul><li><a href="#04-gc-titulos" data-nav="04-gc-titulos"><span class="dot dot-vigente"></span>GC, títulos e placar</a></li><li><a href="#06-audio" data-nav="06-audio"><span class="dot dot-vigente"></span>Áudio na prática</a></li><li><a href="#07-replay" data-nav="07-replay"><span class="dot dot-vigente"></span>Replay na prática</a></li><li><a href="#10-macros-atalhos" data-nav="10-macros-atalhos"><span class="dot dot-vigente"></span>Macros, atalhos e controladores</a></li><li><a href="#11-dsk-overlays" data-nav="11-dsk-overlays"><span class="dot dot-vigente"></span>Overlays e DSK</a></li><li><a href="#12-calls-rundown" data-nav="12-calls-rundown"><span class="dot dot-vigente"></span>Calls e rundown</a></li></ul></div><div class="nav-cat"><div class="nav-cat-title">Transmissão e saídas<span>2</span></div>
+    <ul><li><a href="#05-cor" data-nav="05-cor"><span class="dot dot-vigente"></span>Cor: Color Studio e Superfície</a></li></ul></div><div class="nav-cat"><div class="nav-cat-title">Produção<span>7</span></div>
+    <p class="nav-hint">GC, áudio, replay, overlays, macros, calls, Crew</p>
+    <ul><li><a href="#04-gc-titulos" data-nav="04-gc-titulos"><span class="dot dot-vigente"></span>GC, títulos e placar</a></li><li><a href="#06-audio" data-nav="06-audio"><span class="dot dot-vigente"></span>Áudio na prática</a></li><li><a href="#07-replay" data-nav="07-replay"><span class="dot dot-vigente"></span>Replay na prática</a></li><li><a href="#10-macros-atalhos" data-nav="10-macros-atalhos"><span class="dot dot-vigente"></span>Macros, atalhos e controladores</a></li><li><a href="#11-dsk-overlays" data-nav="11-dsk-overlays"><span class="dot dot-vigente"></span>Overlays e DSK</a></li><li><a href="#12-calls-rundown" data-nav="12-calls-rundown"><span class="dot dot-vigente"></span>Calls e rundown</a></li><li><a href="#16-crew" data-nav="16-crew"><span class="dot dot-vigente"></span>3Mix Crew: Tally + Intercom no celular da equipe</a></li></ul></div><div class="nav-cat"><div class="nav-cat-title">Transmissão e saídas<span>2</span></div>
     <p class="nav-hint">Checklist, destinos, NDI/SRT</p>
     <ul><li><a href="#08-transmissao" data-nav="08-transmissao"><span class="dot dot-vigente"></span>Transmissão: o passo a passo</a></li><li><a href="#09-saidas-ndi-srt" data-nav="09-saidas-ndi-srt"><span class="dot dot-vigente"></span>Saídas externas: NDI, OMT, SRT</a></li></ul></div><div class="nav-cat"><div class="nav-cat-title">Dia a dia<span>4</span></div>
     <p class="nav-hint">Regras de ouro, diagnóstico e atalhos</p>
@@ -616,9 +616,58 @@ main{overflow:auto;scroll-behavior:smooth;padding:26px 34px 90px}
 <li>Calls: <strong>uma pessoa por destino</strong>; várias linhas no mesmo destino se confundem.</li>
 </ul></div>
 </section>
+<section class="page" id="16-crew" data-cat="producao" data-title="3Mix Crew: Tally + Intercom no celular da equipe">
+  <div class="page-head">
+    <div class="page-marker"><span class="page-num">12</span><span class="page-cat">Produção</span>
+      <span class="badge badge-vigente">Manual do usuário</span></div>
+    <h2 class="page-title">3Mix Crew: Tally + Intercom no celular da equipe</h2>
+    <div class="page-actions">
+      <button type="button" class="mini" data-toc>TOC</button>
+      <button type="button" class="mini" data-copy="16-crew">copiar link</button>
+    </div>
+  </div>
+  <div class="page-body"><p>O <strong>3Mix Crew</strong> é uma única tela de celular que une <strong>Tally</strong> (quem está no ar) e <strong>Intercom</strong> (converse com a equipe, sem sair no ar) para operadores de câmera, repórteres e direção. Fica em <code>/crew</code>, separado da tela de Calls (que é para convidados remotos).</p>
+<h2 id="16-crew-parear-um-celular">Parear um celular</h2>
+<ol>
+<li>No computador do 3Mix, abra <strong>3Mix Crew</strong> no Hub. Um <strong>QR Code</strong> aparece sozinho, com o PIN do computador.</li>
+<li>No celular da equipe: aponte a câmera para o QR, ou digite o PIN manualmente em <code>/crew</code>.</li>
+<li>Se o computador tem mais de uma rede (cabo e Wi-Fi, por exemplo), escolha a rede certa no seletor acima do QR antes de mostrar o código — o celular precisa estar na mesma rede.</li>
+<li>Depois de pareado, o celular escolhe <strong>quem é</strong> numa lista (seu nome foi cadastrado antes, ver abaixo); essa escolha fica salva no aparelho, não precisa repetir.</li>
+</ol>
+<h2 id="16-crew-qr-ja-apontado-pra-pessoa">QR já apontado para a pessoa certa</h2>
+<ul>
+<li>Se você já selecionou um nome na lista <strong>antes</strong> de mostrar o QR para a próxima pessoa, o QR muda sozinho para abrir <strong>já com aquele nome escolhido</strong> — a pessoa só confirma, não precisa procurar o nome dela na lista.</li>
+<li>Útil para distribuir vários celulares em sequência: selecione o nome da pessoa 1, mostre o QR para ela, selecione o nome da pessoa 2, mostre de novo.</li>
+</ul>
+<h2 id="16-crew-cadastrar-a-equipe">Cadastrar a equipe (antes do pareamento)</h2>
+<ul>
+<li>Quem entra no Tally/Intercom precisa estar cadastrado primeiro, no computador do 3Mix — isso não é feito pelo celular.</li>
+<li>Cada pessoa vira um <strong>membro</strong>, com um nome e a fonte de áudio dela (o microfone/entrada que representa aquela pessoa).</li>
+<li>Agrupe membros (ex.: "Câmeras", "Repórteres") para falar com o grupo inteiro de uma vez no Intercom.</li>
+</ul>
+<h2 id="16-crew-tally-no-celular">Tally no celular</h2>
+<ul>
+<li>Cada câmera aparece com uma cor: <strong>vermelho</strong> = no Programa (ao vivo), <strong>verde</strong> = no Preview, sem cor = livre.</li>
+<li>O Tally no celular reflete o mesmo estado que o Tally físico e o da Mesa — não é um sistema separado, é o mesmo estado visto de outro lugar.</li>
+<li>Se o celular perde a conexão, o Tally mostra <strong>desconectado</strong> em vez de ficar parado numa cor antiga — nunca confie num Tally "congelado".</li>
+</ul>
+<h2 id="16-crew-intercom-ptt">Intercom (falar com a equipe)</h2>
+<ol>
+<li>Escolha <strong>para quem falar</strong>: uma pessoa, um grupo, ou todos.</li>
+<li><strong>Segure</strong> o botão grande para falar (solte para parar) — é push-to-talk, como um rádio: só transmite enquanto você segura.</li>
+<li>Quando a <strong>Direção</strong> está falando, aparece em destaque na tela — a fala da direção tem prioridade sobre as outras vozes para quem está ouvindo.</li>
+<li>O Intercom nunca sai no Programa, Clean ou ISO — é um canal totalmente separado do áudio da transmissão.</li>
+</ol>
+<h2 id="16-crew-jeito-certo">Jeito certo de usar</h2>
+<ul>
+<li>Teste o pareamento <strong>antes</strong> do horário de entrar no ar, não durante.</li>
+<li>Um nome por pessoa, um celular por pessoa — dois celulares no mesmo nome disputam o mesmo PTT.</li>
+<li>Se o Intercom não vier com som, confira se <strong>3Mix Calls</strong> não está sendo usado ao mesmo tempo — hoje os dois disputam o mesmo microfone do computador e não funcionam juntos ainda; use um ou outro por vez.</li>
+</ul></div>
+</section>
 <section class="page" id="08-transmissao" data-cat="transmissao" data-title="Transmissão: o passo a passo">
   <div class="page-head">
-    <div class="page-marker"><span class="page-num">12</span><span class="page-cat">Transmissão e saídas</span>
+    <div class="page-marker"><span class="page-num">13</span><span class="page-cat">Transmissão e saídas</span>
       <span class="badge badge-vigente">Manual do usuário</span></div>
     <h2 class="page-title">Transmissão: o passo a passo</h2>
     <div class="page-actions">
@@ -660,7 +709,7 @@ main{overflow:auto;scroll-behavior:smooth;padding:26px 34px 90px}
 </section>
 <section class="page" id="09-saidas-ndi-srt" data-cat="transmissao" data-title="Saídas externas: NDI, OMT, SRT">
   <div class="page-head">
-    <div class="page-marker"><span class="page-num">13</span><span class="page-cat">Transmissão e saídas</span>
+    <div class="page-marker"><span class="page-num">14</span><span class="page-cat">Transmissão e saídas</span>
       <span class="badge badge-vigente">Manual do usuário</span></div>
     <h2 class="page-title">Saídas externas: NDI, OMT, SRT</h2>
     <div class="page-actions">
@@ -691,7 +740,7 @@ main{overflow:auto;scroll-behavior:smooth;padding:26px 34px 90px}
 </section>
 <section class="page" id="13-dicas-operacao" data-cat="diaadia" data-title="Regras de ouro e dicas de operação">
   <div class="page-head">
-    <div class="page-marker"><span class="page-num">14</span><span class="page-cat">Dia a dia</span>
+    <div class="page-marker"><span class="page-num">15</span><span class="page-cat">Dia a dia</span>
       <span class="badge badge-vigente">Manual do usuário</span></div>
     <h2 class="page-title">Regras de ouro e dicas de operação</h2>
     <div class="page-actions">
@@ -732,7 +781,7 @@ main{overflow:auto;scroll-behavior:smooth;padding:26px 34px 90px}
 </section>
 <section class="page" id="14-diagnostico" data-cat="diaadia" data-title="Quando algo dá errado">
   <div class="page-head">
-    <div class="page-marker"><span class="page-num">15</span><span class="page-cat">Dia a dia</span>
+    <div class="page-marker"><span class="page-num">16</span><span class="page-cat">Dia a dia</span>
       <span class="badge badge-vigente">Manual do usuário</span></div>
     <h2 class="page-title">Quando algo dá errado</h2>
     <div class="page-actions">
@@ -759,7 +808,7 @@ main{overflow:auto;scroll-behavior:smooth;padding:26px 34px 90px}
 </section>
 <section class="page" id="15-atalhos-rapidos" data-cat="diaadia" data-title="Atalhos e palavras do dia a dia">
   <div class="page-head">
-    <div class="page-marker"><span class="page-num">16</span><span class="page-cat">Dia a dia</span>
+    <div class="page-marker"><span class="page-num">17</span><span class="page-cat">Dia a dia</span>
       <span class="badge badge-vigente">Manual do usuário</span></div>
     <h2 class="page-title">Atalhos e palavras do dia a dia</h2>
     <div class="page-actions">
@@ -780,7 +829,7 @@ main{overflow:auto;scroll-behavior:smooth;padding:26px 34px 90px}
 </section>
 <section class="page" id="sobre" data-cat="diaadia" data-title="Sobre este manual">
   <div class="page-head">
-    <div class="page-marker"><span class="page-num">17</span><span class="page-cat">Dia a dia</span>
+    <div class="page-marker"><span class="page-num">18</span><span class="page-cat">Dia a dia</span>
       <span class="badge badge-vigente">Manual do usuário</span></div>
     <h2 class="page-title">Sobre este manual</h2>
     <div class="page-actions">
@@ -846,7 +895,7 @@ main{overflow:auto;scroll-behavior:smooth;padding:26px 34px 90px}
         var title = hit.page.dataset.title || hit.page.id;
         var safe = q.value.trim().replace(/[.*+?^$(){}|[\]\\]/g, '\\$&');
         var snippet = hit.snippet.replace(new RegExp('(' + safe + ')', 'ig'), '<mark>$1</mark>');
-        return '<a href="#' + hit.page.id + '" data-hit="' + hit.page.id + '"><span class="r-head">' + title + '<span class="r-meta">' + hit.count + ' ocorrÃªncia(s)</span></span><span>' + snippet + '</span></a>';
+        return '<a href="#' + hit.page.id + '" data-hit="' + hit.page.id + '"><span class="r-head">' + title + '<span class="r-meta">' + hit.count + ' ocorrência(s)</span></span><span>' + snippet + '</span></a>';
       }).join('');
     }
     results.classList.add('open');

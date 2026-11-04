@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>3Mix · Lower Third Floating Card (DSK 1-4)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Segoe UI', -apple-system, Roboto, sans-serif;
+    user-select: none;
+  }
+
+  /* Card Flutuante */
+  #card-wrapper {
+    position: absolute;
+    bottom: 50px;
+    left: 70px;
+    max-width: 680px;
+    min-width: 400px;
+
+    opacity: 0;
+    transform: scale(0.9) translateY(30px);
+    transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1), transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
+
+  #card-wrapper.visible {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    pointer-events: auto;
+  }
+
+  .bubble-card {
+    background: #1c2026;
+    border-radius: 12px;
+    padding: 16px 20px;
+    border: 2px solid #2f6fed;
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+  }
+
+  .user-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .user-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #2f6fed;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 16px;
+    border: 2px solid #fff;
+    flex-shrink: 0;
+  }
+
+  .user-titles {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .user-name {
+    font-size: 16px;
+    font-weight: 800;
+    color: #ffffff;
+  }
+
+  .user-handle {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #8b949e;
+  }
+
+  .net-badge {
+    background: #2f6fed;
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+
+  .bubble-text {
+    font-size: 15px;
+    line-height: 1.45;
+    color: #e6edf3;
+    font-weight: 500;
+    background: #14171c;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border-left: 3px solid #2f6fed;
+  }
+
+  .superchat-badge {
+    background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+    color: #000;
+    font-weight: 800;
+    font-size: 11.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="card-wrapper">
+  <div class="bubble-card" id="bubble-card">
+    <div class="user-header">
+      <div class="user-badge">
+        <div class="avatar-circle" id="user-avatar">3M</div>
+        <div class="user-titles">
+          <span class="user-name" id="user-name">Autor</span>
+          <span class="user-handle" id="user-handle">@usuario</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <span class="superchat-badge" id="superchat-badge">R$ 50</span>
+        <span class="net-badge" id="net-badge">TIKTOK</span>
+      </div>
+    </div>
+    <div class="bubble-text" id="bubble-text">
+      Comentário flutuante em tempo real no 3Mix.
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const wrapper = $('card-wrapper');
+  const bubbleCard = $('bubble-card');
+  const userName = $('user-name');
+  const userHandle = $('user-handle');
+  const bubbleText = $('bubble-text');
+  const netBadge = $('net-badge');
+  const superchatBadge = $('superchat-badge');
+  const userAvatar = $('user-avatar');
+
+  const NETWORK_COLORS = {
+    youtube: '#ff0000',
+    twitch: '#9146ff',
+    tiktok: '#00f2fe',
+    instagram: '#e1306c',
+    twitter: '#1da1f2',
+    x: '#1da1f2',
+    manual: '#2f6fed'
+  };
+
+  function updateContent(item) {
+    if (!item) return;
+    userName.textContent = item.author || 'Anônimo';
+    userHandle.textContent = item.handle ? (item.handle.startsWith('@') ? item.handle : '@' + item.handle) : ('@' + (item.author || ''));
+    bubbleText.textContent = item.text || '';
+
+    const net = (item.network || 'manual').toLowerCase();
+    const netColor = item.color || NETWORK_COLORS[net] || '#2f6fed';
+    netBadge.textContent = net.toUpperCase();
+    netBadge.style.backgroundColor = netColor;
+    bubbleCard.style.borderColor = netColor;
+    bubbleText.style.borderLeftColor = netColor;
+
+    if (item.donation) {
+      superchatBadge.textContent = item.donation;
+      superchatBadge.style.display = 'inline-block';
+    } else {
+      superchatBadge.style.display = 'none';
+    }
+
+    if (item.avatar) {
+      userAvatar.innerHTML = `<img src="${item.avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.remove()">`;
+    } else {
+      userAvatar.textContent = (item.author || '3M').charAt(0).toUpperCase();
+      userAvatar.style.backgroundColor = netColor;
+    }
+  }
+
+  function show(on) {
+    if (on) wrapper.classList.add('visible');
+    else wrapper.classList.remove('visible');
+  }
+
+  function connectWs() {
+    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = location.host || '127.0.0.1:3000';
+    const ws = new WebSocket(`${proto}//${host}/ws`);
+
+    ws.onmessage = ev => {
+      try {
+        const msg = JSON.parse(ev.data);
+        if (msg.type === 'SOCIAL_ACTIVATE' || msg.event === 'SOCIAL_ACTIVATE' || msg.action === 'social_take') {
+          updateContent(msg.item);
+          show(true);
+        } else if (msg.type === 'SOCIAL_CLEAR' || msg.event === 'SOCIAL_CLEAR' || msg.action === 'social_clear') {
+          show(false);
+        }
+      } catch {}
+    };
+
+    ws.onclose = () => setTimeout(connectWs, 2000);
+    ws.onerror = () => ws.close();
+  }
+
+  connectWs();
+
+  window.addEventListener('obsSourceActiveChanged', e => {
+    if (e.detail && !e.detail.active) show(false);
+  });
+})();
+</script>
+</body>
+</html>
+

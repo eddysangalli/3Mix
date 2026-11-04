@@ -128,7 +128,7 @@ export class DiskReplay {
     const encoders=new Map(caps.encoders.map(e=>[e.id,e]));
     for(const o of [options,...Object.values(options.perInput||{}).map(value=>({...options,...value}))]){
       const id=o.encoder==='default'?'obs_x264':o.encoder,encoder=encoders.get(id),codec=encoder?.codec||(id==='obs_x264'?'h264':null);
-      if(!encoder||!['h264','hevc','av1'].includes(codec))throw Error('Codificador ISO não carregado: '+id);
+      if(!encoder||!['h264','hevc','av1','dnxhd','prores','mpeg2video'].includes(codec))throw Error('Codificador ISO não carregado: '+id);
       if(o.format==='mpegts'&&codec==='av1')throw Error('AV1 não é compatível com TS nesta gravação; escolha MKV ou MP4 seguro');
     }
     return encoders;
@@ -362,7 +362,7 @@ export class DiskReplay {
         const source = name;
         const ownOptions=options?{...options,...options.perInput?.[name]}:null;
         const camDir=ownOptions?.directory?join(ownOptions.directory,'iso',session.id):session.dir;await mkdir(camDir,{recursive:true});
-        const extension=ownOptions?({mpegts:'.ts',mkv:'.mkv',mp4_safe:'.mkv'})[ownOptions.format]:'.ts';
+        const extension=ownOptions?({mpegts:'.ts',mkv:'.mkv',mp4_safe:'.mkv',mxf:'.mxf',mov:'.mov'})[ownOptions.format]||'.ts':'.ts';
         const basename=ownOptions?`${ownOptions.prefix}-${i+1}`:`cam-${i+1}`;
         const expectedCodec=ownOptions?encoders.get(ownOptions.encoder==='default'?'obs_x264':ownOptions.encoder)?.codec:null;
         const cam = { name, source, file: join(camDir, basename+extension),dir:camDir,options:ownOptions,expectedCodec, index: i + 1, segments: [],...(options?{basename,extension,files:[]}: {}) };
@@ -372,7 +372,7 @@ export class DiskReplay {
           throw new Error(`A entrada ${name} já está gravando replay. Pare a sessão anterior antes de iniciar outra.`);
         }
         const replayAudio=replayCameraOptions(this.state.cameraOptions?.[name]).recordAudio;
-        const settings = { path: camDir, filename_formatting: session.segmented ? `cam-${i+1}-%CCYY-%MM-%DD_%hh-%mm-%ss` : ownOptions?.splitSeconds?`${basename}-%CCYY-%MM-%DD_%hh-%mm-%ss`:basename, rec_format: ownOptions?.format==='mp4_safe'?'mkv':ownOptions?.format||"mpegts", record_mode: 1,
+        const settings = { path: camDir, filename_formatting: session.segmented ? `cam-${i+1}-%CCYY-%MM-%DD_%hh-%mm-%ss` : ownOptions?.splitSeconds?`${basename}-%CCYY-%MM-%DD_%hh-%mm-%ss`:basename, rec_format: ownOptions?.format==='mp4_safe'?'mkv':ownOptions?.format==='mpegts'?'ts':ownOptions?.format||"ts", record_mode: 1,
           ...(!options?{different_audio:replayAudio!=='input',audio_track:({input:0,master:1,'bus-a':2,'bus-b':3})[replayAudio],audio_source:''}:{}),
           split_file: session.segmented, max_time_sec: session.retention.segmentSeconds, max_size_mb: 0, record_max_seconds: 0, keyint_sec: 1, opts: 'keyint=1', x264opts: 'keyint=1',
           ...(process.env.FREEMIX_REPLAY_ENCODER ? { encoder: process.env.FREEMIX_REPLAY_ENCODER } : {}),

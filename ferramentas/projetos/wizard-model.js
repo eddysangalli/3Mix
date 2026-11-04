@@ -5,6 +5,29 @@ const fail=code=>{throw Object.assign(Error(code),{code});};
 const hash=async x=>Array.from(new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(x)))),b=>b.toString(16).padStart(2,'0')).join('');
 export const steps=['Formato','Câmeras e áudio','Conferir'];
 export const formats={landscape:{label:'Horizontal 16:9',width:1920,height:1080},portrait:{label:'Vertical 9:16',width:1080,height:1920},both:{label:'Horizontal + vertical vinculados',width:1920,height:1080,portraitIsCompositionVariant:true}};
+export const productionModels=[
+ {id:'podcast',label:'Podcast / Videocast',format:'both',fps:'30/1',compositionPreset:'landscape-grid-4',portraitPreset:'portrait-grid-4',audioPreset:'noise-speex',dsk:['Logo','Tarja Convidados'],outputs:['Gravação PGM','Gravação Clean','Retorno N-1 Calls'],description:'4 câmeras de mesa + corte vertical vinculado + cadeia de voz Podcast.'},
+ {id:'futebol',label:'Futebol / Futsal (Esportes)',format:'landscape',fps:'60/1',compositionPreset:'landscape-hero-right-4',portraitPreset:'portrait-hero-bottom-4',audioPreset:'original',dsk:['Placar Esportivo','Cronômetro','Logo'],outputs:['Gravação PGM','Replay Instantâneo','ISO Câmeras'],description:'60 fps para lance rápido, placar DSK, Replay A/B e gravação ISO.'},
+ {id:'entrevista',label:'Entrevista / Talk Show',format:'landscape',fps:'30/1',compositionPreset:'landscape-hero-right-4',portraitPreset:'portrait-grid-4',audioPreset:'noise-speex',dsk:['Tarja Entrevistado','Logo'],outputs:['Gravação PGM','Gravação Clean','Retorno N-1'],description:'Destaque no convidado + 2box/4box + tarjas de identificação e Clean Feed.'},
+ {id:'jornalismo',label:'Jornalismo / Telejornal',format:'landscape',fps:'30/1',compositionPreset:'landscape-hero-bottom-4',portraitPreset:'portrait-hero-bottom-4',audioPreset:'noise-speex',dsk:['Tarja Jornalismo','Ticker Rodapé','Relógio + Logo'],outputs:['Transmissão Principal','Gravação PGM','Broadcast Delay + DUMP'],description:'Bancada + externas SRT/Calls + GC com ticker, relógio e proteção de DUMP.'},
+ {id:'evento',label:'Evento Corporativo / Congresso',format:'landscape',fps:'30/1',compositionPreset:'landscape-pip-4',portraitPreset:'portrait-hero-top-4',audioPreset:'original',dsk:['Tarja Palestrante','Logo Evento'],outputs:['Transmissão Principal','Gravação PGM','Gravação Clean','Saída NDI Telão'],description:'Palco + slides em PiP/Side-by-Side + saída AUX/NDI para telão e gravação limpa.'},
+ {id:'culto',label:'Culto / Igreja / Música ao Vivo',format:'landscape',fps:'30/1',compositionPreset:'landscape-grid-4',portraitPreset:'portrait-grid-4',audioPreset:'original',dsk:['Letra / Versículo (Lower Third)','Logo'],outputs:['Transmissão Principal','Gravação PGM','Saída Auxiliar Projeção'],description:'Múltiplas câmeras + projeção de letras em DSK + barramento auxiliar para telão.'},
+ {id:'live',label:'Live / Criador / Vertical + Horizontal',format:'both',fps:'60/1',compositionPreset:'landscape-pip-4',portraitPreset:'portrait-hero-bottom-4',audioPreset:'noise-speex',dsk:['Tarja Redes Sociais','Logo'],outputs:['Transmissão Horizontal','Saída M/E Vertical 9:16','Gravação PGM'],description:'Produção simultânea 16:9 e 9:16 em 60 fps com PiP e cortes ágeis.'}
+];
+export function buildSignalDiagram(plan,modelId='podcast'){
+ const m=productionModels.find(x=>x.id===modelId)||productionModels[0];
+ const camLabels=(plan?.cameras||[]).map(c=>c.label+(c.mode==='placeholder'?' (Cena vazia)':' ('+c.resolution.width+'x'+c.resolution.height+')'));
+ const audLabel=plan?.audio?.mode==='device'?`Áudio (${plan.audio.effectPreset}) → 3Mix Master / Bus A / Bus B`:'Áudio (Sem captura inicial → 3Mix Master)';
+ const compLabels=(plan?.compositions||[]).map(c=>`${c.label} [${c.preset}]`);
+ return {
+  model:m.label,
+  inputs:camLabels,
+  audio:audLabel,
+  compositions:compLabels,
+  dsk:m.dsk,
+  outputs:m.outputs
+ };
+}
 export const effectPresets=[{id:'original',label:'Original · sem filtros',requirements:[],settings:[]},{id:'colour-neutral',label:'Cor neutra',requirements:['color_filter_v2'],settings:[{kind:'color_filter_v2',defaultsFromNative:true}]},{id:'sharp-light',label:'Nitidez leve',requirements:['sharpness_filter_v2'],settings:[{kind:'sharpness_filter_v2',settings:{sharpness:0.08}}]},{id:'noise-speex',label:'Redução de ruído · Speex',requirements:['noise_suppress_filter_v2','noise-method-speex'],settings:[{kind:'noise_suppress_filter_v2',settings:{method:'speex',suppress_level:-30}}]}];
 export function choices(inventory){return effectPresets.map(p=>({...p,disabled:p.requirements.some(k=>!inventory.capabilities.includes(k)),reason:p.requirements.filter(k=>!inventory.capabilities.includes(k)).map(k=>'Recurso não informado pelo motor: '+k).join('; ')}));}
 export async function planProject(d,inventory,context){

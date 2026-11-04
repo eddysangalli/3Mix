@@ -87,10 +87,21 @@
     </section>
 
     <section class="p3-card">
-      <h2>Relatar problema</h2>
+      <h2>Relatar problema e Manuais</h2>
       <div id="dg-relato"></div>
-      <div class="p3-row">
-        <a href="/docs/usuario/manual-operador.html" target="_blank" rel="noopener">Manual do operador</a>
+      <div class="p3-card-head" style="margin-top:16px">
+        <h3 style="margin:0;font-size:14px">Manuais e Documentação</h3>
+        <span class="p3-note">Operação, referência completa e API</span>
+      </div>
+      <div class="p3-row" style="margin-top:8px;flex-wrap:wrap;gap:8px">
+        <button type="button" class="primary" data-open-doc="/docs/manual.html">Manual Completo (com busca)</button>
+        <button type="button" data-open-doc="/docs/usuario/manual-operador.html">Manual do Operador</button>
+        <button type="button" data-open-doc="/docs/api.html">Manual da API (HTTP / WS / vMix)</button>
+        <button type="button" data-open-doc="/docs/srt-alpha.html">Guia SRT 4:4:4 Alpha</button>
+      </div>
+      <div class="p3-row" style="margin-top:8px;flex-wrap:wrap;gap:12px;font-size:12.5px">
+        <a href="/docs/api/indice-acoes.json" target="_blank" rel="noopener">Índice JSON de rotas e ações (indice-acoes.json)</a>
+        <a href="/docs/api/llms.txt" target="_blank" rel="noopener">Resumo da API para IAs (llms.txt)</a>
       </div>
     </section>
   </div>
@@ -175,6 +186,17 @@
 
   fetch('/api/update', { cache: 'no-store' }).then((r) => r.json()).then((v) => { if (v.update?.currentVersion) E('s-versao').textContent = nomeVersao(v.update.currentVersion); }).catch(() => {});
   fetch('/api/json', { cache: 'no-store' }).then((r) => r.json()).then((v) => { if (v.preset) E('s-projeto').textContent = v.preset; }).catch(() => {});
+
+  document.addEventListener('click', async (e) => {
+    const b = e.target.closest('[data-open-doc]');
+    if (!b) return;
+    const route = b.dataset.openDoc;
+    try {
+      const r = await fetch('/api/panel-open', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ route }), signal: AbortSignal.timeout(6000) });
+      if ((await r.json()).success === true) return;
+    } catch {}
+    window.open(route, '_blank', 'noopener');
+  });
 })();
 </script>
 </body>
