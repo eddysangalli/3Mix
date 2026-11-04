@@ -17,6 +17,7 @@
 | **SRT 1.5.7: Correção de CVE-2026-55869 e CVE-2026-55868** | `Testado no Runtime` | `srt.dll` v1.5.7.0 instalada em `3mix-runtime/bin/64bit/` substituindo a 1.5.2 vulnerável. |
 | **SRT 1.5.7: Execução no processo ativo `3Mix.exe`** | `Testado no Runtime` | Comprovado carregamento da DLL em memória no PID ativo sem erros de importação. |
 | **SRT 1.5.7: Modos Caller, Listener e Rendezvous (Loopback UDP)** | `Testado no Runtime` | Bateria `testes/srt/test-srt-157-full.mjs` aprovada com 6/6 PASS. |
+| **SRT 1.5.7: Endpoints reais Caller/Listener/Rendezvous com AES e Stream ID** | `Testado no Runtime` | Nova bateria `testes/srt/test-srt-real-endpoints.mjs` com 7 cenários: Listener+Caller AES-256, Rendezvous bidirecional AES-128, negociação AES-128/192/256, falha com senha incorreta, Stream ID vMix/3Mix, parâmetros de reconexão configurados. |
 | **SRT 1.5.7: Criptografia AES 128, 192 e 256 bits + Stream ID** | `Testado no Runtime` | Sincronismo automático na URL e decodificação validados com sintaxe vMix. |
 | **SRT 1.5.7: Estabilidade WAN / 4G com perda de pacotes e jitter real** | `Pendente de Alpha Tester` | Missão 7 no `PEDIDO-COMUNIDADE-ALPHA.md` para testes de campo via Internet pública. |
 | **Plugins OBS: Isolamento em `3mix-plugins/%module%`** | `Implementado` | Commit `e084a9e` no `3mix-engine`, patch `0050` em `3mix-runtime/fork/`. |
@@ -24,6 +25,7 @@
 | **Plugins OBS: Inspeção estática PE x64 e export `obs_module_load`** | `Testado no Runtime` | Validado em `test-real-plugins-manager.mjs` com `downstream-keyer.dll`, `audio-monitor.dll` e `decklink.dll`. |
 | **Plugins OBS: Rejeição de bibliotecas auxiliares (não-plugins)** | `Testado no Runtime` | `chrome_elf.dll` (sem `obs_module_load`) recusada com sucesso. |
 | **Plugins OBS: Proteção de módulos de fábrica (`obs-plugins/64bit`)** | `Testado no Runtime` | Bloqueio confirmado contra sobrescrita acidental de plugins nativos de fábrica. |
+| **Plugins OBS: Ciclo de vida completo (instalação, desativação, Safe Mode)** | `Testado no Runtime` | Bateria `testes/plugins/test-real-plugins-manager.mjs` valida instalação isolada em `3mix-plugins/`, desativação sem exclusão física, e ativação de Safe Mode defensivo. |
 | **Plugins OBS: Sandbox de memória isolada para DLLs C++ nativas** | `Não Implementado` | **Arquiteturalmente impossível no OBS**: plugins nativos rodam no espaço de processo do executável host (`3Mix.exe`). O isolamento é de diretório de arquivos e recuperação de inicialização, não de proteção de memória de processo. |
 | **Plugins OBS: Testes em massa com centenas de plugins da comunidade** | `Pendente de Alpha Tester` | Missão 9 no `PEDIDO-COMUNIDADE-ALPHA.md`. |
 | **FFmpeg CLI: Auditoria de flags e compatibilidade 9.0.2** | `Testado no Runtime` | Nenhuma flag obsoleta encontrada em `replay-disco`, `apresentacao-slides`, etc. |
@@ -41,6 +43,7 @@
 | **SlideEngine Pro: Importação PPTX sem Office (16:9 e 4:3 pilarbox)** | `Testado no Runtime` | Suíte `test-slide-engine-compositor.mjs` aprovada com capturas reais de frame. |
 | **SlideEngine Pro: Vídeos incorporados com áudio no mixer (-6dB/mute)** | `Testado no Runtime` | Suíte `test-slide-engine-audiovisual.mjs` aprovada com 4/4 PASS. |
 | **SlideEngine Pro: Controles de transporte Play/Pause/Seek contínuos** | `Testado no Runtime` | Posição preservada sem recriação de fonte SVG/OBS. |
+| **SlideEngine Pro: Animações contínuas via SSE (nextAnimation/previousAnimation)** | `Implementado` | `ferramentas/apresentacao-slides.mjs:791-838` atualizado para emitir eventos SSE sem chamar `presentSlide()`, eliminando refresh destrutivo do Browser Source. |
 | **SlideEngine Pro: Fidelidade tipográfica em palestras reais de 100+ slides** | `Pendente de Alpha Tester` | Missão 11 no `PEDIDO-COMUNIDADE-ALPHA.md`. |
 | **Rollback: Backup `srt.dll.v152.bak` e script `reverter-srt-152.cmd`** | `Testado no Runtime` | Script automatizado testado com restauração instantânea. |
 | **Rollback: Script de reativação `ativar-srt-157.cmd`** | `Testado no Runtime` | Script automatizado testado com reativação para 1.5.7. |
