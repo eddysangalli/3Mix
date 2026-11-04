@@ -148,6 +148,9 @@
   .strip .bd { flex: 1; min-height: 52px; display: flex; gap: 3px; align-items: stretch; }
   .mt { width: 6px; background: #0a0a0a; position: relative; border-radius: 1px; }
   .mt::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, #2fd13a 0 70%, #e8d21d 70% 88%, #e0352b 88%); clip-path: inset(calc((1 - var(--l, 0)) * 100%) 0 0 0); }
+  /* Peak hold: marca fina no nível de pico retido (--p, de onMeters()/peak-hold.js), parada por um tempo e depois caindo -- não o mesmo --l do nível instantâneo acima. Clip: borda vermelha quando o pico bateu 0 dBFS há pouco. */
+  .mt::before { content: ""; position: absolute; left: -1px; right: -1px; height: 2px; background: #eef2f7; bottom: calc(var(--p, 0) * (100% - 2px)); opacity: .9; }
+  .mt.clip { box-shadow: 0 0 4px 1px #ff3838, inset 0 0 0 1px #ff3838; }
   .fd { width: 18px; position: relative; touch-action: none; cursor: ns-resize; }
   .fd::before { content: ""; position: absolute; left: 50%; top: 4px; bottom: 4px; width: 2px; margin-left: -1px; background: #505966; }
   .fd i { position: absolute; left: 0; right: 0; height: 10px; bottom: calc(var(--v, 0) * (100% - 10px)); background: linear-gradient(180deg, #d8e0ea, #9ea8b5); border: 1px solid #232323; border-radius: 1px; }
@@ -945,6 +948,9 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   .strip .mt::after {
     background: linear-gradient(to top, #00e676 0 68%, #ffd32a 68% 86%, #ff3838 86%) !important;
   }
+  .strip .mt::before {
+    background: #fff !important;
+  }
   .strip .col .muted {
     background: #e74c3c !important;
     border-color: #ff7675 !important;
@@ -1219,6 +1225,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
 <script src="gc/catalogo.js"></script>
 <script src="gc/catalogo-biblioteca.js"></script>
 <script src="remoto/codecs-mesa.js"></script>
+<script src="remoto/peak-hold.js"></script>
 <script>
   "use strict";
   const $ = (id) => document.getElementById(id);
@@ -1766,12 +1773,33 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     else if (type === "InputVolumeChanged") { const a = st.audio.get(d.inputName); if (a && dragging !== d.inputName) { a.mul = d.inputVolumeMul; a.db = d.inputVolumeDb; paintFader(d.inputName); } }
     else if (type === "InputCreated" || type === "InputRemoved" || type === "InputNameChanged") syncAudio().catch(() => {});
   }
+  // Um PeakHoldMeter por barra visível (2 por entrada: L e R). O motor já manda
+  // InputVolumeMeters a cada 50ms (EventHandler.cpp), então update() aqui já roda numa
+  // cadência suave o bastante para o pico decair sem precisar de um requestAnimationFrame
+  // ou setInterval próprio -- nenhum timer novo disputando o caminho crítico de áudio.
+  // WeakMap, não Map: renderMixer() recria os .strip/.mt via innerHTML sempre que uma
+  // entrada de áudio muda (syncAudio), então um Map reteria para sempre cada elemento
+  // antigo removido do DOM -- memory leak numa transmissão de horas. Perder o pico retido
+  // de uma barra recriada é aceitável (ela volta a 0 e sobe de novo em menos de 50ms).
+  const meterPeaks = new WeakMap(); // elemento .mt -> PeakHoldMeter
+  function peakFor(bar) {
+    let m = meterPeaks.get(bar);
+    if (!m) { m = new window.PeakHoldMeter.PeakHoldMeter(); meterPeaks.set(bar, m); }
+    return m;
+  }
   function onMeters(inputs) {
+    const agora = Date.now();
     for (const i of inputs) {
       const el = document.querySelector(`.strip[data-n="${CSS.escape(i.inputName)}"]`); if (!el) continue;
       const peak = (ch) => { const mul = ch?.[1] ?? 0; return mul > 0 ? clamp((20 * Math.log10(mul) + 60) / 60, 0, 1) : 0; };
       const l = peak(i.inputLevelsMul[0]), r = i.inputLevelsMul[1] ? peak(i.inputLevelsMul[1]) : l, bars = el.querySelectorAll(".mt");
       bars[0].style.setProperty("--l", l.toFixed(3)); bars[1].style.setProperty("--l", r.toFixed(3));
+      [[bars[0], l], [bars[1], r]].forEach(([bar, nivel]) => {
+        if (!bar) return;
+        const m = peakFor(bar);
+        bar.style.setProperty("--p", m.update(nivel, agora).toFixed(3));
+        bar.classList.toggle("clip", m.clipped(agora));
+      });
     }
   }
 
