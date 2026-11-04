@@ -48,15 +48,15 @@ A captura de vídeo não comprimido requer largura de banda sustentada no barram
 
 | Fabricante | Modelo | Barramento PCIe | Canais Físicos | Resolução Máxima | Status no 3Mix | Recomendações Técnicas |
 |---|---|---|---|---|---|---|
-| **Blackmagic Design** | **DeckLink Duo 2** | PCIe 2.0 x4 | 4 BNC configuráveis (In/Out) | 1080p60 | **Homologado** | Padrão da indústria; drivers Desktop Video 12.4+. |
-| **Blackmagic Design** | **DeckLink Quad 2** | PCIe 2.0 x8 | 8 BNC configuráveis | 1080p60 | **Homologado** | Ideal para estúdios com 8 câmeras SDI; requer slot x8 real. |
-| **Blackmagic Design** | **DeckLink 8K Pro** | PCIe 3.0 x8 | 4 BNC bidirecionais 12G-SDI | 4K / 8K DCI | **Homologado** | Recomendado para produções UHD 4K a 60 fps. |
-| **Blackmagic Design** | **DeckLink Mini Recorder 4K** | PCIe 2.0 x4 | 1 SDI + 1 HDMI | 4K30 / 1080p60 | **Homologado** | Entrada compacta para estações móveis e mochilões. |
-| **Magewell** | **Pro Capture Quad SDI** | PCIe 2.0 x4 | 4 SDI | 1080p60 | **Homologado** | Baixíssimo consumo de CPU com FPGA de desentrelaçamento. |
-| **Magewell** | **Pro Capture Quad HDMI** | PCIe 2.0 x4 | 4 HDMI | 1080p60 | **Homologado** | Para produções com câmeras mirrorless ou saídas de PC. |
-| **Magewell** | **USB Capture HDMI Plus** | USB 3.0 | 1 HDMI + Loopout | 1080p60 | **Homologado** | Driverless (UVC nativo); excelente para notebooks. |
-| **Elgato** | **Cam Link 4K** | USB 3.0 | 1 HDMI | 4K30 / 1080p60 | **Homologado** | Conectar em portas USB 3.0 controladas por barramentos distintos. |
-| **Elgato** | **HD60 X / 4K X** | USB 3.2 Gen 2 | 1 HDMI | 4K60 / 1080p120 | **Homologado** | Suporte a taxas elevadas e HDR. |
+| **Blackmagic Design** | **DeckLink Duo 2** | PCIe 2.0 x4 | 4 BNC configuráveis (In/Out) | 1080p60 | **Compatibilidade prevista** | Padrão da indústria; drivers Desktop Video 12.4+. |
+| **Blackmagic Design** | **DeckLink Quad 2** | PCIe 2.0 x8 | 8 BNC configuráveis | 1080p60 | **Compatibilidade prevista** | Ideal para estúdios com 8 câmeras SDI; requer slot x8 real. |
+| **Blackmagic Design** | **DeckLink 8K Pro** | PCIe 3.0 x8 | 4 BNC bidirecionais 12G-SDI | 4K / 8K DCI | **Compatibilidade prevista** | Recomendado para produções UHD 4K a 60 fps. |
+| **Blackmagic Design** | **DeckLink Mini Recorder 4K** | PCIe 2.0 x4 | 1 SDI + 1 HDMI | 4K30 / 1080p60 | **Compatibilidade prevista** | Entrada compacta para estações móveis e mochilões. |
+| **Magewell** | **Pro Capture Quad SDI** | PCIe 2.0 x4 | 4 SDI | 1080p60 | **Compatibilidade prevista** | Baixíssimo consumo de CPU com FPGA de desentrelaçamento. |
+| **Magewell** | **Pro Capture Quad HDMI** | PCIe 2.0 x4 | 4 HDMI | 1080p60 | **Compatibilidade prevista** | Para produções com câmeras mirrorless ou saídas de PC. |
+| **Magewell** | **USB Capture HDMI Plus** | USB 3.0 | 1 HDMI + Loopout | 1080p60 | **Compatibilidade prevista** | Driverless (UVC nativo); excelente para notebooks. |
+| **Elgato** | **Cam Link 4K** | USB 3.0 | 1 HDMI | 4K30 / 1080p60 | **Compatibilidade prevista** | Conectar em portas USB 3.0 controladas por barramentos distintos. |
+| **Elgato** | **HD60 X / 4K X** | USB 3.2 Gen 2 | 1 HDMI | 4K60 / 1080p120 | **Compatibilidade prevista** | Suporte a taxas elevadas e HDR. |
 | **AJA Video Systems** | **KONA 4 / KONA 5** | PCIe 3.0 x8 | 4 SDI (3G/12G) | 1080p / 4K | **Compatível** | Via driver DirectShow / plugin nativo. |
 
 ---
@@ -67,14 +67,14 @@ O 3Mix processa áudio nativamente em 48 kHz / 24-bit PCM. Para evitar latência
 
 | Fabricante | Linha / Modelo | Conexão | Entradas / Saídas | Driver Recomendado | Status | Notas Operacionais |
 |---|---|---|---|---|---|---|
-| **Focusrite** | **Scarlett 2i2 / 4i4 / 8i6** (Gen 3/4) | USB-C | 2 a 8 entradas | Focusrite ASIO Driver v4.x | **Homologado** | Buffer ideal: 128 ou 256 samples em 48 kHz. |
-| **Focusrite** | **Scarlett 18i20 / Clarett+** | USB-C | 18 in / 20 out (ADAT) | Focusrite ASIO Driver v4.x | **Homologado** | Mapeamento multicanal de estúdio com 8 pré-amps. |
-| **Behringer** | **U-Phoria UMC202HD / UMC404HD** | USB 2.0 | 2 a 4 in XLR/P10 | Behringer UMC ASIO Driver 5.x | **Homologado** | Padrão MIDAS; excelente relação custo/benefício. |
-| **Behringer** | **U-Phoria UMC1820** | USB 2.0 | 8 in XLR / ADAT | Behringer UMC ASIO Driver 5.x | **Homologado** | Até 16 canais com expansão ótica ADA8200. |
-| **Behringer / Midas** | **X32 / M32 / Wing** (USB Card) | USB 2.0 | 32 in / 32 out | X-USB / DN32-USB ASIO | **Homologado** | Permite ingest e envio de 32 canais diretos da mesa de som. |
-| **Yamaha / Steinberg** | **UR22C / UR44C / UR816C** | USB 3.1 | 2 a 8 canais | Yamaha Steinberg USB ASIO | **Homologado** | DSP integrado; monitoramento sem latência. |
+| **Focusrite** | **Scarlett 2i2 / 4i4 / 8i6** (Gen 3/4) | USB-C | 2 a 8 entradas | Focusrite ASIO Driver v4.x | **Compatibilidade prevista** | Buffer ideal: 128 ou 256 samples em 48 kHz. |
+| **Focusrite** | **Scarlett 18i20 / Clarett+** | USB-C | 18 in / 20 out (ADAT) | Focusrite ASIO Driver v4.x | **Compatibilidade prevista** | Mapeamento multicanal de estúdio com 8 pré-amps. |
+| **Behringer** | **U-Phoria UMC202HD / UMC404HD** | USB 2.0 | 2 a 4 in XLR/P10 | Behringer UMC ASIO Driver 5.x | **Compatibilidade prevista** | Padrão MIDAS; excelente relação custo/benefício. |
+| **Behringer** | **U-Phoria UMC1820** | USB 2.0 | 8 in XLR / ADAT | Behringer UMC ASIO Driver 5.x | **Compatibilidade prevista** | Até 16 canais com expansão ótica ADA8200. |
+| **Behringer / Midas** | **X32 / M32 / Wing** (USB Card) | USB 2.0 | 32 in / 32 out | X-USB / DN32-USB ASIO | **Compatibilidade prevista** | Permite ingest e envio de 32 canais diretos da mesa de som. |
+| **Yamaha / Steinberg** | **UR22C / UR44C / UR816C** | USB 3.1 | 2 a 8 canais | Yamaha Steinberg USB ASIO | **Compatibilidade prevista** | DSP integrado; monitoramento sem latência. |
 | **RME** | **Babyface Pro FS / Fireface UCX II** | USB 2.0 | Multi-canal | RME MADIface / Fireface ASIO | **Referência** | O driver mais estável do mercado broadcast (< 3 ms RTT). |
-| **Audinate** | **Dante Virtual Soundcard (DVS)** | Ethernet | Até 64 in / 64 out | DVS ASIO Driver | **Homologado** | Para integração com redes de áudio sobre IP Dante/AES67. |
+| **Audinate** | **Dante Virtual Soundcard (DVS)** | Ethernet | Até 64 in / 64 out | DVS ASIO Driver | **Compatibilidade prevista** | Para integração com redes de áudio sobre IP Dante/AES67. |
 
 ---
 
@@ -145,3 +145,11 @@ A gravação simultânea de múltiplas entradas (ISO MultiCorder) exige alta tax
   - **NodeMCU ESP32 (WROOM-32)**: Para acionamento de fitas de LED NeoPixel (WS2812B) no topo de câmeras broadcast ou tripés.
   - Código-fonte e firmware C++ canônicos disponíveis em: [`3mix-panel/firmware/esp32-tally/`](file:///D:/DRIVE/IA/antigravity/3Mix/3mix-panel/firmware/esp32-tally/).
 
+
+## Revisão de evidências vMix 30
+
+As antigas marcações genéricas de Homologado sem referência de ensaio foram reclassificadas como Compatibilidade prevista. Para restaurar homologação, anexar versão/hash do pacote, modelo, driver, modo, duração e logs do ensaio físico.
+
+Estados: Compatibilidade prevista; Implementado sem teste físico; Em homologação Alpha; Homologado com evidência; Incompatível; Não testado.
+
+Compatível nas tabelas legadas não equivale a homologação. A existência de plugin AJA não confirma IP25, KONA X ou Corvid 88 Gen 3: esses modelos permanecem Não testado até confirmação do SDK e ensaio.

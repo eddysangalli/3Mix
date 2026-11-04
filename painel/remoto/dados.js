@@ -28,8 +28,8 @@
   return '';
  }
  function renderMapping(mapping={}){
- const columns=Object.keys(current()?.rows[0]||{}),kind=el('data-kind').value,fields=kind==='score'?['teamHome','teamAway','scoreHome','scoreAway','minutes','period']:kind==='person'?['title','subtitle','color','input','call']:kind==='lower'?['title','subtitle','color']:kind==='text'?['text']:kind==='inputName'?['name']:null;
- const labels={input:'Entrada (nome ou UUID)',call:'Call (nome, ID ou UUID)',title:'Nome',subtitle:'Cargo',color:'Cor',teamHome:'Casa',teamAway:'Visitante',scoreHome:'Pontos casa',scoreAway:'Pontos visitante',minutes:'Minutos',period:'Período',text:'Texto',name:'Nome da entrada'};
+ const columns=Object.keys(current()?.rows[0]||{}),kind=el('data-kind').value,fields=kind==='score'?['teamHome','teamAway','scoreHome','scoreAway','minutes','period']:kind==='person'?['title','subtitle','color','input','call','image']:kind==='lower'?['title','subtitle','color','image']:kind==='text'?['text']:kind==='inputName'?['name']:null;
+ const labels={input:'Entrada (nome ou UUID)',call:'Call (nome, ID ou UUID)',title:'Nome',subtitle:'Cargo',color:'Cor',image:'Imagem / Foto (Path ou URL)',teamHome:'Casa',teamAway:'Visitante',scoreHome:'Pontos casa',scoreAway:'Pontos visitante',minutes:'Minutos',period:'Período',text:'Texto',name:'Nome da entrada'};
  // Formatação só para campo com nome FIXO (fields!==null): 'score' fica fora porque usa
  // número puro (ver fontes-dados.mjs bind()); 'browser'/'variables' (campo de template
  // livre, nome digitado pelo operador em data-field-name) ficam fora porque o controle de

@@ -146,7 +146,7 @@ export class ChromaEngine{
   return (this.p.state?.inputs||[]).filter(x=>!x.audioOnly&&x.key&&x.key!==director&&!INTERNAL.test(x.name));
  }
  source(key){
-  const target=this.targets().find(x=>x.key===key);
+  const target=this.targets().find(x=>x.key===key || x.name===key);
   if(!target)fail('Entrada visual indisponível para chroma');
   return target;
  }
@@ -243,17 +243,20 @@ export class ChromaEngine{
   const presets=[...BUILTIN.map(b=>({...b,builtin:true})),...this.presets.map(x=>({...x,builtin:false}))];
   const targets=this.targets().map(x=>({key:x.key,name:x.name,kind:x.kind||''}));
   let details=null;
-  if(key&&targets.some(x=>x.key===key)){
-   const filter=await this.filterOf(key);
-   const nvFilter=await this.filterNvOf(key);
+  const resolvedTarget = key ? this.targets().find(x=>x.key===key || x.name===key) : null;
+  if(resolvedTarget){
+   const actualKey = resolvedTarget.key;
+   const filter=await this.filterOf(actualKey);
+   const nvFilter=await this.filterNvOf(actualKey);
    details={
-    key,
+    key: actualKey,
+    name: resolvedTarget.name,
     exists:!!filter,
     enabled:filter?.filterEnabled||false,
     settings:chromaSettings(filter?.filterSettings||{}),
     kind:filter?.filterKind||null,
     name:filter?.filterName||null,
-    warning:await this.nestWarning(key),
+    warning:await this.nestWarning(actualKey),
     nvidia:{
      exists:!!nvFilter,
      enabled:nvFilter?.filterEnabled||false,
@@ -383,14 +386,17 @@ export class ChromaEngine{
   if(previous)return previous;                                    // capturas concorrentes compartilham uma suspensão
   const run=(async()=>{
    const filter=await this.filterOf(key),wasEnabled=!!filter?.filterEnabled;
+   const nvFilter=await this.filterNvOf(key).catch(()=>null),wasNvEnabled=!!nvFilter?.filterEnabled;
    const program=inProgram(this.p,key);
-   if(wasEnabled&&program.direct)fail('Esta entrada está no Programa; desligue o chroma por um instante para amostrar a cor real do fundo');
-   let suspended=false;
+   if((wasEnabled||wasNvEnabled)&&program.direct)fail('Esta entrada está no Programa; desligue o chroma por um instante para amostrar a cor real do fundo');
+   let suspendedChroma=false,suspendedNv=false;
    try{
-    if(wasEnabled){await this.p.req('SetSourceFilterEnabled',{sourceUuid:key,filterName:CHROMA_FILTER,filterEnabled:false});suspended=true;}
+    if(wasEnabled){await this.p.req('SetSourceFilterEnabled',{sourceUuid:key,filterName:CHROMA_FILTER,filterEnabled:false});suspendedChroma=true;}
+    if(wasNvEnabled){await this.p.req('SetSourceFilterEnabled',{sourceUuid:key,filterName:NV_CHROMA_FILTER,filterEnabled:false});suspendedNv=true;}
     return await capture();
    }finally{
-    if(suspended)await this.p.req('SetSourceFilterEnabled',{sourceUuid:key,filterName:CHROMA_FILTER,filterEnabled:true}).catch(()=>{});
+    if(suspendedChroma)await this.p.req('SetSourceFilterEnabled',{sourceUuid:key,filterName:CHROMA_FILTER,filterEnabled:true}).catch(()=>{});
+    if(suspendedNv)await this.p.req('SetSourceFilterEnabled',{sourceUuid:key,filterName:NV_CHROMA_FILTER,filterEnabled:true}).catch(()=>{});
    }
   })();
   this.suspendLock.set(key,run);
@@ -440,6 +446,7 @@ export class ChromaEngine{
    key:target.key,name:target.name,
    point:{x:nx,y:ny},radius,pixels:color.pixels,
    color:{...color,hex:keyColorToHex(keyColor)},
+   hex:keyColorToHex(keyColor),
    keyColor,
    suggested:{key_color_type:'custom',key_color:keyColor,similarity:400,smoothness:80,spill:100,opacity:1,contrast:0,brightness:0,gamma:0},
    source:{width:image.width,height:image.height,format:imageFormat},

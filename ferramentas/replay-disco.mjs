@@ -28,7 +28,14 @@ const FILTER = "3Mix Replay Rec";
 // Source Record forwards this OBS enum; DISABLE (0) bypasses GPU rescaling.
 const GPU_SCALE_BICUBIC = 2;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const empty = () => ({ rec: false, speed: 50, activePlayer: "A", selectedEventId: null, events: [], players: {}, markIn: null, session: null, back: null, backPreview: null, linked: false, cameraOptions: {}, audioEnabled: true, retention: { minutes: 30, segmentSeconds: 60, enabled: false } });
+const defaultTags = () => [
+  { id: 'gol', name: 'Gol', color: '#16a34a' },
+  { id: 'falta', name: 'Falta', color: '#eab308' },
+  { id: 'var', name: 'VAR', color: '#ef4444' },
+  { id: 'highlights', name: 'Melhores Momentos', color: '#3b82f6' },
+  { id: 'defesa', name: 'Defesa', color: '#8b5cf6' }
+];
+const empty = () => ({ rec: false, speed: 50, activePlayer: "A", selectedEventId: null, events: [], players: {}, markIn: null, session: null, back: null, backPreview: null, linked: false, cameraOptions: {}, audioEnabled: true, retention: { minutes: 30, segmentSeconds: 60, enabled: false }, tagsLibrary: defaultTags() });
 
 function execute(executable, args, timeout = 60000, binary = false) {
   return new Promise((resolve, reject) => {
@@ -222,6 +229,8 @@ export class DiskReplay {
         case "relocate": await this.relocateClip(data);break;
         case "relink": await this.relinkFolder(data);break;
         case "update-event": await this.updateEvent(data);break;
+        case "tag-create": await this.createTag(data);break;
+        case "tag-remove": await this.removeTag(data);break;
         case "trim-event": await this.trimEvent(data);break;
         case "unload": await this.unloadPlayer(data.player);break;
         case "link": await this.link(data.enabled); break;
@@ -520,16 +529,29 @@ export class DiskReplay {
     return this.exportEventsTo([event],d.directory);
   }
   async exportEvents(d){
+    let pool = this.state.events;
+    if(Array.isArray(d.tags) && d.tags.length){
+      const filterTags = new Set(d.tags.map(t => String(t).toLowerCase()));
+      pool = pool.filter(e => Array.isArray(e.tags) && e.tags.some(t => filterTags.has(String(t).toLowerCase())));
+    }
+    if(typeof d.folder === 'string' && d.folder.trim()){
+      const folder = d.folder.trim().toLowerCase();
+      pool = pool.filter(e => String(e.folder || '').toLowerCase() === folder);
+    }
+    if(typeof d.cam === 'string' && d.cam.trim()){
+      const cam = d.cam.trim();
+      pool = pool.filter(e => e.cam === cam || (Array.isArray(e.clips) && e.clips.some(c => c.cam === cam)));
+    }
     const ids=Array.isArray(d.eventIds)?d.eventIds:null;
     if(ids){
       if(!ids.length||ids.length>500)throw Error('Selecione de 1 a 500 lances para exportar');
-      const byId=new Map(this.state.events.map(e=>[e.id,e]));
+      const byId=new Map(pool.map(e=>[e.id,e]));
       const events=ids.map(id=>byId.get(id));
       if(events.some(e=>!e))throw Error('Um dos lances selecionados não existe mais');
       return this.exportEventsTo(events,d.directory);
     }
-    // Sem eventIds: "exportar todos", igual ao ReplayExportAllEvents do vMix.
-    return this.exportEventsTo(this.state.events,d.directory);
+    // Sem eventIds: "exportar todos" do conjunto filtrado (compatível com ReplayExportAllEvents do vMix)
+    return this.exportEventsTo(pool,d.directory);
   }
   async recoverMarkedEvent() {
     if(this.recordingFolder!=='replay'||this.state.rec||!this.state.session||!this.state.markIn||this.state.markIn.sessionId!==this.state.session.id)throw Error('Nenhum IN interrompido recuperável');
@@ -1016,6 +1038,27 @@ export class DiskReplay {
     await this.save();
   }
 
+  async createTag(d) {
+    const name = String(d.name || '').trim().slice(0, 40);
+    if (!name) throw Error('Informe o nome da etiqueta');
+    const color = String(d.color || '#3b82f6').slice(0, 16);
+    const id = name.toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+    this.state.tagsLibrary = this.state.tagsLibrary || defaultTags();
+    if (!this.state.tagsLibrary.some(t => t.id === id)) {
+      this.state.tagsLibrary.push({ id, name, color });
+      await this.save();
+    }
+  }
+
+  async removeTag(d) {
+    const id = String(d.id || '').trim().toLowerCase();
+    this.state.tagsLibrary = (this.state.tagsLibrary || defaultTags()).filter(t => t.id !== id);
+    for (const e of this.state.events) {
+      if (Array.isArray(e.tags)) e.tags = e.tags.filter(t => t.toLowerCase() !== id);
+    }
+    await this.save();
+  }
+
   async updateEvent(d) {
     const event=this.state.events.find(e=>e.id===d.eventId);
     if(!event)throw Error('Lance não encontrado');
@@ -1028,6 +1071,29 @@ export class DiskReplay {
       const category=String(d.category).trim();
       if(category.length>60||/[\x00-\x1f]/.test(category))throw Error('Categoria deve ter até 60 caracteres sem controles');
       event.category=category;
+    }
+    if(d.tags!==undefined){
+      if(!Array.isArray(d.tags))throw Error('Tags deve ser uma lista');
+      event.tags = d.tags.map(t => String(t).trim().slice(0, 40)).filter(Boolean).slice(0, 15);
+    }
+    if(d.folder!==undefined){
+      const folder=String(d.folder).trim();
+      if(folder.length>60||/[\x00-\x1f]/.test(folder))throw Error('Pasta/Lista deve ter até 60 caracteres');
+      event.folder=folder;
+    }
+    if(d.notesByCam!==undefined && typeof d.notesByCam === 'object' && d.notesByCam !== null){
+      event.notesByCam = event.notesByCam || {};
+      for(const [cam, note] of Object.entries(d.notesByCam)){
+        if(cam && typeof note === 'string') event.notesByCam[cam.slice(0, 40)] = note.trim().slice(0, 140);
+      }
+    }
+    if(d.preRollSeconds!==undefined){
+      const pre = Number(d.preRollSeconds);
+      if(Number.isFinite(pre) && pre >= 0 && pre <= 30) event.preRollSeconds = pre;
+    }
+    if(d.postRollSeconds!==undefined){
+      const post = Number(d.postRollSeconds);
+      if(Number.isFinite(post) && post >= 0 && post <= 30) event.postRollSeconds = post;
     }
     await this.save();
   }

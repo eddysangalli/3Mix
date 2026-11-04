@@ -2,7 +2,7 @@
 // Engine with --remote-debugging-port=9333. Puts the clocks and the Program scene back at the end.
 import { createRequire } from "node:module";
 import { connect, sleep } from "./obsws.mjs";
-const require = createRequire("D:/DRIVE/IA/antigravity/vmixtwste/rea/package.json");
+const require = createRequire(import.meta.url);
 const WebSocket = require("ws");
 const attach = async (end) => { const t = (await (await fetch("http://127.0.0.1:9333/json")).json()).find((x) => x.url.endsWith(end)); const c = new WebSocket(t.webSocketDebuggerUrl); await new Promise((r) => c.on("open", r)); let id = 0; const waits = new Map(); c.on("message", (raw) => { const m = JSON.parse(String(raw)); waits.get(m.id)?.(m); waits.delete(m.id); });
   return { ev: (expression) => new Promise((r) => { const i = ++id; waits.set(i, (m) => r(m.result?.exceptionDetails ? "ERRO: " + m.result.exceptionDetails.exception?.description : m.result?.result?.value)); c.send(JSON.stringify({ id: i, method: "Runtime.evaluate", params: { expression, returnByValue: true, awaitPromise: true } })); }), close: () => c.close() }; };

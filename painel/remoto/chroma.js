@@ -593,6 +593,42 @@
 
     $('telemetry-sample-pos').textContent = `Última amostra: X ${(normX * 100).toFixed(1)}%, Y ${(normY * 100).toFixed(1)}%`;
 
+    // 1. Amostragem direta e instantânea no canvas local (0ms latência)
+    let localHex = null;
+    try {
+      const ctx = canvas.getContext('2d');
+      const cx = Math.floor(normX * canvas.width);
+      const cy = Math.floor(normY * canvas.height);
+      const imgData = ctx.getImageData(Math.max(0, cx - 1), Math.max(0, cy - 1), 3, 3).data;
+      let r = 0, g = 0, b = 0, count = 0;
+      for (let i = 0; i < imgData.length; i += 4) {
+        if (imgData[i + 3] > 10) { // Ignora pixels totalmente transparentes
+          r += imgData[i];
+          g += imgData[i + 1];
+          b += imgData[i + 2];
+          count++;
+        }
+      }
+      if (count > 0) {
+        r = Math.round(r / count);
+        g = Math.round(g / count);
+        b = Math.round(b / count);
+        localHex = '#' + [r, g, b].map(c => c.toString(16).padStart(2, '0')).join('').toUpperCase();
+      }
+    } catch (err) {
+      console.warn('Leitura de pixel local do canvas indisponível:', err);
+    }
+
+    // Se temos cor local, já atualiza a interface imediatamente
+    if (localHex) {
+      $('hex-color-input').value = localHex;
+      $('color-box').style.background = localHex;
+      document.querySelectorAll('#color-type-tabs .color-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-type') === 'custom');
+      });
+      $('custom-color-row').style.display = 'flex';
+    }
+
     try {
       const res = await api('/api/chroma', 'POST', {
         action: 'chroma_sample',
@@ -603,9 +639,10 @@
       });
 
       const sample = res.chroma || {};
-      if (sample.hex) {
-        $('hex-color-input').value = sample.hex;
-        $('color-box').style.background = sample.hex;
+      const pickedHex = sample.hex || sample.color?.hex || localHex;
+      if (pickedHex) {
+        $('hex-color-input').value = pickedHex;
+        $('color-box').style.background = pickedHex;
 
         // Ativa a aba "Personalizado"
         document.querySelectorAll('#color-type-tabs .color-tab').forEach(b => {
@@ -618,8 +655,14 @@
         await applyCurrentSettings();
       }
     } catch (err) {
-      alert('Erro na amostragem da cor: ' + err.message);
-      toggleEyedropper();
+      console.warn('Amostragem remota falhou, aplicando cor local:', err);
+      if (localHex) {
+        toggleEyedropper();
+        await applyCurrentSettings();
+      } else {
+        alert('Erro na amostragem da cor: ' + err.message);
+        toggleEyedropper();
+      }
     }
   }
 

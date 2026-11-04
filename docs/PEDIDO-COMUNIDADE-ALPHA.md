@@ -150,3 +150,105 @@ O coletor de logs do 3Mix possui um filtro de redação automático estrito:
 ---
 
 *A equipe do 3Mix agradece imensamente a dedicação de cada profissional de transmissão que está ajudando a construir o mais moderno switcher broadcast independente.*
+
+
+## Homologação adicional vMix 30 — gates comuns
+
+Estas missões preservam as seis missões anteriores. Executar fora de produção. Antes de testar: registrar versão/hash do pacote, Windows, GPU/driver, modelo/firmware e topologia; confirmar que o motor instalado enumera a capacidade. Opção ausente significa **não disponível no pacote**, não suporte aprovado. Código e mock não são homologação física. Não instalar DLLs não autorizadas nem enviar chaves, passphrases ou URLs autenticadas.
+
+Estados: Compatibilidade prevista; Implementado sem teste físico; Em homologação Alpha; Homologado com evidência; Incompatível; Não testado. Um recurso sem integração operacional permanece pendência de engenharia.
+
+### MISSÃO 7 — DeckLink SDI, 10 bits e áudio multicanal
+
+- **Equipamento:** DeckLink identificada por modelo/revisão; gerador de padrão e receptor/analisador SDI capaz de confirmar bits e canais.
+- **Driver e sistema:** Desktop Video compatível com o modelo e Windows do pacote; registrar versões, sem supor mínimo universal.
+- **Configuração do 3Mix:** Central de Saídas → SDI: atualizar dispositivos, selecionar modo enumerado, conteúdo e barramento disponíveis. Profundidade, HDR e 16 canais são capacidades distintas.
+- **Passos:** Testar padrão em 8 bits e repetir em 10 bits somente quando negociado; identificar separadamente cada canal disponível; trocar Programa/entrada/M/E já configurado e barramento; testar porta ocupada e inicialização sem placa.
+- **Resultado esperado:** Modo e conteúdo confirmados no receptor, áudio correto, incompatibilidades recusadas. Se o caminho expuser apenas estéreo, multicanal fica indisponível, não homologado.
+- **Falhas, logs e evidências:** Modo solicitado/observado, conector, driver/firmware, vídeo de padrão, captura do analisador e diagnóstico sanitizado do motor; ensaio de 30 minutos. Imagem visível sozinha não comprova 10 bits.
+
+### MISSÃO 8 — Captura AJA e compatibilidade de modelos
+
+- **Equipamento:** AJA IP25, KONA X ou Corvid 88 Gen 3, fonte e infraestrutura adequadas ao modelo.
+- **Driver e sistema:** Confirmar primeiro suporte no SDK/plugin/driver distribuído e licença; se ausente, registrar bloqueio de engenharia. Plugin genérico não comprova o modelo.
+- **Configuração do 3Mix:** Enumerar captura/saída AJA existente, usando apenas conectores e modos oferecidos.
+- **Passos:** Abrir sem placa para verificar diagnóstico; com placa, capturar padrão/áudio, testar modos enumerados, perda/retorno de sinal e reabertura; simultaneidade apenas quando anunciada pela capacidade.
+- **Resultado esperado:** Modelo e modo reconhecidos, recuperação clara e sincronismo estável. Não generalizar um ensaio para toda família AJA.
+- **Falhas, logs e evidências:** Modelo/revisão, SDK/driver/firmware, mapa de conexões, horário e logs AJA/3Mix sanitizados; gravação e relatório de 30 minutos.
+
+### MISSÃO 9 — NDI entre computadores e múltiplos emissores
+
+- **Equipamento:** Dois PCs e rede cabeada dimensionada; receptor NDI identificado e padrões distintos.
+- **Driver e sistema:** Registrar plugin/SDK compilado e runtime carregado em ambas as pontas; runtime observado 6.3.2.0 não identifica SDK.
+- **Configuração do 3Mix:** Central de Saídas → NDI: nomes únicos, conteúdo e áudio por sender; não alterar 3Mix IO.
+- **Passos:** Receber cada sender no segundo PC; aumentar concorrência dentro dos limites reais; desligar um sender, interromper rede e recuperar; medir drops e sincronismo por 30 minutos.
+- **Resultado esperado:** Fontes e áudio corretos, falhas isoladas e recuperação observável. Discovery não comprova vídeo estável. MKV/metadados só testar se houver caminho integrado e licenciado, com roundtrip.
+- **Falhas, logs e evidências:** Topologia, NIC/velocidade, versões, nomes sanitizados, CPU/GPU/drops e logs das duas pontas; trechos de vídeo com horário.
+
+### MISSÃO 10 — SRT avançado e transmissão entre redes
+
+- **Equipamento:** Duas máquinas/redes e receptor SRT conhecido; endpoint autorizado de plataforma opcional.
+- **Driver e sistema:** Registrar biblioteca efetivamente usada, firewall/NAT e portas; nunca compartilhar segredos.
+- **Configuração do 3Mix:** Usar transporte existente; Caller/Listener/Rendezvous somente quando expostos; explicitar unidade da latência nas duas pontas.
+- **Passos:** Caller→Listener, inverter papéis, Rendezvous quando viável; variar latência fora do ar; interromper conexão e medir reconexão; validar áudio/sync e plataforma autorizada. Perdas induzidas só em laboratório autorizado.
+- **Resultado esperado:** Sinal correto e erros distinguíveis; reconexão sem duplicação. Estatística ausente não significa perda zero. Plataforma e contribuição ponto a ponto precisam de ensaios separados.
+- **Falhas, logs e evidências:** Topologia sanitizada, modo, latência, tempo de recuperação, estatísticas disponíveis e logs das duas pontas; vídeo antes/depois e horários.
+
+### MISSÃO 11 — Desentrelaçamento e saídas físicas de vídeo
+
+- **Equipamento:** Fontes/padrões 1080i, 576i e 480i, captura e monitor/analisador apropriados; marcador A/V.
+- **Driver e sistema:** Drivers e modos enumerados, taxa racional e ordem de campos conhecidas; não confundir campos/s com quadros/s.
+- **Configuração do 3Mix:** Selecionar fonte nativa de captura, ordem de campo e método exposto; usar saída física já implementada.
+- **Passos:** Para cada formato: comparar desligado/ligado em movimento, conferir ordem superior/inferior, taxa real, drops e offset A/V; salvar/reabrir e repetir perda/retorno de sinal.
+- **Resultado esperado:** Movimento e ordem corretos, sincronismo medido e taxa confirmada. Captura desentrelaçada não prova saída entrelaçada; saída ausente fica indisponível.
+- **Falhas, logs e evidências:** Formato/taxa/ordem/método, offset A/V e drops, vídeo antes/depois, captura do analisador e diagnóstico sanitizado. Homologar separadamente cada formato.
+
+---
+
+### MISSÃO 12 — Estúdio Virtual Unificado (Câmera, Zoom e Presets)
+
+- **Equipamento:** Entrada de vídeo ao vivo (Câmera HDMI/SDI ou NDI/Webcam recortada por Croma Key) e tela de alta resolução para conferência visual dos quatro planos de profundidade.
+- **Configuração do 3Mix:** Criar ou selecionar um Input configurado como Estúdio Virtual (`Virtual Set`). Conectar a câmera ao slot Z=2 (Apresentador), Z=0 (Telão de fundo), Z=1 (Cenário 3D) e Z=3 (Bancada/Mesa frontal).
+- **Passos de reprodução:**
+  1. No card da entrada na Mesa de Corte, inspecionar a coluna lateral de enquadramentos de câmera (botões `1 GERAL`, `2 MÉDIO`, `3 CLOSE`, `4 TELÃO`).
+  2. Acionar a transição de câmera de `GERAL` (1.0x) para `MÉDIO` (1.45x) e `CLOSE` (2.05x).
+  3. Ajustar as velocidades de transição (`F` Rápido, `M` Médio, `S` Lento, `C` Cut instantâneo).
+  4. Observar a movimentação em tempo real no monitor de Preview e PGM.
+- **Critérios de aprovação:**
+  - Todas as 4 camadas devem escalar e transladar em bloco rigorosamente sincronizado, sem descolamento de perspectiva entre o apresentador e a bancada.
+  - A transição dinâmica de câmera deve respeitar o tempo configurado (ex: 1.5s em Slow) com aceleração e desaceleração suaves (curva sinusoidal de easing).
+  - O corte instantâneo (`Cut`) deve saltar de posição imediatamente sem flicker ou quadros pretos.
+
+---
+
+### MISSÃO 13 — Apresentações de Slides Nativos (Vetor SVG com Cache-Busting)
+
+- **Equipamento:** Qualquer estação Windows com saída secundária de vídeo (Projetor, LED Wall ou retorno de palco/confiança).
+- **Configuração do 3Mix:** Adicionar entrada do tipo `Apresentação de Slides` através do painel de criação de entradas ou via API `/api/slides`.
+- **Passos de reprodução:**
+  1. Carregar um arquivo de slides ou conjunto de tópicos com bullets animados.
+  2. Navegar entre slides usando atalhos de teclado (Next/Prev) ou o painel remoto `/remoto/slides.html`.
+  3. Acionar o avanço progressivo de bullets (revelação sequencial de tópicos).
+  4. Modificar o texto ou a formatação de um slide em tempo real durante a execução.
+- **Critérios de aprovação:**
+  - O slide deve renderizar com nitidez vetorial perfeita na resolução nativa de PGM (1080p ou 4K), sem artefatos de compressão de bitmap.
+  - O avanço de tópicos deve revelar os itens com transição de opacidade limpa.
+  - As atualizações de conteúdo devem refletir imediatamente no navegador de cena OBS sem reter cache antigo (validação do parâmetro de cache-busting `?t=timestamp`).
+
+- **Equipamento:** Fontes/padrões 1080i, 576i e 480i, captura e monitor/analisador apropriados; marcador A/V.
+- **Driver e sistema:** Drivers e modos enumerados, taxa racional e ordem de campos conhecidas; não confundir campos/s com quadros/s.
+- **Configuração do 3Mix:** Selecionar fonte nativa de captura, ordem de campo e método exposto; usar saída física já implementada.
+- **Passos:** Para cada formato: comparar desligado/ligado em movimento, conferir ordem superior/inferior, taxa real, drops e offset A/V; salvar/reabrir e repetir perda/retorno de sinal.
+- **Resultado esperado:** Movimento e ordem corretos, sincronismo medido e taxa confirmada. Captura desentrelaçada não prova saída entrelaçada; saída ausente fica indisponível.
+- **Falhas, logs e evidências:** Formato/taxa/ordem/método, offset A/V e drops, vídeo antes/depois, captura do analisador e diagnóstico sanitizado. Homologar separadamente cada formato.
+
+---
+
+### MISSÃO 14 — Gerenciador de Plugins OBS (somente após entrega de build integrada)
+
+- **Estado:** roteiro de homologação Alpha; o código, os testes automatizados e a presença de uma DLL não comprovam carregamento e operação no pacote entregue. Executar em uma cópia de QA, com o tema e a configuração fechada do 3Mix conferidos antes de abrir o aplicativo, nunca durante transmissão ou gravação ativa.
+- **Base sem hardware especial:** Windows x64; versão e SHA256 do 3Mix, libobs e ZIP do plugin; origem oficial, licença e dependências identificadas. Preferir um plugin compatível que registre um filtro ou Input simples. Não executar instalador EXE.
+- **Passos:** Instalar o ZIP pela seção Configurações → Plugins; confirmar que a ação fica pendente até reiniciar; reiniciar só a instância de QA; conferir no log o módulo carregado, o recurso registrado e seu uso na Mesa; desabilitar e reiniciar; confirmar ausência do recurso; habilitar e reiniciar; atualizar com backup, executar rollback e conferir a versão anterior; remover e confirmar preservação de projetos/configurações. Repetir com ZIP incompatível, DLL x86, caminho `../` e tentativa de sobrepor módulo essencial, que devem ser recusados antes de executar qualquer código.
+- **Recuperação:** Provocar falha apenas na instância de QA com fixture autorizada, verificar identificação do último plugin alterado e iniciar o modo de segurança sem carregar terceiros. Registrar se o 3Mix continua abrindo e se o projeto original permanece íntegro.
+- **Hardware específico:** Para plugins de captura AJA/DeckLink, ASIO, NDI, GPU ou controle externo, registrar modelo/revisão, driver/SDK/runtime, firmware, conexões e recursos efetivamente enumerados. Testar sinal, áudio, reconexão e duração por equipamento. Sem o hardware ou dependência correta, classificar como **não homologado naquele equipamento**; o tester não deve suprir integração de engenharia ausente.
+- **Evidência:** Capturas da seção Plugins e do recurso na interface 3Mix, logs sanitizados de cada início, hash dos pacotes, versões antes/depois, resultado do rollback, inventário de Inputs/filtros/transições/encoders/outputs e estado de PGM/Preview, M/Es, DSKs e saídas antes/depois. Relatar separadamente interface Qt/dock próprio que exija adaptador.

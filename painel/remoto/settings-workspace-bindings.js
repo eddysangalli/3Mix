@@ -18,7 +18,7 @@
     audioTracks: 'Qualidade e nome das trilhas 1 a 6. As trilhas usadas são escolhidas em Saída avançada.',
     networkOutput: 'Reconexão, atraso e endereçamento da transmissão principal; destinos independentes têm as próprias opções.',
     encoders: 'Propriedades reais do encoder carregado, com botões próprios para aplicar e descartar.',
-    plugins: 'Ferramentas efetivamente registradas pelos plugins carregados.',
+    plugins: 'Gerencie plugins nativos e abra as ferramentas registradas pelos módulos carregados.',
     workspace: 'Organização persistente dos módulos e tamanho dos cards, independente do texto.',
   });
   let disposed = false, reading = false, lastImage = null;

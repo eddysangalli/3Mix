@@ -10,6 +10,7 @@ node_modules/
 .temp/
 *.tmp
 scratch/
+downloads/
 
 # OBS caches and session storage
 plugin_config/obs-browser/

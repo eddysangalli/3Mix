@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>3Mix · Apresentador de Slides & PowerPoint</title>
+  <script src="3mix-padrao.js"></script>
+  <link rel="stylesheet" href="3mix-grafite.css">
+  <link rel="stylesheet" href="3mix-padrao.css">
+  <style>
+    body {
+      background: #0f1318;
+      color: #e2e8f0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      user-select: none;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 16px;
+      background: #18202b;
+      border-bottom: 1px solid #283344;
+      flex: none;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .topbar-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      color: #38bdf8;
+    }
+    .deck-badge {
+      font-size: 11px;
+      background: #232c3b;
+      padding: 3px 8px;
+      border-radius: 4px;
+      color: #94a3b8;
+      border: 1px solid #334155;
+    }
+    .topbar-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .btn {
+      background: #232d3d;
+      color: #f1f5f9;
+      border: 1px solid #3b4a60;
+      border-radius: 4px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      background: #313e54;
+      border-color: #60a5fa;
+    }
+    .btn.primary {
+      background: #0284c7;
+      border-color: #38bdf8;
+      color: #ffffff;
+    }
+    .btn.primary:hover {
+      background: #0369a1;
+    }
+    .btn.present {
+      background: linear-gradient(180deg, #16a34a, #15803d);
+      border-color: #22c55e;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 800;
+      padding: 12px 20px;
+      box-shadow: 0 4px 12px rgba(22, 163, 74, 0.4);
+    }
+    .btn.present:hover {
+      background: linear-gradient(180deg, #15803d, #166534);
+    }
+
+    /* Main Presenter Grid */
+    .presenter-main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 140px minmax(0, 1fr);
+      gap: 16px;
+      padding: 14px 16px;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .stage-card {
+      display: flex;
+      flex-direction: column;
+      background: #141a23;
+      border: 1px solid #253041;
+      border-radius: 6px;
+      overflow: hidden;
+      min-height: 0;
+    }
+    .stage-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 12px;
+      background: #1b2330;
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #283344;
+    }
+    .stage-card.preview .stage-header {
+      color: #4ade80;
+      border-top: 3px solid #16a34a;
+    }
+    .stage-card.program .stage-header {
+      color: #f87171;
+      border-top: 3px solid #dc2626;
+    }
+    .viewport-box {
+      aspect-ratio: 16 / 9;
+      background: #000;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-bottom: 1px solid #283344;
+      flex: none;
+    }
+    .viewport-box img, .viewport-box svg {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .viewport-empty {
+      color: #475569;
+      font-size: 13px;
+      text-align: center;
+    }
+    .notes-box {
+      flex: 1;
+      padding: 10px 14px;
+      overflow-y: auto;
+      font-size: 12.5px;
+      line-height: 1.5;
+      background: #0c1017;
+      color: #cbd5e1;
+    }
+    .notes-title {
+      font-size: 10.5px;
+      text-transform: uppercase;
+      color: #64748b;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    /* Central Actions */
+    .controls-center {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+    }
+    .controls-center .btn {
+      width: 100%;
+      justify-content: center;
+      padding: 10px;
+    }
+
+    /* Thumbnails Carousel */
+    .thumbnails-strip {
+      height: 130px;
+      background: #11161f;
+      border-top: 1px solid #232c3b;
+      padding: 8px 14px;
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      align-items: center;
+      flex: none;
+    }
+    .thumb-item {
+      flex: none;
+      width: 160px;
+      height: 106px;
+      background: #18202b;
+      border: 2px solid #2e3a4e;
+      border-radius: 4px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.15s ease;
+    }
+    .thumb-item:hover {
+      border-color: #60a5fa;
+      transform: translateY(-2px);
+    }
+    .thumb-item.is-preview {
+      border-color: #22c55e;
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+    }
+    .thumb-item.is-program {
+      border-color: #ef4444;
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+    }
+    .thumb-view {
+      flex: 1;
+      background: #000;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .thumb-view img, .thumb-view svg {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .thumb-num {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      background: rgba(0,0,0,0.75);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+    .thumb-badge {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 2px 5px;
+      border-radius: 3px;
+      text-transform: uppercase;
+    }
+    .thumb-badge.pvw { background: #16a34a; color: #fff; }
+    .thumb-badge.pgm { background: #dc2626; color: #fff; }
+    .thumb-title {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 6px;
+      background: #151b24;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #94a3b8;
+    }
+
+    /* Shortcuts helper */
+    .shortcuts-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 16px;
+      background: #0a0d12;
+      font-size: 11px;
+      color: #64748b;
+      border-top: 1px solid #1c2430;
+      flex: none;
+    }
+    .kbd {
+      background: #1e293b;
+      color: #cbd5e1;
+      padding: 1px 5px;
+      border-radius: 3px;
+      border: 1px solid #334155;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title">📊 3Mix Presenter Mode</div>
+      <div class="deck-badge" id="deck-name">Nenhuma apresentação carregada</div>
+      <div class="deck-badge" id="slide-count">0 slides</div>
+    </div>
+    <div class="topbar-actions">
+      <input type="file" id="file-input-pptx" accept=".pptx" style="display:none;">
+      <button class="btn primary" id="btn-import-pptx">📁 Importar PowerPoint (.pptx)</button>
+      <input type="file" id="file-input-img" accept="image/*" multiple style="display:none;">
+      <button class="btn" id="btn-import-img">🖼️ Importar Imagens</button>
+    </div>
+  </header>
+
+  <main class="presenter-main">
+    <!-- PREVIEW (ARMADO) -->
+    <section class="stage-card preview">
+      <div class="stage-header">
+        <span>Próximo Slide (Preview)</span>
+        <span id="preview-slide-num">Slide —</span>
+      </div>
+      <div class="viewport-box" id="viewport-preview">
+        <div class="viewport-empty">Nenhum slide preparado</div>
+      </div>
+      <div class="notes-box">
+        <div class="notes-title">📝 Notas do Apresentador:</div>
+        <div id="preview-notes">As notas deste slide aparecerão aqui durante a apresentação.</div>
+      </div>
+    </section>
+
+    <!-- CENTRAL CONTROLS -->
+    <section class="controls-center">
+      <button class="btn present" id="btn-present" title="Leva o slide do Preview para o Programa (Enter / Espaço)">
+        APRESENTAR<br><span style="font-size:11px;font-weight:normal;">[ ENTER ]</span>
+      </button>
+      <button class="btn" id="btn-anim-next" style="display:none;background:#4f46e5;border-color:#6366f1;" title="Executa o próximo passo da animação (Tecla N)">
+        ✨ Próx. Animação <span id="anim-step-badge" style="font-size:10px;background:#312e81;padding:1px 5px;border-radius:3px;">1/2</span>
+      </button>
+      <button class="btn" id="btn-prev" title="Slide Anterior (PageUp / Seta Esquerda)">◀ Anterior</button>
+      <button class="btn" id="btn-next" title="Próximo Slide (PageDown / Seta Direita)">Próximo ▶</button>
+      <button class="btn" id="btn-first" title="Primeiro Slide (Home)">⏮ Início</button>
+      
+      <!-- Controles de Vídeo Incorporado -->
+      <div id="video-controls" style="display:none;width:100%;flex-direction:column;gap:6px;padding:6px;background:#18202b;border:1px solid #283344;border-radius:4px;box-sizing:border-box;">
+        <div style="font-size:10px;font-weight:700;color:#38bdf8;text-align:center;">🎬 VÍDEO DO SLIDE</div>
+        <div style="display:flex;gap:4px;width:100%;">
+          <button class="btn" id="btn-video-play" style="flex:1;padding:6px 4px;font-size:11px;justify-content:center;">▶ Play</button>
+          <button class="btn" id="btn-video-pause" style="flex:1;padding:6px 4px;font-size:11px;justify-content:center;">⏸ Pause</button>
+          <button class="btn" id="btn-video-restart" style="flex:1;padding:6px 4px;font-size:11px;justify-content:center;">↺ Início</button>
+        </div>
+      </div>
+
+      <label style="font-size:11px;color:#94a3b8;display:flex;align-items:center;gap:6px;cursor:pointer;margin-top:6px;">
+        <input type="checkbox" id="chk-auto-advance" checked> Auto-avançar
+      </label>
+    </section>
+
+    <!-- PROGRAM (NO AR) -->
+    <section class="stage-card program">
+      <div class="stage-header">
+        <span>No Ar (Program)</span>
+        <span id="program-slide-num" style="background:#dc2626;color:white;padding:1px 6px;border-radius:3px;">● AO VIVO</span>
+      </div>
+      <div class="viewport-box" id="viewport-program">
+        <div class="viewport-empty">Nenhum slide no ar</div>
+      </div>
+      <div class="notes-box">
+        <div class="notes-title">📌 Slide no Ar:</div>
+        <div id="program-title" style="font-weight:700;color:#f8fafc;font-size:13.5px;margin-bottom:4px;">—</div>
+        <div id="program-subtitle" style="color:#94a3b8;">Nenhum conteúdo enviado para a saída.</div>
+        <div id="operator-warnings" style="display:none;background:#2d2013;border:1px solid #d97706;border-radius:4px;padding:6px 10px;margin-top:6px;font-size:11.5px;color:#fcd34d;"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- THUMBNAILS CAROUSEL -->
+  <footer class="thumbnails-strip" id="thumbs-strip">
+    <div style="color:#64748b;font-size:12px;display:flex;align-items:center;justify-content:center;width:100%;">
+      Importe uma apresentação PPTX ou sequência de imagens para navegar pelos slides.
+    </div>
+  </footer>
+
+  <div class="shortcuts-footer">
+    <div>Atalhos: <span class="kbd">PageDown</span> / <span class="kbd">→</span> Próximo · <span class="kbd">PageUp</span> / <span class="kbd">←</span> Anterior · <span class="kbd">Enter</span> / <span class="kbd">Espaço</span> Apresentar · <span class="kbd">Home</span> Início</div>
+    <div id="connection-status">● 3Mix Conectado</div>
+  </div>
+
+  <script src="slides.js"></script>
+</body>
+</html>
+

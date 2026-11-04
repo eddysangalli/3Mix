@@ -55,6 +55,7 @@ const style=[
   {key:'designStyle',label:'Estilo Visual / Geometria',type:'select',default:'modern_internet',options:['modern_internet','classic_tv','swiss_square','esports_neon','corporate_glass','pill_capsule','cyber_bevel','minimal_flat']},
   number('opacity','Opacidade do painel (%)',96,0,100),
   number('fontSize','Tamanho do texto (%)',100,70,140),
+  number('letterSpacing','Espaçamento entre letras (px)',0,-5,30),
   number('offsetX','Deslocamento horizontal (%)',0,-25,25),
   number('offsetY','Deslocamento vertical (%)',0,-25,25),
   number('scale','Escala (%)',100,60,120)

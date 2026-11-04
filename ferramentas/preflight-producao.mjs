@@ -228,6 +228,25 @@ export class PreflightEngine {
           if (isoOpts?.format && isoOpts.format !== 'mpegts') {
             valor += ` · Formato ${String(isoOpts.format).toUpperCase()}`;
           }
+          // Auditoria de Armazenamento Distribuído por SSD (perInput / unidades secundárias)
+          if (isoOpts?.perInput && typeof isoOpts.perInput === 'object') {
+            const extraDirs = Object.entries(isoOpts.perInput).filter(([_, o]) => o && o.directory && o.directory !== pasta);
+            for (const [camKey, o] of extraDirs) {
+              const extraPath = o.directory;
+              const extraStat = await stat(extraPath).catch(() => null);
+              if (!extraStat?.isDirectory()) {
+                return item(id, 'Gravação Distribuída (SSD)', NIVEL.BLOQUEIO, `Unidade/Pasta inacessível para ${camKey}: ${extraPath}`, { alvo: 'gravação', motivo: 'SSD desconectado ou caminho inválido', acao: 'Conecte o SSD ou ajuste a pasta na MultiGravação.' });
+              }
+              const extraDisco = await this.disco(extraPath);
+              if (extraDisco.supported) {
+                if (extraDisco.severity === 'CRITICAL') {
+                  return item(id, 'Gravação Distribuída (SSD)', NIVEL.BLOQUEIO, `SSD de ${camKey} (${extraPath}): apenas ${extraDisco.freeGb} GB livres`, { alvo: 'gravação', motivo: 'Disco quase cheio', acao: 'Libere espaço no SSD secundário.' });
+                } else if (extraDisco.severity === 'WARN') {
+                  return item(id, 'Gravação Distribuída (SSD)', NIVEL.ATENCAO, `${valor} · SSD ${camKey}: ${extraDisco.freeGb} GB livres`, { alvo: 'gravação', acao: 'Confira capacidade do SSD secundário.' });
+                }
+              }
+            }
+          }
           if (disco.severity === 'CRITICAL') return item(id, 'Gravação', NIVEL.BLOQUEIO, valor, { alvo: 'gravação', motivo: 'Disco quase cheio: a gravação pode parar no meio.', acao: 'Libere espaço ou troque a pasta.' });
           if (disco.severity === 'WARN') return item(id, 'Gravação', NIVEL.ATENCAO, valor, { alvo: 'gravação', acao: 'Confira se cabe a duração prevista.' });
           return item(id, 'Gravação', NIVEL.OK, valor, { alvo: 'gravação' });

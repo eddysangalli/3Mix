@@ -14,7 +14,7 @@ export function renderGraphic(id,raw={},seconds=0,clock=new Date()){
   out+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${color}" opacity="${opacity}"${strokeAttr}/>`;
  };
  const text=(x,y,s,size=48,color=F,weight=600,anchor='start')=>{
-  out+=`<text x="${x}" y="${y}" font-size="${size*d.fontSize/100}" font-weight="${weight}" fill="${color}" text-anchor="${anchor}">${esc(s)}</text>`;
+  out+=`<text x="${x}" y="${y}" font-size="${size*d.fontSize/100}" font-weight="${weight}" letter-spacing="${d.letterSpacing}" fill="${color}" text-anchor="${anchor}">${esc(s)}</text>`;
  };
  const wrap=(value,x,y,width,size=48,maxLines=3,color=F)=>{
   const chars=Math.max(12,Math.floor(width/(size*d.fontSize/100*.57))),words=String(value).split(/\s+/);

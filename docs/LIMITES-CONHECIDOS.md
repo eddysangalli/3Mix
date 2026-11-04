@@ -219,6 +219,40 @@ confirmado".
 
 ---
 
-## 8. O que este documento não afirma
+
+---
+
+## 8. PowerPoint & Slide Engine (3Mix SlideEngine Pro)
+
+Auditado e revisado em 04/11/2026 com suíte de 3 baterias de testes automatizados reproduzíveis no repositório (`testes/slides/`):
+- `node testes/slides/test-slide-engine-api.mjs` (Contratos de API, parsing OpenXML e modelos)
+- `node testes/slides/test-slide-engine-compositor.mjs` (Compositor OBS, proporções 16:9/4:3 e isolamento Program/Preview)
+- `node testes/slides/test-slide-engine-audiovisual.mjs` (Roteamento de áudio real, faders/mute e Play/Pause contínuo)
+
+### O que funciona e está homologado (Suporte Total):
+- **Zero Dependência do Office**: Importação nativa de arquivos `.pptx` (formato padrão OpenXML / ECMA-376) e imagens locais sem necessidade de instalação do Microsoft Office, LibreOffice ou visualizadores externos no Windows.
+- **Suporte a Proporções**: Detecção automática de proporções em `ppt/presentation.xml` — suporte completo a 16:9 widescreen (1920×1080) e 4:3 legado com pilarbox limpo automático.
+- **Diagramação Livre e Elementos**: Extração completa de formas (`<p:sp>`), cards com cantos arredondados, preenchimentos coloridos, bordas, múltiplas imagens simultâneas e tabelas (`<a:tbl>`). Suporta qualquer número de tópicos (sem teto artificial) em coordenadas livres.
+- **Vídeos Incorporados com Áudio Real**: Extração de `.mp4` e `.webm` de `ppt/media/*`, com roteamento de áudio dedicado (`reroute_audio: true`) para o mixer 3Mix, com controle de fader em dB, mute/unmute e medidores de pico.
+- **Controle de Playback Contínuo**: Comandos de Play, Pause e Seek sem recriar a fonte do OBS e sem reiniciar o vídeo do início, preservando a posição em tempo real.
+- **Isolamento de Segurança (Zero Warnings no Program)**: Avisos de recursos técnicos e limitações são exibidos **estritamente no Presenter Mode** (`slides.html`) para o operador. A saída de vídeo final para os telespectadores permanece 100% limpa de badges ou mensagens técnicas.
+- **DSK e Multi-M/E**: Homologado para sobreposição gráfica em DSK 1–4 e roteamento no Program do M/E 2.
+- **Persistência**: Cache em disco e índice `decks.json` recuperam decks, apresentações e slides preparados após reinicialização completa do sistema.
+
+### Classificação de Recursos Parciais e Limitações Conhecidas:
+- **Animações Nativas (`p:timing`) — Suporte Parcial**: Suporte às etapas por clique com interpolação contínua a 60 fps para efeitos **Fade**, **Fly-In** e **Zoom**. Quando o efeito não é identificado no XML, aplica corte direto (`appear`) fiel ao padrão sequencial, sem efeitos arbitrários. Deformações vetoriais 3D complexas não são aplicadas.
+- **Transição Morph — Suporte Parcial (Adaptado)**: Reconhecimento da tag `<p:morph>`. Aplica interpolação suave 2D de posicionamento e escala com transição nativa do 3Mix. A malha poligonal 3D proprietária da Microsoft não é reproduzida.
+- **Modo de Compatibilidade Externa (Opcional)**: Estudo técnico completo disponível em `docs/ESTUDO-COMPATIBILIDADE-POWERPOINT-LIBREOFFICE.md` avaliando automação COM de Microsoft PowerPoint e LibreOffice Impress via Window Capture/NDI.
+
+---
+
+## 9. O que este documento não afirma
 
 Seguindo a mesma prática de honestidade do levantamento de origem: este documento não afirma que os itens fora destas listas estão aprovados, não afirma que a interface nova está funcional no motor real do operador (ela está visualmente pronta, mas funcionalmente parcial, segundo `LEVANTAMENTO-BETA-20261030.md` seção 11), e não substitui os recibos de QA específicos já existentes em `qa-portatil/` e pastas `qa-*/` do projeto — cada um vale pelo escopo que declara.
+
+
+## Gate de distribuição e homologação vMix 30
+
+As missões 7–11 de PEDIDO-COMUNIDADE-ALPHA.md exigem confirmação da capacidade no pacote instalado. Não anunciar 10 bits, 16 canais, modelos AJA ou MKV NDI com metadados por existência de opção genérica. Código/compilação/mock e teste físico são estados distintos. Sem evidência de ensaio por modelo, driver e modo, não marcar Homologado.
+
+Inclusão de alterações desta auditoria no instalador/runtime ainda não verificada: nenhum pacote novo está sendo declarado distribuído por esta nota. Antes de enviar: versão/hash, dependências e licenças, manifesto de arquivos, compatibilidade de projetos, backup/rollback e coleta de logs sanitizados. Replay de 16 câmeras e 3Mix IO ficam fora do escopo.

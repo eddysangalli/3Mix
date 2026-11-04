@@ -40,8 +40,9 @@ body.clocks-only .rapid-talk button { display:block; width:100%; min-width:0; he
 <body>
   <div class="grp">
     <span class="brand"><img src="img/3mix-logo.png" alt="3Mix"></span>
-    <span class="project-name" id="lab" data-open="presets" title="Projeto em uso — clique para abrir, salvar como ou salvar como modelo">Conectando…</span>
-
+    <span class="project-name" id="lab" data-open="presets" title="Projeto em uso — clique para alternar ou gerenciar">Conectando…</span>
+    <button class="b save-label" data-do="presetsave" title="Salvar o projeto em uso">Salvar projeto</button>
+    <button class="b" id="b-proj-menu" data-open="presets" title="Abrir projeto salvo, Salvar como, Salvar como modelo ou Novo projeto">Projetos ▾</button>
   </div>
   <nav class="grp workspace-tabs" aria-label="Área de trabalho">
     <button class="b selected" data-do="mesa" title="Mesa de corte com Preview, Programa, entradas e mixer">Mesa</button>
@@ -53,8 +54,8 @@ body.clocks-only .rapid-talk button { display:block; width:100%; min-width:0; he
     <span class="clk" id="clk" title="Relógios de produção. Duplo clique: escolher o que cada um mostra (relógio, evento, gravação, transmissão, tempo restante)."><b id="k-rec">REC 00:00:00</b><b id="k-str">NO AR 00:00:00</b><b id="k-now" class="now"></b></span>
     <span class="dump-state" id="dump-state" hidden></span>
     <button class="b dump-btn" id="b-dump" data-local="1" hidden>DUMP</button>
-    <button class="b save-label" data-do="presetsave" title="Salvar a produção em uso">Salvar projeto</button>
-    <button class="b" id="b-proj-menu" data-open="presets" title="Abrir projeto salvo, Salvar como, Salvar como modelo ou Novo projeto">Projetos ▾</button>
+    <button class="b fullscreen-btn" data-do="fullscreen" title="Abrir Tela Cheia (Fullscreen)">Fullscreen</button>
+    <button class="b dd" data-open="ext" title="Configurar saídas Fullscreen 1, Fullscreen 2 e MultiView">▾</button>
     <button class="b up-nova" id="b-update" data-open="sobre" hidden title="Ver novidades e atualizar">Nova versão</button>
     <button class="b" data-open="settings" title="Configurações 3Mix">⚙ Configurações</button>
     <button class="b" data-open="mainmenu" title="Mais ferramentas de produção" aria-label="Mais ferramentas">•••</button>

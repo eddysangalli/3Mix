@@ -1,6 +1,6 @@
 import {models,model,defaults,normalizeData} from '/gc/biblioteca/modelos.js';import {renderGraphic} from '/gc/biblioteca/render.js';
 const el=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));let id=null,template=models[0].id,state={},fingerprint='',dirty=false;
-const styleKeys=['accent','secondary','background','foreground','designStyle','opacity','fontSize','offsetX','offsetY','scale','fontFamily','fontAsset','imageAsset','imageX','imageY','imageWidth','imageHeight','imageOpacity','animation','animationInMs','animationOutMs','animationEasing'];
+const styleKeys=['accent','secondary','background','foreground','designStyle','opacity','fontSize','letterSpacing','offsetX','offsetY','scale','fontFamily','fontAsset','imageAsset','imageX','imageY','imageWidth','imageHeight','imageOpacity','animation','animationInMs','animationOutMs','animationEasing'];
 const PRESET_PALETTES=[
   {name:'🔴 TV Notícias Pro',accent:'#e11d48',secondary:'#fb7185',background:'#111622',foreground:'#ffffff',designStyle:'classic_tv',animation:'slide'},
   {name:'🔵 Royal Broadcast',accent:'#0284c7',secondary:'#38bdf8',background:'#0d1726',foreground:'#ffffff',designStyle:'classic_tv',animation:'slide'},
@@ -176,3 +176,45 @@ const restartClock=document.createElement('button');restartClock.textContent='Re
 import {installGtzipUi} from './gc-gtzip.js';
 installGtzipUi({command,getState:()=>state});
 const freeFont=document.createElement('button');freeFont.type='button';freeFont.textContent='Usar Bebas Neue livre neste título';freeFont.onclick=async()=>{try{const r=await command('gc_library_asset',{kind:'font',freeFont:'bebas-neue'});el('f-fontAsset').value=r.token;el('f-fontFamily').value=r.family||'Bebas Neue';dirty=true;preview();buttons();el('status').textContent='Bebas Neue livre (SIL OFL 1.1) selecionada somente para este título. Salve para aplicar.';}catch(e){el('status').textContent=e.message;}};el('style').parentElement.append(freeFont);
+// Produtividade no editor atual: copiar somente propriedades visuais, nunca os textos,
+// imagens ou IDs do título. Colar é uma edição local; o operador ainda precisa salvar.
+let copiedTitleStyle=null;
+const copyStyle=document.createElement('button');copyStyle.type='button';copyStyle.id='copy-title-style';copyStyle.textContent='Copiar estilo';
+const pasteStyle=document.createElement('button');pasteStyle.type='button';pasteStyle.id='paste-title-style';pasteStyle.textContent='Colar estilo';pasteStyle.disabled=true;
+const copyableStyle=styleKeys.filter(k=>!['imageAsset','fontAsset'].includes(k));
+copyStyle.onclick=()=>{try{const data=read();copiedTitleStyle=Object.fromEntries(copyableStyle.filter(k=>Object.hasOwn(data,k)).map(k=>[k,data[k]]));pasteStyle.disabled=false;el('status').textContent='Estilo copiado';}catch(e){el('status').textContent=e.message;}};
+pasteStyle.onclick=()=>{try{if(!copiedTitleStyle)return;const next=normalizeData(template,{...read(),...copiedTitleStyle},false);dirty=true;fields(next);buttons();}catch(e){el('status').textContent=e.message;}};
+el('style').parentElement.append(copyStyle,pasteStyle);
+// EyeDropper exige contexto seguro e gesto do operador; cancelamento não altera o título.
+// Cada botão atua no campo de cor específico, não adivinha qual objeto estava selecionado.
+if(typeof window.EyeDropper==='function'&&window.isSecureContext){
+ const addPickers=()=>{for(const input of el('style').querySelectorAll('input[type="color"]')){
+  if(input.parentElement.querySelector('[data-color-picker]'))continue;
+  const pick=document.createElement('button');pick.type='button';pick.dataset.colorPicker='1';pick.textContent='Conta-gotas';
+  pick.onclick=async()=>{try{const result=await new window.EyeDropper().open();input.value=result.sRGBHex;input.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){if(e.name!=='AbortError')el('status').textContent=e.message;}};
+  input.parentElement.append(pick);
+ }};
+ new MutationObserver(addPickers).observe(el('style'),{childList:true});addPickers();
+}
+
+// Organização dos títulos salvos usa o mesmo contrato backend da biblioteca.
+const presetTools=document.createElement('div');presetTools.className='row';
+const presetSelection=document.createElement('select');presetSelection.multiple=true;presetSelection.size=5;presetSelection.setAttribute('aria-label','Títulos para organizar');
+const upPreset=document.createElement('button');upPreset.type='button';upPreset.textContent='Subir';
+const downPreset=document.createElement('button');downPreset.type='button';downPreset.textContent='Descer';
+const removePresets=document.createElement('button');removePresets.type='button';removePresets.textContent='Excluir selecionados';
+presetTools.append(presetSelection,upPreset,downPreset,removePresets);el('saved').after(presetTools);
+let presetSignature='';
+setInterval(()=>{const items=state.gcLibrary?.items||[],sig=JSON.stringify(items.map(i=>[i.id,i.name]));if(sig===presetSignature)return;presetSignature=sig;const chosen=new Set([...presetSelection.selectedOptions].map(o=>o.value));presetSelection.replaceChildren(...items.map(i=>{const o=document.createElement('option');o.value=i.id;o.textContent=i.name;o.selected=chosen.has(i.id);return o;}));},500);
+async function movePreset(delta){try{const chosen=[...presetSelection.selectedOptions];if(chosen.length!==1)throw Error('Selecione um título para mover');const ids=(state.gcLibrary?.items||[]).map(i=>i.id),at=ids.indexOf(chosen[0].value),next=at+delta;if(at<0||next<0||next>=ids.length)return;[ids[at],ids[next]]=[ids[next],ids[at]];await command('gc_library_reorder',{ids});}catch(e){el('status').textContent=e.message;}}
+upPreset.onclick=()=>movePreset(-1);downPreset.onclick=()=>movePreset(1);
+removePresets.onclick=async()=>{try{const ids=[...presetSelection.selectedOptions].map(o=>o.value);if(!ids.length)return;if(!confirm('Excluir '+ids.length+' títulos selecionados? As cenas existentes serão preservadas.'))return;await command('gc_library_remove_many',{ids});if(ids.includes(id))select();}catch(e){el('status').textContent=e.message;}};
+
+const applySelectedStyle=document.createElement('button');applySelectedStyle.type='button';applySelectedStyle.id='apply-selected-title-style';applySelectedStyle.textContent='Aplicar estilo aos selecionados';presetTools.append(applySelectedStyle);
+applySelectedStyle.onclick=async()=>{try{
+ const ids=[...presetSelection.selectedOptions].map(o=>o.value);if(!ids.length)throw Error('Selecione títulos salvos');
+ const data=read(),keys=['accent','secondary','background','foreground','designStyle','opacity','fontSize','letterSpacing','fontFamily','animation','animationInMs','animationOutMs','animationEasing'];
+ const style=Object.fromEntries(keys.filter(k=>Object.hasOwn(data,k)).map(k=>[k,data[k]]));
+ if(!confirm('Aplicar o estilo atual a '+ids.length+' títulos e suas versões vinculadas? Textos e posições serão preservados.'))return;
+ await command('gc_library_style_many',{ids,style});el('status').textContent='Estilo aplicado aos títulos selecionados';
+}catch(e){el('status').textContent=e.message;}};

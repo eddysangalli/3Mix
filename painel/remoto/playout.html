@@ -77,7 +77,26 @@
   @media (max-width: 900px) { .dual-players { grid-template-columns: 1fr; } .take-col { flex-direction: row; } }
   .vd-window button:disabled { opacity: .55; filter: saturate(.25); }
 /* menos-texto */ p.vd-note { display: none; }
-</style>
+    .dur-chip, .pos-chip, .rem-chip {
+      padding: 2px 7px;
+      border-radius: 3px;
+      font-family: Consolas, monospace;
+      font-size: 12px;
+      font-weight: 700;
+      background: #1e242d;
+      border: 1px solid #2d3748;
+      color: #cbd5e1;
+      margin-right: 6px;
+    }
+    .rem-chip.live {
+      background: #3b1111;
+      border-color: #ef4444;
+      color: #fca5a5;
+    }
+    .pos-chip {
+      color: #38bdf8;
+    }
+  </style>
 </head>
 <body data-page="playout" class="vd">
 <div class="vd-window vd-fill">
@@ -206,10 +225,11 @@
               <th style="width: 72px;">Status</th>
               <th style="width: 96px;">Cadeia</th>
               <th>Título / arquivo</th>
-              <th style="width: 104px;">IN</th>
-              <th style="width: 104px;">OUT</th>
-              <th style="width: 96px;">Duração</th>
-              <th style="width: 96px;">Transição</th>
+              <th style="width: 100px;">IN</th>
+              <th style="width: 100px;">OUT</th>
+              <th style="width: 90px;" title="Duração Líquida (DUR)">DUR</th>
+              <th style="width: 90px;" title="Tempo Restante do Clipe (REM)">REM</th>
+              <th style="width: 90px;">Transição</th>
               <th style="width: 128px;">Ao terminar</th>
               <th style="width: 68px;">Ganho</th>
             </tr>
