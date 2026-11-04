@@ -30,11 +30,13 @@
 | **Plugins OBS: Testes em massa com centenas de plugins da comunidade** | `Pendente de Alpha Tester` | Missão 9 no `PEDIDO-COMUNIDADE-ALPHA.md`. |
 | **FFmpeg CLI: Auditoria de flags e compatibilidade 9.0.2** | `Testado no Runtime` | Nenhuma flag obsoleta encontrada em `replay-disco`, `apresentacao-slides`, etc. |
 | **FFmpeg CLI: Resolução de fallback dinâmico (8.1.1 / 9.0.2)** | `Testado no Runtime` | `runtime/ffmpeg.exe` (v8.1.1) funcional no runtime; prioriza v9 se presente no PATH. |
+| **FFmpeg CLI: Teste comparativo 8.1.1 vs 9.0.2 com critérios de homologação** | `Testado no Runtime` | Bateria `testes/ffmpeg/test-ffmpeg-comparativo.mjs` valida DLLs soname 62, ausência de soname 63, e documenta 8 critérios de promoção (recompilação ABI, NVENC P010, QuickSync oneVPL, AMF, benchmark, estabilidade 2h, rollback <30s). |
 | **FFmpeg CLI: Executável 9.0.2 embutido de fábrica no instalador** | `Pendente de Alpha Tester` | Homologar consumo de CPU/RAM em hardware de entrada antes de trocar o binário físico do runtime. |
 | **FFmpeg Integrado: Retenção defensiva das DLLs n8.1.2** | `Testado no Runtime` | DLLs `avcodec-62.dll`, `avformat-62.dll` e `avutil-60.dll` preservadas em `bin/64bit/`. |
 | **FFmpeg Integrado: Substituição cega por DLLs do FFmpeg 9** | `Não Implementado` | **Rejeitada intencionalmente**. Quebraria a ABI do `obs-ffmpeg.dll` devido ao salto de soname para `libavcodec 63`. Documentado em `AVALIACAO-FFMPEG-9.md`. |
 | **OBS Studio: Motor Fork 3Mix v32.2.2 Pro em execução** | `Testado no Runtime` | Multi-M/E 1-4, DSK 1-4, FreeD, DeckLink e áudio ASIO operando perfeitamente. |
 | **OBS Studio: Mapeamento de patches e plano de build OBS 33.0.1** | `Implementado` | Documento técnico detalhado em `3mix-panel/docs/MIGRACAO-OBS-33.md`. |
+| **OBS Studio: Plano de migração isolada OBS 33 + CEF 150/156** | `Implementado` | Documento `3mix-panel/docs/PLANO-MIGRACAO-OBS33-CEF150.md` com 7 fases, catálogo de 40+ patches, matriz de riscos, scripts de rollback atômico (<30s) e critérios GO/NO-GO. |
 | **OBS Studio: Substituição física do binário `3Mix.exe` por OBS 33** | `Não Implementado` | A mesa do operador permanece operando em OBS 32.2.2 até que a árvore de compilação OBS 33 conclua homologação limpa. |
 | **OBS Studio: Teste de transmissão contínua de 2h em placas DeckLink/AJA** | `Pendente de Alpha Tester` | Missão 10 no `PEDIDO-COMUNIDADE-ALPHA.md`. |
 | **CEF: Versão instalada em execução (CEF 127 / Chromium 127)** | `Testado no Runtime` | `obs-plugins/64bit/libcef.dll` (v127.145.7, 213 MB) renderizando Browser Sources e GC. |
