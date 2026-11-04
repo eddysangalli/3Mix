@@ -6,7 +6,7 @@ export function renderGraphic(id,raw={},seconds=0,clock=new Date()){
  const m=model(id),d=normalizeData(id,raw,false),V=m.orientation==='vertical',W=m.width,H=m.height;
  const A=d.accent, S=d.secondary||d.accent, B=d.background, F=d.foreground;
  const shape=d.designStyle||'modern_internet';
- const baseRadius = shape==='swiss_square'?0:shape==='classic_tv'?2:shape==='esports_neon'?4:shape==='corporate_glass'?6:12;
+ const baseRadius = shape==='swiss_square'?0:shape==='classic_tv'?2:shape==='esports_neon'?4:shape==='corporate_glass'?8:shape==='pill_capsule'?40:shape==='cyber_bevel'?2:shape==='minimal_flat'?1:12;
 
  let out='';
  const rect=(x,y,w,h,color=B,r=baseRadius,opacity=d.opacity/100,stroke=null,strokeW=0)=>{
@@ -250,6 +250,214 @@ export function renderGraphic(id,raw={},seconds=0,clock=new Date()){
   text(x+30,y+(V?155:130),d.min_max,V?24:22,F,500);
   rect(x+30,y+(V?190:142),w-60,2,'#2e3744');
   text(x+30,y+(V?240:162),d.forecast,V?22:20,S,400);
+ }
+ if(m.kind==='breaking_banner'){
+  const y=V?H-340:H-160,w=W;
+  rect(0,y,w,V?340:160,B,0,d.opacity/100);
+  rect(0,y,w,6,A);
+  rect(0,y+6,V?260:220,V?60:48,A,0);
+  text(V?130:110,y+(V?46:38),d.badge,V?26:24,'#ffffff',900,'middle');
+  text(W-40,y+(V?46:38),d.time,V?22:20,S,700,'end');
+  wrap(d.title,V?40:60,y+(V?135:95),W-(V?80:120),V?42:38,2,F);
+  text(V?40:60,y+(V?260:136),`• ${d.subtext}`,V?24:22,S,500);
+ }
+ if(m.kind==='lowerthird_chanfro'){
+  const y=V?H-380:H-230,w=V?W-120:960,x=V?60:80;
+  rect(x,y,w,V?260:160,B,shape==='pill_capsule'?30:0,d.opacity/100,A,2);
+  rect(x,y,14,V?260:160,A);
+  rect(x+14,y,V?280:240,36,A,0);
+  text(x+28,y+26,'3MIX ESPORTS',18,'#000000',900);
+  text(x+36,y+80,d.name,V?48:46,F,900);
+  wrap(d.team,x+36,y+125,w-72,V?28:26,1,A);
+  rect(x+36,y+(V?170:138),w-72,1,'#334155');
+  text(x+36,y+(V?215:154),d.stats,V?22:20,S,600);
+ }
+ if(m.kind==='lowerthird_pill'){
+  const y=V?H-340:H-210,w=V?W-120:880,x=V?60:80;
+  rect(x,y,w,V?220:140,B,shape==='swiss_square'?0:45,d.opacity/100,S,1.5);
+  rect(x+16,y+16,V?60:50,V?60:50,A,shape==='swiss_square'?0:25);
+  text(x+(V?46:41),y+(V?54:48),'●',V?26:24,'#ffffff',900,'middle');
+  text(x+(V?96:82),y+(V?56:52),d.name,V?44:42,F,800);
+  rect(x+w-180,y+20,160,32,A,16);
+  text(x+w-100,y+42,d.tag,16,'#ffffff',800,'middle');
+  wrap(d.specialty,x+(V?96:82),y+(V?115:95),w-(V?120:100),V?26:24,2,S);
+ }
+ if(m.kind==='lowerthird_glass'){
+  const y=V?H-360:H-220,w=V?W-120:920,x=V?60:80;
+  rect(x,y,w,V?240:150,'rgba(18,24,38,0.92)',baseRadius,d.opacity/100,'rgba(255,255,255,0.25)',1);
+  rect(x,y,w,4,A);
+  text(x+40,y+58,d.name,V?48:46,F,800);
+  text(x+w-40,y+52,d.company,V?20:18,S,600,'end');
+  wrap(d.title,x+40,y+105,w-80,V?30:26,2,A);
+ }
+ if(m.kind==='crypto_ticker'){
+  const y=V?H-260:H-110,w=W;
+  rect(0,y,w,V?260:110,B,0,d.opacity/100);
+  rect(0,y,w,4,A);
+  rect(0,y+4,V?240:200,V?50:42,A,0);
+  text(V?120:100,y+(V?38:32),d.title,V?22:20,'#ffffff',800,'middle');
+  if(V){
+   text(40,y+90,d.asset1,24,'#22c55e',700);
+   text(40,y+135,d.asset2,24,'#22c55e',700);
+   text(40,y+180,d.asset3,24,'#38bdf8',700);
+   text(40,y+225,d.asset4,24,'#f43f5e',700);
+  } else {
+   text(240,y+32,`  ${d.asset1}    |    ${d.asset2}    |    ${d.asset3}    |    ${d.asset4}`,22,F,600);
+   text(60,y+82,'DADOS DE MERCADO EM TEMPO REAL • ATUALIZAÇÃO CONTÍNUA VIA 3MIX DATA ENGINE',16,S,500);
+  }
+ }
+ if(m.kind==='poll_bar'){
+  const y=V?H-440:H-260,w=V?W-120:860,x=V?60:W-w-80;
+  rect(x,y,w,V?320:200,B,baseRadius,d.opacity/100,A,1.5);
+  rect(x,y,w,44,A,shape==='swiss_square'?0:6);
+  text(x+24,y+30,d.question,V?22:20,'#ffffff',800);
+  const pA=Number(d.pctA)||50, pB=Number(d.pctB)||50;
+  text(x+24,y+85,d.optA,V?24:22,F,700);
+  text(x+w-24,y+85,`${pA}%`,V?26:24,A,800,'end');
+  rect(x+24,y+98,w-48,16,'#1e293b',8);
+  rect(x+24,y+98,(w-48)*(pA/100),16,A,8);
+  text(x+24,y+(V?170:145),d.optB,V?24:22,F,700);
+  text(x+w-24,y+(V?170:145),`${pB}%`,V?26:24,S,800,'end');
+  rect(x+24,y+(V?185:158),w-48,16,'#1e293b',8);
+  rect(x+24,y+(V?185:158),(w-48)*(pB/100),16,S,8);
+ }
+ if(m.kind==='gaming_esports'){
+  const y=V?60:50,w=V?W-120:880,x=V?60:(W-w)/2;
+  rect(x,y,w,V?220:130,B,shape==='pill_capsule'?20:4,d.opacity/100,A,2);
+  rect(x,y,w,32,'#0f172a',0);
+  text(x+w/2,y+22,`${d.map} • ${d.status}`,16,S,700,'middle');
+  text(x+40,y+80,d.teamA,V?36:34,F,900);
+  rect(x+w/2-60,y+45,120,54,A,shape==='swiss_square'?0:6);
+  text(x+w/2,y+84,`${d.scoreA} : ${d.scoreB}`,36,'#000000',900,'middle');
+  text(x+w-40,y+80,d.teamB,V?36:34,F,900,'end');
+ }
+ if(m.kind==='speaker_bio'){
+  const x=V?60:W-540,y=V?H-560:100,w=V?W-120:460;
+  rect(x,y,w,V?460:520,B,baseRadius,d.opacity/100,A,1.5);
+  rect(x,y,w,10,A);
+  text(x+30,y+55,d.name,V?34:32,F,800);
+  text(x+30,y+95,d.role,V?24:22,A,600);
+  rect(x+30,y+115,w-60,1,'#334155');
+  const bioLines=String(d.bio||'').split('\n').slice(0,5);
+  bioLines.forEach((l,i)=>{
+   text(x+30,y+155+i*(V?48:42),`• ${l.trim()}`,V?22:20,F,400);
+  });
+ }
+ if(m.kind==='side_panel_info'){
+  const x=V?60:W-520,y=V?H-540:80,w=V?W-120:440;
+  rect(x,y,w,V?460:580,B,baseRadius,d.opacity/100,S,1.5);
+  rect(x,y,w,52,A,shape==='swiss_square'?0:6);
+  text(x+24,y+36,d.title,26,'#ffffff',800);
+  text(x+24,y+110,d.item1,22,F,600);
+  text(x+24,y+180,d.item2,22,F,600);
+  text(x+24,y+250,d.item3,22,F,600);
+  rect(x+24,y+(V?360:480),w-48,1,'#334155');
+  text(x+24,y+(V?400:520),d.footer,18,S,500);
+ }
+ if(m.kind==='corner_bug_pro'){
+  const x=V?W-380:W-340,y=V?60:50,w=V?320:280,h=90;
+  rect(x,y,w,h,B,shape==='swiss_square'?0:10,d.opacity/100,A,1);
+  rect(x,y,8,h,A);
+  text(x+24,y+38,d.brand,28,F,900);
+  text(x+w-20,y+38,d.temp,24,A,800,'end');
+  text(x+24,y+72,`${d.location} • ${d.badge}`,18,S,600);
+ }
+ if(m.kind==='music_nowplaying'){
+  const y=V?H-320:H-180,w=V?W-120:640,x=V?60:80;
+  rect(x,y,w,V?220:120,B,shape==='pill_capsule'?30:8,d.opacity/100,A,1.5);
+  rect(x+16,y+16,V?60:48,V?60:48,A,shape==='pill_capsule'?24:4);
+  text(x+(V?46:40),y+(V?56:48),'♫',V?32:28,'#000000',900,'middle');
+  text(x+(V?96:80),y+46,d.track,V?30:28,F,800);
+  text(x+(V?96:80),y+82,`${d.artist} • ${d.album}`,V?22:20,S,500);
+  text(x+w-24,y+46,d.duration,18,A,700,'end');
+ }
+ if(m.kind==='topbar_headline'){
+  rect(0,0,W,V?120:60,B,0,d.opacity/100);
+  rect(0,V?116:56,W,4,A);
+  rect(0,0,V?260:200,V?116:56,A,0);
+  text(V?130:100,V?70:38,d.category,V?24:20,'#ffffff',900,'middle');
+  wrap(d.title,V?290:230,V?50:38,W-(V?340:480),V?28:22,1,F);
+  text(W-40,V?70:38,d.source,V?20:18,S,600,'end');
+ }
+ if(m.kind==='versus_match'){
+  const y=V?H-540:H-280,w=V?W-120:1040,x=V?60:(W-w)/2;
+  rect(x,y,w,V?440:210,B,baseRadius,d.opacity/100,A,2);
+  rect(x,y,w,40,A,0);
+  text(x+w/2,y+28,d.title,22,'#ffffff',900,'middle');
+  text(x+30,y+90,d.fighterA,V?34:32,F,800);
+  text(x+30,y+128,d.recordA,V?22:20,S,600);
+  rect(x+w/2-30,y+80,60,40,'#ef4444',4);
+  text(x+w/2,y+108,'VS',22,'#ffffff',900,'middle');
+  text(x+w-30,y+90,d.fighterB,V?34:32,F,800,'end');
+  text(x+w-30,y+128,d.recordB,V?22:20,S,600,'end');
+  rect(x+30,y+(V?260:160),w-60,1,'#334155');
+  text(x+w/2,y+(V?320:190),d.category,20,A,700,'middle');
+ }
+ if(m.kind==='product_card_shop'){
+  const x=V?60:W-540,y=V?H-540:120,w=V?W-120:460;
+  rect(x,y,w,V?440:460,B,baseRadius,d.opacity/100,A,2);
+  rect(x,y,w,46,A,shape==='swiss_square'?0:6);
+  text(x+20,y+32,d.badge,22,'#ffffff',900);
+  rect(x+w-120,y+10,100,26,'#ef4444',13);
+  text(x+w-70,y+28,d.discount,16,'#ffffff',900,'middle');
+  wrap(d.product,x+24,y+95,w-48,V?32:28,2,F);
+  text(x+24,y+(V?210:190),d.price,42,A,900);
+  rect(x+24,y+(V?260:240),w-48,V?120:140,'#1e293b',8);
+  text(x+w/2,y+(V?330:315),d.code,18,S,700,'middle');
+ }
+ if(m.kind==='citation_quote'){
+  const y=V?H-520:H-300,w=V?W-120:960,x=V?60:(W-w)/2;
+  rect(x,y,w,V?420:220,B,baseRadius,d.opacity/100,S,1.5);
+  text(x+30,y+70,'“',72,A,900);
+  wrap(d.quote,x+90,y+65,w-130,V?36:34,3,F);
+  rect(x+90,y+(V?280:150),w-140,2,A);
+  text(x+90,y+(V?330:185),d.author,26,A,800);
+  text(x+90,y+(V?370:208),d.context,20,S,500);
+ }
+ if(m.kind==='podcast_minimal'){
+  const y=V?H-320:H-180,w=V?W-120:800,x=V?60:80;
+  rect(x,y,w,V?220:110,B,shape==='swiss_square'?0:8,d.opacity/100);
+  rect(x,y,4,V?220:110,A);
+  text(x+30,y+45,d.name,V?40:36,F,800);
+  text(x+30,y+85,`${d.role}  |  ${d.social}`,V?24:22,A,600);
+ }
+ if(m.kind==='stats_versus'){
+  const y=V?H-520:H-260,w=V?W-120:960,x=V?60:(W-w)/2;
+  rect(x,y,w,V?420:200,B,baseRadius,d.opacity/100,A,1.5);
+  rect(x,y,w,46,A,0);
+  text(x+30,y+32,d.playerA,22,'#ffffff',800);
+  text(x+w-30,y+32,d.playerB,22,'#ffffff',800,'end');
+  [d.metric1,d.metric2,d.metric3].forEach((mStr,i)=>{
+   const yy=y+90+i*(V?85:40);
+   text(x+w/2,yy,mStr,V?24:22,F,600,'middle');
+   rect(x+40,yy+10,w-80,1,'#334155');
+  });
+ }
+ if(m.kind==='social_card_highlight'){
+  const y=V?H-480:H-260,w=V?W-120:840,x=V?60:80;
+  rect(x,y,w,V?380:190,B,baseRadius,d.opacity/100,A,2);
+  rect(x,y,w,42,A,shape==='swiss_square'?0:6);
+  text(x+20,y+28,`${d.network} • ${d.tag}`,20,'#ffffff',800);
+  text(x+24,y+80,d.author,26,F,800);
+  text(x+24,y+110,d.handle,20,S,600);
+  wrap(d.message,x+24,y+145,w-48,V?28:24,3,F);
+ }
+ if(m.kind==='countdown_circle'){
+  const y=V?H-440:H-240,w=V?W-120:740,x=V?60:(W-w)/2;
+  rect(x,y,w,V?340:170,B,baseRadius,d.opacity/100,A,2);
+  text(x+w/2,y+42,d.title,24,A,800,'middle');
+  text(x+w/2,y+115,time(d.seconds||180),64,F,900,'middle');
+  text(x+w/2,y+(V?260:150),d.subtitle,20,S,500,'middle');
+ }
+ if(m.kind==='church_service'){
+  const y=V?H-460:H-240,w=V?W-120:940,x=V?60:80;
+  rect(x,y,w,V?360:170,B,baseRadius,d.opacity/100,A,1.5);
+  rect(x,y,10,V?360:170,A);
+  rect(x,y-42,Math.min(420,w),42,A,shape==='swiss_square'?0:4);
+  text(x+20,y-12,d.title,24,'#ffffff',800);
+  text(x+36,y+56,d.preacher,V?46:44,F,800);
+  text(x+36,y+100,d.theme,V?28:26,A,600);
+  text(x+36,y+(V?220:140),d.church,V?22:20,S,500);
  }
 
  const asset=token=>esc(new URL('./assets/'+token,import.meta.url).href),font=d.fontAsset?'FreeMixCustom'+d.fontAsset.slice(0,16):d.fontFamily;

@@ -165,6 +165,176 @@ window.GC_CATALOG = [
   ]
  },
  {
+  "id": "social_chat_stream",
+  "name": "Feed de Chat Broadcast (YouTube/Twitch/TikTok)",
+  "collection": "Eventos",
+  "category": "Social",
+  "thumbnail": "thumbnails/social_lowerthird_card.png",
+  "file": "biblioteca/social_chat_stream.html",
+  "fields": [
+   {
+    "key": "network",
+    "label": "Rede Social",
+    "type": "text",
+    "default": "youtube"
+   },
+   {
+    "key": "author",
+    "label": "Autor",
+    "type": "text",
+    "default": "Espectador"
+   },
+   {
+    "key": "message",
+    "label": "Mensagem",
+    "type": "text",
+    "default": "Parabéns pela transmissão ao vivo!"
+   },
+   {
+    "key": "amount",
+    "label": "SuperChat / Doação",
+    "type": "text",
+    "default": ""
+   }
+  ]
+ },
+ {
+  "id": "social_superchat_pill",
+  "name": "Alerta de SuperChat & PIX",
+  "collection": "Eventos",
+  "category": "Social",
+  "thumbnail": "thumbnails/social_lowerthird_card.png",
+  "file": "biblioteca/social_superchat_pill.html",
+  "fields": [
+   {
+    "key": "author",
+    "label": "Nome do Apoiador",
+    "type": "text",
+    "default": "Apoiador VIP"
+   },
+   {
+    "key": "amount",
+    "label": "Valor do PIX / SuperChat",
+    "type": "text",
+    "default": "R$ 50,00"
+   },
+   {
+    "key": "message",
+    "label": "Mensagem de Apoio",
+    "type": "text",
+    "default": "Excelente conteúdo! Parabéns pela transmissão."
+   }
+  ]
+ },
+ {
+  "id": "news_ticker_broadcast",
+  "name": "Ticker Contínuo CNN / GloboNews com Relógio",
+  "collection": "Jornalismo",
+  "category": "Notícias",
+  "thumbnail": "thumbnails/social_lowerthird_ticker.png",
+  "file": "biblioteca/news_ticker_broadcast.html",
+  "fields": [
+   {
+    "key": "badge",
+    "label": "Etiqueta",
+    "type": "text",
+    "default": "AO VIVO"
+   },
+   {
+    "key": "topic",
+    "label": "Editoria / Urgente",
+    "type": "text",
+    "default": "PLANTÃO"
+   },
+   {
+    "key": "text",
+    "label": "Manchete do Ticker",
+    "type": "text",
+    "default": "3Mix Studio Pro inicia fase de testes Alpha com a comunidade."
+   }
+  ]
+ },
+ {
+  "id": "sports_scoreboard_pro",
+  "name": "Placar Esportivo Premier League / FIFA",
+  "collection": "Esportes",
+  "category": "Placares",
+  "thumbnail": "thumbnails/scoreboard_horizontal.png",
+  "file": "biblioteca/sports_scoreboard_pro.html",
+  "fields": [
+   {
+    "key": "teamHome",
+    "label": "Equipe Mandante",
+    "type": "text",
+    "default": "BRASIL"
+   },
+   {
+    "key": "scoreHome",
+    "label": "Gols Mandante",
+    "type": "number",
+    "default": 2
+   },
+   {
+    "key": "scoreAway",
+    "label": "Gols Visitante",
+    "type": "number",
+    "default": 1
+   },
+   {
+    "key": "teamAway",
+    "label": "Equipe Visitante",
+    "type": "text",
+    "default": "ARGENTINA"
+   },
+   {
+    "key": "minutes",
+    "label": "Minuto Inicial",
+    "type": "number",
+    "default": 78
+   },
+   {
+    "key": "extra",
+    "label": "Acréscimos",
+    "type": "text",
+    "default": "+3'"
+   }
+  ]
+ },
+ {
+  "id": "podcast_split_lower",
+  "name": "Lower Third Duplo Podcast Host & Convidado",
+  "collection": "Eventos",
+  "category": "Entrevistas",
+  "thumbnail": "thumbnails/podcast_host_horizontal.png",
+  "file": "biblioteca/podcast_split_lower.html",
+  "fields": [
+   {
+    "key": "nameHost",
+    "label": "Nome Apresentador",
+    "type": "text",
+    "default": "EDDY SANGALLI"
+   },
+   {
+    "key": "handleHost",
+    "label": "Arroba Apresentador",
+    "type": "text",
+    "default": "@eddysangalli"
+   },
+   {
+    "key": "nameGuest",
+    "label": "Nome Convidado",
+    "type": "text",
+    "default": "DR. ROBERTO ALENCAR"
+   },
+   {
+    "key": "handleGuest",
+    "label": "Arroba Convidado",
+    "type": "text",
+    "default": "@dr.roberto • VP Broadcast"
+   }
+  ]
+ },
+ {
   "id": "fm_headline_horizontal",
   "kind": "headline",
   "orientation": "horizontal",
@@ -228,7 +398,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -451,7 +624,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -674,7 +850,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -897,7 +1076,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -1126,7 +1308,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -1355,7 +1540,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -1578,7 +1766,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -1801,7 +1992,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -2024,7 +2218,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -2247,7 +2444,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -2464,7 +2664,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -2681,7 +2884,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -2904,7 +3110,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -3127,7 +3336,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -3352,7 +3564,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -3577,7 +3792,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -3824,7 +4042,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -4071,7 +4292,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -4300,7 +4524,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -4529,7 +4756,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -4758,7 +4988,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -4987,7 +5220,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -5204,7 +5440,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -5421,7 +5660,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -5650,7 +5892,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -5879,7 +6124,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -6102,7 +6350,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -6325,7 +6576,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -6548,7 +6802,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -6771,7 +7028,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -6994,7 +7254,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -7217,7 +7480,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -7452,7 +7718,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -7687,7 +7956,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -7916,7 +8188,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -8145,7 +8420,10 @@ window.GC_CATALOG = [
      "classic_tv",
      "swiss_square",
      "esports_neon",
-     "corporate_glass"
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
     ]
    },
    {
@@ -8305,172 +8583,11230 @@ window.GC_CATALOG = [
   ]
  },
  {
-  "id": "social_chat_stream",
-  "name": "Feed de Chat Broadcast (YouTube/Twitch/TikTok)",
-  "collection": "Eventos",
-  "category": "Social",
-  "thumbnail": "thumbnails/social_lowerthird_card.png",
-  "file": "biblioteca/social_chat_stream.html",
+  "id": "fm_church_verse_horizontal",
+  "kind": "church_verse",
+  "orientation": "horizontal",
+  "name": "Versículo Bíblico · Horizontal",
+  "collection": "Igreja",
+  "category": "Versículo Bíblico",
+  "width": 1920,
+  "height": 1080,
+  "file": "biblioteca/church_verse_horizontal.html",
+  "thumbnail": "biblioteca/thumbnails/church_verse_horizontal.png",
   "fields": [
    {
-    "key": "network",
-    "label": "Rede Social",
+    "key": "book",
+    "label": "Livro e Capítulo",
     "type": "text",
-    "default": "youtube"
+    "default": "JOÃO 3:16"
    },
    {
-    "key": "author",
-    "label": "Autor",
+    "key": "verse",
+    "label": "Texto Bíblico",
     "type": "text",
-    "default": "Espectador"
+    "default": "\"Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito...\""
    },
    {
-    "key": "message",
-    "label": "Mensagem",
+    "key": "version",
+    "label": "Versão",
     "type": "text",
-    "default": "Parabéns pela transmissão ao vivo!"
+    "default": "NVI • Nova Versão Internacional"
    },
    {
-    "key": "amount",
-    "label": "SuperChat / Doação",
-    "type": "text",
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
     "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
    }
   ]
  },
  {
-  "id": "social_superchat_pill",
-  "name": "Alerta de SuperChat & PIX",
-  "collection": "Eventos",
-  "category": "Social",
-  "thumbnail": "thumbnails/social_lowerthird_card.png",
-  "file": "biblioteca/social_superchat_pill.html",
+  "id": "fm_church_verse_vertical",
+  "kind": "church_verse",
+  "orientation": "vertical",
+  "name": "Versículo Bíblico · Vertical",
+  "collection": "Igreja",
+  "category": "Versículo Bíblico",
+  "width": 1080,
+  "height": 1920,
+  "file": "biblioteca/church_verse_vertical.html",
+  "thumbnail": "biblioteca/thumbnails/church_verse_vertical.png",
   "fields": [
    {
-    "key": "author",
-    "label": "Nome do Apoiador",
+    "key": "book",
+    "label": "Livro e Capítulo",
     "type": "text",
-    "default": "Apoiador VIP"
+    "default": "JOÃO 3:16"
    },
    {
-    "key": "amount",
-    "label": "Valor do PIX / SuperChat",
+    "key": "verse",
+    "label": "Texto Bíblico",
     "type": "text",
-    "default": "R$ 50,00"
+    "default": "\"Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito...\""
    },
    {
-    "key": "message",
-    "label": "Mensagem de Apoio",
+    "key": "version",
+    "label": "Versão",
     "type": "text",
-    "default": "Excelente conteúdo! Parabéns pela transmissão."
+    "default": "NVI • Nova Versão Internacional"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
    }
   ]
  },
  {
-  "id": "news_ticker_broadcast",
-  "name": "Ticker Contínuo CNN / GloboNews com Relógio",
+  "id": "fm_breaking_ticker_horizontal",
+  "kind": "breaking_ticker",
+  "orientation": "horizontal",
+  "name": "Tarja Urgente Ticker · Horizontal",
   "collection": "Jornalismo",
-  "category": "Notícias",
-  "thumbnail": "thumbnails/social_lowerthird_ticker.png",
-  "file": "biblioteca/news_ticker_broadcast.html",
+  "category": "Tarja Urgente Ticker",
+  "width": 1920,
+  "height": 1080,
+  "file": "biblioteca/breaking_ticker_horizontal.html",
+  "thumbnail": "biblioteca/thumbnails/breaking_ticker_horizontal.png",
   "fields": [
    {
     "key": "badge",
-    "label": "Etiqueta",
+    "label": "Alerta",
+    "type": "text",
+    "default": "URGENTE"
+   },
+   {
+    "key": "title",
+    "label": "Notícia",
+    "type": "text",
+    "default": "GOVERNO ANUNCIA NOVO PACOTE DE INVESTIMENTOS"
+   },
+   {
+    "key": "ticker",
+    "label": "Ticker de Notícias",
+    "type": "text",
+    "default": "Bolsa opera em alta de +1.4% • Dólar fecha a R$ 5,12 • Inflação recua pelo terceiro mês consecutivo"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_breaking_ticker_vertical",
+  "kind": "breaking_ticker",
+  "orientation": "vertical",
+  "name": "Tarja Urgente Ticker · Vertical",
+  "collection": "Jornalismo",
+  "category": "Tarja Urgente Ticker",
+  "width": 1080,
+  "height": 1920,
+  "file": "biblioteca/breaking_ticker_vertical.html",
+  "thumbnail": "biblioteca/thumbnails/breaking_ticker_vertical.png",
+  "fields": [
+   {
+    "key": "badge",
+    "label": "Alerta",
+    "type": "text",
+    "default": "URGENTE"
+   },
+   {
+    "key": "title",
+    "label": "Notícia",
+    "type": "text",
+    "default": "GOVERNO ANUNCIA NOVO PACOTE DE INVESTIMENTOS"
+   },
+   {
+    "key": "ticker",
+    "label": "Ticker de Notícias",
+    "type": "text",
+    "default": "Bolsa opera em alta de +1.4% • Dólar fecha a R$ 5,12 • Inflação recua pelo terceiro mês consecutivo"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_election_poll_horizontal",
+  "kind": "election_poll",
+  "orientation": "horizontal",
+  "name": "Pesquisa Eleitoral · Horizontal",
+  "collection": "Jornalismo",
+  "category": "Pesquisa Eleitoral",
+  "width": 1920,
+  "height": 1080,
+  "file": "biblioteca/election_poll_horizontal.html",
+  "thumbnail": "biblioteca/thumbnails/election_poll_horizontal.png",
+  "fields": [
+   {
+    "key": "title",
+    "label": "Título da Pesquisa",
+    "type": "text",
+    "default": "INTENÇÃO DE VOTO • 1º TURNO"
+   },
+   {
+    "key": "candA",
+    "label": "Candidato A",
+    "type": "text",
+    "default": "CANDIDATO 1"
+   },
+   {
+    "key": "pctA",
+    "label": "Porcentagem A (%)",
+    "type": "number",
+    "default": 46,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "candB",
+    "label": "Candidato B",
+    "type": "text",
+    "default": "CANDIDATO 2"
+   },
+   {
+    "key": "pctB",
+    "label": "Porcentagem B (%)",
+    "type": "number",
+    "default": 38,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "candC",
+    "label": "Candidato C",
+    "type": "text",
+    "default": "OUTROS / BRANCOS / NULOS"
+   },
+   {
+    "key": "pctC",
+    "label": "Porcentagem C (%)",
+    "type": "number",
+    "default": 16,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "source",
+    "label": "Instituto / Registro",
+    "type": "text",
+    "default": "DataPesquisa • Registro TSE BR-09412/2026 • Margem ±2%"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_election_poll_vertical",
+  "kind": "election_poll",
+  "orientation": "vertical",
+  "name": "Pesquisa Eleitoral · Vertical",
+  "collection": "Jornalismo",
+  "category": "Pesquisa Eleitoral",
+  "width": 1080,
+  "height": 1920,
+  "file": "biblioteca/election_poll_vertical.html",
+  "thumbnail": "biblioteca/thumbnails/election_poll_vertical.png",
+  "fields": [
+   {
+    "key": "title",
+    "label": "Título da Pesquisa",
+    "type": "text",
+    "default": "INTENÇÃO DE VOTO • 1º TURNO"
+   },
+   {
+    "key": "candA",
+    "label": "Candidato A",
+    "type": "text",
+    "default": "CANDIDATO 1"
+   },
+   {
+    "key": "pctA",
+    "label": "Porcentagem A (%)",
+    "type": "number",
+    "default": 46,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "candB",
+    "label": "Candidato B",
+    "type": "text",
+    "default": "CANDIDATO 2"
+   },
+   {
+    "key": "pctB",
+    "label": "Porcentagem B (%)",
+    "type": "number",
+    "default": 38,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "candC",
+    "label": "Candidato C",
+    "type": "text",
+    "default": "OUTROS / BRANCOS / NULOS"
+   },
+   {
+    "key": "pctC",
+    "label": "Porcentagem C (%)",
+    "type": "number",
+    "default": 16,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "source",
+    "label": "Instituto / Registro",
+    "type": "text",
+    "default": "DataPesquisa • Registro TSE BR-09412/2026 • Margem ±2%"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_weather_horizontal",
+  "kind": "weather",
+  "orientation": "horizontal",
+  "name": "Previsão do Tempo · Horizontal",
+  "collection": "Jornalismo",
+  "category": "Previsão do Tempo",
+  "width": 1920,
+  "height": 1080,
+  "file": "biblioteca/weather_horizontal.html",
+  "thumbnail": "biblioteca/thumbnails/weather_horizontal.png",
+  "fields": [
+   {
+    "key": "city",
+    "label": "Cidade / Região",
+    "type": "text",
+    "default": "SÃO PAULO - SP"
+   },
+   {
+    "key": "temp",
+    "label": "Temperatura Atual",
+    "type": "text",
+    "default": "24°C"
+   },
+   {
+    "key": "min_max",
+    "label": "Mínima / Máxima",
+    "type": "text",
+    "default": "Mín 17°C • Máx 28°C"
+   },
+   {
+    "key": "condition",
+    "label": "Condição",
+    "type": "text",
+    "default": "Ensolarado com poucas nuvens"
+   },
+   {
+    "key": "forecast",
+    "label": "Previsão próximos dias",
+    "type": "text",
+    "default": "Amanhã: 26°C Sol • Quinta: 22°C Chuva"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_weather_vertical",
+  "kind": "weather",
+  "orientation": "vertical",
+  "name": "Previsão do Tempo · Vertical",
+  "collection": "Jornalismo",
+  "category": "Previsão do Tempo",
+  "width": 1080,
+  "height": 1920,
+  "file": "biblioteca/weather_vertical.html",
+  "thumbnail": "biblioteca/thumbnails/weather_vertical.png",
+  "fields": [
+   {
+    "key": "city",
+    "label": "Cidade / Região",
+    "type": "text",
+    "default": "SÃO PAULO - SP"
+   },
+   {
+    "key": "temp",
+    "label": "Temperatura Atual",
+    "type": "text",
+    "default": "24°C"
+   },
+   {
+    "key": "min_max",
+    "label": "Mínima / Máxima",
+    "type": "text",
+    "default": "Mín 17°C • Máx 28°C"
+   },
+   {
+    "key": "condition",
+    "label": "Condição",
+    "type": "text",
+    "default": "Ensolarado com poucas nuvens"
+   },
+   {
+    "key": "forecast",
+    "label": "Previsão próximos dias",
+    "type": "text",
+    "default": "Amanhã: 26°C Sol • Quinta: 22°C Chuva"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_breaking_banner_horizontal",
+  "kind": "breaking_banner",
+  "orientation": "horizontal",
+  "name": "Banner Plantão Full · Horizontal",
+  "collection": "Jornalismo",
+  "category": "Banner Plantão Full",
+  "width": 1920,
+  "height": 1080,
+  "file": "biblioteca/breaking_banner_horizontal.html",
+  "thumbnail": "biblioteca/thumbnails/breaking_banner_horizontal.png",
+  "fields": [
+   {
+    "key": "badge",
+    "label": "Badge de Alerta",
+    "type": "text",
+    "default": "PLANTÃO DA REDAÇÃO"
+   },
+   {
+    "key": "title",
+    "label": "Manchete Principal",
+    "type": "text",
+    "default": "DECISÃO HISTÓRICA DO TRIBUNAL EM BRASÍLIA"
+   },
+   {
+    "key": "subtext",
+    "label": "Detalhes",
+    "type": "text",
+    "default": "Julgamento concluído com repercussão geral imediata"
+   },
+   {
+    "key": "time",
+    "label": "Horário / Status",
+    "type": "text",
+    "default": "15:30 AO VIVO"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_breaking_banner_vertical",
+  "kind": "breaking_banner",
+  "orientation": "vertical",
+  "name": "Banner Plantão Full · Vertical",
+  "collection": "Jornalismo",
+  "category": "Banner Plantão Full",
+  "width": 1080,
+  "height": 1920,
+  "file": "biblioteca/breaking_banner_vertical.html",
+  "thumbnail": "biblioteca/thumbnails/breaking_banner_vertical.png",
+  "fields": [
+   {
+    "key": "badge",
+    "label": "Badge de Alerta",
+    "type": "text",
+    "default": "PLANTÃO DA REDAÇÃO"
+   },
+   {
+    "key": "title",
+    "label": "Manchete Principal",
+    "type": "text",
+    "default": "DECISÃO HISTÓRICA DO TRIBUNAL EM BRASÍLIA"
+   },
+   {
+    "key": "subtext",
+    "label": "Detalhes",
+    "type": "text",
+    "default": "Julgamento concluído com repercussão geral imediata"
+   },
+   {
+    "key": "time",
+    "label": "Horário / Status",
+    "type": "text",
+    "default": "15:30 AO VIVO"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_lowerthird_chanfro_horizontal",
+  "kind": "lowerthird_chanfro",
+  "orientation": "horizontal",
+  "name": "Chanfrado Angular · Horizontal",
+  "collection": "Esportes",
+  "category": "Chanfrado Angular",
+  "width": 1920,
+  "height": 1080,
+  "file": "biblioteca/lowerthird_chanfro_horizontal.html",
+  "thumbnail": "biblioteca/thumbnails/lowerthird_chanfro_horizontal.png",
+  "fields": [
+   {
+    "key": "name",
+    "label": "Nome do Atleta",
+    "type": "text",
+    "default": "GABRIEL \"FALLEN\" TOLEDO"
+   },
+   {
+    "key": "team",
+    "label": "Equipe / Posição",
+    "type": "text",
+    "default": "FURIA ESPORTS • CAPITÃO & AWPER"
+   },
+   {
+    "key": "stats",
+    "label": "Estatísticas",
+    "type": "text",
+    "default": "K/D: 1.42 • MAP WIN: 78% • RATING: 1.28"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_lowerthird_chanfro_vertical",
+  "kind": "lowerthird_chanfro",
+  "orientation": "vertical",
+  "name": "Chanfrado Angular · Vertical",
+  "collection": "Esportes",
+  "category": "Chanfrado Angular",
+  "width": 1080,
+  "height": 1920,
+  "file": "biblioteca/lowerthird_chanfro_vertical.html",
+  "thumbnail": "biblioteca/thumbnails/lowerthird_chanfro_vertical.png",
+  "fields": [
+   {
+    "key": "name",
+    "label": "Nome do Atleta",
+    "type": "text",
+    "default": "GABRIEL \"FALLEN\" TOLEDO"
+   },
+   {
+    "key": "team",
+    "label": "Equipe / Posição",
+    "type": "text",
+    "default": "FURIA ESPORTS • CAPITÃO & AWPER"
+   },
+   {
+    "key": "stats",
+    "label": "Estatísticas",
+    "type": "text",
+    "default": "K/D: 1.42 • MAP WIN: 78% • RATING: 1.28"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_lowerthird_pill_horizontal",
+  "kind": "lowerthird_pill",
+  "orientation": "horizontal",
+  "name": "Pill Cápsula Arredondada · Horizontal",
+  "collection": "Moderno",
+  "category": "Pill Cápsula Arredondada",
+  "width": 1920,
+  "height": 1080,
+  "file": "biblioteca/lowerthird_pill_horizontal.html",
+  "thumbnail": "biblioteca/thumbnails/lowerthird_pill_horizontal.png",
+  "fields": [
+   {
+    "key": "name",
+    "label": "Nome do Convidado",
+    "type": "text",
+    "default": "DRA. BEATRIZ MENDES"
+   },
+   {
+    "key": "specialty",
+    "label": "Especialidade / Cargo",
+    "type": "text",
+    "default": "Neurocientista & Pesquisadora Senior"
+   },
+   {
+    "key": "tag",
+    "label": "Etiqueta / Badge",
+    "type": "text",
+    "default": "PAINEL ESPECIAL"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_lowerthird_pill_vertical",
+  "kind": "lowerthird_pill",
+  "orientation": "vertical",
+  "name": "Pill Cápsula Arredondada · Vertical",
+  "collection": "Moderno",
+  "category": "Pill Cápsula Arredondada",
+  "width": 1080,
+  "height": 1920,
+  "file": "biblioteca/lowerthird_pill_vertical.html",
+  "thumbnail": "biblioteca/thumbnails/lowerthird_pill_vertical.png",
+  "fields": [
+   {
+    "key": "name",
+    "label": "Nome do Convidado",
+    "type": "text",
+    "default": "DRA. BEATRIZ MENDES"
+   },
+   {
+    "key": "specialty",
+    "label": "Especialidade / Cargo",
+    "type": "text",
+    "default": "Neurocientista & Pesquisadora Senior"
+   },
+   {
+    "key": "tag",
+    "label": "Etiqueta / Badge",
+    "type": "text",
+    "default": "PAINEL ESPECIAL"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_lowerthird_glass_horizontal",
+  "kind": "lowerthird_glass",
+  "orientation": "horizontal",
+  "name": "Glassmorphism Moderno · Horizontal",
+  "collection": "Corporativo",
+  "category": "Glassmorphism Moderno",
+  "width": 1920,
+  "height": 1080,
+  "file": "biblioteca/lowerthird_glass_horizontal.html",
+  "thumbnail": "biblioteca/thumbnails/lowerthird_glass_horizontal.png",
+  "fields": [
+   {
+    "key": "name",
+    "label": "Nome / Executivo",
+    "type": "text",
+    "default": "MARCELO CARVALHO"
+   },
+   {
+    "key": "title",
+    "label": "Cargo / Função",
+    "type": "text",
+    "default": "Chief Technology Officer • FinTech"
+   },
+   {
+    "key": "company",
+    "label": "Empresa / Evento",
+    "type": "text",
+    "default": "FORUM DE INOVAÇÃO & IA 2026"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_lowerthird_glass_vertical",
+  "kind": "lowerthird_glass",
+  "orientation": "vertical",
+  "name": "Glassmorphism Moderno · Vertical",
+  "collection": "Corporativo",
+  "category": "Glassmorphism Moderno",
+  "width": 1080,
+  "height": 1920,
+  "file": "biblioteca/lowerthird_glass_vertical.html",
+  "thumbnail": "biblioteca/thumbnails/lowerthird_glass_vertical.png",
+  "fields": [
+   {
+    "key": "name",
+    "label": "Nome / Executivo",
+    "type": "text",
+    "default": "MARCELO CARVALHO"
+   },
+   {
+    "key": "title",
+    "label": "Cargo / Função",
+    "type": "text",
+    "default": "Chief Technology Officer • FinTech"
+   },
+   {
+    "key": "company",
+    "label": "Empresa / Evento",
+    "type": "text",
+    "default": "FORUM DE INOVAÇÃO & IA 2026"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_crypto_ticker_horizontal",
+  "kind": "crypto_ticker",
+  "orientation": "horizontal",
+  "name": "Cotações & Criptomoedas · Horizontal",
+  "collection": "Finanças",
+  "category": "Cotações & Criptomoedas",
+  "width": 1920,
+  "height": 1080,
+  "file": "biblioteca/crypto_ticker_horizontal.html",
+  "thumbnail": "biblioteca/thumbnails/crypto_ticker_horizontal.png",
+  "fields": [
+   {
+    "key": "title",
+    "label": "Identificação",
+    "type": "text",
+    "default": "MERCADOS & CRIPTO"
+   },
+   {
+    "key": "asset1",
+    "label": "Ativo 1",
+    "type": "text",
+    "default": "BTC/USD $68.450 (+3.8%)"
+   },
+   {
+    "key": "asset2",
+    "label": "Ativo 2",
+    "type": "text",
+    "default": "ETH/USD $3.520 (+4.2%)"
+   },
+   {
+    "key": "asset3",
+    "label": "Ativo 3",
+    "type": "text",
+    "default": "IBOV 128.400 pts (+1.1%)"
+   },
+   {
+    "key": "asset4",
+    "label": "Ativo 4",
+    "type": "text",
+    "default": "DÓLAR R$ 5,14 (-0.6%)"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_crypto_ticker_vertical",
+  "kind": "crypto_ticker",
+  "orientation": "vertical",
+  "name": "Cotações & Criptomoedas · Vertical",
+  "collection": "Finanças",
+  "category": "Cotações & Criptomoedas",
+  "width": 1080,
+  "height": 1920,
+  "file": "biblioteca/crypto_ticker_vertical.html",
+  "thumbnail": "biblioteca/thumbnails/crypto_ticker_vertical.png",
+  "fields": [
+   {
+    "key": "title",
+    "label": "Identificação",
+    "type": "text",
+    "default": "MERCADOS & CRIPTO"
+   },
+   {
+    "key": "asset1",
+    "label": "Ativo 1",
+    "type": "text",
+    "default": "BTC/USD $68.450 (+3.8%)"
+   },
+   {
+    "key": "asset2",
+    "label": "Ativo 2",
+    "type": "text",
+    "default": "ETH/USD $3.520 (+4.2%)"
+   },
+   {
+    "key": "asset3",
+    "label": "Ativo 3",
+    "type": "text",
+    "default": "IBOV 128.400 pts (+1.1%)"
+   },
+   {
+    "key": "asset4",
+    "label": "Ativo 4",
+    "type": "text",
+    "default": "DÓLAR R$ 5,14 (-0.6%)"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_poll_bar_horizontal",
+  "kind": "poll_bar",
+  "orientation": "horizontal",
+  "name": "Enquete Rápida Dual · Horizontal",
+  "collection": "Interatividade",
+  "category": "Enquete Rápida Dual",
+  "width": 1920,
+  "height": 1080,
+  "file": "biblioteca/poll_bar_horizontal.html",
+  "thumbnail": "biblioteca/thumbnails/poll_bar_horizontal.png",
+  "fields": [
+   {
+    "key": "question",
+    "label": "Pergunta da Enquete",
+    "type": "text",
+    "default": "QUEM DEVE VENCER A PREMIAÇÃO DESTAQUE DO ANO?"
+   },
+   {
+    "key": "optA",
+    "label": "Opção A",
+    "type": "text",
+    "default": "Opção 1 • Gabriel Medeiros"
+   },
+   {
+    "key": "pctA",
+    "label": "Percentual A (%)",
+    "type": "number",
+    "default": 62,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "optB",
+    "label": "Opção B",
+    "type": "text",
+    "default": "Opção 2 • Lucas Silveira"
+   },
+   {
+    "key": "pctB",
+    "label": "Percentual B (%)",
+    "type": "number",
+    "default": 38,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_poll_bar_vertical",
+  "kind": "poll_bar",
+  "orientation": "vertical",
+  "name": "Enquete Rápida Dual · Vertical",
+  "collection": "Interatividade",
+  "category": "Enquete Rápida Dual",
+  "width": 1080,
+  "height": 1920,
+  "file": "biblioteca/poll_bar_vertical.html",
+  "thumbnail": "biblioteca/thumbnails/poll_bar_vertical.png",
+  "fields": [
+   {
+    "key": "question",
+    "label": "Pergunta da Enquete",
+    "type": "text",
+    "default": "QUEM DEVE VENCER A PREMIAÇÃO DESTAQUE DO ANO?"
+   },
+   {
+    "key": "optA",
+    "label": "Opção A",
+    "type": "text",
+    "default": "Opção 1 • Gabriel Medeiros"
+   },
+   {
+    "key": "pctA",
+    "label": "Percentual A (%)",
+    "type": "number",
+    "default": 62,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "optB",
+    "label": "Opção B",
+    "type": "text",
+    "default": "Opção 2 • Lucas Silveira"
+   },
+   {
+    "key": "pctB",
+    "label": "Percentual B (%)",
+    "type": "number",
+    "default": 38,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_gaming_esports_horizontal",
+  "kind": "gaming_esports",
+  "orientation": "horizontal",
+  "name": "Placar Gamer Match Point · Horizontal",
+  "collection": "Esportes",
+  "category": "Placar Gamer Match Point",
+  "width": 1920,
+  "height": 1080,
+  "file": "biblioteca/gaming_esports_horizontal.html",
+  "thumbnail": "biblioteca/thumbnails/gaming_esports_horizontal.png",
+  "fields": [
+   {
+    "key": "teamA",
+    "label": "Time Alpha",
+    "type": "text",
+    "default": "LOUD"
+   },
+   {
+    "key": "scoreA",
+    "label": "Pontos Time A",
+    "type": "number",
+    "default": 2,
+    "min": 0,
+    "max": 9999
+   },
+   {
+    "key": "teamB",
+    "label": "Time Beta",
+    "type": "text",
+    "default": "PAIN GAMING"
+   },
+   {
+    "key": "scoreB",
+    "label": "Pontos Time B",
+    "type": "number",
+    "default": 1,
+    "min": 0,
+    "max": 9999
+   },
+   {
+    "key": "map",
+    "label": "Mapa Atual",
+    "type": "text",
+    "default": "MAPA 3 • BIND (MD5)"
+   },
+   {
+    "key": "status",
+    "label": "Situação do Round",
+    "type": "text",
+    "default": "ROUND 14 • PLANT ATIVO"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_gaming_esports_vertical",
+  "kind": "gaming_esports",
+  "orientation": "vertical",
+  "name": "Placar Gamer Match Point · Vertical",
+  "collection": "Esportes",
+  "category": "Placar Gamer Match Point",
+  "width": 1080,
+  "height": 1920,
+  "file": "biblioteca/gaming_esports_vertical.html",
+  "thumbnail": "biblioteca/thumbnails/gaming_esports_vertical.png",
+  "fields": [
+   {
+    "key": "teamA",
+    "label": "Time Alpha",
+    "type": "text",
+    "default": "LOUD"
+   },
+   {
+    "key": "scoreA",
+    "label": "Pontos Time A",
+    "type": "number",
+    "default": 2,
+    "min": 0,
+    "max": 9999
+   },
+   {
+    "key": "teamB",
+    "label": "Time Beta",
+    "type": "text",
+    "default": "PAIN GAMING"
+   },
+   {
+    "key": "scoreB",
+    "label": "Pontos Time B",
+    "type": "number",
+    "default": 1,
+    "min": 0,
+    "max": 9999
+   },
+   {
+    "key": "map",
+    "label": "Mapa Atual",
+    "type": "text",
+    "default": "MAPA 3 • BIND (MD5)"
+   },
+   {
+    "key": "status",
+    "label": "Situação do Round",
+    "type": "text",
+    "default": "ROUND 14 • PLANT ATIVO"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_speaker_bio_horizontal",
+  "kind": "speaker_bio",
+  "orientation": "horizontal",
+  "name": "Card Lateral Palestrante · Horizontal",
+  "collection": "Eventos",
+  "category": "Card Lateral Palestrante",
+  "width": 1920,
+  "height": 1080,
+  "file": "biblioteca/speaker_bio_horizontal.html",
+  "thumbnail": "biblioteca/thumbnails/speaker_bio_horizontal.png",
+  "fields": [
+   {
+    "key": "name",
+    "label": "Nome do Palestrante",
+    "type": "text",
+    "default": "PROF. CARLOS NOGUEIRA"
+   },
+   {
+    "key": "role",
+    "label": "Especialidade",
+    "type": "text",
+    "default": "PhD em Computação em Nuvem"
+   },
+   {
+    "key": "bio",
+    "label": "Mini-Biografia",
+    "type": "text",
+    "default": "Mais de 20 anos na indústria broadcast\nAutor de 4 livros técnicos de engenharia\nConsultor sênior de infraestrutura SRT e OMT"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_speaker_bio_vertical",
+  "kind": "speaker_bio",
+  "orientation": "vertical",
+  "name": "Card Lateral Palestrante · Vertical",
+  "collection": "Eventos",
+  "category": "Card Lateral Palestrante",
+  "width": 1080,
+  "height": 1920,
+  "file": "biblioteca/speaker_bio_vertical.html",
+  "thumbnail": "biblioteca/thumbnails/speaker_bio_vertical.png",
+  "fields": [
+   {
+    "key": "name",
+    "label": "Nome do Palestrante",
+    "type": "text",
+    "default": "PROF. CARLOS NOGUEIRA"
+   },
+   {
+    "key": "role",
+    "label": "Especialidade",
+    "type": "text",
+    "default": "PhD em Computação em Nuvem"
+   },
+   {
+    "key": "bio",
+    "label": "Mini-Biografia",
+    "type": "text",
+    "default": "Mais de 20 anos na indústria broadcast\nAutor de 4 livros técnicos de engenharia\nConsultor sênior de infraestrutura SRT e OMT"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_side_panel_info_horizontal",
+  "kind": "side_panel_info",
+  "orientation": "horizontal",
+  "name": "Painel Lateral de Destaques · Horizontal",
+  "collection": "Jornalismo",
+  "category": "Painel Lateral de Destaques",
+  "width": 1920,
+  "height": 1080,
+  "file": "biblioteca/side_panel_info_horizontal.html",
+  "thumbnail": "biblioteca/thumbnails/side_panel_info_horizontal.png",
+  "fields": [
+   {
+    "key": "title",
+    "label": "Título do Painel",
+    "type": "text",
+    "default": "DESTAQUES DO DIA"
+   },
+   {
+    "key": "item1",
+    "label": "Pauta 1",
+    "type": "text",
+    "default": "1. Abertura do mercado com forte alta"
+   },
+   {
+    "key": "item2",
+    "label": "Pauta 2",
+    "type": "text",
+    "default": "2. Votação de projetos estratégicos na câmara"
+   },
+   {
+    "key": "item3",
+    "label": "Pauta 3",
+    "type": "text",
+    "default": "3. Previsão de tempo estável para o feriado"
+   },
+   {
+    "key": "footer",
+    "label": "Rodapé",
+    "type": "text",
+    "default": "Fonte: Redação 3Mix News"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_side_panel_info_vertical",
+  "kind": "side_panel_info",
+  "orientation": "vertical",
+  "name": "Painel Lateral de Destaques · Vertical",
+  "collection": "Jornalismo",
+  "category": "Painel Lateral de Destaques",
+  "width": 1080,
+  "height": 1920,
+  "file": "biblioteca/side_panel_info_vertical.html",
+  "thumbnail": "biblioteca/thumbnails/side_panel_info_vertical.png",
+  "fields": [
+   {
+    "key": "title",
+    "label": "Título do Painel",
+    "type": "text",
+    "default": "DESTAQUES DO DIA"
+   },
+   {
+    "key": "item1",
+    "label": "Pauta 1",
+    "type": "text",
+    "default": "1. Abertura do mercado com forte alta"
+   },
+   {
+    "key": "item2",
+    "label": "Pauta 2",
+    "type": "text",
+    "default": "2. Votação de projetos estratégicos na câmara"
+   },
+   {
+    "key": "item3",
+    "label": "Pauta 3",
+    "type": "text",
+    "default": "3. Previsão de tempo estável para o feriado"
+   },
+   {
+    "key": "footer",
+    "label": "Rodapé",
+    "type": "text",
+    "default": "Fonte: Redação 3Mix News"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_corner_bug_pro_horizontal",
+  "kind": "corner_bug_pro",
+  "orientation": "horizontal",
+  "name": "Bug com Relógio e Cidade · Horizontal",
+  "collection": "Marca",
+  "category": "Bug com Relógio e Cidade",
+  "width": 1920,
+  "height": 1080,
+  "file": "biblioteca/corner_bug_pro_horizontal.html",
+  "thumbnail": "biblioteca/thumbnails/corner_bug_pro_horizontal.png",
+  "fields": [
+   {
+    "key": "brand",
+    "label": "Nome da Emissora",
+    "type": "text",
+    "default": "3MIX HD"
+   },
+   {
+    "key": "location",
+    "label": "Localidade",
+    "type": "text",
+    "default": "SÃO PAULO"
+   },
+   {
+    "key": "temp",
+    "label": "Temperatura",
+    "type": "text",
+    "default": "24°C"
+   },
+   {
+    "key": "badge",
+    "label": "Status",
     "type": "text",
     "default": "AO VIVO"
    },
    {
-    "key": "topic",
-    "label": "Editoria / Urgente",
-    "type": "text",
-    "default": "PLANTÃO"
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
    },
    {
-    "key": "text",
-    "label": "Manchete do Ticker",
-    "type": "text",
-    "default": "3Mix Studio Pro inicia fase de testes Alpha com a comunidade."
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
    }
   ]
  },
  {
-  "id": "sports_scoreboard_pro",
-  "name": "Placar Esportivo Premier League / FIFA",
+  "id": "fm_corner_bug_pro_vertical",
+  "kind": "corner_bug_pro",
+  "orientation": "vertical",
+  "name": "Bug com Relógio e Cidade · Vertical",
+  "collection": "Marca",
+  "category": "Bug com Relógio e Cidade",
+  "width": 1080,
+  "height": 1920,
+  "file": "biblioteca/corner_bug_pro_vertical.html",
+  "thumbnail": "biblioteca/thumbnails/corner_bug_pro_vertical.png",
+  "fields": [
+   {
+    "key": "brand",
+    "label": "Nome da Emissora",
+    "type": "text",
+    "default": "3MIX HD"
+   },
+   {
+    "key": "location",
+    "label": "Localidade",
+    "type": "text",
+    "default": "SÃO PAULO"
+   },
+   {
+    "key": "temp",
+    "label": "Temperatura",
+    "type": "text",
+    "default": "24°C"
+   },
+   {
+    "key": "badge",
+    "label": "Status",
+    "type": "text",
+    "default": "AO VIVO"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_music_nowplaying_horizontal",
+  "kind": "music_nowplaying",
+  "orientation": "horizontal",
+  "name": "Música Tocando Agora · Horizontal",
+  "collection": "Entretenimento",
+  "category": "Música Tocando Agora",
+  "width": 1920,
+  "height": 1080,
+  "file": "biblioteca/music_nowplaying_horizontal.html",
+  "thumbnail": "biblioteca/thumbnails/music_nowplaying_horizontal.png",
+  "fields": [
+   {
+    "key": "track",
+    "label": "Faixa / Música",
+    "type": "text",
+    "default": "Sinfonia Digital em Lá Menor"
+   },
+   {
+    "key": "artist",
+    "label": "Artista / Banda",
+    "type": "text",
+    "default": "Banda Orquestral 3Mix"
+   },
+   {
+    "key": "album",
+    "label": "Álbum / Detalhe",
+    "type": "text",
+    "default": "Transmissões Espaciais (Ao Vivo)"
+   },
+   {
+    "key": "duration",
+    "label": "Duração",
+    "type": "text",
+    "default": "03:45"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_music_nowplaying_vertical",
+  "kind": "music_nowplaying",
+  "orientation": "vertical",
+  "name": "Música Tocando Agora · Vertical",
+  "collection": "Entretenimento",
+  "category": "Música Tocando Agora",
+  "width": 1080,
+  "height": 1920,
+  "file": "biblioteca/music_nowplaying_vertical.html",
+  "thumbnail": "biblioteca/thumbnails/music_nowplaying_vertical.png",
+  "fields": [
+   {
+    "key": "track",
+    "label": "Faixa / Música",
+    "type": "text",
+    "default": "Sinfonia Digital em Lá Menor"
+   },
+   {
+    "key": "artist",
+    "label": "Artista / Banda",
+    "type": "text",
+    "default": "Banda Orquestral 3Mix"
+   },
+   {
+    "key": "album",
+    "label": "Álbum / Detalhe",
+    "type": "text",
+    "default": "Transmissões Espaciais (Ao Vivo)"
+   },
+   {
+    "key": "duration",
+    "label": "Duração",
+    "type": "text",
+    "default": "03:45"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_topbar_headline_horizontal",
+  "kind": "topbar_headline",
+  "orientation": "horizontal",
+  "name": "Barra de Notícias Superior · Horizontal",
+  "collection": "Jornalismo",
+  "category": "Barra de Notícias Superior",
+  "width": 1920,
+  "height": 1080,
+  "file": "biblioteca/topbar_headline_horizontal.html",
+  "thumbnail": "biblioteca/thumbnails/topbar_headline_horizontal.png",
+  "fields": [
+   {
+    "key": "category",
+    "label": "Editoria / Tag",
+    "type": "text",
+    "default": "PLANTÃO RODOVIAS"
+   },
+   {
+    "key": "title",
+    "label": "Manchete Superior",
+    "type": "text",
+    "default": "TRÂNSITO INTENSO NAS PRINCIPAIS SAÍDAS PARA O LITORAL"
+   },
+   {
+    "key": "source",
+    "label": "Atualização",
+    "type": "text",
+    "default": "Monitoramento Viário em Tempo Real"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_topbar_headline_vertical",
+  "kind": "topbar_headline",
+  "orientation": "vertical",
+  "name": "Barra de Notícias Superior · Vertical",
+  "collection": "Jornalismo",
+  "category": "Barra de Notícias Superior",
+  "width": 1080,
+  "height": 1920,
+  "file": "biblioteca/topbar_headline_vertical.html",
+  "thumbnail": "biblioteca/thumbnails/topbar_headline_vertical.png",
+  "fields": [
+   {
+    "key": "category",
+    "label": "Editoria / Tag",
+    "type": "text",
+    "default": "PLANTÃO RODOVIAS"
+   },
+   {
+    "key": "title",
+    "label": "Manchete Superior",
+    "type": "text",
+    "default": "TRÂNSITO INTENSO NAS PRINCIPAIS SAÍDAS PARA O LITORAL"
+   },
+   {
+    "key": "source",
+    "label": "Atualização",
+    "type": "text",
+    "default": "Monitoramento Viário em Tempo Real"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_versus_match_horizontal",
+  "kind": "versus_match",
+  "orientation": "horizontal",
+  "name": "Confronto Versus Face-to-Face · Horizontal",
   "collection": "Esportes",
-  "category": "Placares",
-  "thumbnail": "thumbnails/scoreboard_horizontal.png",
-  "file": "biblioteca/sports_scoreboard_pro.html",
+  "category": "Confronto Versus Face-to-Face",
+  "width": 1920,
+  "height": 1080,
+  "file": "biblioteca/versus_match_horizontal.html",
+  "thumbnail": "biblioteca/thumbnails/versus_match_horizontal.png",
   "fields": [
    {
-    "key": "teamHome",
-    "label": "Equipe Mandante",
+    "key": "title",
+    "label": "Título da Luta / Jogo",
     "type": "text",
-    "default": "BRASIL"
+    "default": "DISPUTA PELO CINTURÃO MUNDIAL"
    },
    {
-    "key": "scoreHome",
-    "label": "Gols Mandante",
-    "type": "number",
-    "default": 2
-   },
-   {
-    "key": "scoreAway",
-    "label": "Gols Visitante",
-    "type": "number",
-    "default": 1
-   },
-   {
-    "key": "teamAway",
-    "label": "Equipe Visitante",
+    "key": "fighterA",
+    "label": "Atleta A",
     "type": "text",
-    "default": "ARGENTINA"
+    "default": "ALEX \"POATAN\" PEREIRA"
    },
    {
-    "key": "minutes",
-    "label": "Minuto Inicial",
-    "type": "number",
-    "default": 78
-   },
-   {
-    "key": "extra",
-    "label": "Acréscimos",
+    "key": "recordA",
+    "label": "Cartel / Stats A",
     "type": "text",
-    "default": "+3'"
+    "default": "12-2-0 • 9 KOs • Brasil"
+   },
+   {
+    "key": "fighterB",
+    "label": "Atleta B",
+    "type": "text",
+    "default": "ISRAEL ADESANYA"
+   },
+   {
+    "key": "recordB",
+    "label": "Cartel / Stats B",
+    "type": "text",
+    "default": "24-3-0 • 16 KOs • Nigéria"
+   },
+   {
+    "key": "category",
+    "label": "Categoria de Peso",
+    "type": "text",
+    "default": "CATEGORIA PESO MEIO-PESADO"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
    }
   ]
  },
  {
-  "id": "podcast_split_lower",
-  "name": "Lower Third Duplo Podcast Host & Convidado",
-  "collection": "Eventos",
-  "category": "Entrevistas",
-  "thumbnail": "thumbnails/podcast_host_horizontal.png",
-  "file": "biblioteca/podcast_split_lower.html",
+  "id": "fm_versus_match_vertical",
+  "kind": "versus_match",
+  "orientation": "vertical",
+  "name": "Confronto Versus Face-to-Face · Vertical",
+  "collection": "Esportes",
+  "category": "Confronto Versus Face-to-Face",
+  "width": 1080,
+  "height": 1920,
+  "file": "biblioteca/versus_match_vertical.html",
+  "thumbnail": "biblioteca/thumbnails/versus_match_vertical.png",
   "fields": [
    {
-    "key": "nameHost",
-    "label": "Nome Apresentador",
+    "key": "title",
+    "label": "Título da Luta / Jogo",
     "type": "text",
-    "default": "EDDY SANGALLI"
+    "default": "DISPUTA PELO CINTURÃO MUNDIAL"
    },
    {
-    "key": "handleHost",
-    "label": "Arroba Apresentador",
+    "key": "fighterA",
+    "label": "Atleta A",
     "type": "text",
-    "default": "@eddysangalli"
+    "default": "ALEX \"POATAN\" PEREIRA"
    },
    {
-    "key": "nameGuest",
-    "label": "Nome Convidado",
+    "key": "recordA",
+    "label": "Cartel / Stats A",
     "type": "text",
-    "default": "DR. ROBERTO ALENCAR"
+    "default": "12-2-0 • 9 KOs • Brasil"
    },
    {
-    "key": "handleGuest",
-    "label": "Arroba Convidado",
+    "key": "fighterB",
+    "label": "Atleta B",
     "type": "text",
-    "default": "@dr.roberto • VP Broadcast"
+    "default": "ISRAEL ADESANYA"
+   },
+   {
+    "key": "recordB",
+    "label": "Cartel / Stats B",
+    "type": "text",
+    "default": "24-3-0 • 16 KOs • Nigéria"
+   },
+   {
+    "key": "category",
+    "label": "Categoria de Peso",
+    "type": "text",
+    "default": "CATEGORIA PESO MEIO-PESADO"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_product_card_shop_horizontal",
+  "kind": "product_card_shop",
+  "orientation": "horizontal",
+  "name": "Live Commerce Card Oferta · Horizontal",
+  "collection": "Eventos",
+  "category": "Live Commerce Card Oferta",
+  "width": 1920,
+  "height": 1080,
+  "file": "biblioteca/product_card_shop_horizontal.html",
+  "thumbnail": "biblioteca/thumbnails/product_card_shop_horizontal.png",
+  "fields": [
+   {
+    "key": "badge",
+    "label": "Destaque",
+    "type": "text",
+    "default": "OFERTA RELÂMPAGO AO VIVO"
+   },
+   {
+    "key": "product",
+    "label": "Nome do Produto",
+    "type": "text",
+    "default": "Console Switcher 3Mix Broadcast USB"
+   },
+   {
+    "key": "price",
+    "label": "Preço Promocional",
+    "type": "text",
+    "default": "R$ 899,00"
+   },
+   {
+    "key": "discount",
+    "label": "Selo Desconto",
+    "type": "text",
+    "default": "40% OFF"
+   },
+   {
+    "key": "code",
+    "label": "Instrução",
+    "type": "text",
+    "default": "APONTE A CÂMERA PARA O QR CODE"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_product_card_shop_vertical",
+  "kind": "product_card_shop",
+  "orientation": "vertical",
+  "name": "Live Commerce Card Oferta · Vertical",
+  "collection": "Eventos",
+  "category": "Live Commerce Card Oferta",
+  "width": 1080,
+  "height": 1920,
+  "file": "biblioteca/product_card_shop_vertical.html",
+  "thumbnail": "biblioteca/thumbnails/product_card_shop_vertical.png",
+  "fields": [
+   {
+    "key": "badge",
+    "label": "Destaque",
+    "type": "text",
+    "default": "OFERTA RELÂMPAGO AO VIVO"
+   },
+   {
+    "key": "product",
+    "label": "Nome do Produto",
+    "type": "text",
+    "default": "Console Switcher 3Mix Broadcast USB"
+   },
+   {
+    "key": "price",
+    "label": "Preço Promocional",
+    "type": "text",
+    "default": "R$ 899,00"
+   },
+   {
+    "key": "discount",
+    "label": "Selo Desconto",
+    "type": "text",
+    "default": "40% OFF"
+   },
+   {
+    "key": "code",
+    "label": "Instrução",
+    "type": "text",
+    "default": "APONTE A CÂMERA PARA O QR CODE"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_citation_quote_horizontal",
+  "kind": "citation_quote",
+  "orientation": "horizontal",
+  "name": "Aspas Centrais de Impacto · Horizontal",
+  "collection": "Jornalismo",
+  "category": "Aspas Centrais de Impacto",
+  "width": 1920,
+  "height": 1080,
+  "file": "biblioteca/citation_quote_horizontal.html",
+  "thumbnail": "biblioteca/thumbnails/citation_quote_horizontal.png",
+  "fields": [
+   {
+    "key": "quote",
+    "label": "Citação Textual",
+    "type": "text",
+    "default": "\"A simplicidade é o grau máximo da sofisticação.\""
+   },
+   {
+    "key": "author",
+    "label": "Autor da Frase",
+    "type": "text",
+    "default": "LEONARDO DA VINCI"
+   },
+   {
+    "key": "context",
+    "label": "Contexto Histórico",
+    "type": "text",
+    "default": "Tratado de Pintura e Filosofia"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_citation_quote_vertical",
+  "kind": "citation_quote",
+  "orientation": "vertical",
+  "name": "Aspas Centrais de Impacto · Vertical",
+  "collection": "Jornalismo",
+  "category": "Aspas Centrais de Impacto",
+  "width": 1080,
+  "height": 1920,
+  "file": "biblioteca/citation_quote_vertical.html",
+  "thumbnail": "biblioteca/thumbnails/citation_quote_vertical.png",
+  "fields": [
+   {
+    "key": "quote",
+    "label": "Citação Textual",
+    "type": "text",
+    "default": "\"A simplicidade é o grau máximo da sofisticação.\""
+   },
+   {
+    "key": "author",
+    "label": "Autor da Frase",
+    "type": "text",
+    "default": "LEONARDO DA VINCI"
+   },
+   {
+    "key": "context",
+    "label": "Contexto Histórico",
+    "type": "text",
+    "default": "Tratado de Pintura e Filosofia"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_podcast_minimal_horizontal",
+  "kind": "podcast_minimal",
+  "orientation": "horizontal",
+  "name": "Lower Third Minimal Linha Fina · Horizontal",
+  "collection": "Entretenimento",
+  "category": "Lower Third Minimal Linha Fina",
+  "width": 1920,
+  "height": 1080,
+  "file": "biblioteca/podcast_minimal_horizontal.html",
+  "thumbnail": "biblioteca/thumbnails/podcast_minimal_horizontal.png",
+  "fields": [
+   {
+    "key": "name",
+    "label": "Nome do Host",
+    "type": "text",
+    "default": "FELIPE ALBUQUERQUE"
+   },
+   {
+    "key": "role",
+    "label": "Função",
+    "type": "text",
+    "default": "Host Principal & Criador"
+   },
+   {
+    "key": "social",
+    "label": "Rede Social",
+    "type": "text",
+    "default": "@felipealbuquerque"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_podcast_minimal_vertical",
+  "kind": "podcast_minimal",
+  "orientation": "vertical",
+  "name": "Lower Third Minimal Linha Fina · Vertical",
+  "collection": "Entretenimento",
+  "category": "Lower Third Minimal Linha Fina",
+  "width": 1080,
+  "height": 1920,
+  "file": "biblioteca/podcast_minimal_vertical.html",
+  "thumbnail": "biblioteca/thumbnails/podcast_minimal_vertical.png",
+  "fields": [
+   {
+    "key": "name",
+    "label": "Nome do Host",
+    "type": "text",
+    "default": "FELIPE ALBUQUERQUE"
+   },
+   {
+    "key": "role",
+    "label": "Função",
+    "type": "text",
+    "default": "Host Principal & Criador"
+   },
+   {
+    "key": "social",
+    "label": "Rede Social",
+    "type": "text",
+    "default": "@felipealbuquerque"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_stats_versus_horizontal",
+  "kind": "stats_versus",
+  "orientation": "horizontal",
+  "name": "Comparativo Direto de Jogadores · Horizontal",
+  "collection": "Esportes",
+  "category": "Comparativo Direto de Jogadores",
+  "width": 1920,
+  "height": 1080,
+  "file": "biblioteca/stats_versus_horizontal.html",
+  "thumbnail": "biblioteca/thumbnails/stats_versus_horizontal.png",
+  "fields": [
+   {
+    "key": "playerA",
+    "label": "Jogador 1",
+    "type": "text",
+    "default": "VINICIUS JR (Real Madrid)"
+   },
+   {
+    "key": "playerB",
+    "label": "Jogador 2",
+    "type": "text",
+    "default": "KYLIAN MBAPPÉ (Real Madrid)"
+   },
+   {
+    "key": "metric1",
+    "label": "Métrica 1",
+    "type": "text",
+    "default": "Gols no Torneio: 24 | 28"
+   },
+   {
+    "key": "metric2",
+    "label": "Métrica 2",
+    "type": "text",
+    "default": "Assistências: 11 | 9"
+   },
+   {
+    "key": "metric3",
+    "label": "Métrica 3",
+    "type": "text",
+    "default": "Velocidade Máxima: 36.2 km/h | 37.1 km/h"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_stats_versus_vertical",
+  "kind": "stats_versus",
+  "orientation": "vertical",
+  "name": "Comparativo Direto de Jogadores · Vertical",
+  "collection": "Esportes",
+  "category": "Comparativo Direto de Jogadores",
+  "width": 1080,
+  "height": 1920,
+  "file": "biblioteca/stats_versus_vertical.html",
+  "thumbnail": "biblioteca/thumbnails/stats_versus_vertical.png",
+  "fields": [
+   {
+    "key": "playerA",
+    "label": "Jogador 1",
+    "type": "text",
+    "default": "VINICIUS JR (Real Madrid)"
+   },
+   {
+    "key": "playerB",
+    "label": "Jogador 2",
+    "type": "text",
+    "default": "KYLIAN MBAPPÉ (Real Madrid)"
+   },
+   {
+    "key": "metric1",
+    "label": "Métrica 1",
+    "type": "text",
+    "default": "Gols no Torneio: 24 | 28"
+   },
+   {
+    "key": "metric2",
+    "label": "Métrica 2",
+    "type": "text",
+    "default": "Assistências: 11 | 9"
+   },
+   {
+    "key": "metric3",
+    "label": "Métrica 3",
+    "type": "text",
+    "default": "Velocidade Máxima: 36.2 km/h | 37.1 km/h"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_social_card_highlight_horizontal",
+  "kind": "social_card_highlight",
+  "orientation": "horizontal",
+  "name": "Card Social de Comentário · Horizontal",
+  "collection": "Eventos",
+  "category": "Card Social de Comentário",
+  "width": 1920,
+  "height": 1080,
+  "file": "biblioteca/social_card_highlight_horizontal.html",
+  "thumbnail": "biblioteca/thumbnails/social_card_highlight_horizontal.png",
+  "fields": [
+   {
+    "key": "author",
+    "label": "Nome do Autor",
+    "type": "text",
+    "default": "Mariana Silveira"
+   },
+   {
+    "key": "handle",
+    "label": "Arroba / Perfil",
+    "type": "text",
+    "default": "@mari_silveira"
+   },
+   {
+    "key": "network",
+    "label": "Rede Social",
+    "type": "text",
+    "default": "TWITTER / X"
+   },
+   {
+    "key": "message",
+    "label": "Comentário",
+    "type": "text",
+    "default": "\"A transmissão em 4K e a latência zero no 3Mix estão simplesmente inacreditáveis!\""
+   },
+   {
+    "key": "tag",
+    "label": "Hashtag",
+    "type": "text",
+    "default": "#3MixAoVivo"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_social_card_highlight_vertical",
+  "kind": "social_card_highlight",
+  "orientation": "vertical",
+  "name": "Card Social de Comentário · Vertical",
+  "collection": "Eventos",
+  "category": "Card Social de Comentário",
+  "width": 1080,
+  "height": 1920,
+  "file": "biblioteca/social_card_highlight_vertical.html",
+  "thumbnail": "biblioteca/thumbnails/social_card_highlight_vertical.png",
+  "fields": [
+   {
+    "key": "author",
+    "label": "Nome do Autor",
+    "type": "text",
+    "default": "Mariana Silveira"
+   },
+   {
+    "key": "handle",
+    "label": "Arroba / Perfil",
+    "type": "text",
+    "default": "@mari_silveira"
+   },
+   {
+    "key": "network",
+    "label": "Rede Social",
+    "type": "text",
+    "default": "TWITTER / X"
+   },
+   {
+    "key": "message",
+    "label": "Comentário",
+    "type": "text",
+    "default": "\"A transmissão em 4K e a latência zero no 3Mix estão simplesmente inacreditáveis!\""
+   },
+   {
+    "key": "tag",
+    "label": "Hashtag",
+    "type": "text",
+    "default": "#3MixAoVivo"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_countdown_circle_horizontal",
+  "kind": "countdown_circle",
+  "orientation": "horizontal",
+  "name": "Contador Regressivo com Alerta · Horizontal",
+  "collection": "Eventos",
+  "category": "Contador Regressivo com Alerta",
+  "width": 1920,
+  "height": 1080,
+  "file": "biblioteca/countdown_circle_horizontal.html",
+  "thumbnail": "biblioteca/thumbnails/countdown_circle_horizontal.png",
+  "fields": [
+   {
+    "key": "title",
+    "label": "Mensagem de Espera",
+    "type": "text",
+    "default": "NOSSA TRANSMISSÃO COMEÇA EM"
+   },
+   {
+    "key": "subtitle",
+    "label": "Status da Conexão",
+    "type": "text",
+    "default": "Sincronizando feed de vídeo e áudio dos estúdios..."
+   },
+   {
+    "key": "seconds",
+    "label": "Tempo em Segundos",
+    "type": "number",
+    "default": 180,
+    "min": 0,
+    "max": 86400
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_countdown_circle_vertical",
+  "kind": "countdown_circle",
+  "orientation": "vertical",
+  "name": "Contador Regressivo com Alerta · Vertical",
+  "collection": "Eventos",
+  "category": "Contador Regressivo com Alerta",
+  "width": 1080,
+  "height": 1920,
+  "file": "biblioteca/countdown_circle_vertical.html",
+  "thumbnail": "biblioteca/thumbnails/countdown_circle_vertical.png",
+  "fields": [
+   {
+    "key": "title",
+    "label": "Mensagem de Espera",
+    "type": "text",
+    "default": "NOSSA TRANSMISSÃO COMEÇA EM"
+   },
+   {
+    "key": "subtitle",
+    "label": "Status da Conexão",
+    "type": "text",
+    "default": "Sincronizando feed de vídeo e áudio dos estúdios..."
+   },
+   {
+    "key": "seconds",
+    "label": "Tempo em Segundos",
+    "type": "number",
+    "default": 180,
+    "min": 0,
+    "max": 86400
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_church_service_horizontal",
+  "kind": "church_service",
+  "orientation": "horizontal",
+  "name": "Transmissão de Celebração / Culto · Horizontal",
+  "collection": "Igreja",
+  "category": "Transmissão de Celebração / Culto",
+  "width": 1920,
+  "height": 1080,
+  "file": "biblioteca/church_service_horizontal.html",
+  "thumbnail": "biblioteca/thumbnails/church_service_horizontal.png",
+  "fields": [
+   {
+    "key": "title",
+    "label": "Título do Encontro",
+    "type": "text",
+    "default": "CELEBRAÇÃO DA FAMÍLIA & FÉ"
+   },
+   {
+    "key": "preacher",
+    "label": "Ministro / Preletor",
+    "type": "text",
+    "default": "Pastor David Oliveira"
+   },
+   {
+    "key": "theme",
+    "label": "Tema da Mensagem",
+    "type": "text",
+    "default": "Tema: Edificados Sobre a Rocha Firme"
+   },
+   {
+    "key": "church",
+    "label": "Comunidade / Local",
+    "type": "text",
+    "default": "Templo Central • Transmissão Oficial"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fm_church_service_vertical",
+  "kind": "church_service",
+  "orientation": "vertical",
+  "name": "Transmissão de Celebração / Culto · Vertical",
+  "collection": "Igreja",
+  "category": "Transmissão de Celebração / Culto",
+  "width": 1080,
+  "height": 1920,
+  "file": "biblioteca/church_service_vertical.html",
+  "thumbnail": "biblioteca/thumbnails/church_service_vertical.png",
+  "fields": [
+   {
+    "key": "title",
+    "label": "Título do Encontro",
+    "type": "text",
+    "default": "CELEBRAÇÃO DA FAMÍLIA & FÉ"
+   },
+   {
+    "key": "preacher",
+    "label": "Ministro / Preletor",
+    "type": "text",
+    "default": "Pastor David Oliveira"
+   },
+   {
+    "key": "theme",
+    "label": "Tema da Mensagem",
+    "type": "text",
+    "default": "Tema: Edificados Sobre a Rocha Firme"
+   },
+   {
+    "key": "church",
+    "label": "Comunidade / Local",
+    "type": "text",
+    "default": "Templo Central • Transmissão Oficial"
+   },
+   {
+    "key": "accent",
+    "label": "Cor primária (Destaque)",
+    "type": "color",
+    "default": "#19c9aa"
+   },
+   {
+    "key": "secondary",
+    "label": "Cor secundária (Acento 2)",
+    "type": "color",
+    "default": "#0284c7"
+   },
+   {
+    "key": "background",
+    "label": "Cor do painel (Fundo)",
+    "type": "color",
+    "default": "#102330"
+   },
+   {
+    "key": "foreground",
+    "label": "Cor do texto",
+    "type": "color",
+    "default": "#ffffff"
+   },
+   {
+    "key": "designStyle",
+    "label": "Estilo Visual / Geometria",
+    "type": "select",
+    "default": "modern_internet",
+    "options": [
+     "modern_internet",
+     "classic_tv",
+     "swiss_square",
+     "esports_neon",
+     "corporate_glass",
+     "pill_capsule",
+     "cyber_bevel",
+     "minimal_flat"
+    ]
+   },
+   {
+    "key": "opacity",
+    "label": "Opacidade do painel (%)",
+    "type": "number",
+    "default": 96,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "fontSize",
+    "label": "Tamanho do texto (%)",
+    "type": "number",
+    "default": 100,
+    "min": 70,
+    "max": 140
+   },
+   {
+    "key": "offsetX",
+    "label": "Deslocamento horizontal (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "offsetY",
+    "label": "Deslocamento vertical (%)",
+    "type": "number",
+    "default": 0,
+    "min": -25,
+    "max": 25
+   },
+   {
+    "key": "scale",
+    "label": "Escala (%)",
+    "type": "number",
+    "default": 100,
+    "min": 60,
+    "max": 120
+   },
+   {
+    "key": "fontFamily",
+    "label": "Família da fonte",
+    "type": "select",
+    "default": "Segoe UI",
+    "options": [
+     "Segoe UI",
+     "Arial",
+     "Montserrat",
+     "Bebas Neue",
+     "Roboto",
+     "Impact",
+     "Trebuchet MS",
+     "Georgia"
+    ]
+   },
+   {
+    "key": "fontAsset",
+    "label": "Arquivo de fonte importado",
+    "type": "asset",
+    "kind": "font",
+    "default": ""
+   },
+   {
+    "key": "imageAsset",
+    "label": "Imagem / logotipo",
+    "type": "asset",
+    "kind": "image",
+    "default": ""
+   },
+   {
+    "key": "imageX",
+    "label": "Imagem X (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageY",
+    "label": "Imagem Y (%)",
+    "type": "number",
+    "default": 5,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "imageWidth",
+    "label": "Imagem largura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageHeight",
+    "label": "Imagem altura (%)",
+    "type": "number",
+    "default": 15,
+    "min": 1,
+    "max": 100
+   },
+   {
+    "key": "imageOpacity",
+    "label": "Imagem opacidade (%)",
+    "type": "number",
+    "default": 100,
+    "min": 0,
+    "max": 100
+   },
+   {
+    "key": "animation",
+    "label": "Efeito de Transição",
+    "type": "select",
+    "default": "slide",
+    "options": [
+     "none",
+     "fade",
+     "slide",
+     "zoom",
+     "rotate",
+     "blur_fade",
+     "wipe"
+    ]
+   },
+   {
+    "key": "animationInMs",
+    "label": "Entrada (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationOutMs",
+    "label": "Saída (ms)",
+    "type": "number",
+    "default": 280,
+    "min": 0,
+    "max": 5000
+   },
+   {
+    "key": "animationEasing",
+    "label": "Curva da animação",
+    "type": "select",
+    "default": "ease-out",
+    "options": [
+     "linear",
+     "ease-in",
+     "ease-out",
+     "ease-in-out",
+     "cubic-bezier(0.16, 1, 0.3, 1)"
+    ]
    }
   ]
  }

@@ -1,0 +1,122 @@
+{
+  "threeMixCompatibility": {
+    "version": 1,
+    "animation": true,
+    "clock": true,
+    "style": true,
+    "styleFields": [
+      {
+        "key": "accent",
+        "label": "Cor primária (Destaque)",
+        "type": "color",
+        "default": "#19c9aa"
+      },
+      {
+        "key": "background",
+        "label": "Cor do painel (Fundo)",
+        "type": "color",
+        "default": "#102330"
+      },
+      {
+        "key": "foreground",
+        "label": "Cor do texto",
+        "type": "color",
+        "default": "#ffffff"
+      },
+      {
+        "key": "opacity",
+        "label": "Opacidade do painel (%)",
+        "type": "number",
+        "default": 96,
+        "min": 0,
+        "max": 100
+      },
+      {
+        "key": "fontSize",
+        "label": "Tamanho do texto (%)",
+        "type": "number",
+        "default": 100,
+        "min": 70,
+        "max": 140
+      },
+      {
+        "key": "imageOpacity",
+        "label": "Imagem opacidade (%)",
+        "type": "number",
+        "default": 100,
+        "min": 0,
+        "max": 100
+      },
+      {
+        "key": "animationInMs",
+        "label": "Entrada (ms)",
+        "type": "number",
+        "default": 280,
+        "min": 0,
+        "max": 5000
+      },
+      {
+        "key": "animationOutMs",
+        "label": "Saída (ms)",
+        "type": "number",
+        "default": 280,
+        "min": 0,
+        "max": 5000
+      }
+    ]
+  },
+  "fields": [
+    {
+      "key": "title",
+      "label": "Título do Painel",
+      "type": "text",
+      "default": "DESTAQUES DO DIA"
+    },
+    {
+      "key": "item1",
+      "label": "Pauta 1",
+      "type": "text",
+      "default": "1. Abertura do mercado com forte alta"
+    },
+    {
+      "key": "item2",
+      "label": "Pauta 2",
+      "type": "text",
+      "default": "2. Votação de projetos estratégicos na câmara"
+    },
+    {
+      "key": "item3",
+      "label": "Pauta 3",
+      "type": "text",
+      "default": "3. Previsão de tempo estável para o feriado"
+    },
+    {
+      "key": "footer",
+      "label": "Rodapé",
+      "type": "text",
+      "default": "Fonte: Redação 3Mix News"
+    },
+    {
+      "key": "secondary",
+      "label": "Cor secundária (Acento 2)",
+      "type": "color",
+      "default": "#0284c7"
+    },
+    {
+      "key": "designStyle",
+      "label": "Estilo Visual / Geometria",
+      "type": "select",
+      "default": "modern_internet",
+      "options": [
+        "modern_internet",
+        "classic_tv",
+        "swiss_square",
+        "esports_neon",
+        "corporate_glass",
+        "pill_capsule",
+        "cyber_bevel",
+        "minimal_flat"
+      ]
+    }
+  ]
+}

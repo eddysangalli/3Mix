@@ -1,0 +1,110 @@
+{
+  "threeMixCompatibility": {
+    "version": 1,
+    "animation": true,
+    "clock": true,
+    "style": true,
+    "styleFields": [
+      {
+        "key": "accent",
+        "label": "Cor primária (Destaque)",
+        "type": "color",
+        "default": "#19c9aa"
+      },
+      {
+        "key": "background",
+        "label": "Cor do painel (Fundo)",
+        "type": "color",
+        "default": "#102330"
+      },
+      {
+        "key": "foreground",
+        "label": "Cor do texto",
+        "type": "color",
+        "default": "#ffffff"
+      },
+      {
+        "key": "opacity",
+        "label": "Opacidade do painel (%)",
+        "type": "number",
+        "default": 96,
+        "min": 0,
+        "max": 100
+      },
+      {
+        "key": "fontSize",
+        "label": "Tamanho do texto (%)",
+        "type": "number",
+        "default": 100,
+        "min": 70,
+        "max": 140
+      },
+      {
+        "key": "imageOpacity",
+        "label": "Imagem opacidade (%)",
+        "type": "number",
+        "default": 100,
+        "min": 0,
+        "max": 100
+      },
+      {
+        "key": "animationInMs",
+        "label": "Entrada (ms)",
+        "type": "number",
+        "default": 280,
+        "min": 0,
+        "max": 5000
+      },
+      {
+        "key": "animationOutMs",
+        "label": "Saída (ms)",
+        "type": "number",
+        "default": 280,
+        "min": 0,
+        "max": 5000
+      }
+    ]
+  },
+  "fields": [
+    {
+      "key": "badge",
+      "label": "Alerta",
+      "type": "text",
+      "default": "URGENTE"
+    },
+    {
+      "key": "title",
+      "label": "Notícia",
+      "type": "text",
+      "default": "GOVERNO ANUNCIA NOVO PACOTE DE INVESTIMENTOS"
+    },
+    {
+      "key": "ticker",
+      "label": "Ticker de Notícias",
+      "type": "text",
+      "default": "Bolsa opera em alta de +1.4% • Dólar fecha a R$ 5,12 • Inflação recua pelo terceiro mês consecutivo"
+    },
+    {
+      "key": "secondary",
+      "label": "Cor secundária (Acento 2)",
+      "type": "color",
+      "default": "#0284c7"
+    },
+    {
+      "key": "designStyle",
+      "label": "Estilo Visual / Geometria",
+      "type": "select",
+      "default": "modern_internet",
+      "options": [
+        "modern_internet",
+        "classic_tv",
+        "swiss_square",
+        "esports_neon",
+        "corporate_glass",
+        "pill_capsule",
+        "cyber_bevel",
+        "minimal_flat"
+      ]
+    }
+  ]
+}
