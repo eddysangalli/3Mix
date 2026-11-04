@@ -13,7 +13,7 @@ export function inspectPe(bytes) {
   if (pe < 0x40 || pe + 24 > bytes.length || bytes.readUInt32LE(pe) !== 0x4550) throw Error('Cabeçalho PE inválido');
   const machine = bytes.readUInt16LE(pe + 4), count = bytes.readUInt16LE(pe + 6);
   const size = bytes.readUInt16LE(pe + 20), optional = pe + 24;
-  if (machine !== 0x8664 || count < 1 || count > 96 || size < 112 || optional + size > bytes.length || bytes.readUInt16LE(optional) !== 0x20b) throw Error('Plugin requer DLL Windows x64 (PE32+)');
+  if (machine !== 0x8664 || count < 1 || count > 96 || size < 128 || optional + size > bytes.length || bytes.readUInt16LE(optional) !== 0x20b) throw Error('Plugin requer DLL Windows x64 (PE32+)');
   const imageBase = bytes.readBigUInt64LE(optional + 24);
   const sectionStart = optional + size;
   if (sectionStart + count * 40 > bytes.length) throw Error('Seções PE truncadas');
