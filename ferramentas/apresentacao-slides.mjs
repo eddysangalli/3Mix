@@ -682,8 +682,11 @@ export class SlideEngine extends EventEmitter {
 
   /**
    * Coloca o slide armado no ar (PRESENT TAKE) e atualiza o motor OBS!
+   * @param {string} deckId - ID da apresentação
+   * @param {number|null} targetIndex - Índice do slide (1-based)
+   * @param {Object} options - Opções: emitEvent, targetScene (cena customizada)
    */
-  async presentSlide(deckId, targetIndex = null, options = { emitEvent: true }) {
+  async presentSlide(deckId, targetIndex = null, options = { emitEvent: true, targetScene: 'Slides' }) {
     if (deckId && this.decks.has(deckId)) this.activeDeckId = deckId;
     const deck = this.decks.get(deckId || this.activeDeckId);
     if (!deck) throw new Error('Nenhuma apresentação selecionada');
@@ -693,13 +696,13 @@ export class SlideEngine extends EventEmitter {
     deck.currentSlide = deck.preparedSlide;
 
     const slide = deck.slides[deck.currentSlide - 1];
+    const targetScene = options.targetScene || 'Slides';
     if (slide && this.p?.req) {
       try {
         const localFilePath = resolve(slide.renderedPath);
         const fileName = basename(slide.renderedPath);
         const apiPort = process.env.FREEMIX_API_PORT ? Number(process.env.FREEMIX_API_PORT) : 18188;
         
-        // URL da rota do visualizador broadcast contínuo ou fallback direto para mídia
         const viewerUrl = `http://localhost:${apiPort}/api/slides/view/${deck.id}?slide=${deck.currentSlide}&t=${Date.now()}`;
         const slideMediaUrl = `http://localhost:${apiPort}/api/slides/media/${deck.id}/${fileName}?t=${Date.now()}`;
 
@@ -708,18 +711,18 @@ export class SlideEngine extends EventEmitter {
           url: viewerUrl,
           width: 1920,
           height: 1080,
-          reroute_audio: true, // Áudio de qualquer vídeo roteado diretamente aos faders e barramentos!
+          reroute_audio: true,
           restart_when_active: false,
           css: 'body { margin: 0; background: transparent; overflow: hidden; } svg { width: 100vw; height: 100vh; }'
         };
 
         const sceneList = await this.p.req('GetSceneList').catch(() => null);
-        const hasSlidesScene = sceneList?.scenes?.some(s => s.sceneName === 'Slides');
+        const hasTargetScene = sceneList?.scenes?.some(s => s.sceneName === targetScene);
 
-        if (!hasSlidesScene) {
-          await this.p.req('CreateScene', { sceneName: 'Slides' }).catch(() => {});
+        if (!hasTargetScene) {
+          await this.p.req('CreateScene', { sceneName: targetScene }).catch(() => {});
           await this.p.req('CreateInput', {
-            sceneName: 'Slides',
+            sceneName: targetScene,
             inputName: 'Fonte Slides',
             inputKind: 'browser_source',
             inputSettings: browserSettings
@@ -731,7 +734,7 @@ export class SlideEngine extends EventEmitter {
           }).catch(async () => {
             await this.p.req('RemoveInput', { inputName: 'Fonte Slides' }).catch(() => {});
             await this.p.req('CreateInput', {
-              sceneName: 'Slides',
+              sceneName: targetScene,
               inputName: 'Fonte Slides',
               inputKind: 'browser_source',
               inputSettings: browserSettings

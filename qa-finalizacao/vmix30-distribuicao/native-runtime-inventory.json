@@ -1,0 +1,44 @@
+{
+  "kind": "installed-runtime-inventory-not-build-freeze",
+  "nativeHead": "e084a9ec09b0bd701b6501703450e279b4e77492",
+  "files": [
+    {
+      "path": "bin/64bit/3Mix.exe",
+      "exists": true,
+      "sha256": "3d3e0daeabfea886871fda513d7f152fdd601a2b955d779730d1563944261fff"
+    },
+    {
+      "path": "bin/64bit/obs.dll",
+      "exists": true,
+      "sha256": "2d6d6065f9c5f982dbb30cd2595febd4f188bedbd0332f2a9b8ea7265e3b70fe"
+    },
+    {
+      "path": "bin/64bit/obs-frontend-api.dll",
+      "exists": true,
+      "sha256": "b37b6b17e33239165e6cdd30eed0c9513d3c5ebc6e12321772eb6307ae41f676"
+    },
+    {
+      "path": "obs-plugins/64bit/decklink.dll",
+      "exists": true,
+      "sha256": "1558b275a178a7a91b5ed0bfa6f04d625bff48ca715177583f55a0920dbf5edc"
+    },
+    {
+      "path": "obs-plugins/64bit/aja.dll",
+      "exists": true,
+      "sha256": "f902a4858512d217a0a61d3e808744ab0baeb3aa685f785907b9bef4c2b346d2"
+    },
+    {
+      "path": "obs-plugins/64bit/obs-ffmpeg.dll",
+      "exists": true,
+      "sha256": "de8471ee089d5fb185591a34faf4c43ef11a4e20931b977072551686d39f23e2"
+    },
+    {
+      "path": "bin/64bit/srt.dll",
+      "exists": true,
+      "sha256": "63110eb3d82a33d1923638bf2f83dd3afb18b7f495de1f8ed1eea353000e0289"
+    }
+  ],
+  "operatorModified": false,
+  "buildStatus": "running-separately",
+  "note": "Hashes identify installed bytes only; no assertion that installed binaries correspond to nativeHead."
+}

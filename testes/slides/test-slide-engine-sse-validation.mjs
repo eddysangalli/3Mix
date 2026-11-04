@@ -1,25 +1,33 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import fs from 'node:fs';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { SlideEngine } from '../../ferramentas/apresentacao-slides.mjs';
 import { connect } from 'file:///D:/DRIVE/IA/antigravity/3Mix/3mix-runtime/ferramentas/obsws.mjs';
 
-const QA_DIR = path.join(process.cwd(), '../../../../qa-replay/evidencias-sse-validation');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const PROJECT_ROOT = resolve(__dirname, '../../..');
+const RUNTIME_ROOT = resolve(PROJECT_ROOT, '3mix-runtime');
+const QA_DIR = resolve(PROJECT_ROOT, 'qa-replay/evidencias-sse-validation');
+const PPTX_PATH = resolve(PROJECT_ROOT, 'scratch/apresentacao-rica-broadcast.pptx');
+const ISOLATED_SCENE_PREFIX = 'SSE_TEST_';
 
 async function runSSEValidationTest() {
-  console.log('=== TESTE VALIDAÇÃO SSE-ONLY: Browser Source NÃO RECARREGA ===\n');
+  console.log('=== TESTE SSE-ONLY: Browser Source NÃO RECARREGA (ambiente isolado) ===\n');
 
   let obs = null;
   let runtimeTested = false;
+  let testSceneName = null;
 
   try {
-    console.log('[1/6] Conectando ao 3Mix Pro via OBS WebSocket...');
-    obs = await connect({ root: 'D:/DRIVE/IA/antigravity/3Mix/3mix-runtime' });
-    console.log('   [PASS] Conectado ao motor 3Mix Pro');
+    console.log('[1/7] Conectando ao 3Mix Pro...');
+    obs = await connect({ root: RUNTIME_ROOT });
+    console.log('   [PASS] Conectado');
     runtimeTested = true;
   } catch (err) {
-    console.log('   [AVISO] 3Mix Pro não está rodando - teste de validação SSE-only PULADO');
-    console.log('   Para validar: inicie o 3Mix Pro e reexecute este teste.');
+    console.log('   [SKIPPED] 3Mix Pro não ativo');
     return;
   }
 
@@ -29,187 +37,159 @@ async function runSSEValidationTest() {
   };
 
   const engine = new SlideEngine({
-    root: 'D:/DRIVE/IA/antigravity/3Mix/3mix-runtime',
+    root: RUNTIME_ROOT,
     production: productionAdapter
   });
   await engine.ready;
 
-  const pptxPath = path.join(process.cwd(), '../../../../3Mix/scratch/apresentacao-rica-broadcast.pptx');
-  const deck = await engine.importPptx(pptxPath, 'Apresentação Teste SSE');
+  const deck = await engine.importPptx(PPTX_PATH, 'Apresentação Teste SSE');
 
   if (!fs.existsSync(QA_DIR)) fs.mkdirSync(QA_DIR, { recursive: true });
 
+  // Create isolated scene
+  testSceneName = `${ISOLATED_SCENE_PREFIX}Slides`;
+  await obs.req('CreateScene', { sceneName: testSceneName }).catch(() => {});
+  console.log(`   Cena isolada: ${testSceneName}`);
+
   // -------------------------------------------------------------
-  // TESTE 1: Apresentar Slide 3 (com animações) no Program
+  // TESTE 1: Apresentar Slide 3 no Program (cena isolada)
   // -------------------------------------------------------------
-  console.log('\n[2/6] Apresentando Slide 3 (3 animações) no Program...');
-  await engine.presentSlide(deck.id, 3);
+  console.log('\n[2/7] Apresentando Slide 3 (3 animações) no Program isolado...');
+  await engine.presentSlide(deck.id, 3, { targetScene: testSceneName });
   await new Promise(r => setTimeout(r, 1500));
 
-  // Capturar UUID da fonte Browser Source ANTES das animações
-  const sceneItemsBefore = await obs.req('GetSceneItemList', { sceneName: 'Slides' });
+  const sceneItemsBefore = await obs.req('GetSceneItemList', { sceneName: testSceneName });
   const sourceUuidBefore = sceneItemsBefore.sceneItems[0]?.sourceUuid;
   const sourceName = sceneItemsBefore.sceneItems[0]?.sourceName;
-  console.log(`   Fonte: ${sourceName}, UUID antes: ${sourceUuidBefore}`);
+  console.log(`   Fonte: ${sourceName}, UUID: ${sourceUuidBefore}`);
 
-  // Capturar frame de referência (slide 3, step 0)
   const shotStep0 = await obs.req('GetSourceScreenshot', {
-    sourceName: sourceName,
-    imageFormat: 'png',
-    imageWidth: 1920,
-    imageHeight: 1080
+    sourceName, imageFormat: 'png', imageWidth: 1920, imageHeight: 1080
   });
   const bufStep0 = Buffer.from(shotStep0.imageData.replace(/^data:image\/png;base64,/, ''), 'base64');
   fs.writeFileSync(path.join(QA_DIR, 'sse_slide3_step0.png'), bufStep0);
-  console.log(`   [PASS] Frame step 0 capturado (${bufStep0.length} bytes)`);
+  console.log(`   [PASS] Frame step 0 capturado`);
 
   // -------------------------------------------------------------
-  // TESTE 2: Avançar animação 1 (Fade) via SSE-only
+  // TESTE 2: Animação 1 (Fade) via SSE-only
   // -------------------------------------------------------------
-  console.log('\n[3/6] Avançando animação 1 (Fade) via nextAnimation() [SSE-only]...');
+  console.log('\n[3/7] Animação 1 (Fade) via nextAnimation() [SSE-only]...');
   await engine.nextAnimation(deck.id);
   await new Promise(r => setTimeout(r, 800));
 
-  // Verificar UUID da fonte NÃO mudou (Browser Source não recarregou)
-  const sceneItemsAfter1 = await obs.req('GetSceneItemList', { sceneName: 'Slides' });
+  const sceneItemsAfter1 = await obs.req('GetSceneItemList', { sceneName: testSceneName });
   const sourceUuidAfter1 = sceneItemsAfter1.sceneItems[0]?.sourceUuid;
   
-  assert.strictEqual(sourceUuidBefore, sourceUuidAfter1, 
-    'UUID da fonte Browser Source DEVE permanecer idêntico (sem recarregamento)');
+  assert.strictEqual(sourceUuidBefore, sourceUuidAfter1, 'UUID deve permanecer idêntico (sem reload)');
   console.log('   [PASS] UUID preservado — Browser Source NÃO recarregou');
 
-  // Capturar frame step 1
   const shotStep1 = await obs.req('GetSourceScreenshot', {
-    sourceName: sourceName,
-    imageFormat: 'png',
-    imageWidth: 1920,
-    imageHeight: 1080
+    sourceName, imageFormat: 'png', imageWidth: 1920, imageHeight: 1080
   });
   const bufStep1 = Buffer.from(shotStep1.imageData.replace(/^data:image\/png;base64,/, ''), 'base64');
   fs.writeFileSync(path.join(QA_DIR, 'sse_slide3_step1_fade.png'), bufStep1);
-  console.log(`   [PASS] Frame step 1 (Fade) capturado`);
-
-  // Verificar que o frame MUDOU (animação aplicada via SSE)
-  assert.notStrictEqual(bufStep0.toString('base64'), bufStep1.toString('base64'),
-    'Frame deve ter mudado (animação Fade aplicada via SSE)');
-  console.log('   [PASS] Frame alterado — animação aplicada via SSE sem reload');
+  
+  assert.notStrictEqual(bufStep0.toString('base64'), bufStep1.toString('base64'), 'Frame deve mudar via SSE');
+  console.log('   [PASS] Frame alterado — Fade via SSE sem reload');
 
   // -------------------------------------------------------------
-  // TESTE 3: Avançar animação 2 (Fly-In) via SSE-only
+  // TESTE 3: Animação 2 (Fly-In) via SSE-only
   // -------------------------------------------------------------
-  console.log('\n[4/6] Avançando animação 2 (Fly-In) via nextAnimation() [SSE-only]...');
+  console.log('\n[4/7] Animação 2 (Fly-In) via nextAnimation() [SSE-only]...');
   await engine.nextAnimation(deck.id);
   await new Promise(r => setTimeout(r, 800));
 
-  const sceneItemsAfter2 = await obs.req('GetSceneItemList', { sceneName: 'Slides' });
+  const sceneItemsAfter2 = await obs.req('GetSceneItemList', { sceneName: testSceneName });
   const sourceUuidAfter2 = sceneItemsAfter2.sceneItems[0]?.sourceUuid;
   
-  assert.strictEqual(sourceUuidBefore, sourceUuidAfter2, 
-    'UUID da fonte DEVE permanecer idêntico após segunda animação');
-  console.log('   [PASS] UUID preservado — Browser Source NÃO recarregou');
+  assert.strictEqual(sourceUuidBefore, sourceUuidAfter2, 'UUID deve permanecer idêntico');
+  console.log('   [PASS] UUID preservado');
 
   const shotStep2 = await obs.req('GetSourceScreenshot', {
-    sourceName: sourceName,
-    imageFormat: 'png',
-    imageWidth: 1920,
-    imageHeight: 1080
+    sourceName, imageFormat: 'png', imageWidth: 1920, imageHeight: 1080
   });
   const bufStep2 = Buffer.from(shotStep2.imageData.replace(/^data:image\/png;base64,/, ''), 'base64');
   fs.writeFileSync(path.join(QA_DIR, 'sse_slide3_step2_fly.png'), bufStep2);
-  console.log(`   [PASS] Frame step 2 (Fly-In) capturado`);
-
-  assert.notStrictEqual(bufStep1.toString('base64'), bufStep2.toString('base64'),
-    'Frame deve ter mudado (animação Fly-In aplicada via SSE)');
-  console.log('   [PASS] Frame alterado — animação Fly-In aplicada via SSE sem reload');
+  
+  assert.notStrictEqual(bufStep1.toString('base64'), bufStep2.toString('base64'), 'Frame deve mudar via SSE');
+  console.log('   [PASS] Frame alterado — Fly-In via SSE sem reload');
 
   // -------------------------------------------------------------
-  // TESTE 4: Avançar animação 3 (Zoom) via SSE-only
+  // TESTE 4: Animação 3 (Zoom) via SSE-only
   // -------------------------------------------------------------
-  console.log('\n[5/6] Avançando animação 3 (Zoom) via nextAnimation() [SSE-only]...');
+  console.log('\n[5/7] Animação 3 (Zoom) via nextAnimation() [SSE-only]...');
   await engine.nextAnimation(deck.id);
   await new Promise(r => setTimeout(r, 800));
 
-  const sceneItemsAfter3 = await obs.req('GetSceneItemList', { sceneName: 'Slides' });
+  const sceneItemsAfter3 = await obs.req('GetSceneItemList', { sceneName: testSceneName });
   const sourceUuidAfter3 = sceneItemsAfter3.sceneItems[0]?.sourceUuid;
   
-  assert.strictEqual(sourceUuidBefore, sourceUuidAfter3, 
-    'UUID da fonte DEVE permanecer idêntico após terceira animação');
-  console.log('   [PASS] UUID preservado — Browser Source NÃO recarregou');
+  assert.strictEqual(sourceUuidBefore, sourceUuidAfter3, 'UUID deve permanecer idêntico');
+  console.log('   [PASS] UUID preservado');
 
   const shotStep3 = await obs.req('GetSourceScreenshot', {
-    sourceName: sourceName,
-    imageFormat: 'png',
-    imageWidth: 1920,
-    imageHeight: 1080
+    sourceName, imageFormat: 'png', imageWidth: 1920, imageHeight: 1080
   });
   const bufStep3 = Buffer.from(shotStep3.imageData.replace(/^data:image\/png;base64,/, ''), 'base64');
   fs.writeFileSync(path.join(QA_DIR, 'sse_slide3_step3_zoom.png'), bufStep3);
-  console.log(`   [PASS] Frame step 3 (Zoom) capturado`);
-
-  assert.notStrictEqual(bufStep2.toString('base64'), bufStep3.toString('base64'),
-    'Frame deve ter mudado (animação Zoom aplicada via SSE)');
-  console.log('   [PASS] Frame alterado — animação Zoom aplicada via SSE sem reload');
+  
+  assert.notStrictEqual(bufStep2.toString('base64'), bufStep3.toString('base64'), 'Frame deve mudar via SSE');
+  console.log('   [PASS] Frame alterado — Zoom via SSE sem reload');
 
   // -------------------------------------------------------------
-  // TESTE 5: Voltar animação (previousAnimation) via SSE-only
+  // TESTE 5: previousAnimation via SSE-only
   // -------------------------------------------------------------
-  console.log('\n[6/6] Retrocedendo animação (previousAnimation) via SSE-only...');
+  console.log('\n[6/7] Retrocedendo (previousAnimation) via SSE-only...');
   await engine.previousAnimation(deck.id);
   await new Promise(r => setTimeout(r, 800));
 
-  const sceneItemsAfterBack = await obs.req('GetSceneItemList', { sceneName: 'Slides' });
+  const sceneItemsAfterBack = await obs.req('GetSceneItemList', { sceneName: testSceneName });
   const sourceUuidAfterBack = sceneItemsAfterBack.sceneItems[0]?.sourceUuid;
   
-  assert.strictEqual(sourceUuidBefore, sourceUuidAfterBack, 
-    'UUID da fonte DEVE permanecer idêntico ao voltar animação');
-  console.log('   [PASS] UUID preservado — Browser Source NÃO recarregou');
+  assert.strictEqual(sourceUuidBefore, sourceUuidAfterBack, 'UUID deve permanecer idêntico');
+  console.log('   [PASS] UUID preservado ao voltar');
 
   const shotStepBack = await obs.req('GetSourceScreenshot', {
-    sourceName: sourceName,
-    imageFormat: 'png',
-    imageWidth: 1920,
-    imageHeight: 1080
+    sourceName, imageFormat: 'png', imageWidth: 1920, imageHeight: 1080
   });
   const bufStepBack = Buffer.from(shotStepBack.imageData.replace(/^data:image\/png;base64,/, ''), 'base64');
   fs.writeFileSync(path.join(QA_DIR, 'sse_slide3_step2_back.png'), bufStepBack);
-  console.log(`   [PASS] Frame step 2 (volta) capturado`);
+  console.log('   [PASS] Frame step 2 (volta) capturado');
 
   // -------------------------------------------------------------
-  // VALIDAÇÃO ADICIONAL: Preview preparado permanece intacto
+  // TESTE 6: Isolamento Preview vs Program
   // -------------------------------------------------------------
-  console.log('\n[VALIDAÇÃO] Verificando isolamento Preview vs Program...');
+  console.log('\n[7/7] Isolamento Preview vs Program...');
   
-  // Armar slide 1 no Preview enquanto slide 3 está no Program
   engine.prepareSlide(deck.id, 1);
-  assert.strictEqual(deck.currentSlide, 3, 'Slide no ar (Program) deve continuar sendo 3');
-  assert.strictEqual(deck.preparedSlide, 1, 'Slide no Preview deve ser 1');
+  assert.strictEqual(deck.currentSlide, 3, 'Program continua no slide 3');
+  assert.strictEqual(deck.preparedSlide, 1, 'Preview armado no slide 1');
   
   await new Promise(r => setTimeout(r, 500));
   
   const shotDuringPreview = await obs.req('GetSourceScreenshot', {
-    sourceName: sourceName,
-    imageFormat: 'png',
-    imageWidth: 1920,
-    imageHeight: 1080
+    sourceName, imageFormat: 'png', imageWidth: 1920, imageHeight: 1080
   });
   const bufDuringPreview = Buffer.from(shotDuringPreview.imageData.replace(/^data:image\/png;base64,/, ''), 'base64');
   
-  // Program deve continuar mostrando slide 3 step 2 (último estado)
-  assert.strictEqual(bufDuringPreview.toString('base64'), bufStep2.toString('base64'),
-    'Program NÃO deve mudar ao armar slide no Preview');
-  console.log('   [PASS] Isolamento Preview/Program confirmado — Program inalterado ao armar Preview');
+  assert.strictEqual(bufDuringPreview.toString('base64'), bufStep2.toString('base64'), 'Program inalterado ao armar Preview');
+  console.log('   [PASS] Program inalterado — Preview isolado');
+
+  // Cleanup
+  await obs.req('RemoveScene', { sceneName: testSceneName }).catch(() => {});
+  console.log('   [PASS] Cena isolada removida');
 
   obs.close();
-  console.log('\n=== TESTE SSE-ONLY VALIDADO COM SUCESSO ===');
-  console.log('Resultados:');
-  console.log('  ✓ Browser Source NÃO recarregou em nenhuma animação (UUID preservado)');
+  console.log('\n=== TESTE SSE-ONLY: TODOS PASS ===');
+  console.log('  ✓ Browser Source NÃO recarregou (UUID preservado em 4 animações + volta)');
   console.log('  ✓ Animações aplicadas via SSE (frames mudam sem reload)');
-  console.log('  ✓ previousAnimation também via SSE (sem reload)');
-  console.log('  ✓ Preview preparado não afeta Program');
-  console.log('Evidências salvas em:', QA_DIR);
+  console.log('  ✓ previousAnimation via SSE (sem reload)');
+  console.log('  ✓ Preview armado não afeta Program');
+  console.log('  ✓ Cena isolada criada e removida — sem lixo no runtime');
+  console.log('Evidências:', QA_DIR);
 }
 
 runSSEValidationTest().catch(err => {
-  console.error('\n❌ FALHA NO TESTE SSE-VALIDATION:', err);
+  console.error('\n❌ FALHA SSE-VALIDATION:', err.message);
   process.exit(1);
 });

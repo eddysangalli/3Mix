@@ -19,7 +19,7 @@ import { createHash, sign, verify, createPublicKey } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 
-import {updateRoots,excludedFromUpdate} from "./update-path-policy.mjs";
+import {updateRoots,excludedFromUpdate,dependencyUpdatePath,alphaReleaseDocuments} from "./update-path-policy.mjs";
 const {ws,repo}=updateRoots(import.meta.dirname);
 const args = Object.fromEntries(process.argv.slice(2).map((a) => { const m = /^--([a-z-]+)(?:=(.*))?$/.exec(a); assert(m, "argumento inválido: " + a); return [m[1], m[2] ?? true]; }));
 assert(args.freeze && args.target, "informe --freeze e --target");
@@ -42,7 +42,8 @@ for (const p of tracked) if (p.startsWith("painel/") && !never(p)) want.set(p, p
 const { runtimeDependencyClosure } = await import(pathToFileURL(path.join(repo, "ferramentas/pacote-dependencias.mjs")));
 const components = JSON.parse(await fs.readFile(path.join(base, "componentes.json"), "utf8"));
 const closure = await runtimeDependencyClosure(path.join(repo, "ferramentas"), components.runtimeLocal.runtimeModules, { copiedModuleRoots: [path.join(repo, "painel")] });
-for (const p of closure) want.set(path.posix.normalize("ferramentas/" + p), path.join(repo, "ferramentas", p));
+for (const p of closure) want.set(dependencyUpdatePath(p), path.join(repo, "ferramentas", p));
+for(const p of alphaReleaseDocuments){assert(await exists(path.join(repo,p)),"documento Alpha ausente: "+p);want.set(p,path.join(repo,p));}
 for (const p of ["docs/CONTINUAR.md", "docs/PENDENCIAS-REAIS.md", "docs/ENTREGA-ATUAL.md", "FONTES.md"]) if (await exists(path.join(repo, p))) want.set(p, path.join(repo, p));
 
 // 2. Component list with the hashes of what will really be there.

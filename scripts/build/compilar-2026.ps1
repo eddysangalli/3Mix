@@ -6,9 +6,10 @@
 # The first run takes minutes; later runs only rebuild what changed. -ConfigureOnly stops after generating the
 # project files; -Target builds one target (for the program itself: obs-studio).
 param([switch]$ConfigureOnly, [string]$Target = '')
-$workspace = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
+$repo = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
+$workspace = Split-Path -Parent $repo
 if (Test-Path -LiteralPath (Join-Path $workspace '.freemix-build-lock')) { 'Outra compilacao esta em andamento. Nenhum build duplicado iniciado.'; exit 1 }
-$root = $workspace; $src = Join-Path $root 'freemix-app'; $log = Join-Path $root 'qa-finalizacao/freemix-build-2026.log'
+$root = $workspace; $src = Join-Path $root '3mix-engine'; $log = Join-Path $root 'qa-finalizacao/freemix-build-2026.log'
 $cmake = 'C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe'
 if (-not (Test-Path $cmake)) { 'CMake do Visual Studio 2026 nao encontrado.'; exit 1 }
 # The 32-bit helpers are configured into build_x86; one made by the 2022 generator cannot be reused by the 2026 one.

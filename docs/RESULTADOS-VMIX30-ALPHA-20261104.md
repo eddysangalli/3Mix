@@ -94,3 +94,47 @@ Outra frente publicou modernização SRT/plugins/Slides (commits 6d2ebe8, 62ae7f
 ## Segurança da distribuição — processo 3Mix e rollback
 
 Defeito no guard Windows de atualizar-3mix.mjs: regex de tasklist reconhecia FreeMix.exe/obs64.exe mas não 3Mix.exe. Incluído nome oficial; teste extrai regex real e verifica 3Mix/legados/auxiliares versus processo alheio. Teste isolado de update assinado executado: 6 verificações PASS com apply/rollback reais em instalação sintética, hash adulterado recusado antes de escrita, mesma versão recusada e recuperação de falha. Chaves QA, nunca chave de produção; instalação do operador intocada. Correção ainda precisa integrar o pacote/runtime antes de uso como proteção efetiva instalada.
+
+
+## Guard de atualização — pertencimento por componentes
+
+processBlocksUpdate compara caminhos canônicos por componentes (case-insensitive), recusando processo ativo dentro da instalação ou sem caminho conhecido, sem confundir pasta irmã com prefixo semelhante. Corrige fragilidade de misturar barra de root resolvida e separador literal. Dois testes de guard PASS e seis verificações reais de update/rollback sintético PASS novamente. Comparação direta confirmou runtime ainda com regex antiga sem 3Mix.exe: NÃO declarar proteção instalada até atualização verificável. Nenhum processo nem runtime do operador modificado.
+
+
+## Política de dependências do pacote
+
+A lista de dependências literais agora aplica dependencyUpdatePath após normalizar o destino: import relativo não pode contornar exclusões de config, painel/local.js, assets privados ou sair da raiz. Módulos GC próprios continuam permitidos explicitamente. Cinco testes de política PASS; regressão consolidada de nove suítes: 68 casos PASS, zero falhas. Update/rollback assinado em instalação sintética: seis verificações PASS novamente. Não há aprovação de hardware implícita nem aplicação ao runtime.
+
+
+## Distribuição das instruções Alpha
+
+alphaReleaseDocuments inclui obrigatoriamente guia, suplemento hardware, matriz, limites e leia-me no incremental; montagem recusa documento ausente. Não basta atualizar docs no checkout. Seis testes da política PASS, regressão consolidada 69 casos PASS. Isso valida seleção de arquivos, não assinatura/aplicação de um pacote desta versão: release ainda depende de congelar revisão, gerar artefato assinado e ensaiar instalação isolada. Runtime do operador não alterado.
+
+
+## Gate SRT preservado por permissão
+
+Identificada ambiguidade na aplicação de passphrase vazia: o validador permite vazio, mas a mesclagem preserva senha já presente na URL. Tentativa de implementar remoção explícita foi NEGADA pela permissão da sessão por desativar criptografia salva. Nenhuma alteração aplicada, nenhuma tentativa de contorno. Requer autorização explícita do proprietário para mudança desse comportamento; até lá manter senha existente. Regressão independente: 43 casos PASS; test-clock-message também PASS.
+
+Investigação de Rendezvous: header local obs-ffmpeg-srt.h valida lp extraído de localport mas atribui la.sin_port=htons(port). Necessita confirmar significado de port e versão binária efetiva antes de corrigir; não declarar defeito de transmissão comprovado apenas por esse trecho, não conflitar com testes SRT nativos da outra frente.
+
+
+## Ensaio de payload real assinado — QA, não release
+
+test-updater-payload-real.mjs montou pacote com bytes reais de core/modelos/render/editor GC, SRT presets, atualizador e cinco documentos Alpha; assinatura Ed25519 com chave efêmera exclusiva QA. inspect/apply verificaram todos os hashes instalados; rollback restaurou player anterior e versão e removeu arquivos novos. PASS. Recibo: qa-finalizacao/vmix30-distribuicao/payload-rehearsal.json. Nenhuma chave de produção, nenhum runtime do operador, nenhum motor iniciado. Artefato temporário removido após ensaio, não distribuído como release.
+
+Bloqueio concreto do montador completo: o único freeze localizado referencia native build antigo 709f101 em caminho vmixtwste removido; não representa o motor/runtime atual após modernizações concorrentes. É necessário freeze válido da revisão nativa atual antes de assinar release de produção. Não substituir por caminho inventado nem declarar pacote entregue por este ensaio parcial.
+
+
+## Compilação nativa — resolução canônica
+
+compilar-2026.ps1 estava resolvendo workspace como repositório do painel e procurando freemix-app dentro dele. Corrigido para pai do repo e irmão 3mix-engine; mantido lock e parâmetros originais. Teste de contrato confirma CMakeLists real no destino e preservação do gate; parser PowerShell valida sintaxe. Nenhum build iniciado, nenhum binário substituído, nenhuma nova proveniência de freeze declarada.
+
+
+## Build incremental em execução
+
+Verificados fonte nativa limpa, ausência de lock e nenhum MSBuild/cmake/ninja/cl/link ativo. Iniciado compilar-2026.ps1 -Target obs-studio em background, sem ExecutionPolicy Bypass e sem iniciar motor. Resultado ainda pendente; não declarar build PASS. Inventário de sete binários instalados registrado em qa-finalizacao/vmix30-distribuicao/native-runtime-inventory.json, explicitamente NÃO um freeze de build nem prova de correspondência com commit. Bateria de contratos paralela: 45 casos PASS.
+
+
+## Interface de macro Playout
+
+A ação playout_item_enabled recebeu rótulo legível e exemplo JSON com ID do primeiro clipe quando disponível, sem oferecer seletor de entrada irrelevante. Browser estático confirmou rótulo, parâmetros e campo de entrada oculto; dez testes do contrato Playout PASS. Não houve envio ao motor nem gravação de macro do operador. Build nativo anterior continua sem resultado recebido nesta sessão; não relançado nem declarado aprovado.

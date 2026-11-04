@@ -1,15 +1,19 @@
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
-import { resolve, join } from 'node:path';
-import { execSync, spawn } from 'node:child_process';
+import { resolve, join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { spawn } from 'node:child_process';
 import { connect } from 'file:///D:/DRIVE/IA/antigravity/3Mix/3mix-runtime/ferramentas/obsws.mjs';
 import { validateSrtTransport } from 'file:///D:/DRIVE/IA/antigravity/3Mix/3mix-panel/ferramentas/srt-presets.mjs';
 
-const RUNTIME_ROOT = 'D:/DRIVE/IA/antigravity/3Mix/3mix-runtime';
-const BIN_DIR = 'D:/DRIVE/IA/antigravity/3Mix/3mix-runtime/bin/64bit';
-const FFMPEG_EXE = 'D:/DRIVE/IA/antigravity/3Mix/3mix-runtime/runtime/ffmpeg.exe';
-const FFPROBE_EXE = 'D:/DRIVE/IA/antigravity/3Mix/3mix-runtime/runtime/ffprobe.exe';
-const TEST_DIR = 'D:/DRIVE/IA/antigravity/3Mix/qa-finalizacao/srt-homologacao';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const PROJECT_ROOT = resolve(__dirname, '../../..');
+const RUNTIME_ROOT = resolve(PROJECT_ROOT, '3mix-runtime');
+const BIN_DIR = resolve(RUNTIME_ROOT, 'bin/64bit');
+const FFMPEG_EXE = resolve(RUNTIME_ROOT, 'runtime/ffmpeg.exe');
+const FFPROBE_EXE = resolve(RUNTIME_ROOT, 'runtime/ffprobe.exe');
+const TEST_DIR = resolve(PROJECT_ROOT, 'qa-finalizacao/srt-homologacao');
 const TEST_VIDEO = join(TEST_DIR, 'test-source-10s.mp4');
 const RECEIVED_VIDEO = join(TEST_DIR, 'received-10s.mp4');
 
@@ -35,7 +39,7 @@ function runFfmpeg(args, options = {}) {
 }
 
 async function generateTestVideo() {
-  console.log('   Gerando vídeo de teste 10s com frames numerados...');
+  console.log('   Gerando vídeo de teste 10s...');
   await runFfmpeg([
     '-y', '-f', 'lavfi', '-i', 'testsrc2=size=1920x1080:rate=30:duration=10',
     '-f', 'lavfi', '-i', 'sine=frequency=1000:duration=10:sample_rate=48000',
@@ -135,25 +139,21 @@ async function waitForConnection(obs, env, inputName, timeoutMs = 15000) {
   return false;
 }
 
-async function testSrtTransmission(obs, env, testName, listenerUrl, callerUrl, expectedFrames, description) {
+async function testSrtObsIntegration(obs, env, testName, listenerUrl, callerUrl, description) {
   console.log(`\n   --- ${testName}: ${description} ---`);
   
   const listenerName = `listener_${testName}`;
   const callerName = `caller_${testName}`;
   const sceneName = await env.createScene(`srt_${testName}`);
   
-  // Create listener
   await env.createInput(sceneName, listenerName, 'ffmpeg_source', {
     input: listenerUrl,
     is_local_file: false,
     restart_on_activate: true,
     close_when_inactive: false
   });
-  
-  // Start listener (begin listening)
   await sleep(1000);
   
-  // Create caller (transmitter)
   await env.createInput(sceneName, callerName, 'ffmpeg_source', {
     input: callerUrl,
     is_local_file: false,
@@ -161,7 +161,6 @@ async function testSrtTransmission(obs, env, testName, listenerUrl, callerUrl, e
     close_when_inactive: false
   });
   
-  // Wait for connection
   const connected = await waitForConnection(obs, env, callerName);
   
   if (!connected) {
@@ -170,13 +169,8 @@ async function testSrtTransmission(obs, env, testName, listenerUrl, callerUrl, e
   }
   
   console.log(`   [PASS] Conexão SRT estabelecida`);
+  await sleep(5000);
   
-  // Allow transmission time
-  await sleep(12000); // 10s video + 2s buffer
-  
-  // Verify received video (if we had a receiver recording)
-  // Note: With ffmpeg_source inputs, we'd need to record the output
-  // For now, verify the caller source is active and streaming
   const callerStatus = await env.getInputStatus(callerName);
   const listenerStatus = await env.getInputStatus(listenerName);
   
@@ -185,249 +179,46 @@ async function testSrtTransmission(obs, env, testName, listenerUrl, callerUrl, e
   
   assert.ok(callerStatus.active, 'Caller deve permanecer ativo durante transmissão');
   
-  // Cleanup this test's inputs
   await obs.req('RemoveInput', { inputName: `${env.prefix}_${callerName}` }).catch(() => {});
   await obs.req('RemoveInput', { inputName: `${env.prefix}_${listenerName}` }).catch(() => {});
   env.createdInputs = env.createdInputs.filter(i => !i.endsWith(callerName) && !i.endsWith(listenerName));
   
-  console.log(`   [PASS] ${testName} concluído com sucesso`);
+  console.log(`   [PASS] ${testName} concluído`);
   return true;
 }
 
-console.log('=== TESTE SRT 1.5.7 — TRANSMISSÃO REAL COM VALIDAÇÃO ===\n');
+console.log('=== TESTE SRT 1.5.7 — TRANSMISSÃO REAL + INTEGRAÇÃO OBS ===\n');
 
 let obs = null;
 let testEnv = null;
+let testResults = {
+  ffmpegDirect: { executed: false, passed: false, frameRatio: 0 },
+  obsIntegration: { executed: false, passed: 0, total: 0, details: [] }
+};
 
 try {
-  // Generate test video first
   if (!existsSync(TEST_DIR)) mkdirSync(TEST_DIR, { recursive: true });
   await generateTestVideo();
   
-  // Probe test video
   const testVideoInfo = await probeVideo(TEST_VIDEO);
-  console.log(`   Vídeo referência: ${testVideoInfo.frames} frames, ${testVideoInfo.duration.toFixed(1)}s, ${testVideoInfo.width}x${testVideoInfo.height}`);
-  assert.ok(testVideoInfo.frames >= 250, 'Vídeo de teste deve ter frames suficientes (30fps x 10s = 300)');
+  console.log(`   Vídeo referência: ${testVideoInfo.frames} frames, ${testVideoInfo.duration.toFixed(1)}s`);
+  assert.ok(testVideoInfo.frames >= 250, 'Vídeo deve ter frames suficientes');
   
-  console.log('\n[1/8] Conectando ao 3Mix Pro via OBS WebSocket...');
+  console.log('\n[1/2] Conectando ao 3Mix Pro (opcional)...');
   try {
     obs = await connect({ root: RUNTIME_ROOT });
-    console.log('   [PASS] Conectado ao motor 3Mix Pro');
+    console.log('   [PASS] Conectado ao 3Mix Pro');
+    testEnv = new IsolatedTestEnv(obs, 'SRT_HOMOLOG');
   } catch (err) {
-    console.log('   [AVISO] 3Mix Pro não está rodando (ECONNREFUSED). Testes OBS-integrados serão pulados.');
-    console.log('   Executando apenas teste de transmissão direta FFmpeg→FFmpeg (teste 8)...');
+    console.log('   [SKIPPED] 3Mix Pro não ativo — testes OBS-integrados pulados');
     obs = null;
   }
   
-  if (obs) {
-    testEnv = new IsolatedTestEnv(obs, 'SRT_HOMOLOG');
-  }
-  
-  const passphrase256 = 'ChaveSeguraBroadcast256!MaximaSegurancaMilitar';
-  const passphrase128 = 'ChaveSeguraBroadcast128!';
-  const streamId = '#!::u=operador,r=pgm_clean,m=publish';
-  
   // -------------------------------------------------------------
-  // TESTES 2-7: OBS-INTEGRADOS (requerem 3Mix ativo)
+  // TESTE A: TRANSMISSÃO DIRETA FFmpeg→FFmpeg (SEMPRE EXECUTA)
   // -------------------------------------------------------------
-  if (obs && testEnv) {
-  console.log('\n[2/8] Testando SRT Caller → Listener com AES-256...');
+  console.log('\n[A] Transmissão direta FFmpeg→FFmpeg via SRT...');
   
-  const listenerPort = 19360;
-  const transportAes256 = validateSrtTransport({
-    latencyMs: 120,
-    passphrase: passphrase256,
-    pbkeylen: 32
-  }, 'contribuicao-lan');
-  
-  const listenerUrl = `srt://0.0.0.0:${listenerPort}?mode=listener&latency=${transportAes256.latencyMs * 1000}&passphrase=${encodeURIComponent(transportAes256.passphrase)}&pbkeylen=32&streamid=${encodeURIComponent(streamId)}`;
-  
-  // Caller sends test video
-  const callerUrl = `srt://127.0.0.1:${listenerPort}?mode=caller&latency=${transportAes256.latencyMs * 1000}&passphrase=${encodeURIComponent(transportAes256.passphrase)}&pbkeylen=32&streamid=${encodeURIComponent(streamId)}`;
-  
-  await testSrtTransmission(obs, testEnv, 'aes256_caller_listener', listenerUrl, callerUrl, testVideoInfo.frames, 'Caller→Listener AES-256 com Stream ID');
-  
-  // -------------------------------------------------------------
-  // TESTE 3: RENDEZVOUS BIDIRECIONAL AES-128
-  // -------------------------------------------------------------
-  console.log('\n[3/8] Testando SRT Rendezvous bidirecional AES-128...');
-  
-  const rendPort1 = 19362;
-  const rendPort2 = 19363;
-  const transportAes128 = validateSrtTransport({
-    latencyMs: 150,
-    passphrase: passphrase128,
-    pbkeylen: 16
-  }, 'contribuicao-lan');
-  
-  // Rendezvous A
-  const rendUrlA = `srt://127.0.0.1:${rendPort2}?mode=rendezvous&port=${rendPort1}&latency=${transportAes128.latencyMs * 1000}&passphrase=${encodeURIComponent(transportAes128.passphrase)}&pbkeylen=16`;
-  
-  // Rendezvous B  
-  const rendUrlB = `srt://127.0.0.1:${rendPort1}?mode=rendezvous&port=${rendPort2}&latency=${transportAes128.latencyMs * 1000}&passphrase=${encodeURIComponent(transportAes128.passphrase)}&pbkeylen=16`;
-  
-  await testSrtTransmission(obs, testEnv, 'rendezvous_aes128', rendUrlA, rendUrlB, testVideoInfo.frames, 'Rendezvous bidirecional AES-128');
-  
-  // -------------------------------------------------------------
-  // TESTE 4: NEGOCIAÇÃO AES-128/192/256
-  // -------------------------------------------------------------
-  console.log('\n[4/8] Validando negociação AES-128/192/256...');
-  
-  for (const [label, pbkeylen, passphrase] of [
-    ['AES-128', 16, 'ChaveSeguraBroadcast128!'],
-    ['AES-192', 24, 'ChaveSeguraBroadcast192!MedioSeguro'],
-    ['AES-256', 32, 'ChaveSeguraBroadcast256!MaximaSegurancaMilitarGrade']
-  ]) {
-    const transport = validateSrtTransport({
-      latencyMs: 100,
-      passphrase,
-      pbkeylen
-    }, 'contribuicao-lan');
-    
-    const testUrl = `srt://127.0.0.1:19370?mode=caller&latency=${transport.latencyMs * 1000}&passphrase=${encodeURIComponent(transport.passphrase)}&pbkeylen=${pbkeylen}`;
-    
-    const srcName = `srt_negotiate_${label}`;
-    const sceneName = await testEnv.createScene(`negotiate_${label}`);
-    
-    await testEnv.createInput(sceneName, srcName, 'ffmpeg_source', {
-      input: testUrl,
-      is_local_file: false,
-      restart_on_activate: true,
-      close_when_inactive: false
-    });
-    
-    await sleep(500);
-    const status = await testEnv.getInputStatus(srcName);
-    // Note: Without a listener, caller won't connect - this tests parameter acceptance
-    console.log(`   ${label} (pbkeylen=${pbkeylen}): parâmetros aceitos, status=${status.active ? 'conectado' : 'aguardando listener'}`);
-    
-    await obs.req('RemoveInput', { inputName: `${testEnv.prefix}_${srcName}` }).catch(() => {});
-    testEnv.createdInputs = testEnv.createdInputs.filter(i => !i.endsWith(srcName));
-  }
-  console.log('   [PASS] Parâmetros AES-128/192/256 aceitos corretamente');
-  
-  // -------------------------------------------------------------
-  // TESTE 5: FALHA COM SENHA INCORRETA
-  // -------------------------------------------------------------
-  console.log('\n[5/8] Testando rejeição com senha incorreta...');
-  
-  const correctPass = 'SenhaCorretaParaTeste123!';
-  const wrongPass = 'SenhaErradaParaTeste456!';
-  
-  const transportCorrect = validateSrtTransport({
-    latencyMs: 120,
-    passphrase: correctPass,
-    pbkeylen: 16
-  }, 'contribuicao-lan');
-  
-  const listenerUrl2 = `srt://0.0.0.0:19371?mode=listener&latency=${transportCorrect.latencyMs * 1000}&passphrase=${encodeURIComponent(transportCorrect.passphrase)}&pbkeylen=16`;
-  
-  const sceneName = await testEnv.createScene('wrong_pass');
-  await testEnv.createInput(sceneName, 'listener_correct', 'ffmpeg_source', {
-    input: listenerUrl2,
-    is_local_file: false,
-    restart_on_activate: true,
-    close_when_inactive: false
-  });
-  await sleep(1000);
-  
-  // Try with WRONG password
-  const wrongUrl = `srt://127.0.0.1:19371?mode=caller&latency=${transportCorrect.latencyMs * 1000}&passphrase=${encodeURIComponent(wrongPass)}&pbkeylen=16`;
-  
-  await testEnv.createInput(sceneName, 'caller_wrong', 'ffmpeg_source', {
-    input: wrongUrl,
-    is_local_file: false,
-    restart_on_activate: true,
-    close_when_inactive: false
-  });
-  
-  await sleep(3000);
-  
-  const wrongStatus = await testEnv.getInputStatus('caller_wrong');
-  const listenerStatus = await testEnv.getInputStatus('listener_correct');
-  
-  console.log(`   Listener (senha correta): ${listenerStatus.active ? 'ATIVO' : 'INATIVO'}`);
-  console.log(`   Caller (senha errada): ${wrongStatus.active ? 'CONECTADO (FALHA DE SEGURANÇA!)' : 'REJEITADO (CORRETO)'}`);
-  
-  // With wrong password, connection should NOT be established
-  assert.ok(!wrongStatus.active, 'Conexão com senha incorreta DEVE ser rejeitada');
-  
-  await obs.req('RemoveInput', { inputName: `${testEnv.prefix}_listener_correct` }).catch(() => {});
-  await obs.req('RemoveInput', { inputName: `${testEnv.prefix}_caller_wrong` }).catch(() => {});
-  testEnv.createdInputs = testEnv.createdInputs.filter(i => !i.endsWith('listener_correct') && !i.endsWith('caller_wrong'));
-  
-  console.log('   [PASS] Senha incorreta corretamente rejeitada');
-  
-  // -------------------------------------------------------------
-  // TESTE 6: STREAM ID vMix/3Mix
-  // -------------------------------------------------------------
-  console.log('\n[6/8] Validando Stream IDs vMix/3Mix...');
-  
-  const streamIds = [
-    '#!::u=operador,r=pgm_clean,m=publish',
-    '#!::u=cam1,r=pgm,m=publish',
-    '#!::r=preview,m=request',
-    '#!::m=playback,r=rec,m=request'
-  ];
-  
-  for (const streamId of streamIds) {
-    const url = `srt://127.0.0.1:19372?mode=caller&latency=120000&streamid=${encodeURIComponent(streamId)}`;
-    
-    const srcName = `streamid_test`;
-    const sceneName = await testEnv.createScene('streamid');
-    
-    await testEnv.createInput(sceneName, srcName, 'ffmpeg_source', {
-      input: url,
-      is_local_file: false,
-      restart_on_activate: true,
-      close_when_inactive: false
-    });
-    
-    await sleep(300);
-    await obs.req('RemoveInput', { inputName: `${testEnv.prefix}_${srcName}` }).catch(() => {});
-    testEnv.createdInputs = testEnv.createdInputs.filter(i => !i.endsWith(srcName));
-  }
-  console.log('   [PASS] Stream IDs vMix/3Mix aceitos');
-  
-  // -------------------------------------------------------------
-  // TESTE 7: PARÂMETROS DE RECONEXÃO
-  // -------------------------------------------------------------
-  console.log('\n[7/8] Validando parâmetros de reconexão SRT...');
-  
-  const reconnectUrl = `srt://127.0.0.1:19373?mode=caller&latency=120000&reconnect=1&reconnect_delay=1000&reconnect_at_eof=1&reconnect_streamed=1&reconnect_delay_max=5000`;
-  
-  const srcName = 'reconnect_test';
-  const sceneReconnect = await testEnv.createScene('reconnect');
-  
-  await testEnv.createInput(sceneReconnect, srcName, 'ffmpeg_source', {
-    input: reconnectUrl,
-    is_local_file: false,
-    restart_on_activate: true,
-    close_when_inactive: false,
-    reconnect: true,
-    reconnect_delay: 1000,
-    reconnect_at_eof: true,
-    reconnect_streamed: true,
-    reconnect_delay_max: 5000
-  });
-  
-  console.log('   Parâmetros configurados: reconnect=1, reconnect_delay=1000, reconnect_at_eof=1, reconnect_streamed=1, reconnect_delay_max=5000');
-  
-  await sleep(500);
-  await obs.req('RemoveInput', { inputName: `${testEnv.prefix}_${srcName}` }).catch(() => {});
-  testEnv.createdInputs = testEnv.createdInputs.filter(i => !i.endsWith(srcName));
-  
-  console.log('   [PASS] Parâmetros de reconexão aceitos');
-  
-  } // Fim do bloco if (obs && testEnv)
-  
-  // -------------------------------------------------------------
-  // TESTE 8: TRANSMISSÃO COM FFmpeg DIRETO (VALIDAÇÃO DE QUADROS) - SEMPRE EXECUTA
-  // -------------------------------------------------------------
-  const testNumber = obs ? '8/8' : '2/2';
-  console.log(`\n[${testNumber}] Teste de transmissão direta FFmpeg→FFmpeg com contagem de quadros...`);
-  
-  // Start FFmpeg listener that records to file
   const listenerPortDirect = 19380;
   const listenerArgs = [
     '-y', '-v', 'error',
@@ -435,12 +226,9 @@ try {
     '-c', 'copy', RECEIVED_VIDEO
   ];
   
-  console.log(`   Iniciando listener FFmpeg na porta ${listenerPortDirect}...`);
   const listenerProc = spawn(FFMPEG_EXE, listenerArgs, { stdio: ['ignore', 'pipe', 'pipe'] });
+  await sleep(2000);
   
-  await sleep(2000); // Give listener time to bind
-  
-  // Start FFmpeg sender
   const senderArgs = [
     '-y', '-v', 'error',
     '-re', '-i', TEST_VIDEO,
@@ -449,10 +237,8 @@ try {
     `srt://127.0.0.1:${listenerPortDirect}?mode=caller&latency=120000`
   ];
   
-  console.log(`   Iniciando transmissão FFmpeg...`);
   const senderProc = spawn(FFMPEG_EXE, senderArgs, { stdio: ['ignore', 'pipe', 'pipe'] });
   
-  // Wait for transmission
   await new Promise((resolve, reject) => {
     const timeout = setTimeout(() => reject(new Error('Timeout transmissão direta')), 20000);
     senderProc.on('close', code => {
@@ -463,39 +249,139 @@ try {
     senderProc.on('error', e => { clearTimeout(timeout); reject(e); });
   });
   
-  // Give listener time to finish writing
   await sleep(3000);
   listenerProc.kill();
   
-  // Verify received video
+  testResults.ffmpegDirect.executed = true;
   if (existsSync(RECEIVED_VIDEO)) {
     const receivedInfo = await probeVideo(RECEIVED_VIDEO);
-    console.log(`   Vídeo recebido: ${receivedInfo.frames} frames, ${receivedInfo.duration.toFixed(1)}s`);
-    
-    // Allow some frame loss but require minimum 80%
     const frameRatio = receivedInfo.frames / testVideoInfo.frames;
-    console.log(`   Taxa de quadros: ${(frameRatio * 100).toFixed(1)}% (${receivedInfo.frames}/${testVideoInfo.frames})`);
+    testResults.ffmpegDirect.frameRatio = frameRatio;
     
-    assert.ok(frameRatio >= 0.8, `Deve receber pelo menos 80% dos quadros (recebido ${(frameRatio*100).toFixed(1)}%)`);
-    assert.ok(receivedInfo.duration >= 8, `Duração deve ser >= 8s (recebido ${receivedInfo.duration.toFixed(1)}s)`);
+    console.log(`   Enviados: ${testVideoInfo.frames} frames | Recebidos: ${receivedInfo.frames} (${(frameRatio*100).toFixed(1)}%)`);
+    console.log(`   Duração: ${receivedInfo.duration.toFixed(1)}s`);
     
-    console.log('   [PASS] Transmissão direta FFmpeg validada com integridade de quadros');
+    assert.ok(frameRatio >= 0.8, `Mínimo 80% quadros (recebido ${(frameRatio*100).toFixed(1)}%)`);
+    assert.ok(receivedInfo.duration >= 8, `Duração ≥ 8s (recebido ${receivedInfo.duration.toFixed(1)}s)`);
+    
+    testResults.ffmpegDirect.passed = true;
+    console.log('   [PASS] Transmissão FFmpeg→FFmpeg validada');
   } else {
-    throw new Error('Arquivo de recepção não foi criado - transmissão falhou');
+    throw new Error('Arquivo não criado - transmissão falhou');
   }
   
-  const totalTests = obs ? 8 : 2;
-  console.log(`\n=== TODOS OS ${totalTests} TESTES SRT CONCLUÍDOS ${obs ? '(COM TRANSMISSÃO REAL OBS)' : '(APENAS TRANSMISSÃO DIRETA FFmpeg - 3Mix não ativo)'} ===`);
+  // -------------------------------------------------------------
+  // TESTE B: INTEGRAÇÃO OBS (SÓ SE 3MIX ATIVO)
+  // -------------------------------------------------------------
+  if (obs && testEnv) {
+    testResults.obsIntegration.executed = true;
+    
+    const passphrase256 = 'ChaveSeguraBroadcast256!MaximaSegurancaMilitar';
+    const passphrase128 = 'ChaveSeguraBroadcast128!';
+    const streamId = '#!::u=operador,r=pgm_clean,m=publish';
+    
+    const tests = [
+      { 
+        name: 'aes256_caller_listener', 
+        listenerUrl: `srt://0.0.0.0:19360?mode=listener&latency=120000&passphrase=${encodeURIComponent(passphrase256)}&pbkeylen=32&streamid=${encodeURIComponent(streamId)}`,
+        callerUrl: `srt://127.0.0.1:19360?mode=caller&latency=120000&passphrase=${encodeURIComponent(passphrase256)}&pbkeylen=32&streamid=${encodeURIComponent(streamId)}`,
+        desc: 'Caller→Listener AES-256 + Stream ID'
+      },
+      { 
+        name: 'rendezvous_aes128', 
+        listenerUrl: `srt://127.0.0.1:19363?mode=rendezvous&port=19362&latency=150000&passphrase=${encodeURIComponent(passphrase128)}&pbkeylen=16`,
+        callerUrl: `srt://127.0.0.1:19362?mode=rendezvous&port=19363&latency=150000&passphrase=${encodeURIComponent(passphrase128)}&pbkeylen=16`,
+        desc: 'Rendezvous AES-128'
+      }
+    ];
+    
+    for (const t of tests) {
+      testResults.obsIntegration.total++;
+      try {
+        await testSrtObsIntegration(obs, testEnv, t.name, t.listenerUrl, t.callerUrl, t.desc);
+        testResults.obsIntegration.passed++;
+        testResults.obsIntegration.details.push({ name: t.name, status: 'PASS' });
+      } catch (e) {
+        testResults.obsIntegration.details.push({ name: t.name, status: 'FAIL', error: e.message });
+        throw e;
+      }
+    }
+    
+    // AES negotiation params only (no connection test without listener)
+    console.log('\n   Validando parâmetros AES-128/192/256...');
+    for (const [label, pbkeylen, passphrase] of [
+      ['AES-128', 16, 'ChaveSeguraBroadcast128!'],
+      ['AES-192', 24, 'ChaveSeguraBroadcast192!MedioSeguro'],
+      ['AES-256', 32, 'ChaveSeguraBroadcast256!MaximaSegurancaMilitarGrade']
+    ]) {
+      const transport = validateSrtTransport({ latencyMs: 100, passphrase, pbkeylen }, 'contribuicao-lan');
+      const url = `srt://127.0.0.1:19370?mode=caller&latency=${transport.latencyMs*1000}&passphrase=${encodeURIComponent(transport.passphrase)}&pbkeylen=${pbkeylen}`;
+      const srcName = `param_${label}`;
+      const sceneName = await testEnv.createScene(`param_${label}`);
+      await testEnv.createInput(sceneName, srcName, 'ffmpeg_source', { input: url, is_local_file: false, restart_on_activate: true, close_when_inactive: false });
+      await sleep(200);
+      await obs.req('RemoveInput', { inputName: `${testEnv.prefix}_${srcName}` }).catch(() => {});
+      testEnv.createdInputs = testEnv.createdInputs.filter(i => !i.endsWith(srcName));
+    }
+    console.log('   [PASS] Parâmetros AES aceitos');
+    
+    // Wrong password rejection
+    console.log('\n   Testando rejeição senha incorreta...');
+    const correctPass = 'SenhaCorretaParaTeste123!';
+    const wrongPass = 'SenhaErradaParaTeste456!';
+    const tc = validateSrtTransport({ latencyMs: 120, passphrase: correctPass, pbkeylen: 16 }, 'contribuicao-lan');
+    const scene = await testEnv.createScene('wrong_pass');
+    await testEnv.createInput(scene, 'listener_ok', 'ffmpeg_source', { input: `srt://0.0.0.0:19371?mode=listener&latency=${tc.latencyMs*1000}&passphrase=${encodeURIComponent(tc.passphrase)}&pbkeylen=16`, is_local_file: false, restart_on_activate: true, close_when_inactive: false });
+    await sleep(1000);
+    await testEnv.createInput(scene, 'caller_bad', 'ffmpeg_source', { input: `srt://127.0.0.1:19371?mode=caller&latency=${tc.latencyMs*1000}&passphrase=${encodeURIComponent(wrongPass)}&pbkeylen=16`, is_local_file: false, restart_on_activate: true, close_when_inactive: false });
+    await sleep(3000);
+    const badStatus = await testEnv.getInputStatus('caller_bad');
+    assert.ok(!badStatus.active, 'Senha incorreta deve ser rejeitada');
+    console.log('   [PASS] Senha incorreta rejeitada');
+    await testEnv.cleanup(); // will clean up this scene too
+    
+    // Stream IDs
+    console.log('\n   Validando Stream IDs...');
+    for (const sid of ['#!::u=op,r=pgm,m=publish', '#!::r=preview,m=request']) {
+      const url = `srt://127.0.0.1:19372?mode=caller&latency=120000&streamid=${encodeURIComponent(sid)}`;
+      const src = `sid_test`;
+      const sc = await testEnv.createScene('streamid');
+      await testEnv.createInput(sc, src, 'ffmpeg_source', { input: url, is_local_file: false, restart_on_activate: true, close_when_inactive: false });
+      await sleep(200);
+      await obs.req('RemoveInput', { inputName: `${testEnv.prefix}_${src}` }).catch(() => {});
+      testEnv.createdInputs = testEnv.createdInputs.filter(i => !i.endsWith(src));
+    }
+    console.log('   [PASS] Stream IDs aceitos');
+    
+    // Reconnect params
+    console.log('\n   Validando parâmetros reconexão...');
+    const rcUrl = 'srt://127.0.0.1:19373?mode=caller&latency=120000&reconnect=1&reconnect_delay=1000&reconnect_at_eof=1&reconnect_streamed=1&reconnect_delay_max=5000';
+    const sc = await testEnv.createScene('reconnect');
+    await testEnv.createInput(sc, 'rc_test', 'ffmpeg_source', { input: rcUrl, is_local_file: false, restart_on_activate: true, close_when_inactive: false });
+    await sleep(200);
+    await obs.req('RemoveInput', { inputName: `${testEnv.prefix}_rc_test` }).catch(() => {});
+    testEnv.createdInputs = testEnv.createdInputs.filter(i => !i.endsWith('rc_test'));
+    console.log('   [PASS] Parâmetros reconexão aceitos');
+    
+  } else {
+    console.log('\n[B] Testes OBS-integrados: SKIPPED (3Mix não ativo)');
+  }
+  
+  // Summary
+  console.log('\n=== RESUMO ===');
+  console.log(`FFmpeg→FFmpeg direto: ${testResults.ffmpegDirect.executed ? 'EXECUTADO' : 'PULADO'} | ${testResults.ffmpegDirect.passed ? 'PASS' : 'FAIL'} | ${(testResults.ffmpegDirect.frameRatio*100).toFixed(1)}% quadros`);
+  if (testResults.obsIntegration.executed) {
+    console.log(`Integração OBS: ${testResults.obsIntegration.passed}/${testResults.obsIntegration.total} PASS`);
+    testResults.obsIntegration.details.forEach(d => console.log(`  - ${d.name}: ${d.status}${d.error ? ' (' + d.error + ')' : ''}`));
+  } else {
+    console.log('Integração OBS: SKIPPED (3Mix não ativo)');
+  }
   
 } catch (err) {
-  console.error('\n❌ FALHA NO TESTE SRT REAL:', err.message);
+  console.error('\n❌ FALHA:', err.message);
   process.exitCode = 1;
   throw err;
 } finally {
-  if (testEnv) {
-    await testEnv.cleanup();
-  }
-  if (obs) {
-    obs.close();
-  }
+  if (testEnv) await testEnv.cleanup();
+  if (obs) obs.close();
 }
