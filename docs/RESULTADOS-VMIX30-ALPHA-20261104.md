@@ -138,3 +138,8 @@ Verificados fonte nativa limpa, ausência de lock e nenhum MSBuild/cmake/ninja/c
 ## Interface de macro Playout
 
 A ação playout_item_enabled recebeu rótulo legível e exemplo JSON com ID do primeiro clipe quando disponível, sem oferecer seletor de entrada irrelevante. Browser estático confirmou rótulo, parâmetros e campo de entrada oculto; dez testes do contrato Playout PASS. Não houve envio ao motor nem gravação de macro do operador. Build nativo anterior continua sem resultado recebido nesta sessão; não relançado nem declarado aprovado.
+
+
+## Recuperação do build deslocado
+
+Build incremental anterior falhou: CMakeCache aponta para vmixtwste/freemix-app removido (log com código -2). Tentativa seguinte iniciou configuração no destino errado D:/DRIVE/IA/infinito; proprietário autorizou interrupção explicitamente, mas os PIDs identificados já tinham terminado e nenhum processo foi encerrado. Nenhum arquivo desse destino foi apagado. Script agora valida destino explícito como subpasta qa-finalizacao ANTES de CMake, recusa cache de outra raiz e não renomeia build_x86. Três testes PASS e ensaio de destino inválido recusado antes de escrita. Configuração nova iniciada em qa-finalizacao/native-vmix30-clean, calculada a partir do workspace real, resultado pendente. Não repetir build em paralelo.
