@@ -20,6 +20,20 @@
       overflow: hidden;
       user-select: none;
     }
+    body.compact .topbar { padding: 4px 8px; }
+    body.compact .topbar-title { font-size: 11.5px; }
+    body.compact .topbar-actions .btn:not(.primary) { display: none; }
+    body.compact .presenter-main {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto;
+      gap: 8px;
+      padding: 6px;
+      overflow-y: auto;
+    }
+    body.compact .stage-card.program { display: none; }
+    body.compact .shortcuts-footer { display: none; }
+    body.compact .thumbnails-strip { height: 70px; padding: 4px 6px; }
+    body.compact .btn.present { padding: 8px 12px; font-size: 12px; }
     .topbar {
       display: flex;
       justify-content: space-between;
@@ -378,6 +392,11 @@
     <div id="connection-status">● 3Mix Conectado</div>
   </div>
 
+  <script>
+    if (new URLSearchParams(location.search).has("compact") || window.innerWidth < 500) {
+      document.body.classList.add("compact");
+    }
+  </script>
   <script src="slides.js"></script>
 </body>
 </html>

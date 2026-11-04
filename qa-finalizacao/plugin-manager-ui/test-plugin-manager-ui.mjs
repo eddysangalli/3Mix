@@ -45,6 +45,7 @@ test('four areas render, labels are escaped, and module actions use the API', as
   await flush();
   const operation = f.calls.find((c) => c.url === '/api/plugin-manager/disable');
   assert.deepEqual(JSON.parse(operation.options.body), { id: 'qa-plugin' });
+  assert.equal(operation.options.headers['X-3Mix-Plugin-Manager'], '1');
   f.click('[data-plugin-tab]', { pluginTab: 'diagnostics' });
   assert.match(f.element.innerHTML, /Revisar dependência/);
 });
@@ -64,5 +65,6 @@ test('production lock prevents mutations and ZIP upload uses multipart file fiel
   await flush();
   const upload = f.calls.find((c) => c.url === '/api/plugin-manager/install');
   assert.equal(upload.options.method, 'POST');
+  assert.equal(upload.options.headers['X-3Mix-Plugin-Manager'], '1');
   assert.equal(upload.options.body.get('file')?.name, 'qa-plugin.zip');
 });

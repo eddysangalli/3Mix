@@ -85,25 +85,26 @@
   function installed() {
     const plugins = array(snapshot?.plugins);
     return '<div class="settings-card"><div class="card-title-row"><h2>Plugins desta instalação</h2><span class="settings-badge quiet">' + plugins.length + ' módulos</span></div>'
-      + '<p class="card-desc">Módulos essenciais aparecem protegidos. As ações em plugins de terceiros são preparadas para o próximo reinício seguro do 3Mix.</p>'
+      + '<p class="card-desc keep">Módulos essenciais aparecem protegidos. As ações em plugins de terceiros são preparadas para o próximo reinício seguro do 3Mix.</p>'
       + (plugins.length ? '<div class="pm-plugin-list">' + plugins.map(pluginCard).join('') + '</div>' : '<p class="pm-empty">Nenhum módulo foi informado pelo gerenciador.</p>') + '</div>';
   }
 
   function catalog() {
     const entries = array(snapshot?.catalog);
-    return '<div class="settings-card"><div class="card-title-row"><h2>Catálogo avaliado</h2><span class="settings-badge quiet">' + entries.length + ' aprovados</span></div>'
-      + '<p class="card-desc">A instalação pelo catálogo exige origem, versão, hash, licença e compatibilidade avaliados para a versão do motor desta instalação.</p>'
+    return '<div class="settings-card"><div class="card-title-row"><h2>Catálogo avaliado</h2><span class="settings-badge quiet">' + entries.length + ' avaliados</span></div>'
+      + '<p class="card-desc keep">A instalação pelo catálogo exige origem, versão, hash, licença e compatibilidade avaliados para a versão do motor desta instalação.</p>'
       + (entries.length ? '<div class="pm-plugin-list">' + entries.map((item) => '<article class="pm-plugin"><div class="pm-plugin-head"><div><h3>' + esc(text(item.name, item.id)) + '</h3><p class="pm-meta">' + esc(text(item.version, 'Versão não informada')) + ' · ' + esc(text(item.developer)) + '</p></div><span class="pm-badge">' + esc(text(item.license, 'Licença não informada')) + '</span></div>'
         + (item.description ? '<p class="pm-description">' + esc(item.description) + '</p>' : '')
-        + '<p class="pm-detail"><strong>Origem:</strong> ' + esc(text(item.origin)) + ' · <strong>SHA-256:</strong> ' + esc(text(item.sha256)) + '</p>'
-        + '<div class="pm-actions">' + action(item.id, 'install-catalog', 'Preparar instalação', isLocked() || item.installable !== true) + '</div></article>').join('') + '</div>'
+        + '<p class="pm-detail"><strong>Origem:</strong> ' + esc(text(item.sourceUrl || item.origin)) + ' · <strong>SHA-256:</strong> ' + esc(text(item.sha256)) + '</p>'
+        + (item.note ? '<p class="pm-detail">' + esc(item.note) + '</p>' : '')
+        + '<div class="pm-actions">' + action(item.id, 'install-catalog', item.status === 'included' ? 'Já incluído no 3Mix' : 'Preparar instalação', isLocked() || item.installable !== true) + '</div></article>').join('') + '</div>'
         : '<p class="pm-empty">Nenhum plugin foi aprovado para instalação pelo catálogo nesta versão. Use um ZIP local que passe pela análise do instalador.</p>') + '</div>';
   }
 
   function install() {
     const target = updateTarget && array(snapshot?.plugins).find((plugin) => String(plugin.id) === String(updateTarget));
     return '<div class="settings-card"><div class="card-title-row"><h2>' + (target ? 'Atualizar ' + esc(target.name) : 'Instalar ZIP de plugin') + '</h2><span class="settings-badge quiet">Windows x64</span></div>'
-      + '<p class="card-desc">Selecione um pacote ZIP de plugin OBS para Windows x64. O instalador analisa caminhos, DLLs, arquitetura, hash e compatibilidade antes de preparar a instalação. Nenhum EXE é executado.</p>'
+      + '<p class="card-desc keep">Selecione um pacote ZIP de plugin OBS para Windows x64. O instalador analisa caminhos, DLLs, arquitetura, hash e compatibilidade antes de preparar a instalação. Nenhum EXE é executado.</p>'
       + '<input id="pm-file" type="file" accept=".zip,application/zip,application/x-zip-compressed" hidden>'
       + '<div class="pm-file-picker"><button type="button" data-plugin-action="pick-file"' + (isLocked() ? ' disabled' : '') + '>Selecionar ZIP</button><span>' + esc(selectedFile?.name || 'Nenhum arquivo selecionado') + '</span></div>'
       + (target ? '<p class="pm-detail">Módulo alvo: <strong>' + esc(target.name) + '</strong>. A versão anterior será preservada para rollback.</p>' : '')
@@ -117,11 +118,11 @@
     const operations = array(snapshot?.operations);
     const last = snapshot?.lastChanged;
     return '<div class="settings-card"><div class="card-title-row"><h2>Diagnóstico do carregamento</h2><button type="button" data-plugin-action="diagnose"' + (busy ? ' disabled' : '') + '>Atualizar diagnóstico</button></div>'
-      + '<p class="card-desc">Falhas de carregamento, dependências ausentes e incompatibilidades observadas. A consulta não executa DLLs desconhecidas.</p>'
+      + '<p class="card-desc keep">Falhas de carregamento, dependências ausentes e incompatibilidades observadas. A consulta não executa DLLs desconhecidas.</p>'
       + (last ? '<p class="pm-detail"><strong>Última alteração:</strong> ' + esc(typeof last === 'object' ? [last.name || last.pluginId || last.id, last.action, last.at || last.date].filter(Boolean).join(' · ') : last) + '</p>' : '')
       + (entries.length ? '<div class="pm-diagnostics">' + entries.map((entry) => '<div class="pm-diagnostic" data-tone="' + esc(entry.severity || '') + '"><strong>' + esc(text(entry.code, entry.severity || 'Diagnóstico')) + '</strong><span>' + esc(text(entry.pluginId, 'Motor')) + ' · ' + esc(text(entry.message)) + '</span></div>').join('') + '</div>' : '<p class="pm-empty">Nenhum diagnóstico foi registrado nesta consulta.</p>') + '</div>'
       + '<div class="settings-card"><div class="card-title-row"><h2>Recuperação</h2><span class="settings-badge quiet">Próximo reinício</span></div>'
-      + '<p class="card-desc">O modo de segurança impede o carregamento de plugins de terceiros. Projetos e configurações são preservados.</p>'
+      + '<p class="card-desc keep">O modo de segurança impede o carregamento de plugins de terceiros. Projetos e configurações são preservados.</p>'
       + '<div class="pm-actions"><button type="button" data-plugin-action="safe-mode"' + (isLocked() ? ' disabled' : '') + '>' + (snapshot?.safeMode ? 'Desativar modo de segurança' : 'Ativar modo de segurança') + '</button></div>'
       + (operations.length ? '<h3 class="pm-section-title">Operações recentes</h3><div class="pm-operation-list">' + operations.slice(0, 12).map((op) => '<p>' + esc(typeof op === 'object' ? [op.at || op.date, op.action, op.pluginId || op.name, op.result].filter(Boolean).join(' · ') : op) + '</p>').join('') + '</div>' : '') + '</div>';
   }
@@ -144,8 +145,9 @@
   async function request(path, body) {
     const options = { method: body === undefined ? 'GET' : 'POST', cache: 'no-store', credentials: 'same-origin', signal: AbortSignal.timeout(body instanceof FormData ? 120000 : 20000) };
     if (body !== undefined) {
+      options.headers = { 'X-3Mix-Plugin-Manager': '1' };
       if (body instanceof FormData) options.body = body;
-      else { options.headers = { 'Content-Type': 'application/json' }; options.body = JSON.stringify(body); }
+      else { options.headers['Content-Type'] = 'application/json'; options.body = JSON.stringify(body); }
     }
     const response = await fetch(path, options);
     const result = await response.json().catch(() => ({}));

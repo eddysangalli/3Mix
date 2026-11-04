@@ -98,7 +98,8 @@
     const items = s.activeList.items;
     let totalDur = 0;
     const netDurs = items.map((it) => {
-      const d = Math.max(0, (it.outMs || it.durationMs || 0) - (it.inMs || 0));
+      const duration=Number.isFinite(Number(it.durationMs))?Math.max(0,Number(it.durationMs)):0, start=Number.isFinite(Number(it.inMs))?Math.max(0,Number(it.inMs)):0, out=Number.isFinite(Number(it.outMs))?Math.max(0,Number(it.outMs)):0;
+      const d = it.enabled===false?0:Math.max(0,(out>0?(duration>0?Math.min(out,duration):out):duration)-start);
       totalDur += d;
       return d;
     });
@@ -224,7 +225,7 @@
 
   // ---- table ----
   const tableSignature = (items) => JSON.stringify({
-    ids: items.map((i) => [i.id, i.title, i.inMs, i.outMs, i.endBehavior, i.audioGainDb, i.chainId, i.chainOrder, i.transitionIn, i.transitionMs]),
+    ids: items.map((i) => [i.id, i.enabled, i.title, i.inMs, i.outMs, i.endBehavior, i.audioGainDb, i.chainId, i.chainOrder, i.transitionIn, i.transitionMs]),
     pgm: state?.program?.item?.id || null, status: state?.program?.status || 'stopped', pv: state?.preview?.item?.id || null,
     sel: [...selectedItemIds].sort(), rundown: rundownInCommand(),
   });
@@ -241,6 +242,8 @@
       const isPgm = pgmItemId === item.id, isPv = pvItemId === item.id, isSel = selectedItemIds.has(item.id);
       if (isPgm) tr.classList.add('is-on-air'); else if (isPv) tr.classList.add('is-preview'); else if (isSel) tr.classList.add('selected');
       tr.append(cell(String(idx + 1), 'center'));
+      const enabled=document.createElement('input');enabled.type='checkbox';enabled.checked=item.enabled!==false;enabled.setAttribute('aria-label','Habilitar '+(item.title||'clipe'));enabled.onclick=e=>e.stopPropagation();enabled.onchange=async()=>{enabled.disabled=true;try{const result=await sendCommand('playout_item_update',{itemId:item.id,enabled:enabled.checked});if(!result)enabled.checked=item.enabled!==false;}finally{enabled.disabled=false;}};tr.lastElementChild.append(enabled);
+
 
       const tdStatus = document.createElement('td');
       tdStatus.innerHTML = isPgm ? (state.program.status === 'playing' ? '<span class="badge-state playing">No ar</span>' : '<span class="badge-state frozen">' + esc((state.program.status || '').toUpperCase()) + '</span>')

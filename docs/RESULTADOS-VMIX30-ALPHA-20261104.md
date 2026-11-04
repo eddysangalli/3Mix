@@ -47,3 +47,40 @@ Execução combinada nesta rodada: test-srt-presets.mjs, test-deinterlace-produc
 ## Correção funcional SRT — unidade de latência
 
 Defeito comprovado no gerador de presets: API latencyMs=120 gerava URL latency=120, enquanto obs-ffmpeg-srt.h lê a query sem conversão e depois divide s->latency por 1000 antes de SRTO_LATENCY. Isso truncava para 0ms. Corrigido buildSrtQueryParams para serializar latencyMs*1000 (microssegundos). URLs manuais existentes não são migradas/alteradas automaticamente; apenas geração explícita via presets muda. Teste de roundtrip cobre 20/120/2000/60000ms. test-srt-presets.mjs: 12/12 PASS. Sem ensaio de conexão SRT nativa nesta execução; sem cópia para runtime. Corrigir também qualquer pacote anterior que contiver o gerador antigo antes de homologação Alpha.
+
+
+## Checkpoint de recuperação — regressão consolidada
+
+50 casos node:test PASS, zero falhas: SRT, player GT, presets GT, deinterlace e ASIO. Evidência: qa-finalizacao/vmix30-distribuicao/regressao-atual.txt. core.js reconstruído com letterSpacing; novo teste executa window.GC.update do bundle real e confirma 4px/default 0. Gerador atualizado para classificar letterSpacing como estilo. Sem alteração de runtime nesta execução. Plugin manager está sendo editado por outra frente e permanece intocado por esta sessão. Próximo gate: integração no pacote e teste nativo, sem confundir VM/browser com motor físico.
+
+
+## Correção do empacotador incremental
+
+montar-atualizacao-mesa.mjs resolvia repo como <repo>/FreeMix (inexistente) e ws como o próprio repo; agora usa updateRoots() com raiz real derivada do script. A política anterior excluía toda biblioteca GC, impedindo atualizar core.js e renderer/modelos. Nova política inclui SOMENTE os seis módulos de código conhecidos e continua excluindo assets, páginas customizadas, títulos importados, catálogo do operador, configurações e gravações. Test-update-path-policy: 4/4 PASS, incluindo traversal e caminhos absolutos. O gate de checkout limpo, assinatura Ed25519, inspeção do pacote e aplicação separada permanecem intactos. Pacote ainda não gerado: checkout compartilhado tem alterações concorrentes e é corretamente recusado pelo gate; não relaxado para fabricar um release. Runtime não modificado.
+
+
+## Correção Playout — duração efetiva
+
+MediaPlayoutEngine.summary somava durationMs bruto, divergindo do IN/OUT usado na interface. Agora playoutItemDurationMs limita OUT à duração conhecida e desconta IN, sem produzir números negativos/NaN. A interface usa o mesmo contrato. Quatro testes passaram, incluindo execução da função real updatePlaylistTotals extraída da UI (IN=2s, duração=10s, OUT=12s resulta DUR=8s/POS=1s/REM=7s). Não altera Auto Next nem promete itens desabilitados: esse contrato ainda precisa ser fechado separadamente. Teste CEF de relógios requer depuração 9333 e altera estado temporariamente; não executado contra motor do operador.
+
+
+## Persistência GT e regressão relógios
+
+Novo caso de test-gc-preset-operations usa save()/setScope() reais em subpasta QA do projeto: grava títulos, aplica estilo em lote, reordena, instancia biblioteca nova, confirma valores e ordem, remove e relê novamente. 7/7 PASS nesta suíte; transporte/motor não simulado como homologado. test-clock-message.mjs também PASS no checkout atual integrado. Teste de mensagem não comprova CEF/reabertura nativa.
+
+Normalizados escapes de controles em srt-presets.mjs/test-srt-presets.mjs para texto legível (sem bytes NUL literais no fonte); 13/13 testes SRT PASS. Alterações de plugin manager continuam concorrentes e não foram sobrescritas. Nenhum pacote assinado nem aplicação ao runtime realizado nesta rodada.
+
+
+## Playout — habilitar/desabilitar e Auto Next
+
+enabled opcional (default true) persiste nos itens. Navegação automática e chains pulam desabilitados; TAKE recusa item desabilitado inclusive se o Preview tiver cópia antiga. DUR da lista exclui itens desabilitados. Checkbox usa sendCommand/playout_item_update existente; mesma ação acessível pelo contrato API. Desabilitar item atualmente playing é recusado, sem parar o sinal. autoNext=false agora impede avanço ao terminar (antes era salvo mas não consultado no ramo play_next). Seis testes de duração/navegação/Auto Next PASS. Sem homologação nativa de reprodução nesta rodada.
+
+
+## Recuperação de falhas na seleção Playout
+
+enabled é validado antes da mutação; falha de save restaura o valor anterior (inclusive ausência do campo em projeto legado). Checkbox desabilita durante envio e retorna ao estado anterior se comando falhar. Auto Next e skip cobertos em sete testes. Resta confirmar interface conectada e playback nativo, sem tráfego ao motor do operador.
+
+
+## Playout — persistência e atalho compartilhado
+
+_normalizeLegacyList preserva enabled e autoNext explícitos, com padrões true para projetos antigos. Teste grava playlist em disco, reabre nova instância e confirma exclusão de desabilitados no total e navegação. Nova ação playout_item_enabled passa pelo normalizador operacional de macros, valida ID/booleano e delega ao mesmo playout_item_update (sem segundo motor). Seletor de macro expõe a ação com parâmetros JSON. Dez testes Playout PASS; ainda sem teste físico de reprodução.

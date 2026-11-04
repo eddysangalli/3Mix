@@ -26,3 +26,12 @@ test('browser and backend model/renderer contracts remain aligned',async()=>{
   assert.equal(a.replaceAll('./modelos.js','./modelos.mjs').trim(),b.trim());
  }
 });
+
+import {runInNewContext} from 'node:vm';
+test('live core.js bundle applies spacing through actual GC update',async()=>{
+ const source=await readFile(new URL('../painel/gc/biblioteca/core.js',import.meta.url),'utf8');
+ const canvas={innerHTML:'',style:{},classList:{toggle(){}}};
+ const context={document:{currentScript:{src:'file:///3mix/gc/biblioteca/core.js'},body:{dataset:{model:models[0].id},style:{}},getElementById:()=>canvas},window:{},URL,Date,clearInterval,setInterval};
+ runInNewContext(source,context);context.window.GC.update({letterSpacing:4});assert.match(canvas.innerHTML,/letter-spacing="4"/);
+ context.window.GC.update({});assert.match(canvas.innerHTML,/letter-spacing="0"/);
+});

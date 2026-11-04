@@ -1254,6 +1254,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
         <div class="side-view" id="view-dsk" style="display:none"></div>
         <div class="side-view" id="view-replay" style="display:none"></div>
         <div class="side-view" id="view-list" style="display:none"></div>
+        <div class="side-view" id="view-slides" style="display:none"></div>
         <div class="side-view" id="view-rundown" style="display:none"></div>
         <div class="side-view" id="view-ptz" style="display:none"></div>
         <div class="dock-empty" id="dock-empty-0" hidden>Nenhuma aba nesta dock.<button class="b" data-a="dockconfig" data-v="0">Escolher abas</button></div>
@@ -1391,9 +1392,12 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     { id: "ReplayLive", label: "Replay Live (Voltar ao vivo)", needTarget: false },
     { id: "ReplayMarkIn", label: "Replay Mark IN (Ponto inicial)", needTarget: false },
     { id: "ReplayMarkOut", label: "Replay Mark OUT (Ponto final)", needTarget: false },
+    { id: "SlideNext", label: "Slides: Próximo Slide", needTarget: false },
+    { id: "SlidePrev", label: "Slides: Slide Anterior", needTarget: false },
+    { id: "SlideStep", label: "Slides: Próxima Animação", needTarget: false },
   ];
 
-  const DOCK_TABS_PADRAO = [["list", "mixer", "dsk", "rundown", "ptz"], ["replay"]];
+  const DOCK_TABS_PADRAO = [["list", "mixer", "slides", "dsk", "rundown", "ptz"], ["replay"]];
   const DOCK_TABS_LEGACY_3_3 = [["list", "mixer", "ptz"], ["replay", "dsk", "rundown"]];
   function dockTabsIniciais() {
     const salvo = store.get("mesa.dockTabs", null);
@@ -2108,6 +2112,18 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
         }
         case "ReplayMarkOut": {
           A.rpmarkout();
+          break;
+        }
+        case "SlideNext": {
+          await fetch("/api/slides/next", { method: "POST" }).catch(() => {});
+          break;
+        }
+        case "SlidePrev": {
+          await fetch("/api/slides/prev", { method: "POST" }).catch(() => {});
+          break;
+        }
+        case "SlideStep": {
+          await fetch("/api/slides/step", { method: "POST" }).catch(() => {});
           break;
         }
       }
@@ -3993,7 +4009,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     const body1 = document.querySelector("#side-panel .side-panel-body");
     const body2 = $("side-body-2");
     if (!body1 || !body2) return;
-    const views = { mixer: $("view-mixer"), replay: $("view-replay"), list: $("view-list"), dsk: $("view-dsk"), rundown: $("view-rundown"), ptz: $("view-ptz") };
+    const views = { mixer: $("view-mixer"), replay: $("view-replay"), list: $("view-list"), slides: $("view-slides"), dsk: $("view-dsk"), rundown: $("view-rundown"), ptz: $("view-ptz") };
     const t1 = st.sideTab || "mixer";
     const t2 = st.uiDock2 && st.mixer ? st.side2Tab : null;
     const empty0 = $("dock-empty-0"), empty1 = $("dock-empty-1");
@@ -4024,7 +4040,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   function abrirDock(dock) {
     enforceDockTabOwnership();
     if (!st.dockTabs[0].length && !st.dockTabs[1].length) {
-      st.dockTabs = [["list", "mixer", "dsk", "rundown", "ptz"], ["replay"]];
+      st.dockTabs = [["list", "mixer", "slides", "dsk", "rundown", "ptz"], ["replay"]];
       st.sideTab = "mixer"; st.side2Tab = "replay";
     }
     if (dock === 1) {
@@ -4033,7 +4049,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     } else { st.mixer = true; st.uiDock1Off = false; }
   }
   function enforceDockTabOwnership() {
-    const all = ["list", "replay", "mixer", "dsk", "rundown", "ptz"];
+    const all = ["list", "replay", "mixer", "slides", "dsk", "rundown", "ptz"];
     if (!Array.isArray(st.dockTabs) || st.dockTabs.length !== 2) {
       const second = all.includes(st.side2Tab) ? st.side2Tab : "replay";
       st.dockTabs = [all.filter(t => t !== second), [second]];
@@ -4074,6 +4090,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     ["mixer", "Mixer", "Mixer de áudio"],
     ["replay", "Replay", "Replay"],
     ["list", "Playlist", "Playlist"],
+    ["slides", "Slides", "Apresentador de Slides & PowerPoint"],
     ["dsk", "DSK", "DSK e gráficos"],
     ["rundown", "Roteiro", "Roteiro da produção"],
     ["ptz", "PTZ", "Câmeras PTZ"],
@@ -4082,6 +4099,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     mixer: '<path d="M6 4v16M12 4v16M18 4v16"/><path d="M4 15h4M10 8h4M16 13h4"/>',
     replay: '<path d="M4 12a8 8 0 1 0 2.5-5.8L4 8.5"/><path d="M4 4v4.5h4.5"/><path d="m11 9 4 3-4 3V9Z"/>',
     list: '<path d="M4 6h11M4 12h11M4 18h7"/><path d="m16 15 5 3-5 3v-6Z"/>',
+    slides: '<rect x="3" y="4" width="18" height="13" rx="1.5"/><path d="M7 8h10M7 11h6M8 17l4 3 4-3"/>',
     dsk: '<rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M6 15h9"/><path d="M6 12h5"/>',
     rundown: '<rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M9 8h6M9 12h6M9 16h4"/>',
     ptz: '<rect x="3" y="8" width="13" height="9" rx="1.5"/><path d="m16 11 5-3v9l-5-3"/><path d="M9.5 8V4"/>',
@@ -4103,7 +4121,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     const owned = DOM_TAB_SAFE(st.side2Tab);
     box.innerHTML = st.dockTabs[1].map((value) => dockTabHtml(value, owned === value, "dock2tab", value === "replay" && st.rpDisk?.rec ? " live" : "")).join("");
   }
-  function DOM_TAB_SAFE(v) { return ["mixer", "replay", "list", "dsk", "rundown", "ptz"].includes(v) ? v : "replay"; }
+  function DOM_TAB_SAFE(v) { return ["mixer", "replay", "list", "slides", "dsk", "rundown", "ptz"].includes(v) ? v : "replay"; }
   let ptzCompactSurface=null;
   function renderSideDock() {
     const sp = $("side-panel");
@@ -4138,6 +4156,16 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       if (tab === "mixer") renderMixer();
       else if (tab === "replay") renderSideReplay();
       else if (tab === "list") renderSideList();
+      else if (tab === "slides") {
+        const vSlides = $("view-slides");
+        if (vSlides && !vSlides.querySelector("iframe")) {
+          const frame = document.createElement("iframe");
+          frame.title = "Slides · Apresentador";
+          frame.src = replayUrl.replace(/\/api\/replay$/, "/slides") + "?compact=1";
+          frame.style.cssText = "width:100%;height:100%;min-height:0;border:0;flex:1;background:#0f1318;";
+          vSlides.replaceChildren(frame);
+        }
+      }
       else if (tab === "dsk") renderSideDsk();
       else if (tab === "rundown" && vRundown && !vRundown.querySelector("iframe")) {
         const frame = document.createElement("iframe");
@@ -5647,6 +5675,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   <button data-a="top_audio">Mixer de áudio…</button>
   <button data-a="audiobuses">Barramentos de áudio…</button>
   <button data-a="pop" data-v="playout">VT e playlists…</button>
+  <button data-a="pop" data-v="slides">Apresentador de Slides &amp; PowerPoint…</button>
   ${moduloAtivo('rundown') ? `<button data-a="rundown">Roteiro…</button>` : ""}
   ${moduloAtivo('calls') ? `<button data-a="retornos">Retornos SRT e N-1…</button>` : ""}
   ${moduloAtivo('blackbox') ? `<button data-a="blackbox">Caixa-preta…</button>` : ""}

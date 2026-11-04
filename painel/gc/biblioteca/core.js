@@ -57,6 +57,7 @@ const style=[
   {key:'designStyle',label:'Estilo Visual / Geometria',type:'select',default:'modern_internet',options:['modern_internet','classic_tv','swiss_square','esports_neon','corporate_glass','pill_capsule','cyber_bevel','minimal_flat']},
   number('opacity','Opacidade do painel (%)',96,0,100),
   number('fontSize','Tamanho do texto (%)',100,70,140),
+  number('letterSpacing','Espaçamento entre letras (px)',0,-5,30),
   number('offsetX','Deslocamento horizontal (%)',0,-25,25),
   number('offsetY','Deslocamento vertical (%)',0,-25,25),
   number('scale','Escala (%)',100,60,120)
@@ -134,7 +135,7 @@ function renderGraphic(id,raw={},seconds=0,clock=new Date()){
   out+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${color}" opacity="${opacity}"${strokeAttr}/>`;
  };
  const text=(x,y,s,size=48,color=F,weight=600,anchor='start')=>{
-  out+=`<text x="${x}" y="${y}" font-size="${size*d.fontSize/100}" font-weight="${weight}" fill="${color}" text-anchor="${anchor}">${esc(s)}</text>`;
+  out+=`<text x="${x}" y="${y}" font-size="${size*d.fontSize/100}" font-weight="${weight}" letter-spacing="${d.letterSpacing}" fill="${color}" text-anchor="${anchor}">${esc(s)}</text>`;
  };
  const wrap=(value,x,y,width,size=48,maxLines=3,color=F)=>{
   const chars=Math.max(12,Math.floor(width/(size*d.fontSize/100*.57))),words=String(value).split(/\s+/);

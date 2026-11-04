@@ -1,0 +1,400 @@
+TAP version 13
+# Subtest: normalizeAsioRoutes aceita de 1 a 8 rotas estéreo, rejeita 0 ou mais de 8
+ok 1 - normalizeAsioRoutes aceita de 1 a 8 rotas estéreo, rejeita 0 ou mais de 8
+  ---
+  duration_ms: 1.5949
+  type: 'test'
+  ...
+# Subtest: normalizeAsioRoutes rejeita canais repetidos entre rotas diferentes (mesma proteção que o C++ nativo faz com std::set)
+ok 2 - normalizeAsioRoutes rejeita canais repetidos entre rotas diferentes (mesma proteção que o C++ nativo faz com std::set)
+  ---
+  duration_ms: 0.2215
+  type: 'test'
+  ...
+# Subtest: normalizeAsioRoutes rejeita left === right na mesma rota (canal não pode apontar para si mesmo nos dois lados)
+ok 3 - normalizeAsioRoutes rejeita left === right na mesma rota (canal não pode apontar para si mesmo nos dois lados)
+  ---
+  duration_ms: 0.1159
+  type: 'test'
+  ...
+# Subtest: normalizeAsioRoutes rejeita canal fora de 0–255 e fonte não permitida (privada/removida)
+ok 4 - normalizeAsioRoutes rejeita canal fora de 0–255 e fonte não permitida (privada/removida)
+  ---
+  duration_ms: 0.14
+  type: 'test'
+  ...
+# Subtest: normalizeAsioRoutes rejeita ganho fora de 0..2, aceita default 1 quando omitido
+ok 5 - normalizeAsioRoutes rejeita ganho fora de 0..2, aceita default 1 quando omitido
+  ---
+  duration_ms: 0.1797
+  type: 'test'
+  ...
+# Subtest: normalizeAsioRoutes aceita múltiplas rotas válidas sem conflito de canal, preservando uuid/left/right/gain
+ok 6 - normalizeAsioRoutes aceita múltiplas rotas válidas sem conflito de canal, preservando uuid/left/right/gain
+  ---
+  duration_ms: 0.6436
+  type: 'test'
+  ...
+# Subtest: normalizeMembers rejeita mais de 32 fontes, fonte repetida ou ganho inválido
+ok 7 - normalizeMembers rejeita mais de 32 fontes, fonte repetida ou ganho inválido
+  ---
+  duration_ms: 0.3865
+  type: 'test'
+  ...
+# Subtest: publicAudio exclui corretamente o diretor, buses internos e nomes reservados do 3Mix (mix-minus/N1/Master/Retorno)
+ok 8 - publicAudio exclui corretamente o diretor, buses internos e nomes reservados do 3Mix (mix-minus/N1/Master/Retorno)
+  ---
+  duration_ms: 1.1034
+  type: 'test'
+  ...
+# Subtest: AudioBusesEngine.command("audio_routing_asio_output_configure") valida e persiste rotas reais, confirmando pelo motor antes de salvar
+ok 9 - AudioBusesEngine.command("audio_routing_asio_output_configure") valida e persiste rotas reais, confirmando pelo motor antes de salvar
+  ---
+  duration_ms: 9.3316
+  type: 'test'
+  ...
+# Subtest: AudioBusesEngine.command rejeita driver desconhecido antes de chamar o motor (evita configurar com ID inválido)
+ok 10 - AudioBusesEngine.command rejeita driver desconhecido antes de chamar o motor (evita configurar com ID inválido)
+  ---
+  duration_ms: 2.3057
+  type: 'test'
+  ...
+# Subtest: AudioBusesEngine.command rejeita buffer fora de 0 (automático) ou 16–8192
+ok 11 - AudioBusesEngine.command rejeita buffer fora de 0 (automático) ou 16–8192
+  ---
+  duration_ms: 1.7649
+  type: 'test'
+  ...
+# Subtest: os 9 modos reais do enum nativo estão presentes, todos com rótulo em português
+ok 12 - os 9 modos reais do enum nativo estão presentes, todos com rótulo em português
+  ---
+  duration_ms: 0.9009
+  type: 'test'
+  ...
+# Subtest: validateDeinterlaceMode aceita as 9 strings reais e rejeita qualquer outra
+ok 13 - validateDeinterlaceMode aceita as 9 strings reais e rejeita qualquer outra
+  ---
+  duration_ms: 0.6041
+  type: 'test'
+  ...
+# Subtest: validateDeinterlaceFieldOrder aceita só TOP/BOTTOM
+ok 14 - validateDeinterlaceFieldOrder aceita só TOP/BOTTOM
+  ---
+  duration_ms: 0.1371
+  type: 'test'
+  ...
+# Subtest: readDeinterlace: fonte fora da lista de captura física (ex. browser_source) devolve supported:false sem chamar o motor
+ok 15 - readDeinterlace: fonte fora da lista de captura física (ex. browser_source) devolve supported:false sem chamar o motor
+  ---
+  duration_ms: 0.195
+  type: 'test'
+  ...
+# Subtest: readDeinterlace: câmera real (dshow_input) consulta modo e ordem de campo reais via obs-websocket padrão
+ok 16 - readDeinterlace: câmera real (dshow_input) consulta modo e ordem de campo reais via obs-websocket padrão
+  ---
+  duration_ms: 0.7379
+  type: 'test'
+  ...
+# Subtest: readDeinterlace: motor recusa (ex. dshow_input sem dispositivo real ainda) -- devolve supported:false com o motivo, não lança
+ok 17 - readDeinterlace: motor recusa (ex. dshow_input sem dispositivo real ainda) -- devolve supported:false com o motivo, não lança
+  ---
+  duration_ms: 0.2869
+  type: 'test'
+  ...
+# Subtest: setDeinterlace: aplica modo E ordem de campo reais, confirmando por releitura (mesmo padrão de SetInputMute/GetInputMute do resto do projeto)
+ok 18 - setDeinterlace: aplica modo E ordem de campo reais, confirmando por releitura (mesmo padrão de SetInputMute/GetInputMute do resto do projeto)
+  ---
+  duration_ms: 0.3003
+  type: 'test'
+  ...
+# Subtest: setDeinterlace: motor não confirma o modo enviado (ex. race condition/fonte removida) -- lança, não finge sucesso
+ok 19 - setDeinterlace: motor não confirma o modo enviado (ex. race condition/fonte removida) -- lança, não finge sucesso
+  ---
+  duration_ms: 0.3433
+  type: 'test'
+  ...
+# Subtest: setDeinterlace: fonte fora da lista de captura física é recusada antes de qualquer chamada ao motor
+ok 20 - setDeinterlace: fonte fora da lista de captura física é recusada antes de qualquer chamada ao motor
+  ---
+  duration_ms: 0.4798
+  type: 'test'
+  ...
+# Subtest: setDeinterlace: só mode informado não toca a ordem de campo, e vice-versa -- os dois campos são independentes
+ok 21 - setDeinterlace: só mode informado não toca a ordem de campo, e vice-versa -- os dois campos são independentes
+  ---
+  duration_ms: 0.4566
+  type: 'test'
+  ...
+# Subtest: ASYNC_CAPTURE_KINDS cobre os tipos de captura física/arquivo já usados em outras partes do projeto (audio-routing, PTZ), sem inventar nenhum novo
+ok 22 - ASYNC_CAPTURE_KINDS cobre os tipos de captura física/arquivo já usados em outras partes do projeto (audio-routing, PTZ), sem inventar nenhum novo
+  ---
+  duration_ms: 0.2115
+  type: 'test'
+  ...
+# Subtest: legacy titles preserve zero spacing across all templates
+ok 23 - legacy titles preserve zero spacing across all templates
+  ---
+  duration_ms: 5.2873
+  type: 'test'
+  ...
+# Subtest: spacing is rendered by the production SVG renderer
+ok 24 - spacing is rendered by the production SVG renderer
+  ---
+  duration_ms: 1.8533
+  type: 'test'
+  ...
+# Subtest: spacing rejects invalid values before render/save
+ok 25 - spacing rejects invalid values before render/save
+  ---
+  duration_ms: 0.5044
+  type: 'test'
+  ...
+# Subtest: browser and backend model/renderer contracts remain aligned
+ok 26 - browser and backend model/renderer contracts remain aligned
+  ---
+  duration_ms: 8.1931
+  type: 'test'
+  ...
+# Subtest: live core.js bundle applies spacing through actual GC update
+ok 27 - live core.js bundle applies spacing through actual GC update
+  ---
+  duration_ms: 5.0036
+  type: 'test'
+  ...
+# Subtest: reorder preserves records and validates complete permutation
+ok 28 - reorder preserves records and validates complete permutation
+  ---
+  duration_ms: 1.8415
+  type: 'test'
+  ...
+# Subtest: batch removal validates every member before modifying library
+ok 29 - batch removal validates every member before modifying library
+  ---
+  duration_ms: 0.7053
+  type: 'test'
+  ...
+# Subtest: save failure restores library for reorder and batch removal
+ok 30 - save failure restores library for reorder and batch removal
+  ---
+  duration_ms: 0.2701
+  type: 'test'
+  ...
+# Subtest: batch style preserves text/geometry and updates linked versions
+ok 31 - batch style preserves text/geometry and updates linked versions
+  ---
+  duration_ms: 1.3857
+  type: 'test'
+  ...
+# Subtest: batch style rejects on-air linked sibling and unsafe/invalid properties atomically
+ok 32 - batch style rejects on-air linked sibling and unsafe/invalid properties atomically
+  ---
+  duration_ms: 0.7304
+  type: 'test'
+  ...
+# Subtest: batch style restores previous records on persistence failure
+ok 33 - batch style restores previous records on persistence failure
+  ---
+  duration_ms: 0.3679
+  type: 'test'
+  ...
+# Subtest: batch operations survive disk reload without mocked save
+ok 34 - batch operations survive disk reload without mocked save
+  ---
+  duration_ms: 21.5138
+  type: 'test'
+  ...
+# Subtest: input_deinterlace aplica o modo real na fonte nativa (dshow_input), confirmado pelo motor
+ok 35 - input_deinterlace aplica o modo real na fonte nativa (dshow_input), confirmado pelo motor
+  ---
+  duration_ms: 1.1266
+  type: 'test'
+  ...
+# Subtest: input_deinterlace recusa fonte que não existe em sourceInputs -- não inventa estado para nome inexistente
+ok 36 - input_deinterlace recusa fonte que não existe em sourceInputs -- não inventa estado para nome inexistente
+  ---
+  duration_ms: 0.4561
+  type: 'test'
+  ...
+# Subtest: input_deinterlace recusa fonte que não é captura física (ex. browser_source) -- erro chega até a integração real, não só o módulo isolado
+ok 37 - input_deinterlace recusa fonte que não é captura física (ex. browser_source) -- erro chega até a integração real, não só o módulo isolado
+  ---
+  duration_ms: 0.156
+  type: 'test'
+  ...
+# Subtest: input_deinterlace aplica ordem de campo junto com o modo, na mesma chamada
+ok 38 - input_deinterlace aplica ordem de campo junto com o modo, na mesma chamada
+  ---
+  duration_ms: 0.1751
+  type: 'test'
+  ...
+# Subtest: trimmed duration respects IN/OUT and known source length
+ok 39 - trimmed duration respects IN/OUT and known source length
+  ---
+  duration_ms: 0.8573
+  type: 'test'
+  ...
+# Subtest: unknown, malformed and reversed ranges do not invent duration
+ok 40 - unknown, malformed and reversed ranges do not invent duration
+  ---
+  duration_ms: 0.1431
+  type: 'test'
+  ...
+# Subtest: summary uses effective rather than raw duration without changing end behavior
+ok 41 - summary uses effective rather than raw duration without changing end behavior
+  ---
+  duration_ms: 0.2851
+  type: 'test'
+  ...
+# Subtest: real playlist UI and backend agree on bounded trim totals
+ok 42 - real playlist UI and backend agree on bounded trim totals
+  ---
+  duration_ms: 5.8211
+  type: 'test'
+  ...
+# Subtest: navigation and totals skip disabled clips and reject disabled TAKE
+ok 43 - navigation and totals skip disabled clips and reject disabled TAKE
+  ---
+  duration_ms: 0.7378
+  type: 'test'
+  ...
+# Subtest: Auto Next false holds at end instead of taking the following item
+ok 44 - Auto Next false holds at end instead of taking the following item
+  ---
+  duration_ms: 0.2093
+  type: 'test'
+  ...
+# Subtest: enable state rejects invalid payload and rolls back when persistence fails
+ok 45 - enable state rejects invalid payload and rolls back when persistence fails
+  ---
+  duration_ms: 0.6857
+  type: 'test'
+  ...
+# Subtest: legacy normalization preserves explicit enabled and Auto Next states
+ok 46 - legacy normalization preserves explicit enabled and Auto Next states
+  ---
+  duration_ms: 0.4315
+  type: 'test'
+  ...
+# Subtest: playlist enabled state survives real save and reload
+ok 47 - playlist enabled state survives real save and reload
+  ---
+  duration_ms: 10.6487
+  type: 'test'
+  ...
+# Subtest: macro enable shortcut uses validated shared playlist dispatcher
+ok 48 - macro enable shortcut uses validated shared playlist dispatcher
+  ---
+  duration_ms: 1.184
+  type: 'test'
+  ...
+# Subtest: os 3 presets existem com latência/overhead dentro dos limites do protocolo
+ok 49 - os 3 presets existem com latência/overhead dentro dos limites do protocolo
+  ---
+  duration_ms: 1.8431
+  type: 'test'
+  ...
+# Subtest: preset de contribuição internet usa latência maior que LAN local (absorve jitter de WAN)
+ok 50 - preset de contribuição internet usa latência maior que LAN local (absorve jitter de WAN)
+  ---
+  duration_ms: 0.1299
+  type: 'test'
+  ...
+# Subtest: preset desconhecido é rejeitado, não ignorado silenciosamente
+ok 51 - preset desconhecido é rejeitado, não ignorado silenciosamente
+  ---
+  duration_ms: 0.3281
+  type: 'test'
+  ...
+# Subtest: parâmetros customizados sobrescrevem o preset, mas ainda passam pela validação de limites
+ok 52 - parâmetros customizados sobrescrevem o preset, mas ainda passam pela validação de limites
+  ---
+  duration_ms: 0.1012
+  type: 'test'
+  ...
+# Subtest: latência fora da faixa [20, 60000] é rejeitada com mensagem em português
+ok 53 - latência fora da faixa [20, 60000] é rejeitada com mensagem em português
+  ---
+  duration_ms: 0.2075
+  type: 'test'
+  ...
+# Subtest: overhead fora da faixa [1, 100] é rejeitado
+ok 54 - overhead fora da faixa [1, 100] é rejeitado
+  ---
+  duration_ms: 0.1477
+  type: 'test'
+  ...
+# Subtest: passphrase precisa ter entre 10 e 79 caracteres (limite real da libsrt, não arbitrário) ou ficar vazia
+ok 55 - passphrase precisa ter entre 10 e 79 caracteres (limite real da libsrt, não arbitrário) ou ficar vazia
+  ---
+  duration_ms: 0.2515
+  type: 'test'
+  ...
+# Subtest: buildSrtQueryParams gera exatamente os parâmetros que o motor nativo lê (confirmado em obs-ffmpeg-srt.h)
+ok 56 - buildSrtQueryParams gera exatamente os parâmetros que o motor nativo lê (confirmado em obs-ffmpeg-srt.h)
+  ---
+  duration_ms: 0.1967
+  type: 'test'
+  ...
+# Subtest: applySrtTransportToServer preserva host/porta e mescla query existente sem duplicar chaves
+ok 57 - applySrtTransportToServer preserva host/porta e mescla query existente sem duplicar chaves
+  ---
+  duration_ms: 0.7031
+  type: 'test'
+  ...
+# Subtest: applySrtTransportToServer NÃO altera servidores de outros protocolos (rtmp/rist/hls) -- nunca injeta parâmetro SRT onde não se aplica
+ok 58 - applySrtTransportToServer NÃO altera servidores de outros protocolos (rtmp/rist/hls) -- nunca injeta parâmetro SRT onde não se aplica
+  ---
+  duration_ms: 0.3173
+  type: 'test'
+  ...
+# Subtest: applySrtTransportToServer é case-insensitive no esquema (SRT:// também funciona)
+ok 59 - applySrtTransportToServer é case-insensitive no esquema (SRT:// também funciona)
+  ---
+  duration_ms: 0.206
+  type: 'test'
+  ...
+# Subtest: URL latency survives native microseconds-to-milliseconds conversion
+ok 60 - URL latency survives native microseconds-to-milliseconds conversion
+  ---
+  duration_ms: 0.2177
+  type: 'test'
+  ...
+# Subtest: SRT passphrase validates UTF-8 bytes and rejects embedded controls
+ok 61 - SRT passphrase validates UTF-8 bytes and rejects embedded controls
+  ---
+  duration_ms: 0.1923
+  type: 'test'
+  ...
+# Subtest: roots resolve repository and workspace from distribution script location
+ok 62 - roots resolve repository and workspace from distribution script location
+  ---
+  duration_ms: 1.0252
+  type: 'test'
+  ...
+# Subtest: built-in live GC modules are included
+ok 63 - built-in live GC modules are included
+  ---
+  duration_ms: 0.3089
+  type: 'test'
+  ...
+# Subtest: operator titles, assets, catalogues, state and path traversal stay excluded
+ok 64 - operator titles, assets, catalogues, state and path traversal stay excluded
+  ---
+  duration_ms: 0.347
+  type: 'test'
+  ...
+# Subtest: ordinary shipped panel and tools remain updateable
+ok 65 - ordinary shipped panel and tools remain updateable
+  ---
+  duration_ms: 0.3212
+  type: 'test'
+  ...
+1..65
+# tests 65
+# suites 0
+# pass 65
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 169.7538

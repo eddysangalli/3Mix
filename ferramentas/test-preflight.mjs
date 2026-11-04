@@ -193,6 +193,15 @@ await teste('Motor desconectado bloqueia', async () => {
   assert.equal(nivel(r, 'motor'), NIVEL.BLOQUEIO);
 });
 
+await teste('Diagnóstico de componentes do motor reporta versões homologadas (SRT 1.5.7, CEF, FFmpeg)', async () => {
+  const r = await motor(producao()).runCheck();
+  assert.equal(nivel(r, 'componentes'), NIVEL.OK);
+  const comp = r.itens.find((x) => x.id === 'componentes');
+  assert.ok(comp.componentes.srt.includes('1.5.7.0'), 'SRT 1.5.7 deve estar homologado');
+  assert.ok(comp.componentes.ffmpegDll.includes('8.1.2'), 'FFmpeg DLL deve estar reportado');
+  assert.ok(comp.componentes.cef.includes('CEF'), 'CEF deve estar reportado');
+});
+
 rmSync(pasta, { recursive: true, force: true });
 rmSync(raiz, { recursive: true, force: true });
 console.log(`TODOS OS ${ok} TESTES DO PRE-FLIGHT PASSARAM`);

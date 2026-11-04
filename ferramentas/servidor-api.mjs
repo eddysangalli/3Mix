@@ -47,6 +47,7 @@ import { CrewIntercomWsTransport } from './crew-intercom-transport-ws.mjs';
 import { lerMontagens, salvarMontagens } from './multiview-montagens.mjs';
 import { SlideEngine } from './apresentacao-slides.mjs';
 import { LiveLanDistribution } from './livelan-distribuicao.mjs';
+import { PluginManager, readPluginMultipart } from './plugin-manager.mjs';
 
 const ROOT = process.env.FREEMIX_ROOT || fileURLToPath(new URL('../', import.meta.url));
 const PANEL = process.env.FREEMIX_PANEL_DIR || join(ROOT, 'painel'), PORT = Number(process.env.FREEMIX_API_PORT || 8088);
@@ -84,6 +85,27 @@ const slideEngine = new SlideEngine({ root: ROOT, production });
 const liveLanDistribution = new LiveLanDistribution({ port: PORT });
 const onlineUpdate = new OnlineUpdateEngine(ROOT);
 const diagnostics = new DiagnosticCollector(ROOT);
+async function pluginProductionActive() {
+  if (!obs || production.state.connected !== true) return true; // Unknown is not safe for a mutation.
+  if (production.state.streaming || production.state.recording || replay.state.rec || iso.state.rec) return true;
+  try {
+    const [native, outputs] = await Promise.all([production.req('GetOutputList'), production.outputEngine.read()]);
+    if (!Array.isArray(native?.outputs) || !outputs || typeof outputs !== 'object') return true;
+    if (native.outputs.some(o => o.outputActive === true)) return true;
+    if (outputs.sdi?.slots?.some(o => o.active === true) || outputs.destinations?.some(o => o.active === true) || outputs.ndi?.active === true || outputs.omt?.active === true || outputs.virtualCamera?.active === true) return true;
+    return false;
+  } catch { return true; }
+}
+const pluginManager = new PluginManager({
+  root: ROOT,
+  catalogPath: join(ROOT, 'config/plugin-catalog.json'),
+  versionGetter: async () => {
+    if (!obs || production.state.connected !== true) return null;
+    const data = await production.optional('GetVersion');
+    return typeof data?.obsVersion === 'string' ? data.obsVersion : null;
+  },
+  productionActive: pluginProductionActive
+});
 // Retrato leve do programa para o pacote: valores simples, listas viram contagem.
 const reduzirEstado = (v, nivel = 0) => { if (Array.isArray(v)) return v.length; if (v && typeof v === 'object') { if (nivel >= 2) return undefined; return Object.fromEntries(Object.entries(v).slice(0, 80).map(([k, x]) => [k, reduzirEstado(x, nivel + 1)]).filter(([, x]) => x !== undefined)); } return typeof v === 'string' ? v.slice(0, 200) : v; };
 async function estadoParaDiagnostico() { const ler = async rota => { try { const r = await fetch('http://127.0.0.1:' + PORT + rota, { signal: AbortSignal.timeout(2500) }); return r.ok ? reduzirEstado(await r.json()) : { status: r.status }; } catch (e) { return { erro: String(e?.message || e).slice(0, 200) }; } }; return { saude: await ler('/api/health'), programa: await ler('/api/json'), saidas: await ler('/api/outputs') }; }
@@ -381,6 +403,20 @@ async function handleHttp(req, res) {
         if (path === '/api/diagnostics' && req.method === 'GET') return json(res, 200, await diagnostics.situacao());
         if (['/api/diagnostics/download', '/api/diagnostics/preview'].includes(path) && req.method === 'GET') { const zip = await diagnostics.download(u.searchParams.get('id')); if (path.endsWith('/preview')) { const files = await readDiagnosticZip(zip); let text = 'Prévia: até 4 KB de cada log. O ZIP preserva o conteúdo limitado descrito no manifesto.\n'; for (const [name, data] of files) { const snippet = name.startsWith('logs/') ? data.subarray(0, 4096) : data; text += '\n--- ' + name + ' ---\n' + snippet.toString('utf8') + (snippet.length < data.length ? '\n[prévia reduzida; restante no ZIP]' : '') + '\n'; } return json(res, 200, { success: true, text }); } res.writeHead(200, { 'Content-Type': 'application/zip', 'Content-Disposition': 'attachment; filename="' + diagnostics.last.name + '"', 'Content-Length': zip.length }); res.end(zip); return; }
         return json(res, 404, { success: false, error: 'Operação de diagnóstico inválida' });
+      }
+      if (path === '/api/plugin-manager' || path.startsWith('/api/plugin-manager/')) {
+        if (!local(req) || !originAllowed(req)) return json(res, 403, { success: false, error: 'Gerenciador de plugins disponível somente neste computador' });
+        if (path === '/api/plugin-manager' && req.method === 'GET') return json(res, 200, await pluginManager.snapshot());
+        if (req.method !== 'POST') return json(res, 405, { success: false, error: 'Método não permitido' });
+        if (req.headers['x-3mix-plugin-manager'] !== '1') return json(res, 403, { success: false, error: 'Pedido do gerenciador não autorizado' });
+        const action = path.slice('/api/plugin-manager/'.length);
+        if (action === 'install') {
+          await pluginManager.assertIdle(); // Reject before reading a potentially large ZIP while on air.
+          const { file, id } = await readPluginMultipart(req);
+          return json(res, 200, await pluginManager.install(file, id));
+        }
+        if (!/^(?:enable|disable|remove|rollback|install-catalog|diagnose|safe-mode)$/.test(action)) return json(res, 404, { success: false, error: 'Ação de plugin desconhecida' });
+        return json(res, 200, await pluginManager.action(action, await body(req)));
       }
       if (path === '/api/update' && req.method === 'GET') { if (!local(req)) return json(res, 403, { success: false, error: 'Atualização disponível somente neste computador' }); await onlineUpdate.execute('update_read', {}); return json(res, 200, { success: true, update: onlineUpdate.last }); }
       if (path === '/api/effects-frame' && req.method === 'GET') {

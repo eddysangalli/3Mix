@@ -4,6 +4,7 @@ import {existsSync} from 'node:fs';import {fileURLToPath} from 'node:url';import
 import {connect,sleep} from './obsws.mjs';import {preparePortable} from './preparar-portatil.mjs';
 import {prepareNdiRuntime} from './ndi-runtime.mjs';
 import {acquireStartupLock,startupRecord} from './recuperacao-inicializacao.mjs';
+import {applyPendingPlugins} from './plugin-manager.mjs';
 const run=promisify(execFile),root=resolve(process.env.FREEMIX_ROOT||fileURLToPath(new URL('../',import.meta.url))),exe=(existsSync(join(root,'bin/64bit/3Mix.exe'))?join(root,'bin/64bit/3Mix.exe'):join(root,'bin/64bit/FreeMix.exe'));
 process.env.FREEMIX_ROOT=root;
 // Process-local runtime paths: never change the computer's global environment.
@@ -27,8 +28,13 @@ try{
   if(all.some(info=>!info.exited&&(!info.path||resolve(info.path).toLowerCase()===exe.toLowerCase())))throw Error('Esta instala��o j� est� aberta sem conex�o confirmada. Nenhuma janela foi alterada. Feche-a pelo pr�prio 3Mix antes de iniciar.');
  }
  const ndiRuntime=await prepareNdiRuntime(root);
- const prepared=await preparePortable(root),apiInfo=await api();prepared.apiPort=Number(apiInfo.port);process.env.FREEMIX_API_PORT=String(prepared.apiPort);
- const app=spawn(exe,['--portable','--multi','--disable-updater','--disable-missing-files-check','--enable-media-stream',...(process.argv.includes('--bandeja')?['--minimize-to-tray']:[])],{cwd:join(root,'bin/64bit'),windowsHide:false,detached:true,stdio:'ignore'});let appError;app.on('error',e=>{appError=e;});app.unref();
+ const prepared=await preparePortable(root);
+ // The launcher lock and the process check above ensure no engine in this installation
+ // can be using these files. No third-party DLL is loaded by this step.
+ const pluginChanges=await applyPendingPlugins(root);
+ if(pluginChanges.applied.length)await startupRecord(root,'plugins-applied',{plugins:pluginChanges.applied});
+ const apiInfo=await api();prepared.apiPort=Number(apiInfo.port);process.env.FREEMIX_API_PORT=String(prepared.apiPort);
+ const app=spawn(exe,['--portable','--multi','--disable-updater','--disable-missing-files-check','--enable-media-stream',...(process.argv.includes('--safe-mode')?['--safe-mode']:[]),...(process.argv.includes('--disable-3p-plugins')?['--disable-3p-plugins']:[]),...(process.argv.includes('--bandeja')?['--minimize-to-tray']:[])],{cwd:join(root,'bin/64bit'),windowsHide:false,detached:true,stdio:'ignore'});let appError;app.on('error',e=>{appError=e;});app.unref();
  await startupRecord(root,'engine-spawned',{nativePid:app.pid,apiPort:prepared.apiPort,wsPort:prepared.wsPort});
  // Compatibility helper remains asynchronous. Its reused API is not stopped by a second helper.
  const helper=spawn('powershell.exe',['-NoProfile','-ExecutionPolicy','Bypass','-WindowStyle','Hidden','-File',join(root,'ferramentas/ajudante.ps1')],{cwd:root,windowsHide:true,detached:true,stdio:'ignore',env:process.env});helper.on('error',()=>{});helper.unref();

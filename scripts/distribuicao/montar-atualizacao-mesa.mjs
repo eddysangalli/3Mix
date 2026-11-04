@@ -19,7 +19,8 @@ import { createHash, sign, verify, createPublicKey } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 
-const ws = path.resolve(import.meta.dirname, "../.."), repo = path.join(ws, "FreeMix");
+import {updateRoots,excludedFromUpdate} from "./update-path-policy.mjs";
+const {ws,repo}=updateRoots(import.meta.dirname);
 const args = Object.fromEntries(process.argv.slice(2).map((a) => { const m = /^--([a-z-]+)(?:=(.*))?$/.exec(a); assert(m, "argumento inválido: " + a); return [m[1], m[2] ?? true]; }));
 assert(args.freeze && args.target, "informe --freeze e --target");
 const base = path.resolve(args.base || path.join(ws, "entregas/FreeMix-Completo-0.1.0-local.20261010060000")), target = path.resolve(args.target);
@@ -28,7 +29,7 @@ const digest = async (file) => { const h = createHash("sha256"); for await (cons
 const exists = (p) => fs.access(p).then(() => true, () => false);
 
 // Paths that belong to the operator or are written while the program runs.
-const never = (p) => /^(config|gravacoes|capturas|originais|updates|projetos|logs|crashes|diagnosticos)\//i.test(p) || /^painel\/local\.js$/i.test(p) || /^painel\/gc\/(catalogo\.js$|gt_titles\/|biblioteca\/)/i.test(p) || /^(manifest\.json|manifest\.sig|hashes\.json|version\.json|installation\.json|portable_mode\.txt)$/i.test(p) || /\.(pdb|ilk|log|dmp|bak|salvo)$/i.test(p);
+const never = excludedFromUpdate;
 
 // 1. What the installation should have: path -> source file.
 const want = new Map();

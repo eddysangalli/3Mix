@@ -15,6 +15,14 @@ import { createHash, randomUUID } from 'node:crypto';
  * - Compatível com API central, Companion, Stream Deck, MIDI e OSC
  * - Retrocompatível com chamadas queue_* legadas
  */
+// Effective duration is bounded by source duration when known. Unknown/live items
+// contribute zero rather than inventing a length; this does not imply a finite rundown.
+export function playoutItemDurationMs(item={}){
+ const finite=v=>Number.isFinite(Number(v))?Math.max(0,Number(v)):0;
+ const duration=finite(item.durationMs),start=finite(item.inMs),out=finite(item.outMs);
+ const end=out>0?(duration>0?Math.min(out,duration):out):duration;
+ return Math.max(0,end-start);
+}
 export class MediaPlayoutEngine {
   constructor(production) {
     this.p = production;
@@ -115,7 +123,8 @@ export class MediaPlayoutEngine {
         loop: !!item.loop,
         freeze: !!item.freeze,
         hold: false,
-        autoNext: item.autoAdvance !== false,
+        autoNext: item.autoNext !== undefined ? item.autoNext !== false : item.autoAdvance !== false,
+        enabled: item.enabled !== false,
         audioGainDb: Number(item.audioGainDb || 0),
         geometry: item.geometry || 'fit',
         notes: item.notes || '',
@@ -225,6 +234,8 @@ export class MediaPlayoutEngine {
       throw new Error('Nenhum clip selecionado no Preview para TAKE');
     }
 
+    const activeRecord=this.getActiveList()?.items.find(i=>i.id===candidate.id);
+    if(candidate.enabled===false||activeRecord?.enabled===false)throw Error('Clipe desabilitado na playlist');
     const transition = options.transition || this.state.preview.transition || 'cut';
     const transitionMs = Number(options.transitionMs ?? this.state.preview.transitionMs ?? 500);
 
@@ -302,7 +313,7 @@ export class MediaPlayoutEngine {
     // Se fizer parte de uma chain vinculada, buscar o próximo da cadeia
     if (currentItem?.chainId) {
       const chainItems = list.items
-        .filter(i => i.chainId === currentItem.chainId)
+        .filter(i => i.chainId === currentItem.chainId && i.enabled !== false)
         .sort((a, b) => (a.chainOrder || 0) - (b.chainOrder || 0));
       const chainIdx = chainItems.findIndex(i => i.id === currentItem.id);
       if (chainIdx >= 0 && chainIdx + 1 < chainItems.length) {
@@ -310,14 +321,9 @@ export class MediaPlayoutEngine {
       }
     }
 
-    // Caso padrão: próximo item linear
-    if (currentIndex + 1 < list.items.length) {
-      return list.items[currentIndex + 1];
-    }
-    // Loop de playlist
-    if (list.loop) {
-      return list.items[0];
-    }
+    // Skip disabled items; default missing enabled remains true for old projects.
+    for(let n=currentIndex+1;n<list.items.length;n++)if(list.items[n].enabled!==false)return list.items[n];
+    if(list.loop)for(let n=0;n<=Math.min(currentIndex,list.items.length-1);n++)if(list.items[n].enabled!==false)return list.items[n];
     return null;
   }
 
@@ -496,7 +502,7 @@ export class MediaPlayoutEngine {
       case 'play_next':
       default: {
         const list = this.getActiveList();
-        if (list && this.state.automation.active && this.state.automation.autoAdvance) {
+        if (list && list.autoAdvance!==false && prog.item?.autoNext!==false && this.state.automation.active && this.state.automation.autoAdvance) {
           const nextItem = this._findNextItem(list, this.state.automation.currentIndex);
           if (nextItem) {
             await this.take({ item: nextItem, transition: list.transition || 'cut', transitionMs: list.fadeMs || 500 });
@@ -522,7 +528,7 @@ export class MediaPlayoutEngine {
         id: l.id,
         name: l.name,
         itemCount: l.items.length,
-        totalDurationMs: l.items.reduce((acc, i) => acc + (i.durationMs || 0), 0),
+        totalDurationMs: l.items.reduce((acc, i) => acc + (i.enabled===false?0:playoutItemDurationMs(i)), 0),
         loop: !!l.loop,
         autoAdvance: l.autoAdvance !== false
       })),
@@ -563,6 +569,7 @@ export class MediaPlayoutEngine {
    * Execução de comandos centralizados (API REST, WebSocket, Companion)
    */
   async execute(action, d = {}) {
+    if(action==='playout_item_enabled')return this.execute('playout_item_update',{itemId:d.itemId,enabled:d.enabled});
     // Normalização para aceitar comandos diretos (Companion, OSC, Stream Deck, MIDI)
     const act = String(action).toLowerCase().replace(/^playout_|^queue_/, '');
 
@@ -702,6 +709,7 @@ export class MediaPlayoutEngine {
         freeze: !!i.freeze,
         hold: !!i.hold,
         autoNext: i.autoNext !== false,
+        enabled: i.enabled !== false,
         audioGainDb: Number(i.audioGainDb || 0),
         geometry: i.geometry || 'fit',
         notes: String(i.notes || ''),
@@ -735,7 +743,7 @@ export class MediaPlayoutEngine {
       const list = this.getList(d.id);
       this.activeListId = list.id;
       if (list.items.length > 0) {
-        await this.preloadClip(list.items[0], list.transition || 'cut', list.fadeMs || 500);
+        await this.preloadClip(list.items.find(i=>i.enabled!==false), list.transition || 'cut', list.fadeMs || 500);
       }
       await this.save();
       return this.summary();
@@ -792,6 +800,9 @@ export class MediaPlayoutEngine {
       const item = list.items.find(i => i.id === d.itemId);
       if (!item) throw new Error('Item não encontrado na playlist');
 
+      if(d.enabled!==undefined){if(typeof d.enabled!=='boolean')throw Error('Estado do clipe inválido');if(d.enabled===false&&this.state.program.item?.id===item.id&&this.state.program.status==='playing')throw Error('Pare o clipe antes de desabilitar');}
+      const before=structuredClone(item);
+      if(d.enabled!==undefined)item.enabled=d.enabled;
       if (d.title !== undefined) item.title = String(d.title);
       if (d.inMs !== undefined) item.inMs = Math.max(0, Number(d.inMs));
       if (d.outMs !== undefined) item.outMs = Math.max(0, Number(d.outMs));
@@ -813,7 +824,7 @@ export class MediaPlayoutEngine {
       if (d.autoNext !== undefined) item.autoNext = !!d.autoNext;
       if (d.loop !== undefined) item.loop = !!d.loop;
 
-      await this.save();
+      try{await this.save();}catch(error){Object.assign(item,before);if(!Object.hasOwn(before,'enabled'))delete item.enabled;throw error;}
       return this.summary();
     }
 

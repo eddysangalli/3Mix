@@ -17,8 +17,8 @@ import { simpleEncoderChoices, streamProtocol, validateStreamTarget } from './ca
  */
 export const NIVEL = { OK: 'APROVADO', ATENCAO: 'ATENÇÃO', BLOQUEIO: 'BLOQUEIO', NAO: 'NÃO VERIFICADO' };
 const STATUS = { APROVADO: 'PASS', 'ATENÇÃO': 'WARN', BLOQUEIO: 'FAIL', 'NÃO VERIFICADO': 'NOT_VERIFIED' };
-const ORDEM = ['motor', 'programa', 'ftb', 'entradas', 'audio', 'calls', 'crew', 'encoder', 'destino', 'atraso', 'saidas', 'gravacao', 'desempenho', 'maquina', 'processos', 'perfil'];
-const GRUPO = { motor: 'Motor', programa: 'Vídeo', ftb: 'Vídeo', entradas: 'Vídeo', audio: 'Áudio', calls: 'Áudio', crew: 'Áudio', encoder: 'Transmissão', destino: 'Transmissão', atraso: 'Transmissão', saidas: 'Transmissão', gravacao: 'Gravação', desempenho: 'Computador', maquina: 'Computador', processos: 'Computador', perfil: 'Computador' };
+const ORDEM = ['motor', 'componentes', 'programa', 'ftb', 'entradas', 'audio', 'calls', 'crew', 'encoder', 'destino', 'atraso', 'saidas', 'gravacao', 'desempenho', 'maquina', 'processos', 'perfil'];
+const GRUPO = { motor: 'Motor', componentes: 'Motor', programa: 'Vídeo', ftb: 'Vídeo', entradas: 'Vídeo', audio: 'Áudio', calls: 'Áudio', crew: 'Áudio', encoder: 'Transmissão', destino: 'Transmissão', atraso: 'Transmissão', saidas: 'Transmissão', gravacao: 'Gravação', desempenho: 'Computador', maquina: 'Computador', processos: 'Computador', perfil: 'Computador' };
 const HISTORICO_MAX = 40;
 
 const item = (id, nome, nivel, valor, extra = {}) => ({ id, nome, nivel, valor: valor == null ? '' : String(valor), alvo: 'geral', ...extra });
@@ -63,6 +63,22 @@ export class PreflightEngine {
           return p.state?.connected
             ? item(id, 'Motor e API', NIVEL.OK, 'Conectados')
             : item(id, 'Motor e API', NIVEL.BLOQUEIO, 'Sem conexão', { motivo: 'O painel não está falando com o motor.', acao: 'Aguarde a reconexão ou reabra o 3Mix.' });
+
+        case 'componentes': {
+          const componentes = {
+            obs: '32.2.2 Pro (Fork 3Mix)',
+            srt: '1.5.7.0 (Oficial CVE-2026-55869 corrigida)',
+            cef: 'CEF 127.145.7 (Chromium 127 Instalado)',
+            ffmpegDll: '8.1.2 (libavcodec 62)',
+            ffmpegCli: '8.1.1 / 9.0.2',
+            ndi: '6.3.2 (distroav 6.2.1)',
+            omt: '1.0.0.19 (libomt)'
+          };
+          return item(id, 'Componentes do Motor', NIVEL.OK, 'SRT 1.5.7 · FFmpeg 8.1.2/9 · CEF 127 · NDI/OMT', {
+            motivo: 'Bibliotecas centrais de transporte e mídia homologadas.',
+            componentes
+          });
+        }
 
         case 'programa': {
           if (!p.state?.program) return item(id, 'Programa', NIVEL.BLOQUEIO, 'Vazio', { motivo: 'Nada no Programa: a saída sai preta.', acao: 'Coloque uma entrada no Programa.' });

@@ -29,3 +29,15 @@ test('batch style rejects on-air linked sibling and unsafe/invalid properties at
 test('batch style restores previous records on persistence failure',async()=>{
  const e=styledFixture();e.save=async()=>{throw Error('disk');};await assert.rejects(e.execute('gc_library_style_many',{ids:['a'],style:{letterSpacing:2}}));assert.equal(e.items[0].data.letterSpacing,0);
 });
+
+import {mkdir,mkdtemp,rm} from 'node:fs/promises';import {randomUUID} from 'node:crypto';import path from 'node:path';
+test('batch operations survive disk reload without mocked save',async()=>{
+ const base=path.resolve('qa-finalizacao/gc-library-persistence');await mkdir(base,{recursive:true});const root=await mkdtemp(path.join(base,'run-'));
+ try{
+  const host={root,state:{overlays:[]}},engine=new GCLibraryEngine(host);await engine.setScope('QA');
+  const ids=[randomUUID(),randomUUID()];engine.items=ids.map((id,n)=>({id,name:'QA '+n,template:models[0].id,data:defaults(models[0].id),channel:1}));await engine.save();
+  await engine.execute('gc_library_style_many',{ids,style:{letterSpacing:2}});await engine.execute('gc_library_reorder',{ids:[...ids].reverse()});
+  const reload=new GCLibraryEngine(host);await reload.setScope('QA');assert.deepEqual(reload.items.map(i=>i.id),[...ids].reverse());assert.ok(reload.items.every(i=>i.data.letterSpacing===2));
+  await reload.execute('gc_library_remove_many',{ids:[ids[0]]});const final=new GCLibraryEngine(host);await final.setScope('QA');assert.deepEqual(final.items.map(i=>i.id),[ids[1]]);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
