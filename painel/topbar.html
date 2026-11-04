@@ -18,7 +18,7 @@
   .b:disabled { color: #6b7480; background: #222222; border-color: #353535; cursor: default; }
   .b.dd { min-width: 0; width: 15px; padding: 0; margin-left: -5px; border-left-color: #222222; font-size: 8px; }
   .b.sq { min-width: 0; width: 24px; padding: 0; }
-  .clk { display: inline-flex; gap: 10px; margin-left: 10px; padding: 0 10px; height: 22px; align-items: center; background: #000; border: 1px solid #f2f5f8; font: 700 12px Consolas, monospace; } .clk b { color: #5a636e; } .clk b.on { color: #ff5a4f; } .clk b.now { color: #f2f5f8; } .clk b.amber { color: #ffb300; } .clk b.green { color: #3fd145; } .clk b[hidden] { display: none; }
+  .clk { display: inline-flex; gap: 10px; margin-left: 10px; padding: 0 10px; height: 22px; align-items: center; background: #000; border: 1px solid #f2f5f8; font: 700 12px Consolas, monospace; } .clk b { color: #5a636e; overflow: hidden; text-overflow: ellipsis; max-width: 100%; } .clk b.on { color: #ff5a4f; } .clk b.now { color: #f2f5f8; } .clk b.amber { color: #ffb300; } .clk b.green { color: #3fd145; } .clk b[hidden] { display: none; }
   .lab { padding: 0 14px 0 10px; font-size: 12px; }
 body:not(.clocks-only) .clk { display:none; }
 body.clocks-only { display:block; padding:0; }
@@ -129,6 +129,7 @@ body.clocks-only .rapid-talk button { display:block; width:100%; min-width:0; he
     return s && s.mediaDuration ? s.mediaDuration - s.mediaCursor : null;
   }
   async function clockText(c, rec, str) {
+    if (c.type === "message") return { text: String(c.message || "").trim().slice(0, 40) || "MENSAGEM", cls: "amber" };
     if (c.type === "rec") return { text: "REC " + (rec && rec.outputActive ? rec.outputTimecode.slice(0, 8) : "00:00:00"), cls: rec && rec.outputActive ? "on" : "" };
     if (c.type === "stream") return { text: "NO AR " + (str && str.outputActive ? str.outputTimecode.slice(0, 8) : "00:00:00"), cls: str && str.outputActive ? "on" : "" };
     if (c.type === "remaining") { const r = on ? await remaining() : null; return { text: "RESTA " + (r == null ? "--:--:--" : hms(r)), cls: r == null ? "" : r < 10000 ? "on" : "now" }; }
@@ -148,7 +149,7 @@ body.clocks-only .rapid-talk button { display:block; width:100%; min-width:0; he
     for (let i = 0; i < SLOTS.length; i++) {
       const el = $(SLOTS[i]), c = clocks[i] || { type: "none" };
       if (c.type === "none") { el.textContent = ""; el.hidden = true; continue; }
-      const r = await clockText(c, rec, str); el.hidden = false; el.textContent = r.text; el.className = r.cls;
+      const r = await clockText(c, rec, str); el.hidden = false; el.textContent = r.text; el.title = r.text; el.className = r.cls;
     }
   }, 1000);
   document.getElementById("clk").addEventListener("dblclick", () => tell({ open: "clocks" }).catch(() => {}));
