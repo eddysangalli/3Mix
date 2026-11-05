@@ -19,7 +19,7 @@ import { createHash, sign, verify, createPublicKey } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 
-import {updateRoots,excludedFromUpdate,dependencyUpdatePath,alphaReleaseDocuments} from "./update-path-policy.mjs";
+import {updateRoots,excludedFromUpdate,dependencyUpdatePath,alphaReleaseDocuments,validateFrozenFile} from "./update-path-policy.mjs";
 const {ws,repo}=updateRoots(import.meta.dirname);
 const args = Object.fromEntries(process.argv.slice(2).map((a) => { const m = /^--([a-z-]+)(?:=(.*))?$/.exec(a); assert(m, "argumento inválido: " + a); return [m[1], m[2] ?? true]; }));
 assert(args.freeze && args.target, "informe --freeze e --target");
@@ -35,7 +35,12 @@ const never = excludedFromUpdate;
 const want = new Map();
 const baseManifest = JSON.parse(await fs.readFile(path.join(base, "manifest.json"), "utf8"));
 for (const f of baseManifest.files) if (!never(f.path)) want.set(f.path, path.join(base, f.path));
-for (const f of frozen.files) if (!never(f.path)) want.set(f.path, path.join(frozen.root, f.path));
+for (const f of frozen.files) if (!never(f.path)) {
+  const source=path.join(frozen.root,f.path), info=await fs.lstat(source);
+  assert(info.isFile()&&!info.isSymbolicLink(), "fonte nativa irregular: "+f.path);
+  validateFrozenFile(f,info.size,await digest(source));
+  want.set(f.path,source);
+}
 assert.equal(execFileSync("git", ["-C", repo, "status", "--porcelain"], { encoding: "utf8" }).trim(), "", "o repositório FreeMix tem alterações não commitadas");
 const tracked = execFileSync("git", ["-C", repo, "ls-files", "-z"], { maxBuffer: 16 * 1024 * 1024 }).toString().split("\0").filter(Boolean);
 for (const p of tracked) if (p.startsWith("painel/") && !never(p)) want.set(p, path.join(repo, p));

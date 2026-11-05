@@ -29,3 +29,14 @@ test('thumbnail cadence module and its importing desk both ship in panel updates
  const packager=await readFile(new URL('../scripts/distribuicao/montar-atualizacao-mesa.mjs',import.meta.url),'utf8');
  assert.ok(packager.includes('p.startsWith("painel/")'));
 });
+
+
+import {validateFrozenFile} from '../scripts/distribuicao/update-path-policy.mjs';
+test('native freeze requires exact size and hash before packaging',()=>{
+ const hash='a'.repeat(64),f={path:'bin/64bit/obs.dll',bytes:123,sha256:hash};
+ assert.doesNotThrow(()=>validateFrozenFile(f,123,hash));
+ assert.throws(()=>validateFrozenFile(f,124,hash),/diverge/);
+ assert.throws(()=>validateFrozenFile(f,123,'b'.repeat(64)),/diverge/);
+ assert.throws(()=>validateFrozenFile({...f,sha256:undefined},123,hash),/incompleto/);
+ assert.throws(()=>validateFrozenFile({...f,path:'../outside'},123,hash));
+});
