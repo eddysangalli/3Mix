@@ -2,8 +2,8 @@
 // Uso: --package=PASTA_SELADA --base=MANIFESTO_DA_BASE --key=CHAVE_PRIVADA --channel=beta|stable [--canal=PASTA] [--assets=PASTA] [--files-base=URL]
 // Estável exige --aprovar-estavel=VERSAO e --aprovado-por=NOME, e a mesma numeração já publicada no canal beta.
 // O manifesto é cumulativo: quem está em qualquer versão anterior chega à nova com um único pacote, e o atualizador só baixa o que falta.
-import { createPrivateKey, createPublicKey, sign, verify } from 'node:crypto';
-import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { createHash, createPrivateKey, createPublicKey, sign, verify } from 'node:crypto';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -58,7 +58,15 @@ if (!verify(null, manifesto, createPublicKey(await readFile(join(pkg, 'update-pu
 
 const assets = resolve(args.assets || join(repo, '..', 'entregas', 'canal-assets', tag));
 await rm(assets, { recursive: true, force: true }); await mkdir(assets, { recursive: true });
-for (const f of arquivos) await copyFile(join(pkg, f.path), join(assets, f.sha256));
+for (const f of arquivos) {
+  const bytes=await readFile(join(pkg,f.path));
+  if(bytes.length!==f.size||createHash('sha256').update(bytes).digest('hex')!==f.sha256)throw Error('Arquivo diverge do manifesto: '+f.path);
+  await writeFile(join(assets,f.sha256),bytes,{flag:'wx'}).catch(async error=>{
+    if(error.code!=='EEXIST')throw error;
+    const existing=await readFile(join(assets,f.sha256));
+    if(!existing.equals(bytes))throw Error('Asset existente diverge do hash: '+f.path);
+  });
+}
 
 const pasta = join(canal, 'releases', versao);
 await rm(join(canal, 'releases'), { recursive: true, force: true }); await mkdir(pasta, { recursive: true });
