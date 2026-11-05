@@ -1239,6 +1239,16 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     <div class="switcher-bank pgm" id="bank-pgm"><h2>PROGRAMA (PGM)<span class="bank-tools"><button class="bank-tool" data-a="bank_hide" data-v="pgm" title="Fechar a botoeira PGM. Reabra no rodapé.">×</button></span></h2><div class="switcher-inputs" id="switcher-pgm"></div></div>
   </section>
   <div class="tabs" id="tabs"></div>
+  <label style="display:flex;align-items:center;gap:6px;padding:4px 8px;font-size:11px" title="Somente miniaturas. Frequência desejada; limitada pelo tempo de captura e número de Inputs visíveis.">Miniaturas
+    <select id="thumbnail-skip" aria-label="Descarte de quadros das miniaturas">
+      <option value="legacy">Econômico (atual)</option>
+      <option value="0">Sem descarte</option>
+      <option value="2">Pular 1 a cada 2 quadros</option>
+      <option value="3">Pular 1 a cada 3 quadros</option>
+      <option value="5">Pular 1 a cada 5 quadros</option>
+      <option value="10">Pular 1 a cada 10 quadros</option>
+    </select>
+  </label>
   <div class="mid">
     <div class="tiles" id="tiles"></div>
     <div class="me-surface" id="me-surface" aria-label="M/E"></div>
@@ -1950,7 +1960,18 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     }
     return [...names];
   }
+  const thumbnailCadence = import('./thumbnail-cadence.mjs');
+  const thumbnailSkipControl = document.getElementById('thumbnail-skip');
+  const thumbnailSkipValues = ['legacy','0','2','3','5','10'];
+  const savedThumbnailSkip = store.get('mesa.thumbnailSkip', 'legacy');
+  thumbnailSkipControl.value = thumbnailSkipValues.includes(savedThumbnailSkip) ? savedThumbnailSkip : 'legacy';
+  thumbnailSkipControl.addEventListener('change', () => {
+    if (!thumbnailSkipValues.includes(thumbnailSkipControl.value)) thumbnailSkipControl.value = 'legacy';
+    store.set('mesa.thumbnailSkip', thumbnailSkipControl.value);
+  });
   async function thumbLoop() {
+    const cadence = await thumbnailCadence.catch(() => null);
+    if (!cadence) { thumbnailSkipControl.value = 'legacy'; thumbnailSkipControl.disabled = true; }
     let turn = 0, coldAt = -Infinity;
     const last = new Map();
     for (;;) {
@@ -1959,10 +1980,18 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       for (const name of last.keys()) if (!st.scenes.includes(name)) last.delete(name);
       const now = performance.now();
       const hot = [st.program, st.preview].filter((n) => names.includes(n)), cold = names.filter((n) => !hot.includes(n));
-      const batch = new Set(hot.filter((n) => now - (last.get(n) ?? -Infinity) >= 350));
+      const custom = cadence && thumbnailSkipControl.value !== 'legacy';
+      let interval = 1000;
+      if (custom) {
+        const v = st.video || {};
+        try { interval = cadence.thumbnailIntervalMs(v.fpsNumerator, v.fpsDenominator, Number(thumbnailSkipControl.value)); }
+        catch { interval = 1000; } // Unknown production rate: do not flood the motor.
+      }
+      const selected = custom ? cadence.nextThumbnail(names, last, now, interval) : null;
+      const batch = new Set(custom ? (selected ? [selected] : []) : hot.filter((n) => now - (last.get(n) ?? -Infinity) >= 350));
       const firstThumbnail = cold.find(name => !thumbs.has(name) && now - (last.get(name) ?? -Infinity) >= 1000);
-      if (firstThumbnail) { batch.add(firstThumbnail); coldAt = now; }
-      else if (cold.length && now - coldAt >= 1000) { batch.add(cold[turn++ % cold.length]); coldAt = now; }
+      if (!custom && firstThumbnail) { batch.add(firstThumbnail); coldAt = now; }
+      else if (!custom && cold.length && now - coldAt >= 1000) { batch.add(cold[turn++ % cold.length]); coldAt = now; }
       for (const name of batch) {
         // Revalidate after each awaited capture: minimization, scrolling and disconnect are immediate.
         if (!visibleThumbnailNames().includes(name)) continue;
@@ -1972,9 +2001,9 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
           thumbs.set(name, r.imageData);
           for (const img of document.querySelectorAll(`img[data-t="${CSS.escape(name)}"],img[data-bank-thumb="${CSS.escape(name)}"]`)) img.src = r.imageData;
         }
-        await sleep(75);
+        if (!custom) await sleep(75);
       }
-      await sleep(125);
+      await sleep(custom ? Math.max(4, Math.min(16, interval / 2)) : 125);
     }
   }
   async function slowLoop() {
