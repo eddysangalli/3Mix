@@ -68,3 +68,10 @@ test('native source export counts patches against canonical manifest baseline',a
  assert.ok(source.includes('path.join(repo, "fork/manifest.json")'));
  assert.ok(source.includes('manifest.base + ".." + f.head'));assert.ok(!source.includes('"ba2f32b..HEAD"'));
 });
+
+
+import {panelOnlyUpdatePath} from '../scripts/distribuicao/update-path-policy.mjs';
+test('panel-only payload forbids native replacement and operator data',()=>{
+ for(const file of ['painel/mesa.html','painel/thumbnail-cadence.mjs','ferramentas/relogios-comandos.mjs',...alphaReleaseDocuments])assert.equal(panelOnlyUpdatePath(file),true,file);
+ for(const file of ['bin/64bit/3Mix.exe','obs-plugins/64bit/decklink.dll','runtime/node.exe','node_modules/ws/index.js','painel/native.dll','ferramentas/native.node','config/project.json','painel/local.js','painel/gc/gt_titles/private.html','../outside','painel//bad'])assert.equal(panelOnlyUpdatePath(file),false,file);
+});
