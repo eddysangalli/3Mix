@@ -1,3 +1,4 @@
+import {setClockMessage} from './relogios-comandos.mjs';
 import {createCoreProjectBinding} from './projetos/core-host-binding.mjs';
 import {installIsolationHooks} from './projetos/isolation-hooks.mjs';
 import {readProjectOwnerActivity} from './projetos/owner-activity.mjs';
@@ -446,6 +447,7 @@ export class Production {
     throw Error('Destino de dados não implementado');
   }
   async execute(action,d) {
+    if(action==='clock_message')return setClockMessage(this,d);
     if(action.startsWith('effects_')){this.effectsResult=await this.effectsEngine.execute(action,d);return;}
     if(action.startsWith('signal_'))return this.signalEngine.execute(action,d);
     if(action.startsWith('patch_'))return this.patchRegistry.execute(action,d);
