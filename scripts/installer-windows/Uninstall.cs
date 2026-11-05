@@ -79,7 +79,12 @@ namespace FreeMixUninstall {
             }
 
             string registryKey = (string)ownership["registryKey"];
-            if (!registryKey.StartsWith("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\3MixStudio-", StringComparison.Ordinal) || !System.Text.RegularExpressions.Regex.IsMatch(registryKey.Substring(registryKey.LastIndexOf('-') + 1), "^[a-f0-9]{16}$") || registryKey.IndexOf('\\', "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\".Length) >= 0) throw new Exception("Chave de desinstalação inválida.");
+            // Support both 3MixStudio- and FreeMixStudio- prefixes for backward compatibility
+            bool is3Mix = registryKey.StartsWith("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\3MixStudio-", StringComparison.Ordinal);
+            bool isFreeMix = registryKey.StartsWith("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\FreeMixStudio-", StringComparison.Ordinal);
+            bool validHash = System.Text.RegularExpressions.Regex.IsMatch(registryKey.Substring(registryKey.LastIndexOf('-') + 1), "^[a-f0-9]{16}$");
+            bool noExtraBackslash = registryKey.IndexOf('\\', "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\".Length) < 0;
+            if (!(is3Mix || isFreeMix) || !validHash || !noExtraBackslash) throw new Exception("Chave de desinstalação inválida.");
             using (RegistryKey key = Registry.CurrentUser.OpenSubKey(registryKey)) if (apply && key != null && String.Equals(Convert.ToString(key.GetValue("InstallLocation")), root, StringComparison.OrdinalIgnoreCase)) { key.Close(); Registry.CurrentUser.DeleteSubKeyTree(registryKey, false); }
 
             if (apply) {
