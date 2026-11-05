@@ -8,6 +8,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { mkdir, open, readFile, rm, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { detectResizableBar } from './rebar-diagnostico.mjs';
 
 const ps = (script, timeout = 30000) => new Promise((resolve, reject) => {
   execFile('powershell.exe', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command', '[Console]::OutputEncoding=[Text.Encoding]::UTF8;' + script],
@@ -37,8 +38,12 @@ const gb = (b) => (b ? Number((b / 1024 ** 3).toFixed(1)) : null);
 export async function inventario() {
   const bruto = JSON.parse(await ps(INVENTARIO, 45000));
   const nvidia = await nvidiaSmi();
+  // Platform-level signal only: Resizable BAR is BIOS+firmware+driver, not an app-level
+  // D3D11 toggle. Reported purely for the Alpha hardware matrix; never implies app opt-in.
+  const resizableBar = nvidia.length ? await detectResizableBar() : { status: 'undetermined', vendor: 'none', reason: 'Nenhuma GPU NVIDIA identificada por nvidia-smi nesta leitura' };
   return {
     lidoEm: new Date().toISOString(),
+    resizableBar,
     windows: bruto.windows || null,
     cpu: bruto.cpu?.nome ? bruto.cpu : null,
     ramGb: gb(bruto.ram),

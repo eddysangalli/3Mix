@@ -177,3 +177,16 @@ Na mesma baseline, EnableAudioOutput ainda solicita dois canais. Logo o multican
 montar-atualizacao-painel.mjs executado de ponta a ponta em instalação sintética (pasta temporária do sistema, fora do checkout git, chave Ed25519 efêmera QA): montou pacote assinado com 452 arquivos/12 MB a partir do painel/ferramentas reais do repositório e dos cinco documentos Alpha obrigatórios; aplicar substituiu mesa.html e version.json e confirmou nenhum caminho bin/ ou obs-plugins/ jamais escrito; rollback restaurou ambos ao estado anterior. Nenhuma chave de produção, nenhum arquivo da instalação real do operador, nenhum processo iniciado.
 
 Isso comprova o caminho de distribuição apenas-painel ponta a ponta em ambiente sintético; NÃO é pacote aplicado à instalação do operador nem homologação. Gerar/aplicar um pacote real exige decisão explícita do proprietário sobre quando distribuir.
+
+
+## Resizable BAR — diagnóstico de plataforma real, implementado
+
+Investigação confirmada: Direct3D 11 (nosso renderizador) não tem equivalente público ao `D3D12_HEAP_TYPE_GPU_UPLOAD` do D3D12 para um aplicativo "ativar" ReBAR; é recurso de BIOS+firmware da GPU+driver. Nenhum botão de ativação foi ou será criado por essa razão.
+
+Implementado `ferramentas/rebar-diagnostico.mjs`: lê nome/VRAM e, quando há GPU NVIDIA, a seção BAR1 Memory Usage de `nvidia-smi -q -d MEMORY` (o campo `--query-gpu=bar1.memory.total` não existe nesta versão de driver; descoberto e corrigido nesta rodada). Classifica active/inactive/undetermined comparando BAR1 à VRAM total, sem nunca inferir estado sem dado real.
+
+Integrado a `diagnostico-maquina.mjs`/`inventario()` (o mesmo caminho usado pelo assistente de primeira execução e Pre-Flight), reaproveitando a chamada nvidia-smi existente para a lista de GPUs; não duplica consulta.
+
+Execução real nesta máquina (não mock): RTX 4060 Laptop, driver 32.0.16.2101 — `resizableBar: {status: "active", bar1MiB: 8192, totalMiB: 8188}`. 6 testes PASS, incluindo `inventario()` real completo (PowerShell + nvidia-smi, ~11s) e 4 cenários do diagnóstico isolado com driver mockado. Sem GPU NVIDIA, ou com `nvidia-smi` ausente, o campo retorna `undetermined`/`vendor:'none'` em vez de inventar um estado.
+
+Isto é diagnóstico de hardware para a matriz Alpha — não é otimização nem suporte efetivo aplicado pelo 3Mix ao renderizador. AMD/Intel permanecem `undetermined` por esta rodada: nenhuma consulta equivalente foi implementada para esses fornecedores.
