@@ -2905,6 +2905,8 @@ private:
 	QPointer<QLabel> programLabel;
 
 	QPointer<QWidget> programOptions;
+	QPointer<QWidget> masterMeter;
+	QPointer<QVBoxLayout> programTransitionsLayout;
 
 	QPointer<OBSQTDisplay> program;
 

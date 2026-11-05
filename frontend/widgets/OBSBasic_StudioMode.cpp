@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
     Copyright (C) 2023 by Lain Bailey <lain@obsproject.com>
                           Zachary Lund <admin@computerquip.com>
                           Philippe Groarke <philippe.groarke@gmail.com>
@@ -27,6 +27,29 @@
 #include <slider-ignorewheel.hpp>
 
 #include <QToolTip>
+#include "FreeMixCenterColumn.hpp"
+#include <QSpinBox>
+#include <QDockWidget>
+#include <QDateTime>
+#include <QMouseEvent>
+#include <functional>
+
+class FreeMixClockLabel : public QLabel {
+public:
+	using QLabel::QLabel;
+	std::function<void()> doubleClicked;
+
+protected:
+	void mouseDoubleClickEvent(QMouseEvent *event) override
+	{
+		if (doubleClicked)
+			doubleClicked();
+		QLabel::mouseDoubleClickEvent(event);
+	}
+};
+#include <algorithm>
+
+
 
 void OBSBasic::CreateProgramDisplay()
 {
@@ -66,25 +89,46 @@ void OBSBasic::CreateProgramDisplay()
 void OBSBasic::CreateProgramOptions()
 {
 	programOptions = new QWidget();
-	QVBoxLayout *layout = new QVBoxLayout();
-	layout->setSpacing(4);
+	programOptions->setObjectName("freemixTransitionColumn");
+	programOptions->setFixedWidth(392);
+	programOptions->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+
+	QHBoxLayout *centerLayout = new QHBoxLayout();
+	centerLayout->setContentsMargins(0, 0, 0, 0);
+	centerLayout->setSpacing(2);
+
+	QWidget *controlsColumn = new QWidget(programOptions);
+	controlsColumn->setObjectName("freemixSwitcherControls");
+	controlsColumn->setFixedWidth(132);
+	QVBoxLayout *layout = new QVBoxLayout(controlsColumn);
+	layout->setContentsMargins(0, 0, 0, 0);
+	layout->setSpacing(2);
 
 	QPushButton *configTransitions = new QPushButton();
 	configTransitions->setProperty("class", "icon-dots-vert");
+	configTransitions->setFixedSize(22, 26);
+	configTransitions->setStyleSheet("min-width:0px; padding:0px;");
 
 	QHBoxLayout *mainButtonLayout = new QHBoxLayout();
 	mainButtonLayout->setSpacing(2);
 
-	transitionButton = new QPushButton(QTStr("Transition"));
+	transitionButton = new QPushButton("AUTO");
+	transitionButton->setStyleSheet("min-width:0px; padding:0px 2px; font-size:11px;");
+	transitionButton->setFixedHeight(26);
 	transitionButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-	QHBoxLayout *quickTransitionsLayout = new QHBoxLayout();
+	QVBoxLayout *quickTransitionsLayout = new QVBoxLayout();
 	quickTransitionsLayout->setSpacing(2);
+	// Quick transitions stay in this hidden layout: the visible column follows
+	// the mockup (CUT/AUTO, duration and T-Bar only).
+	programTransitionsLayout = quickTransitionsLayout;
 
 	QPushButton *addQuickTransition = new QPushButton();
 	addQuickTransition->setProperty("class", "icon-plus");
+	addQuickTransition->setFixedSize(24, 24);
+	addQuickTransition->setStyleSheet("min-width:0px; padding:0px;");
 
-	QLabel *quickTransitionsLabel = new QLabel(QTStr("QuickTransitions"));
+	QLabel *quickTransitionsLabel = new QLabel("TRANSIÇÃO");
 	quickTransitionsLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
 	quickTransitionsLayout->addWidget(quickTransitionsLabel);
@@ -92,8 +136,24 @@ void OBSBasic::CreateProgramOptions()
 
 	mainButtonLayout->addWidget(transitionButton);
 	mainButtonLayout->addWidget(configTransitions);
+	mainButtonLayout->addWidget(addQuickTransition);
+	auto *cutButton = new QPushButton("CUT", controlsColumn);
+	cutButton->setFixedHeight(30);
+	cutButton->setObjectName("freemixCutButton");
+	connect(cutButton, &QPushButton::clicked, this, [this]() {
+		if (!IsPreviewProgramMode()) return;
+		OBSSourceAutoRelease cut = obs_source_create_private("cut_transition", "3Mix CUT", nullptr);
+		if (!cut) return;
+		OverrideTransition(cut.Get());
+		overridingTransition = true;
+		TransitionToScene(GetCurrentSceneSource(), false, true, 0, false);
+	});
 
-	tBar = new SliderIgnoreClick(Qt::Horizontal);
+	tBar = new SliderIgnoreClick(Qt::Vertical);
+	tBar->setMinimumHeight(130);
+	/* Compact column: the T-Bar never takes the room of the clock and the talkback. */
+	tBar->setMaximumHeight(260);
+	tBar->setFixedWidth(28);
 	tBar->setMinimum(0);
 	tBar->setMaximum(T_BAR_PRECISION - 1);
 
@@ -102,13 +162,175 @@ void OBSBasic::CreateProgramOptions()
 	connect(tBar, &QSlider::valueChanged, this, &OBSBasic::TBarChanged);
 	connect(tBar, &QSlider::sliderReleased, this, &OBSBasic::TBarReleased);
 
-	layout->addStretch(0);
+	layout->addWidget(cutButton);
 	layout->addLayout(mainButtonLayout);
-	layout->addLayout(quickTransitionsLayout);
-	layout->addWidget(tBar);
-	layout->addStretch(0);
+	auto *durationSpin = new QSpinBox(controlsColumn);
+	durationSpin->setMinimumWidth(136);
+	durationSpin->setObjectName("freemixTransitionDuration");
+	durationSpin->setRange(50, 2000);
+	durationSpin->setSingleStep(50);
+	durationSpin->setSuffix(" ms");
+	durationSpin->setPrefix("Dur. ");
+	const int transitionDuration = GetTransitionDuration();
+	durationSpin->setValue(transitionDuration >= 50 && transitionDuration <= 2000 ? transitionDuration : 500);
+	durationSpin->setToolTip("Duração da transição usada por AUTO, T-Bar e pelos DSK configurados para acompanhar a transição da mesa.");
+	connect(durationSpin, QOverload<int>::of(&QSpinBox::valueChanged), this, [this](int value) {
+		SetTransitionDuration(value);
+	});
+	layout->addWidget(durationSpin);
+	/* The holder centers the T-Bar in the controls column and gives it the free vertical space, so the
+	 * clock keeps its square and the talkback sits at the base of the column. */
+	auto *tBarHolder = new QWidget(controlsColumn);
+	tBarHolder->setObjectName("freemixTBarHolder");
+	tBarHolder->setMinimumHeight(130);
+	tBarHolder->setMaximumHeight(260);
+	auto *tBarLayout = new QHBoxLayout(tBarHolder);
+	tBarLayout->setContentsMargins(0, 0, 0, 0);
+	tBarLayout->setSpacing(0);
+	tBarLayout->addStretch(1);
+	tBarLayout->addWidget(tBar);
+	tBarLayout->addStretch(1);
+	layout->addWidget(tBarHolder, 1);
+	// Production clock and the momentary private talkback stay under the T-Bar.
+	// Native widgets only: the CEF clock widget corrupted the heap in this column.
+	auto *centerClock = new FreeMixClockLabel(controlsColumn);
+	centerClock->setObjectName("freemixCenterClock");
+	centerClock->setAlignment(Qt::AlignCenter);
+	centerClock->setFixedHeight(132);
+	centerClock->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	centerClock->setTextFormat(Qt::RichText);
+	centerClock->setCursor(Qt::PointingHandCursor);
+	centerClock->setToolTip("Duplo clique: escolher quais relógios aparecem aqui.");
+	centerClock->setStyleSheet("background:#0b1116;border:1px solid #2a343e;padding:2px;");
+	centerClock->doubleClicked = []() { FreeMixOpenClocks(); };
+	layout->addWidget(centerClock);
 
-	programOptions->setLayout(layout);
+	auto *centerTalk = new QPushButton("Talkback", controlsColumn);
+	centerTalk->setObjectName("freemixCenterTalkback");
+	centerTalk->setFixedHeight(28);
+	centerTalk->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	centerTalk->setToolTip("Segure para falar no microfone privado preparado em Calls. Soltar fecha o microfone.");
+	centerTalk->setEnabled(false);
+	centerTalk->setStyleSheet("font-size:11px;padding:0;");
+	layout->addWidget(centerTalk);
+	/* Free space stays below the group: the clock and the talkback always fit, the column never
+	 * grows, and the Preview/Program monitors keep the area they had. */
+	layout->addStretch(1);
+
+	auto *centerTimer = new QTimer(controlsColumn);
+	connect(centerTimer, &QTimer::timeout, controlsColumn, [centerClock, centerTalk]() {
+		centerClock->setText(FreeMixCenterClockHtml());
+		const bool active = FreeMixTalkbackActive();
+		centerTalk->setEnabled(FreeMixTalkbackReady());
+		if (centerTalk->property("talking").toBool() != active) {
+			centerTalk->setProperty("talking", active);
+			centerTalk->setText(active ? "FALANDO" : "Talkback");
+			centerTalk->setStyleSheet(active ? "font-size:10px;padding:0;background:#a11;color:#fff;"
+							 : "font-size:10px;padding:0;");
+		}
+	});
+	centerTimer->start(500);
+	connect(centerTalk, &QPushButton::pressed, this, []() { FreeMixTalkbackPress(true); });
+	connect(centerTalk, &QPushButton::released, this, []() { FreeMixTalkbackPress(false); });
+	auto *talkKeepAlive = new QTimer(centerTalk);
+	talkKeepAlive->setInterval(500);
+	connect(talkKeepAlive, &QTimer::timeout, centerTalk, []() { FreeMixTalkbackKeepAlive(); });
+	connect(centerTalk, &QPushButton::pressed, talkKeepAlive, [talkKeepAlive]() { talkKeepAlive->start(); });
+	connect(centerTalk, &QPushButton::released, talkKeepAlive, [talkKeepAlive]() { talkKeepAlive->stop(); });
+
+	// Two extra quick transitions from the mockup: MERGE and STINGER.
+	// They trigger the project's real quick transitions, not a fake animation.
+	auto *quickRow = new QHBoxLayout();
+	quickRow->setSpacing(2);
+	auto *mergeButton = new QPushButton("MERGE", controlsColumn);
+	auto *stingerButton = new QPushButton("STINGER", controlsColumn);
+	for (auto *button : {mergeButton, stingerButton}) {
+		button->setFixedHeight(23);
+		button->setStyleSheet("font-size:9px; padding:0px;");
+	}
+	mergeButton->setObjectName("freemixQuickMerge");
+	stingerButton->setObjectName("freemixQuickStinger");
+	mergeButton->setToolTip("Transição rápida Merge deste projeto");
+	stingerButton->setToolTip("Transição rápida Stinger deste projeto");
+	connect(mergeButton, &QPushButton::clicked, this, [this]() {
+		for (QuickTransition &qt : quickTransitions) {
+			if (!qt.source || qt.fadeToBlack) continue;
+			const char *name = obs_source_get_name(qt.source);
+			if (name && QString::fromUtf8(name).contains("merge", Qt::CaseInsensitive)) {
+				TriggerQuickTransition(qt.id);
+				return;
+			}
+		}
+	});
+	connect(stingerButton, &QPushButton::clicked, this, [this]() {
+		for (QuickTransition &qt : quickTransitions) {
+			if (!qt.source || qt.fadeToBlack) continue;
+			if (strcmp(obs_source_get_id(qt.source), "stinger_transition") == 0) {
+				TriggerQuickTransition(qt.id);
+				return;
+			}
+		}
+	});
+	auto *quickTimer = new QTimer(controlsColumn);
+	quickTimer->setInterval(1200);
+	connect(quickTimer, &QTimer::timeout, controlsColumn, [this, mergeButton, stingerButton]() {
+		bool merge = false, stinger = false;
+		for (QuickTransition &qt : quickTransitions) {
+			if (!qt.source || qt.fadeToBlack) continue;
+			const char *name = obs_source_get_name(qt.source);
+			if (name && QString::fromUtf8(name).contains("merge", Qt::CaseInsensitive)) merge = true;
+			if (strcmp(obs_source_get_id(qt.source), "stinger_transition") == 0) stinger = true;
+		}
+		mergeButton->setEnabled(merge);
+		stingerButton->setEnabled(stinger);
+	});
+	quickTimer->start();
+	mergeButton->setEnabled(false);
+	stingerButton->setEnabled(false);
+	quickRow->addWidget(mergeButton);
+	quickRow->addWidget(stingerButton);
+	layout->insertLayout(2, quickRow);
+
+	masterMeter = FreeMixCreateMasterMeter(programOptions);
+
+	centerLayout->addWidget(controlsColumn);
+	centerLayout->addWidget(FreeMixCreateOverlayButtons(programOptions), 1);
+	if (auto *dskColumn = programOptions->findChild<QWidget *>("freemixOverlayButtons"))
+		FreeMixDskBindBottomLine(dskColumn, centerTalk);
+	centerLayout->addWidget(masterMeter);
+
+	programOptions->setLayout(centerLayout);
+	ui->previewLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+	ui->previewLabel->setMinimumWidth(0);
+	connect(ui->preview, &OBSQTDisplay::DisplayResized, programOptions, [this]() {
+		ui->previewLabel->setMinimumWidth(ui->preview->width());
+		ui->previewLabel->setMaximumWidth(ui->preview->width());
+	});
+	ui->previewLabel->setMinimumWidth(ui->preview->width());
+	ui->previewLabel->setMaximumWidth(ui->preview->width());
+
+	// Keep the monitor row at the production aspect: the empty bands above and
+	// below Preview/Program come from a central area taller than 16:9.
+	auto *fitTimer = new QTimer(this);
+	fitTimer->setSingleShot(true);
+	fitTimer->setInterval(180);
+	connect(ui->preview, &OBSQTDisplay::DisplayResized, fitTimer, [fitTimer]() { fitTimer->start(); });
+	connect(fitTimer, &QTimer::timeout, this, [this]() {
+		if (!previewProgramMode || !isVisible() || isMinimized() || property("freemixFitting").toBool()) return;
+		auto *dock = findChild<QDockWidget *>("Mesa_extraBrowser");
+		if (!dock || !dock->isVisible() || ui->preview->width() < 320) return;
+		const int desired = qRound(ui->preview->width() * 9.0 / 16.0) +
+				    (ui->previewLabel->isVisible() ? ui->previewLabel->height() : 0) + 4;
+		const int central = centralWidget() ? centralWidget()->height() : 0;
+		const int extra = central - desired;
+		if (extra <= 10) return;
+		int target = std::min(height() - 180, dock->height() + extra);
+		if (target <= dock->height() + 10) return;
+		setProperty("freemixFitting", true);
+		resizeDocks({dock}, {target}, Qt::Vertical);
+		QTimer::singleShot(350, this, [this]() { setProperty("freemixFitting", false); });
+	});
+	fitTimer->start();
 
 	auto onAdd = [this]() {
 		QScopedPointer<QMenu> menu(CreateTransitionMenu(this, nullptr));
