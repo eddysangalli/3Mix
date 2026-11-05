@@ -15,9 +15,13 @@ import {parseGtXml} from './gtzip-xml.mjs';import {generateHtml} from './gtzip-r
 test('browser data event reaches actual generated renderer and preserves unrelated text',()=>{
  const html=generateHtml(parseGtXml('<Composition Width="640" Height="360"><TextBlock Name="Headline" Dimensions="300,50,0" Location="0,0,0" Text="Initial" FontSize="28"/></Composition>'));
  const source=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)][0][1],listeners={};
- const el={dataset:{fieldName:'Headline'},style:{},classList:{contains:()=>false},textContent:'Initial'};
+ const el={dataset:{fieldName:'Headline'},style:{},classList:{contains:name=>name==='gt-text'},textContent:'Initial'};
  const window={addEventListener:(name,fn)=>listeners[name]=fn};const context={window,location:{hash:'#'+encodeURIComponent(JSON.stringify({n:'Own'}))},document:{querySelectorAll:s=>s==='[data-field-name]'?[el]:[],getElementById:()=>({style:{}}),querySelector:()=>null},setInterval(){}};
  runInNewContext(source,context);runInNewContext(GT_RUNTIME_SCRIPT,context);
  listeners['freemix-data']({detail:{name:'Own',values:{Headline:'From table'}}});assert.equal(el.textContent,'From table');
  listeners['freemix-data']({detail:{name:'Other',values:{Headline:'Wrong title'}}});assert.equal(el.textContent,'From table');
+ listeners['freemix-data']({detail:{name:'Own',values:{HeadlineColor:'#12ab34'}}});assert.equal(el.style.color,'#12ab34');assert.equal(el.textContent,'From table');
+ for(const color of ['red','url(http://invalid)','#fff','#123456;display:none'])listeners['freemix-data']({detail:{name:'Own',values:{HeadlineColor:color}}});
+ assert.equal(el.style.color,'#12ab34');
+ listeners['freemix-data']({detail:{name:'Other',values:{HeadlineColor:'#ffffff'}}});assert.equal(el.style.color,'#12ab34');
 });

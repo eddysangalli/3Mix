@@ -898,3 +898,10 @@ Comandos TCP: `FUNCTION`, `QUIT`, `SUBSCRIBE`, `TALLY`, `UNSUBSCRIBE`, `XML`. As
 Em passos de macro/controladores, usar `data: {"slot":3,"message":"FALTAM 2 MINUTOS"}`. Posições 1–3, texto até 40 caracteres sem controles. Texto vazio mantém o tipo mensagem e a topbar exibe seu placeholder; não restaura o tipo anterior. Outras posições são preservadas. A gravação é relida antes do broadcast; falha de confirmação não emite notificação de sucesso. Falha no broadcast pode ocorrer depois de persistir: não implica rollback da gravação. O comando passa pela fila operacional existente.
 
 Editor de macros: “Mensagem dos relógios de produção”. Para teclado, salvar a macro e vinculá-la pelo controlador existente, ou usar o alvo de ação quando disponível na interface. Testes de normalização, persistência/readback simulado e despacho por controlador passaram; interface do editor conferida em navegador estático. Runtime/CEF e pacote Alpha ainda não verificados por esta entrega.
+
+
+### GTZIP — cor de texto vinculada a dados
+
+Em novas conversões, o vínculo existente de destino HTML (`browser`) aceita o campo `<NomeDoObjeto>Color` para TextBlock. Exemplo: objeto `Headline`, campo `HeadlineColor` vinculado a uma coluna com `#12ab34`. Aceita somente `#RRGGBB`; valores inválidos são ignorados. A cor pode mudar sem alterar o texto. Não aceita CSS arbitrário, não afeta imagem/ticker/QR e não cria outro compositor. Se o nome derivado colidir com um campo existente do título, não é interpretado como propriedade de cor.
+
+A ponte reutiliza freemix-data com identidade da fonte. Títulos já importados são preservados; reimportar como cópia para obter a ponte/renderer novos. Contrato testado com renderer gerado em VM; navegador/CEF, autoPublish conectado e pacote ainda pendentes.
