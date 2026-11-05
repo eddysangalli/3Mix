@@ -93,3 +93,22 @@ test('successful imported event persistence preserves prior events',async()=>{
  const {r}=fixture();const previous={id:'existing'},event={id:'imported'};r.state.events=[previous];let saved;r.save=async()=>{saved=r.state.events.slice();};
  await r.persistImportedEvent(event);assert.deepEqual(saved,[previous,event]);assert.equal(r.state.events[0],previous);assert.equal(r.state.events[1],event);
 });
+
+
+test('imported event loads dedicated B player without altering A or sending Program',async()=>{
+ const {r}=fixture();const playerA={eventId:'live-other',speed:75};r.state.players.A=playerA;r.state.players.B={speed:25};
+ r.state.events=[{id:'external',imported:true,clips:[{cam:'Importado',file:'external-fixture.mp4'}]}];
+ r.probe=async()=>({duration:10,frameRate:'30/1',hasVideo:true,audio:true});const calls=[];
+ r.req=async(type,data={})=>{calls.push({type,data});
+ if(type==='GetStudioModeEnabled')return {studioModeEnabled:true};
+ if(type==='GetSceneList')return {currentProgramSceneName:'LIVE',scenes:[{sceneName:'REPLAY B'}]};
+ if(type==='GetInputSettings')return {inputKind:'ffmpeg_source',inputSettings:{}};
+ if(type==='GetSceneItemList')return {sceneItems:[{sourceName:'Replay Player B',sceneItemId:2}]};
+ if(type==='GetVideoSettings')return {baseWidth:1920,baseHeight:1080};
+ if(type==='GetMediaInputStatus')return {mediaDuration:10000,mediaCursor:0,mediaState:'OBS_MEDIA_STATE_PLAYING'};return {};};
+ r.optional=r.req;await r.load('B','external','Importado');
+ assert.equal(r.state.players.A,playerA);assert.equal(r.state.players.B.eventId,'external');
+ assert.ok(calls.some(c=>c.type==='SetInputSettings'&&c.data.inputName==='Replay Player B'&&c.data.inputSettings.local_file==='external-fixture.mp4'));
+ assert.ok(!calls.some(c=>c.type==='SetCurrentProgramScene'||c.data.inputName==='Replay Player A'));
+ assert.ok(calls.some(c=>c.type==='SetInputMute'&&c.data.inputName==='Replay Player B'&&c.data.inputMuted===true));
+});
