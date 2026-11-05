@@ -207,6 +207,8 @@ static inline uint64_t ns_to_audio_frames(size_t sample_rate, uint64_t frames)
 #define AUDIO_OUTPUT_FAIL -2
 
 EXPORT int audio_output_open(audio_t **audio, struct audio_output_info *info);
+/* Stop the worker; retain format and connection state until close. */
+EXPORT void audio_output_stop(audio_t *audio);
 EXPORT void audio_output_close(audio_t *audio);
 
 typedef void (*audio_output_callback_t)(void *param, size_t mix_idx, struct audio_data *data);

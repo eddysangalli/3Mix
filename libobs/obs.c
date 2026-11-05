@@ -941,12 +941,10 @@ static bool obs_init_audio(struct audio_output_info *ai)
 
 static void stop_audio(void)
 {
-	struct obs_core_audio *audio = &obs->audio;
-
-	if (audio->audio) {
-		audio_output_close(audio->audio);
-		audio->audio = NULL;
-	}
+	/* Sources may still deliver audio until their asynchronous destruction finishes.
+	 * Stop rendering now, but keep format metadata and connection mutex alive.
+	 * obs_free_audio closes the object after obs_free_data drains source teardown. */
+	audio_output_stop(obs->audio.audio);
 }
 
 static void obs_free_audio(void)
