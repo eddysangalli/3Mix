@@ -12,3 +12,14 @@ test('oldest visible input first, invisible and recent sources ignored',()=>{
  last.set('a',100);assert.equal(nextThumbnail(['a','b'],last,100,50),'b');
  last.set('b',100);assert.equal(nextThumbnail(['a','b'],last,100,50),null);assert.equal(nextThumbnail(['new','a'],last,100,50),'new');
 });
+
+
+test('desk inline scripts parse and thumbnail loop cannot change production video settings',async()=>{
+ const {readFile}=await import('node:fs/promises');const {Script}=await import('node:vm');
+ const html=await readFile(new URL('../painel/mesa.html',import.meta.url),'utf8');
+ const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map(m=>m[1]).filter(s=>s.trim());
+ assert.ok(scripts.length>0);for(const source of scripts)new Script(source);
+ const begin=html.indexOf('  async function thumbLoop()');const end=html.indexOf('  async function slowLoop()',begin);assert.ok(begin>=0&&end>begin);
+ const loop=html.slice(begin,end);assert.ok(loop.includes('cadence.nextThumbnail(names, last, now, interval)'));
+ assert.ok(loop.includes('await tryReq("GetSourceScreenshot"'));assert.ok(!loop.includes('SetVideoSettings'));assert.ok(!loop.includes('Promise.all'));
+});
