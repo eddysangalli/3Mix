@@ -1411,7 +1411,9 @@ export class DiskReplay {
     }
     if (!event) throw Error("Lance não encontrado");
     await this.load(player, event.id, d.cam);
+    const previousSelection=this.state.selectedEventId;
     this.state.selectedEventId = event.id;
+    try{await this.save();}catch(error){this.state.selectedEventId=previousSelection;throw error;}
     if (d.toOutput === true) {
       await this.air(player);
     }

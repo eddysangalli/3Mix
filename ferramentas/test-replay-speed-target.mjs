@@ -66,3 +66,9 @@ test('invalid camera index is rejected without fallback or decoder requests',asy
  for(const camIndex of [0,-1,0.5,1.5,NaN,Infinity,2])await assert.rejects(r.selectCamera({player:'A',cam:'CAM 1',camIndex}),/Índice/);
  assert.equal(loaded,false);assert.equal(calls.length,0);
 });
+
+test('play-event persists selection after successful load and before optional output',async()=>{
+ const {r}=fixture();r.state.events=[{id:'one'},{id:'two'}];r.state.selectedEventId='one';r.load=async()=>{};const order=[];
+ r.save=async()=>{order.push('save:'+r.state.selectedEventId);};r.air=async()=>order.push('air');await r.playEvent({eventId:'two',toOutput:true});assert.deepEqual(order,['save:two','air']);
+ r.state.selectedEventId='one';r.save=async()=>{throw Error('disk');};order.length=0;await assert.rejects(r.playEvent({eventId:'two',toOutput:true}),/disk/);assert.equal(r.state.selectedEventId,'one');assert.deepEqual(order,[]);
+});
