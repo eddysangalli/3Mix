@@ -1732,7 +1732,10 @@ public:
 	void ResetFreeMixFtbContext();
 
 	// 3Mix: Input reordering
-	void ReorderFreeMixInputs();
+	void ReorderFreeMixInputs(OBSDataArrayAutoRelease keys);
+
+	// 3Mix: VirtualCam
+	QString VirtualCamScene() const;
 
 public slots:
 	void SetupBroadcast();
