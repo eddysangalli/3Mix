@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
     Copyright (C) 2023 by Lain Bailey <lain@obsproject.com>
 
     This program is free software: you can redistribute it and/or modify
@@ -25,6 +25,9 @@
 #include <qt-wrappers.hpp>
 
 #include <QDir>
+#include <QFileInfo>
+#include <QCoreApplication>
+#include <QUrl>
 
 using namespace json11;
 #endif
@@ -114,6 +117,18 @@ void OBSBasic::AddExtraBrowserDock(const QString &title, const QString &url, con
 	bId.replace(QRegularExpression("[{}-]"), "");
 	dock->setProperty("uuid", bId);
 	dock->setObjectName(title + OBJ_NAME_SUFFIX);
+	// Internal role is independent of translated/operator-edited dock titles.
+	// Only the installation's own local pages may claim essential desk roles.
+	const QUrl pageUrl(url);
+	const QDir panelDir(QDir(QCoreApplication::applicationDirPath()).absoluteFilePath("../../painel"));
+	const QString localPage = QFileInfo(pageUrl.toLocalFile()).canonicalFilePath();
+	if (pageUrl.isLocalFile() && !localPage.isEmpty()) {
+		if (localPage == QFileInfo(panelDir.filePath("topbar.html")).canonicalFilePath())
+			dock->setProperty("3mix.componentId", "3mix.menu");
+		else if (localPage == QFileInfo(panelDir.filePath("mesa.html")).canonicalFilePath())
+			dock->setProperty("3mix.componentId", "3mix.mesa");
+	}
+
 	dock->resize(460, 600);
 	dock->setMinimumSize(80, 80);
 	dock->setWindowTitle(title);
