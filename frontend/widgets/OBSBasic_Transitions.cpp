@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
     Copyright (C) 2023 by Lain Bailey <lain@obsproject.com>
 
     This program is free software: you can redistribute it and/or modify
@@ -1341,7 +1341,10 @@ void OBSBasic::AddQuickTransitionId(int id)
 	button->setMenu(buttonMenu);
 	connect(button, &QAbstractButton::clicked, this, &OBSBasic::QuickTransitionClicked);
 
-	QVBoxLayout *programLayout = reinterpret_cast<QVBoxLayout *>(programOptions->layout());
+	QVBoxLayout *programLayout = programTransitionsLayout;
+	if (!programLayout) {
+		return;
+	}
 
 	int idx = 3;
 	for (;; idx++) {
@@ -1397,7 +1400,10 @@ void OBSBasic::ClearQuickTransitions()
 		return;
 	}
 
-	QVBoxLayout *programLayout = reinterpret_cast<QVBoxLayout *>(programOptions->layout());
+	QVBoxLayout *programLayout = programTransitionsLayout;
+	if (!programLayout) {
+		return;
+	}
 
 	for (int idx = 0;; idx++) {
 		QLayoutItem *item = programLayout->itemAt(idx);
@@ -1484,7 +1490,10 @@ void OBSBasic::ClearQuickTransitionWidgets()
 		return;
 	}
 
-	QVBoxLayout *programLayout = reinterpret_cast<QVBoxLayout *>(programOptions->layout());
+	QVBoxLayout *programLayout = programTransitionsLayout;
+	if (!programLayout) {
+		return;
+	}
 
 	for (int idx = 0;; idx++) {
 		QLayoutItem *item = programLayout->itemAt(idx);
@@ -1531,7 +1540,10 @@ void OBSBasic::EnableTransitionWidgets(bool enable)
 		return;
 	}
 
-	QVBoxLayout *programLayout = reinterpret_cast<QVBoxLayout *>(programOptions->layout());
+	QVBoxLayout *programLayout = programTransitionsLayout;
+	if (!programLayout) {
+		return;
+	}
 
 	for (int idx = 0;; idx++) {
 		QLayoutItem *item = programLayout->itemAt(idx);
