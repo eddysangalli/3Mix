@@ -475,8 +475,14 @@ export class DiskReplay {
     const original=resolve(d.file),input=await lstat(original);if(!input.isFile()||input.isSymbolicLink())throw Error('Arquivo de vídeo irregular');
     const source=await this.probe(original);if(source.duration<=0||source.duration>3600)throw Error('Clipe precisa durar até uma hora');
     const id=randomUUID(),dir=join(this.root,'gravacoes/replay/importados',id);await mkdir(dir,{recursive:true});const file=join(dir,'clip.mp4');
-    try{await execute(this.ffmpeg,['-hide_banner','-v','error','-nostdin','-y','-i',original,'-map','0:v:0','-map','0:a:0?','-c:v','libx264','-preset','veryfast','-crf','18','-g','1','-bf','0','-pix_fmt','yuv420p','-c:a','aac','-movflags','+faststart',file],600000);const media=await this.probe(file);const name=String(d.name||'Clipe importado').trim().slice(0,120),cam=String(d.cam||'Importado').trim().slice(0,120);this.state.events.push({id,name,cam,dur:media.duration,createdAt:Date.now(),time:new Date().toLocaleTimeString('pt-BR'),imported:true,clips:[{cam,file,start:0,end:media.duration,duration:media.duration}]});await this.save();}catch(e){await unlink(file).catch(()=>{});throw e;}
+    try{await execute(this.ffmpeg,['-hide_banner','-v','error','-nostdin','-y','-i',original,'-map','0:v:0','-map','0:a:0?','-c:v','libx264','-preset','veryfast','-crf','18','-g','1','-bf','0','-pix_fmt','yuv420p','-c:a','aac','-movflags','+faststart',file],600000);const media=await this.probe(file);const name=String(d.name||'Clipe importado').trim().slice(0,120),cam=String(d.cam||'Importado').trim().slice(0,120);await this.persistImportedEvent({id,name,cam,dur:media.duration,createdAt:Date.now(),time:new Date().toLocaleTimeString('pt-BR'),imported:true,clips:[{cam,file,start:0,end:media.duration,duration:media.duration}]});}catch(e){await unlink(file).catch(()=>{});throw e;}
   }
+  async persistImportedEvent(event) {
+    const previous=this.state.events;
+    this.state.events=[...previous,event];
+    try{await this.save();}catch(error){this.state.events=previous;throw error;}
+  }
+
   async reorderEvents(d) {
     if(!Array.isArray(d.ids)||d.ids.length!==this.state.events.length||new Set(d.ids).size!==d.ids.length||d.ids.some(id=>!this.state.events.some(e=>e.id===id)))throw Error('Envie cada lance exatamente uma vez na ordem desejada');
     const previous=this.state.events,events=new Map(previous.map(e=>[e.id,e]));this.state.events=d.ids.map(id=>events.get(id));try{await this.save();}catch(error){this.state.events=previous;throw error;}

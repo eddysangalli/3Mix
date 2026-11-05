@@ -83,3 +83,13 @@ test('reorder save failure restores original list and event identities',async()=
 test('invalid reorder never mutates list or writes storage',async()=>{
  const {r}=fixture();const previous=[{id:'one'},{id:'two'}];r.state.events=previous;let saves=0;r.save=async()=>{saves++;};for(const ids of [[],['one','one'],['two','unknown'],['one']])await assert.rejects(r.reorderEvents({ids}));assert.equal(r.state.events,previous);assert.equal(saves,0);
 });
+
+
+test('import persistence failure does not leave a deleted clip in event list',async()=>{
+ const {r}=fixture();const previous=[{id:'existing'}];r.state.events=previous;r.save=async()=>{throw Error('disk full');};
+ await assert.rejects(r.persistImportedEvent({id:'imported',clips:[{file:'clip.mp4'}]}),/disk full/);assert.equal(r.state.events,previous);assert.equal(r.state.events.length,1);
+});
+test('successful imported event persistence preserves prior events',async()=>{
+ const {r}=fixture();const previous={id:'existing'},event={id:'imported'};r.state.events=[previous];let saved;r.save=async()=>{saved=r.state.events.slice();};
+ await r.persistImportedEvent(event);assert.deepEqual(saved,[previous,event]);assert.equal(r.state.events[0],previous);assert.equal(r.state.events[1],event);
+});
