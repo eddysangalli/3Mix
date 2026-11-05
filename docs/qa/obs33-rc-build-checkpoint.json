@@ -1,0 +1,24 @@
+{
+  "status": "WIP_BUILD_FAILED_NOT_ALPHA",
+  "base": "02a995c2567f2cc7080c5d08aee2eac4cfcac176",
+  "newIntegrationObserved": "34bfeca4453fa135f31134aa5ce4464e9610be74",
+  "newIntegrationMerged": false,
+  "command": "cmake --build ../obs33-rc-build-output --config RelWithDebInfo --parallel 4",
+  "exitCode": 1,
+  "cefEnabled": true,
+  "operatorInstallationModified": false,
+  "restored": [
+    "OMT header and MIT license",
+    "independent audio bus implementation",
+    "ASIO playback and licensed SDK"
+  ],
+  "remaining": [
+    "inherited disabled-feature stubs",
+    "unported delay and final-gate APIs",
+    "OBSBasic interface mismatches",
+    "Multistream syntax errors",
+    "single Plugin Manager writer integration",
+    "FFmpeg 9 ABI verification"
+  ],
+  "artifactsQualified": false
+}

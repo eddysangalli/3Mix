@@ -22,12 +22,10 @@ inline bool FreeMixCallVideoDrain(unsigned) { return true; }
 
 namespace freemix_call_audio {
 inline void FreeMixCallAudioDirector(const char *, const char *) {}
-inline void FreeMixCallAudioTick() {}
-inline void FreeMixCallAudioStop() {}
 inline void FreeMixCallAudioRequest(obs_data_t *, obs_data_t *) {}
 inline void FreeMixCallAudioTick() {}
 inline void FreeMixCallAudioStop() {}
-inline void FreeMixAudioCapabilitiesRequest(obs_data_t *, obs_data_t *) {}
+
 } // namespace freemix_call_audio
 
 namespace freemix_srt_hdr {
@@ -60,9 +58,9 @@ inline void Register() {}
 } // namespace freemix_omt_hdr
 
 // Audio routing stubs
-inline bool FreeMixAudioBusAllowed(obs_source_t *) { return false; }
-inline void FreeMixAudioRoutingRegister() {}
-inline void FreeMixAudioCapabilitiesRequest(obs_data_t *, obs_data_t *) {}
+
+
+
 
 // OBS view stub
 inline void obs_view_add_program_final_gate(obs_view_t *, obs_source_t *) {}

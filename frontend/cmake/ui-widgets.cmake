@@ -14,6 +14,10 @@ target_sources(
     widgets/AudioMixer.hpp
     widgets/ColorSelect.cpp
     widgets/ColorSelect.hpp
+    widgets/FreeMixAudioRouting.cpp
+    widgets/FreeMixAudioRouting.hpp
+    widgets/FreeMixAsioOutput.cpp
+    widgets/FreeMixAsioOutput.hpp
     widgets/FreeMixFillKey.hpp
     widgets/FreeMixMixEffectManager.hpp
     widgets/FreeMixMultistream.cpp
