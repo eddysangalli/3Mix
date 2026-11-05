@@ -1426,8 +1426,10 @@ export class DiskReplay {
     else if (d.index !== undefined) targetIdx = Math.max(0, Math.min(this.state.events.length - 1, Number(d.index)));
     else if (d.eventId) {
       const found = this.state.events.findIndex(e => e.id === d.eventId);
-      if (found >= 0) targetIdx = found;
+      if (found < 0) throw Error("Lance não encontrado");
+      targetIdx = found;
     }
+    if(!Number.isInteger(targetIdx))throw Error("Índice de lance inválido");
     const event = this.state.events[targetIdx];
     this.state.selectedEventId = event.id;
     if (d.load === true) {

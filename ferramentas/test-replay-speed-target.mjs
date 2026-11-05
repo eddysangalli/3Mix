@@ -29,3 +29,10 @@ test('actual load sends retained channel speed and preserves other channel',asyn
  r.optional=r.req;await r.load('A','event','CAM 1');
  assert.equal(writes[0].inputSettings.speed_percent,25);assert.equal(r.state.players.A.speed,25);assert.equal(r.state.players.B.speed,75);
 });
+
+test('invalid event ID or fractional index never silently selects another event',async()=>{
+ const {r}=fixture();r.state.events=[{id:'one'},{id:'two'}];r.state.selectedEventId='two';let loaded=false;r.load=async()=>{loaded=true;};
+ await assert.rejects(r.selectEvent({eventId:'missing',load:true}),/não encontrado/);
+ await assert.rejects(r.selectEvent({index:0.5}),/Índice/);
+ assert.equal(r.state.selectedEventId,'two');assert.equal(loaded,false);
+});
