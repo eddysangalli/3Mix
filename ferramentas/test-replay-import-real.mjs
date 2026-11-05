@@ -23,3 +23,14 @@ test('audio-only file is rejected before creating imported replay events',async(
  await assert.rejects(replay.importClip({file:input}),/faixa de vídeo/);assert.equal(replay.state.events.length,0);assert.equal(saved,false);
  }finally{await rm(root,{recursive:true,force:true});}
 });
+
+
+test('real import save failure removes generated clip and preserves source',async()=>{
+ const qa=new URL('../qa-finalizacao/',import.meta.url);await mkdir(qa,{recursive:true});const root=await mkdtemp(new URL('replay-import-failure-',qa));
+ try{
+ const input=join(root,'original.mp4');const result=spawnSync('ffmpeg',['-v','error','-nostdin','-y','-f','lavfi','-i','testsrc2=size=160x90:duration=0.2','-c:v','libx264',input],{timeout:15000});assert.equal(result.status,0,String(result.stderr));
+ const original=await readFile(input),replay=new DiskReplay({root,getObs:()=>{throw Error('Operator motor must not be accessed');}});let generated;
+ replay.save=async()=>{generated=replay.state.events.at(-1).clips[0].file;throw Error('disk full');};
+ await assert.rejects(replay.importClip({file:input}),/disk full/);assert.equal(replay.state.events.length,0);assert.deepEqual(await readFile(input),original);await assert.rejects(readFile(generated),{code:'ENOENT'});
+ }finally{await rm(root,{recursive:true,force:true});}
+});
