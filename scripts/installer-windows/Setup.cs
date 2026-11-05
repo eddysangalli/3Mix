@@ -172,7 +172,7 @@ namespace FreeMixSetup {
             footer.Controls.AddRange(new Control[] { back, next });
             Controls.AddRange(new Control[] { header, body, footer });
 
-            steps = new Panel[] { StepWelcome(), StepEula(), StepDestination(o), StepModules(o), StepProgress(), StepDone() };
+            steps = new Panel[] { StepWelcome(), StepEula(), StepPreparation(), StepDestination(o), StepModules(o), StepReview(o), StepProgress(), StepDone() };
             foreach (Panel step in steps) { step.Location = new Point(0, 0); step.Size = body.Size; step.Visible = false; body.Controls.Add(step); }
             FormClosing += delegate(object sender, FormClosingEventArgs e) { if (running) e.Cancel = true; };
             Navigate(0);
