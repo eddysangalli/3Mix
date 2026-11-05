@@ -1960,7 +1960,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     }
     return [...names];
   }
-  const thumbnailCadence = import('./thumbnail-cadence.mjs');
+  const thumbnailCadence = import('./thumbnail-cadence.mjs').catch(() => null);
   const thumbnailSkipControl = document.getElementById('thumbnail-skip');
   const thumbnailSkipValues = ['legacy','0','2','3','5','10'];
   const savedThumbnailSkip = store.get('mesa.thumbnailSkip', 'legacy');
@@ -1970,7 +1970,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     store.set('mesa.thumbnailSkip', thumbnailSkipControl.value);
   });
   async function thumbLoop() {
-    const cadence = await thumbnailCadence.catch(() => null);
+    const cadence = await thumbnailCadence;
     if (!cadence) { thumbnailSkipControl.value = 'legacy'; thumbnailSkipControl.disabled = true; }
     let turn = 0, coldAt = -Infinity;
     const last = new Map();
