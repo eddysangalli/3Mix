@@ -117,7 +117,10 @@ void OBSBasic::CreateProgramOptions()
 	transitionButton->setFixedHeight(26);
 	transitionButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-	QVBoxLayout *quickTransitionsLayout = new QVBoxLayout();
+	// Hidden transition buttons still need an owner for mode toggles and shutdown.
+	auto *quickTransitionsHolder = new QWidget(controlsColumn);
+	quickTransitionsHolder->hide();
+	QVBoxLayout *quickTransitionsLayout = new QVBoxLayout(quickTransitionsHolder);
 	quickTransitionsLayout->setSpacing(2);
 	// Quick transitions stay in this hidden layout: the visible column follows
 	// the mockup (CUT/AUTO, duration and T-Bar only).
