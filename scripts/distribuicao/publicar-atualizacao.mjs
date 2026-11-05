@@ -38,7 +38,7 @@ if (args.channel === 'stable') {
 // Reject malformed manifest entries before deriving filesystem paths.
 const manifestNames=new Set();
 for(const f of novo.files){
- if(typeof f.path!=='string'||!f.path||f.path.includes(String.fromCharCode(92))||f.path.includes(':')||f.path.split('/').some(part=>!part||part==='.'||part==='..')||[...f.path].some(c=>c.charCodeAt(0)<32))throw Error('Caminho inválido no manifesto');
+ if(typeof f.path!=='string'||!f.path||f.path.includes(String.fromCharCode(92))||f.path.includes(':')||f.path.split('/').some(part=>!part||part==='.'||part==='..'||/[ .]$/.test(part)||/^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:[.]|$)/i.test(part))||[...f.path].some(c=>c.charCodeAt(0)<32))throw Error('Caminho inválido no manifesto');
  const key=f.path.toLowerCase();if(manifestNames.has(key))throw Error('Caminho duplicado no manifesto');manifestNames.add(key);
  if(!Number.isSafeInteger(f.size)||f.size<0||typeof f.sha256!=='string'||!/^[a-f0-9]{64}$/.test(f.sha256))throw Error('Integridade inválida no manifesto');
 }
