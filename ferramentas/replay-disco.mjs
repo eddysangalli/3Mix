@@ -479,7 +479,7 @@ export class DiskReplay {
   }
   async reorderEvents(d) {
     if(!Array.isArray(d.ids)||d.ids.length!==this.state.events.length||new Set(d.ids).size!==d.ids.length||d.ids.some(id=>!this.state.events.some(e=>e.id===id)))throw Error('Envie cada lance exatamente uma vez na ordem desejada');
-    const events=new Map(this.state.events.map(e=>[e.id,e]));this.state.events=d.ids.map(id=>events.get(id));await this.save();
+    const previous=this.state.events,events=new Map(previous.map(e=>[e.id,e]));this.state.events=d.ids.map(id=>events.get(id));try{await this.save();}catch(error){this.state.events=previous;throw error;}
   }
 
   // vMix 30 ("ReplaySelectedEventsExport"/"Export All Events"): copia os clipes já prontos de

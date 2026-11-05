@@ -72,3 +72,14 @@ test('play-event persists selection after successful load and before optional ou
  r.save=async()=>{order.push('save:'+r.state.selectedEventId);};r.air=async()=>order.push('air');await r.playEvent({eventId:'two',toOutput:true});assert.deepEqual(order,['save:two','air']);
  r.state.selectedEventId='one';r.save=async()=>{throw Error('disk');};order.length=0;await assert.rejects(r.playEvent({eventId:'two',toOutput:true}),/disk/);assert.equal(r.state.selectedEventId,'one');assert.deepEqual(order,[]);
 });
+
+
+test('reorder persists requested order without replacing events',async()=>{
+ const {r}=fixture();const one={id:'one'},two={id:'two'};r.state.events=[one,two];let saved;r.save=async()=>{saved=r.state.events.map(e=>e.id);};await r.reorderEvents({ids:['two','one']});assert.deepEqual(saved,['two','one']);assert.equal(r.state.events[0],two);
+});
+test('reorder save failure restores original list and event identities',async()=>{
+ const {r}=fixture();const previous=[{id:'one'},{id:'two'}];r.state.events=previous;r.save=async()=>{throw Error('disk full');};await assert.rejects(r.reorderEvents({ids:['two','one']}),/disk full/);assert.equal(r.state.events,previous);assert.deepEqual(r.state.events.map(e=>e.id),['one','two']);
+});
+test('invalid reorder never mutates list or writes storage',async()=>{
+ const {r}=fixture();const previous=[{id:'one'},{id:'two'}];r.state.events=previous;let saves=0;r.save=async()=>{saves++;};for(const ids of [[],['one','one'],['two','unknown'],['one']])await assert.rejects(r.reorderEvents({ids}));assert.equal(r.state.events,previous);assert.equal(saves,0);
+});
