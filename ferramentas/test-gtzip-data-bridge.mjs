@@ -25,3 +25,13 @@ test('browser data event reaches actual generated renderer and preserves unrelat
  assert.equal(el.style.color,'#12ab34');
  listeners['freemix-data']({detail:{name:'Other',values:{HeadlineColor:'#ffffff'}}});assert.equal(el.style.color,'#12ab34');
 });
+
+
+test('actual central publisher emits mapped text/color to the named browser source',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const source=await readFile(new URL('./controle-producao.mjs',import.meta.url),'utf8');
+ const begin=source.indexOf('  async publishData('),end=source.indexOf('  async execute(',begin);assert.ok(begin>=0&&end>begin);
+ const publish=runInNewContext('({'+source.slice(begin,end)+'}).publishData',{}),events=[];
+ const context={dataSources:{mapped:()=>({kind:'browser',target:'source-uuid',data:{Headline:'Table text',HeadlineColor:'#12ab34'}})},state:{calls:{}},req:async()=>({inputs:[{inputUuid:'source-uuid',inputName:'QA GTZIP',inputKind:'browser_source'}]}),vendor:async(...args)=>events.push(args)};
+ await publish.call(context,'table');assert.equal(events.length,1);assert.equal(events[0][0],'emit_event');assert.equal(events[0][1].event_name,'freemix-data');assert.equal(events[0][1].event_data.name,'QA GTZIP');assert.equal(events[0][1].event_data.values.HeadlineColor,'#12ab34');assert.equal(events[0][2],'obs-browser');
+});
