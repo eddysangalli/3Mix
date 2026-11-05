@@ -14,9 +14,16 @@ target_sources(
     widgets/AudioMixer.hpp
     widgets/ColorSelect.cpp
     widgets/ColorSelect.hpp
+    widgets/FreeMixFillKey.hpp
     widgets/FreeMixMixEffectManager.hpp
     widgets/FreeMixMultistream.cpp
     widgets/FreeMixMultistream.hpp
+    widgets/FreeMixNdiOutput.hpp
+    widgets/FreeMixOmtOutput.hpp
+    widgets/FreeMixSrtAlpha.hpp
+    widgets/FreeMixSrtHdrOutput.hpp
+    widgets/FreeMixSrtHdrLifecycle.hpp
+    widgets/FreeMixVideoTransports.hpp
     widgets/OBSBasic.cpp
     widgets/OBSBasic.hpp
     widgets/OBSBasic_Browser.cpp
