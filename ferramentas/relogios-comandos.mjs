@@ -14,7 +14,7 @@ export async function setClockMessage(p,data){
  clocks[slot-1]={...clocks[slot-1],type:'message',message};
  await p.req('SetPersistentData',{...query,slotValue:clocks});
  const confirmed=await p.req('GetPersistentData',query);
- if(confirmed.slotValue?.[slot-1]?.type!=='message'||confirmed.slotValue[slot-1].message!==message)throw Error('Mensagem não confirmada pelo motor');
+ if(!Array.isArray(confirmed.slotValue)||JSON.stringify(confirmed.slotValue)!==JSON.stringify(clocks))throw Error('Mensagem não confirmada pelo motor; configuração mudou durante a operação');
  await p.req('BroadcastCustomEvent',{eventData:{freemix:{clocks:confirmed.slotValue}}});
  return {slot,message,persisted:true};
 }

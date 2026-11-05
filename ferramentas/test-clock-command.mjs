@@ -35,3 +35,10 @@ test('clock macro survives actual disk reload and controller resolves saved macr
  assert.equal(target.data.id,second.items[0].id);
  }finally{await rm(root,{recursive:true,force:true});}
 });
+
+
+test('readback divergence in another slot prevents stale broadcast',async()=>{
+ let reads=0,broadcast=false,value;
+ const p={req:async(type,data)=>{if(type==='GetPersistentData'){reads++;return {slotValue:reads===1?[{type:'rec'},{type:'stream'},{type:'clock'}]:[{type:'none'},value[1],value[2]]};}if(type==='SetPersistentData')value=structuredClone(data.slotValue);if(type==='BroadcastCustomEvent')broadcast=true;return {};}};
+ await assert.rejects(setClockMessage(p,{slot:3,message:'AVISO'}),/mudou durante/);assert.equal(broadcast,false);
+});
