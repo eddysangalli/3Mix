@@ -1929,15 +1929,30 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   }
 
   /* ---- miniaturas: só entradas visíveis, com orçamento separado dos comandos ---- */
+  const DEINTERLACE_LABELS = { OBS_DEINTERLACE_MODE_DISABLE: "Desligado", OBS_DEINTERLACE_MODE_DISCARD: "Descartar campo", OBS_DEINTERLACE_MODE_RETRO: "Retro", OBS_DEINTERLACE_MODE_BLEND: "Mesclar campos", OBS_DEINTERLACE_MODE_BLEND_2X: "Mesclar (2x quadros)", OBS_DEINTERLACE_MODE_LINEAR: "Linear", OBS_DEINTERLACE_MODE_LINEAR_2X: "Linear (2x quadros)", OBS_DEINTERLACE_MODE_YADIF: "YADIF (alta qualidade)", OBS_DEINTERLACE_MODE_YADIF_2X: "YADIF (2x quadros)" };
+  const DEINTERLACE_MODES = Object.keys(DEINTERLACE_LABELS);
   async function avLoad(name) {
     const filtros = await req("GetSourceFilterList", { sourceName: name });
     const ajuste = filtros.filters.find((f) => f.filterName === "3Mix Atraso de Vídeo")?.filterSettings, video = ajuste?.requested_ms ?? ajuste?.delay_ms ?? 0;
     const estado = window.FreeMixProductionState, proprias = estado?.inputs?.find((i) => i.name === name)?.sources || [];
     const fontes = (estado?.audioRouting?.sources || []).filter((a) => proprias.includes(a.name) && !a.protected);
     const audio = await Promise.all(fontes.map(async (a) => ({ name: a.name, key: a.key, ms: (await req("GetInputAudioSyncOffset", { inputName: a.name })).inputAudioSyncOffset })));
-    st.av = { name, video, audio };
+    // Deinterlace is engine-standard (GetInputDeinterlaceMode/FieldOrder) but only applies to
+    // physical-capture/file async sources; the engine itself refuses with InvalidResourceState
+    // otherwise, read here as the one signal to hide the control -- never guessed from kind.
+    let deinterlace = null;
+    try {
+      const [modeResult, orderResult] = await Promise.all([req("GetInputDeinterlaceMode", { inputName: name }), req("GetInputDeinterlaceFieldOrder", { inputName: name })]);
+      deinterlace = { mode: modeResult.inputDeinterlaceMode, fieldOrder: orderResult.inputDeinterlaceFieldOrder };
+    } catch { deinterlace = null; }
+    st.av = { name, video, audio, deinterlace };
     if (st.pop === "avdelay") renderPop();
   }
+  document.addEventListener("change", (e) => {
+    const t = e.target; if (!st.av || (t.dataset?.deinterlaceMode === undefined && t.dataset?.deinterlaceOrder === undefined)) return;
+    const name = st.av.name;
+    run(productionAction("input_deinterlace", { sourceName: name, [t.dataset.deinterlaceMode !== undefined ? "mode" : "fieldOrder"]: t.value }).then(() => avLoad(name)));
+  });
   document.addEventListener("change", (e) => {
     const t = e.target; if (!st.av || (t.dataset?.avVideo === undefined && t.dataset?.avAudio === undefined)) return;
     const pedido = t.dataset.avVideo !== undefined ? productionAction("input_video_delay", { input: st.sceneKeys[st.av.name], ms: Number(t.value) }) : productionAction("audio_routing_delay", { key: t.dataset.avAudio, delayMs: Number(t.value) });
@@ -5560,6 +5575,8 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       p.innerHTML = `<h3>Atraso · ${esc(st.popArg)}</h3>` + (!av || av.name !== st.popArg ? "<p>Lendo…</p>"
         : `<label>Vídeo (0 a 500 ms)<input type="number" min="0" max="500" step="1" data-av-video value="${av.video}"></label>`
           + (av.audio.length ? av.audio.map((a) => `<label>Áudio · ${esc(a.name)} (-950 a 20000 ms)<input type="number" min="-950" max="20000" step="1" data-av-audio="${esc(a.key)}" value="${a.ms}"></label>`).join("") : "<p>Esta entrada não tem áudio próprio.</p>")
+          + (av.deinterlace ? `<label>Desentrelaçamento (vídeo entrelaçado: 1080i/576i/480i)<select data-deinterlace-mode>${DEINTERLACE_MODES.map((m) => `<option value="${m}"${m === av.deinterlace.mode ? " selected" : ""}>${DEINTERLACE_LABELS[m]}</option>`).join("")}</select></label>`
+             + `<label>Ordem dos campos<select data-deinterlace-order><option value="OBS_DEINTERLACE_FIELD_ORDER_TOP"${av.deinterlace.fieldOrder === "OBS_DEINTERLACE_FIELD_ORDER_TOP" ? " selected" : ""}>Superior primeiro</option><option value="OBS_DEINTERLACE_FIELD_ORDER_BOTTOM"${av.deinterlace.fieldOrder === "OBS_DEINTERLACE_FIELD_ORDER_BOTTOM" ? " selected" : ""}>Inferior primeiro</option></select></label>` : "")
           + `<p>Vale na hora. Use para alinhar câmera e som.</p>`)
         + `<div class="row end"><button class="b" data-a="close">Fechar</button></div>`;
     }
