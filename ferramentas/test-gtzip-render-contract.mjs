@@ -12,3 +12,13 @@ test('existing GTZIP renderer updates a named text object without replacing its 
  assert.equal(el.textContent,'Updated');assert.equal(el.style.color,'#ffffff');
  context.window.GC.update({Other:'Ignored'});assert.equal(el.textContent,'Updated');
 });
+
+
+test('existing object named HeadlineColor is not interpreted as another object color',()=>{
+ const xml='<Composition Width="640" Height="360">'+['Headline','HeadlineColor'].map(name=>'<TextBlock Name="'+name+'" Dimensions="300,50,0" Location="20,20,0" Text="Initial" FontSize="28"/>').join('')+'</Composition>';
+ const html=generateHtml(parseGtXml(xml)),source=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)][0][1];
+ const elements=['Headline','HeadlineColor'].map(fieldName=>({dataset:{fieldName},style:{color:'#ffffff'},classList:{contains:name=>name==='gt-text'},textContent:'Initial'}));
+ const context={window:{addEventListener(){}},document:{querySelectorAll:s=>s==='[data-field-name]'?elements:[],getElementById:()=>({style:{}}),querySelector:()=>null},setInterval(){}};
+ runInNewContext(source,context);context.window.GC.update({HeadlineColor:'#123456'});
+ assert.equal(elements[0].style.color,'#ffffff');assert.equal(elements[1].textContent,'#123456');
+});
