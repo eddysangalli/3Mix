@@ -10,3 +10,22 @@ test('per-player speed is retained independently for subsequent clip loads',asyn
  const restored=new DiskReplay({root:'.',getObs:()=>({})});restored.state=JSON.parse(JSON.stringify(r.state));assert.equal(restored.playerSpeed('A'),25);
  await r.command('speed',{speed:75});assert.equal(r.playerSpeed('A'),75);assert.equal(r.playerSpeed('B'),75);
 });
+
+test('actual load sends retained channel speed and preserves other channel',async()=>{
+ const {r}=fixture();r.state.players.A.speed=25;r.state.players.B.speed=75;
+ r.state.events=[{id:'event',clips:[{cam:'CAM 1',file:'fixture.mp4'}]}];
+ r.probe=async()=>({duration:10,frameRate:'30/1',hasVideo:true,audio:true});
+ const writes=[];
+ r.req=async(type,data={})=>{
+ if(type==='GetStudioModeEnabled')return {studioModeEnabled:true};
+ if(type==='GetSceneList')return {currentProgramSceneName:'LIVE',scenes:[{sceneName:'REPLAY A'}]};
+ if(type==='GetInputSettings')return {inputKind:'ffmpeg_source',inputSettings:{}};
+ if(type==='GetSceneItemList')return {sceneItems:[{sourceName:'Replay Player A',sceneItemId:1}]};
+ if(type==='GetVideoSettings')return {baseWidth:1920,baseHeight:1080};
+ if(type==='GetMediaInputStatus')return {mediaDuration:10000,mediaCursor:0,mediaState:'OBS_MEDIA_STATE_PLAYING'};
+ if(type==='SetInputSettings')writes.push(data);
+ return {};
+ };
+ r.optional=r.req;await r.load('A','event','CAM 1');
+ assert.equal(writes[0].inputSettings.speed_percent,25);assert.equal(r.state.players.A.speed,25);assert.equal(r.state.players.B.speed,75);
+});
