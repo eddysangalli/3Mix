@@ -1,0 +1,78 @@
+{
+  "status": "BUILD_PASS_RUNTIME_NOT_TESTED",
+  "sourceCommit": "9006c47ac",
+  "configureExit": 0,
+  "buildExit": 0,
+  "command": "cmake --build ../obs33-rc-build-output --config RelWithDebInfo --parallel 1",
+  "cefEnabled": true,
+  "ffmpegArchiveSha256": "2b7bd492859505e52cc76304de0ce415eea881aa679557f6498f96b1b19973de",
+  "ffmpegSource": "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-n9.0-latest-win64-gpl-shared-9.0.zip",
+  "actualPeImports": {
+    "obs.dll": [
+      "avcodec-63.dll",
+      "avformat-63.dll",
+      "avutil-61.dll",
+      "swscale-10.dll",
+      "swresample-7.dll"
+    ],
+    "obs-ffmpeg.dll": [
+      "avcodec-63.dll",
+      "avformat-63.dll",
+      "avdevice-63.dll",
+      "avutil-61.dll",
+      "swscale-10.dll"
+    ]
+  },
+  "cacheSelections": [
+    "FFmpeg_avcodec_IMPLIB:FILEPATH=D:/DRIVE/IA/antigravity/3Mix/qa-finalizacao/obs33-rc-build/.deps/ffmpeg9/ffmpeg-n9.0-latest-win64-gpl-shared-9.0/lib/avcodec.lib",
+    "FFmpeg_avcodec_INCLUDE_DIR:PATH=D:/DRIVE/IA/antigravity/3Mix/qa-finalizacao/obs33-rc-build/.deps/ffmpeg9/ffmpeg-n9.0-latest-win64-gpl-shared-9.0/include",
+    "FFmpeg_avcodec_LIBRARY:FILEPATH=D:/DRIVE/IA/antigravity/3Mix/qa-finalizacao/obs33-rc-build/.deps/ffmpeg9/ffmpeg-n9.0-latest-win64-gpl-shared-9.0/bin/avcodec-63.dll",
+    "FFmpeg_avdevice_IMPLIB:FILEPATH=D:/DRIVE/IA/antigravity/3Mix/qa-finalizacao/obs33-rc-build/.deps/ffmpeg9/ffmpeg-n9.0-latest-win64-gpl-shared-9.0/lib/avdevice.lib",
+    "FFmpeg_avdevice_INCLUDE_DIR:PATH=D:/DRIVE/IA/antigravity/3Mix/qa-finalizacao/obs33-rc-build/.deps/ffmpeg9/ffmpeg-n9.0-latest-win64-gpl-shared-9.0/include",
+    "FFmpeg_avdevice_LIBRARY:FILEPATH=D:/DRIVE/IA/antigravity/3Mix/qa-finalizacao/obs33-rc-build/.deps/ffmpeg9/ffmpeg-n9.0-latest-win64-gpl-shared-9.0/bin/avdevice-63.dll",
+    "FFmpeg_avfilter_IMPLIB:FILEPATH=D:/DRIVE/IA/antigravity/3Mix/qa-finalizacao/obs33-rc-build/.deps/ffmpeg9/ffmpeg-n9.0-latest-win64-gpl-shared-9.0/lib/avfilter.lib",
+    "FFmpeg_avfilter_INCLUDE_DIR:PATH=D:/DRIVE/IA/antigravity/3Mix/qa-finalizacao/obs33-rc-build/.deps/ffmpeg9/ffmpeg-n9.0-latest-win64-gpl-shared-9.0/include",
+    "FFmpeg_avfilter_LIBRARY:FILEPATH=D:/DRIVE/IA/antigravity/3Mix/qa-finalizacao/obs33-rc-build/.deps/ffmpeg9/ffmpeg-n9.0-latest-win64-gpl-shared-9.0/bin/avfilter-12.dll",
+    "FFmpeg_avformat_IMPLIB:FILEPATH=D:/DRIVE/IA/antigravity/3Mix/qa-finalizacao/obs33-rc-build/.deps/ffmpeg9/ffmpeg-n9.0-latest-win64-gpl-shared-9.0/lib/avformat.lib",
+    "FFmpeg_avformat_INCLUDE_DIR:PATH=D:/DRIVE/IA/antigravity/3Mix/qa-finalizacao/obs33-rc-build/.deps/ffmpeg9/ffmpeg-n9.0-latest-win64-gpl-shared-9.0/include",
+    "FFmpeg_avformat_LIBRARY:FILEPATH=D:/DRIVE/IA/antigravity/3Mix/qa-finalizacao/obs33-rc-build/.deps/ffmpeg9/ffmpeg-n9.0-latest-win64-gpl-shared-9.0/bin/avformat-63.dll",
+    "FFmpeg_avutil_IMPLIB:FILEPATH=D:/DRIVE/IA/antigravity/3Mix/qa-finalizacao/obs33-rc-build/.deps/ffmpeg9/ffmpeg-n9.0-latest-win64-gpl-shared-9.0/lib/avutil.lib",
+    "FFmpeg_avutil_INCLUDE_DIR:PATH=D:/DRIVE/IA/antigravity/3Mix/qa-finalizacao/obs33-rc-build/.deps/ffmpeg9/ffmpeg-n9.0-latest-win64-gpl-shared-9.0/include",
+    "FFmpeg_avutil_LIBRARY:FILEPATH=D:/DRIVE/IA/antigravity/3Mix/qa-finalizacao/obs33-rc-build/.deps/ffmpeg9/ffmpeg-n9.0-latest-win64-gpl-shared-9.0/bin/avutil-61.dll",
+    "FFmpeg_swresample_IMPLIB:FILEPATH=D:/DRIVE/IA/antigravity/3Mix/qa-finalizacao/obs33-rc-build/.deps/ffmpeg9/ffmpeg-n9.0-latest-win64-gpl-shared-9.0/lib/swresample.lib",
+    "FFmpeg_swresample_INCLUDE_DIR:PATH=D:/DRIVE/IA/antigravity/3Mix/qa-finalizacao/obs33-rc-build/.deps/ffmpeg9/ffmpeg-n9.0-latest-win64-gpl-shared-9.0/include",
+    "FFmpeg_swresample_LIBRARY:FILEPATH=D:/DRIVE/IA/antigravity/3Mix/qa-finalizacao/obs33-rc-build/.deps/ffmpeg9/ffmpeg-n9.0-latest-win64-gpl-shared-9.0/bin/swresample-7.dll",
+    "FFmpeg_swscale_IMPLIB:FILEPATH=D:/DRIVE/IA/antigravity/3Mix/qa-finalizacao/obs33-rc-build/.deps/ffmpeg9/ffmpeg-n9.0-latest-win64-gpl-shared-9.0/lib/swscale.lib",
+    "FFmpeg_swscale_INCLUDE_DIR:PATH=D:/DRIVE/IA/antigravity/3Mix/qa-finalizacao/obs33-rc-build/.deps/ffmpeg9/ffmpeg-n9.0-latest-win64-gpl-shared-9.0/include",
+    "FFmpeg_swscale_LIBRARY:FILEPATH=D:/DRIVE/IA/antigravity/3Mix/qa-finalizacao/obs33-rc-build/.deps/ffmpeg9/ffmpeg-n9.0-latest-win64-gpl-shared-9.0/bin/swscale-10.dll"
+  ],
+  "files": [
+    {
+      "path": "bin/64bit/obs64.exe",
+      "bytes": 11053568,
+      "sha256": "ec0eb333138355e3fa6a35d6b9875b53d1e250c758fc70c91bc5d76e24b148ec"
+    },
+    {
+      "path": "bin/64bit/obs.dll",
+      "bytes": 1519616,
+      "sha256": "0a0d3299f5810e86e8c0771b4484f50090bccce98ccc2ac6831d23cd1952ef98"
+    },
+    {
+      "path": "core/obs-ffmpeg/obs-ffmpeg.dll",
+      "bytes": 780288,
+      "sha256": "72f189cad7af66d4c212c7d864fe8a1fd28b65725e655c42ebf8155976289c0e"
+    },
+    {
+      "path": "core/obs-browser/libcef.dll",
+      "bytes": 278149632,
+      "sha256": "2515467dac0631a2e83c1de7010535092cedde02c70813aec74303a3e8a8fbe1"
+    }
+  ],
+  "operatorTouched": false,
+  "remaining": [
+    "native startup and branding",
+    "Plugin Manager single writer",
+    "inherited remaining stubs",
+    "full RC qualification"
+  ]
+}
