@@ -34,6 +34,13 @@ if (args.channel === 'stable') {
   aprovacao = { format: 1, versao, aprovadoPor: args['aprovado-por'], em: new Date().toISOString() };
 }
 
+// Reject malformed manifest entries before deriving filesystem paths.
+const manifestNames=new Set();
+for(const f of novo.files){
+ if(typeof f.path!=='string'||!f.path||f.path.includes(String.fromCharCode(92))||f.path.includes(':')||f.path.split('/').some(part=>!part||part==='.'||part==='..')||[...f.path].some(c=>c.charCodeAt(0)<32))throw Error('Caminho inválido no manifesto');
+ const key=f.path.toLowerCase();if(manifestNames.has(key))throw Error('Caminho duplicado no manifesto');manifestNames.add(key);
+ if(!Number.isSafeInteger(f.size)||f.size<0||typeof f.sha256!=='string'||!/^[a-f0-9]{64}$/.test(f.sha256))throw Error('Integridade inválida no manifesto');
+}
 const hashBase = new Map(base.files.map((f) => [f.path, f.sha256]));
 // O que mudou contra a base, mais o que já esteve em um pacote anterior: um arquivo que volta ao conteúdo original também precisa chegar a quem recebeu a versão intermediária.
 const historicoPath = join(canal, 'historico.json');
