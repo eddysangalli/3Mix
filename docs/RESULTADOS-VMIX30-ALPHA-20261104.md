@@ -143,3 +143,8 @@ A ação playout_item_enabled recebeu rótulo legível e exemplo JSON com ID do 
 ## Recuperação do build deslocado
 
 Build incremental anterior falhou: CMakeCache aponta para vmixtwste/freemix-app removido (log com código -2). Tentativa seguinte iniciou configuração no destino errado D:/DRIVE/IA/infinito; proprietário autorizou interrupção explicitamente, mas os PIDs identificados já tinham terminado e nenhum processo foi encerrado. Nenhum arquivo desse destino foi apagado. Script agora valida destino explícito como subpasta qa-finalizacao ANTES de CMake, recusa cache de outra raiz e não renomeia build_x86. Três testes PASS e ensaio de destino inválido recusado antes de escrita. Configuração nova iniciada em qa-finalizacao/native-vmix30-clean, calculada a partir do workspace real, resultado pendente. Não repetir build em paralelo.
+
+
+## Resultado do build isolado
+
+Target obs-studio em native-vmix30-clean terminou código 0 (log fim 21:01:14). Artefatos 3Mix.exe, obs.dll e obs-frontend-api.dll encontrados e hashados em native-build-target-receipt.json. Cache aponta ao motor canônico e gerador VS18 2026. Fonte nativa limpa na leitura posterior; hash de início não foi capturado, portanto NÃO atribuir proveniência completa do binário ao commit observado depois. Target bem-sucedido não prova todos os plugins compilados, operação AV, hardware ou migração OBS33. Nada aplicado ao runtime. A modernização permanece atribuída à outra IA.
