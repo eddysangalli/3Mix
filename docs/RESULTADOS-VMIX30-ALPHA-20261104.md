@@ -190,3 +190,20 @@ Integrado a `diagnostico-maquina.mjs`/`inventario()` (o mesmo caminho usado pelo
 Execução real nesta máquina (não mock): RTX 4060 Laptop, driver 32.0.16.2101 — `resizableBar: {status: "active", bar1MiB: 8192, totalMiB: 8188}`. 6 testes PASS, incluindo `inventario()` real completo (PowerShell + nvidia-smi, ~11s) e 4 cenários do diagnóstico isolado com driver mockado. Sem GPU NVIDIA, ou com `nvidia-smi` ausente, o campo retorna `undetermined`/`vendor:'none'` em vez de inventar um estado.
 
 Isto é diagnóstico de hardware para a matriz Alpha — não é otimização nem suporte efetivo aplicado pelo 3Mix ao renderizador. AMD/Intel permanecem `undetermined` por esta rodada: nenhuma consulta equivalente foi implementada para esses fornecedores.
+
+
+## NDI — versão real do SDK/runtime auditada e verificada
+
+Correção de registro anterior: busquei RELATORIO-NDI-OMT-MULTIPLOS.md apenas no checkout isolado antes; ele existe no checkout principal `3mix-panel/docs/` e em três outras cópias (entregas e runtime). Não deveria ter sido tratado como "não encontrado".
+
+Verificação desta rodada, binário a binário, não apenas leitura de texto:
+- `3mix-runtime/obs-plugins/64bit/libomt.dll` SHA256 `673b1d33222295f1c9190c54cefc89d5e322301702532e2c8fe78a16e8aa28da` — **idêntico** ao citado no relatório de 08/10.
+- `3mix-runtime/runtime/ndi-v6/Processing.NDI.Lib.x64.dll` SHA256 `2b6602075868ba4401...` — **idêntico** ao fixado em `ndi-runtime.mjs` (`NDI_SDK_SHA256`) e ao declarado em `componentes.json`/`docs/provenance/ndi-runtime-inventario-copia.json`.
+- Executado `inspectNdiBinary()` real (parser de recurso PE, não apenas nome do arquivo) contra o binário instalado: retornou **versão 6.3.2.0**, arquitetura x64, API `NDIlib_v6_load` presente. DistroAV exige 6.3+; esta instalação atende.
+- Executado `prepareNdiRuntime()` em cópia real do binário+licenças em pasta temporária: aceita a cópia correta, rejeita adulteração do DLL antes de abrir o motor.
+- 2 testes PASS em `ferramentas/test-ndi-runtime.mjs`, contra os bytes reais instalados (não mock).
+
+**Múltiplos emissores:** o relatório de 08/10 já documenta dois NDI e dois OMT decodificados simultaneamente, com áudio distinto por fonte, alpha BGRA preservado e reconexão funcional, com recibos JSON específicos (`qa-portatil/network-multiple-*`). Isso cobre a verificação de múltiplos emissores pedida. Transmissão física entre dois computadores reais, WAN/endurance e equipamento físico continuam não realizados por esta ou aquela rodada — ficam para os Alpha testers, como o pedido original já previa.
+
+**Gravação MKV com metadados:** não investigada nesta rodada; permanece pendente.
+**Não alterado:** 3Mix IO, conforme instrução explícita de escopo.
