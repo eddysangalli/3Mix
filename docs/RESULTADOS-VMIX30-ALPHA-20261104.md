@@ -163,3 +163,10 @@ Saída multicanal continua PARCIAL: decklink-output.cpp solicita SPEAKERS_STEREO
 | Gravação de campos GTZIP | Proteção parcial de duplo envio | executeGtImport, verificação SHA-256 e persistência existentes | Serialização UI durante save, bloqueio de troca de título/ações, recuperação de erro | painel/remoto/gc-gtzip.js; ferramentas/test-gtzip-save-integration.mjs; qa-finalizacao/gtzip-save-ui | Browser QA confirmou bloqueio/erro/sucesso; disco real confirmou save/reload/rollback e recusa de adulteração | Nenhum para esses ensaios | Testes de software concluídos; CEF/pacote pendentes | d6fa7a2, 25ba2c7; PR 13 aberta | Integrar no pacote sem tocar títulos privados |
 
 Esses resultados NÃO concluem seleção/edição múltipla de objetos internos, cor dinâmica por objeto, monitor pós-Master, hardware, ReBAR ou distribuição. Nenhum pacote novo aplicado ao operador. Testes de transporte simulado não são ensaio físico.
+
+
+## Reconciliação de baseline nativa — DeckLink
+
+A branch nativa freemix/broadcast-suite, commit ca9b44b6853e6b4cbfe13237db47fbccd10d18b2, contém StartupRollback em StartOutput, verifica SetScheduledFrameCompletionCallback e StartScheduledPlayback e restaura estado em falha. O achado anterior sobre retornos ignorados se aplica ao trecho da integração OBS33 examinado, NÃO a todas as baselines. Reaproveitar essa implementação; não duplicar. Esta comparação foi por git show, sem build ou ensaio físico.
+
+Na mesma baseline, EnableAudioOutput ainda solicita dois canais. Logo o multicanal/16 canais continua parcial, independente do rollback já implementado. Nada aplicado ao runtime ou homologado por esta comparação.
