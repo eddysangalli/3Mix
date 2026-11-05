@@ -60,3 +60,9 @@ test('selection persistence failure restores previous selection',async()=>{
 test('play-event invalid indexes never silently fall back to first event',async()=>{
  const {r}=fixture();r.state.events=[{id:'one'}];let loaded=false;r.load=async()=>{loaded=true;};for(const index of [-1,0.5,NaN,Infinity,10])await assert.rejects(r.playEvent({index}),/Índice/);assert.equal(loaded,false);
 });
+
+test('invalid camera index is rejected without fallback or decoder requests',async()=>{
+ const {r,calls}=fixture();r.state.players.A={eventId:'one'};r.state.events=[{id:'one',clips:[{cam:'CAM 1'}]}];let loaded=false;r.load=async()=>{loaded=true;};
+ for(const camIndex of [0,-1,0.5,1.5,NaN,Infinity,2])await assert.rejects(r.selectCamera({player:'A',cam:'CAM 1',camIndex}),/Índice/);
+ assert.equal(loaded,false);assert.equal(calls.length,0);
+});

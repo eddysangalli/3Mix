@@ -1453,9 +1453,8 @@ export class DiskReplay {
     let targetCam = d.cam;
     if (d.camIndex !== undefined) {
       const idx = Number(d.camIndex) - 1;
-      if (idx >= 0 && idx < event.clips.length) {
-        targetCam = event.clips[idx].cam;
-      }
+      if(!Number.isSafeInteger(idx)||idx<0||idx>=event.clips.length)throw Error("Índice de câmera inválido");
+      targetCam = event.clips[idx].cam;
     }
     if (!targetCam || !event.clips.some(c => c.cam === targetCam)) {
       throw Error("Câmera selecionada não existe no lance");

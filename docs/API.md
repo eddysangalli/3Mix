@@ -503,6 +503,15 @@ Toda ação `playout_X` também é aceita como `queue_X` (compatibilidade). `POS
 
 ### 7.8 Replay
 
+#### Contrato de canal, velocidade e navegação
+
+- `speed {speed, player?}`: 10–100%; `player` explícito afeta somente esse player carregado e conserva sua velocidade no próximo lance. Omitido mantém a alteração global e o padrão para novos players.
+- `jump {player?, seconds?, frames?}`: segundos finitos e quadros inteiros; conversão usa a taxa racional do clipe. Limites são restringidos ao intervalo do clipe.
+- `play-event.index` é inteiro a partir de zero. `select-camera.camIndex` é inteiro a partir de um. ID inexistente e índice fracionário são recusados, sem fallback silencioso.
+- Falha de carregamento não confirma uma nova seleção nem envia o lance ao ar. Falha de persistência da seleção restaura o ID anterior em memória; isso não promete rollback do decodificador já carregado.
+- Verificação desta correção usa a classe real com transporte OBS simulado, não homologação AV nativa. A instalação do runtime depende de merge e pacote posteriores.
+
+
 Pelo `POST /api/replay` `{"action":"<comando>", ...}`: `status`, `start` (`cams`), `stop`, `mark-in`, `mark-out`, `capture` (`seconds`), `load` (`player`, `eventId`, `cam`), `air` (`player`), `live`, `speed` (`speed`), `transport`, `seek`, `frame`, `link` (`enabled`), `audio` (`enabled`), `delete` (`eventId`) e os demais da lista gerada. Pelo `/ws`: `{"action":"replay","cmd":"<comando>", ...}`. [código; `status` verificado]
 
 **Exportação de lances** (vMix 30 "Export All Events"/"Export Selected Events" — equivalente próprio do 3Mix, copiando os clipes já prontos, sem recodificar):
