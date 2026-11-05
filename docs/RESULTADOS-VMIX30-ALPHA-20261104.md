@@ -218,3 +218,19 @@ Cobertura confirmada: PE x64 válido; Caller/Listener/Rendezvous constroem URL v
 Reconexão automática: `ferramentas/saidas-watchdog.mjs` já implementa supervisão e reconexão com jitter anti-avalanche para qualquer saída de streaming, incluindo SRT — não é específico de protocolo, reaproveitado, não duplicado.
 
 **Não coberto por este teste** (limite explícito do próprio script): perda de pacotes real sob rede degradada, diagnóstico textual de causa de queda exposto ao operador na interface, e conexão SRT real ponta a ponta entre duas redes distintas. Esses permanecem para os Alpha testers com equipamento físico, conforme o pedido original.
+
+
+## ReBAR — correção de terminologia, perfil de driver e fechamento do item
+
+Correção de exatidão sobre o diagnóstico publicado anteriormente (commit b0fbe1f), a pedido direto do proprietário: o módulo chamava o resultado de `active`/`inactive`, o que confunde **tamanho observado da janela BAR1** com **confirmação da negociação PCIe de Resizable BAR**. São coisas diferentes: BAR1 grande é consistente com ReBAR negociado, mas `nvidia-smi` não expõe um campo que confirme a negociação em si — um BAR1 grande também pode ocorrer por outras razões (SR-IOV, certas configurações workstation).
+
+Corrigido `rebar-diagnostico.mjs`: vocabulário agora é `bar1_large` / `bar1_legacy` / `undetermined`, com `reason` explicitando que é um sinal, não confirmação. Teste de guarda adicionado (`status vocabulary never uses active/inactive`) para impedir regressão terminológica. 7 testes PASS, incluindo execução real nesta máquina: `bar1_large`, BAR1 8192 MiB / VRAM 8188 MiB — mesmo resultado numérico de antes, linguagem corrigida.
+
+**Perfil/configuração de driver NVIDIA aplicável ao 3Mix:** verificado `HKLM\SOFTWARE\NVIDIA Corporation\Global\NVTweak` (leitura, nenhuma alteração) — contém apenas `OverridePRR` (chave legada de range/resolução de painel de display, sem relação com ReBAR). Não existe perfil de aplicativo, nem no painel de controle NVIDIA nem via registro, que controle Resizable BAR: é negociação PCIe única em boot entre BIOS/UEFI, firmware da GPU e driver — não há gancho de configuração por processo para isso em nenhum dos dois fabricantes.
+
+**Oportunidades de otimização de transferência de memória para etapa futura (não implementadas agora, sem evidência de ganho):**
+- Migração do renderizador de D3D11 para D3D12 abriria `D3D12_HEAP_TYPE_GPU_UPLOAD`/`GPUUploadHeapSupported`, permitindo pedido explícito por recurso de heap na janela ampliada quando ReBAR estiver negociado. É mudança de arquitetura do renderizador inteiro, não uma função pontual — fora do escopo desta auditoria.
+- Investigar se extensões de fornecedor (NVAPI da NVIDIA, AGS da AMD) expõem algum controle de alocação fora da API D3D11 padrão; busca nesta rodada não encontrou uso dessas extensões no motor atual, e nenhuma delas foi integrada.
+- Medir com profiling real (não estimativa) se o gargalo de upload CPU→GPU em algum caminho específico do pipeline (ex.: readback de miniaturas, captura de fontes) justificaria esse investimento antes de qualquer refactor.
+
+**Decisão explícita do proprietário, registrada aqui:** não alterar o renderizador sem evidência de ganho medido. Nenhuma mudança de arquitetura D3D11→D3D12 foi feita ou proposta para execução imediata. Assunto ReBAR encerrado por esta auditoria; prioridade volta a ser o build OBS 33 e preparação do Alpha.

@@ -1,14 +1,18 @@
-// Resizable BAR (ReBAR) is a platform feature (BIOS + GPU firmware + driver), not an
-// application-level D3D11 switch: our renderer is D3D11 only, and D3D11 has no public
-// API equivalent to D3D12_HEAP_TYPE_GPU_UPLOAD to opt an app into it. This module never
-// claims to "enable" ReBAR; it only reports whether the platform already has it active,
-// from the one vendor signal we can read without a native build: nvidia-smi's BAR1 size.
+// Resizable BAR (ReBAR) is a PCIe capability negotiated once between BIOS/UEFI, the GPU
+// firmware and the driver at boot. It has no per-application toggle, profile or NVAPI call
+// in either vendor's public SDK, and D3D11 (our renderer) has no API equivalent to D3D12's
+// D3D12_HEAP_TYPE_GPU_UPLOAD to opt a resource into it. This module never claims to "enable"
+// ReBAR, and does not claim to confirm it is active either: nvidia-smi's BAR1 window SIZE is
+// consistent with ReBAR being negotiated, but a large BAR1 can exist for other reasons (SR-IOV,
+// certain workstation configurations), and nvidia-smi exposes no field that reports the PCIe
+// negotiation outcome directly. Reported here as a probable/likely signal for the hardware
+// matrix, never as a confirmed state -- the wording below says exactly that.
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 const run=promisify(execFile);
-// A traditional (non-resizable) BAR1 window is 256 MiB; real GPUs with ReBAR expose a
-// BAR1 close to their total frame buffer. Mid window avoids false positives/negatives
-// from reporting noise.
+// A traditional (non-resizable) BAR1 window is 256 MiB; GPUs with ReBAR negotiated typically
+// expose a BAR1 close to their total frame buffer. This threshold only classifies the SIZE
+// we read, not whether the PCIe negotiation itself succeeded.
 const LEGACY_BAR1_MIB=256;
 export async function detectResizableBar({run:runner=run}={}){
  let smi,gpuName,vramTotalMiB;
@@ -37,8 +41,10 @@ export async function detectResizableBar({run:runner=run}={}){
  const match=totalLine&&totalLine.match(/:\s*(\d+)\s*MiB/);
  if(!match)return {status:'undetermined',vendor:'nvidia',gpu:gpuName,totalMiB:vramTotalMiB,reason:'Valor de BAR1 Total não reconhecido na saída do driver'};
  const bar1MiB=Number(match[1]);
- const active=bar1MiB>LEGACY_BAR1_MIB*4&&bar1MiB>=vramTotalMiB*0.9;
- return {status:active?'active':'inactive',vendor:'nvidia',gpu:gpuName,totalMiB:vramTotalMiB,bar1MiB,
-  reason:active?'BAR1 ('+bar1MiB+' MiB) próxima da VRAM total ('+vramTotalMiB+' MiB); plataforma já expõe a janela ampliada ao driver.'
-             :'BAR1 ('+bar1MiB+' MiB) compatível com janela tradicional; ReBAR não parece ativo nesta máquina (BIOS/driver).'};
+ const largeBar1=bar1MiB>LEGACY_BAR1_MIB*4&&bar1MiB>=vramTotalMiB*0.9;
+ // status names a SIZE OBSERVATION, not a confirmed negotiation outcome -- nvidia-smi has
+ // no field for the latter, so this code must never say ReBAR itself is active/inactive.
+ return {status:largeBar1?'bar1_large':'bar1_legacy',vendor:'nvidia',gpu:gpuName,totalMiB:vramTotalMiB,bar1MiB,
+  reason:largeBar1?'BAR1 ('+bar1MiB+' MiB) próxima da VRAM total ('+vramTotalMiB+' MiB): consistente com Resizable BAR negociado, mas nvidia-smi não confirma a negociação PCIe diretamente; outras causas (SR-IOV, configurações workstation) também produzem BAR1 grande.'
+             :'BAR1 ('+bar1MiB+' MiB) do tamanho de uma janela tradicional: Resizable BAR provavelmente não foi negociado (BIOS/UEFI desligado, ou GPU/slot sem suporte).'};
 }
