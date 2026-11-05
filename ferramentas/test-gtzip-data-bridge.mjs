@@ -6,6 +6,8 @@ test('GTZIP consumes named browser data events for text only, preserving ticker 
  send({name:'Own',values:{Headline:'Live data',Ticker:'unsafe bypass',Image:'http://remote',Unknown:'ignored'}});
  assert.equal(updates.length,1);assert.equal(updates[0].Headline,'Live data');assert.equal(updates[0].Existing,'keep');assert.equal(Object.hasOwn(updates[0],'Ticker'),false);assert.equal(Object.hasOwn(updates[0],'Image'),false);
  send({name:'Own',values:{Headline:'x'.repeat(2001)}});assert.equal(updates.length,1);
+ send({name:'Own',values:{Headline:'invalid'+String.fromCharCode(0)}});assert.equal(updates.length,1);
+ send({name:'Own',values:{Headline:'line one'+String.fromCharCode(10)+'line two'}});assert.equal(updates.length,2);
 });
 
 
