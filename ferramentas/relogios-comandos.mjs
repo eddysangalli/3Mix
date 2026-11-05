@@ -8,6 +8,7 @@ export async function setClockMessage(p,data){
  const {slot,message}=normalizeClockMessage(data);
  const query={realm:'OBS_WEBSOCKET_DATA_REALM_GLOBAL',slotName:'freemix_clocks'};
  const read=await p.req('GetPersistentData',query);
+ if(read.slotValue!=null&&(!Array.isArray(read.slotValue)||read.slotValue.length>3||read.slotValue.some(c=>!c||typeof c!=='object'||Array.isArray(c))))throw Error('Configuração de relógios inválida; nenhuma alteração gravada');
  const clocks=Array.isArray(read.slotValue)?structuredClone(read.slotValue):[{type:'rec'},{type:'stream'},{type:'clock'}];
  while(clocks.length<3)clocks.push({type:'none'});
  clocks[slot-1]={...clocks[slot-1],type:'message',message};

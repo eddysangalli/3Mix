@@ -14,3 +14,10 @@ test('saved keyboard controller dispatches clock message once on press, never on
  await controller.fire(item,{clientId,phase:'down'});await controller.fire(item,{clientId,phase:'up'});
  assert.deepEqual(calls,[{action:'clock_message',data:{slot:3,message:'AVISO'}}]);assert.equal(controller.feedback[item.id].success,true);
 });
+
+
+test('malformed existing clock configuration is rejected before writes',async()=>{
+ for(const slotValue of [{unexpected:true},[null],['clock'],[{type:'clock'},{},{},{}]]){
+ const calls=[];await assert.rejects(setClockMessage({req:async t=>{calls.push(t);return {slotValue};}},{slot:1,message:'AVISO'}),/inválida/);assert.deepEqual(calls,['GetPersistentData']);
+ }
+});
