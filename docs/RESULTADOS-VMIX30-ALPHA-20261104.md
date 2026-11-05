@@ -138,3 +138,11 @@ Verificados fonte nativa limpa, ausência de lock e nenhum MSBuild/cmake/ninja/c
 ## Interface de macro Playout
 
 A ação playout_item_enabled recebeu rótulo legível e exemplo JSON com ID do primeiro clipe quando disponível, sem oferecer seletor de entrada irrelevante. Browser estático confirmou rótulo, parâmetros e campo de entrada oculto; dez testes do contrato Playout PASS. Não houve envio ao motor nem gravação de macro do operador. Build nativo anterior continua sem resultado recebido nesta sessão; não relançado nem declarado aprovado.
+
+
+## Escopo adicional autorizado — miniaturas e Resizable BAR
+
+- Pendente: opção “pular 1 quadro a cada N quadros” somente nas miniaturas dos Inputs, acompanhando a frequência da produção (30/60 e taxas racionais), sem alterar Preview/Program ou saídas.
+- Diagnóstico do fonte atual painel/mesa.html, thumbLoop: hot limitado a 350 ms, cold em rodízio de uma captura a cada 1000 ms, mais esperas de 75/125 ms. Não é um fluxo de vídeo com descarte por quadro; aumentar uma opção sem substituir esse agendamento não entrega a fluidez pedida. Manter fontes invisíveis suspensas, backpressure e prioridade dos comandos. Implementação e medição ainda pendentes.
+- ReBAR: nvidia-smi nesta máquina identificou RTX 4060 Laptop, driver 621.01, BAR1 total 8192 MiB. Isso não comprova ganho do aplicativo nem otimização equivalente ao vMix. libobs-d3d11 usa recursos D3D11 dynamic/default/staging; busca não encontrou integração explícita ReBAR. Investigar mecanismo oficial aplicável antes de implementar, com fallback e benchmark. NÃO declarar suporte otimizado ou criar botão fictício.
+- Runtime do operador não alterado; nenhum processo iniciado/parado. Esses itens não substituem nenhuma pendência da auditoria original.
