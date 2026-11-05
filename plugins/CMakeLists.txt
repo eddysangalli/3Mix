@@ -75,6 +75,11 @@ add_core_module(
     PLATFORMS WINDOWS MACOS LINUX
     WITH_MESSAGE
 )
+add_core_module(
+    3mix-plugin-manager
+    PLATFORMS WINDOWS MACOS LINUX
+    WITH_MESSAGE
+)
 add_core_module(image-source)
 add_core_module(linux-alsa PLATFORMS LINUX FREEBSD OPENBSD)
 add_core_module(linux-capture PLATFORMS LINUX FREEBSD OPENBSD)
