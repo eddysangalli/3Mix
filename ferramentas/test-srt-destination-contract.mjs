@@ -17,3 +17,11 @@ test('packed alpha width respects actual motor limit',()=>{
  assert.throws(()=>srtDestinationOptions({protocol:'srt',alphaMode:'packed',width:1920},{},caps),/1280/);
  assert.deepEqual(srtDestinationOptions({protocol:'srt',alphaMode:'packed',width:1280},{},caps),{chroma:'420',alphaMode:'packed'});
 });
+
+
+test('missing Fill/Key gives maintenance guidance without promising restart upgrades',()=>{
+ assert.throws(()=>srtDestinationOptions({protocol:'srt',alphaMode:'fill'}),error=>{
+  assert.match(error.message,/pacote 3Mix compatível/);assert.match(error.message,/manutenção/);
+  assert.ok(!error.message.includes('ABRIR-FREEMIX'));return true;
+ });
+});
