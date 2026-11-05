@@ -812,7 +812,7 @@ export class DiskReplay {
     const scene = `REPLAY ${player}`, input = `Replay Player ${player}`;
     if (!list.scenes.some((s) => s.sceneName === scene)) await this.req("CreateScene", { sceneName: scene });
     const settings = { local_file: clip.file, is_local_file: true, looping: false, restart_on_activate: false,
-      close_when_inactive: false, clear_on_media_end: false, speed_percent: this.state.speed,
+      close_when_inactive: false, clear_on_media_end: false, speed_percent: this.playerSpeed(player),
       freemix_replay_unbuffered: true };
     const before = await this.optional("GetInputSettings", { inputName: input });
     let itemId;
@@ -854,7 +854,7 @@ export class DiskReplay {
     // Allow that frame to reach the Preview before acknowledging the load.
     await sleep(250);
     this.state.linked = false;
-    this.state.players[player] = { eventId: event.id, cam: clip.cam, file: clip.file, duration: clipInfo.duration, frameRate:clipInfo.frameRate,variableFrameRate:clipInfo.variableFrameRate,cadence:clipInfo.cadence,cadenceChecked:true,audio:clipInfo.audio,hasVideo:clipInfo.hasVideo,metadataProbed:true,offsetFrames:replayCameraOptions(this.state.cameraOptions?.[clip.cam]).offsetFrames };
+    this.state.players[player] = { speed:this.playerSpeed(player),eventId: event.id, cam: clip.cam, file: clip.file, duration: clipInfo.duration, frameRate:clipInfo.frameRate,variableFrameRate:clipInfo.variableFrameRate,cadence:clipInfo.cadence,cadenceChecked:true,audio:clipInfo.audio,hasVideo:clipInfo.hasVideo,metadataProbed:true,offsetFrames:replayCameraOptions(this.state.cameraOptions?.[clip.cam]).offsetFrames };
     this.state.activePlayer = player;
     await this.save();
   }
@@ -1319,6 +1319,7 @@ export class DiskReplay {
     for(const p of Object.values(this.state.players))if(!p.metadataProbed||!p.cadenceChecked||p.cadence?.method!=='finite-full-decoded-pts'||!(await this.cadenceScanner().matches(p.file,p.cadence?.identity))){const media=await this.probe(p.file,true);Object.assign(p,{metadataProbed:true,cadenceChecked:true,cadence:media.cadence,hasVideo:media.hasVideo,duration:media.duration,frameRate:media.frameRate,variableFrameRate:media.variableFrameRate,audio:media.audio,offsetFrames:replayCameraOptions(this.state.cameraOptions?.[p.cam]).offsetFrames});}
   }
 
+  playerSpeed(player){const value=this.state.players[player]?.speed;return Number.isFinite(value)&&value>=10&&value<=100?value:this.state.speed;}
   async speed(value, playerId) {
     if (!Number.isFinite(value) || value < 10 || value > 100) throw new Error("A velocidade deve estar entre 10% e 100%");
     if(playerId!==undefined&&(!REPLAY_PLAYERS.includes(playerId)||!this.state.players[playerId]))throw Error('Player inválido');
@@ -1343,6 +1344,7 @@ export class DiskReplay {
       await this.req("SetMediaInputCursor", { inputName, mediaCursor: target });
       if(paused)await this.waitFor("GetMediaInputStatus",{inputName},m=>Number.isFinite(m.mediaCursor)&&Math.abs(m.mediaCursor-target)<100);
     }
+    for(const player of players)this.state.players[player].speed=value;
     if(playerId===undefined)this.state.speed = value;
     await this.save();
   }

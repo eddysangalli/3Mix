@@ -4,3 +4,9 @@ function fixture(){const r=new DiskReplay({root:'.',getObs:()=>({})}),calls=[];r
 test('channel-specific command does not mutate other player or global default',async()=>{const {r,calls}=fixture(),before=r.state.speed;await r.command('speed',{speed:25,player:'A'});assert.ok(calls.some(c=>c.type==='SetInputSettings'));assert.ok(calls.every(c=>c.data.inputName==='Replay Player A'));assert.equal(r.state.speed,before);});
 test('legacy global speed still applies to all loaded players',async()=>{const {r,calls}=fixture();await r.command('speed',{speed:25});assert.deepEqual(calls.filter(c=>c.type==='SetInputSettings').map(c=>c.data.inputName),['Replay Player A','Replay Player B']);assert.equal(r.state.speed,25);});
 test('invalid or unloaded player is rejected before native requests',async()=>{const {r,calls}=fixture();for(const player of ['Z','C',null])await assert.rejects(r.command('speed',{speed:25,player}),/Player/);assert.equal(calls.length,0);});
+
+test('per-player speed is retained independently for subsequent clip loads',async()=>{
+ const {r}=fixture();await r.command('speed',{speed:25,player:'A'});assert.equal(r.playerSpeed('A'),25);assert.equal(r.playerSpeed('B'),50);
+ const restored=new DiskReplay({root:'.',getObs:()=>({})});restored.state=JSON.parse(JSON.stringify(r.state));assert.equal(restored.playerSpeed('A'),25);
+ await r.command('speed',{speed:75});assert.equal(r.playerSpeed('A'),75);assert.equal(r.playerSpeed('B'),75);
+});
