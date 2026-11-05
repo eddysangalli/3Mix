@@ -1721,6 +1721,19 @@ public:
 	YouTubeAppDock *GetYouTubeAppDock();
 #endif
 
+public:
+	// 3Mix: Preset document handling
+	void SavePresetAsDocument(const QString &path);
+	bool PresetHasChanges() const;
+	void DescribeScope(obs_data_t *response);
+	void SetScopeMode(int mode);
+
+	// 3Mix: Fade to black context
+	void ResetFreeMixFtbContext();
+
+	// 3Mix: Input reordering
+	void ReorderFreeMixInputs();
+
 public slots:
 	void SetupBroadcast();
 

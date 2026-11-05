@@ -27,6 +27,7 @@ inline void FreeMixCallAudioStop() {}
 inline void FreeMixCallAudioRequest(obs_data_t *, obs_data_t *) {}
 inline void FreeMixCallAudioTick() {}
 inline void FreeMixCallAudioStop() {}
+inline void FreeMixAudioCapabilitiesRequest(obs_data_t *, obs_data_t *) {}
 } // namespace freemix_call_audio
 
 namespace freemix_srt_hdr {
@@ -49,6 +50,7 @@ inline void Register() {}
 
 namespace freemix_srt_alpha {
 inline void Register() {}
+inline void Create(obs_source_t *, uint32_t, uint32_t, const std::string &) {}
 } // namespace freemix_srt_alpha
 
 namespace freemix_omt_hdr {
@@ -57,16 +59,13 @@ inline bool IdentityInUse(const std::string &, obs_output_t *) { return false; }
 inline void Register() {}
 } // namespace freemix_omt_hdr
 
+// Audio routing stubs
+inline bool FreeMixAudioBusAllowed(obs_source_t *) { return false; }
+inline void FreeMixAudioRoutingRegister() {}
+inline void FreeMixAudioCapabilitiesRequest(obs_data_t *, obs_data_t *) {}
+
+// OBS view stub
+inline void obs_view_add_program_final_gate(obs_view_t *, obs_source_t *) {}
+
 // Timer for call video tick
 extern QTimer *callVideoTimer;
-
-// Stub for FreeMixSourceAudio used by disabled network media features
-struct FreeMixSourceAudio {
-    static std::unique_ptr<FreeMixSourceAudio> Open(const std::string &, const std::string &, std::string &) { return nullptr; }
-    audio_t *Audio() { return obs_get_audio(); }
-    bool Valid() const { return false; }
-    ~FreeMixSourceAudio() = default;
-};
-
-// Timer for call video tick
-QTimer *callVideoTimer = nullptr;
