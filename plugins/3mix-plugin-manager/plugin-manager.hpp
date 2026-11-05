@@ -28,7 +28,10 @@
 #include <map>
 #include <mutex>
 #include <atomic>
-#include <json/json.h>
+#include <set>
+#include <nlohmann/json.hpp>
+
+namespace json = nlohmann;
 
 #ifdef _WIN32
 #define PLUGIN_MANAGER_EXPORT __declspec(dllexport)
@@ -68,7 +71,7 @@ struct PluginMetadata {
     std::string signatureStatus;
     std::string installedAt;
     std::string operationId;
-    Json::Value resources; // inputs, outputs, encoders, services
+    json::json resources; // inputs, outputs, encoders, services
 };
 
 // Plugin info from load report
@@ -108,19 +111,19 @@ OBSDataAutoRelease plugin_manager_vendor_request(const char* requestType, obs_da
 bool plugin_manager_apply_pending();
 
 // Internal: load report from last startup
-bool plugin_manager_load_report(Json::Value& report);
+bool plugin_manager_load_report(json::json& report);
 
 // Internal: get list of managed plugins
-void plugin_manager_get_plugins(Json::Value& plugins, const char* obsVersion);
+void plugin_manager_get_plugins(json::json& plugins, const char* obsVersion);
 
 // Internal: get protected plugin IDs (factory plugins)
 std::set<std::string> plugin_manager_get_protected_ids();
 
 // Internal: inspect plugin zip compatibility
-bool plugin_manager_inspect_compatibility(const char* zipPath, Json::Value& result);
+bool plugin_manager_inspect_compatibility(const char* zipPath, json::json& result);
 
 // Internal: install/update plugin from zip
-bool plugin_manager_install_plugin(const char* zipPath, const char* targetId, Json::Value& result);
+bool plugin_manager_install_plugin(const char* zipPath, const char* targetId, json::json& result);
 
 // Internal: queue operation
-bool plugin_manager_queue_operation(const char* action, const char* id, const char* stage, const char* backup, Json::Value& result);
+bool plugin_manager_queue_operation(const char* action, const char* id, const char* stage, const char* backup, json::json& result);
