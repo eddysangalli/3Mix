@@ -13,3 +13,13 @@ for(const withAudio of [false,true])test('external video import persists decodab
  const decode=spawnSync('ffmpeg',['-v','error','-nostdin','-i',clip.file,'-f','null','-'],{timeout:15000});assert.equal(decode.status,0,String(decode.stderr));
  }finally{await rm(root,{recursive:true,force:true});}
 });
+
+
+test('audio-only file is rejected before creating imported replay events',async()=>{
+ const qa=new URL('../qa-finalizacao/',import.meta.url);await mkdir(qa,{recursive:true});const root=await mkdtemp(new URL('replay-audio-only-',qa));
+ try{
+ const input=join(root,'audio.wav');const result=spawnSync('ffmpeg',['-v','error','-nostdin','-y','-f','lavfi','-i','sine=duration=0.2',input],{timeout:15000});assert.equal(result.status,0,String(result.stderr));
+ const replay=new DiskReplay({root,getObs:()=>{throw Error('Operator motor must not be accessed');}});let saved=false;replay.save=async()=>{saved=true;};
+ await assert.rejects(replay.importClip({file:input}),/faixa de vídeo/);assert.equal(replay.state.events.length,0);assert.equal(saved,false);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
