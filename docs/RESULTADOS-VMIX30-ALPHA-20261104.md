@@ -234,3 +234,25 @@ Corrigido `rebar-diagnostico.mjs`: vocabulário agora é `bar1_large` / `bar1_le
 - Medir com profiling real (não estimativa) se o gargalo de upload CPU→GPU em algum caminho específico do pipeline (ex.: readback de miniaturas, captura de fontes) justificaria esse investimento antes de qualquer refactor.
 
 **Decisão explícita do proprietário, registrada aqui:** não alterar o renderizador sem evidência de ganho medido. Nenhuma mudança de arquitetura D3D11→D3D12 foi feita ou proposta para execução imediata. Assunto ReBAR encerrado por esta auditoria; prioridade volta a ser o build OBS 33 e preparação do Alpha.
+
+
+## ReBAR — correção da conclusão sobre perfil por aplicativo (NVIDIA App)
+
+O proprietário corrigiu uma conclusão imprecisa do documento anterior: eu havia escrito que "não existe perfil de aplicativo para ReBAR" baseado apenas na ausência de uma chave no `NVTweak` legado, sem checar o mecanismo moderno. Isso estava errado como afirmação geral, mesmo que o fato pontual verificado (a chave `NVTweak`) estivesse correto.
+
+**Confirmado nesta máquina, por verificação direta (leitura, nada alterado):**
+- NVIDIA App 11.0.9.585 está instalado (`C:\Program Files\NVIDIA Corporation\Installer2\Display.NvApp...`), a mesma versão citada pelo proprietário com a função Resizable BAR por programa documentada em https://www.nvidia.com/pt-br/software/nvidia-app/release-highlights/ (Gráficos > Configurações do Programa > Configurações do Driver > Resizable BAR).
+- O armazenamento real desses perfis por aplicativo é o banco **DRS** (Driver Settings) do driver NVIDIA, em `C:\ProgramData\NVIDIA Corporation\Drs\nvdrsdb0.bin`/`nvdrsdb1.bin` — formato binário proprietário, não registro simples nem JSON. É o mesmo mecanismo que guarda outras configurações por jogo/aplicativo (ex.: modo de energia, V-Sync) há anos, só que a opção Resizable BAR é recente (NVIDIA App, não o antigo painel de controle).
+- **Nenhum perfil para `3Mix.exe`/`FreeMix.exe` existe ainda** nesse banco (string scan não encontrou referência) — esperado: o aplicativo precisa ser adicionado manualmente na interface do NVIDIA App por um usuário antes de ter um perfil. Isso não significa que a função seja indisponível para o 3Mix; significa que ninguém a configurou ainda nesta máquina.
+- Essa configuração por programa é uma política do **driver** sobre como ele trata a alocação de memória para aquele processo especificamente — distinta da negociação PCIe de ReBAR na BIOS/UEFI (que permanece ligada/desligada globalmente), mas também distinta de uma API que o código do 3Mix chamaria: é configurada fora do aplicativo, pelo usuário, na ferramenta da NVIDIA.
+
+**Limitações documentadas, sem implementar nada no renderizador:**
+- Ler ou escrever esse perfil programaticamente exigiria integrar o SDK **NVAPI** (`NvAPI_DRS_*`), proprietário da NVIDIA, exclusivo para essa marca de GPU — não existe equivalente universal (AMD tem seu próprio mecanismo via AGS, Intel não tem nada documentado publicamente para isso). Não investigado nem integrado nesta rodada, por instrução explícita de não alterar o renderizador sem evidência de ganho testada.
+- Mesmo com o perfil configurado no NVIDIA App, o efeito observável seria uma mudança de comportamento do **driver** ao alocar memória para o processo `3Mix.exe` — não há, até onde verificado, uma forma de o próprio 3Mix consultar ou confirmar programaticamente se esse perfil está ativo para si mesmo sem usar NVAPI.
+- Recomendação para o guia do Alpha tester: documentar o caminho manual (NVIDIA App > Gráficos > Configurações do Programa > 3Mix > Resizable BAR) como uma configuração opcional de sistema que o operador pode testar e comparar, não como algo que o 3Mix ativa ou detecta sozinho.
+
+Assunto ReBAR encerrado por esta auditoria, conforme instrução do proprietário.
+
+## Desentrelaçamento (UI) — status de validação explícito
+
+Implementação publicada (commit 7ec9a58) mantida: backend com 15 testes PASS (unidade, transporte simulado) e controle real integrado ao popup de atraso A/V da mesa. **Marcando aqui, por instrução do proprietário, o que esses testes NÃO cobrem:** nenhuma validação foi feita com o motor nativo em execução real, nenhuma fonte de captura física (câmera/placa) com sinal 1080i/576i/480i real foi testada, e a confirmação por releitura do motor (`GetInputDeinterlaceMode`) nunca rodou contra um `obs-websocket` real. Classificar como **IMPLEMENTADO — AGUARDANDO TESTE COM MOTOR REAL**, não como validado nativamente.
