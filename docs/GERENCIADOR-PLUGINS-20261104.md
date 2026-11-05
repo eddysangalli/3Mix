@@ -30,9 +30,11 @@ A [nota oficial do OBS 33.0.1](https://github.com/obsproject/obs-studio/releases
 
 | Gate | Evidência necessária | Estado nesta rodada |
 |---|---|
-| ZIP e ciclo de vida | Casos positivos e negativos em raiz de QA, incluindo múltiplas operações, backup e rollback | Em execução |
-| Interface | Quatro áreas, estado efetivo vs pendente e bloqueio durante produção | Prévia isolada e testes de interface passaram; integração API pendente |
+| ZIP e ciclo de vida | Casos positivos e negativos em raiz de QA, incluindo múltiplas operações, backup e rollback | 7/7 testes automatizados passaram em 05/11/2026. A verificação cobre instalação, atualização, rollback, remoção, retomada de rollback interrompido, duas operações pendentes, bloqueio de produção inclusive no Safe Mode, preservação de perfil, proteção dos layouts nativos OBS 32/33, rejeições estáticas, colisões de nomes no Windows, scripts e arquivos multipart duplicados, limite declarado de upload, estado/fila corrompidos e trava entre launchers. Continua sendo simulação de reinício em filesystem, não carga no motor. |
+| Interface | Quatro áreas, estado efetivo vs pendente e bloqueio durante produção | 2/2 testes de interface passaram em 05/11/2026; integração com o motor continua pendente. |
 | Motor real | Build nativa atual, instalar plugin terceiro, reiniciar, confirmar registro/uso, desativar/remover e reiniciar | Em execução |
 | Hardware e operação | Placas/GPUs/dispositivos específicos, M/Es, DSKs, saídas, duração e recuperação | Roteiro Alpha na Missão 14 de `PEDIDO-COMUNIDADE-ALPHA.md`; ainda não homologado |
+
+Na validação de 05/11/2026, a chamada de Authenticode feita pelo Node encontrou primeiro um módulo do PowerShell 7 incompatível com o `powershell.exe` 5.1. O verificador passou a importar explicitamente o módulo `Microsoft.PowerShell.Security` nativo do Windows. Essa correção revelou e permitiu corrigir um segundo defeito: a instalação inicial criava um diretório de backup vazio, que podia ser escolhido pelo rollback por ordenação de UUID. Backups agora só são anunciados quando contêm efetivamente uma cópia do plugin, e o rollback seleciona a cópia existente mais recente pelo horário do diretório. O processamento pendente também ganhou validação estrutural de estado/fila e trava de arquivo com identificação do processo e token de propriedade; uma trava abandonada por processo inexistente pode ser recuperada sem remover a trava ativa de outro launcher.
 
 Este arquivo deve ser atualizado com os resultados reais antes de declarar o gerenciador concluído ou incluído no pacote do operador.

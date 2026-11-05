@@ -1,4 +1,4 @@
-import { appendFile, mkdir, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
+import { appendFile, mkdir, open, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { createHash, randomUUID } from 'node:crypto';
@@ -9,6 +9,8 @@ import { inspectPe } from './plugin-manager-pe.mjs';
 
 const run = promisify(execFile);
 const ID = /^[a-z0-9][a-z0-9._-]{0,79}$/;
+const QUEUED_ACTIONS = new Set(['install', 'update', 'remove', 'rollback']);
+const APPLY_LOCK_STALE_MS = 10 * 60 * 1000;
 const MAX_UPLOAD = 256 * 1024 * 1024 + 16 * 1024;
 const SYSTEM_DLL = /^(?:api-ms-win-[\w-]+|ext-ms-[\w-]+|kernel32|user32|advapi32|gdi32|shell32|ole32|oleaut32|comdlg32|comctl32|ws2_32|winmm|secur32|crypt32|bcrypt|ntdll|shlwapi|version|dwmapi|uxtheme|rpcrt4|setupapi|imm32|iphlpapi|psapi|opengl32|d3d\w*|dxgi|mf\w*|avrt|msvcp\w*|vcruntime\w*|ucrtbase)\.dll$/i;
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -17,6 +19,70 @@ const exists = async path => !!(await stat(path).catch(e => { if (e.code === 'EN
 const safeId = value => { const id = String(value ?? '').toLowerCase(); if (!ID.test(id) || id === '.' || id === '..') throw Error('Identificador de plugin inválido'); return id; };
 const within = (base, child) => { const rel = relative(resolve(base), resolve(child)); if (!rel || rel.startsWith('..' + sep) || rel === '..' || rel.includes(':')) throw Error('Caminho do plugin fora da instalação'); noGtLinks(child); return child; };
 const atomicJson = async (path, value) => { await mkdir(dirname(path), { recursive: true }); const temp = path + '.' + randomUUID() + '.tmp'; await writeFile(temp, JSON.stringify(value, null, 2) + '\n', { flag: 'wx' }); await rename(temp, path); };
+
+function validateQueue(value) {
+  if (!Array.isArray(value)) throw Error('Fila de plugins inválida');
+  const operationIds = new Set(), pluginIds = new Set();
+  return value.map(operation => {
+    if (!operation || typeof operation !== 'object' || Array.isArray(operation)) throw Error('Operação pendente inválida');
+    const id = safeId(operation.id), opId = safeId(operation.opId), action = String(operation.action || '');
+    if (!QUEUED_ACTIONS.has(action)) throw Error('Ação pendente inválida');
+    if (operationIds.has(opId) || pluginIds.has(id)) throw Error('Fila contém operações duplicadas');
+    operationIds.add(opId); pluginIds.add(id);
+    const normalized = { ...operation, id, opId, action };
+    if (action === 'install' || action === 'update') normalized.stage = safeId(operation.stage);
+    if (action === 'rollback') {
+      normalized.backup = safeId(operation.backup);
+      if (operation.restoreOperationId != null) normalized.restoreOperationId = safeId(operation.restoreOperationId);
+    }
+    return normalized;
+  });
+}
+
+async function backupCandidate(pluginsRoot, id, name) {
+  try { if (safeId(name) !== name) return null; } catch { return null; }
+  try {
+    const plugin = within(pluginsRoot, join(pluginsRoot, '.backups', id, name, 'plugin'));
+    const info = await stat(plugin);
+    if (!info.isDirectory() || !await exists(join(plugin, id + '.dll'))) return null;
+    const marker = await readJson(join(plugin, '.3mix.json'), null);
+    if (!marker || typeof marker !== 'object' || Array.isArray(marker) || safeId(marker.operationId) !== marker.operationId) return null;
+    return { name, changedAt: info.mtimeMs, marker };
+  } catch (error) {
+    if (error.code === 'ENOENT') return null;
+    throw error;
+  }
+}
+
+function processIsAlive(pid) {
+  if (!Number.isSafeInteger(pid) || pid <= 0) return false;
+  try { process.kill(pid, 0); return true; } catch (error) { return error.code === 'EPERM'; }
+}
+
+async function acquireApplyLock(path) {
+  await mkdir(dirname(path), { recursive: true });
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const handle = await open(path, 'wx');
+      const token = randomUUID();
+      try { await handle.writeFile(JSON.stringify({ pid: process.pid, token, at: new Date().toISOString() }) + '\n'); }
+      catch (error) { await handle.close(); await rm(path, { force: true }); throw error; }
+      return async () => {
+        await handle.close();
+        const owner = await readJson(path, null).catch(() => null);
+        if (owner?.token === token) await rm(path, { force: true });
+      };
+    } catch (error) {
+      if (error.code !== 'EEXIST') throw error;
+      const owner = await readJson(path, null).catch(() => null);
+      const info = await stat(path).catch(() => null);
+      const recentUnknownLock = !Number.isSafeInteger(owner?.pid) && info && Date.now() - info.mtimeMs < APPLY_LOCK_STALE_MS;
+      if (processIsAlive(owner?.pid) || recentUnknownLock || attempt > 0) throw Error('A fila de plugins já está sendo processada por outro launcher');
+      await rm(path, { force: true });
+    }
+  }
+  throw Error('Não foi possível adquirir a trava da fila de plugins');
+}
 
 export async function readPluginMultipart(req) {
   const type = String(req.headers['content-type'] || '');
@@ -126,10 +192,28 @@ export class PluginManager {
     this.lock = Promise.resolve();
   }
   exclusive(fn) { const task = this.lock.then(fn); this.lock = task.catch(() => {}); return task; }
-  async state() { const state = await readJson(this.statePath, { format: 1, safeMode: false, plugins: {}, lastChangedPlugin: null }); if (!state || typeof state !== 'object' || !state.plugins || typeof state.plugins !== 'object') throw Error('Estado do gerenciador inválido'); return state; }
-  async queue() { const queue = await readJson(this.queuePath, []); if (!Array.isArray(queue)) throw Error('Fila de plugins inválida'); return queue; }
+  async state() {
+    const state = await readJson(this.statePath, { format: 1, safeMode: false, plugins: {}, lastChangedPlugin: null });
+    if (!state || typeof state !== 'object' || Array.isArray(state) || !state.plugins || typeof state.plugins !== 'object' || Array.isArray(state.plugins) || typeof state.safeMode !== 'boolean') throw Error('Estado do gerenciador inválido');
+    for (const [id, plugin] of Object.entries(state.plugins)) if (safeId(id) !== id || !plugin || typeof plugin !== 'object' || Array.isArray(plugin)) throw Error('Estado do gerenciador contém plugin inválido');
+    return state;
+  }
+  async queue() { return validateQueue(await readJson(this.queuePath, [])); }
   async log(action, id, detail = {}) { await mkdir(this.dir, { recursive: true }); await appendFile(this.logPath, JSON.stringify({ at: new Date().toISOString(), action, id, ...detail }) + '\n'); }
-  async protectedIds() { const path = join(this.root, 'obs-plugins/64bit'); const files = await readdir(path).catch(e => { if (e.code === 'ENOENT') return []; throw e; }); return new Set(files.filter(f => extname(f).toLowerCase() === '.dll').map(f => basename(f, extname(f)).toLowerCase())); }
+  async protectedIds() {
+    const ids = new Set();
+    const legacyPath = join(this.root, 'obs-plugins/64bit');
+    const legacyFiles = await readdir(legacyPath).catch(e => { if (e.code === 'ENOENT') return []; throw e; });
+    for (const file of legacyFiles) if (extname(file).toLowerCase() === '.dll') ids.add(basename(file, extname(file)).toLowerCase());
+    const modernPath = join(this.root, 'plugins');
+    const modernEntries = await readdir(modernPath, { withFileTypes: true }).catch(e => { if (e.code === 'ENOENT') return []; throw e; });
+    for (const entry of modernEntries) {
+      const id = entry.name.toLowerCase();
+      if (!entry.isDirectory() || !ID.test(id)) continue;
+      if (await exists(within(this.root, join(modernPath, entry.name, id + '.dll')))) ids.add(id);
+    }
+    return ids;
+  }
   async assertIdle() { if (await this.productionActive()) throw Error('Há produção ou saída ativa. Aguarde o encerramento antes de preparar plugins.'); }
   async inspectCompatibility(zip) {
     const version = await this.versionGetter();
@@ -178,6 +262,7 @@ export class PluginManager {
     const state = await this.state(), queue = await this.queue();
     if (action === 'diagnose') return this.snapshot();
     if (action === 'safe-mode') {
+      await this.assertIdle();
       if (typeof args.enabled !== 'boolean') throw Error('Informe enabled verdadeiro ou falso');
       state.safeMode = args.enabled;
       state.lastChangedPlugin = { id: null, action: args.enabled ? 'safe-mode-on' : 'safe-mode-off', at: new Date().toISOString() };
@@ -193,10 +278,12 @@ export class PluginManager {
     const installed = await exists(join(this.plugins, id));
     if (['enable', 'disable', 'remove'].includes(action) && !installed) throw Error('Plugin gerenciado não instalado');
     if (action === 'rollback') {
-      const backups = await readdir(join(this.plugins, '.backups', id), { withFileTypes: true }).catch(e => { if (e.code === 'ENOENT') return []; throw e; });
-      const latest = backups.filter(e => e.isDirectory()).map(e => e.name).sort().at(-1);
+      const backupRoot = join(this.plugins, '.backups', id);
+      const backups = await readdir(backupRoot, { withFileTypes: true }).catch(e => { if (e.code === 'ENOENT') return []; throw e; });
+      const candidates = (await Promise.all(backups.filter(e => e.isDirectory()).map(entry => backupCandidate(this.plugins, id, entry.name)))).filter(Boolean).sort((a, b) => a.changedAt - b.changedAt);
+      const latest = candidates.at(-1)?.name;
       if (!latest) throw Error('Nenhuma versão anterior disponível para restauração');
-      queue.push({ id, opId: randomUUID(), action, backup: latest, at: new Date().toISOString() });
+      queue.push({ id, opId: randomUUID(), action, backup: latest, restoreOperationId: candidates.at(-1).marker.operationId, at: new Date().toISOString() });
     } else if (action === 'remove') queue.push({ id, opId: randomUUID(), action, at: new Date().toISOString() });
     else state.plugins[id] = { ...(state.plugins[id] || {}), enabled: action === 'enable', pendingAction: { action, at: new Date().toISOString() } };
     state.lastChangedPlugin = { id, action, at: new Date().toISOString(), opId: queue.at(-1)?.id === id ? queue.at(-1).opId : undefined };
@@ -217,13 +304,15 @@ export class PluginManager {
       if (!ID.test(id) || protectedIds.has(id)) continue;
       const pending = queue.find(op => op.id === id), item = state.plugins[id] || {};
       const metadata = await readJson(join(managedDir, id, '.3mix.json'), item.metadata || {}).catch(() => item.metadata || {});
-      const backups = await readdir(join(this.plugins, '.backups', id)).catch(e => { if (e.code === 'ENOENT') return []; throw e; });
+      const backupRoot = join(this.plugins, '.backups', id);
+      const backups = await readdir(backupRoot).catch(e => { if (e.code === 'ENOENT') return []; throw e; });
+      const backupAvailable = (await Promise.all(backups.filter(name => !name.startsWith('.')).map(name => backupCandidate(this.plugins, id, name)))).some(Boolean);
       const loaded = Array.isArray(report?.plugins) ? report.plugins.find(m => String(m.id || '').toLowerCase() === id) : null;
       const reportFresh = report?.phase === 'complete' && Date.parse(report.at || 0) >= Date.parse(item.appliedAt || item.pendingAction?.at || 0);
       const pendingAction = item.pendingAction && !reportFresh ? item.pendingAction.action : null;
       const stateName = pending ? 'pending-' + pending.action : pendingAction ? 'pending-' + pendingAction : !folders.includes(id) ? 'removed' : reportFresh && loaded?.status === 'loaded' ? 'active' : reportFresh && loaded?.status === 'failed' ? 'failed' : item.enabled === false && reportFresh ? 'disabled' : 'unknown';
       const resources = loaded ? { inputs: loaded.sourceTypes || [], outputs: loaded.outputs || [], encoders: loaded.encoders || [], services: loaded.services || [] } : {};
-      plugins.push({ id, name: loaded?.name || metadata.name || id, version: loaded?.version || metadata.version || 'Não informada', developer: loaded?.author || metadata.developer || 'Não informado', description: loaded?.description || metadata.description || '', state: stateName, compatibility: reportFresh && loaded?.status === 'loaded' ? 'verified' : metadata.compatibility?.staticCheck === 'passed' ? 'pending-test' : 'unknown', essential: false, managed: true, resources, dependencies: metadata.dependencies || [], license: metadata.license || 'Não informada', options: [], backupAvailable: backups.some(name => !name.startsWith('.')), updateAvailable: true, signature: metadata.signature || null, sha256: metadata.sha256 || null });
+      plugins.push({ id, name: loaded?.name || metadata.name || id, version: loaded?.version || metadata.version || 'Não informada', developer: loaded?.author || metadata.developer || 'Não informado', description: loaded?.description || metadata.description || '', state: stateName, compatibility: reportFresh && loaded?.status === 'loaded' ? 'verified' : metadata.compatibility?.staticCheck === 'passed' ? 'pending-test' : 'unknown', essential: false, managed: true, resources, dependencies: metadata.dependencies || [], license: metadata.license || 'Não informada', options: [], backupAvailable, updateAvailable: true, signature: metadata.signature || null, sha256: metadata.sha256 || null });
     }
     const catalog = (await readJson(this.catalogPath, []).catch(() => [])).map(c => ({ ...c, installable: c.installable === true && !!c.packageUrl && /^[a-f0-9]{64}$/i.test(c.sha256 || '') && Array.isArray(c.obsVersions) && c.obsVersions.includes(version) && !protectedIds.has(c.id) }));
     const diagnostics = [];
@@ -238,49 +327,61 @@ export class PluginManager {
 
 export async function applyPendingPlugins(root) {
   root = resolve(root);
-  const manager = new PluginManager({ root });
-  const queue = await manager.queue();
-  if (!queue.length) return { applied: [] };
-  let remaining = [...queue];
-  const state = await manager.state(), applied = [];
-  for (const op of queue) {
-    const id = safeId(op.id);
-    if ((await manager.protectedIds()).has(id)) throw Error('Operação pendente aponta para plugin protegido: ' + id);
-    const bin = within(manager.plugins, join(manager.plugins, id));
-    const data = join(bin, 'data');
-    const backup = within(manager.plugins, join(manager.plugins, '.backups', id, op.opId));
-    await mkdir(dirname(bin), { recursive: true }); await mkdir(dirname(data), { recursive: true });
-    if (op.action === 'install' || op.action === 'update') {
-      const stage = within(manager.plugins, join(manager.plugins, '.staging', op.stage));
-      const stageBin = join(stage, 'bin'), stageData = join(stage, 'data');
-      if (await exists(bin)) {
-        const marker = await readJson(join(bin, '.3mix.json'), null).catch(() => null);
-        if (marker?.operationId !== op.opId) { await mkdir(backup, { recursive: true }); await rename(bin, join(backup, 'plugin')); }
+  const release = await acquireApplyLock(join(root, 'config/3mix-plugin-manager/apply.lock'));
+  try {
+    const manager = new PluginManager({ root });
+    const queue = await manager.queue();
+    if (!queue.length) return { applied: [] };
+    let remaining = [...queue];
+    const state = await manager.state(), applied = [];
+    for (const op of queue) {
+      const id = safeId(op.id);
+      if ((await manager.protectedIds()).has(id)) throw Error('Operação pendente aponta para plugin protegido: ' + id);
+      const bin = within(manager.plugins, join(manager.plugins, id));
+      const data = join(bin, 'data');
+      const backup = within(manager.plugins, join(manager.plugins, '.backups', id, op.opId));
+      await mkdir(dirname(bin), { recursive: true });
+      if (op.action === 'install' || op.action === 'update') {
+        const stage = within(manager.plugins, join(manager.plugins, '.staging', op.stage));
+        const stageBin = join(stage, 'bin'), stageData = join(stage, 'data');
+        if (await exists(bin)) {
+          const marker = await readJson(join(bin, '.3mix.json'), null).catch(() => null);
+          if (marker?.operationId !== op.opId) { await mkdir(backup, { recursive: true }); await rename(bin, join(backup, 'plugin')); }
+        }
+        if (await exists(stageBin)) await rename(stageBin, bin);
+        if (await exists(stageData) && !await exists(data)) await rename(stageData, data);
+        const marker = await readJson(join(bin, '.3mix.json'), null);
+        if (marker?.operationId !== op.opId) throw Error('Aplicação incompleta do plugin ' + id);
+        await rm(stage, { recursive: true, force: true });
+        state.plugins[id] = { ...(state.plugins[id] || {}), enabled: true, metadata: marker };
+      } else if (op.action === 'remove') {
+        await mkdir(backup, { recursive: true });
+        if (await exists(bin)) await rename(bin, join(backup, 'plugin'));
+        state.plugins[id] = { ...(state.plugins[id] || {}), enabled: false };
+      } else if (op.action === 'rollback') {
+        const old = within(manager.plugins, join(manager.plugins, '.backups', id, op.backup));
+        const oldPlugin = join(old, 'plugin');
+        if (await exists(oldPlugin)) {
+          const restoreMarker = await readJson(join(oldPlugin, '.3mix.json'), null);
+          if (!restoreMarker || (op.restoreOperationId && restoreMarker.operationId !== op.restoreOperationId)) throw Error('Backup de plugin inválido: ' + id);
+          await mkdir(backup, { recursive: true });
+          if (await exists(bin)) await rename(bin, join(backup, 'plugin'));
+          await rename(oldPlugin, bin);
+        } else {
+          const currentMarker = await readJson(join(bin, '.3mix.json'), null).catch(() => null);
+          if (!op.restoreOperationId || currentMarker?.operationId !== op.restoreOperationId) throw Error('Backup de plugin não encontrado: ' + id);
+        }
+        state.plugins[id] = { ...(state.plugins[id] || {}), enabled: true, metadata: await readJson(join(bin, '.3mix.json'), {}) };
       }
-      if (await exists(stageBin)) await rename(stageBin, bin);
-      if (await exists(stageData) && !await exists(data)) await rename(stageData, data);
-      const marker = await readJson(join(bin, '.3mix.json'), null);
-      if (marker?.operationId !== op.opId) throw Error('Aplicação incompleta do plugin ' + id);
-      await rm(stage, { recursive: true, force: true });
-      state.plugins[id] = { ...(state.plugins[id] || {}), enabled: true, metadata: marker };
-    } else if (op.action === 'remove') {
-      await mkdir(backup, { recursive: true });
-      if (await exists(bin)) await rename(bin, join(backup, 'plugin'));
-      state.plugins[id] = { ...(state.plugins[id] || {}), enabled: false };
-    } else if (op.action === 'rollback') {
-      const old = within(manager.plugins, join(manager.plugins, '.backups', id, op.backup));
-      if (!await exists(join(old, 'plugin'))) throw Error('Backup de plugin não encontrado: ' + id);
-      await mkdir(backup, { recursive: true });
-      if (await exists(bin)) await rename(bin, join(backup, 'plugin'));
-      await rename(join(old, 'plugin'), bin);
-      state.plugins[id] = { ...(state.plugins[id] || {}), enabled: true, metadata: await readJson(join(bin, '.3mix.json'), {}) };
-    } else throw Error('Ação pendente inválida');
-    state.plugins[id].appliedAt = new Date().toISOString();
-    await atomicJson(manager.statePath, state);
-    remaining = remaining.filter(item => item.opId !== op.opId);
-    await atomicJson(manager.queuePath, remaining);
-    await manager.log(op.action + '-applied', id, { opId: op.opId });
-    applied.push({ id, action: op.action });
+      state.plugins[id].appliedAt = new Date().toISOString();
+      await atomicJson(manager.statePath, state);
+      remaining = remaining.filter(item => item.opId !== op.opId);
+      await atomicJson(manager.queuePath, remaining);
+      await manager.log(op.action + '-applied', id, { opId: op.opId });
+      applied.push({ id, action: op.action });
+    }
+    return { applied };
+  } finally {
+    await release();
   }
-  return { applied };
 }
