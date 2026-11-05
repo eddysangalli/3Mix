@@ -170,3 +170,10 @@ Esses resultados NÃO concluem seleção/edição múltipla de objetos internos,
 A branch nativa freemix/broadcast-suite, commit ca9b44b6853e6b4cbfe13237db47fbccd10d18b2, contém StartupRollback em StartOutput, verifica SetScheduledFrameCompletionCallback e StartScheduledPlayback e restaura estado em falha. O achado anterior sobre retornos ignorados se aplica ao trecho da integração OBS33 examinado, NÃO a todas as baselines. Reaproveitar essa implementação; não duplicar. Esta comparação foi por git show, sem build ou ensaio físico.
 
 Na mesma baseline, EnableAudioOutput ainda solicita dois canais. Logo o multicanal/16 canais continua parcial, independente do rollback já implementado. Nada aplicado ao runtime ou homologado por esta comparação.
+
+
+## Ensaio real — atualização somente de painel (motor preservado)
+
+montar-atualizacao-painel.mjs executado de ponta a ponta em instalação sintética (pasta temporária do sistema, fora do checkout git, chave Ed25519 efêmera QA): montou pacote assinado com 452 arquivos/12 MB a partir do painel/ferramentas reais do repositório e dos cinco documentos Alpha obrigatórios; aplicar substituiu mesa.html e version.json e confirmou nenhum caminho bin/ ou obs-plugins/ jamais escrito; rollback restaurou ambos ao estado anterior. Nenhuma chave de produção, nenhum arquivo da instalação real do operador, nenhum processo iniciado.
+
+Isso comprova o caminho de distribuição apenas-painel ponta a ponta em ambiente sintético; NÃO é pacote aplicado à instalação do operador nem homologação. Gerar/aplicar um pacote real exige decisão explícita do proprietário sobre quando distribuir.
