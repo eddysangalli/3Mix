@@ -1369,6 +1369,8 @@ export class DiskReplay {
   }
 
   async jump(d = {}) {
+    if(d.seconds!==undefined&&!Number.isFinite(Number(d.seconds)))throw Error('Deslocamento em segundos inválido');
+    if(d.frames!==undefined&&!Number.isSafeInteger(Number(d.frames)))throw Error('Deslocamento em quadros deve ser inteiro');
     await this.hydratePlayers();
     const player = d.player || this.state.activePlayer;
     if (!REPLAY_PLAYERS.includes(player) || !this.state.players[player]) throw Error("Player inválido");

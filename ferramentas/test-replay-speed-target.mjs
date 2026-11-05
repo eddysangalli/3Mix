@@ -36,3 +36,15 @@ test('invalid event ID or fractional index never silently selects another event'
  await assert.rejects(r.selectEvent({index:0.5}),/Índice/);
  assert.equal(r.state.selectedEventId,'two');assert.equal(loaded,false);
 });
+
+test('invalid jog displacement is rejected before hydration or seeking',async()=>{
+ const {r}=fixture();let touched=false;r.hydratePlayers=async()=>{touched=true;};r.seekPlayer=async()=>{touched=true;};
+ for(const data of [{seconds:NaN},{seconds:Infinity},{seconds:'invalid'},{frames:0.5},{frames:Infinity}])await assert.rejects(r.jump(data));
+ assert.equal(touched,false);
+});
+test('valid frame jog uses rational frame rate and clamps at clip boundaries',async()=>{
+ const {r}=fixture();r.hydratePlayers=async()=>{};r.state.players.A={duration:10,frameRate:'30000/1001'};let target;r.seekPlayer=async d=>{target=d.cursor;};
+ await r.jump({player:'A',frames:30});assert.ok(Math.abs(target-3001)<0.01);
+ await r.jump({player:'A',seconds:-100});assert.equal(target,0);
+ await r.jump({player:'A',seconds:100});assert.equal(target,10000);
+});
