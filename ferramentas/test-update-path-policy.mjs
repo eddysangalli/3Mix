@@ -40,3 +40,13 @@ test('native freeze requires exact size and hash before packaging',()=>{
  assert.throws(()=>validateFrozenFile({...f,sha256:undefined},123,hash),/incompleto/);
  assert.throws(()=>validateFrozenFile({...f,path:'../outside'},123,hash));
 });
+
+
+test('packager validates native receipt before accessing its file',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const source=await readFile(new URL('../scripts/distribuicao/montar-atualizacao-mesa.mjs',import.meta.url),'utf8');
+ const begin=source.indexOf('for (const f of frozen.files)');
+ const check=source.indexOf('validateFrozenFile(f,f.bytes ?? f.size,f.sha256)',begin);
+ const access=source.indexOf('await fs.lstat(source)',begin);
+ assert.ok(begin>=0&&check>begin&&access>check);
+});

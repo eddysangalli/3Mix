@@ -36,6 +36,8 @@ const want = new Map();
 const baseManifest = JSON.parse(await fs.readFile(path.join(base, "manifest.json"), "utf8"));
 for (const f of baseManifest.files) if (!never(f.path)) want.set(f.path, path.join(base, f.path));
 for (const f of frozen.files) if (!never(f.path)) {
+  // Validate receipt metadata before reading any source path.
+  validateFrozenFile(f,f.bytes ?? f.size,f.sha256);
   const source=path.join(frozen.root,f.path), info=await fs.lstat(source);
   assert(info.isFile()&&!info.isSymbolicLink(), "fonte nativa irregular: "+f.path);
   validateFrozenFile(f,info.size,await digest(source));
