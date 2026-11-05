@@ -1,6 +1,6 @@
 find_package(
   FFmpeg
-  6.1
+  7.0
   REQUIRED avcodec avfilter avdevice avutil swscale avformat swresample
 )
 
