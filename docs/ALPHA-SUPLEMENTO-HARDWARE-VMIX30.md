@@ -22,3 +22,28 @@ Equipamento: fontes/padrões 1080i, 576i e 480i, captura e monitor/analisador ap
 
 ## Classificação
 Compatibilidade prevista; Implementado sem teste físico; Em homologação Alpha; Homologado com evidência; Incompatível; Não testado. Funções sem código/integração permanecem engenharia pendente, não tarefa do tester.
+
+
+## Recibo obrigatório por ensaio
+
+Copiar este modelo para cada combinação de equipamento/modo; campos sem medição devem dizer “não medido”, nunca zero.
+
+```text
+Roteiro / data e horário com fuso:
+Versão do pacote / commit do painel / hash do motor:
+Windows / CPU / GPU e driver:
+Placa / revisão / firmware / driver / SDK ou runtime carregado:
+Topologia / conectores / receptor e versão:
+Formato / taxa racional / ordem de campos / profundidade / canais:
+Configuração reproduzível (sem credenciais):
+Passos executados e duração real:
+Resultado esperado / resultado observado:
+Drops / offset A-V / reconexão: valor, unidade e ferramenta usada:
+Falha: horário exato, mensagem e passos mínimos de reprodução:
+Arquivos de log sanitizados (motor, painel, driver/receptor):
+Evidências: padrão antes/depois, analisador, gravação e seus hashes:
+Estado proposto: não testado / em homologação / falhou / aprovado neste modo:
+Limitações e cenários não exercitados:
+```
+
+Enviar o recibo junto às evidências pelo canal Alpha definido pelo proprietário. Usar o coletor COLETAR-LOGS.cmd somente quando presente no pacote; revisar o conteúdo antes do envio. Não anexar pastas config inteiras, chaves de atualização privadas, URLs com credenciais, passphrases SRT ou mídia de clientes. O recibo preenchido não promove automaticamente toda a família de placas a homologada: a aprovação vale apenas para modelo/revisão/driver/modo efetivamente ensaiados.
