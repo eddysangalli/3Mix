@@ -156,6 +156,24 @@ void OBSBasic::UpdateVirtualCamConfig(const VCamConfig &config)
 	log_vcam_changed(config, false);
 }
 
+void OBSBasic::SetVirtualCamScene(const std::string &scene)
+{
+	VCamConfig config;
+	config.type = scene.empty() ? VCamOutputType::ProgramView : VCamOutputType::SceneOutput;
+	config.scene = scene;
+	// Entre o Programa e uma cena a câmera muda de caminho de vídeo, e isso só vale reiniciando-a.
+	const bool changesPath = (vcamConfig.type == VCamOutputType::ProgramView) != (config.type == VCamOutputType::ProgramView);
+	if (VirtualCamActive() && changesPath)
+		RestartVirtualCam(config);
+	else
+		UpdateVirtualCamConfig(config);
+}
+
+std::string OBSBasic::VirtualCamScene() const
+{
+	return vcamConfig.type == VCamOutputType::SceneOutput ? vcamConfig.scene : std::string();
+}
+
 void OBSBasic::RestartVirtualCam(const VCamConfig &config)
 {
 	restartingVCam = true;

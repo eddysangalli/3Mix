@@ -5,7 +5,6 @@
 #include <util/config-file.h>
 #include <string>
 #include <set>
-
 namespace {
 struct ReloadState { bool safe = true; size_t count = 0; };
 void FilterFound(obs_source_t *, obs_source_t *, void *param) { static_cast<ReloadState *>(param)->safe = false; }
@@ -26,7 +25,6 @@ bool InspectSource(void *param, obs_source_t *source)
  return true;
 }
 }
-
 bool FreeMixReadProjectCreationPolicy(obs_data_t *response)
 {
  if (!response || !App()) return false;

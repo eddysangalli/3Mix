@@ -18,6 +18,11 @@ target_sources(
     widgets/FreeMixAudioRouting.hpp
     widgets/FreeMixAsioOutput.cpp
     widgets/FreeMixAsioOutput.hpp
+    widgets/FreeMixCenterColumn.cpp
+    widgets/FreeMixCenterColumn.hpp
+    widgets/FreeMixPresetExit.cpp
+    widgets/FreeMixProjectPolicy.cpp
+    widgets/FreeMixProjectInventory.cpp
     widgets/FreeMixFillKey.hpp
     widgets/FreeMixMixEffectManager.hpp
     widgets/FreeMixMultistream.cpp
