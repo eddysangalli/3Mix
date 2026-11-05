@@ -1346,7 +1346,8 @@ void OBSBasic::AddQuickTransitionId(int id)
 		return;
 	}
 
-	int idx = 3;
+	// Dedicated broadcast layout starts with its label and add button.
+	int idx = 2;
 	for (;; idx++) {
 		QLayoutItem *item = programLayout->itemAt(idx);
 		if (!item) {
