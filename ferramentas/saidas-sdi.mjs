@@ -2,6 +2,10 @@ import {assertSdrOutputRequest} from './saidas-hdr.mjs';
 const uuidPattern=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const coordinates=['redX','redY','greenX','greenY','blueX','blueY','whiteX','whiteY'];
 export function sdiConfig(data,sourceUuid,audioSourceUuid='') {
+ for(const field of ['modeId','keyer','audioTrack']){
+  const value=data[field];if(value===undefined&&field!=='modeId')continue;
+  if(!['string','number'].includes(typeof value)||typeof value==='string'&&!value.trim())throw Error('Selecione dispositivo, modo, keyer e áudio SDI válidos');
+ }
  const hdr=data.hdr===true;
  if(!hdr)assertSdrOutputRequest('SDI',data);
  const config={deviceHash:String(data.deviceHash||''),modeId:Number(data.modeId),keyer:Number(data.keyer??0),audioTrack:Number(data.audioTrack??0),audioSourceUuid,sourceUuid,hdr,autoStart:false};
