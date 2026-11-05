@@ -50,3 +50,13 @@ test('packager validates native receipt before accessing its file',async()=>{
  const access=source.indexOf('await fs.lstat(source)',begin);
  assert.ok(begin>=0&&check>begin&&access>check);
 });
+
+
+test('native source exporter resolves canonical sibling engine rather than removed workspace paths',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const source=await readFile(new URL('../scripts/build/exportar-motor-para-repo.mjs',import.meta.url),'utf8');
+ assert.ok(source.includes('repo = path.resolve(import.meta.dirname, "../..")'));
+ assert.ok(source.includes('native = path.join(ws, "3mix-engine")'));
+ assert.ok(!source.includes('path.join(ws, "freemix-app")'));assert.ok(!source.includes('repo = path.join(ws, "FreeMix")'));
+ assert.ok(source.includes('f.build.exitCode, 0'));assert.ok(source.includes('the fork moved after this build was frozen'));
+});
