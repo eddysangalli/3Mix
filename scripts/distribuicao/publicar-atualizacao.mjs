@@ -20,6 +20,7 @@ const novo = JSON.parse(await readFile(join(pkg, 'manifest.json'), 'utf8'));
 const base = JSON.parse(await readFile(resolve(args.base), 'utf8'));
 const versao = JSON.parse(await readFile(join(pkg, 'version.json'), 'utf8')).version;
 if (versao !== novo.version) throw Error('version.json diverge do manifesto do pacote');
+if(typeof versao!=='string'||versao.length>100||!/^\d+\.\d+\.\d+(?:-[A-Za-z0-9]+(?:[.-][A-Za-z0-9]+)*)?$/.test(versao))throw Error('Versão inválida para publicação');
 const estavel = /^\d+\.\d+\.\d+$/.test(versao);
 if (args.channel === 'stable' && !estavel) throw Error(`${versao} é versão de teste e não pode ir para o canal estável`);
 if (args.channel === 'beta' && estavel) throw Error(`${versao} não tem sufixo de teste; use o canal estável, com aprovação`);
