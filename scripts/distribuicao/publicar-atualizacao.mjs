@@ -3,7 +3,7 @@
 // Estável exige --aprovar-estavel=VERSAO e --aprovado-por=NOME, e a mesma numeração já publicada no canal beta.
 // O manifesto é cumulativo: quem está em qualquer versão anterior chega à nova com um único pacote, e o atualizador só baixa o que falta.
 import { createHash, createPrivateKey, createPublicKey, sign, verify } from 'node:crypto';
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -74,7 +74,8 @@ for (const f of arquivos) {
 }
 
 const pasta = join(canal, 'releases', versao);
-await rm(join(canal, 'releases'), { recursive: true, force: true }); await mkdir(pasta, { recursive: true });
+await mkdir(join(canal, 'releases'), { recursive: true });
+await mkdir(pasta); // Never remove previous releases or replace a pre-existing version.
 await writeFile(join(pasta, 'manifest.json'), manifesto);
 await writeFile(join(pasta, 'manifest.sig'), assinatura);
 const u = `${SITE}/${args.channel}/releases/${versao}/`;
