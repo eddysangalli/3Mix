@@ -23,6 +23,13 @@ target_sources(
     widgets/FreeMixPresetExit.cpp
     widgets/FreeMixProjectPolicy.cpp
     widgets/FreeMixProjectInventory.cpp
+    widgets/FreeMixSafeArea.cpp
+    widgets/FreeMixScope.cpp
+    widgets/FreeMixGlobalHotkeys.cpp
+    widgets/FreeMixGlobalHotkeys.hpp
+    widgets/FreeMixPreferences.cpp
+    widgets/FreeMixPreferences.hpp
+    widgets/FreeMixEncoderPreferences.hpp
     widgets/FreeMixFillKey.hpp
     widgets/FreeMixMixEffectManager.hpp
     widgets/FreeMixMultistream.cpp

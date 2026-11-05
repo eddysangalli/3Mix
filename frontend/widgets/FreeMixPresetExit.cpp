@@ -26,6 +26,34 @@ bool SameContent(const std::filesystem::path &a, const std::filesystem::path &b)
 }
 
 }
+void OnFrontendEvent(enum obs_frontend_event event, void *)
+{
+	if (event == OBS_FRONTEND_EVENT_FINISHED_LOADING || event == OBS_FRONTEND_EVENT_SCENE_COLLECTION_CHANGED) {
+		OBSBasic::Get()->SnapshotPreset();
+	}
+}
+
+
+
+void OBSBasic::InitPresetDocument()
+{
+	obs_frontend_add_event_callback(OnFrontendEvent, nullptr);
+}
+
+void OBSBasic::SnapshotPreset()
+{
+	try {
+		const std::filesystem::path preset = GetCurrentSceneCollection().getFilePath();
+		std::error_code error;
+		if (std::filesystem::exists(preset, error)) {
+			std::filesystem::copy_file(preset, SavedCopyPath(preset),
+						   std::filesystem::copy_options::overwrite_existing, error);
+		}
+	} catch (const std::exception &error) {
+		blog(LOG_WARNING, "[freemix] could not keep a copy of the preset: %s", error.what());
+	}
+}
+
 void OBSBasic::FinishPresetOnExit()
 {
 	try {

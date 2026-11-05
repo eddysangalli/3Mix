@@ -1650,7 +1650,8 @@ gs_vertbuffer_t *actionSafeMargin = nullptr;
 
  	/* FreeMix: waveform monitor and vectorscope of the Preview window, chosen from the colour bars icon in its
 
- 	int scopeMode = 0;
+ 	*/
+	int scopeMode = 0;
 
  	bool scopeWithPreview = false;
 
@@ -1679,6 +1680,9 @@ gs_vertbuffer_t *actionSafeMargin = nullptr;
  	bool discardPresetOnExit = false;
 
  	void InitPresetDocument();
+	public:
+	void SnapshotPreset();
+private:
 
  	void FinishPresetOnExit();
 
@@ -1686,7 +1690,7 @@ gs_vertbuffer_t *actionSafeMargin = nullptr;
 
  	/* FreeMix: scope source for waveform/vectorscope */
 
- 	obs_source_t *scopeSource = nullptr;
+ 	
 
 
 
@@ -3456,7 +3460,7 @@ public:
 
 	void DescribeScope(obs_data_t *response);
 
-	void SetScopeMode(int mode);
+	void SetScopeMode(int mode, bool withPreview);
 
 
 
