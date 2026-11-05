@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
 
     Copyright (C) 2023 by Lain Bailey <lain@obsproject.com>
 
@@ -1650,7 +1650,7 @@ gs_vertbuffer_t *actionSafeMargin = nullptr;
 
  	/* FreeMix: waveform monitor and vectorscope of the Preview window, chosen from the colour bars icon in its
 
- 	*/
+	*/
 	int scopeMode = 0;
 
  	bool scopeWithPreview = false;
@@ -1690,7 +1690,7 @@ private:
 
  	/* FreeMix: scope source for waveform/vectorscope */
 
- 	
+
 
 
 
