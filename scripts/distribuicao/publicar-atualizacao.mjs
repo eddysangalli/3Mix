@@ -57,7 +57,12 @@ const assinatura = sign(null, manifesto, createPrivateKey(await readFile(resolve
 if (!verify(null, manifesto, createPublicKey(await readFile(join(pkg, 'update-public.pem'))), assinatura)) throw Error('A chave usada não corresponde a update-public.pem do pacote');
 
 const assets = resolve(args.assets || join(repo, '..', 'entregas', 'canal-assets', tag));
-await rm(assets, { recursive: true, force: true }); await mkdir(assets, { recursive: true });
+// Validate every selected payload before changing existing publication assets.
+for (const f of arquivos) {
+  const bytes=await readFile(join(pkg,f.path));
+  if(bytes.length!==f.size||createHash('sha256').update(bytes).digest('hex')!==f.sha256)throw Error('Arquivo diverge do manifesto: '+f.path);
+}
+await mkdir(assets, { recursive: true });
 for (const f of arquivos) {
   const bytes=await readFile(join(pkg,f.path));
   if(bytes.length!==f.size||createHash('sha256').update(bytes).digest('hex')!==f.sha256)throw Error('Arquivo diverge do manifesto: '+f.path);
