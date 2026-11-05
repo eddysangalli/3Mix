@@ -9,6 +9,7 @@ test('external video import creates independently decodable replay clip and pers
  await replay.importClip({file:input,name:'External QA',cam:'Importado'});
  const events=JSON.parse(await readFile(join(root,'events.json'),'utf8'));assert.equal(events.length,1);assert.equal(events[0].imported,true);assert.equal(events[0].cam,'Importado');assert.equal(events[0].clips.length,1);
  const clip=events[0].clips[0];assert.notEqual(clip.file,input);assert.ok(clip.duration>0);
+ const decodedMedia=await replay.probe(clip.file);assert.ok(decodedMedia.duration>0);
  const decode=spawnSync('ffmpeg',['-v','error','-nostdin','-i',clip.file,'-f','null','-'],{timeout:15000});assert.equal(decode.status,0,String(decode.stderr));
  }finally{await rm(root,{recursive:true,force:true});}
 });
