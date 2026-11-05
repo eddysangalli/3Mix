@@ -146,3 +146,10 @@ A ação playout_item_enabled recebeu rótulo legível e exemplo JSON com ID do 
 - Diagnóstico do fonte atual painel/mesa.html, thumbLoop: hot limitado a 350 ms, cold em rodízio de uma captura a cada 1000 ms, mais esperas de 75/125 ms. Não é um fluxo de vídeo com descarte por quadro; aumentar uma opção sem substituir esse agendamento não entrega a fluidez pedida. Manter fontes invisíveis suspensas, backpressure e prioridade dos comandos. Implementação e medição ainda pendentes.
 - ReBAR: nvidia-smi nesta máquina identificou RTX 4060 Laptop, driver 621.01, BAR1 total 8192 MiB. Isso não comprova ganho do aplicativo nem otimização equivalente ao vMix. libobs-d3d11 usa recursos D3D11 dynamic/default/staging; busca não encontrou integração explícita ReBAR. Investigar mecanismo oficial aplicável antes de implementar, com fallback e benchmark. NÃO declarar suporte otimizado ou criar botão fictício.
 - Runtime do operador não alterado; nenhum processo iniciado/parado. Esses itens não substituem nenhuma pendência da auditoria original.
+
+
+## Gate nativo DeckLink — inicialização não equivale a operação
+
+Inspeção do motor canônico plugins/decklink/decklink-device-instance.cpp, StartOutput: retorno de SetScheduledFrameCompletionCallback e StartScheduledPlayback não é verificado antes de marcar mode/output e retornar true. Falhas após EnableVideoOutput/EnableAudioOutput retornam sem rollback explícito dessas habilitações. São lacunas de tratamento de erro identificadas no fonte, NÃO falhas reproduzidas em placa. Corrigir com verificação HRESULT e unwind antes de declarar saída operacional; testar callbacks/playback recusados, liberação após falha e nova tentativa, além de compilar o plugin.
+
+Saída multicanal continua PARCIAL: decklink-output.cpp solicita SPEAKERS_STEREO na conversão e StartOutput solicita dois canais. Não elevar somente EnableAudioOutput a 16: o buffer e o mapeamento precisam corresponder, respeitando capacidade do SDK/dispositivo. Nenhuma placa homologada por esta inspeção. Fonte nativa compartilhada na branch feat/obs33-dsk com arquivos concorrentes não versionados; nenhum arquivo dessa frente alterado.
