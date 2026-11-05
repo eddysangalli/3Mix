@@ -1997,7 +1997,13 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
         if (!visibleThumbnailNames().includes(name)) continue;
         last.set(name, performance.now());
         const r = await tryReq("GetSourceScreenshot", { sourceName: name, imageFormat: "jpg", imageWidth: 256, imageCompressionQuality: 60 });
-        if (r && visibleThumbnailNames().includes(name)) {
+        // A failing source must not be retried at the full thumbnail cadence.
+        // Keep the previous image and allow other visible inputs to progress.
+        if (!r || typeof r.imageData !== 'string' || !r.imageData.startsWith('data:image/')) {
+          last.set(name, performance.now() + 1000);
+          continue;
+        }
+        if (visibleThumbnailNames().includes(name)) {
           thumbs.set(name, r.imageData);
           for (const img of document.querySelectorAll(`img[data-t="${CSS.escape(name)}"],img[data-bank-thumb="${CSS.escape(name)}"]`)) img.src = r.imageData;
         }
