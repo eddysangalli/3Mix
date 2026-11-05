@@ -17,3 +17,15 @@ test('required alpha operating documents exist and are permitted in update',asyn
  assert.equal(new Set(alphaReleaseDocuments).size,5);
  for(const doc of alphaReleaseDocuments){assert.equal(excludedFromUpdate(doc),false);await access(new URL('../'+doc,import.meta.url));}
 });
+
+
+test('thumbnail cadence module and its importing desk both ship in panel updates',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const desk=await readFile(new URL('../painel/mesa.html',import.meta.url),'utf8');
+ assert.ok(desk.includes("import('./thumbnail-cadence.mjs')"));
+ for(const file of ['painel/mesa.html','painel/thumbnail-cadence.mjs']){
+  assert.equal(excludedFromUpdate(file),false);await access(new URL('../'+file,import.meta.url));
+ }
+ const packager=await readFile(new URL('../scripts/distribuicao/montar-atualizacao-mesa.mjs',import.meta.url),'utf8');
+ assert.ok(packager.includes('p.startsWith("painel/")'));
+});
