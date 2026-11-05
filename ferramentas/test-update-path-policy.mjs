@@ -60,3 +60,11 @@ test('native source exporter resolves canonical sibling engine rather than remov
  assert.ok(!source.includes('path.join(ws, "freemix-app")'));assert.ok(!source.includes('repo = path.join(ws, "FreeMix")'));
  assert.ok(source.includes('f.build.exitCode, 0'));assert.ok(source.includes('the fork moved after this build was frozen'));
 });
+
+
+test('native source export counts patches against canonical manifest baseline',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const source=await readFile(new URL('../scripts/build/exportar-motor-para-repo.mjs',import.meta.url),'utf8');
+ assert.ok(source.includes('path.join(repo, "fork/manifest.json")'));
+ assert.ok(source.includes('manifest.base + ".." + f.head'));assert.ok(!source.includes('"ba2f32b..HEAD"'));
+});
