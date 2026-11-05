@@ -792,116 +792,144 @@ private slots:
 private slots:
 	void on_actionOpenPluginManager_triggered();
 
-	/* -------------------------------------
-	 * MARK: - OBSBasic_Preview
-	 * -------------------------------------
-	 */
-private:
-	bool previewEnabled = true;
-	QPointer<QTimer> nudge_timer;
-	bool recent_nudge = false;
+/* -------------------------------------
+ 	 * MARK: - OBSBasic_Preview
+ 	 * -------------------------------------
+ 	 */
+ private:
+ 	bool previewEnabled = true;
+ 	QPointer<QTimer> nudge_timer;
+ 	bool recent_nudge = false;
 
-	gs_vertbuffer_t *box = nullptr;
-	gs_vertbuffer_t *boxLeft = nullptr;
-	gs_vertbuffer_t *boxTop = nullptr;
-	gs_vertbuffer_t *boxRight = nullptr;
-	gs_vertbuffer_t *boxBottom = nullptr;
-	gs_vertbuffer_t *circle = nullptr;
+ 	gs_vertbuffer_t *box = nullptr;
+ 	gs_vertbuffer_t *boxLeft = nullptr;
+ 	gs_vertbuffer_t *boxTop = nullptr;
+ 	gs_vertbuffer_t *boxRight = nullptr;
+ 	gs_vertbuffer_t *boxBottom = nullptr;
+ 	gs_vertbuffer_t *circle = nullptr;
 
-	gs_vertbuffer_t *actionSafeMargin = nullptr;
-	gs_vertbuffer_t *graphicsSafeMargin = nullptr;
-	gs_vertbuffer_t *fourByThreeSafeMargin = nullptr;
-	gs_vertbuffer_t *leftLine = nullptr;
-	gs_vertbuffer_t *topLine = nullptr;
-	gs_vertbuffer_t *rightLine = nullptr;
+gs_vertbuffer_t *actionSafeMargin = nullptr;
+ 	gs_vertbuffer_t *graphicsSafeMargin = nullptr;
+ 	gs_vertbuffer_t *fourByThreeSafeMargin = nullptr;
+ 	gs_vertbuffer_t *leftLine = nullptr;
+ 	gs_vertbuffer_t *topLine = nullptr;
+ 	gs_vertbuffer_t *rightLine = nullptr;
 
-	int previewX = 0, previewY = 0;
-	int previewCX = 0, previewCY = 0;
-	float previewScale = 0.0f;
-	bool drawSafeAreas = false;
+ 	/* FreeMix: safe area and grid guides of the Preview window, chosen from the icon in its title bar
+ 	 * (widgets/FreeMixSafeArea.cpp). */
+ 	int safeAreaMode = 0;
+ 	std::vector<gs_vertbuffer_t *> safeAreaGuides;
+ 	void InitSafeAreaMenu();
+ 	void SetSafeAreaMode(int mode);
 
-	QColor selectionColor;
-	QColor cropColor;
-	QColor hoverColor;
+ 	/* FreeMix: waveform monitor and vectorscope of the Preview window, chosen from the colour bars icon in its
+ 	int scopeMode = 0;
+ 	bool scopeWithPreview = false;
+ 	bool scopeSquare = false;
+ 	obs_source_t *scopeSource = nullptr;
+ 	/* Counts the frames the scope was drawn in, so its state can be confirmed from outside. */
+ 	std::atomic<long long> scopeFramesDrawn{0};
+ 	void InitScopeMenu();
+ 	void UpdateScopeTarget();
+ 	void RenderScope(uint32_t baseCX, uint32_t baseCY);
 
-	bool drawSpacingHelpers = true;
+ 	/* FreeMix: the open preset as a document (widgets/FreeMixPreset.cpp). A copy of the preset as it was when
+ 	 * opened, or last saved on purpose, is kept next to it; on exit the operator keeps the changes or goes back
+ 	 * to that copy. */
+ 	bool discardPresetOnExit = false;
+ 	void InitPresetDocument();
+ 	void FinishPresetOnExit();
 
-	float dpi = 1.0;
+ 	/* FreeMix: scope source for waveform/vectorscope */
+ 	obs_source_t *scopeSource = nullptr;
 
-	void DrawBackdrop(float cx, float cy);
-	void InitPrimitives();
-	void UpdatePreviewScalingMenu();
+ 	int previewX = 0, previewY = 0;
+ 	int previewCX = 0, previewCY = 0;
+ 	float previewScale = 0.0f;
+ 	bool drawSafeAreas = false;
 
-	void Nudge(int dist, MoveDir dir);
+ 	QColor selectionColor;
+ 	QColor cropColor;
+ 	QColor hoverColor;
 
-	void UpdateProjectorHideCursor();
-	void UpdateProjectorAlwaysOnTop(bool top);
-	void ResetProjectors();
+ 	bool drawSpacingHelpers = true;
 
-	void UpdatePreviewSafeAreas();
+ 	float dpi = 1.0;
 
-	QColor GetCropColor() const;
-	QColor GetHoverColor() const;
+ 	void DrawBackdrop(float cx, float cy);
+ 	void InitPrimitives();
+ 	void UpdatePreviewScalingMenu();
 
-	void UpdatePreviewSpacingHelpers();
+ 	void Nudge(int dist, MoveDir dir);
 
-	float GetDevicePixelRatio();
+ 	void UpdateProjectorHideCursor();
+ 	void UpdateProjectorAlwaysOnTop(bool top);
+ 	void ResetProjectors();
 
-	void UpdatePreviewOverflowSettings();
-	void UpdatePreviewControls();
+ 	void UpdatePreviewSafeAreas();
 
-	/* OBS Callbacks */
-	static void RenderMain(void *data, uint32_t cx, uint32_t cy);
+ 	QColor GetCropColor() const;
+ 	QColor GetHoverColor() const;
 
-	void ResizePreview(uint32_t cx, uint32_t cy);
+ 	void UpdatePreviewSpacingHelpers();
 
-private slots:
-	void PreviewScalingModeChanged(int value);
+ 	float GetDevicePixelRatio();
 
-	void ColorChange();
+ 	void UpdatePreviewOverflowSettings();
+ 	void UpdatePreviewControls();
 
-	void EnablePreview();
-	void DisablePreview();
+ 	/* OBS Callbacks */
+ 	static void RenderMain(void *data, uint32_t cx, uint32_t cy);
 
-	void setPreviewScalingWindow();
-	void setPreviewScalingCanvas();
-	void setPreviewScalingOutput();
+ 	void ResizePreview(uint32_t cx, uint32_t cy);
 
-	void on_actionLockPreview_triggered();
+ private slots:
+ 	void PreviewScalingModeChanged(int value);
 
-	void on_scalingMenu_aboutToShow();
+ 	void ColorChange();
 
-	void on_preview_customContextMenuRequested();
-	void on_previewDisabledWidget_customContextMenuRequested();
+ 	void EnablePreview();
+ 	void DisablePreview();
 
-	void EnablePreviewDisplay(bool enable);
-	void TogglePreview();
+ 	void setPreviewScalingWindow();
+ 	void setPreviewScalingCanvas();
+ 	void setPreviewScalingOutput();
 
-public:
-	void addSnapGuide(SnapGuide guide);
-	inline void GetDisplayRect(int &x, int &y, int &cx, int &cy)
-	{
-		x = previewX;
-		y = previewY;
-		cx = previewCX;
-		cy = previewCY;
-	}
+ 	void on_actionLockPreview_triggered();
 
-	QColor GetSelectionColor() const;
+ 	void on_scalingMenu_aboutToShow();
 
-signals:
-	void CanvasResized(uint32_t width, uint32_t height);
-	void OutputResized(uint32_t width, uint32_t height);
+ 	void on_preview_customContextMenuRequested();
+ 	void on_previewDisabledWidget_customContextMenuRequested();
 
-	/* Preview signals */
-	void PreviewZoomIn();
-	void PreviewZoomOut();
-	void PreviewResetZoom();
+ 	void EnablePreviewDisplay(bool enable);
+ 	void TogglePreview();
 
-	/* -------------------------------------
-	 * MARK: - OBSBasic_Profiles
-	 * -------------------------------------
-	 */
+ public:
+ 	void addSnapGuide(SnapGuide guide);
+ 	inline void GetDisplayRect(int &x, int &y, int &cx, int &cy)
+ 	{
+ 		x = previewX;
+ 		y = previewY;
+ 		cx = previewCX;
+ 		cy = previewCY;
+ 	}
+
+ 	QColor GetSelectionColor() const;
+
+ signals:
+ 	void CanvasResized(uint32_t width, uint32_t height);
+ 	void OutputResized(uint32_t width, uint32_t height);
+
+ 	/* Preview signals */
+ 	void PreviewZoomIn();
+ 	void PreviewZoomOut();
+ 	void PreviewResetZoom();
+
+ 	/* -------------------------------------
+ 	 * MARK: - OBSBasic_Profiles
+ 	 * -------------------------------------
+ 	 */
 private:
 	OBSProfileCache profiles{};
 

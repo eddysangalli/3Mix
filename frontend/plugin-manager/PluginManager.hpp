@@ -22,6 +22,7 @@
 #include <filesystem>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 namespace OBS {
 
@@ -48,22 +49,31 @@ public:
 	enum class Mode { CoreOnly, Full };
 	enum class State { Failure, PartialFailure, Success };
 
-private:
-	Mode loadMode_{Mode::Full};
-	State loadState_{State::Failure};
-
+	// Public data members for implementation access (matching cpp file)
 	std::vector<ModuleInfo> modules_ = {};
 	ModuleList failedModules_ = {};
 	ModuleList disabledSources_ = {};
 	ModuleList disabledOutputs_ = {};
 	ModuleList disabledServices_ = {};
 	ModuleList disabledEncoders_ = {};
+	std::unordered_map<std::string, bool> managedPlugins_ = {};
+	bool managedSafeMode_ = false;
+	Mode loadMode_{Mode::Full};
+	State loadState_{State::Failure};
+
+	// Private methods (matching cpp file implementation)
 	std::filesystem::path getConfigFilePath_();
-	void loadModuleConfiguration_();
+	static std::filesystem::path getManagedStatePath_();
+	static std::filesystem::path getManagedReportPath_();
+	void loadModules_();
+	void loadManagedState_();
+	void saveManagedState_();
+	void writeManagedReport_(bool complete);
 	void saveModules_();
 	void disableModules_();
 	void addModuleTypes_();
 	void linkUnloadedModules_();
+	void loadModuleConfiguration_();
 
 	State loadPlugins(bool usePortableMode);
 	State loadLegacyPlugins(bool usePortableMode);
@@ -79,6 +89,8 @@ public:
 	void postLoad();
 	void loadAllPlugins(bool usePortableMode);
 	void open();
+
+	static bool managedSafeModeRequested();
 
 	friend void addModuleToPluginManagerImpl(void *param, obs_module_t *newModule);
 };

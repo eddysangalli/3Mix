@@ -65,6 +65,36 @@ void addModuleToPluginManagerImpl(void *param, obs_module_t *newModule)
 constexpr std::string_view OBSPluginManagerPath = "obs-studio/plugin_manager";
 constexpr std::string_view OBSPluginManagerModulesFile = "modules.json";
 
+static nlohmann::json readManagedState(const std::filesystem::path &path)
+{
+	std::ifstream stream(path);
+	if (!stream)
+		return nlohmann::json::object();
+	try {
+		return nlohmann::json::parse(stream);
+	} catch (const nlohmann::json::exception &error) {
+		blog(LOG_ERROR, "[3Mix Plugins] Invalid managed state: %s", error.what());
+		return nlohmann::json::object();
+	}
+}
+
+std::filesystem::path PluginManager::getManagedStatePath_()
+{
+	return App()->userPluginManagerSettingsLocation / "3mix-plugin-manager" / "state.json";
+}
+
+std::filesystem::path PluginManager::getManagedReportPath_()
+{
+	return App()->userPluginManagerSettingsLocation / "3mix-plugin-manager" / "load-report.json";
+}
+
+bool PluginManager::managedSafeModeRequested()
+{
+	const auto state = readManagedState(getManagedStatePath_());
+	return state.is_object() && state.contains("safeMode") && state["safeMode"].is_boolean() &&
+	       state["safeMode"].get<bool>();
+}
+
 void PluginManager::preLoad()
 {
 	loadModuleConfiguration_();

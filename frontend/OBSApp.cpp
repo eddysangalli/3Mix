@@ -2078,7 +2078,7 @@ void OBSApp::addLogLine(int logLevel, const QString &message)
 	emit logLineAdded(logLevel, message);
 }
 
-void OBSApp::loadAppModules()
+void OBSApp::loadAppModules(struct obs_module_failure_info &mfi)
 {
 	using PluginMode = OBS::PluginManager::Mode;
 	PluginMode mode = (disable_3p_plugins || safe_mode) ? PluginMode::CoreOnly : PluginMode::Full;

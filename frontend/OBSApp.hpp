@@ -232,10 +232,12 @@ public:
 	static void sigIntSignalHandler(int);
 	static void sigTermSignalHandler(int);
 	static void sigAbrtSignalHandler(int);
+	#include <obs-module.h>
+
 	static void sigQuitSignalHandler(int);
 #endif
 
-	void loadAppModules();
+	void loadAppModules(struct obs_module_failure_info &mfi);
 
 	ThumbnailManager *thumbnails() const { return thumbnailManager; }
 
