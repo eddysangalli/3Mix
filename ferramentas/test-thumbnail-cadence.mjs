@@ -23,3 +23,21 @@ test('desk inline scripts parse and thumbnail loop cannot change production vide
  const loop=html.slice(begin,end);assert.ok(loop.includes('cadence.nextThumbnail(names, last, now, interval)'));
  assert.ok(loop.includes('await tryReq("GetSourceScreenshot"'));assert.ok(!loop.includes('SetVideoSettings'));assert.ok(!loop.includes('Promise.all'));
 });
+
+
+test('real desk loop backs off failed source and continues healthy thumbnails serially',async()=>{
+ const {readFile}=await import('node:fs/promises');const {runInNewContext}=await import('node:vm');
+ const html=await readFile(new URL('../painel/mesa.html',import.meta.url),'utf8');
+ const begin=html.indexOf('  async function thumbLoop()');const end=html.indexOf('  async function slowLoop()',begin);
+ let now=0,active=0,peak=0;const calls=[],thumbs=new Map(),stop=new Error('finished');
+ const context={thumbnailCadence:Promise.resolve({thumbnailIntervalMs,nextThumbnail}),thumbnailSkipControl:{value:'2'},
+ st:{scenes:['bad','good'],video:{fpsNumerator:60,fpsDenominator:1},program:'',preview:''},
+ performance:{now:()=>now},visibleThumbnailNames:()=>['bad','good'],thumbs,
+ CSS:{escape:x=>x},document:{querySelectorAll:()=>[]},
+ sleep:async ms=>{now+=ms;if(now>=200)throw stop;},
+ tryReq:async(type,data)=>{assert.equal(type,'GetSourceScreenshot');active++;peak=Math.max(peak,active);calls.push({name:data.sourceName,at:now});await Promise.resolve();active--;return data.sourceName==='bad'?null:{imageData:'data:image/jpeg;base64,TEST'};}
+ };
+ await assert.rejects(runInNewContext(html.slice(begin,end)+';thumbLoop()',context),e=>e===stop);
+ assert.equal(peak,1);assert.equal(calls.filter(c=>c.name==='bad').length,1);assert.ok(calls.filter(c=>c.name==='good').length>=3);
+ assert.equal(thumbs.has('bad'),false);assert.equal(thumbs.get('good'),'data:image/jpeg;base64,TEST');
+});
