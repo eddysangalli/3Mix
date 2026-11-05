@@ -207,3 +207,14 @@ Verificação desta rodada, binário a binário, não apenas leitura de texto:
 
 **Gravação MKV com metadados:** não investigada nesta rodada; permanece pendente.
 **Não alterado:** 3Mix IO, conforme instrução explícita de escopo.
+
+
+## SRT — homologação forte confirmada no processo real em execução
+
+Executada a bateria `testes/srt/test-srt-157-full.mjs` (pré-existente, não criada nesta rodada) a partir do diretório correto do checkout principal — script anterior só roda com cwd=`3mix-panel/`, resolve relativo ao processo, não ao arquivo. **6/6 PASS**, incluindo item decisivo: o processo `3Mix.exe` do operador, já em execução desde 04/11 23:59 (não iniciado nem reiniciado por esta sessão — consulta somente leitura via `Get-Process`), reportou `srt.dll` **1.5.7.0 carregada em memória real**, não apenas presente em disco. Isso é evidência de carregamento no binário ativo, mais forte que inspeção estática isolada.
+
+Cobertura confirmada: PE x64 válido; Caller/Listener/Rendezvous constroem URL válida com latência no intervalo broadcast 20–8000ms; AES-128/192/256 com `pbkeylen` e Stream ID; loopback de transporte UDP; regras 4:4:4/Fill-Key/HDR. Hash do `srt.dll` instalado (`63110eb3d82a33d1...`) bate com o registrado em auditoria QA anterior desta mesma rodada de trabalho.
+
+Reconexão automática: `ferramentas/saidas-watchdog.mjs` já implementa supervisão e reconexão com jitter anti-avalanche para qualquer saída de streaming, incluindo SRT — não é específico de protocolo, reaproveitado, não duplicado.
+
+**Não coberto por este teste** (limite explícito do próprio script): perda de pacotes real sob rede degradada, diagnóstico textual de causa de queda exposto ao operador na interface, e conexão SRT real ponta a ponta entre duas redes distintas. Esses permanecem para os Alpha testers com equipamento físico, conforme o pedido original.
