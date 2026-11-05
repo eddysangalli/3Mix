@@ -21,3 +21,17 @@ test('malformed existing clock configuration is rejected before writes',async()=
  const calls=[];await assert.rejects(setClockMessage({req:async t=>{calls.push(t);return {slotValue};}},{slot:1,message:'AVISO'}),/inválida/);assert.deepEqual(calls,['GetPersistentData']);
  }
 });
+
+
+test('clock macro survives actual disk reload and controller resolves saved macro',async()=>{
+ const {mkdir,mkdtemp,rm}=await import('node:fs/promises');
+ const qa=new URL('../qa-finalizacao/',import.meta.url);await mkdir(qa,{recursive:true});const root=await mkdtemp(new URL('clock-macro-',qa));
+ try{
+ const p={root,state:{connected:true},publish(){}};const first=new MacroEngine(p);await first.setScope('QA clocks');
+ await first.execute('macro_save',{name:'Aviso produção',steps:[{action:'clock_message',data:{slot:3,message:'FALTAM 2 MINUTOS'}}]});
+ const second=new MacroEngine(p);await second.setScope('QA clocks');assert.equal(second.items.length,1);
+ assert.deepEqual(second.items[0].steps,[{action:'clock_message',data:{slot:3,message:'FALTAM 2 MINUTOS'}}]);
+ p.macroEngine=second;const controller=new ControllerEngine(p);const target=controller.normalizeTarget({action:'macro_run',data:{id:second.items[0].id}},{type:'keyboard'});
+ assert.equal(target.data.id,second.items[0].id);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
