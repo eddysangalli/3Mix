@@ -253,7 +253,7 @@ export class DiskReplay {
         case "load": await this.load(data.player, data.eventId, data.cam); break;
         case "air": await this.air(data.player); break;
         case "live": await this.live(); break;
-        case "speed": await this.speed(Number(data.speed)); break;
+        case "speed": await this.speed(Number(data.speed),data.player); break;
         case "delete": this.state.events = this.state.events.filter((e) => e.id !== data.eventId); await this.save(); break;
         default: throw new Error("Comando de replay desconhecido");
       }
@@ -1319,9 +1319,11 @@ export class DiskReplay {
     for(const p of Object.values(this.state.players))if(!p.metadataProbed||!p.cadenceChecked||p.cadence?.method!=='finite-full-decoded-pts'||!(await this.cadenceScanner().matches(p.file,p.cadence?.identity))){const media=await this.probe(p.file,true);Object.assign(p,{metadataProbed:true,cadenceChecked:true,cadence:media.cadence,hasVideo:media.hasVideo,duration:media.duration,frameRate:media.frameRate,variableFrameRate:media.variableFrameRate,audio:media.audio,offsetFrames:replayCameraOptions(this.state.cameraOptions?.[p.cam]).offsetFrames});}
   }
 
-  async speed(value) {
+  async speed(value, playerId) {
     if (!Number.isFinite(value) || value < 10 || value > 100) throw new Error("A velocidade deve estar entre 10% e 100%");
-    for (const player of Object.keys(this.state.players)) {
+    if(playerId!==undefined&&(!REPLAY_PLAYERS.includes(playerId)||!this.state.players[playerId]))throw Error('Player inválido');
+    const players=playerId===undefined?Object.keys(this.state.players):[playerId];
+    for (const player of players) {
       const inputName = `Replay Player ${player}`;
       const before = await this.req("GetMediaInputStatus", { inputName });
       const settings=await this.req("GetInputSettings",{inputName});if(Number(settings.inputSettings.speed_percent||100)===value)continue;
@@ -1341,7 +1343,7 @@ export class DiskReplay {
       await this.req("SetMediaInputCursor", { inputName, mediaCursor: target });
       if(paused)await this.waitFor("GetMediaInputStatus",{inputName},m=>Number.isFinite(m.mediaCursor)&&Math.abs(m.mediaCursor-target)<100);
     }
-    this.state.speed = value;
+    if(playerId===undefined)this.state.speed = value;
     await this.save();
   }
 
