@@ -1402,15 +1402,16 @@ export class DiskReplay {
       event = this.state.events.find(e => e.id === d.eventId);
     } else if (d.index !== undefined) {
       const idx = Number(d.index);
-      event = this.state.events[idx >= 0 ? idx : 0];
+      if(!Number.isSafeInteger(idx)||idx<0||idx>=this.state.events.length)throw Error("Índice de lance inválido");
+      event = this.state.events[idx];
     } else if (this.state.selectedEventId) {
       event = this.state.events.find(e => e.id === this.state.selectedEventId);
     } else {
       event = this.state.events[0];
     }
     if (!event) throw Error("Lance não encontrado");
-    this.state.selectedEventId = event.id;
     await this.load(player, event.id, d.cam);
+    this.state.selectedEventId = event.id;
     if (d.toOutput === true) {
       await this.air(player);
     }
@@ -1433,12 +1434,13 @@ export class DiskReplay {
     }
     if(!Number.isInteger(targetIdx))throw Error("Índice de lance inválido");
     const event = this.state.events[targetIdx];
-    this.state.selectedEventId = event.id;
+    const previousSelection=this.state.selectedEventId;
     if (d.load === true) {
       const player = d.player || this.state.activePlayer;
       await this.load(player, event.id, d.cam);
     }
-    await this.save();
+    this.state.selectedEventId = event.id;
+    try{await this.save();}catch(error){this.state.selectedEventId=previousSelection;throw error;}
     return event;
   }
 

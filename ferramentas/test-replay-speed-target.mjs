@@ -48,3 +48,15 @@ test('valid frame jog uses rational frame rate and clamps at clip boundaries',as
  await r.jump({player:'A',seconds:-100});assert.equal(target,0);
  await r.jump({player:'A',seconds:100});assert.equal(target,10000);
 });
+
+test('failed load does not change selected event or send event to output',async()=>{
+ const {r}=fixture();r.state.events=[{id:'one'},{id:'two'}];r.state.selectedEventId='one';r.load=async()=>{throw Error('decoder unavailable');};let aired=false;r.air=async()=>{aired=true;};
+ await assert.rejects(r.playEvent({eventId:'two',toOutput:true}),/decoder/);assert.equal(r.state.selectedEventId,'one');assert.equal(aired,false);
+ await assert.rejects(r.selectEvent({eventId:'two',load:true}),/decoder/);assert.equal(r.state.selectedEventId,'one');
+});
+test('selection persistence failure restores previous selection',async()=>{
+ const {r}=fixture();r.state.events=[{id:'one'},{id:'two'}];r.state.selectedEventId='one';r.save=async()=>{throw Error('disk');};await assert.rejects(r.selectEvent({eventId:'two'}),/disk/);assert.equal(r.state.selectedEventId,'one');
+});
+test('play-event invalid indexes never silently fall back to first event',async()=>{
+ const {r}=fixture();r.state.events=[{id:'one'}];let loaded=false;r.load=async()=>{loaded=true;};for(const index of [-1,0.5,NaN,Infinity,10])await assert.rejects(r.playEvent({index}),/Índice/);assert.equal(loaded,false);
+});
