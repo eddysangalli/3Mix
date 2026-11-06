@@ -71,6 +71,11 @@ add_core_module(
     WITH_MESSAGE
 )
 add_core_module(
+    3mix-vst3
+    PLATFORMS WINDOWS
+    WITH_MESSAGE
+)
+add_core_module(
     frontend-tools
     PLATFORMS WINDOWS MACOS LINUX
     WITH_MESSAGE
