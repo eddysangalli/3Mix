@@ -8,7 +8,7 @@
 body { grid-template-rows:32px 32px 152px minmax(0,1fr) 40px 22px; }
 /* O dock Menu é o único cabeçalho da aplicação, acima dos monitores. */
 body:not(.popup-mode) > .studio-topbar { display:none; }
-.b,.bot .b,.vmix-btn { border-radius:4px; border-color:var(--bd); background:linear-gradient(#373737,#292929); box-shadow:inset 0 1px #ffffff08; }
+.b,.bot .b,.vmix-btn { border-radius:4px; border-color:var(--bd); background:#303030; }
 .b:hover,.bot .b:hover,.vmix-btn:hover { background:#414141; border-color:#666; }
 button:focus-visible,input:focus-visible,select:focus-visible { outline:2px solid #ddd; outline-offset:-2px; }
 .media-row { height:40px; padding:0 6px; background:var(--bg); }
@@ -20,7 +20,7 @@ button:focus-visible,input:focus-visible,select:focus-visible { outline:2px soli
 .vmix-thumb { height:15px; background:#bebebe; border-color:#777; border-radius:2px; }
 .vmix-progress { background:#888; }
 #media-trans-ctrl { flex-direction:row !important; padding:4px !important; }
-#media-trans-ctrl button { height:30px !important; border:1px solid #555; border-radius:4px; background:linear-gradient(#414141,#2a2a2a); font-size:11px; }
+#media-trans-ctrl button { height:30px !important; border:1px solid #555; border-radius:4px; background:#363636; font-size:11px; box-shadow:0 1px 3px rgba(0,0,0,0.4); }
 #dsk-bar-strip { background:#232323 !important; border-color:#3c3c3c !important; padding:3px 6px !important; overflow-x:auto; overflow-y:hidden; }
 #dsk-bar-strip > div { flex-shrink:0; }
 #dsk-bar-strip span,#dsk-bar-strip b { color:#ccc !important; }
@@ -99,7 +99,7 @@ body:not(.popup-mode) .side-panel-header { display:flex; height:32px; padding:3p
 .strip .col .fw.lit { background:#246699 !important; border-color:#5e9dc9 !important; color:#fff !important; box-shadow:none !important; }
 .strip .fd { background:repeating-linear-gradient(180deg,#777 0 1px,transparent 1px 13px) left center / 5px calc(100% - 12px) no-repeat; }
 .strip .fd::before { background:#0f0f0f; width:3px; }
-.strip .fd i { width:21px; margin-left:-10px; background:linear-gradient(#72a9d4,#3e78ad) !important; border-color:#a9c4dc !important; box-shadow:0 1px 2px #0008 !important; }
+.strip .fd i { width:21px; margin-left:-10px; background:#5891c1 !important; border-color:#a9c4dc !important; box-shadow:0 1px 2px #0008 !important; }
 .strip .pan input::-webkit-slider-runnable-track { background:#696969; }
 .strip .bt { justify-content:center; padding:0 2px; }
 #mixer .busoff { height:100%; width:170px; flex-shrink:0; background:#242424; border-color:#444; }
@@ -456,11 +456,10 @@ body.native-switcher { grid-template-columns:minmax(0,1fr); grid-template-rows:4
   font-size: 12px;
   font-weight: 600;
   border-radius: 4px;
-  background: linear-gradient(180deg, #373737 0%, #292929 100%);
+  background: #303030;
   border: 1px solid #494949;
   color: #ededed;
   cursor: pointer;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 .bot .b:hover {
   background: #414141;
@@ -471,7 +470,7 @@ body.native-switcher { grid-template-columns:minmax(0,1fr); grid-template-rows:4
   height: 32px;
   padding: 0 12px;
   font-size: 12px;
-  background: linear-gradient(180deg, #373737 0%, #292929 100%);
+  background: #303030;
   border: 1px solid #494949;
   color: #ededed;
   font-weight: 600;
@@ -488,7 +487,7 @@ body.native-switcher { grid-template-columns:minmax(0,1fr); grid-template-rows:4
   padding: 0;
   display: grid;
   place-items: center;
-  background: linear-gradient(180deg, #373737 0%, #292929 100%);
+  background: #303030;
   border: 1px solid #494949;
   border-radius: 4px 0 0 4px;
   color: #c0c0c0;
@@ -527,13 +526,12 @@ body.native-switcher { grid-template-columns:minmax(0,1fr); grid-template-rows:4
   font-weight: 600;
   letter-spacing: 0.2px;
   white-space: nowrap;
-  background: linear-gradient(180deg, #373737 0%, #292929 100%);
+  background: #303030;
   border: 1px solid #494949;
   border-radius: 4px;
   color: #dedede;
   cursor: pointer;
   transition: all 0.12s ease;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 .bot .ib:hover {
   background: #414141;
@@ -541,7 +539,7 @@ body.native-switcher { grid-template-columns:minmax(0,1fr); grid-template-rows:4
   color: #ffffff;
 }
 .bot .ib.on, .bot .ib.lockon {
-  background: linear-gradient(180deg, #991b1b 0%, #7f1d1d 100%);
+  background: #8c1c1c;
   border-color: #dc2626;
   color: #ffffff;
   box-shadow: 0 0 6px rgba(220, 38, 38, 0.4);
@@ -575,7 +573,7 @@ body.native-switcher { grid-template-columns:minmax(0,1fr); grid-template-rows:4
   font-weight: 700;
   padding: 0 9px;
   border-radius: 3px;
-  background: linear-gradient(180deg, #303030 0%, #252525 100%);
+  background: #2b2b2b;
   border: 1px solid #404040;
   color: #a8a8a8;
   cursor: pointer;
@@ -588,10 +586,10 @@ body.native-switcher { grid-template-columns:minmax(0,1fr); grid-template-rows:4
   border-color: #555555;
 }
 .bot .lt.on {
-  background: linear-gradient(180deg, #4d4d4d 0%, #3d3d3d 100%);
+  background: #454545;
   color: #ffffff;
   border-color: #707070;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 1px 2px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 /* Linha inferior de telemetria e status com espaçamento amplo e generoso */

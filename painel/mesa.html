@@ -84,17 +84,17 @@
   }
   .vmix-btn {
     height: 34px; font-size: 11px; font-weight: 600; color: #d0d7e2;
-    background: linear-gradient(180deg, #434343 0%, #2d2d2d 100%);
+    background: #383838;
     border: 1px solid #4a576a; border-radius: 2px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.4);
     cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
     white-space: nowrap; user-select: none;
   }
   .vmix-btn:hover {
-    background: linear-gradient(180deg, #445163 0%, #363636 100%); color: #fff; border-color: #5d6d84;
+    background: #3d444d; color: #fff; border-color: #5d6d84;
   }
   .vmix-btn:active {
-    background: #232323; box-shadow: inset 0 1px 2px rgba(0,0,0,0.6);
+    background: #232323;
   }
   .vmix-btn.restart { padding: 0 8px; font-size: 10.5px; }
   .vmix-btn.pp { width: 40px; font-size: 16px; }
@@ -127,8 +127,8 @@
   .pop label.chk { display: flex; gap: 6px; align-items: center; margin-bottom: 3px; color: var(--tx); } .pop label.chk input { height: auto; }
   .bot .arrow { width: 18px; padding: 0; border-left: 0; font-size: 9px; }
   .tt .tag.none { border-color: transparent; } .tile:hover .tag.none { border: 1px dashed rgba(255, 255, 255, .45); }
-  .tt.pv { background: linear-gradient(180deg, #16a34a, #15803d); color: #fff; } .tt.pv .n { background: #14532d; color: #fff; }
-  .tt.out { background: linear-gradient(180deg, #b91c1c, #991b1b); color: #fff; } .tt.out .n { background: #7f1d1d; color: #fff; }
+  .tt.pv { background: #169244; color: #fff; } .tt.pv .n { background: #14532d; color: #fff; }
+  .tt.out { background: #a91c1c; color: #fff; } .tt.out .n { background: #7f1d1d; color: #fff; }
   .th { height: 97px; background: #000; display: block; width: 100%; position: relative; }
   .th img { width: 100%; height: 100%; object-fit: contain; display: block; }
   .tile.is-pv .th { outline: 2px solid #16a34a; outline-offset: -2px; }
@@ -153,7 +153,7 @@
   .mt.clip { box-shadow: 0 0 4px 1px #ff3838, inset 0 0 0 1px #ff3838; }
   .fd { width: 18px; position: relative; touch-action: none; cursor: ns-resize; }
   .fd::before { content: ""; position: absolute; left: 50%; top: 4px; bottom: 4px; width: 2px; margin-left: -1px; background: #505966; }
-  .fd i { position: absolute; left: 0; right: 0; height: 10px; bottom: calc(var(--v, 0) * (100% - 10px)); background: linear-gradient(180deg, #d8e0ea, #9ea8b5); border: 1px solid #232323; border-radius: 1px; }
+  .fd i { position: absolute; left: 0; right: 0; height: 10px; bottom: calc(var(--v, 0) * (100% - 10px)); background: #bbc4d0; border: 1px solid #232323; border-radius: 1px; }
   .strip .db { font-size: 10px; color: var(--mut); font-variant-numeric: tabular-nums; font-family: Consolas, monospace; }
   .strip .bt button { width: 26px; height: 17px; font-size: 10px; font-weight: 800; background: var(--btn); border: 1px solid var(--bd); display: grid; place-items: center; border-radius: 2px; }
   .strip .bt .muted { background: var(--red); border-color: #ef5a4f; color: #fff; }
@@ -162,7 +162,7 @@
   .bot { display: flex; align-items: center; justify-content: space-between; padding: 0 8px; background: var(--bar); gap: 6px; border-top: 1px solid #323232; }
   .bot .g { display: flex; align-items: center; gap: 3px; } .bot .gear { width: 26px; padding: 0; }
   .bot .tc { font: 700 12px Consolas, monospace; padding: 0 6px; color: #ffad99; background: #261715; border-radius: 2px; margin-left: 2px; }
-  .b.add-input { background: linear-gradient(180deg, #373737, #292929); border-color: var(--bd, #494949); color: var(--tx, #ededed); font-weight: 600; height: 26px; padding: 0 14px; font-size: 12px; }
+  .b.add-input { background: #303030; border-color: var(--bd, #494949); color: var(--tx, #ededed); font-weight: 600; height: 26px; padding: 0 14px; font-size: 12px; }
   .b.add-input:hover { background: #414141; border-color: #666666; color: #ffffff; }
   .stat { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 0 12px; background: #121212; font-size: 11px; white-space: nowrap; overflow: hidden; border-top: 1px solid #212121; }
   .stat .stat-info { display: flex; align-items: center; gap: 12px; flex: none; }
@@ -320,8 +320,8 @@
   .tri { width: 0; height: 0; border-left: 7px solid currentColor; border-top: 4px solid transparent; border-bottom: 4px solid transparent; }
   .toast { position: fixed; left: 50%; bottom: 60px; transform: translateX(-50%); background: #272727; border: 1px solid #5a636e; padding: 7px 12px; z-index: 30; display: none; max-width: 80vw; border-radius: 3px; box-shadow: 0 4px 14px rgba(0,0,0,0.6); }
   .toast.on { display: block; } .toast.err { border-color: #ef5a4f; color: #ffc4bf; }
-  .tt.pv { background: linear-gradient(180deg, #12a31a, #0a7a10); color: #fff; } .tt.pv .n { background: #07590b; color: #fff; }
-  .tt.out { background: linear-gradient(180deg, #e0281c, #b3160d); color: #fff; } .tt.out .n { background: #8a0f08; color: #fff; }
+  .tt.pv { background: #0e8f15; color: #fff; } .tt.pv .n { background: #07590b; color: #fff; }
+  .tt.out { background: #ca1f15; color: #fff; } .tt.out .n { background: #8a0f08; color: #fff; }
   .tile.is-pv { border-color: #12a31a; } .tile.is-out { border-color: #e0281c; }
   .tt .x { width: 20px; height: 100%; flex: none; font-weight: 700; color: inherit; opacity: .8; } .tt .x:hover { opacity: 1; background: rgba(0, 0, 0, .3); }
   .bot .cg { width: 26px; padding: 0; margin-left: 10px; border-right: 0; } .bot .cg svg { width: 13px; height: 13px; }
@@ -489,7 +489,7 @@
   .rp-panoramic-grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: 12px; align-items: start; }
   @media (max-width: 900px) { .rp-panoramic-grid { grid-template-columns: 1fr; } }
   .rp-col { display: flex; flex-direction: column; gap: 8px; }
-  .rp-box { background: #181818; border: 1px solid #3a3a3a; border-radius: 4px; padding: 10px 12px; margin-bottom: 0; box-shadow: inset 0 1px 0 rgba(255,255,255,0.03); }
+  .rp-box { background: #181818; border: 1px solid #3a3a3a; border-radius: 4px; padding: 10px 12px; margin-bottom: 0; }
   .rp-box h4 { margin: 0 0 7px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #a4b3c6; display: flex; justify-content: space-between; align-items: center; letter-spacing: 0.3px; }
   .rp-cams-grid { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 6px; }
   .rp-cam-item { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; background: #212121; padding: 3px 8px; border: 1px solid #414141; border-radius: 3px; cursor: pointer; }
@@ -659,7 +659,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   .brand-box .brand-title b { color: #00d2d3; }
   .brand-box .brand-logo { display: block; height: 24px; width: auto; }
   .brand-box .brand-badge {
-    background: linear-gradient(135deg, #0984e3, #00cec9);
+    background: #05a9d6;
     color: #000;
     padding: 1px 6px;
     border-radius: 3px;
@@ -941,7 +941,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   .btn-atem-cut {
     flex: 1.2;
     height: 100%;
-    background: linear-gradient(180deg, #991414, #730e0e);
+    background: #861111;
     border: 1px solid #c0392b;
     color: #fff;
     font-size: 11px;
@@ -952,22 +952,23 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     box-shadow: 0 1px 3px rgba(0,0,0,0.5);
   }
   .btn-atem-cut:hover {
-    background: linear-gradient(180deg, #b81919, #8c1111);
+    background: #a21515;
     border-color: #e74c3c;
   }
   .btn-atem-auto {
     flex: 1.2;
     height: 100%;
-    background: linear-gradient(180deg, #2b2b2b, #1c1c1c);
+    background: #242424;
     border: 1px solid #3d4f63;
     color: #dcdde1;
     font-size: 11px;
     font-weight: 800;
     border-radius: 2px;
     cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.5);
   }
   .btn-atem-auto:hover {
-    background: linear-gradient(180deg, #3c3c3c, #282828);
+    background: #323232;
     color: #fff;
   }
   .btn-atem-ftb {
@@ -988,7 +989,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
 
   /* Audio Mixer Pro Refinements (MotionCaster & ATEM Fairlight) */
   .strip .fd i {
-    background: linear-gradient(180deg, #00d2d3, #0984e3) !important;
+    background: #05abdb !important;
     border: 1px solid #70d6ff !important;
     box-shadow: 0 0 6px rgba(0, 210, 211, 0.45) !important;
     height: 12px !important;

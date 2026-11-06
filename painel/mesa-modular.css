@@ -80,9 +80,9 @@ body.no-inputs:not(:has(#side-panel.on)):not(:has(#side-panel-2.on)) .mid-empty 
 .stat { gap: 16px; }
 .stat-info { display: flex; align-items: center; gap: 14px; flex: none; min-width: 0; }
 .view-toggles { display: inline-flex; align-items: center; gap: 4px; flex: none; background: #171717; padding: 2px 8px; border: 1px solid #353535; border-radius: 4px; }
-.view-toggles .lt { height: 28px; padding: 0 9px; font: 700 11px/26px 'Segoe UI'; background: linear-gradient(180deg, #303030 0%, #252525 100%); border: 1px solid #404040; border-radius: 3px; color: #a8a8a8; cursor: pointer; transition: all 0.12s ease; }
+.view-toggles .lt { height: 28px; padding: 0 9px; font: 700 11px/26px 'Segoe UI'; background: #2b2b2b; border: 1px solid #404040; border-radius: 3px; color: #a8a8a8; cursor: pointer; transition: all 0.12s ease; }
 .view-toggles .lt:hover { border-color: #555555; color: #f0f0f0; background: #3c3c3c; }
-.view-toggles .lt.on { background: linear-gradient(180deg, #4d4d4d 0%, #3d3d3d 100%); border-color: #707070; color: #ffffff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 1px 2px rgba(0, 0, 0, 0.5); }
+.view-toggles .lt.on { background: #454545; border-color: #707070; color: #ffffff; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); }
 
 /* ===== Dock de Áudio no idioma da janela completa (mockup) =====
    Mesma paleta por categoria do Áudio (MIC vermelho, CAM verde, VT amarelo,
@@ -96,19 +96,19 @@ body.no-inputs:not(:has(#side-panel.on)):not(:has(#side-panel-2.on)) .mid-empty 
 #view-mixer #mixer .strip .hd { height: 34px; flex: none; display: flex; align-items: center; gap: 5px; padding: 0 7px; color: #eef1f4; border-bottom: 1px solid rgba(0,0,0,.35); background: #242830 !important; }
 #view-mixer #mixer .strip .hd b { width: 20px; height: 15px; flex: none; display: grid; place-items: center; font: 700 8.5px/1 'Segoe UI'; background: rgba(0,0,0,.35); border-radius: 2px; color: #fff; }
 #view-mixer #mixer .strip .hd span { font-size: 10.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#view-mixer #mixer .strip[data-visual="mic"] .hd { background: linear-gradient(180deg, #a33a3a, #7d2929) !important; }
-#view-mixer #mixer .strip[data-visual="cam"] .hd { background: linear-gradient(180deg, #2f7d4f, #22603b) !important; }
-#view-mixer #mixer .strip[data-visual="vt"] .hd { background: linear-gradient(180deg, #b08c1e, #8a6d14) !important; }
-#view-mixer #mixer .strip[data-visual="replay"] .hd { background: linear-gradient(180deg, #6b4fa0, #513a7d) !important; }
-#view-mixer #mixer .strip[data-visual="call"] .hd { background: linear-gradient(180deg, #2f5f9e, #234777) !important; }
-#view-mixer #mixer .strip[data-visual="trilha"] .hd { background: linear-gradient(180deg, #b06a2c, #8a4f1f) !important; }
-#view-mixer #mixer .strip[data-visual="aux"] .hd { background: linear-gradient(180deg, #2f7f72, #226055) !important; }
-#view-mixer #mixer .strip.out[data-visual="main"] .hd { background: linear-gradient(180deg, #2f7d4f, #1f5f3a) !important; }
-#view-mixer #mixer .strip.out[data-visual="a"] .hd { background: linear-gradient(180deg, #2f5f9e, #234777) !important; }
-#view-mixer #mixer .strip.out[data-visual="b"] .hd { background: linear-gradient(180deg, #6b4fa0, #513a7d) !important; }
+#view-mixer #mixer .strip[data-visual="mic"] .hd { background: #903232 !important; }
+#view-mixer #mixer .strip[data-visual="cam"] .hd { background: #296f45 !important; }
+#view-mixer #mixer .strip[data-visual="vt"] .hd { background: #9d7d19 !important; }
+#view-mixer #mixer .strip[data-visual="replay"] .hd { background: #5e458f !important; }
+#view-mixer #mixer .strip[data-visual="call"] .hd { background: #29538b !important; }
+#view-mixer #mixer .strip[data-visual="trilha"] .hd { background: #9d5d26 !important; }
+#view-mixer #mixer .strip[data-visual="aux"] .hd { background: #297064 !important; }
+#view-mixer #mixer .strip.out[data-visual="main"] .hd { background: #276e45 !important; }
+#view-mixer #mixer .strip.out[data-visual="a"] .hd { background: #29538b !important; }
+#view-mixer #mixer .strip.out[data-visual="b"] .hd { background: #5e458f !important; }
 #view-mixer #mixer .pan { height: 20px; flex: none; display: grid; place-items: center; background: transparent; border-bottom: 1px solid #303030; }
 #view-mixer #mixer .pan input { -webkit-appearance: none; appearance: none; width: 74%; height: 4px; background: #191919; border: 1px solid #383838; border-radius: 2px; cursor: pointer; padding: 0; }
-#view-mixer #mixer .pan input::-webkit-slider-thumb { -webkit-appearance: none; width: 11px; height: 11px; border-radius: 50%; background: linear-gradient(180deg, #c9d0d7, #8d959c); border: 1px solid #565f68; }
+#view-mixer #mixer .pan input::-webkit-slider-thumb { -webkit-appearance: none; width: 11px; height: 11px; border-radius: 50%; background: #abb3ba; border: 1px solid #565f68; }
 #view-mixer #mixer .bd { flex: 1; min-height: 118px; display: flex; align-items: stretch; gap: 4px; padding: 4px; background: transparent; }
 #view-mixer #mixer .bd .col { width: 22px; flex: none; display: flex; flex-direction: column; gap: 3px; }
 #view-mixer #mixer .bd .col button { width: 22px; height: 20px; padding: 0; display: grid; place-items: center; font-size: 9px; background: #303030; border: 1px solid #4a4a4a; border-radius: 3px; color: #d5d5d5; cursor: pointer; }
@@ -117,7 +117,7 @@ body.no-inputs:not(:has(#side-panel.on)):not(:has(#side-panel-2.on)) .mid-empty 
 #view-mixer #mixer .bd .col .fw { background: #303030; border-color: #4a4a4a; }
 #view-mixer #mixer .bd .col .fw.lit { background: #173242 !important; border-color: #2f6f98 !important; }
 #view-mixer #mixer .fd { width: 26px; flex: none; position: relative; background: #191919; border: 1px solid #383838; border-radius: 3px; cursor: ns-resize; }
-#view-mixer #mixer .fd i { background: linear-gradient(180deg, #72a9d4, #3e78ad); border: 1px solid #a9c4dc; border-radius: 3px; height: 11px; }
+#view-mixer #mixer .fd i { background: #5891c1; border: 1px solid #a9c4dc; border-radius: 3px; height: 11px; }
 #view-mixer #mixer .mt { flex: 1 1 5px; min-width: 5px; }
 #view-mixer #mixer .dbchip { flex: none; height: 18px; margin: 0 4px 4px; display: flex; align-items: center; justify-content: center; font: 600 10.5px/1 Consolas, monospace; background: #1b1b1b; border: 1px solid #383838; border-radius: 3px; color: #e0e0e0; }
 #view-mixer #mixer .bt { flex: none; display: flex; gap: 3px; padding: 0 4px 4px; }
