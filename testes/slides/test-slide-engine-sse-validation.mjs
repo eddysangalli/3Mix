@@ -2,9 +2,8 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import fs from 'node:fs';
 import { resolve, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { SlideEngine } from '../../ferramentas/apresentacao-slides.mjs';
-import { connect } from 'file:///D:/DRIVE/IA/antigravity/3Mix/3mix-runtime/ferramentas/obsws.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -20,9 +19,15 @@ async function runSSEValidationTest() {
   let obs = null;
   let runtimeTested = false;
   let testSceneName = null;
+  let sceneCreated = false;
 
   try {
     console.log('[1/7] Conectando ao 3Mix Pro...');
+    if (process.env.MIX3_QA_ALLOW_LIVE !== 'YES') {
+      console.log('[SKIPPED] Teste SSE no OBS requer instância exclusiva de QA e MIX3_QA_ALLOW_LIVE=YES');
+      return;
+    }
+    const { connect } = await import(pathToFileURL(resolve(RUNTIME_ROOT, 'ferramentas/obsws.mjs')).href);
     obs = await connect({ root: RUNTIME_ROOT });
     console.log('   [PASS] Conectado');
     runtimeTested = true;
@@ -31,6 +36,7 @@ async function runSSEValidationTest() {
     return;
   }
 
+  try {
   const productionAdapter = {
     req: (type, data) => obs.req(type, data),
     getObs: () => obs
@@ -47,8 +53,9 @@ async function runSSEValidationTest() {
   if (!fs.existsSync(QA_DIR)) fs.mkdirSync(QA_DIR, { recursive: true });
 
   // Create isolated scene
-  testSceneName = `${ISOLATED_SCENE_PREFIX}Slides`;
-  await obs.req('CreateScene', { sceneName: testSceneName }).catch(() => {});
+  testSceneName = `${ISOLATED_SCENE_PREFIX}Slides_${process.pid}_${Date.now()}`;
+  await obs.req('CreateScene', { sceneName: testSceneName });
+  sceneCreated = true;
   console.log(`   Cena isolada: ${testSceneName}`);
 
   // -------------------------------------------------------------
@@ -175,11 +182,6 @@ async function runSSEValidationTest() {
   assert.strictEqual(bufDuringPreview.toString('base64'), bufStep2.toString('base64'), 'Program inalterado ao armar Preview');
   console.log('   [PASS] Program inalterado — Preview isolado');
 
-  // Cleanup
-  await obs.req('RemoveScene', { sceneName: testSceneName }).catch(() => {});
-  console.log('   [PASS] Cena isolada removida');
-
-  obs.close();
   console.log('\n=== TESTE SSE-ONLY: TODOS PASS ===');
   console.log('  ✓ Browser Source NÃO recarregou (UUID preservado em 4 animações + volta)');
   console.log('  ✓ Animações aplicadas via SSE (frames mudam sem reload)');
@@ -187,6 +189,16 @@ async function runSSEValidationTest() {
   console.log('  ✓ Preview armado não afeta Program');
   console.log('  ✓ Cena isolada criada e removida — sem lixo no runtime');
   console.log('Evidências:', QA_DIR);
+  } finally {
+    try {
+      if (sceneCreated) {
+        await obs.req('RemoveScene', { sceneName: testSceneName });
+        console.log('   [PASS] Cena isolada removida');
+      }
+    } finally {
+      if (obs) obs.close();
+    }
+  }
 }
 
 runSSEValidationTest().catch(err => {

@@ -19,11 +19,11 @@
  * e recuperação via Safe Mode (load-report.json), NÃO sandbox de memória.
  */
 import assert from 'node:assert/strict';
-import { readFileSync, existsSync, mkdirSync, rmSync, copyFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, existsSync, mkdirSync, mkdtempSync, rmSync, copyFileSync, writeFileSync } from 'node:fs';
 import { resolve, join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { inspectPe } from 'file:///D:/DRIVE/IA/antigravity/3Mix/3mix-panel/ferramentas/plugin-manager-pe.mjs';
-import { PluginManager, applyPendingPlugins } from 'file:///D:/DRIVE/IA/antigravity/3Mix/3mix-panel/ferramentas/plugin-manager.mjs';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { inspectPe } from '../../ferramentas/plugin-manager-pe.mjs';
+import { PluginManager, applyPendingPlugins } from '../../ferramentas/plugin-manager.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -91,7 +91,7 @@ let isolatedRuntimeRoot = null;
 
 async function connectObs() {
   try {
-    const { connect } = await import('file:///D:/DRIVE/IA/antigravity/3Mix/3mix-runtime/ferramentas/obsws.mjs');
+    const { connect } = await import(pathToFileURL(resolve(RUNTIME_ROOT, 'ferramentas/obsws.mjs')).href);
     obs = await connect({ root: RUNTIME_ROOT });
     console.log('[INIT] Conectado ao 3Mix Pro via OBS WebSocket — testes de runtime HABILITADOS\n');
     return true;
@@ -103,8 +103,10 @@ async function connectObs() {
 
 // Create isolated runtime copy for testing
 async function createIsolatedRuntime() {
-  isolatedRuntimeRoot = resolve(PROJECT_ROOT, 'qa-finalizacao/runtime-isolado-test');
-  if (existsSync(isolatedRuntimeRoot)) rmSync(isolatedRuntimeRoot, { recursive: true, force: true });
+  const qaRoot = resolve(PROJECT_ROOT, 'qa-finalizacao');
+  mkdirSync(qaRoot, { recursive: true });
+  isolatedRuntimeRoot = mkdtempSync(join(qaRoot, 'runtime-isolado-test-'));
+  // Este diretório temporário foi criado por esta execução; nunca apagar uma pasta pré-existente.
   
   // Copy minimal runtime structure
   mkdirSync(join(isolatedRuntimeRoot, '3mix-plugins'), { recursive: true });
@@ -182,8 +184,10 @@ console.log('   [PASS] Não-plugin rejeitado\n');
 
 // 5. Proteção fábrica + ciclo isolado (sandbox)
 console.log('5. [ESTÁTICO] Proteção fábrica + ciclo isolado (sandbox)...');
-const sandboxRoot = resolve(PROJECT_ROOT, 'qa-finalizacao/sandbox-plugin-test');
-if (existsSync(sandboxRoot)) rmSync(sandboxRoot, { recursive: true, force: true });
+const sandboxParent = resolve(PROJECT_ROOT, 'qa-finalizacao');
+mkdirSync(sandboxParent, { recursive: true });
+const sandboxRoot = mkdtempSync(join(sandboxParent, 'sandbox-plugin-test-'));
+// Só remover ao final o diretório temporário gerado por esta execução.
 mkdirSync(join(sandboxRoot, 'obs-plugins/64bit'), { recursive: true });
 mkdirSync(join(sandboxRoot, 'bin/64bit'), { recursive: true });
 
@@ -249,11 +253,12 @@ console.log('\n=== PARTE 1 (ESTÁTICA): 5/5 PASS ===\n');
 // PARTE 2: RUNTIME ISOLADO (REQUER 3MIX ATIVO)
 // ============================================================
 
-const obsConnected = await connectObs();
+const obsConnected = process.env.MIX3_QA_ALLOW_LIVE === 'YES' ? await connectObs() : false;
+if (!obsConnected) console.log('[SKIPPED] Testes de plugins no processo OBS exigem instância exclusiva de QA e MIX3_QA_ALLOW_LIVE=YES.');
 
 if (obsConnected && obs) {
   runtimeTested = true;
-  console.log('--- PARTE 2: RUNTIME ISOLADO (cópia, não mexe no principal) ---\n');
+  console.log('--- PARTE 2: Teste experimental contra processo OBS ativo (ATENÇÃO: a cópia de DLL não isola memória/processo) ---\n');
   
   try {
     await createIsolatedRuntime();
@@ -303,8 +308,8 @@ if (obsConnected && obs) {
         inputName: 'TestAudioMonitor',
         inputKind: 'audio_monitor_source',
         inputSettings: {}
-      }).catch(() => {});
-      console.log('   [PASS] Tipo de fonte aceito (ou scene criada)');
+      });
+      console.log('   [PASS] CreateInput retornou sem erro');
     } catch (e) {
       throw new Error('Falha ao criar fonte do plugin: ' + e.message);
     }
