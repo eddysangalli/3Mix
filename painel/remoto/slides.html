@@ -9,8 +9,8 @@
   <link rel="stylesheet" href="3mix-padrao.css">
   <style>
     body {
-      background: #0f1318;
-      color: #e2e8f0;
+      background: #202020;
+      color: #ededed;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       margin: 0;
       padding: 0;
@@ -39,8 +39,8 @@
       justify-content: space-between;
       align-items: center;
       padding: 8px 16px;
-      background: #18202b;
-      border-bottom: 1px solid #283344;
+      background: #292929;
+      border-bottom: 1px solid #3c3c3c;
       flex: none;
     }
     .topbar-left {
@@ -52,15 +52,15 @@
       font-size: 14px;
       font-weight: 700;
       letter-spacing: 0.4px;
-      color: #38bdf8;
+      color: #ededed;
     }
     .deck-badge {
       font-size: 11px;
-      background: #232c3b;
+      background: #303030;
       padding: 3px 8px;
       border-radius: 4px;
-      color: #94a3b8;
-      border: 1px solid #334155;
+      color: #b2b2b2;
+      border: 1px solid #494949;
     }
     .topbar-actions {
       display: flex;
@@ -68,9 +68,9 @@
       align-items: center;
     }
     .btn {
-      background: #232d3d;
-      color: #f1f5f9;
-      border: 1px solid #3b4a60;
+      background: #303030;
+      color: #ededed;
+      border: 1px solid #505050;
       border-radius: 4px;
       padding: 6px 12px;
       font-size: 12px;
@@ -82,16 +82,16 @@
       transition: all 0.15s ease;
     }
     .btn:hover {
-      background: #313e54;
-      border-color: #60a5fa;
+      background: #414141;
+      border-color: #888888;
     }
     .btn.primary {
-      background: #0284c7;
-      border-color: #38bdf8;
+      background: #454545;
+      border-color: #ededed;
       color: #ffffff;
     }
     .btn.primary:hover {
-      background: #0369a1;
+      background: #505050;
     }
     .btn.present {
       background: linear-gradient(180deg, #16a34a, #15803d);
@@ -119,8 +119,8 @@
     .stage-card {
       display: flex;
       flex-direction: column;
-      background: #141a23;
-      border: 1px solid #253041;
+      background: #242424;
+      border: 1px solid #3c3c3c;
       border-radius: 6px;
       overflow: hidden;
       min-height: 0;
@@ -130,12 +130,12 @@
       justify-content: space-between;
       align-items: center;
       padding: 6px 12px;
-      background: #1b2330;
+      background: #292929;
       font-size: 11.5px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      border-bottom: 1px solid #283344;
+      border-bottom: 1px solid #3c3c3c;
     }
     .stage-card.preview .stage-header {
       color: #4ade80;
@@ -153,7 +153,7 @@
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      border-bottom: 1px solid #283344;
+      border-bottom: 1px solid #3c3c3c;
       flex: none;
     }
     .viewport-box img, .viewport-box svg {
@@ -162,7 +162,7 @@
       object-fit: contain;
     }
     .viewport-empty {
-      color: #475569;
+      color: #909090;
       font-size: 13px;
       text-align: center;
     }
@@ -172,13 +172,13 @@
       overflow-y: auto;
       font-size: 12.5px;
       line-height: 1.5;
-      background: #0c1017;
-      color: #cbd5e1;
+      background: #202020;
+      color: #d5d5d5;
     }
     .notes-title {
       font-size: 10.5px;
       text-transform: uppercase;
-      color: #64748b;
+      color: #a0a0a0;
       font-weight: 700;
       margin-bottom: 4px;
     }
@@ -200,8 +200,8 @@
     /* Thumbnails Carousel */
     .thumbnails-strip {
       height: 130px;
-      background: #11161f;
-      border-top: 1px solid #232c3b;
+      background: #202020;
+      border-top: 1px solid #303030;
       padding: 8px 14px;
       display: flex;
       gap: 10px;
@@ -213,8 +213,8 @@
       flex: none;
       width: 160px;
       height: 106px;
-      background: #18202b;
-      border: 2px solid #2e3a4e;
+      background: #292929;
+      border: 2px solid #494949;
       border-radius: 4px;
       cursor: pointer;
       position: relative;
@@ -224,7 +224,7 @@
       transition: all 0.15s ease;
     }
     .thumb-item:hover {
-      border-color: #60a5fa;
+      border-color: #888888;
       transform: translateY(-2px);
     }
     .thumb-item.is-preview {
@@ -275,11 +275,11 @@
       font-size: 10px;
       font-weight: 600;
       padding: 3px 6px;
-      background: #151b24;
+      background: #242424;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      color: #94a3b8;
+      color: #b2b2b2;
     }
 
     /* Shortcuts helper */
@@ -288,18 +288,18 @@
       justify-content: space-between;
       align-items: center;
       padding: 4px 16px;
-      background: #0a0d12;
+      background: #1c1c1c;
       font-size: 11px;
-      color: #64748b;
-      border-top: 1px solid #1c2430;
+      color: #a0a0a0;
+      border-top: 1px solid #353535;
       flex: none;
     }
     .kbd {
-      background: #1e293b;
-      color: #cbd5e1;
+      background: #303030;
+      color: #d5d5d5;
       padding: 1px 5px;
       border-radius: 3px;
-      border: 1px solid #334155;
+      border: 1px solid #494949;
       font-family: monospace;
     }
   </style>
@@ -340,16 +340,16 @@
       <button class="btn present" id="btn-present" title="Leva o slide do Preview para o Programa (Enter / Espaço)">
         APRESENTAR<br><span style="font-size:11px;font-weight:normal;">[ ENTER ]</span>
       </button>
-      <button class="btn" id="btn-anim-next" style="display:none;background:#4f46e5;border-color:#6366f1;" title="Executa o próximo passo da animação (Tecla N)">
-        ✨ Próx. Animação <span id="anim-step-badge" style="font-size:10px;background:#312e81;padding:1px 5px;border-radius:3px;">1/2</span>
+      <button class="btn" id="btn-anim-next" style="display:none;background:#454545;border-color:#777777;" title="Executa o próximo passo da animação (Tecla N)">
+        ✨ Próx. Animação <span id="anim-step-badge" style="font-size:10px;background:#303030;padding:1px 5px;border-radius:3px;">1/2</span>
       </button>
       <button class="btn" id="btn-prev" title="Slide Anterior (PageUp / Seta Esquerda)">◀ Anterior</button>
       <button class="btn" id="btn-next" title="Próximo Slide (PageDown / Seta Direita)">Próximo ▶</button>
       <button class="btn" id="btn-first" title="Primeiro Slide (Home)">⏮ Início</button>
       
       <!-- Controles de Vídeo Incorporado -->
-      <div id="video-controls" style="display:none;width:100%;flex-direction:column;gap:6px;padding:6px;background:#18202b;border:1px solid #283344;border-radius:4px;box-sizing:border-box;">
-        <div style="font-size:10px;font-weight:700;color:#38bdf8;text-align:center;">🎬 VÍDEO DO SLIDE</div>
+      <div id="video-controls" style="display:none;width:100%;flex-direction:column;gap:6px;padding:6px;background:#292929;border:1px solid #3c3c3c;border-radius:4px;box-sizing:border-box;">
+        <div style="font-size:10px;font-weight:700;color:#ededed;text-align:center;">🎬 VÍDEO DO SLIDE</div>
         <div style="display:flex;gap:4px;width:100%;">
           <button class="btn" id="btn-video-play" style="flex:1;padding:6px 4px;font-size:11px;justify-content:center;">▶ Play</button>
           <button class="btn" id="btn-video-pause" style="flex:1;padding:6px 4px;font-size:11px;justify-content:center;">⏸ Pause</button>
@@ -357,7 +357,7 @@
         </div>
       </div>
 
-      <label style="font-size:11px;color:#94a3b8;display:flex;align-items:center;gap:6px;cursor:pointer;margin-top:6px;">
+      <label style="font-size:11px;color:#b2b2b2;display:flex;align-items:center;gap:6px;cursor:pointer;margin-top:6px;">
         <input type="checkbox" id="chk-auto-advance" checked> Auto-avançar
       </label>
     </section>
@@ -373,8 +373,8 @@
       </div>
       <div class="notes-box">
         <div class="notes-title">📌 Slide no Ar:</div>
-        <div id="program-title" style="font-weight:700;color:#f8fafc;font-size:13.5px;margin-bottom:4px;">—</div>
-        <div id="program-subtitle" style="color:#94a3b8;">Nenhum conteúdo enviado para a saída.</div>
+        <div id="program-title" style="font-weight:700;color:#ededed;font-size:13.5px;margin-bottom:4px;">—</div>
+        <div id="program-subtitle" style="color:#b2b2b2;">Nenhum conteúdo enviado para a saída.</div>
         <div id="operator-warnings" style="display:none;background:#2d2013;border:1px solid #d97706;border-radius:4px;padding:6px 10px;margin-top:6px;font-size:11.5px;color:#fcd34d;"></div>
       </div>
     </section>
@@ -382,7 +382,7 @@
 
   <!-- THUMBNAILS CAROUSEL -->
   <footer class="thumbnails-strip" id="thumbs-strip">
-    <div style="color:#64748b;font-size:12px;display:flex;align-items:center;justify-content:center;width:100%;">
+    <div style="color:#a0a0a0;font-size:12px;display:flex;align-items:center;justify-content:center;width:100%;">
       Importe uma apresentação PPTX ou sequência de imagens para navegar pelos slides.
     </div>
   </footer>

@@ -1239,6 +1239,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     <div class="switcher-bank pgm" id="bank-pgm"><h2>PROGRAMA (PGM)<span class="bank-tools"><button class="bank-tool" data-a="bank_hide" data-v="pgm" title="Fechar a botoeira PGM. Reabra no rodapé.">×</button></span></h2><div class="switcher-inputs" id="switcher-pgm"></div></div>
   </section>
   <div class="tabs" id="tabs"></div>
+
   <div class="mid">
     <div class="tiles" id="tiles"></div>
     <div class="me-surface" id="me-surface" aria-label="M/E"></div>
@@ -1272,7 +1273,16 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     <div class="mid-empty" id="mid-empty" aria-live="polite"><b>Nada aberto na mesa</b><span><button class="b" data-a="ui_toggle" data-v="inputs">Abrir entradas</button><button class="b" data-a="ui_toggle" data-v="dock">Abrir dock</button><button class="b" data-a="ui_reset">Voltar ao padrão</button></span></div>
   </div>
   <div class="bot" id="bot"></div>
-  <div class="stat" id="stat-bar"><div class="stat-info" id="stat"></div><div class="stat-spacer"></div><div class="estado-ar" id="estado-ar" role="status" aria-label="O que está no ar"></div></div>
+  <div class="stat" id="stat-bar"><div class="stat-info" id="stat"></div><label style="display:flex;align-items:center;gap:6px;padding:4px 8px;font-size:11px" title="Somente miniaturas. Frequência desejada; limitada pelo tempo de captura e número de Inputs visíveis.">Miniaturas
+    <select id="thumbnail-skip" aria-label="Descarte de quadros das miniaturas">
+      <option value="legacy">Econômico (atual)</option>
+      <option value="0">Sem descarte</option>
+      <option value="2">Pular 1 a cada 2 quadros</option>
+      <option value="3">Pular 1 a cada 3 quadros</option>
+      <option value="5">Pular 1 a cada 5 quadros</option>
+      <option value="10">Pular 1 a cada 10 quadros</option>
+    </select>
+  </label><div class="stat-spacer"></div><div class="estado-ar" id="estado-ar" role="status" aria-label="O que está no ar"></div></div>
   <div class="pop" id="pop"></div>
   <div id="operation-status" hidden style="position:fixed;top:4px;left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 24px);box-sizing:border-box;z-index:2000;background:#27313c;color:white;padding:6px;border:1px solid #8aa1b7">Comando aguardando confirmação · <button data-a="operationcheck">Conferir motor</button> <button id="operation-release" data-a="operationrelease" hidden>Liberar controles sem repetir</button></div>
   <div id="input-editor-status" role="status" hidden style="position:fixed;bottom:46px;left:12px;right:12px;z-index:1999;background:#27313c;color:white;padding:8px;border:1px solid #8aa1b7"><span id="input-editor-message"></span> <button data-a="editorcheck">Conferir janela</button> <button data-a="editorrelease">Liberar controle sem repetir</button> <button data-a="editordismiss">Ocultar aviso</button></div>
@@ -1286,6 +1296,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
 <script src="gc/catalogo-biblioteca.js"></script>
 <script src="remoto/codecs-mesa.js"></script>
 <script src="remoto/peak-hold.js"></script>
+<script src="thumbnail-cadence.js"></script>
 <script>
   "use strict";
   const $ = (id) => document.getElementById(id);
@@ -1950,7 +1961,18 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     }
     return [...names];
   }
+  const thumbnailCadence = Promise.resolve(window.ThreeMixThumbnailCadence || null);
+  const thumbnailSkipControl = document.getElementById('thumbnail-skip');
+  const thumbnailSkipValues = ['legacy','0','2','3','5','10'];
+  const savedThumbnailSkip = store.get('mesa.thumbnailSkip', 'legacy');
+  thumbnailSkipControl.value = thumbnailSkipValues.includes(savedThumbnailSkip) ? savedThumbnailSkip : 'legacy';
+  thumbnailSkipControl.addEventListener('change', () => {
+    if (!thumbnailSkipValues.includes(thumbnailSkipControl.value)) thumbnailSkipControl.value = 'legacy';
+    store.set('mesa.thumbnailSkip', thumbnailSkipControl.value);
+  });
   async function thumbLoop() {
+    const cadence = await thumbnailCadence;
+    if (!cadence) { thumbnailSkipControl.value = 'legacy'; thumbnailSkipControl.disabled = true; }
     let turn = 0, coldAt = -Infinity;
     const last = new Map();
     for (;;) {
@@ -1959,22 +1981,36 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       for (const name of last.keys()) if (!st.scenes.includes(name)) last.delete(name);
       const now = performance.now();
       const hot = [st.program, st.preview].filter((n) => names.includes(n)), cold = names.filter((n) => !hot.includes(n));
-      const batch = new Set(hot.filter((n) => now - (last.get(n) ?? -Infinity) >= 350));
+      const custom = cadence && thumbnailSkipControl.value !== 'legacy';
+      let interval = 1000;
+      if (custom) {
+        const v = st.video || {};
+        try { interval = cadence.thumbnailIntervalMs(v.fpsNumerator, v.fpsDenominator, Number(thumbnailSkipControl.value)); }
+        catch { interval = 1000; } // Unknown production rate: do not flood the motor.
+      }
+      const selected = custom ? cadence.nextThumbnail(names, last, now, interval) : null;
+      const batch = new Set(custom ? (selected ? [selected] : []) : hot.filter((n) => now - (last.get(n) ?? -Infinity) >= 350));
       const firstThumbnail = cold.find(name => !thumbs.has(name) && now - (last.get(name) ?? -Infinity) >= 1000);
-      if (firstThumbnail) { batch.add(firstThumbnail); coldAt = now; }
-      else if (cold.length && now - coldAt >= 1000) { batch.add(cold[turn++ % cold.length]); coldAt = now; }
+      if (!custom && firstThumbnail) { batch.add(firstThumbnail); coldAt = now; }
+      else if (!custom && cold.length && now - coldAt >= 1000) { batch.add(cold[turn++ % cold.length]); coldAt = now; }
       for (const name of batch) {
         // Revalidate after each awaited capture: minimization, scrolling and disconnect are immediate.
         if (!visibleThumbnailNames().includes(name)) continue;
         last.set(name, performance.now());
         const r = await tryReq("GetSourceScreenshot", { sourceName: name, imageFormat: "jpg", imageWidth: 256, imageCompressionQuality: 60 });
-        if (r && visibleThumbnailNames().includes(name)) {
+        // A failing source must not be retried at the full thumbnail cadence.
+        // Keep the previous image and allow other visible inputs to progress.
+        if (!r || typeof r.imageData !== 'string' || !r.imageData.startsWith('data:image/')) {
+          last.set(name, performance.now() + 1000);
+          continue;
+        }
+        if (visibleThumbnailNames().includes(name)) {
           thumbs.set(name, r.imageData);
           for (const img of document.querySelectorAll(`img[data-t="${CSS.escape(name)}"],img[data-bank-thumb="${CSS.escape(name)}"]`)) img.src = r.imageData;
         }
-        await sleep(75);
+        if (!custom) await sleep(75);
       }
-      await sleep(125);
+      await sleep(custom ? Math.max(4, Math.min(16, interval / 2)) : 125);
     }
   }
   async function slowLoop() {
@@ -2956,6 +2992,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     dump: () => { if (!st.dumpArmed) { st.dumpArmed = setTimeout(() => { st.dumpArmed = null; }, 3000); toast("Clique de novo em até 3 segundos para confirmar o DUMP."); return; } clearTimeout(st.dumpArmed); st.dumpArmed = null; run((async () => { await productionAction("dump", { note: "DUMP acionado na mesa" }); toast("DUMP executado."); })()); },
     rundown: () => run(launchPanel('rundown')),
     retornos: () => run(launchPanel('retornos')),
+    crewopen: () => run(rpDockOpenWindow("/crew")),
     blackbox: () => run(launchPanel('blackbox')),
     audiobuses: () => run(launchPanel('audiobuses')),
     // The current desk is the workspace. Do not replace the working native desk with the demo page.
@@ -5673,6 +5710,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       p.innerHTML = `<h3>Configurações de áudio · ${esc(st.popArg)}</h3><div class="add"><div class="types">${[["geral", "Geral"], ["eq", "EQ"], ["comp", "Compressor"], ["gate", "Noise Gate"], ["lim", "Limitador"], ["plugins", "Plugins"]].map(([id, l]) => `<button class="${tab === id ? "on" : ""}" data-a="asettab" data-v="${id}">${l}</button>`).join("")}</div><div class="form">${body}<p>As mudanças valem na hora. Os efeitos são filtros de áudio do motor aplicados a esta entrada.</p></div></div><div class="row end">${st.audio.get(st.popArg)?.bus ? `<button class="b" data-a="busdrop" title="Remove o Master e os barramentos A e B deste preset; as entradas voltam a ir direto para as trilhas do motor. Os efeitos dos barramentos se perdem.">Desligar barramentos</button>` : ""}<button class="b" data-a="close">Fechar</button></div>`; }
     else if (st.pop === "mainmenu") p.innerHTML = `<h3>Módulos</h3><div class="menu">
   <button data-a="top_audio">Mixer de áudio…</button>
+  <button data-a="crewopen">Crew · Tally e Intercom…</button>
   <button data-a="audiobuses">Barramentos de áudio…</button>
   <button data-a="pop" data-v="playout">VT e playlists…</button>
   <button data-a="pop" data-v="slides">Apresentador de Slides &amp; PowerPoint…</button>

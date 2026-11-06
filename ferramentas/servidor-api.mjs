@@ -680,6 +680,7 @@ async function handleHttp(req, res) {
           '/multicorder': ['MultiGravação', 1040, 680],
           '/iso': ['MultiGravação', 1040, 680],
           '/calls': ['Chamada de Vídeo', 700, 540],
+          '/crew': ['3Mix Crew · Tally e Intercom', 900, 760],
           '/replay': ['Replay', 1440, 900],
           '/settings': ['Configurações', 1280, 800],
           '/configuracoes': ['Configurações', 1280, 800],

@@ -7,7 +7,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdtemp,mkdir,readFile,rm,readdir} from 'node:fs/promises';
-import {tmpdir} from 'node:os';
+import {fileURLToPath} from 'node:url';
+const qaRoot=fileURLToPath(new URL('../qa-finalizacao/replay-export-tests/',import.meta.url));
+async function temporaryRoot(){await mkdir(qaRoot,{recursive:true});return mkdtemp(join(qaRoot,'case-'));}
 import {join} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {DiskReplay} from './replay-disco.mjs';
@@ -43,9 +45,9 @@ async function gerarClipe(dir,nome,segundos=1){
   return file;
 }
 
-test('export-event copia os clipes reais de um lance para a pasta pedida, com nomes legíveis', async()=>{
-  if(!temClipeReal()){console.log('SKIP: ffmpeg indisponível neste ambiente');return;}
-  const root=await mkdtemp(join(tmpdir(),'3mix-replay-export-'));
+test('export-event copia os clipes reais de um lance para a pasta pedida, com nomes legíveis', async(t)=>{
+  if(!temClipeReal()){t.skip('ffmpeg indisponível neste ambiente');return;}
+  const root=await temporaryRoot();
   try{
     const origem=join(root,'gravacoes','replay','capturas');await mkdir(origem,{recursive:true});
     const clipeCam1=await gerarClipe(origem,'cam1.mp4');
@@ -74,9 +76,9 @@ test('export-event copia os clipes reais de um lance para a pasta pedida, com no
   } finally { await rm(root,{recursive:true,force:true}); }
 });
 
-test('export-events sem eventIds exporta TODOS os lances (equivalente a "Export All Events" do vMix)', async()=>{
-  if(!temClipeReal()){console.log('SKIP: ffmpeg indisponível neste ambiente');return;}
-  const root=await mkdtemp(join(tmpdir(),'3mix-replay-export-'));
+test('export-events sem eventIds exporta TODOS os lances (equivalente a "Export All Events" do vMix)', async(t)=>{
+  if(!temClipeReal()){t.skip('ffmpeg indisponível neste ambiente');return;}
+  const root=await temporaryRoot();
   try{
     const origem=join(root,'gravacoes','replay','capturas');await mkdir(origem,{recursive:true});
     const c1=await gerarClipe(origem,'a.mp4'),c2=await gerarClipe(origem,'b.mp4');
@@ -92,9 +94,9 @@ test('export-events sem eventIds exporta TODOS os lances (equivalente a "Export 
   } finally { await rm(root,{recursive:true,force:true}); }
 });
 
-test('export-events com eventIds exporta só os selecionados, na ordem enviada (equivalente a "Export Selected Events")', async()=>{
-  if(!temClipeReal()){console.log('SKIP: ffmpeg indisponível neste ambiente');return;}
-  const root=await mkdtemp(join(tmpdir(),'3mix-replay-export-'));
+test('export-events com eventIds exporta só os selecionados, na ordem enviada (equivalente a "Export Selected Events")', async(t)=>{
+  if(!temClipeReal()){t.skip('ffmpeg indisponível neste ambiente');return;}
+  const root=await temporaryRoot();
   try{
     const origem=join(root,'gravacoes','replay','capturas');await mkdir(origem,{recursive:true});
     const c1=await gerarClipe(origem,'a.mp4'),c2=await gerarClipe(origem,'b.mp4'),c3=await gerarClipe(origem,'c.mp4');
@@ -111,7 +113,7 @@ test('export-events com eventIds exporta só os selecionados, na ordem enviada (
 });
 
 test('export-event: lance inexistente é rejeitado explicitamente, nunca silenciosamente ignorado', async()=>{
-  const root=await mkdtemp(join(tmpdir(),'3mix-replay-export-'));
+  const root=await temporaryRoot();
   try{
     const replay=await novoReplay(root);
     replay.state.events=[];
@@ -120,7 +122,7 @@ test('export-event: lance inexistente é rejeitado explicitamente, nunca silenci
 });
 
 test('export-events: lista de ids vazia ou id inexistente na seleção é rejeitada, nunca exporta parcialmente sem avisar', async()=>{
-  const root=await mkdtemp(join(tmpdir(),'3mix-replay-export-'));
+  const root=await temporaryRoot();
   try{
     const replay=await novoReplay(root);
     replay.state.events=[{id:'ev1',name:'LANCE 1',dur:1,clips:[]}];
@@ -130,7 +132,7 @@ test('export-events: lista de ids vazia ou id inexistente na seleção é rejeit
 });
 
 test('export-event: lance sem clipes é relatado com erro explícito no evento, não lançado como falha geral', async()=>{
-  const root=await mkdtemp(join(tmpdir(),'3mix-replay-export-'));
+  const root=await temporaryRoot();
   try{
     const replay=await novoReplay(root);
     replay.state.events=[{id:'ev1',name:'LANCE VAZIO',dur:1,clips:[]}];
@@ -139,9 +141,9 @@ test('export-event: lance sem clipes é relatado com erro explícito no evento, 
   } finally { await rm(root,{recursive:true,force:true}); }
 });
 
-test('export-event: clipe cujo arquivo original foi apagado do disco aparece com erro por câmera, sem interromper os demais', async()=>{
-  if(!temClipeReal()){console.log('SKIP: ffmpeg indisponível neste ambiente');return;}
-  const root=await mkdtemp(join(tmpdir(),'3mix-replay-export-'));
+test('export-event: clipe cujo arquivo original foi apagado do disco aparece com erro por câmera, sem interromper os demais', async(t)=>{
+  if(!temClipeReal()){t.skip('ffmpeg indisponível neste ambiente');return;}
+  const root=await temporaryRoot();
   try{
     const origem=join(root,'gravacoes','replay','capturas');await mkdir(origem,{recursive:true});
     const existente=await gerarClipe(origem,'existe.mp4');
@@ -160,7 +162,7 @@ test('export-event: clipe cujo arquivo original foi apagado do disco aparece com
 });
 
 test('exportDestination: diretório relativo ou com caractere de controle é rejeitado (mesma regra de segurança usada em outras pastas de produção)', async()=>{
-  const root=await mkdtemp(join(tmpdir(),'3mix-replay-export-'));
+  const root=await temporaryRoot();
   try{
     const replay=await novoReplay(root);
     assert.throws(()=>replay.exportDestination('pasta/relativa'),/caminho absoluto/);
