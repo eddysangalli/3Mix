@@ -1296,6 +1296,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
 <script src="gc/catalogo-biblioteca.js"></script>
 <script src="remoto/codecs-mesa.js"></script>
 <script src="remoto/peak-hold.js"></script>
+<script src="thumbnail-cadence.js"></script>
 <script>
   "use strict";
   const $ = (id) => document.getElementById(id);
@@ -1960,7 +1961,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     }
     return [...names];
   }
-  const thumbnailCadence = import('./thumbnail-cadence.mjs').catch(() => null);
+  const thumbnailCadence = Promise.resolve(window.ThreeMixThumbnailCadence || null);
   const thumbnailSkipControl = document.getElementById('thumbnail-skip');
   const thumbnailSkipValues = ['legacy','0','2','3','5','10'];
   const savedThumbnailSkip = store.get('mesa.thumbnailSkip', 'legacy');
