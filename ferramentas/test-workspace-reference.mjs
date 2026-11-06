@@ -25,3 +25,14 @@ test('corrupt workspace is preserved and rejected instead of silently reset',asy
  await assert.rejects(handleWorkspaceRequest({path:'/api/workspace',req:{method:'GET'},res:{},root,local:()=>true,json:()=>{throw Error('unexpected success');}}),/preservado/);assert.equal(await readFile(file,'utf8'),invalid);
  }finally{await rm(root,{recursive:true,force:true});}
 });
+
+test('remote workspace mutation is refused before body or disk access',async()=>{
+ let response;let reads=0;
+ const handled=await handleWorkspaceRequest({path:'/api/workspace',req:{method:'POST'},res:{},root:undefined,local:()=>false,body:async()=>{reads++;throw Error('body must not be read');},json:(_res,status,data)=>{response={status,data};}});
+ assert.equal(handled,true);assert.equal(response.status,403);assert.equal(response.data.success,false);assert.equal(reads,0);
+});
+test('unsupported workspace method reports allowed methods without reading body',async()=>{
+ let response;const headers={};
+ await handleWorkspaceRequest({path:'/api/workspace',req:{method:'DELETE'},res:{setHeader:(k,v)=>headers[k]=v},root:'.',local:()=>true,body:async()=>{throw Error('unexpected body');},json:(_res,status,data)=>{response={status,data};}});
+ assert.equal(response.status,405);assert.equal(headers.Allow,'GET, POST');assert.equal(response.data.success,false);
+});
