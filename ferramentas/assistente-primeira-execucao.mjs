@@ -9,9 +9,7 @@ import { join } from 'node:path';
 import { 
   inventario, testarEncoders, testarDisco, testarRede, 
   descobrirOnvif, controladoresConectados,
-  lerPerfil, salvarPerfil, precisaRevalidar,
-  testarEncoders, testarDisco, testarRede, descobrirOnvif, controladoresConectados,
-  BenchmarkCapacidade, PERFIS
+  lerPerfil, salvarPerfil, precisaRevalidar
 } from './diagnostico-maquina.mjs';
 
 const ARQUIVO_ESTADO = (raiz) => join(raiz, 'config', '3mix-primeira-execucao.json');
@@ -80,6 +78,21 @@ export async function pularEtapa(raiz, etapa) {
 
 export async function concluirAssistente(raiz) {
   const estado = await lerEstado(raiz);
+  // Only mark equipment as validated if diagnostics were completed successfully
+  const diagnosticoCompleto = estado.etapas?.diagnostico?.situacao === 'feita';
+  if (!diagnosticoCompleto) {
+    throw new Error('Não é possível concluir: diagnóstico não foi completado');
+  }
+  // Verify that diagnostic results were actually saved to profile
+  const { lerPerfil } = await import('./diagnostico-maquina.mjs');
+  const perfil = await lerPerfil(raiz);
+  const temInventario = perfil?.inventario?.cpu?.nome;
+  const temEncoders = Array.isArray(perfil?.encoders) && perfil.encoders.length > 0;
+  const temDisco = perfil?.disco?.escritaMBs != null;
+  const temRede = Array.isArray(perfil?.rede) && perfil.rede.length > 0;
+  if (!temInventario || !temEncoders || !temDisco || !temRede) {
+    throw new Error('Não é possível concluir: resultados do diagnóstico incompletos no perfil');
+  }
   estado.concluidoEm = new Date().toISOString();
   estado.equipamentoValidado = true;
   return gravarEstado(raiz, estado);
@@ -121,22 +134,25 @@ export async function executarDiagnosticoCompleto(raiz, production, { signal, ao
 
   // 2. Testar encoders
   if (signal?.aborted) throw new Error('cancelado');
-  const ffmpeg = join(process.cwd(), 'runtime', 'ffmpeg.exe');
+  // Use the 3Mix runtime FFmpeg path
+  const ffmpeg = join(raiz, 'runtime', 'ffmpeg.exe');
   const encoders = await import('./diagnostico-maquina.mjs').then(m => m.testarEncoders(ffmpeg, { signal, aoProgresso }));
   await import('./diagnostico-maquina.mjs').then(m => m.salvarPerfil(raiz, { encoders: encoders }));
   resultados.encoders = encoders;
 
-  // 3. Disco
+  // 3. Disco - use a safe test directory under raiz
   if (signal?.aborted) throw new Error('cancelado');
-  const disco = await import('./diagnostico-maquina.mjs').then(m => m.testarDisco(process.cwd(), { mb: 512 }));
-  await import('./diagnostico-maquina.mjs').then(m => m.salvarPerfil(raiz, { disco: result }));
-  resultados.disco = result;
+  const testDir = join(raiz, 'diagnostico-temp');
+  await mkdir(testDir, { recursive: true });
+  const discoResult = await import('./diagnostico-maquina.mjs').then(m => m.testarDisco(testDir, { mb: 512, signal }));
+  await import('./diagnostico-maquina.mjs').then(m => m.salvarPerfil(raiz, { disco: discoResult }));
+  resultados.disco = discoResult;
 
   // 4. Rede
   if (signal?.aborted) throw new Error('cancelado');
-  const rede = await import('./diagnostico-maquina.mjs').then(m => m.testarRede({ externo: false }));
-  await import('./diagnostico-maquina.mjs').then(m => m.salvarPerfil(raiz, { rede: result }));
-  resultados.rede = result;
+  const redeResult = await import('./diagnostico-maquina.mjs').then(m => m.testarRede({ externo: false }));
+  await import('./diagnostico-maquina.mjs').then(m => m.salvarPerfil(raiz, { rede: redeResult }));
+  resultados.rede = redeResult;
 
   // 5. Equipamentos (ONVIF + controladores)
   if (signal?.aborted) throw new Error('cancelado');
@@ -151,15 +167,6 @@ export async function executarDiagnosticoCompleto(raiz, production, { signal, ao
     controladores: controladores.map(c => c.nome) 
   }}));
   resultados.equipamentos = { onvif, controladores };
-
-  // 6. Benchmark de capacidade
-  const benchmark = new (await import('./diagnostico-maquina.mjs')).BenchmarkCapacidade(null, { 
-    ffmpeg: join(process.cwd(), 'runtime', 'ffmpeg.exe'), 
-    raiz: process.cwd() 
-  });
-  const benchmarkResult = await benchmark.iniciar({ perfis: ['streaming', 'gravacao'], aquecimentoS: 5, medicaoS: 10 });
-  await import('./diagnostico-maquina.mjs').then(m => m.salvarPerfil(raiz, { capacidade: benchmarkResult }));
-  resultados.capacidade = benchmarkResult;
 
   return resultados;
 }
