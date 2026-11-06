@@ -20,13 +20,7 @@ inline bool FreeMixCallVideoPending() { return false; }
 inline bool FreeMixCallVideoDrain(unsigned) { return true; }
 } // namespace freemix_call_video
 
-namespace freemix_call_audio {
-inline void FreeMixCallAudioDirector(const char *, const char *) {}
-inline void FreeMixCallAudioRequest(obs_data_t *, obs_data_t *) {}
-inline void FreeMixCallAudioTick() {}
-inline void FreeMixCallAudioStop() {}
 
-} // namespace freemix_call_audio
 
 
 

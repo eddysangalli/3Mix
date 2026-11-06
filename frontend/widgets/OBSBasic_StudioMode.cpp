@@ -27,12 +27,63 @@
 #include <slider-ignorewheel.hpp>
 
 #include <QToolTip>
+#include <QGraphicsOpacityEffect>
+#include <QPointer>
+#include <QLayout>
 #include "FreeMixCenterColumn.hpp"
 #include <QSpinBox>
 #include <QDockWidget>
 #include <QDateTime>
 #include <QMouseEvent>
 #include <functional>
+
+// UI-only sibling overlay: never registered as an OBS source or draw callback.
+class ThreeMixMonitorIdentity final : public QObject {
+	QPointer<QLabel> label;
+	QPointer<QWidget> display;
+	QGraphicsOpacityEffect *opacity;
+	void place()
+	{
+		if (!label || !display) return;
+		label->setGeometry(display->x(), display->y(),
+			std::max(0, std::min(260, display->width())), 24);
+		label->raise();
+	}
+protected:
+	bool eventFilter(QObject *, QEvent *event) override
+	{
+		if (event->type() == QEvent::Hide && label) {
+			label->setProperty("3mix.restoreIdentity", !label->isHidden());
+			label->hide();
+		}
+		if (event->type() == QEvent::Show && label &&
+		    label->property("3mix.restoreIdentity").toBool()) label->show();
+		if (event->type() == QEvent::Resize || event->type() == QEvent::Move ||
+		    event->type() == QEvent::Show) place();
+		if (event->type() == QEvent::Enter || event->type() == QEvent::FocusIn)
+			opacity->setOpacity(1.0);
+		if (event->type() == QEvent::Leave || event->type() == QEvent::FocusOut)
+			opacity->setOpacity(display && display->hasFocus() ? 1.0 : 0.55);
+		return false;
+	}
+public:
+	ThreeMixMonitorIdentity(QLabel *identity, QWidget *monitor)
+		: QObject(identity), label(identity), display(monitor),
+		  opacity(new QGraphicsOpacityEffect(identity))
+	{
+		if (identity->parentWidget() && identity->parentWidget()->layout())
+			identity->parentWidget()->layout()->removeWidget(identity);
+		identity->setParent(monitor->parentWidget());
+		identity->setMinimumWidth(0);
+		identity->setMaximumWidth(QWIDGETSIZE_MAX);
+		// Scope and safe-area controls are real children of this label.
+		identity->setAttribute(Qt::WA_TransparentForMouseEvents, false);
+		identity->setGraphicsEffect(opacity);
+		opacity->setOpacity(0.55);
+		monitor->installEventFilter(this);
+		place();
+	}
+};
 
 class FreeMixClockLabel : public QLabel {
 public:
@@ -90,12 +141,17 @@ void OBSBasic::CreateProgramOptions()
 {
 	programOptions = new QWidget();
 	programOptions->setObjectName("freemixTransitionColumn");
+	programOptions->setStyleSheet(
+		"QWidget#freemixTransitionColumn,QWidget#freemixSwitcherControls,"
+		"QWidget#freemixOverlayButtons,QWidget#freemixDskHeader,QWidget#freemixTBarHolder{background:#202020;}"
+		"QWidget#freemixSwitcherControls QPushButton{margin-left:0px;margin-right:0px;}");
 	programOptions->setFixedWidth(392);
 	programOptions->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
 
 	QHBoxLayout *centerLayout = new QHBoxLayout();
 	centerLayout->setContentsMargins(0, 0, 0, 0);
-	centerLayout->setSpacing(2);
+	centerLayout->setSpacing(8);
+	centerLayout->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
 
 	QWidget *controlsColumn = new QWidget(programOptions);
 	controlsColumn->setObjectName("freemixSwitcherControls");
@@ -153,9 +209,9 @@ void OBSBasic::CreateProgramOptions()
 	});
 
 	tBar = new SliderIgnoreClick(Qt::Vertical);
-	tBar->setMinimumHeight(130);
+	tBar->setMinimumHeight(80);
 	/* Compact column: the T-Bar never takes the room of the clock and the talkback. */
-	tBar->setMaximumHeight(260);
+	tBar->setMaximumHeight(QWIDGETSIZE_MAX);
 	tBar->setFixedWidth(28);
 	tBar->setMinimum(0);
 	tBar->setMaximum(T_BAR_PRECISION - 1);
@@ -168,7 +224,7 @@ void OBSBasic::CreateProgramOptions()
 	layout->addWidget(cutButton);
 	layout->addLayout(mainButtonLayout);
 	auto *durationSpin = new QSpinBox(controlsColumn);
-	durationSpin->setMinimumWidth(136);
+	durationSpin->setFixedWidth(132);
 	durationSpin->setObjectName("freemixTransitionDuration");
 	durationSpin->setRange(50, 2000);
 	durationSpin->setSingleStep(50);
@@ -185,8 +241,8 @@ void OBSBasic::CreateProgramOptions()
 	 * clock keeps its square and the talkback sits at the base of the column. */
 	auto *tBarHolder = new QWidget(controlsColumn);
 	tBarHolder->setObjectName("freemixTBarHolder");
-	tBarHolder->setMinimumHeight(130);
-	tBarHolder->setMaximumHeight(260);
+	tBarHolder->setMinimumHeight(80);
+	tBarHolder->setMaximumHeight(QWIDGETSIZE_MAX);
 	auto *tBarLayout = new QHBoxLayout(tBarHolder);
 	tBarLayout->setContentsMargins(0, 0, 0, 0);
 	tBarLayout->setSpacing(0);
@@ -204,7 +260,7 @@ void OBSBasic::CreateProgramOptions()
 	centerClock->setTextFormat(Qt::RichText);
 	centerClock->setCursor(Qt::PointingHandCursor);
 	centerClock->setToolTip("Duplo clique: escolher quais relógios aparecem aqui.");
-	centerClock->setStyleSheet("background:#0b1116;border:1px solid #2a343e;padding:2px;");
+	centerClock->setStyleSheet("background:#202020;border:1px solid #383838;padding:2px;");
 	centerClock->doubleClicked = []() { FreeMixOpenClocks(); };
 	layout->addWidget(centerClock);
 
@@ -216,9 +272,8 @@ void OBSBasic::CreateProgramOptions()
 	centerTalk->setEnabled(false);
 	centerTalk->setStyleSheet("font-size:11px;padding:0;");
 	layout->addWidget(centerTalk);
-	/* Free space stays below the group: the clock and the talkback always fit, the column never
-	 * grows, and the Preview/Program monitors keep the area they had. */
-	layout->addStretch(1);
+	// The T-Bar holder owns spare height; clocks and Talkback stay at the
+	// bottom instead of leaving an unused stretch beneath the controls.
 
 	auto *centerTimer = new QTimer(controlsColumn);
 	connect(centerTimer, &QTimer::timeout, controlsColumn, [centerClock, centerTalk]() {
@@ -294,6 +349,30 @@ void OBSBasic::CreateProgramOptions()
 	quickRow->addWidget(stingerButton);
 	layout->insertLayout(2, quickRow);
 
+	// Restore the visible FTB control using the native quick-transition path.
+	auto *ftbButton = new QPushButton("FTB", controlsColumn);
+	ftbButton->setObjectName("threeMixFadeToBlack");
+	ftbButton->setCheckable(true);
+	ftbButton->setFixedHeight(26);
+	ftbButton->setToolTip("Fade to Black — apagar/restaurar Programa pela transição FTB do projeto");
+	connect(ftbButton, &QPushButton::clicked, this, [this]() {
+		for (const QuickTransition &qt : quickTransitions) {
+			if (qt.fadeToBlack && qt.source) {
+				TriggerQuickTransition(qt.id);
+				return;
+			}
+		}
+	});
+	connect(quickTimer, &QTimer::timeout, ftbButton, [this, ftbButton]() {
+		bool available = false;
+		for (const QuickTransition &qt : quickTransitions)
+			if (qt.fadeToBlack && qt.source) available = true;
+		ftbButton->setEnabled(available);
+		ftbButton->setChecked(bool(prevFTBSource));
+	});
+	ftbButton->setEnabled(false);
+	layout->insertWidget(layout->indexOf(centerClock), ftbButton);
+
 	masterMeter = FreeMixCreateMasterMeter(programOptions);
 
 	centerLayout->addWidget(controlsColumn);
@@ -303,14 +382,10 @@ void OBSBasic::CreateProgramOptions()
 	centerLayout->addWidget(masterMeter);
 
 	programOptions->setLayout(centerLayout);
-	ui->previewLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-	ui->previewLabel->setMinimumWidth(0);
-	connect(ui->preview, &OBSQTDisplay::DisplayResized, programOptions, [this]() {
-		ui->previewLabel->setMinimumWidth(ui->preview->width());
-		ui->previewLabel->setMaximumWidth(ui->preview->width());
-	});
-	ui->previewLabel->setMinimumWidth(ui->preview->width());
-	ui->previewLabel->setMaximumWidth(ui->preview->width());
+	if (!ui->previewLabel->property("3mix.monitorOverlay").toBool()) {
+		new ThreeMixMonitorIdentity(ui->previewLabel, ui->preview);
+		ui->previewLabel->setProperty("3mix.monitorOverlay", true);
+	}
 
 	// Keep the monitor row at the production aspect: the empty bands above and
 	// below Preview/Program come from a central area taller than 16:9.
@@ -328,10 +403,18 @@ void OBSBasic::CreateProgramOptions()
 			}
 		}
 		if (!dock || !dock->isVisible() || ui->preview->width() < 320) return;
-		const int desired = qRound(ui->preview->width() * 9.0 / 16.0) +
-				    (ui->previewLabel->isVisible() ? ui->previewLabel->height() : 0) + 4;
+		// Reserve an operable lower desk at compact window heights. Video
+		// remains aspect-fitted by the display renderer, never stretched.
+		const int deskReserve = height() < 850 ? 300 : 360;
+		const int aspectHeight = qRound(ui->preview->width() * 9.0 / 16.0) + 4;
+		const int desired = std::min(aspectHeight, std::max(280, height() - deskReserve - 40));
 		const int central = centralWidget() ? centralWidget()->height() : 0;
 		const int extra = central - desired;
+		if (qEnvironmentVariableIntValue("THREEMIX_QA_INTEGRATED_TITLEBAR") == 1)
+			blog(LOG_INFO, "[3Mix layout QA] window=%dx%d preview=%dx%d central=%d desired=%d dock=%d min=%d columnMin=%d",
+			     width(), height(), ui->preview->width(), ui->preview->height(), central, desired,
+			     dock->height(), dock->minimumSizeHint().height(),
+			     programOptions ? programOptions->minimumSizeHint().height() : -1);
 		if (extra <= 10) return;
 		int target = std::min(height() - 180, dock->height() + extra);
 		if (target <= dock->height() + 10) return;
@@ -462,10 +545,10 @@ void OBSBasic::SetPreviewProgramMode(bool enabled)
 		programLayout->setContentsMargins(0, 0, 0, 0);
 		programLayout->setSpacing(0);
 
-		programLayout->addWidget(programLabel);
 		programLayout->addWidget(program);
 
 		programWidget->setLayout(programLayout);
+		new ThreeMixMonitorIdentity(programLabel, program);
 
 		ui->previewLayout->addWidget(programOptions);
 		ui->previewLayout->addWidget(programWidget);
@@ -564,11 +647,12 @@ void OBSBasic::ResizeProgram(uint32_t cx, uint32_t cy)
 
 	/* resize program panel to fix to the top section of the window */
 	targetSize = GetPixelSize(program);
-	GetScaleAndCenterPos(int(cx), int(cy), targetSize.width() - PREVIEW_EDGE_SIZE * 2,
-			     targetSize.height() - PREVIEW_EDGE_SIZE * 2, programX, programY, programScale);
+	const int edge = qEnvironmentVariableIntValue("THREEMIX_QA_INTEGRATED_TITLEBAR") == 1 ? 0 : PREVIEW_EDGE_SIZE;
+	GetScaleAndCenterPos(int(cx), int(cy), targetSize.width() - edge * 2,
+			     targetSize.height() - edge * 2, programX, programY, programScale);
 
-	programX += float(PREVIEW_EDGE_SIZE);
-	programY += float(PREVIEW_EDGE_SIZE);
+	programX += float(edge);
+	programY += float(edge);
 }
 
 void OBSBasic::UpdatePreviewProgramIndicators()
@@ -591,13 +675,18 @@ void OBSBasic::UpdatePreviewProgramIndicators()
 
 	QString program = QTStr("StudioMode.ProgramSceneName").arg(QT_UTF8(obs_source_get_name(GetProgramSource())));
 
-	if (ui->previewLabel->text() != preview) {
-		ui->previewLabel->setText(preview);
-	}
-
-	if (programLabel && programLabel->text() != program) {
-		programLabel->setText(program);
-	}
+	const auto compactIndicator = [](QLabel *label, const QString &description, const char *text, const char *accent) {
+		if (!label) return;
+		label->setToolTip(description);
+		label->setAccessibleName(description);
+		label->setText(text);
+		label->setStyleSheet(QString("background:#202020;color:#ededed;border:0;"
+			"border-left:3px solid %1;padding:2px 7px;font-weight:600;").arg(accent));
+		label->setMinimumHeight(0);
+		label->setMaximumHeight(24);
+	};
+	compactIndicator(ui->previewLabel, preview, "PVW", "#39d349");
+	compactIndicator(programLabel, program, "PGM", "#f53038");
 }
 
 OBSSource OBSBasic::GetProgramSource()

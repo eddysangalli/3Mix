@@ -18,6 +18,9 @@ target_sources(
     widgets/FreeMixAudioRouting.hpp
     widgets/FreeMixAsioOutput.cpp
     widgets/FreeMixAsioOutput.hpp
+    widgets/FreeMixCallAudio.cpp
+    widgets/FreeMixCallAudio.hpp
+    widgets/FreeMixCallAudioClock.hpp
     widgets/FreeMixCenterColumn.cpp
     widgets/FreeMixCenterColumn.hpp
     widgets/FreeMixPresetExit.cpp

@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
     Copyright (C) 2023 by Lain Bailey <lain@obsproject.com>
                           Zachary Lund <admin@computerquip.com>
                           Philippe Groarke <philippe.groarke@gmail.com>
@@ -213,6 +213,7 @@ void OBSBasic::ResizePreview(uint32_t cx, uint32_t cy)
 
 	/* resize preview panel to fix to the top section of the window */
 	targetSize = GetPixelSize(ui->preview);
+	const int edge = qEnvironmentVariableIntValue("THREEMIX_QA_INTEGRATED_TITLEBAR") == 1 ? 0 : PREVIEW_EDGE_SIZE;
 
 	isFixedScaling = ui->preview->IsFixedScaling();
 	obs_get_video_info(&ovi);
@@ -222,21 +223,21 @@ void OBSBasic::ResizePreview(uint32_t cx, uint32_t cy)
 
 		ui->preview->ClampScrollingOffsets();
 
-		GetCenterPosFromFixedScale(int(cx), int(cy), targetSize.width() - PREVIEW_EDGE_SIZE * 2,
-					   targetSize.height() - PREVIEW_EDGE_SIZE * 2, previewX, previewY,
+		GetCenterPosFromFixedScale(int(cx), int(cy), targetSize.width() - edge * 2,
+					   targetSize.height() - edge * 2, previewX, previewY,
 					   previewScale);
 		previewX += ui->preview->GetScrollX();
 		previewY += ui->preview->GetScrollY();
 
 	} else {
-		GetScaleAndCenterPos(int(cx), int(cy), targetSize.width() - PREVIEW_EDGE_SIZE * 2,
-				     targetSize.height() - PREVIEW_EDGE_SIZE * 2, previewX, previewY, previewScale);
+		GetScaleAndCenterPos(int(cx), int(cy), targetSize.width() - edge * 2,
+				     targetSize.height() - edge * 2, previewX, previewY, previewScale);
 	}
 
 	ui->preview->SetScalingAmount(previewScale);
 
-	previewX += float(PREVIEW_EDGE_SIZE);
-	previewY += float(PREVIEW_EDGE_SIZE);
+	previewX += float(edge);
+	previewY += float(edge);
 }
 
 void OBSBasic::on_preview_customContextMenuRequested()
