@@ -1,0 +1,5 @@
+<!doctype html><meta charset="utf-8"><title>3Mix QA Playout</title><iframe id="view" style="width:1200px;height:800px" src="about:blank"></iframe><script type="module">
+const html=await (await fetch('../../painel/remoto/playout.html')).text();
+const stub=`<script>window.qaItems=Array.from({length:80},(_,i)=>({id:'qa-'+i,title:'Clipe QA '+i,durationMs:10000,inMs:0,outMs:0,enabled:true}));window.fetch=async()=>({ok:true,json:async()=>({playout:{lists:[],activeList:{id:'qa',name:'QA',items:qaItems},preview:{},program:{}}})});<`+'/script>';
+document.querySelector('#view').srcdoc=html.replace('<head>','<head><base href="../../painel/remoto/">'+stub);
+</script>

@@ -148,3 +148,119 @@ Build incremental anterior falhou: CMakeCache aponta para vmixtwste/freemix-app 
 ## Resultado do build isolado
 
 Target obs-studio em native-vmix30-clean terminou código 0 (log fim 21:01:14). Artefatos 3Mix.exe, obs.dll e obs-frontend-api.dll encontrados e hashados em native-build-target-receipt.json. Cache aponta ao motor canônico e gerador VS18 2026. Fonte nativa limpa na leitura posterior; hash de início não foi capturado, portanto NÃO atribuir proveniência completa do binário ao commit observado depois. Target bem-sucedido não prova todos os plugins compilados, operação AV, hardware ou migração OBS33. Nada aplicado ao runtime. A modernização permanece atribuída à outra IA.
+## Escopo adicional autorizado — miniaturas e Resizable BAR
+
+- Pendente: opção “pular 1 quadro a cada N quadros” somente nas miniaturas dos Inputs, acompanhando a frequência da produção (30/60 e taxas racionais), sem alterar Preview/Program ou saídas.
+- Diagnóstico do fonte atual painel/mesa.html, thumbLoop: hot limitado a 350 ms, cold em rodízio de uma captura a cada 1000 ms, mais esperas de 75/125 ms. Não é um fluxo de vídeo com descarte por quadro; aumentar uma opção sem substituir esse agendamento não entrega a fluidez pedida. Manter fontes invisíveis suspensas, backpressure e prioridade dos comandos. Implementação e medição ainda pendentes.
+- ReBAR: nvidia-smi nesta máquina identificou RTX 4060 Laptop, driver 621.01, BAR1 total 8192 MiB. Isso não comprova ganho do aplicativo nem otimização equivalente ao vMix. libobs-d3d11 usa recursos D3D11 dynamic/default/staging; busca não encontrou integração explícita ReBAR. Investigar mecanismo oficial aplicável antes de implementar, com fallback e benchmark. NÃO declarar suporte otimizado ou criar botão fictício.
+- Runtime do operador não alterado; nenhum processo iniciado/parado. Esses itens não substituem nenhuma pendência da auditoria original.
+
+
+## Gate nativo DeckLink — inicialização não equivale a operação
+
+Inspeção do motor canônico plugins/decklink/decklink-device-instance.cpp, StartOutput: retorno de SetScheduledFrameCompletionCallback e StartScheduledPlayback não é verificado antes de marcar mode/output e retornar true. Falhas após EnableVideoOutput/EnableAudioOutput retornam sem rollback explícito dessas habilitações. São lacunas de tratamento de erro identificadas no fonte, NÃO falhas reproduzidas em placa. Corrigir com verificação HRESULT e unwind antes de declarar saída operacional; testar callbacks/playback recusados, liberação após falha e nova tentativa, além de compilar o plugin.
+
+Saída multicanal continua PARCIAL: decklink-output.cpp solicita SPEAKERS_STEREO na conversão e StartOutput solicita dois canais. Não elevar somente EnableAudioOutput a 16: o buffer e o mapeamento precisam corresponder, respeitando capacidade do SDK/dispositivo. Nenhuma placa homologada por esta inspeção. Fonte nativa compartilhada na branch feat/obs33-dsk com arquivos concorrentes não versionados; nenhum arquivo dessa frente alterado.
+
+
+## Consolidação — relógios e gravação GTZIP
+
+| Recurso | Anterior | Reutilizado | Alteração | Arquivos | Testes executados | Hardware | Homologação | Commit/PR | Próxima ação |
+|---|---|---|---|---|---|---|---|---|---|
+| Mensagem de relógios via automação | UI de mensagem existente, sem ação operacional específica encontrada | Slot freemix_clocks, BroadcastCustomEvent, macros e ControllerEngine | clock_message com validação, persistência/readback e editor de macros | ferramentas/relogios-comandos.mjs, automacao-operacional.mjs, controle-producao.mjs; painel/remoto/macros.js | 6 casos PASS; macro salva/relida em disco QA; navegador confirmou inclusão do passo | Nenhum para contratos; runtime CEF para integração final | Implementado e testado em software; runtime/pacote pendentes | ab85294, 1c887c3, b872acb, 8117846; PR 13 aberta | Ensaiar tecla → macro → topbar e reabertura no runtime isolado |
+| Gravação de campos GTZIP | Proteção parcial de duplo envio | executeGtImport, verificação SHA-256 e persistência existentes | Serialização UI durante save, bloqueio de troca de título/ações, recuperação de erro | painel/remoto/gc-gtzip.js; ferramentas/test-gtzip-save-integration.mjs; qa-finalizacao/gtzip-save-ui | Browser QA confirmou bloqueio/erro/sucesso; disco real confirmou save/reload/rollback e recusa de adulteração | Nenhum para esses ensaios | Testes de software concluídos; CEF/pacote pendentes | d6fa7a2, 25ba2c7; PR 13 aberta | Integrar no pacote sem tocar títulos privados |
+
+Esses resultados NÃO concluem seleção/edição múltipla de objetos internos, cor dinâmica por objeto, monitor pós-Master, hardware, ReBAR ou distribuição. Nenhum pacote novo aplicado ao operador. Testes de transporte simulado não são ensaio físico.
+
+
+## Reconciliação de baseline nativa — DeckLink
+
+A branch nativa freemix/broadcast-suite, commit ca9b44b6853e6b4cbfe13237db47fbccd10d18b2, contém StartupRollback em StartOutput, verifica SetScheduledFrameCompletionCallback e StartScheduledPlayback e restaura estado em falha. O achado anterior sobre retornos ignorados se aplica ao trecho da integração OBS33 examinado, NÃO a todas as baselines. Reaproveitar essa implementação; não duplicar. Esta comparação foi por git show, sem build ou ensaio físico.
+
+Na mesma baseline, EnableAudioOutput ainda solicita dois canais. Logo o multicanal/16 canais continua parcial, independente do rollback já implementado. Nada aplicado ao runtime ou homologado por esta comparação.
+
+
+## Ensaio real — atualização somente de painel (motor preservado)
+
+montar-atualizacao-painel.mjs executado de ponta a ponta em instalação sintética (pasta temporária do sistema, fora do checkout git, chave Ed25519 efêmera QA): montou pacote assinado com 452 arquivos/12 MB a partir do painel/ferramentas reais do repositório e dos cinco documentos Alpha obrigatórios; aplicar substituiu mesa.html e version.json e confirmou nenhum caminho bin/ ou obs-plugins/ jamais escrito; rollback restaurou ambos ao estado anterior. Nenhuma chave de produção, nenhum arquivo da instalação real do operador, nenhum processo iniciado.
+
+Isso comprova o caminho de distribuição apenas-painel ponta a ponta em ambiente sintético; NÃO é pacote aplicado à instalação do operador nem homologação. Gerar/aplicar um pacote real exige decisão explícita do proprietário sobre quando distribuir.
+
+
+## Resizable BAR — diagnóstico de plataforma real, implementado
+
+Investigação confirmada: Direct3D 11 (nosso renderizador) não tem equivalente público ao `D3D12_HEAP_TYPE_GPU_UPLOAD` do D3D12 para um aplicativo "ativar" ReBAR; é recurso de BIOS+firmware da GPU+driver. Nenhum botão de ativação foi ou será criado por essa razão.
+
+Implementado `ferramentas/rebar-diagnostico.mjs`: lê nome/VRAM e, quando há GPU NVIDIA, a seção BAR1 Memory Usage de `nvidia-smi -q -d MEMORY` (o campo `--query-gpu=bar1.memory.total` não existe nesta versão de driver; descoberto e corrigido nesta rodada). Classifica active/inactive/undetermined comparando BAR1 à VRAM total, sem nunca inferir estado sem dado real.
+
+Integrado a `diagnostico-maquina.mjs`/`inventario()` (o mesmo caminho usado pelo assistente de primeira execução e Pre-Flight), reaproveitando a chamada nvidia-smi existente para a lista de GPUs; não duplica consulta.
+
+Execução real nesta máquina (não mock): RTX 4060 Laptop, driver 32.0.16.2101 — `resizableBar: {status: "active", bar1MiB: 8192, totalMiB: 8188}`. 6 testes PASS, incluindo `inventario()` real completo (PowerShell + nvidia-smi, ~11s) e 4 cenários do diagnóstico isolado com driver mockado. Sem GPU NVIDIA, ou com `nvidia-smi` ausente, o campo retorna `undetermined`/`vendor:'none'` em vez de inventar um estado.
+
+Isto é diagnóstico de hardware para a matriz Alpha — não é otimização nem suporte efetivo aplicado pelo 3Mix ao renderizador. AMD/Intel permanecem `undetermined` por esta rodada: nenhuma consulta equivalente foi implementada para esses fornecedores.
+
+
+## NDI — versão real do SDK/runtime auditada e verificada
+
+Correção de registro anterior: busquei RELATORIO-NDI-OMT-MULTIPLOS.md apenas no checkout isolado antes; ele existe no checkout principal `3mix-panel/docs/` e em três outras cópias (entregas e runtime). Não deveria ter sido tratado como "não encontrado".
+
+Verificação desta rodada, binário a binário, não apenas leitura de texto:
+- `3mix-runtime/obs-plugins/64bit/libomt.dll` SHA256 `673b1d33222295f1c9190c54cefc89d5e322301702532e2c8fe78a16e8aa28da` — **idêntico** ao citado no relatório de 08/10.
+- `3mix-runtime/runtime/ndi-v6/Processing.NDI.Lib.x64.dll` SHA256 `2b6602075868ba4401...` — **idêntico** ao fixado em `ndi-runtime.mjs` (`NDI_SDK_SHA256`) e ao declarado em `componentes.json`/`docs/provenance/ndi-runtime-inventario-copia.json`.
+- Executado `inspectNdiBinary()` real (parser de recurso PE, não apenas nome do arquivo) contra o binário instalado: retornou **versão 6.3.2.0**, arquitetura x64, API `NDIlib_v6_load` presente. DistroAV exige 6.3+; esta instalação atende.
+- Executado `prepareNdiRuntime()` em cópia real do binário+licenças em pasta temporária: aceita a cópia correta, rejeita adulteração do DLL antes de abrir o motor.
+- 2 testes PASS em `ferramentas/test-ndi-runtime.mjs`, contra os bytes reais instalados (não mock).
+
+**Múltiplos emissores:** o relatório de 08/10 já documenta dois NDI e dois OMT decodificados simultaneamente, com áudio distinto por fonte, alpha BGRA preservado e reconexão funcional, com recibos JSON específicos (`qa-portatil/network-multiple-*`). Isso cobre a verificação de múltiplos emissores pedida. Transmissão física entre dois computadores reais, WAN/endurance e equipamento físico continuam não realizados por esta ou aquela rodada — ficam para os Alpha testers, como o pedido original já previa.
+
+**Gravação MKV com metadados:** não investigada nesta rodada; permanece pendente.
+**Não alterado:** 3Mix IO, conforme instrução explícita de escopo.
+
+
+## SRT — homologação forte confirmada no processo real em execução
+
+Executada a bateria `testes/srt/test-srt-157-full.mjs` (pré-existente, não criada nesta rodada) a partir do diretório correto do checkout principal — script anterior só roda com cwd=`3mix-panel/`, resolve relativo ao processo, não ao arquivo. **6/6 PASS**, incluindo item decisivo: o processo `3Mix.exe` do operador, já em execução desde 04/11 23:59 (não iniciado nem reiniciado por esta sessão — consulta somente leitura via `Get-Process`), reportou `srt.dll` **1.5.7.0 carregada em memória real**, não apenas presente em disco. Isso é evidência de carregamento no binário ativo, mais forte que inspeção estática isolada.
+
+Cobertura confirmada: PE x64 válido; Caller/Listener/Rendezvous constroem URL válida com latência no intervalo broadcast 20–8000ms; AES-128/192/256 com `pbkeylen` e Stream ID; loopback de transporte UDP; regras 4:4:4/Fill-Key/HDR. Hash do `srt.dll` instalado (`63110eb3d82a33d1...`) bate com o registrado em auditoria QA anterior desta mesma rodada de trabalho.
+
+Reconexão automática: `ferramentas/saidas-watchdog.mjs` já implementa supervisão e reconexão com jitter anti-avalanche para qualquer saída de streaming, incluindo SRT — não é específico de protocolo, reaproveitado, não duplicado.
+
+**Não coberto por este teste** (limite explícito do próprio script): perda de pacotes real sob rede degradada, diagnóstico textual de causa de queda exposto ao operador na interface, e conexão SRT real ponta a ponta entre duas redes distintas. Esses permanecem para os Alpha testers com equipamento físico, conforme o pedido original.
+
+
+## ReBAR — correção de terminologia, perfil de driver e fechamento do item
+
+Correção de exatidão sobre o diagnóstico publicado anteriormente (commit b0fbe1f), a pedido direto do proprietário: o módulo chamava o resultado de `active`/`inactive`, o que confunde **tamanho observado da janela BAR1** com **confirmação da negociação PCIe de Resizable BAR**. São coisas diferentes: BAR1 grande é consistente com ReBAR negociado, mas `nvidia-smi` não expõe um campo que confirme a negociação em si — um BAR1 grande também pode ocorrer por outras razões (SR-IOV, certas configurações workstation).
+
+Corrigido `rebar-diagnostico.mjs`: vocabulário agora é `bar1_large` / `bar1_legacy` / `undetermined`, com `reason` explicitando que é um sinal, não confirmação. Teste de guarda adicionado (`status vocabulary never uses active/inactive`) para impedir regressão terminológica. 7 testes PASS, incluindo execução real nesta máquina: `bar1_large`, BAR1 8192 MiB / VRAM 8188 MiB — mesmo resultado numérico de antes, linguagem corrigida.
+
+**Perfil/configuração de driver NVIDIA aplicável ao 3Mix:** verificado `HKLM\SOFTWARE\NVIDIA Corporation\Global\NVTweak` (leitura, nenhuma alteração) — contém apenas `OverridePRR` (chave legada de range/resolução de painel de display, sem relação com ReBAR). Não existe perfil de aplicativo, nem no painel de controle NVIDIA nem via registro, que controle Resizable BAR: é negociação PCIe única em boot entre BIOS/UEFI, firmware da GPU e driver — não há gancho de configuração por processo para isso em nenhum dos dois fabricantes.
+
+**Oportunidades de otimização de transferência de memória para etapa futura (não implementadas agora, sem evidência de ganho):**
+- Migração do renderizador de D3D11 para D3D12 abriria `D3D12_HEAP_TYPE_GPU_UPLOAD`/`GPUUploadHeapSupported`, permitindo pedido explícito por recurso de heap na janela ampliada quando ReBAR estiver negociado. É mudança de arquitetura do renderizador inteiro, não uma função pontual — fora do escopo desta auditoria.
+- Investigar se extensões de fornecedor (NVAPI da NVIDIA, AGS da AMD) expõem algum controle de alocação fora da API D3D11 padrão; busca nesta rodada não encontrou uso dessas extensões no motor atual, e nenhuma delas foi integrada.
+- Medir com profiling real (não estimativa) se o gargalo de upload CPU→GPU em algum caminho específico do pipeline (ex.: readback de miniaturas, captura de fontes) justificaria esse investimento antes de qualquer refactor.
+
+**Decisão explícita do proprietário, registrada aqui:** não alterar o renderizador sem evidência de ganho medido. Nenhuma mudança de arquitetura D3D11→D3D12 foi feita ou proposta para execução imediata. Assunto ReBAR encerrado por esta auditoria; prioridade volta a ser o build OBS 33 e preparação do Alpha.
+
+
+## ReBAR — correção da conclusão sobre perfil por aplicativo (NVIDIA App)
+
+O proprietário corrigiu uma conclusão imprecisa do documento anterior: eu havia escrito que "não existe perfil de aplicativo para ReBAR" baseado apenas na ausência de uma chave no `NVTweak` legado, sem checar o mecanismo moderno. Isso estava errado como afirmação geral, mesmo que o fato pontual verificado (a chave `NVTweak`) estivesse correto.
+
+**Confirmado nesta máquina, por verificação direta (leitura, nada alterado):**
+- NVIDIA App 11.0.9.585 está instalado (`C:\Program Files\NVIDIA Corporation\Installer2\Display.NvApp...`), a mesma versão citada pelo proprietário com a função Resizable BAR por programa documentada em https://www.nvidia.com/pt-br/software/nvidia-app/release-highlights/ (Gráficos > Configurações do Programa > Configurações do Driver > Resizable BAR).
+- O armazenamento real desses perfis por aplicativo é o banco **DRS** (Driver Settings) do driver NVIDIA, em `C:\ProgramData\NVIDIA Corporation\Drs\nvdrsdb0.bin`/`nvdrsdb1.bin` — formato binário proprietário, não registro simples nem JSON. É o mesmo mecanismo que guarda outras configurações por jogo/aplicativo (ex.: modo de energia, V-Sync) há anos, só que a opção Resizable BAR é recente (NVIDIA App, não o antigo painel de controle).
+- **Nenhum perfil para `3Mix.exe`/`FreeMix.exe` existe ainda** nesse banco (string scan não encontrou referência) — esperado: o aplicativo precisa ser adicionado manualmente na interface do NVIDIA App por um usuário antes de ter um perfil. Isso não significa que a função seja indisponível para o 3Mix; significa que ninguém a configurou ainda nesta máquina.
+- Essa configuração por programa é uma política do **driver** sobre como ele trata a alocação de memória para aquele processo especificamente — distinta da negociação PCIe de ReBAR na BIOS/UEFI (que permanece ligada/desligada globalmente), mas também distinta de uma API que o código do 3Mix chamaria: é configurada fora do aplicativo, pelo usuário, na ferramenta da NVIDIA.
+
+**Limitações documentadas, sem implementar nada no renderizador:**
+- Ler ou escrever esse perfil programaticamente exigiria integrar o SDK **NVAPI** (`NvAPI_DRS_*`), proprietário da NVIDIA, exclusivo para essa marca de GPU — não existe equivalente universal (AMD tem seu próprio mecanismo via AGS, Intel não tem nada documentado publicamente para isso). Não investigado nem integrado nesta rodada, por instrução explícita de não alterar o renderizador sem evidência de ganho testada.
+- Mesmo com o perfil configurado no NVIDIA App, o efeito observável seria uma mudança de comportamento do **driver** ao alocar memória para o processo `3Mix.exe` — não há, até onde verificado, uma forma de o próprio 3Mix consultar ou confirmar programaticamente se esse perfil está ativo para si mesmo sem usar NVAPI.
+- Recomendação para o guia do Alpha tester: documentar o caminho manual (NVIDIA App > Gráficos > Configurações do Programa > 3Mix > Resizable BAR) como uma configuração opcional de sistema que o operador pode testar e comparar, não como algo que o 3Mix ativa ou detecta sozinho.
+
+Assunto ReBAR encerrado por esta auditoria, conforme instrução do proprietário.
+
+## Desentrelaçamento (UI) — status de validação explícito
+
+Implementação publicada (commit 7ec9a58) mantida: backend com 15 testes PASS (unidade, transporte simulado) e controle real integrado ao popup de atraso A/V da mesa. **Marcando aqui, por instrução do proprietário, o que esses testes NÃO cobrem:** nenhuma validação foi feita com o motor nativo em execução real, nenhuma fonte de captura física (câmera/placa) com sinal 1080i/576i/480i real foi testada, e a confirmação por releitura do motor (`GetInputDeinterlaceMode`) nunca rodou contra um `obs-websocket` real. Classificar como **IMPLEMENTADO — AGUARDANDO TESTE COM MOTOR REAL**, não como validado nativamente.

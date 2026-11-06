@@ -234,6 +234,8 @@
     const signature = tableSignature(items);
     if (signature === lastTableSignature) return;
     lastTableSignature = signature;
+    const scrollContainer = plTbody.closest('.table-wrap');
+    const previousScroll = scrollContainer ? {top:scrollContainer.scrollTop,left:scrollContainer.scrollLeft} : null;
     plTbody.innerHTML = '';
     const pgmItemId = state?.program?.item?.id, pvItemId = state?.preview?.item?.id;
     items.forEach((item, idx) => {
@@ -319,6 +321,7 @@
       plTbody.appendChild(tr);
     });
     if (!items.length) plTbody.innerHTML = '<tr><td colspan="10" style="padding:14px;color:#9a9a9a">Playlist vazia. Use “Adicionar vídeo” para incluir o primeiro clipe.</td></tr>';
+    if (previousScroll) { scrollContainer.scrollTop = previousScroll.top; scrollContainer.scrollLeft = previousScroll.left; }
   }
   function cell(text, align = '', className = '') {
     const td = document.createElement('td');

@@ -8,7 +8,7 @@ export function srtDestinationOptions(data,before={},capabilities={}){
  const protocol=data.protocol??before.protocol??'auto',server=String(data.server??before.server??''),effective=protocol==='auto'?server.split(':')[0].toLowerCase():protocol,encoder=data.encoder??before.encoder??'obs_x264',width=Number(data.width??before.width);
  if(effective!=='srt')throw Error('4:4:4 e cor + máscara exigem um destino SRT');
  if(['fill','key'].includes(alphaMode)){
-  if(!capabilities.srtSeparateAlphaSupported)throw Error('Este motor não oferece Fill/Key separado; feche e abra pelo ABRIR-FREEMIX.cmd para atualizar');
+  if(!capabilities.srtSeparateAlphaSupported)throw Error('Este motor não oferece Fill/Key separado; instale um pacote 3Mix compatível em janela de manutenção antes de selecionar este formato');
   if(chroma!=='420')throw Error('Fill/Key separado usa 4:2:0 para compatibilidade');
   if(encoder!=='obs_x264')throw Error('Fill/Key separado usa x264 H.264');
   return {chroma,alphaMode};

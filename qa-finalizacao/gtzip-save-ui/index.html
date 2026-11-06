@@ -1,0 +1,6 @@
+<!doctype html><meta charset="utf-8"><title>3Mix QA — salvar GTZIP</title><main></main><script type="module">
+import {installGtzipUi} from '../../painel/remoto/gc-gtzip.js';
+window.qa={calls:[],pending:[]};
+const records=['a','b'].map(id=>({id,name:'QA '+id,fields:[{name:'Headline',type:'TextBlock',default:'Texto '+id}],values:{},warnings:[]}));
+installGtzipUi({getState:()=>({gcLibrary:{importedTitles:records}}),command:(action,data)=>{qa.calls.push({action,data});return new Promise((resolve,reject)=>qa.pending.push({resolve,reject}));}});
+</script>

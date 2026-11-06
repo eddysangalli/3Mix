@@ -1,0 +1,44 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {normalizeClockMessage,setClockMessage} from './relogios-comandos.mjs';
+import {MacroEngine} from './macros-producao.mjs';
+test('macro and controller normalization share bounded clock action',()=>{const m=new MacroEngine({});assert.deepEqual(m.normalize({action:'clock_message',data:{slot:2,message:' AVISO '}}),{action:'clock_message',data:{slot:2,message:'AVISO'}});for(const d of [{slot:0,message:'a'},{slot:1,message:'a'.repeat(41)},{slot:1,message:'a'+String.fromCharCode(10)+'b'}])assert.throws(()=>normalizeClockMessage(d));});
+test('clock persists and confirms before broadcasting, preserving other slots',async()=>{let value=[{type:'rec'},{type:'stream'},{type:'clock'}];const calls=[];const p={req:async(t,d)=>{calls.push(t);if(t==='GetPersistentData')return {slotValue:structuredClone(value)};if(t==='SetPersistentData')value=structuredClone(d.slotValue);return {};}};await setClockMessage(p,{slot:2,message:'ATENÇÃO'});assert.equal(value[0].type,'rec');assert.equal(value[2].type,'clock');assert.equal(value[1].message,'ATENÇÃO');assert.deepEqual(calls,['GetPersistentData','SetPersistentData','GetPersistentData','BroadcastCustomEvent']);});
+test('failed readback never broadcasts success',async()=>{const calls=[];await assert.rejects(setClockMessage({req:async t=>{calls.push(t);return {slotValue:[]};}},{slot:1,message:'a'}),/confirmada/);assert.ok(!calls.includes('BroadcastCustomEvent'));});
+
+
+import {ControllerEngine} from './controlador-producao.mjs';
+test('saved keyboard controller dispatches clock message once on press, never on release',async()=>{
+ const calls=[];const p={execute:async(action,data)=>calls.push({action,data})};p.macroEngine=new MacroEngine(p);
+ const controller=new ControllerEngine(p),item={id:'clock-shortcut',enabled:true,trigger:{type:'keyboard'},target:{action:'clock_message',data:{slot:3,message:'AVISO'}}};
+ const clientId='11111111-1111-4111-8111-111111111111';
+ await controller.fire(item,{clientId,phase:'down'});await controller.fire(item,{clientId,phase:'up'});
+ assert.deepEqual(calls,[{action:'clock_message',data:{slot:3,message:'AVISO'}}]);assert.equal(controller.feedback[item.id].success,true);
+});
+
+
+test('malformed existing clock configuration is rejected before writes',async()=>{
+ for(const slotValue of [{unexpected:true},[null],['clock'],[{type:'clock'},{},{},{}]]){
+ const calls=[];await assert.rejects(setClockMessage({req:async t=>{calls.push(t);return {slotValue};}},{slot:1,message:'AVISO'}),/inválida/);assert.deepEqual(calls,['GetPersistentData']);
+ }
+});
+
+
+test('clock macro survives actual disk reload and controller resolves saved macro',async()=>{
+ const {mkdir,mkdtemp,rm}=await import('node:fs/promises');
+ const qa=new URL('../qa-finalizacao/',import.meta.url);await mkdir(qa,{recursive:true});const root=await mkdtemp(new URL('clock-macro-',qa));
+ try{
+ const p={root,state:{connected:true},publish(){}};const first=new MacroEngine(p);await first.setScope('QA clocks');
+ await first.execute('macro_save',{name:'Aviso produção',steps:[{action:'clock_message',data:{slot:3,message:'FALTAM 2 MINUTOS'}}]});
+ const second=new MacroEngine(p);await second.setScope('QA clocks');assert.equal(second.items.length,1);
+ assert.deepEqual(second.items[0].steps,[{action:'clock_message',data:{slot:3,message:'FALTAM 2 MINUTOS'}}]);
+ p.macroEngine=second;const controller=new ControllerEngine(p);const target=controller.normalizeTarget({action:'macro_run',data:{id:second.items[0].id}},{type:'keyboard'});
+ assert.equal(target.data.id,second.items[0].id);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
+
+
+test('readback divergence in another slot prevents stale broadcast',async()=>{
+ let reads=0,broadcast=false,value;
+ const p={req:async(type,data)=>{if(type==='GetPersistentData'){reads++;return {slotValue:reads===1?[{type:'rec'},{type:'stream'},{type:'clock'}]:[{type:'none'},value[1],value[2]]};}if(type==='SetPersistentData')value=structuredClone(data.slotValue);if(type==='BroadcastCustomEvent')broadcast=true;return {};}};
+ await assert.rejects(setClockMessage(p,{slot:3,message:'AVISO'}),/mudou durante/);assert.equal(broadcast,false);
+});

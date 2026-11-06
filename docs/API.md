@@ -503,6 +503,15 @@ Toda ação `playout_X` também é aceita como `queue_X` (compatibilidade). `POS
 
 ### 7.8 Replay
 
+#### Contrato de canal, velocidade e navegação
+
+- `speed {speed, player?}`: 10–100%; `player` explícito afeta somente esse player carregado e conserva sua velocidade no próximo lance. Omitido mantém a alteração global e o padrão para novos players.
+- `jump {player?, seconds?, frames?}`: segundos finitos e quadros inteiros; conversão usa a taxa racional do clipe. Limites são restringidos ao intervalo do clipe.
+- `play-event.index` é inteiro a partir de zero. `select-camera.camIndex` é inteiro a partir de um. ID inexistente e índice fracionário são recusados, sem fallback silencioso.
+- Falha de carregamento não confirma uma nova seleção nem envia o lance ao ar. Falha de persistência da seleção restaura o ID anterior em memória; isso não promete rollback do decodificador já carregado.
+- Verificação desta correção usa a classe real com transporte OBS simulado, não homologação AV nativa. A instalação do runtime depende de merge e pacote posteriores.
+
+
 Pelo `POST /api/replay` `{"action":"<comando>", ...}`: `status`, `start` (`cams`), `stop`, `mark-in`, `mark-out`, `capture` (`seconds`), `load` (`player`, `eventId`, `cam`), `air` (`player`), `live`, `speed` (`speed`), `transport`, `seek`, `frame`, `link` (`enabled`), `audio` (`enabled`), `delete` (`eventId`) e os demais da lista gerada. Pelo `/ws`: `{"action":"replay","cmd":"<comando>", ...}`. [código; `status` verificado]
 
 **Exportação de lances** (vMix 30 "Export All Events"/"Export Selected Events" — equivalente próprio do 3Mix, copiando os clipes já prontos, sem recodificar):
@@ -876,3 +885,23 @@ Comandos TCP: `FUNCTION`, `QUIT`, `SUBSCRIBE`, `TALLY`, `UNSUBSCRIBE`, `XML`. As
 - `obs-browser` (`freemix-app/plugins/obs-browser/obs-browser-plugin.cpp`): `emit_event`
 
 <!-- indice-gerado:fim -->
+
+
+### Mensagem dos relógios de produção
+
+`clock_message` reutiliza o slot persistente dos três relógios e o evento da topbar. Exemplo de ação para API, macro ou alvo de controlador:
+
+```json
+{"action":"clock_message","slot":3,"message":"FALTAM 2 MINUTOS"}
+```
+
+Em passos de macro/controladores, usar `data: {"slot":3,"message":"FALTAM 2 MINUTOS"}`. Posições 1–3, texto até 40 caracteres sem controles. Texto vazio mantém o tipo mensagem e a topbar exibe seu placeholder; não restaura o tipo anterior. Outras posições são preservadas. A gravação é relida antes do broadcast; falha de confirmação não emite notificação de sucesso. Falha no broadcast pode ocorrer depois de persistir: não implica rollback da gravação. O comando passa pela fila operacional existente.
+
+Editor de macros: “Mensagem dos relógios de produção”. Para teclado, salvar a macro e vinculá-la pelo controlador existente, ou usar o alvo de ação quando disponível na interface. Testes de normalização, persistência/readback simulado e despacho por controlador passaram; interface do editor conferida em navegador estático. Runtime/CEF e pacote Alpha ainda não verificados por esta entrega.
+
+
+### GTZIP — cor de texto vinculada a dados
+
+Em novas conversões, o vínculo existente de destino HTML (`browser`) aceita o campo `<NomeDoObjeto>Color` para TextBlock. Exemplo: objeto `Headline`, campo `HeadlineColor` vinculado a uma coluna com `#12ab34`. Aceita somente `#RRGGBB`; valores inválidos são ignorados. A cor pode mudar sem alterar o texto. Não aceita CSS arbitrário, não afeta imagem/ticker/QR e não cria outro compositor. Se o nome derivado colidir com um campo existente do título, não é interpretado como propriedade de cor.
+
+A ponte reutiliza freemix-data com identidade da fonte. Títulos já importados são preservados; reimportar como cópia para obter a ponte/renderer novos. Contrato testado com renderer gerado em VM; navegador/CEF, autoPublish conectado e pacote ainda pendentes.

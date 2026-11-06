@@ -24,3 +24,21 @@ export const alphaReleaseDocuments=Object.freeze([
  'docs/PEDIDO-COMUNIDADE-ALPHA.md','docs/ALPHA-SUPLEMENTO-HARDWARE-VMIX30.md',
  'docs/MATRIZ-HARDWARE-HOMOLOGADO.md','docs/LIMITES-CONHECIDOS.md','docs/LEIA-ME-BETA.md'
 ]);
+
+
+// A freeze is an integrity receipt, not merely a list of paths.
+export function validateFrozenFile(entry, actualSize, actualHash){
+ if(!entry || typeof entry.path!=='string' || !entry.path || excludedFromUpdate(entry.path))throw Error('Arquivo nativo inválido no freeze');
+ const expectedSize=entry.bytes ?? entry.size;
+ if(!Number.isSafeInteger(expectedSize)||expectedSize<0||typeof entry.sha256!=='string'||!/^[a-f0-9]{64}$/i.test(entry.sha256))throw Error('Recibo nativo incompleto: '+entry.path);
+ if(actualSize!==expectedSize||actualHash.toLowerCase()!==entry.sha256.toLowerCase())throw Error('Binário diverge do freeze: '+entry.path);
+}
+
+
+// Panel-only payloads must never replace native binaries, dependencies or operator data.
+export function panelOnlyUpdatePath(value){
+ if(typeof value!=='string'||!value||excludedFromUpdate(value))return false;
+ if(value.includes(String.fromCharCode(92))||value.includes(':')||value.split('/').some(part=>!part))return false;
+ if(/\.(exe|dll|sys|pdb|lib|node)$/i.test(value))return false;
+ return /^(painel|ferramentas)\//.test(value)||alphaReleaseDocuments.includes(value);
+}

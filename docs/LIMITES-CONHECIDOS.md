@@ -256,3 +256,14 @@ Seguindo a mesma prática de honestidade do levantamento de origem: este documen
 As missões 7–11 de PEDIDO-COMUNIDADE-ALPHA.md exigem confirmação da capacidade no pacote instalado. Não anunciar 10 bits, 16 canais, modelos AJA ou MKV NDI com metadados por existência de opção genérica. Código/compilação/mock e teste físico são estados distintos. Sem evidência de ensaio por modelo, driver e modo, não marcar Homologado.
 
 Inclusão de alterações desta auditoria no instalador/runtime ainda não verificada: nenhum pacote novo está sendo declarado distribuído por esta nota. Antes de enviar: versão/hash, dependências e licenças, manifesto de arquivos, compatibilidade de projetos, backup/rollback e coleta de logs sanitizados. Replay de 16 câmeras e 3Mix IO ficam fora do escopo.
+
+
+## Miniaturas dos Inputs — controle de cadência em desenvolvimento
+
+A branch `fix/replay-speed-target` inclui seletor persistente na mesa: Econômico (comportamento anterior), Sem descarte, Pular 1 a cada 2/3/5/10 quadros. Somente screenshots das miniaturas são afetados; Preview/Program e frequência de saída não são alterados. O modo Econômico é o padrão para não elevar a carga silenciosamente em instalações existentes.
+
+A frequência escolhida é um ALVO de atualização derivado da taxa de produção (incluindo 30000/1001 e 60000/1001), não garantia de captura de cada quadro exato da fonte: GetSourceScreenshot não fornece uma sequência de quadros indexada. Há uma captura por vez e seleção justa entre Inputs visíveis. Tempo de resposta do motor e quantidade de miniaturas limitam a frequência real; aumentar fluidez pode aumentar readback GPU, compressão JPEG, tráfego e decodificação. Não anunciar 30/60 fps efetivos sem medição.
+
+Verificado: cálculo/seleção em testes automatizados e escolha/persistência após recarregar no navegador estático. NÃO verificado: fluidez, custo e estabilidade com motor conectado. NÃO incluído por esta etapa no runtime do operador ou em novo pacote Alpha. Política do incremental inclui mesa.html e thumbnail-cadence.mjs, mas isso não comprova geração/aplicação do pacote.
+
+ReBAR permanece EM INVESTIGAÇÃO: BAR1 ampliada detectada não demonstra otimização específica do aplicativo. Nenhum botão de ativação ou ganho de desempenho é oferecido por esta entrega.

@@ -2,10 +2,14 @@ import {assertSdrOutputRequest} from './saidas-hdr.mjs';
 const uuidPattern=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const coordinates=['redX','redY','greenX','greenY','blueX','blueY','whiteX','whiteY'];
 export function sdiConfig(data,sourceUuid,audioSourceUuid='') {
+ for(const field of ['modeId','keyer','audioTrack']){
+  const value=data[field];if(value===undefined&&field!=='modeId')continue;
+  if(!['string','number'].includes(typeof value)||typeof value==='string'&&!value.trim())throw Error('Selecione dispositivo, modo, keyer e áudio SDI válidos');
+ }
  const hdr=data.hdr===true;
  if(!hdr)assertSdrOutputRequest('SDI',data);
  const config={deviceHash:String(data.deviceHash||''),modeId:Number(data.modeId),keyer:Number(data.keyer??0),audioTrack:Number(data.audioTrack??0),audioSourceUuid,sourceUuid,hdr,autoStart:false};
- if(!config.deviceHash||!Number.isInteger(config.modeId)||!Number.isInteger(config.keyer)||![0,1,2].includes(config.audioTrack))throw Error('Selecione dispositivo, modo, keyer e áudio SDI válidos');
+ if(!config.deviceHash||!Number.isInteger(config.modeId)||![0,1,2].includes(config.keyer)||![0,1,2].includes(config.audioTrack))throw Error('Selecione dispositivo, modo, keyer e áudio SDI válidos');
  if(!hdr)return config;
  if(config.keyer||data.alpha||data.fillKey)throw Error('HDR SDI é opaco; alpha e Fill+Key não são suportados');
  if(!uuidPattern.test(sourceUuid))throw Error('Selecione uma fonte HDR por UUID');

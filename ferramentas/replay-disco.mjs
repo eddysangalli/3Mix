@@ -253,7 +253,7 @@ export class DiskReplay {
         case "load": await this.load(data.player, data.eventId, data.cam); break;
         case "air": await this.air(data.player); break;
         case "live": await this.live(); break;
-        case "speed": await this.speed(Number(data.speed)); break;
+        case "speed": await this.speed(Number(data.speed),data.player); break;
         case "delete": this.state.events = this.state.events.filter((e) => e.id !== data.eventId); await this.save(); break;
         default: throw new Error("Comando de replay desconhecido");
       }
@@ -473,13 +473,19 @@ export class DiskReplay {
     if(this.recordingFolder!=='replay')throw Error('Importação disponível no Replay');
     if(typeof d.file!=='string'||d.file.length>1000||!/^([a-z]:[\\/]|\\\\[^\\]+\\[^\\]+)/i.test(d.file)||/[\x00-\x1f]/.test(d.file))throw Error('Informe arquivo de vídeo local com caminho absoluto');
     const original=resolve(d.file),input=await lstat(original);if(!input.isFile()||input.isSymbolicLink())throw Error('Arquivo de vídeo irregular');
-    const source=await this.probe(original);if(source.duration<=0||source.duration>3600)throw Error('Clipe precisa durar até uma hora');
+    const source=await this.probe(original);if(!source.streams?.some(stream=>stream.codec_type==='video'&&stream.width>0))throw Error('Importação Replay exige uma faixa de vídeo');if(!Number.isFinite(source.duration)||source.duration<=0||source.duration>3600)throw Error('Clipe precisa durar até uma hora');
     const id=randomUUID(),dir=join(this.root,'gravacoes/replay/importados',id);await mkdir(dir,{recursive:true});const file=join(dir,'clip.mp4');
-    try{await execute(this.ffmpeg,['-hide_banner','-v','error','-nostdin','-y','-i',original,'-map','0:v:0','-map','0:a:0?','-c:v','libx264','-preset','veryfast','-crf','18','-g','1','-bf','0','-pix_fmt','yuv420p','-c:a','aac','-movflags','+faststart',file],600000);const media=await this.probe(file);const name=String(d.name||'Clipe importado').trim().slice(0,120),cam=String(d.cam||'Importado').trim().slice(0,120);this.state.events.push({id,name,cam,dur:media.duration,createdAt:Date.now(),time:new Date().toLocaleTimeString('pt-BR'),imported:true,clips:[{cam,file,start:0,end:media.duration,duration:media.duration}]});await this.save();}catch(e){await unlink(file).catch(()=>{});throw e;}
+    try{await execute(this.ffmpeg,['-hide_banner','-v','error','-nostdin','-y','-i',original,'-map','0:v:0','-map','0:a:0?','-c:v','libx264','-preset','veryfast','-crf','18','-g','1','-bf','0','-pix_fmt','yuv420p','-c:a','aac','-movflags','+faststart',file],600000);const media=await this.probe(file);const name=String(d.name||'Clipe importado').trim().slice(0,120),cam=String(d.cam||'Importado').trim().slice(0,120);await this.persistImportedEvent({id,name,cam,dur:media.duration,createdAt:Date.now(),time:new Date().toLocaleTimeString('pt-BR'),imported:true,clips:[{cam,file,start:0,end:media.duration,duration:media.duration}]});}catch(e){await unlink(file).catch(()=>{});throw e;}
   }
+  async persistImportedEvent(event) {
+    const previous=this.state.events;
+    this.state.events=[...previous,event];
+    try{await this.save();}catch(error){this.state.events=previous;throw error;}
+  }
+
   async reorderEvents(d) {
     if(!Array.isArray(d.ids)||d.ids.length!==this.state.events.length||new Set(d.ids).size!==d.ids.length||d.ids.some(id=>!this.state.events.some(e=>e.id===id)))throw Error('Envie cada lance exatamente uma vez na ordem desejada');
-    const events=new Map(this.state.events.map(e=>[e.id,e]));this.state.events=d.ids.map(id=>events.get(id));await this.save();
+    const previous=this.state.events,events=new Map(previous.map(e=>[e.id,e]));this.state.events=d.ids.map(id=>events.get(id));try{await this.save();}catch(error){this.state.events=previous;throw error;}
   }
 
   // vMix 30 ("ReplaySelectedEventsExport"/"Export All Events"): copia os clipes já prontos de
@@ -812,7 +818,7 @@ export class DiskReplay {
     const scene = `REPLAY ${player}`, input = `Replay Player ${player}`;
     if (!list.scenes.some((s) => s.sceneName === scene)) await this.req("CreateScene", { sceneName: scene });
     const settings = { local_file: clip.file, is_local_file: true, looping: false, restart_on_activate: false,
-      close_when_inactive: false, clear_on_media_end: false, speed_percent: this.state.speed,
+      close_when_inactive: false, clear_on_media_end: false, speed_percent: this.playerSpeed(player),
       freemix_replay_unbuffered: true };
     const before = await this.optional("GetInputSettings", { inputName: input });
     let itemId;
@@ -854,7 +860,7 @@ export class DiskReplay {
     // Allow that frame to reach the Preview before acknowledging the load.
     await sleep(250);
     this.state.linked = false;
-    this.state.players[player] = { eventId: event.id, cam: clip.cam, file: clip.file, duration: clipInfo.duration, frameRate:clipInfo.frameRate,variableFrameRate:clipInfo.variableFrameRate,cadence:clipInfo.cadence,cadenceChecked:true,audio:clipInfo.audio,hasVideo:clipInfo.hasVideo,metadataProbed:true,offsetFrames:replayCameraOptions(this.state.cameraOptions?.[clip.cam]).offsetFrames };
+    this.state.players[player] = { speed:this.playerSpeed(player),eventId: event.id, cam: clip.cam, file: clip.file, duration: clipInfo.duration, frameRate:clipInfo.frameRate,variableFrameRate:clipInfo.variableFrameRate,cadence:clipInfo.cadence,cadenceChecked:true,audio:clipInfo.audio,hasVideo:clipInfo.hasVideo,metadataProbed:true,offsetFrames:replayCameraOptions(this.state.cameraOptions?.[clip.cam]).offsetFrames };
     this.state.activePlayer = player;
     await this.save();
   }
@@ -1319,9 +1325,12 @@ export class DiskReplay {
     for(const p of Object.values(this.state.players))if(!p.metadataProbed||!p.cadenceChecked||p.cadence?.method!=='finite-full-decoded-pts'||!(await this.cadenceScanner().matches(p.file,p.cadence?.identity))){const media=await this.probe(p.file,true);Object.assign(p,{metadataProbed:true,cadenceChecked:true,cadence:media.cadence,hasVideo:media.hasVideo,duration:media.duration,frameRate:media.frameRate,variableFrameRate:media.variableFrameRate,audio:media.audio,offsetFrames:replayCameraOptions(this.state.cameraOptions?.[p.cam]).offsetFrames});}
   }
 
-  async speed(value) {
+  playerSpeed(player){const value=this.state.players[player]?.speed;return Number.isFinite(value)&&value>=10&&value<=100?value:this.state.speed;}
+  async speed(value, playerId) {
     if (!Number.isFinite(value) || value < 10 || value > 100) throw new Error("A velocidade deve estar entre 10% e 100%");
-    for (const player of Object.keys(this.state.players)) {
+    if(playerId!==undefined&&(!REPLAY_PLAYERS.includes(playerId)||!this.state.players[playerId]))throw Error('Player inválido');
+    const players=playerId===undefined?Object.keys(this.state.players):[playerId];
+    for (const player of players) {
       const inputName = `Replay Player ${player}`;
       const before = await this.req("GetMediaInputStatus", { inputName });
       const settings=await this.req("GetInputSettings",{inputName});if(Number(settings.inputSettings.speed_percent||100)===value)continue;
@@ -1341,7 +1350,8 @@ export class DiskReplay {
       await this.req("SetMediaInputCursor", { inputName, mediaCursor: target });
       if(paused)await this.waitFor("GetMediaInputStatus",{inputName},m=>Number.isFinite(m.mediaCursor)&&Math.abs(m.mediaCursor-target)<100);
     }
-    this.state.speed = value;
+    for(const player of players)this.state.players[player].speed=value;
+    if(playerId===undefined)this.state.speed = value;
     await this.save();
   }
 
@@ -1365,6 +1375,8 @@ export class DiskReplay {
   }
 
   async jump(d = {}) {
+    if(d.seconds!==undefined&&!Number.isFinite(Number(d.seconds)))throw Error('Deslocamento em segundos inválido');
+    if(d.frames!==undefined&&!Number.isSafeInteger(Number(d.frames)))throw Error('Deslocamento em quadros deve ser inteiro');
     await this.hydratePlayers();
     const player = d.player || this.state.activePlayer;
     if (!REPLAY_PLAYERS.includes(player) || !this.state.players[player]) throw Error("Player inválido");
@@ -1396,15 +1408,18 @@ export class DiskReplay {
       event = this.state.events.find(e => e.id === d.eventId);
     } else if (d.index !== undefined) {
       const idx = Number(d.index);
-      event = this.state.events[idx >= 0 ? idx : 0];
+      if(!Number.isSafeInteger(idx)||idx<0||idx>=this.state.events.length)throw Error("Índice de lance inválido");
+      event = this.state.events[idx];
     } else if (this.state.selectedEventId) {
       event = this.state.events.find(e => e.id === this.state.selectedEventId);
     } else {
       event = this.state.events[0];
     }
     if (!event) throw Error("Lance não encontrado");
-    this.state.selectedEventId = event.id;
     await this.load(player, event.id, d.cam);
+    const previousSelection=this.state.selectedEventId;
+    this.state.selectedEventId = event.id;
+    try{await this.save();}catch(error){this.state.selectedEventId=previousSelection;throw error;}
     if (d.toOutput === true) {
       await this.air(player);
     }
@@ -1422,15 +1437,18 @@ export class DiskReplay {
     else if (d.index !== undefined) targetIdx = Math.max(0, Math.min(this.state.events.length - 1, Number(d.index)));
     else if (d.eventId) {
       const found = this.state.events.findIndex(e => e.id === d.eventId);
-      if (found >= 0) targetIdx = found;
+      if (found < 0) throw Error("Lance não encontrado");
+      targetIdx = found;
     }
+    if(!Number.isInteger(targetIdx))throw Error("Índice de lance inválido");
     const event = this.state.events[targetIdx];
-    this.state.selectedEventId = event.id;
+    const previousSelection=this.state.selectedEventId;
     if (d.load === true) {
       const player = d.player || this.state.activePlayer;
       await this.load(player, event.id, d.cam);
     }
-    await this.save();
+    this.state.selectedEventId = event.id;
+    try{await this.save();}catch(error){this.state.selectedEventId=previousSelection;throw error;}
     return event;
   }
 
@@ -1443,9 +1461,8 @@ export class DiskReplay {
     let targetCam = d.cam;
     if (d.camIndex !== undefined) {
       const idx = Number(d.camIndex) - 1;
-      if (idx >= 0 && idx < event.clips.length) {
-        targetCam = event.clips[idx].cam;
-      }
+      if(!Number.isSafeInteger(idx)||idx<0||idx>=event.clips.length)throw Error("Índice de câmera inválido");
+      targetCam = event.clips[idx].cam;
     }
     if (!targetCam || !event.clips.some(c => c.cam === targetCam)) {
       throw Error("Câmera selecionada não existe no lance");

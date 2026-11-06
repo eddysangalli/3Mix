@@ -2,8 +2,8 @@
 // Uso: --package=PASTA_SELADA --base=MANIFESTO_DA_BASE --key=CHAVE_PRIVADA --channel=beta|stable [--canal=PASTA] [--assets=PASTA] [--files-base=URL]
 // Estável exige --aprovar-estavel=VERSAO e --aprovado-por=NOME, e a mesma numeração já publicada no canal beta.
 // O manifesto é cumulativo: quem está em qualquer versão anterior chega à nova com um único pacote, e o atualizador só baixa o que falta.
-import { createPrivateKey, createPublicKey, sign, verify } from 'node:crypto';
-import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { createHash, createPrivateKey, createPublicKey, sign, verify } from 'node:crypto';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,6 +20,7 @@ const novo = JSON.parse(await readFile(join(pkg, 'manifest.json'), 'utf8'));
 const base = JSON.parse(await readFile(resolve(args.base), 'utf8'));
 const versao = JSON.parse(await readFile(join(pkg, 'version.json'), 'utf8')).version;
 if (versao !== novo.version) throw Error('version.json diverge do manifesto do pacote');
+if(typeof versao!=='string'||versao.length>100||!/^\d+\.\d+\.\d+(?:-[A-Za-z0-9]+(?:[.-][A-Za-z0-9]+)*)?$/.test(versao))throw Error('Versão inválida para publicação');
 const estavel = /^\d+\.\d+\.\d+$/.test(versao);
 if (args.channel === 'stable' && !estavel) throw Error(`${versao} é versão de teste e não pode ir para o canal estável`);
 if (args.channel === 'beta' && estavel) throw Error(`${versao} não tem sufixo de teste; use o canal estável, com aprovação`);
@@ -34,6 +35,13 @@ if (args.channel === 'stable') {
   aprovacao = { format: 1, versao, aprovadoPor: args['aprovado-por'], em: new Date().toISOString() };
 }
 
+// Reject malformed manifest entries before deriving filesystem paths.
+const manifestNames=new Set();
+for(const f of novo.files){
+ if(typeof f.path!=='string'||!f.path||f.path.includes(String.fromCharCode(92))||f.path.includes(':')||f.path.split('/').some(part=>!part||part==='.'||part==='..'||/[ .]$/.test(part)||/^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:[.]|$)/i.test(part))||[...f.path].some(c=>c.charCodeAt(0)<32))throw Error('Caminho inválido no manifesto');
+ const key=f.path.toLowerCase();if(manifestNames.has(key))throw Error('Caminho duplicado no manifesto');manifestNames.add(key);
+ if(!Number.isSafeInteger(f.size)||f.size<0||typeof f.sha256!=='string'||!/^[a-f0-9]{64}$/.test(f.sha256))throw Error('Integridade inválida no manifesto');
+}
 const hashBase = new Map(base.files.map((f) => [f.path, f.sha256]));
 // O que mudou contra a base, mais o que já esteve em um pacote anterior: um arquivo que volta ao conteúdo original também precisa chegar a quem recebeu a versão intermediária.
 const historicoPath = join(canal, 'historico.json');
@@ -57,11 +65,25 @@ const assinatura = sign(null, manifesto, createPrivateKey(await readFile(resolve
 if (!verify(null, manifesto, createPublicKey(await readFile(join(pkg, 'update-public.pem'))), assinatura)) throw Error('A chave usada não corresponde a update-public.pem do pacote');
 
 const assets = resolve(args.assets || join(repo, '..', 'entregas', 'canal-assets', tag));
-await rm(assets, { recursive: true, force: true }); await mkdir(assets, { recursive: true });
-for (const f of arquivos) await copyFile(join(pkg, f.path), join(assets, f.sha256));
+// Validate every selected payload before changing existing publication assets.
+for (const f of arquivos) {
+  const bytes=await readFile(join(pkg,f.path));
+  if(bytes.length!==f.size||createHash('sha256').update(bytes).digest('hex')!==f.sha256)throw Error('Arquivo diverge do manifesto: '+f.path);
+}
+await mkdir(assets, { recursive: true });
+for (const f of arquivos) {
+  const bytes=await readFile(join(pkg,f.path));
+  if(bytes.length!==f.size||createHash('sha256').update(bytes).digest('hex')!==f.sha256)throw Error('Arquivo diverge do manifesto: '+f.path);
+  await writeFile(join(assets,f.sha256),bytes,{flag:'wx'}).catch(async error=>{
+    if(error.code!=='EEXIST')throw error;
+    const existing=await readFile(join(assets,f.sha256));
+    if(!existing.equals(bytes))throw Error('Asset existente diverge do hash: '+f.path);
+  });
+}
 
 const pasta = join(canal, 'releases', versao);
-await rm(join(canal, 'releases'), { recursive: true, force: true }); await mkdir(pasta, { recursive: true });
+await mkdir(join(canal, 'releases'), { recursive: true });
+await mkdir(pasta); // Never remove previous releases or replace a pre-existing version.
 await writeFile(join(pasta, 'manifest.json'), manifesto);
 await writeFile(join(pasta, 'manifest.sig'), assinatura);
 const u = `${SITE}/${args.channel}/releases/${versao}/`;

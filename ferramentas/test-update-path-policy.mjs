@@ -17,3 +17,61 @@ test('required alpha operating documents exist and are permitted in update',asyn
  assert.equal(new Set(alphaReleaseDocuments).size,5);
  for(const doc of alphaReleaseDocuments){assert.equal(excludedFromUpdate(doc),false);await access(new URL('../'+doc,import.meta.url));}
 });
+
+
+test('thumbnail cadence module and its importing desk both ship in panel updates',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const desk=await readFile(new URL('../painel/mesa.html',import.meta.url),'utf8');
+ assert.ok(desk.includes("import('./thumbnail-cadence.mjs')"));
+ for(const file of ['painel/mesa.html','painel/thumbnail-cadence.mjs']){
+  assert.equal(excludedFromUpdate(file),false);await access(new URL('../'+file,import.meta.url));
+ }
+ const packager=await readFile(new URL('../scripts/distribuicao/montar-atualizacao-mesa.mjs',import.meta.url),'utf8');
+ assert.ok(packager.includes('p.startsWith("painel/")'));
+});
+
+
+import {validateFrozenFile} from '../scripts/distribuicao/update-path-policy.mjs';
+test('native freeze requires exact size and hash before packaging',()=>{
+ const hash='a'.repeat(64),f={path:'bin/64bit/obs.dll',bytes:123,sha256:hash};
+ assert.doesNotThrow(()=>validateFrozenFile(f,123,hash));
+ assert.throws(()=>validateFrozenFile(f,124,hash),/diverge/);
+ assert.throws(()=>validateFrozenFile(f,123,'b'.repeat(64)),/diverge/);
+ assert.throws(()=>validateFrozenFile({...f,sha256:undefined},123,hash),/incompleto/);
+ assert.throws(()=>validateFrozenFile({...f,path:'../outside'},123,hash));
+});
+
+
+test('packager validates native receipt before accessing its file',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const source=await readFile(new URL('../scripts/distribuicao/montar-atualizacao-mesa.mjs',import.meta.url),'utf8');
+ const begin=source.indexOf('for (const f of frozen.files)');
+ const check=source.indexOf('validateFrozenFile(f,f.bytes ?? f.size,f.sha256)',begin);
+ const access=source.indexOf('await fs.lstat(source)',begin);
+ assert.ok(begin>=0&&check>begin&&access>check);
+});
+
+
+test('native source exporter resolves canonical sibling engine rather than removed workspace paths',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const source=await readFile(new URL('../scripts/build/exportar-motor-para-repo.mjs',import.meta.url),'utf8');
+ assert.ok(source.includes('repo = path.resolve(import.meta.dirname, "../..")'));
+ assert.ok(source.includes('native = path.join(ws, "3mix-engine")'));
+ assert.ok(!source.includes('path.join(ws, "freemix-app")'));assert.ok(!source.includes('repo = path.join(ws, "FreeMix")'));
+ assert.ok(source.includes('f.build.exitCode, 0'));assert.ok(source.includes('the fork moved after this build was frozen'));
+});
+
+
+test('native source export counts patches against canonical manifest baseline',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const source=await readFile(new URL('../scripts/build/exportar-motor-para-repo.mjs',import.meta.url),'utf8');
+ assert.ok(source.includes('path.join(repo, "fork/manifest.json")'));
+ assert.ok(source.includes('manifest.base + ".." + f.head'));assert.ok(!source.includes('"ba2f32b..HEAD"'));
+});
+
+
+import {panelOnlyUpdatePath} from '../scripts/distribuicao/update-path-policy.mjs';
+test('panel-only payload forbids native replacement and operator data',()=>{
+ for(const file of ['painel/mesa.html','painel/thumbnail-cadence.mjs','ferramentas/relogios-comandos.mjs',...alphaReleaseDocuments])assert.equal(panelOnlyUpdatePath(file),true,file);
+ for(const file of ['bin/64bit/3Mix.exe','obs-plugins/64bit/decklink.dll','runtime/node.exe','node_modules/ws/index.js','painel/native.dll','ferramentas/native.node','config/project.json','painel/local.js','painel/gc/gt_titles/private.html','../outside','painel//bad'])assert.equal(panelOnlyUpdatePath(file),false,file);
+});
