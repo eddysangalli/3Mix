@@ -37,6 +37,8 @@
 #include <chrono>
 #include <regex>
 
+OBS_DECLARE_MODULE()
+
 namespace fs = std::filesystem;
 namespace json = nlohmann;
 
