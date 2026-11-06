@@ -152,14 +152,31 @@ function setAudioConnection(connected) {
   notify();
 }
 
+function audioErrorMessage(error) {
+  const message = String(error?.message || error || '').trim();
+  if (error?.name === 'TimeoutError' || /timeout|timed out|tempo limite/i.test(message)) {
+    return 'O motor 3Mix não respondeu a tempo. A conexão de áudio será tentada novamente.';
+  }
+  if (error instanceof TypeError || /failed to fetch|fetch failed|networkerror|load failed/i.test(message)) {
+    return 'A API de áudio do 3Mix não está acessível nesta porta. Confirme que o motor e a API desta bancada estão em execução.';
+  }
+  return message || 'A API de áudio do 3Mix não respondeu.';
+}
+AUDIO.describeError = audioErrorMessage;
+
 async function send(action, data = {}) {
   if (!audioConnected) throw Error('Sem conexão com o motor 3Mix');
-  const response = await fetch('/api/control', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action, ...data }),
-    signal: AbortSignal.timeout(20000)
-  });
+  let response;
+  try {
+    response = await fetch('/api/control', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, ...data }),
+      signal: AbortSignal.timeout(20000)
+    });
+  } catch (error) {
+    throw Error(audioErrorMessage(error));
+  }
   const result = await response.json().catch(() => ({}));
   if (!response.ok || !result.success) throw Error(result.error || 'Comando não confirmado pelo motor');
   return result;
@@ -230,10 +247,15 @@ async function poll(force = false) {
     if (state.error) toast(state.error, 'warn');
   } catch (error) {
     setAudioConnection(false);
+    const message = audioErrorMessage(error);
     if (!state) {
       const connection = E('connection');
-      if (connection) connection.textContent = 'Sem conexão com o motor 3Mix';
+      if (connection) {
+        connection.textContent = 'Sem conexão com o motor 3Mix';
+        connection.title = message;
+      }
     }
+    if (force) toast(message, 'error');
     document.dispatchEvent(new CustomEvent('audio:offline'));
   }
 }
@@ -249,7 +271,7 @@ async function command(action, data) {
     dirty = false;
     return true;
   } catch (error) {
-    toast(error.message, 'error');
+    toast(audioErrorMessage(error), 'error');
     return false;
   } finally {
     busy = false;
@@ -400,7 +422,7 @@ const MAIN_BUS = '3Mix Master';
 let masterMeOn = false;
 async function pluginNoMain(op) {
   try { await send('audio_routing_plugin', { key: MAIN_BUS, type: 'master_me', op }); return true; }
-  catch (error) { toast(error.message, 'warn'); return false; }
+  catch (error) { toast(audioErrorMessage(error), 'warn'); return false; }
 }
 E('plugin-master-toggle')?.addEventListener('click', async () => {
   if (await pluginNoMain(masterMeOn ? 'off' : 'on')) {
