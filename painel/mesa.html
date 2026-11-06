@@ -1024,6 +1024,39 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     box-shadow: 0 0 6px rgba(0, 206, 201, 0.5) !important;
   }
 
+  /* ---------- Splash de abertura: cobre a mesa até o motor conectar (st.on) ---------- */
+  #boot-splash {
+    position: fixed; inset: 0; z-index: 4000; background: #202020;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transition: opacity .35s ease-out; user-select: none;
+  }
+  #boot-splash.gone { opacity: 0; pointer-events: none; }
+  #boot-splash .bs-logo { width: 104px; height: 104px; object-fit: contain; margin-bottom: 20px; }
+  #boot-splash .bs-name { font-size: 25px; font-weight: 700; letter-spacing: .4px; color: #ededed; margin: 0 0 4px; }
+  #boot-splash .bs-tag { font-size: 12px; color: #b0b0b0; margin: 0 0 30px; }
+  #boot-splash .bs-bar-track { width: 200px; height: 3px; border-radius: 2px; background: #2d2d2d; overflow: hidden; }
+  #boot-splash .bs-bar-fill { width: 38%; height: 100%; border-radius: 2px; background: #2f6fed; animation: bs-slide 1.1s ease-in-out infinite; }
+  #boot-splash .bs-status { margin-top: 13px; font-size: 11.5px; color: #909090; min-height: 15px; }
+  #boot-splash .bs-status.warn { color: #ffc47a; }
+  @keyframes bs-slide { 0% { transform: translateX(-100%); } 50% { transform: translateX(130%); } 100% { transform: translateX(260%); } }
+
+  /* ---------- Aviso proativo de atualização disponível ---------- */
+  #update-banner {
+    position: fixed; right: 14px; bottom: 58px; z-index: 1800; width: 300px;
+    background: #242424; border: 1px solid #494941; border-left: 3px solid #2f6fed; border-radius: 4px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.55); padding: 11px 12px; display: none;
+  }
+  #update-banner.on { display: block; }
+  #update-banner .ub-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  #update-banner .ub-head b { font-size: 12.5px; color: #ededed; flex: 1; }
+  #update-banner .ub-close { width: 18px; height: 18px; line-height: 18px; text-align: center; color: #909090; border-radius: 3px; flex: none; }
+  #update-banner .ub-close:hover { background: #333; color: #fff; }
+  #update-banner .ub-body { font-size: 11.5px; color: #b0b0b0; line-height: 1.45; margin: 0 0 8px; }
+  #update-banner .ub-notas { margin: 0 0 9px; padding-left: 16px; font-size: 11px; color: #909090; max-height: 70px; overflow: auto; }
+  #update-banner .ub-notas li { margin-bottom: 2px; }
+  #update-banner .ub-progress { width: 100%; height: 4px; margin: 0 0 8px; accent-color: #2f6fed; }
+  #update-banner .ub-row { display: flex; gap: 6px; justify-content: flex-end; }
+  #update-banner .ub-row .b { height: 24px; padding: 0 10px; font-size: 11px; }
 </style>
 <link rel="stylesheet" href="remoto/3mix-tipografia.css">
 <link rel="stylesheet" href="remoto/input-menu-ui.css">
@@ -1032,6 +1065,13 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
 <link rel="stylesheet" href="remoto/replay-dock.css">
 </head>
 <body data-tipografia="3mix">
+<div id="boot-splash" role="status" aria-label="Abrindo o 3Mix">
+  <img class="bs-logo" src="img/3mix-logo.png" alt="">
+  <h1 class="bs-name">3Mix Studio</h1>
+  <p class="bs-tag">Suíte broadcast de produção ao vivo</p>
+  <div class="bs-bar-track"><div class="bs-bar-fill"></div></div>
+  <p class="bs-status" id="bs-status">Conectando ao motor…</p>
+</div>
 
   <!-- 1. STUDIO TOPBAR ESTILO MOTIONCASTER PRO -->
   <header class="studio-topbar" id="studio-topbar">
@@ -1287,6 +1327,13 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   <div id="operation-status" hidden style="position:fixed;top:4px;left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 24px);box-sizing:border-box;z-index:2000;background:#27313c;color:white;padding:6px;border:1px solid #8aa1b7">Comando aguardando confirmação · <button data-a="operationcheck">Conferir motor</button> <button id="operation-release" data-a="operationrelease" hidden>Liberar controles sem repetir</button></div>
   <div id="input-editor-status" role="status" hidden style="position:fixed;bottom:46px;left:12px;right:12px;z-index:1999;background:#27313c;color:white;padding:8px;border:1px solid #8aa1b7"><span id="input-editor-message"></span> <button data-a="editorcheck">Conferir janela</button> <button data-a="editorrelease">Liberar controle sem repetir</button> <button data-a="editordismiss">Ocultar aviso</button></div>
   <div class="toast" id="toast"></div>
+  <div id="update-banner" role="status" aria-label="Atualização disponível">
+    <div class="ub-head"><b id="ub-title">Nova versão disponível</b><button type="button" class="ub-close" data-a="updatedismiss" title="Lembrar depois" aria-label="Fechar">✕</button></div>
+    <p class="ub-body" id="ub-body"></p>
+    <ul class="ub-notas" id="ub-notas" hidden></ul>
+    <progress class="ub-progress" id="ub-progress" hidden max="100" value="0"></progress>
+    <div class="ub-row"><button type="button" class="b" data-a="updatelater">Mais tarde</button><button type="button" class="b on" id="ub-go" data-a="updategogo">Atualizar agora</button></div>
+  </div>
 
 <script src="local.js"></script>
 <script src="remoto/replay-dock.js"></script>
@@ -1439,6 +1486,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     rpLoop: store.get("mesa.rp_loop", false), rpArm: null, rpDelete: null, rpError: "",
     videoDevices: [], audioDevices: [], monitors: [], windows: [],
     inputProps: store.get("mesa.inputProps", {}),
+    updateDismissed: store.get("mesa.update_dismissed", null), updateInstalling: false,
   };
 
   function goTitle(act) {
@@ -1576,6 +1624,11 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
   });
   const tryReq = (type, data) => req(type, data).catch(() => null);
   const vendor = (type, data = {}) => req("CallVendorRequest", { vendorName: "downstream-keyer", requestType: type, requestData: data }).then((r) => r.responseData);
+  // Splash de abertura: só cobre a primeira conexão do boot. Depois que a mesa aparece uma vez,
+  // uma reconexão (motor reiniciado, rede) usa o aviso "estado-ar"/toast normal, nunca a splash de novo.
+  let bootSplashDone = false;
+  const bootSplashStatus = (text, warn) => { const el = $("bs-status"); if (!el) return; el.textContent = text; el.className = "bs-status" + (warn ? " warn" : ""); };
+  const hideBootSplash = () => { if (bootSplashDone) return; bootSplashDone = true; const el = $("boot-splash"); if (el) { el.classList.add("gone"); setTimeout(() => el.remove(), 400); } };
   function connect() {
     if (mesaDisposed) return;
     const mine = ws = new WebSocket(LOCAL.url || "ws://127.0.0.1:4455");
@@ -1583,10 +1636,11 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       if (mesaDisposed || ws !== mine) return;
       const m = JSON.parse(ev.data);
       if (m.op === 0) {
+        bootSplashStatus("Identificando o motor…");
         const d = { rpcVersion: 1, eventSubscriptions: SUBS }, a = m.d.authentication;
         if (a) d.authentication = await sha((await sha((LOCAL.password || "") + a.salt)) + a.challenge);
         mine.send(JSON.stringify({ op: 1, d }));
-      } else if (m.op === 2) { st.on = true; st.why = ""; syncAll().catch((e) => toast(e.message, true)); }
+      } else if (m.op === 2) { st.on = true; st.why = ""; bootSplashStatus("Carregando a mesa…"); syncAll().then(hideBootSplash).catch((e) => { toast(e.message, true); hideBootSplash(); }); }
       else if (m.op === 5) m.d.eventType === "InputVolumeMeters" ? onMeters(m.d.eventData.inputs) : onEvent(m.d.eventType, m.d.eventData || {});
       else if (m.op === 7) {
         const p = pending.get(m.d.requestId); if (!p) return;
@@ -1598,6 +1652,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       rejectMesaRequests("Conexão encerrada. Resultado incerto: confira o estado antes de repetir comandos.");
       clearMesaPaints();
       st.on = false; st.why = ev.code === 4009 ? "senha recusada (confira painel/local.js)" : "sem conexão, tentando de novo…";
+      if (!bootSplashDone) bootSplashStatus(ev.code === 4009 ? "Senha recusada. Confira painel/local.js." : "O motor ainda não respondeu. Tentando de novo…", true);
       if (!mesaDisposed) { renderAll(); setTimeout(connect, 2500); }
     };
   }
@@ -3506,6 +3561,22 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       await req("SetSceneName", { sceneName: from, newSceneName: to });
       if (st.tags[from] !== undefined) { st.tags[to] = st.tags[from]; delete st.tags[from]; store.set("mesa.tags", st.tags); }
       closePop();
+    })()),
+    // Aviso proativo de atualização (diferente da tela de configuração manual em Configurações → Atualizações).
+    updatelater: () => { $("update-banner").classList.remove("on"); },
+    updatedismiss: () => { const v = st.lastUpdateInfo?.version; st.updateDismissed = v || null; store.set("mesa.update_dismissed", st.updateDismissed); $("update-banner").classList.remove("on"); },
+    updategogo: () => run((async () => {
+      if (st.updateInstalling) return;
+      if (!confirm('O 3Mix vai fechar, atualizar e abrir de novo. Pare a transmissão e a gravação antes de continuar, se ainda não parou.')) return;
+      st.updateInstalling = true; renderUpdateBanner();
+      // Acompanha o andamento enquanto baixa; quando o motor fechar para aplicar, a mesa cai com ele.
+      const acompanha = setInterval(() => { pollUpdateOnce(); }, 1000);
+      try {
+        const r = await fetch(replayUrl.replace(/replay$/, 'control'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'update_install' }), signal: AbortSignal.timeout(120000) });
+        const result = await r.json();
+        if (!r.ok || result.success !== true) throw Error(result.error || 'O motor não aceitou a atualização');
+        $("ub-body").textContent = 'Baixando e preparando. O 3Mix vai fechar e abrir de novo sozinho.';
+      } catch (e) { clearInterval(acompanha); st.updateInstalling = false; toast(e.message, true); renderUpdateBanner(); }
     })()),
   };
 
@@ -6239,6 +6310,49 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     }
   }
   async function productionMetadataLoop(){while(true){if(st.on)try{const response=await fetch(new URL('/api/json',replayUrl).href,{signal:AbortSignal.timeout(2000)});if(response.ok){const data=await response.json();window.FreeMixProductionState=data;if(data.connected){const tags=Object.fromEntries((data.inputs||[]).map(i=>[i.name,i.tags||[]]));const tagsChanged=JSON.stringify(tags)!==JSON.stringify(st.inputTags),tallyChanged=JSON.stringify(data.tally)!==JSON.stringify(st.recursiveTally);st.inputTags=tags;st.recursiveTally=data.tally;if(tagsChanged){renderTabs();scheduleMesaPaint('tiles');}else if(tallyChanged)scheduleMesaPaint('tally');}}}catch{}await sleep(1500);}}
+
+  /* ---- Aviso proativo de atualização: lê o OnlineUpdateEngine já existente (ferramentas/atualizacao-online.mjs).
+     A tela em Configurações → Atualizações continua sendo a configuração manual; isto é só o toast/banner
+     que aparece sozinho quando uma versão nova já foi conferida e verificada (assinatura Ed25519). */
+  const updateVersionLabel = (v) => { const m = String(v || '').match(/^(\d+\.\d+\.\d+)(?:-(alpha|beta))?$/); return m ? (m[2] === 'alpha' ? 'Alpha ' : m[2] === 'beta' ? 'Beta ' : '') + m[1] : (v || ''); };
+  function renderUpdateBanner(info) {
+    const d = info || st.lastUpdateInfo; if (d) st.lastUpdateInfo = d;
+    const el = $("update-banner"); if (!el || !d) return;
+    if (st.updateInstalling) {
+      $("ub-title").textContent = "Atualizando o 3Mix…";
+      $("ub-body").textContent = $("ub-body").textContent || "Baixando e verificando. O 3Mix vai fechar e abrir de novo sozinho.";
+      $("ub-notas").hidden = true;
+      const prog = $("ub-progress"); prog.hidden = !(d.downloadBytes > 0); if (d.downloadBytes > 0) prog.value = Math.min(100, Math.round((d.receivedBytes || 0) * 100 / d.downloadBytes));
+      $("ub-go").disabled = true; $("ub-go").textContent = "Atualizando…";
+      el.classList.add("on");
+      return;
+    }
+    if (d.status !== 'available' || !d.version || st.updateDismissed === d.version) { el.classList.remove("on"); return; }
+    $("ub-title").textContent = "Nova versão disponível: " + updateVersionLabel(d.version);
+    $("ub-body").textContent = (d.downloadBytes != null ? "Download de " + (d.downloadBytes / 1048576).toFixed(0) + " MB, já conferido e assinado." : "Atualização conferida e assinada.") + " O 3Mix fecha, aplica e abre de novo.";
+    const itens = (d.novidades || []).flatMap((v) => v.itens || []);
+    const notas = $("ub-notas"); notas.hidden = !itens.length; notas.replaceChildren(...itens.slice(0, 6).map((t) => { const li = document.createElement('li'); li.textContent = t; return li; }));
+    $("ub-progress").hidden = true; $("ub-go").disabled = false; $("ub-go").textContent = "Atualizar agora";
+    el.classList.add("on");
+  }
+  async function pollUpdateOnce(){
+    try {
+      const r = await fetch(replayUrl.replace(/replay$/, 'update'), { cache: 'no-store', signal: AbortSignal.timeout(4000) });
+      if (r.ok) { const d = await r.json(); if (d.update) { renderUpdateBanner(d.update); return d.update; } }
+    } catch {}
+    return null;
+  }
+  // Fundo: só lê o estado já conhecido pelo motor (sem rede; quem baixa de verdade é startAutoCheck
+  // a cada 6h no lado do motor). Enquanto uma instalação está em andamento, o clique em "Atualizar agora"
+  // assume um ritmo próprio e mais rápido (ver updategogo), em vez de esperar este laço lento acordar.
+  async function updateCheckLoop(){
+    await sleep(8000); // dá tempo da mesa assentar antes do primeiro toque na rede
+    for (;;) {
+      if (st.on && !document.hidden && !st.updateInstalling) await pollUpdateOnce();
+      await sleep(45000);
+    }
+  }
+
   // BEGIN isolated visual integration: no command/request/state queue.
   const mesaPaintQueue = new Set();
   const mesaPaintFns = {tiles:renderTiles, tally:paintTileState, mixer:renderMixer, bot:renderBot, stat:renderStat};
@@ -6305,12 +6419,14 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     try { ws?.close(1000); } catch {}
   });
   // END isolated visual integration
-  initializeModuleLayout(); renderAll(); connect(); loadMesaWorkspace(); fetchAllDevices(); thumbLoop(); slowLoop(); mediaLoop(); productionMetadataLoop(); initMidi(); initSplitter(); initDock2Splitter();
+  initializeModuleLayout(); renderAll(); connect(); loadMesaWorkspace(); fetchAllDevices(); thumbLoop(); slowLoop(); mediaLoop(); productionMetadataLoop(); updateCheckLoop(); initMidi(); initSplitter(); initDock2Splitter();
 
   // Suporte a janela destacada independente (pop-up para segundo monitor)
   const qParams = new URLSearchParams(location.search);
   const qPop = qParams.get("pop");
   const qArg = qParams.get("arg");
+  // A splash de abertura é só da mesa principal; uma janela ?pop= secundária nunca a mostra.
+  if (qPop) hideBootSplash();
   if (qPop === 'add') fetchAllDevices();
   if (qPop === 'replay') {
     // Native menu entries still use mesa.html?pop=replay. Open the full console,
