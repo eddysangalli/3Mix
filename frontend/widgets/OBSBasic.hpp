@@ -3472,6 +3472,7 @@ public:
 	void ResetFreeMixFinalGate();
 	void FreeMixFadeToBlackRequest(obs_data_t *request,obs_data_t *response);
 	void FreeMixFinalProgramGateRequest(obs_data_t *request,obs_data_t *response);
+	bool EnsureFreeMixMergeTransition(std::string &transitionName, std::string &error);
 	freemix_ftb::Policy freeMixFtbPolicy;
 	freemix_final_gate::Policy finalGatePolicy;
 	bool finalGateExperimental=false;
