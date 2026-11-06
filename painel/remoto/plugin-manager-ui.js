@@ -10,6 +10,7 @@
     active: 'Carregado', disabled: 'Desabilitado', failed: 'Falha', unknown: 'Não confirmado',
     'pending-install': 'Instalação preparada', 'pending-enable': 'Ativação preparada',
     'pending-disable': 'Desativação preparada', 'pending-remove': 'Remoção preparada',
+    'pending-update': 'Atualização preparada', 'pending-rollback': 'Rollback preparado',
   };
   const compatibility = {
     verified: 'Verificado nesta versão', incompatible: 'Incompatível',
@@ -55,13 +56,15 @@
   }
 
   function pluginCard(plugin) {
-    const managed = !!plugin.managed && !plugin.essential;
+    const managed = !!plugin.managed && !plugin.essential && !plugin.protected;
     const state = text(plugin.state, 'unknown');
     const pending = state.startsWith('pending-');
     const locked = isLocked() || !managed || pending;
     const stateTone = /^(active|verified)$/.test(state) ? 'ok' : state === 'failed' ? 'error' : pending ? 'pending' : '';
     const options = listText(plugin.options);
     const deps = listText(plugin.dependencies);
+    const signature = plugin.signature && typeof plugin.signature === 'object' ? [plugin.signature.status, plugin.signature.signer].filter(Boolean).join(' · ') : plugin.signature;
+    const integrity = [plugin.source ? 'Origem: ' + plugin.source : null, signature ? 'Assinatura: ' + signature : null, plugin.sha256 ? 'SHA-256: ' + plugin.sha256 : null].filter(Boolean).map(esc).join(' · ');
     const meta = [plugin.developer, plugin.license ? 'Licença: ' + plugin.license : null].filter(Boolean).map(esc).join(' · ');
     const id = text(plugin.id, plugin.name);
     const canDisable = state === 'active' || state === 'pending-enable';
@@ -73,9 +76,10 @@
       + '<div class="pm-plugin-head"><div><h3>' + esc(text(plugin.name, id)) + '</h3><p class="pm-meta">' + esc(text(plugin.version, 'Versão não informada')) + (meta ? ' · ' + meta : '') + '</p></div>'
       + '<div class="pm-badges"><span class="pm-badge" data-tone="' + stateTone + '">' + esc(states[state] || state) + '</span>'
       + '<span class="pm-badge" data-tone="' + (plugin.compatibility === 'incompatible' ? 'error' : plugin.compatibility === 'verified' ? 'ok' : 'pending') + '">' + esc(compatibility[plugin.compatibility] || text(plugin.compatibility, 'Compatibilidade não verificada')) + '</span>'
-      + (plugin.essential ? '<span class="pm-badge">Essencial · protegido</span>' : !managed ? '<span class="pm-badge">Fora do diretório gerenciado</span>' : '') + '</div></div>'
+      + (plugin.essential ? '<span class="pm-badge">Essencial · protegido</span>' : plugin.protected ? '<span class="pm-badge">Integrado · protegido</span>' : !managed ? '<span class="pm-badge">Fora do diretório gerenciado</span>' : '') + '</div></div>'
       + (plugin.description ? '<p class="pm-description">' + esc(plugin.description) + '</p>' : '')
       + (deps ? '<p class="pm-detail"><strong>Dependências:</strong> ' + esc(deps) + '</p>' : '')
+      + (integrity ? '<p class="pm-detail">' + integrity + '</p>' : '')
       + resources(plugin)
       + (options ? '<p class="pm-detail"><strong>Opções:</strong> ' + esc(options) + '</p>' : '')
       + (controls ? '<div class="pm-actions">' + controls + '</div>' : '')

@@ -8,7 +8,12 @@ const snapshot = {
   success: true, engine: { version: '32.2.2' }, productionActive: false, safeMode: false,
   plugins: [{ id: 'qa-plugin', name: '<img src=x onerror=alert(1)>', version: '1.0', developer: 'QA',
     state: 'active', compatibility: 'pending-test', managed: true, essential: false,
-    backupAvailable: true, resources: { inputs: ['qa-input'] } }],
+    backupAvailable: true, source: 'arquivo local', sha256: 'a'.repeat(64),
+    signature: { status: 'Valid', signer: 'QA <Signer>' }, resources: { inputs: ['qa-input'] } },
+  { id: 'qa-pending', name: 'QA Pending', version: '2.0', developer: 'QA', state: 'pending-update',
+    compatibility: 'pending-test', managed: true, essential: false, backupAvailable: false, resources: {} },
+  { id: 'qa-integrated', name: 'QA Integrated', version: '1.0', developer: 'QA', state: 'active',
+    compatibility: 'verified', managed: false, protected: true, essential: false, backupAvailable: false, resources: {} }],
   catalog: [], diagnostics: [{ severity: 'warning', code: 'QA', pluginId: 'qa-plugin', message: 'Revisar dependência' }],
 };
 
@@ -67,4 +72,17 @@ test('production lock prevents mutations and ZIP upload uses multipart file fiel
   assert.equal(upload.options.method, 'POST');
   assert.equal(upload.options.headers['X-3Mix-Plugin-Manager'], '1');
   assert.equal(upload.options.body.get('file')?.name, 'qa-plugin.zip');
+});
+
+test('installed cards expose provenance and friendly pending states without trusting metadata HTML', async () => {
+  const f = fixture();
+  f.ui.mount(f.element);
+  await flush();
+  assert.match(f.element.innerHTML, /Atualização preparada/);
+  assert.match(f.element.innerHTML, /Origem: arquivo local/);
+  assert.match(f.element.innerHTML, /Assinatura: Valid/);
+  assert.match(f.element.innerHTML, /SHA-256: a{64}/);
+  assert.match(f.element.innerHTML, /QA &lt;Signer&gt;/);
+  assert.doesNotMatch(f.element.innerHTML, /QA <Signer>/);
+  assert.match(f.element.innerHTML, /Integrado · protegido/);
 });
