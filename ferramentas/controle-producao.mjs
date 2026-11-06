@@ -52,6 +52,25 @@ export function number(value, min, max, label='Valor') {
   return Number(value);
 }
 
+const transitionAliases={
+  merge:{kinds:['move_transition'],names:['merge','move','3mix merge']},
+  stinger:{kinds:['obs_stinger_transition','stinger_transition'],names:['stinger']},
+  wipe:{kinds:['luma_wipe_transition','swipe_transition'],names:['wipe','swipe','luma wipe']},
+  slide:{kinds:['slide_transition'],names:['slide']},
+  cube:{kinds:['cube_transition','obs_cube_transition'],names:['cube']}
+};
+const transitionToken=value=>String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase();
+export function resolveRequestedTransition(transitions,requested) {
+  const token=transitionToken(requested);
+  if(!token)return null;
+  const list=Array.isArray(transitions)?transitions:[];
+  const exact=list.find(item=>transitionToken(item?.transitionName)===token||transitionToken(item?.transitionKind)===token);
+  if(exact)return exact;
+  const alias=transitionAliases[token];
+  if(!alias)return null;
+  return list.find(item=>alias.kinds.includes(transitionToken(item?.transitionKind))||alias.names.includes(transitionToken(item?.transitionName)))||null;
+}
+
 export class Production {
   installProjectHost({replay,iso,onlineUpdate,diagnostics}) {
     if(this.projectBinding)throw Error('PROJECT_HOST_ALREADY_INSTALLED');
@@ -512,18 +531,37 @@ export class Production {
         // Se for um corte direto para uma entrada diferente do Preview atual, restaura o Preview anterior preservando a pré-seleção.
         const nextPreview=(!direct||directName===previousPreview)?previousProgram:previousPreview;
         if(direct){await this.req('SetCurrentPreviewScene',{sceneName:directName});await this.wait('GetSceneList',{},s=>s.currentPreviewSceneName===directName);}
-        const t=action==='transition'?await this.req('GetCurrentSceneTransition'):this.state.transitions.find(t=>t.transitionKind===(action==='cut'?'cut_transition':'fade_transition')); if(!t) throw new Error('Transição indisponível');
+        const requested=action==='transition'?transitionToken(d.transition):'';
+        let t;
+        if(action==='transition'&&requested){
+          t=resolveRequestedTransition(this.state.transitions,d.transition);
+          if(!t&&requested==='merge'){
+            await this.vendor('ensure_merge_transition',{},'freemix');
+            const updated=await this.req('GetSceneTransitionList');
+            this.state.transitions=updated.transitions;
+            t=resolveRequestedTransition(updated.transitions,d.transition);
+          }
+          if(!t)throw new Error(`Transição ${String(d.transition).toUpperCase()} indisponível ou não configurada`);
+        }else t=action==='transition'?await this.req('GetCurrentSceneTransition'):this.state.transitions.find(t=>t.transitionKind===(action==='cut'?'cut_transition':'fade_transition'));
+        if(!t) throw new Error('Transição indisponível');
         // OBS refuses selection while the preceding AUDIO transition is still active,
         // even when its visual cursor already reads 1. Retry selection until confirmed.
-        let selected=action==='transition';for(let n=0;!selected&&n<60;n++){await this.req('SetCurrentSceneTransition',{transitionName:t.transitionName});if((await this.req('GetCurrentSceneTransition')).transitionKind===t.transitionKind){selected=true;break;}await delay(50);}if(!selected)throw new Error('A transição anterior ainda está ativa');
-        if(action==='fade') await this.req('SetCurrentSceneTransitionDuration',{transitionDuration:number(d.duration??500,50,20000,'Duração')});
-        // CUT selection was already confirmed above; only fade duration needs another read.
-        if(action==='fade') await this.wait('GetCurrentSceneTransition',{},s=>s.transitionKind===t.transitionKind&&s.transitionDuration===Number(d.duration??500));
+        let selected=action==='transition'&&!requested,selectedState=selected?t:null;
+        for(let n=0;!selected&&n<60;n++){
+          await this.req('SetCurrentSceneTransition',{transitionName:t.transitionName});
+          const current=await this.req('GetCurrentSceneTransition');
+          if(current.transitionName===t.transitionName){selected=true;selectedState=current;break;}
+          await delay(50);
+        }
+        if(!selected)throw new Error('A transição anterior ainda está ativa');
+        const requestedDuration=action==='fade'?number(d.duration??500,50,20000,'Duração'):d.duration!==undefined?number(d.duration,50,20000,'Duração'):null;
+        if(requestedDuration!==null)await this.req('SetCurrentSceneTransitionDuration',{transitionDuration:requestedDuration});
+        if(requestedDuration!==null)await this.wait('GetCurrentSceneTransition',{},s=>s.transitionName===t.transitionName&&s.transitionDuration===requestedDuration);
         const target=(await this.req('GetSceneList')).currentPreviewSceneName;
         await this.req('TriggerStudioModeTransition'); await this.wait('GetSceneList',{},s=>s.currentProgramSceneName===target);
         // Program is selected at transition START, not at its final video frame.
         // Poll completion immediately for CUT; wait() still retries if the engine is busy.
-        if(t.transitionKind!=='cut_transition')await delay(action==='fade'?Number(d.duration??500)+50:Math.max(50,Math.min(20000,Number(t.transitionDuration)||0)+50));
+        if(t.transitionKind!=='cut_transition')await delay(action==='fade'?Number(d.duration??500)+50:Math.max(50,Math.min(20000,Number(d.duration??selectedState?.transitionDuration??t.transitionDuration)||0)+50));
         await this.wait('GetCurrentSceneTransitionCursor',{},s=>s.transitionCursor===1);
         if(nextPreview&&nextPreview!==target){await this.req('SetCurrentPreviewScene',{sceneName:nextPreview}).catch(()=>{});await this.wait('GetSceneList',{},s=>s.currentPreviewSceneName===nextPreview).catch(()=>{});}
         break;
