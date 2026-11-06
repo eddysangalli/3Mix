@@ -1,0 +1,52 @@
+{
+  "status": "INVENTORY_ONLY_NOT_BUILD_FREEZE",
+  "at": "2026-11-05T02:31:48.793235+00:00",
+  "root": "D:\\DRIVE\\IA\\antigravity\\3Mix\\qa-finalizacao\\native-vmix30-clean\\rundir\\RelWithDebInfo",
+  "sourceRevisionAtBuildStartKnown": false,
+  "physicalHardwareQualified": false,
+  "operatorRuntimeModified": false,
+  "files": [
+    {
+      "path": "bin/64bit/3Mix.exe",
+      "present": true,
+      "bytes": 11104768,
+      "sha256": "6b01001e818d6e490dabc2c77b1ca8532564d66863a8e6aaa2b86dff17f1bbf2"
+    },
+    {
+      "path": "bin/64bit/obs.dll",
+      "present": true,
+      "bytes": 1502720,
+      "sha256": "44a87e808d7cb05254b742dfa4c8778dc34afe23b8318a30326f73ff61b2ebb9"
+    },
+    {
+      "path": "obs-plugins/64bit/decklink.dll",
+      "present": true,
+      "bytes": 200192,
+      "sha256": "ea0a6780775b75b149cfe96a485d6abe3356e1c580be17e8aeab712dd3545f62"
+    },
+    {
+      "path": "obs-plugins/64bit/aja.dll",
+      "present": true,
+      "bytes": 4342784,
+      "sha256": "a20c998c70f64d6542e2b2f80719f0c0aafd05f498ccf3136adf82191fa606c8"
+    },
+    {
+      "path": "obs-plugins/64bit/obs-ffmpeg.dll",
+      "present": true,
+      "bytes": 780288,
+      "sha256": "110fbf263bec1dc5e4eb31bf4ec3de90783c4f8a035f16faf54576eef112d339"
+    },
+    {
+      "path": "obs-plugins/64bit/obs-browser.dll",
+      "present": true,
+      "bytes": 2911232,
+      "sha256": "6e9555bd7922e5cf878355c51ca9d90c7852a42e3d50ba07b91216f2c81ab523"
+    },
+    {
+      "path": "obs-plugins/64bit/obs-websocket.dll",
+      "present": true,
+      "bytes": 3057664,
+      "sha256": "2e3e1ac742782a3b1d0700a0bb75bcdf71087afca7146309bfa2c130243c0266"
+    }
+  ]
+}
