@@ -35,3 +35,7 @@ body.clocks-only .rapid-talk { top:58px; }
 
 /* The production clock lives in the center column; keep the top bar free. */
 body:not(.clocks-only) .clk { display:none !important; }
+
+/* Navigation centered in the full native window, compensating caption controls. */
+body:not(.clocks-only) { grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); }
+body:not(.clocks-only) .workspace-tabs { transform:translateX(var(--native-caption-half,0px)); }
