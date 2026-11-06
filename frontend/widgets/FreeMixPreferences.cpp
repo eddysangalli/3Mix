@@ -166,7 +166,16 @@ void Request(obs_data_t *request,obs_data_t *response,void *)
  QMetaObject::invokeMethod(OBSBasic::Get(),[request,response](){
   const std::string action=obs_data_get_string(request,"action"),category=obs_data_get_string(request,"category");
   if(action=="plugin_tools"||action=="plugin_tool_open"){
-   auto *main=OBSBasic::Get();auto *menu=main?main->findChild<QMenu *>("menuTools"):nullptr;
+   // The integrated caption header unparents the Designer menu bar to keep its actions
+   // alive (source-selection callbacks, shortcuts), so a plain findChild from the main
+   // window can no longer reach menuTools once that header is active. Fall back to it
+   // explicitly instead of declaring the native tools unavailable.
+   auto *main=OBSBasic::Get();
+   QMenu *menu=nullptr;
+   if(main){
+    menu=main->findChild<QMenu *>("menuTools");
+    if(!menu)if(auto *preserved=main->OriginalMenuWidget())menu=preserved->findChild<QMenu *>("menuTools");
+   }
    if(!menu){obs_data_set_bool(response,"success",false);obs_data_set_string(response,"error","Native tools menu unavailable");return;}
    const auto actions=menu->actions();
    if(action=="plugin_tools"){

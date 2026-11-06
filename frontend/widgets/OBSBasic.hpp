@@ -3491,6 +3491,12 @@ public:
 	void SetVirtualCamScene(const std::string &scene);
 	std::string VirtualCamScene() const;
 
+	// 3Mix: integrated caption header keeps the Designer menu bar alive but unparented
+	// (findChild from the window can no longer reach it); callers that need it directly,
+	// such as plugin_tools/plugin_tool_open, go through this instead.
+	QWidget *preservedOriginalMenuWidget = nullptr;
+	QWidget *OriginalMenuWidget() const { return preservedOriginalMenuWidget; }
+
 public slots:
 
 	void SetupBroadcast();

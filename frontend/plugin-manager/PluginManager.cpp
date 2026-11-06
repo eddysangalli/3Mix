@@ -22,6 +22,7 @@
 #include <qt-wrappers.hpp>
 #include <widgets/OBSBasic.hpp>
 
+#include <QDateTime>
 #include <QMessageBox>
 
 #include <nlohmann/json.hpp>
@@ -110,6 +111,57 @@ void PluginManager::postLoad()
 	saveModules_();
 	// Add provided features from any unloaded modules
 	linkUnloadedModules_();
+	// 3Mix: tell the panel's plugin manager what actually loaded natively.
+	writeManagedReport_(true);
+}
+
+void PluginManager::writeManagedReport_(bool complete)
+{
+	nlohmann::json report;
+	report["phase"] = complete ? "complete" : "loading";
+	report["at"] = QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs).toStdString();
+	report["libobsVersion"] = obs_get_version_string();
+	nlohmann::json plugins = nlohmann::json::array();
+	// obs_enum_modules (feeding modules_ above) only visits modules the loader could open
+	// and initialize; obs_is_core_module already filtered out the bundled OBS core modules
+	// in addModuleToPluginManagerImpl. Everything left in modules_ therefore did load.
+	for (const auto &moduleInfo : modules_) {
+		nlohmann::json entry;
+		entry["id"] = moduleInfo.module_name;
+		entry["status"] = "loaded";
+		entry["name"] = moduleInfo.display_name;
+		entry["version"] = moduleInfo.version;
+		entry["sourceTypes"] = moduleInfo.sourcesLoaded;
+		entry["outputs"] = moduleInfo.outputsLoaded;
+		entry["encoders"] = moduleInfo.encodersLoaded;
+		entry["services"] = moduleInfo.servicesLoaded;
+		plugins.push_back(entry);
+	}
+	report["plugins"] = plugins;
+	auto reportFile = getManagedReportPath_();
+	std::error_code dirError;
+	std::filesystem::create_directories(reportFile.parent_path(), dirError);
+	if (dirError) {
+		blog(LOG_ERROR, "[3Mix Plugins] Could not create report directory: %s", dirError.message().c_str());
+		return;
+	}
+	// Atomic-ish: write to a temp file then rename, so a reader never sees a half-written report.
+	auto tempFile = reportFile;
+	tempFile += ".tmp";
+	{
+		std::ofstream outFile(tempFile);
+		if (!outFile) {
+			blog(LOG_ERROR, "[3Mix Plugins] Could not open load report for writing: %s",
+			     tempFile.u8string().c_str());
+			return;
+		}
+		outFile << std::setw(4) << report << std::endl;
+	}
+	std::error_code renameError;
+	std::filesystem::rename(tempFile, reportFile, renameError);
+	if (renameError) {
+		blog(LOG_ERROR, "[3Mix Plugins] Could not finalize load report: %s", renameError.message().c_str());
+	}
 }
 
 void PluginManager::loadAllPlugins(bool usePortableMode)
