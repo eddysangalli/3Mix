@@ -9,7 +9,7 @@ export function validateWorkspace(value){
  if(!Number.isInteger(value.sideWidth)||value.sideWidth<0||value.sideWidth>4000||(value.sideWidth>0&&value.sideWidth<280))throw Error('Largura lateral: automática (0) ou entre 280 e 4000 px');
  const result=Object.fromEntries(Object.keys(workspaceDefaults).map(key=>[key,value[key]]));
  if(value.dockTabs!==undefined){
-  const ids=['list','replay','mixer','dsk','rundown','ptz'],seen=new Set();
+  const ids=['list','replay','mixer','slides','dsk','rundown','ptz'],seen=new Set();
   if(!Array.isArray(value.dockTabs)||value.dockTabs.length!==2||value.dockTabs.some(tabs=>!Array.isArray(tabs)||tabs.some(id=>!ids.includes(id)||seen.has(id)||(seen.add(id),false))))throw Error('Abas dos docks inválidas ou duplicadas');
   result.dockTabs=value.dockTabs.map(tabs=>[...tabs]);
  }

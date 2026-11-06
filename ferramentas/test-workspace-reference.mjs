@@ -36,3 +36,5 @@ test('unsupported workspace method reports allowed methods without reading body'
  await handleWorkspaceRequest({path:'/api/workspace',req:{method:'DELETE'},res:{setHeader:(k,v)=>headers[k]=v},root:'.',local:()=>true,body:async()=>{throw Error('unexpected body');},json:(_res,status,data)=>{response={status,data};}});
  assert.equal(response.status,405);assert.equal(headers.Allow,'GET, POST');assert.equal(response.data.success,false);
 });
+
+test('slides is a valid dock tab id',()=>{const v={...workspaceDefaults,dockTabs:[['mixer','slides'],['replay']]};const out=validateWorkspace(v);assert.deepEqual(out.dockTabs,v.dockTabs);});

@@ -3101,7 +3101,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     dock_undock: () => A.undock_side(),
     dockwin: (d) => {
       const cur = (Number(d?.v) === 1 ? st.side2Tab : st.sideTab) || "mixer";
-      const id = { mixer: "audio", replay: "replay", rundown: "rundown", list: "playlist", dsk: "dsk", ptz: "ptz" }[cur];
+      const id = { mixer: "audio", replay: "replay", rundown: "rundown", list: "playlist", dsk: "dsk", ptz: "ptz", slides: "slides" }[cur];
       if (!id) return toast("Este módulo não tem janela própria; abra pelas abas de cima.");
       run(launchPanel(id));
     },
