@@ -48,6 +48,13 @@ class ThreeMixMonitorIdentity final : public QObject {
 		label->setGeometry(display->x(), display->y(),
 			std::max(0, std::min(260, display->width())), 24);
 		label->raise();
+		// QGraphicsOpacityEffect caches the label's rendered pixmap. A re-layout
+		// (dock resize, window move, Program re-entering Studio Mode) can leave a
+		// stale cached frame showing through the freshly positioned one until
+		// something else forces the effect to repaint - previously only a hover.
+		// Invalidate on every reposition so two overlapping renders of "PGM"/"PVW"
+		// never linger without the user having to mouse over the monitor first.
+		if (opacity) opacity->update();
 	}
 protected:
 	bool eventFilter(QObject *, QEvent *event) override
@@ -556,6 +563,16 @@ void OBSBasic::SetPreviewProgramMode(bool enabled)
 
 		sizeObserver = new PreviewProgramSizeObserver(ui->preview, program, this);
 
+		// programLabel was just constructed with the raw "StudioMode.ProgramSceneLabel"
+		// lookup key as its text (that locale key does not exist; TextLookup::GetString
+		// returns the key itself when a lookup misses - see libobs/util/util.hpp). Nothing
+		// before this point replaces that text with the compact "PGM" the user is meant to
+		// see: UpdatePreviewProgramIndicators() only runs later, off a scene/transition
+		// event. With the opacity effect attached above, that stale first paint could be
+		// cached and linger - visually indistinguishable from the label being duplicated -
+		// until a hover forced a repaint. Apply the real indicator text up front instead.
+		UpdatePreviewProgramIndicators();
+
 		OnEvent(OBS_FRONTEND_EVENT_STUDIO_MODE_ENABLED);
 
 		blog(LOG_INFO, "Switched to Preview/Program mode");
@@ -684,6 +701,15 @@ void OBSBasic::UpdatePreviewProgramIndicators()
 			"border-left:3px solid %1;padding:2px 7px;font-weight:600;").arg(accent));
 		label->setMinimumHeight(0);
 		label->setMaximumHeight(24);
+		// ThreeMixMonitorIdentity keeps a QGraphicsOpacityEffect permanently attached for the
+		// hover fade (0.55 at rest, 1.0 on Enter/FocusIn). That effect caches the label's last
+		// rendered pixmap; setText()/setStyleSheet() alone do not reliably invalidate it, which
+		// left the previous text ("PGM"'s own prior paint, or the raw "StudioMode.ProgramSceneLabel"
+		// locale key on first paint before this function first ran) ghosted under the new one
+		// until a hover forced the opacity to change and repainted it clean. Force the same
+		// invalidation here, every time the text changes, instead of only on hover.
+		if (auto *effect = label->graphicsEffect())
+			effect->update();
 	};
 	compactIndicator(ui->previewLabel, preview, "PVW", "#39d349");
 	compactIndicator(programLabel, program, "PGM", "#f53038");
