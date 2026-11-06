@@ -744,3 +744,32 @@ body.me-on .input-module .me-surface { display:block; flex:1 1 0; min-width:0; m
 .plugin-linha { display:grid; grid-template-columns:1fr auto; gap:4px 8px; align-items:center; padding:6px 0; border-bottom:1px solid #414141; }
 .plugin-linha small { grid-column:1 / -1; color:#a9a9a9; }
 .plugin-vst3 { padding-top:8px; } .plugin-vst3 > b { display:block; padding-bottom:2px; } .plugin-vst3 .plugin-linha { grid-template-columns:1fr auto auto; } .plugin-vst3 select { grid-column:1 / 3; min-width:0; }
+
+/* Acabamento broadcast sóbrio: nenhuma alteração de geometria ou de estado. */
+:root { --surface-work:#202020; --surface-panel:#242424; --surface-header:#292929; --edge-quiet:#3c3c3c; }
+.switcher-bank,.tile:not(.is-pv):not(.is-out),.side-panel,#side-panel-2 { border-color:var(--edge-quiet); box-shadow:none; }
+.tiles,.tabs,.side-panel-header,#side-panel-2 .side-panel-header { border-color:var(--edge-quiet); }
+.tabs,.side-panel-header,#side-panel-2 .side-panel-header { background:var(--surface-header); }
+.tile { background:var(--surface-panel); }
+.tt:not(.pv):not(.out) { background:#2c2c2c; }
+.r button:not(.on):not(.na) { background:#303030; border-color:#444; }
+#mixer .strip { border-color:var(--edge-quiet); }
+.stat { background:#1c1c1c; border-color:#353535; font-variant-numeric:tabular-nums; }
+
+/* Hierarquia de módulos: títulos discretos; estados PV/PGM permanecem coloridos. */
+.switcher-bank h2 { background:#252525; }
+.side-panel .side-tabs .st-tab:not(.on):not(.live) { color:#b8b8b8; }
+.side-panel .side-tabs .st-tab.on { background:#303030; }
+.side-undock-btn,.bank-tool { box-shadow:none; }
+.tile .tt { font-weight:600; }
+.tile.is-pv { border-color:#39d349; }
+.tile.is-out { border-color:#f53038; }
+
+/* Superfícies secundárias coerentes, sem atenuar tally, alertas ou medidores. */
+.replay-quick-dock { background:var(--surface-panel); color:var(--tx); }
+.replay-quick-dock header,.replay-quick-dock .quick-group { border-color:var(--edge-quiet); }
+.replay-quick-dock select,.bank-sel { background:#202020; border-color:#484848; color:#e6e6e6; }
+.strip .col button:not(.on):not(.lit),.strip .bt button:not(.on):not(.lit) { background:#303030; border-color:#484848; }
+.strip .hd span { font-weight:600; }
+.stat .res,.media-time-row { font-variant-numeric:tabular-nums; }
+.bank-tool:not(:hover),.side-undock-btn:not(:hover) { color:#b8b8b8; border-color:#484848; }
