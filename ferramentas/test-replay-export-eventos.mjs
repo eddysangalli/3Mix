@@ -45,8 +45,8 @@ async function gerarClipe(dir,nome,segundos=1){
   return file;
 }
 
-test('export-event copia os clipes reais de um lance para a pasta pedida, com nomes legíveis', async()=>{
-  if(!temClipeReal()){console.log('SKIP: ffmpeg indisponível neste ambiente');return;}
+test('export-event copia os clipes reais de um lance para a pasta pedida, com nomes legíveis', async(t)=>{
+  if(!temClipeReal()){t.skip('ffmpeg indisponível neste ambiente');return;}
   const root=await temporaryRoot();
   try{
     const origem=join(root,'gravacoes','replay','capturas');await mkdir(origem,{recursive:true});
@@ -76,8 +76,8 @@ test('export-event copia os clipes reais de um lance para a pasta pedida, com no
   } finally { await rm(root,{recursive:true,force:true}); }
 });
 
-test('export-events sem eventIds exporta TODOS os lances (equivalente a "Export All Events" do vMix)', async()=>{
-  if(!temClipeReal()){console.log('SKIP: ffmpeg indisponível neste ambiente');return;}
+test('export-events sem eventIds exporta TODOS os lances (equivalente a "Export All Events" do vMix)', async(t)=>{
+  if(!temClipeReal()){t.skip('ffmpeg indisponível neste ambiente');return;}
   const root=await temporaryRoot();
   try{
     const origem=join(root,'gravacoes','replay','capturas');await mkdir(origem,{recursive:true});
@@ -94,8 +94,8 @@ test('export-events sem eventIds exporta TODOS os lances (equivalente a "Export 
   } finally { await rm(root,{recursive:true,force:true}); }
 });
 
-test('export-events com eventIds exporta só os selecionados, na ordem enviada (equivalente a "Export Selected Events")', async()=>{
-  if(!temClipeReal()){console.log('SKIP: ffmpeg indisponível neste ambiente');return;}
+test('export-events com eventIds exporta só os selecionados, na ordem enviada (equivalente a "Export Selected Events")', async(t)=>{
+  if(!temClipeReal()){t.skip('ffmpeg indisponível neste ambiente');return;}
   const root=await temporaryRoot();
   try{
     const origem=join(root,'gravacoes','replay','capturas');await mkdir(origem,{recursive:true});
@@ -141,8 +141,8 @@ test('export-event: lance sem clipes é relatado com erro explícito no evento, 
   } finally { await rm(root,{recursive:true,force:true}); }
 });
 
-test('export-event: clipe cujo arquivo original foi apagado do disco aparece com erro por câmera, sem interromper os demais', async()=>{
-  if(!temClipeReal()){console.log('SKIP: ffmpeg indisponível neste ambiente');return;}
+test('export-event: clipe cujo arquivo original foi apagado do disco aparece com erro por câmera, sem interromper os demais', async(t)=>{
+  if(!temClipeReal()){t.skip('ffmpeg indisponível neste ambiente');return;}
   const root=await temporaryRoot();
   try{
     const origem=join(root,'gravacoes','replay','capturas');await mkdir(origem,{recursive:true});
