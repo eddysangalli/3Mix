@@ -43,7 +43,7 @@ void Cameras(obs_data_t *response)
     int width = 0, height = 0; char extra = 0;
     if (resolution.disabled || std::sscanf(resolution.id.c_str(), "%dx%d%c", &width, &height, &extra) != 2 || width < 2 || height < 2 || width > 7680 || height > 7680) continue;
     obs_data_set_string(settings, "resolution", resolution.id.c_str()); obs_data_set_int(settings, "frame_interval", 0);
-    obs_properties_apply_settings(props.get(), settings); // Applies only our owned defaults, never source context settings.
+    obs_properties_apply_settings(props.get(), settings);
     auto *fps = obs_properties_get(props.get(), "frame_interval");
     if (!fps || obs_property_get_type(fps) != OBS_PROPERTY_LIST || obs_property_list_format(fps) != OBS_COMBO_FORMAT_INT) continue;
     if (obs_property_list_item_count(fps) > 256) throw std::runtime_error("FPS_LIMIT");

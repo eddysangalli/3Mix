@@ -77,6 +77,7 @@ target_sources(
     obs-source.h
     obs-video-gpu-encode.c
     obs-video.c
+    obs-master-final-gate.c
     obs-view.c
     obs.c
     obs.h

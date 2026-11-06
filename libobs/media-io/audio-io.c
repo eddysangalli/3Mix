@@ -72,6 +72,7 @@ struct audio_output {
 	os_event_t *stop_event;
 
 	bool initialized;
+	bool stopped;
 
 	audio_input_callback_t input_cb;
 	void *input_param;
@@ -389,16 +390,23 @@ fail0:
 	return AUDIO_OUTPUT_FAIL;
 }
 
+void audio_output_stop(audio_t *audio)
+{
+	if (audio && audio->initialized && !audio->stopped) {
+		os_event_signal(audio->stop_event);
+		pthread_join(audio->thread, NULL);
+		audio->stopped = true;
+	}
+}
+
 void audio_output_close(audio_t *audio)
 {
-	void *thread_ret;
 
 	if (!audio)
 		return;
 
 	if (audio->initialized) {
-		os_event_signal(audio->stop_event);
-		pthread_join(audio->thread, &thread_ret);
+		audio_output_stop(audio);
 		os_event_destroy(audio->stop_event);
 		pthread_mutex_destroy(&audio->input_mutex);
 	}

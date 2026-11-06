@@ -1974,6 +1974,8 @@ EXPORT uint32_t obs_output_get_delay(const obs_output_t *output);
 
 /** If delay is active, gets the currently active delay value, in seconds. */
 EXPORT uint32_t obs_output_get_active_delay(const obs_output_t *output);
+EXPORT bool obs_output_delay_dump(obs_output_t *output, uint32_t *discarded_packets, uint64_t *discarded_bytes);
+EXPORT uint64_t obs_output_get_delay_buffered_ns(obs_output_t *output);
 
 /** Forces the output to stop.  Usually only used with delay. */
 EXPORT void obs_output_force_stop(obs_output_t *output);
@@ -2729,6 +2731,16 @@ EXPORT void obs_canvas_render(obs_canvas_t *canvas);
 /** Returns true if video of the canvas is active, false otherwise */
 EXPORT bool obs_canvas_video_active(obs_canvas_t *canvas);
 
+#ifdef __cplusplus
+}
+#endif
+
+#include "obs-final-gate.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+EXPORT video_t *obs_view_add_program_final_gate(obs_view_t *view, struct obs_video_info *ovi);
 #ifdef __cplusplus
 }
 #endif

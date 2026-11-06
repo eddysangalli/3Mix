@@ -8,7 +8,6 @@
 #include <cstring>
 #include <mutex>
 #include <vector>
-
 class FreeMixPrecisionVideo {
  OBSSourceAutoRelease source;
  gs_texrender_t *render=nullptr;gs_stagesurf_t *stage=nullptr;

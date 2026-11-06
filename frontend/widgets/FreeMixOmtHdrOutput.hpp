@@ -11,16 +11,8 @@ inline bool Transfer(const std::string &value){return value=="pq"||value=="hlg";
 inline video_colorspace ColorSpace(const std::string &value){return value=="pq"?VIDEO_CS_2100_PQ:VIDEO_CS_2100_HLG;}
 // SDK identities are shared by SDR Fill/Key and dedicated opaque HDR senders.
 inline bool IdentityInUse(const std::string &name,obs_output_t *ignore=nullptr){
- struct Context {const std::string &name;obs_output_t *ignore;bool found=false;};
- obs_enum_outputs([](void *param,obs_output_t *output){
-  auto &c=*static_cast<Context *>(param);
-  if(output==c.ignore||!obs_output_active(output))return true;
-  const std::string id=obs_output_get_id(output);
-  if(id!="freemix_omt_output"&&id!="freemix_omt_hdr_output")return true;
-  OBSDataAutoRelease settings=obs_output_get_settings(output);
-  c.found=std::string(obs_data_get_string(settings,"name"))==c.name||(obs_data_get_bool(settings,"fill_key")&&std::string(obs_data_get_string(settings,"key_name"))==c.name);
-  return !c.found;
- },&context);return context.found;
+ struct Context {const std::string &name;obs_output_t *ignore;bool found=false;};Context context={name,ignore};
+ obs_enum_outputs([](void *param,obs_output_t *output){auto &c=*static_cast<Context *>(param);if(output==c.ignore||!obs_output_active(output))return true;const std::string id=obs_output_get_id(output);if(id!="freemix_omt_output"&&id!="freemix_omt_hdr_output")return true;OBSDataAutoRelease settings=obs_output_get_settings(output);c.found=std::string(obs_data_get_string(settings,"name"))==c.name||(obs_data_get_bool(settings,"fill_key")&&std::string(obs_data_get_string(settings,"key_name"))==c.name);return !c.found;},&context);return context.found;
 }
 struct Sender {
  obs_output_t *output=nullptr;omt_send_t *sender=nullptr;std::mutex mutex;
@@ -51,9 +43,97 @@ struct Sender {
  uint64_t Bytes(){std::lock_guard<std::mutex> lock(mutex);return bytes;}
 };
 inline void Register(){
- static bool registered=false;if(registered)return;registered=true;obs_output_info info={};info.id="freemix_omt_hdr_output";info.flags=OBS_OUTPUT_AV;info.get_name=[](void *){return "3Mix OMT HDR (manual PQ/HLG receiver)";};
+ static bool registered=false;if(registered)return;registered=true;obs_output_info info={};info.id="freemix_omt_hdr_output";info.flags=OBS_OUTPUT_AV;info.get_name=[](void *){return "FreeMix OMT HDR (manual PQ/HLG receiver)";};
  info.create=[](obs_data_t *settings,obs_output_t *output)->void *{auto *s=new Sender();s->output=output;s->name=obs_data_get_string(settings,"name");s->transfer=obs_data_get_string(settings,"transfer");return s;};
  info.destroy=[](void *data){auto *s=static_cast<Sender *>(data);{std::lock_guard<std::mutex> lock(s->mutex);s->Destroy();}delete s;};
  info.start=[](void *data){return static_cast<Sender *>(data)->Start();};info.stop=[](void *data,uint64_t){static_cast<Sender *>(data)->Stop();};info.raw_video=[](void *data,video_data *v){static_cast<Sender *>(data)->Video(v);};info.raw_audio=[](void *data,audio_data *a){static_cast<Sender *>(data)->Audio(a);};info.get_total_bytes=[](void *data){return static_cast<Sender *>(data)->Bytes();};obs_register_output(&info);
+}
+struct Slot {
+ OBSOutputAutoRelease output;obs_view_t *view=nullptr;OBSSourceAutoRelease source;std::unique_ptr<FreeMixSourceAudio> audio;
+ void Stop(){if(output&&obs_output_active(output))obs_output_force_stop(output);output=nullptr;audio.reset();if(view){obs_view_remove(view);obs_view_set_source(view,0,nullptr);obs_view_destroy(view);view=nullptr;}source=nullptr;}
+};
+inline std::array<Slot,4> &Slots(){static std::array<Slot,4> hdrOutputs;return hdrOutputs;}
+inline void StopAll(){for(auto &slot:Slots())slot.Stop();}
+inline std::string Path(int id){char *folder=obs_frontend_get_current_profile_path();const std::string path=folder?std::string(folder)+"/freemix-omt-hdr-"+std::to_string(id)+".json":"";bfree(folder);return path;}
+inline std::string Preflight(obs_data_t *config,bool (*isPrivate)(obs_source_t *)){
+ if(!freemix_omt::Available())return "Official OMT SDK unavailable";
+ const std::string transfer=obs_data_get_string(config,"transfer"),name=obs_data_get_string(config,"name");
+ if(!Transfer(transfer)||!obs_data_get_bool(config,"manualReceiverConfirmed")||std::string(obs_data_get_string(config,"receiverTransfer"))!=transfer)return "Confirm the receiver's matching manual PQ/HLG transfer; OMT does not signal it automatically";
+ if(obs_data_get_bool(config,"alpha")||obs_data_get_bool(config,"fillKey"))return "HDR alpha/FillKey is not supported by this P216 route; use SDR alpha or opaque HDR";
+ if(name.empty()||name.size()>120)return "Unique HDR sender name required, up to120 characters";
+ if(obs_data_get_int(config,"audioTrack")<0||obs_data_get_int(config,"audioTrack")>2)return "Select Master/A/B or a public independent audio UUID";
+ OBSSourceAutoRelease source=obs_get_source_by_uuid(obs_data_get_string(config,"sourceUuid"));if(!source||isPrivate(source))return "Select an HDR source outside private director audio";
+ const auto width=obs_source_get_width(source),height=obs_source_get_height(source);if(!width||!height||width%2||height%2||width>3840||height>3840)return "HDR source dimensions must be even, nonzero and at most3840";
+ const auto space=obs_source_get_color_space(source,0,nullptr);if(space!=GS_CS_709_EXTENDED&&space!=GS_CS_709_SCRGB)return "Source does not declare HDR/float HDR; an SDR image must not be relabeled PQ/HLG. Wait for HDR media to load";
+ const std::string audioUuid=obs_data_get_string(config,"audioSourceUuid");if(!audioUuid.empty()){OBSSourceAutoRelease audio=obs_get_source_by_uuid(audioUuid.c_str());if(!FreeMixAudioBusAllowed(audio))return "Select a public independent audio bus with global tracks disabled";}
+ return "";
+}
+// Called exclusively on the interface thread by the FreeMix vendor wrapper.
+inline void Request(obs_data_t *request,obs_data_t *response,bool (*isPrivate)(obs_source_t *)){
+ struct SourceList {obs_data_array_t *rows;bool (*isPrivate)(obs_source_t *);};
+ OBSDataArrayAutoRelease hdrSources=obs_data_array_create();SourceList list={hdrSources.Get(),isPrivate};
+ auto enumerate=[](void *param,obs_source_t *source){auto &list=*static_cast<SourceList *>(param);if(list.isPrivate(source))return true;const auto space=obs_source_get_color_space(source,0,nullptr);const auto width=obs_source_get_width(source),height=obs_source_get_height(source);if((space==GS_CS_709_EXTENDED||space==GS_CS_709_SCRGB)&&width&&height&&!(width%2)&&!(height%2)&&width<=3840&&height<=3840){OBSDataAutoRelease row=obs_data_create();obs_data_set_string(row,"uuid",obs_source_get_uuid(source));obs_data_set_string(row,"name",obs_source_get_name(source));obs_data_set_int(row,"width",width);obs_data_set_int(row,"height",height);obs_data_array_push_back(list.rows,row);}return true;};
+ obs_enum_sources(enumerate,&list);obs_enum_scenes(enumerate,&list);obs_data_set_array(response,"hdrSources",hdrSources);
+ const auto id=obs_data_get_int(request,"senderId");
+ if(id<0||id>3){obs_data_set_bool(response,"success",false);obs_data_set_string(response,"error","Select HDR sender0..3");return;}
+ auto &slot=Slots()[size_t(id)];const auto path=Path(int(id));
+ OBSDataAutoRelease config=path.empty()?nullptr:obs_data_create_from_json_file(path.c_str());
+ if(!config)config=obs_data_create();
+ const std::string action=obs_data_get_string(request,"action");std::string error;
+ if(action=="configure"){
+  if(slot.output&&obs_output_active(slot.output))error="Stop HDR output before configuring";
+  else{
+   OBSDataAutoRelease proposed=obs_data_get_obj(request,"config");
+   if(!proposed)error="HDR configuration missing";
+   else{
+    error=Preflight(proposed,isPrivate);
+    if(error.empty()){
+     if(IdentityInUse(obs_data_get_string(proposed,"name")))error="Choose a unique active OMT SDR/Key/HDR sender name";
+     if(error.empty()){
+      if(path.empty()||!obs_data_save_json_safe(proposed,path.c_str(),"tmp","bak"))error="Could not persist HDR config";
+      else{config=obs_data_create();obs_data_apply(config,proposed);}
+     }
+    }
+   }
+  }
+ }else if(action=="start"){
+  if(!slot.output||!obs_output_active(slot.output)){
+   error=Preflight(config,isPrivate);
+   if(error.empty()){
+    if(IdentityInUse(obs_data_get_string(config,"name")))error="Choose a unique active OMT SDR/Key/HDR sender name";
+   }
+   if(error.empty()){
+    slot.Stop();slot.source=obs_get_source_by_uuid(obs_data_get_string(config,"sourceUuid"));
+    obs_video_info info={};
+    if(!obs_get_video_info(&info))error="Video context unavailable";
+    else{
+     info.base_width=info.output_width=obs_source_get_width(slot.source);info.base_height=info.output_height=obs_source_get_height(slot.source);
+     info.output_format=VIDEO_FORMAT_P216;info.colorspace=ColorSpace(obs_data_get_string(config,"transfer"));info.range=VIDEO_RANGE_PARTIAL;
+     slot.view=obs_view_create();
+     if(!slot.view)error="HDR view unavailable";
+     else{
+      obs_view_set_source(slot.view,0,slot.source);auto *video=obs_view_add2(slot.view,&info);
+      if(!video)error="Native HDR P216 view unavailable";
+      else{
+       const std::string audioUuid=obs_data_get_string(config,"audioSourceUuid");
+       if(!audioUuid.empty())slot.audio=FreeMixSourceAudio::Open(audioUuid,"FreeMix OMT HDR PCM",error);
+       if(error.empty()){
+        slot.output=obs_output_create("freemix_omt_hdr_output",("FreeMix OMT HDR "+std::to_string(id+1)).c_str(),config,nullptr);
+        if(!slot.output)error="HDR output unavailable";
+        else{
+         obs_output_set_media(slot.output,video,slot.audio?slot.audio->Audio():obs_get_audio());
+         obs_output_set_mixers(slot.output,slot.audio?1ULL:1ULL<<uint32_t(obs_data_get_int(config,"audioTrack")));
+         if(!obs_output_start(slot.output)){const char *last=obs_output_get_last_error(slot.output);error=last&&*last?last:"HDR output failed to start";}
+        }
+       }
+      }
+     }
+    }
+   }
+   if(!error.empty())slot.Stop();
+  }
+ }else if(action=="stop")slot.Stop();else if(action!="state"&&action!="preflight")error="Invalid HDR action";
+ if(action=="preflight"){OBSDataAutoRelease proposed=obs_data_get_obj(request,"config");error=Preflight(proposed?proposed.Get():config.Get(),isPrivate);}
+ obs_data_set_bool(response,"success",error.empty());if(!error.empty())obs_data_set_string(response,"error",error.c_str());obs_data_set_bool(response,"available",freemix_omt::Available());obs_data_set_bool(response,"active",slot.output&&obs_output_active(slot.output));obs_data_set_obj(response,"config",config);obs_data_set_int(response,"senderId",id);obs_data_set_bool(response,"hdrSupported",freemix_omt::Available());obs_data_set_bool(response,"hdrAlphaSupported",false);obs_data_set_bool(response,"hdrTransferSignaled",false);obs_data_set_bool(response,"autoStart",false);obs_data_set_string(response,"pixelFormat","P216 limited-range16-bit native view");obs_data_set_string(response,"receiverContract","manual-matching-pq-or-hlg");obs_data_set_int(response,"capturedFrames",slot.output?int64_t(obs_output_get_total_frames(slot.output)):0);
 }
 }
