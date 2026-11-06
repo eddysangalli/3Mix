@@ -41,3 +41,17 @@ test('real desk loop backs off failed source and continues healthy thumbnails se
  assert.equal(peak,1);assert.equal(calls.filter(c=>c.name==='bad').length,1);assert.ok(calls.filter(c=>c.name==='good').length>=3);
  assert.equal(thumbs.has('bad'),false);assert.equal(thumbs.get('good'),'data:image/jpeg;base64,TEST');
 });
+
+
+test('classic CEF loader matches module cadence and is loaded before desk usage',async()=>{
+ const {readFile}=await import('node:fs/promises');const {runInNewContext}=await import('node:vm');
+ const source=await readFile(new URL('../painel/thumbnail-cadence.js',import.meta.url),'utf8');
+ const context={window:{}};runInNewContext(source,context);const classic=context.window.ThreeMixThumbnailCadence;
+ for(const fps of [24,30,60,60000]) for(const skip of [0,2,3,5,10,120])
+  assert.equal(classic.thumbnailIntervalMs(fps,fps===60000?1001:1,skip),thumbnailIntervalMs(fps,fps===60000?1001:1,skip));
+ const last=new Map([['a',10],['b',20]]);assert.equal(classic.nextThumbnail(['a','b'],last,100,50),nextThumbnail(['a','b'],last,100,50));
+ const html=await readFile(new URL('../painel/mesa.html',import.meta.url),'utf8');
+ const loader=html.indexOf('<script src="thumbnail-cadence.js"></script>');
+ assert.ok(loader>=0&&loader<html.search(/const\s+thumbnailCadence\s*=/));
+ assert.ok(!html.includes("import('./thumbnail-cadence.mjs')"));
+});
