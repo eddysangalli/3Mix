@@ -22,8 +22,10 @@ test('required alpha operating documents exist and are permitted in update',asyn
 test('thumbnail cadence module and its importing desk both ship in panel updates',async()=>{
  const {readFile}=await import('node:fs/promises');
  const desk=await readFile(new URL('../painel/mesa.html',import.meta.url),'utf8');
- assert.ok(desk.includes("import('./thumbnail-cadence.mjs')"));
- for(const file of ['painel/mesa.html','painel/thumbnail-cadence.mjs']){
+ // Carregado via <script src> classico (compatibilidade CEF embarcado, commit 40181899b);
+ // o .mjs continua existindo para paridade testada em test-thumbnail-cadence.mjs.
+ assert.ok(desk.includes('<script src="thumbnail-cadence.js"></script>'));
+ for(const file of ['painel/mesa.html','painel/thumbnail-cadence.js','painel/thumbnail-cadence.mjs']){
   assert.equal(excludedFromUpdate(file),false);await access(new URL('../'+file,import.meta.url));
  }
  const packager=await readFile(new URL('../scripts/distribuicao/montar-atualizacao-mesa.mjs',import.meta.url),'utf8');
