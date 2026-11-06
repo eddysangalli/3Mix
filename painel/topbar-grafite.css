@@ -39,3 +39,11 @@ body:not(.clocks-only) .clk { display:none !important; }
 /* Navigation centered in the full native window, compensating caption controls. */
 body:not(.clocks-only) { grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); }
 body:not(.clocks-only) .workspace-tabs { transform:translateX(var(--native-caption-half,0px)); }
+
+/* Empty header surface drags; branding and actionable controls stay uncovered. */
+body:not(.clocks-only) { -webkit-app-region:drag; }
+body:not(.clocks-only) .brand,
+body:not(.clocks-only) button,
+body:not(.clocks-only) [data-open],
+body:not(.clocks-only) input,
+body:not(.clocks-only) select { -webkit-app-region:no-drag; }
