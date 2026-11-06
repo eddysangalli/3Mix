@@ -172,7 +172,7 @@ namespace FreeMixSetup {
             footer.Controls.AddRange(new Control[] { back, next });
             Controls.AddRange(new Control[] { header, body, footer });
 
-            steps = new Panel[] { StepWelcome(), StepEula(), StepPreparation(), StepDestination(o), StepModules(o), StepReview(o), StepProgress(), StepDone() };
+            steps = new Panel[] { StepWelcome(), StepEula(), StepPreparation(), StepDestination(o), StepModules(o), StepReview(), StepProgress(), StepDone() };
             foreach (Panel step in steps) { step.Location = new Point(0, 0); step.Size = body.Size; step.Visible = false; body.Controls.Add(step); }
             FormClosing += delegate(object sender, FormClosingEventArgs e) { if (running) e.Cancel = true; };
             Navigate(0);
@@ -242,6 +242,69 @@ namespace FreeMixSetup {
             };
             accept.CheckedChanged += delegate { UpdateNextEnabled(); };
             p.Controls.Add(accept);
+            return p;
+        }
+
+        // Lido uma vez e reaproveitado tanto no texto desta etapa quanto no resumo da
+        // etapa Revisão, para as duas telas nunca divergirem sobre o que foi detectado.
+        internal struct SystemCheck { public bool Ok; public string Label; public string Detail; }
+        internal static List<SystemCheck> RunSystemChecks() {
+            List<SystemCheck> checks = new List<SystemCheck>();
+            bool is64 = Environment.Is64BitOperatingSystem;
+            checks.Add(new SystemCheck { Ok = is64, Label = "Windows de 64 bits", Detail = Environment.OSVersion.VersionString + (is64 ? "" : " — o 3Mix Studio exige Windows x64") });
+            long ramBytes = 0;
+            try { ramBytes = (long)new Microsoft.VisualBasic.Devices.ComputerInfo().TotalPhysicalMemory; } catch { }
+            double ramGb = ramBytes / 1073741824.0;
+            bool ramOk = ramBytes == 0 || ramGb >= 8;
+            checks.Add(new SystemCheck { Ok = ramOk, Label = "Memória RAM", Detail = ramBytes == 0 ? "Não foi possível consultar a memória instalada; prosseguindo sem bloquear." : ramGb.ToString("0.0", CultureInfo.InvariantCulture) + " GB" + (ramOk ? "" : " — recomendado 8 GB ou mais para produção ao vivo") });
+            int cores = Environment.ProcessorCount;
+            bool coresOk = cores >= 4;
+            checks.Add(new SystemCheck { Ok = coresOk, Label = "Processador", Detail = cores + " threads lógicas" + (coresOk ? "" : " — recomendado 4 ou mais para codificação em tempo real") });
+            string gpu = null;
+            try {
+                using (RegistryKey classKey = Registry.LocalMachine.OpenSubKey(@"SYSTEM\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}")) {
+                    if (classKey != null) foreach (string sub in classKey.GetSubKeyNames()) {
+                        using (RegistryKey adapterKey = classKey.OpenSubKey(sub)) {
+                            object desc = adapterKey == null ? null : adapterKey.GetValue("DriverDesc");
+                            if (desc != null) { gpu = desc.ToString(); break; }
+                        }
+                    }
+                }
+            } catch { }
+            // GPU is informational only: a 3Mix module not finding a specific vendor feature
+            // at runtime is a better gate than this installer guessing compatibility upfront.
+            checks.Add(new SystemCheck { Ok = true, Label = "Placa de vídeo", Detail = gpu ?? "Não identificada pelo Windows nesta leitura; a instalação prossegue normalmente." });
+            return checks;
+        }
+
+        Panel StepPreparation() {
+            Panel p = new Panel();
+            p.Controls.Add(new Label { Text = "Preparação do Sistema", Font = new Font("Segoe UI", 14, FontStyle.Bold), ForeColor = TextWhite, Location = new Point(0, 0), AutoSize = true });
+            p.Controls.Add(new Label { Text = "Conferindo os requisitos desta máquina antes de prosseguir. Nenhum arquivo é alterado nesta etapa.", Font = new Font("Segoe UI", 9.5f), ForeColor = TextMuted, Location = new Point(0, 26), Size = new Size(656, 22) });
+
+            Panel card = new Panel { Location = new Point(0, 56), Size = new Size(656, 230), BackColor = CardBg, AutoScroll = true };
+            card.Paint += delegate(object s, PaintEventArgs pe) { ControlPaint.DrawBorder(pe.Graphics, card.ClientRectangle, BorderColor, ButtonBorderStyle.Solid); };
+
+            int y = 14; bool anyBlocking = false;
+            foreach (SystemCheck check in RunSystemChecks()) {
+                Label mark = new Label { Text = check.Ok ? "✔" : "⚠", Font = new Font("Segoe UI", 11f, FontStyle.Bold), ForeColor = check.Ok ? Color.FromArgb(70, 200, 120) : Color.FromArgb(230, 170, 60), Location = new Point(14, y), Size = new Size(24, 22) };
+                Label label = new Label { Text = check.Label, Font = new Font("Segoe UI", 10f, FontStyle.Bold), ForeColor = TextWhite, Location = new Point(44, y), Size = new Size(200, 22) };
+                Label detail = new Label { Text = check.Detail, Font = new Font("Segoe UI", 9f), ForeColor = TextMuted, Location = new Point(44, y + 20), Size = new Size(596, 20) };
+                card.Controls.AddRange(new Control[] { mark, label, detail });
+                y += 46;
+                if (!check.Ok && check.Label == "Windows de 64 bits") anyBlocking = true;
+            }
+            p.Controls.Add(card);
+
+            Label note = new Label {
+                Text = anyBlocking
+                    ? "O 3Mix Studio exige Windows 64 bits e não pode ser instalado nesta máquina."
+                    : "Os demais avisos, se houver, são recomendações — a instalação pode prosseguir normalmente.",
+                Location = new Point(0, 296), Size = new Size(656, 36), Font = new Font("Segoe UI", 9f, FontStyle.Bold),
+                ForeColor = anyBlocking ? Color.FromArgb(230, 90, 90) : TextMuted
+            };
+            p.Controls.Add(note);
+            p.Tag = anyBlocking;
             return p;
         }
 
@@ -354,6 +417,42 @@ namespace FreeMixSetup {
             return p;
         }
 
+        Label reviewBody;
+        Panel StepReview() {
+            Panel p = new Panel();
+            p.Controls.Add(new Label { Text = "Revisão Antes de Instalar", Font = new Font("Segoe UI", 14, FontStyle.Bold), ForeColor = TextWhite, Location = new Point(0, 0), AutoSize = true });
+            p.Controls.Add(new Label { Text = "Confira as escolhas abaixo. Nada é instalado até você clicar em Instalar Agora.", Font = new Font("Segoe UI", 9.5f), ForeColor = TextMuted, Location = new Point(0, 26), Size = new Size(656, 22) });
+
+            Panel card = new Panel { Location = new Point(0, 56), Size = new Size(656, 290), BackColor = CardBg };
+            card.Paint += delegate(object s, PaintEventArgs pe) { ControlPaint.DrawBorder(pe.Graphics, card.ClientRectangle, BorderColor, ButtonBorderStyle.Solid); };
+            reviewBody = new Label { Location = new Point(16, 14), Size = new Size(624, 262), Font = new Font("Segoe UI", 10f), ForeColor = TextWhite };
+            card.Controls.Add(reviewBody);
+            p.Controls.Add(card);
+            return p;
+        }
+        // Chamado ao entrar na etapa Revisão (Navigate), nunca na construção do passo: precisa
+        // refletir a pasta de destino e os módulos como estavam na última vez que o operador
+        // passou pelas etapas anteriores, não o que havia quando o wizard abriu.
+        void RefreshReview() {
+            if (reviewBody == null) return;
+            // PayloadInfo.Length is the exact byte size of the signed ZIP embedded in this
+            // executable by build.mjs, not an estimate — more reliable than guessing before
+            // extraction, and it's what CheckSpace already gates the real install against.
+            int disabledCount = 0; foreach (KeyValuePair<string, CheckBox> entry in moduleChecks) if (!entry.Value.Checked) disabledCount++;
+            StringBuilder text = new StringBuilder();
+            text.Append("Versão:  ").Append(PayloadInfo.DisplayVersion).Append("\r\n\r\n");
+            text.Append("Pasta de destino:\r\n  ").Append(folder.Text).Append("\r\n\r\n");
+            text.Append("Módulos:  ").Append(moduleChecks.Count - disabledCount).Append(" de ").Append(moduleChecks.Count).Append(" ativos");
+            text.Append(disabledCount == 0 ? " (configuração completa)" : " (" + disabledCount + " em standby, ajustável depois)").Append("\r\n\r\n");
+            if (importProject.Checked && !String.IsNullOrWhiteSpace(project.Text)) text.Append("Projeto a importar:\r\n  ").Append(project.Text).Append("\r\n\r\n");
+            text.Append("Espaço necessário:  ").Append(Math.Ceiling(PayloadInfo.Length / 1073741824.0).ToString(CultureInfo.InvariantCulture)).Append(" GB (pacote compactado; a instalação descompactada ocupa mais)");
+            try {
+                DriveInfo drive = new DriveInfo(Path.GetPathRoot(Path.GetFullPath(folder.Text)));
+                text.Append("\r\nEspaço livre em ").Append(drive.Name).Append(":  ").Append(Math.Floor(drive.AvailableFreeSpace / 1073741824.0).ToString(CultureInfo.InvariantCulture)).Append(" GB");
+            } catch { }
+            reviewBody.Text = text.ToString();
+        }
+
         Panel StepProgress() {
             Panel p = new Panel();
             p.Controls.Add(new Label { Text = "Instalando o 3Mix Studio…", Font = new Font("Segoe UI", 15, FontStyle.Bold), ForeColor = TextWhite, Location = new Point(0, 20), AutoSize = true });
@@ -396,29 +495,34 @@ namespace FreeMixSetup {
             return p;
         }
 
+        // Indices into steps[]: 0 Welcome, 1 Eula, 2 Preparation, 3 Destination, 4 Modules,
+        // 5 Review, 6 Progress, 7 Done. Keep every index below in sync with this order.
         void Navigate(int index) {
             if (index < 0 || index >= steps.Length) return;
             steps[current].Visible = false; current = index; steps[current].Visible = true;
-            string[] titles = { "Bem-vindo", "Termos de Uso", "Pasta de Destino", "Módulos em Standby", "Instalando", "Concluído" };
+            string[] titles = { "Bem-vindo", "Termos de Uso", "Preparação", "Pasta de Destino", "Módulos em Standby", "Revisão", "Instalando", "Concluído" };
             stepTitle.Text = titles[current] + "  •  Passo " + (current + 1) + " de " + steps.Length;
-            back.Visible = current > 0 && current < 4;
-            next.Text = current == 3 ? "Instalar Agora" : current == 5 ? "Concluir" : "Avançar >";
-            next.Visible = current != 4; UpdateNextEnabled();
+            back.Visible = current > 0 && current < 6;
+            next.Text = current == 5 ? "Instalar Agora" : current == 7 ? "Concluir" : "Avançar >";
+            next.Visible = current != 6;
+            if (current == 5) RefreshReview();
+            UpdateNextEnabled();
         }
         void UpdateNextEnabled() {
             if (current == 1) { CheckBox accept = (CheckBox)steps[1].Controls["accept"]; next.Enabled = accept.Checked; }
+            else if (current == 2) { next.Enabled = !(bool)(steps[2].Tag ?? false); }
             else next.Enabled = true;
         }
         async void NextClicked() {
-            if (current == 2) { try { Installer.ValidateDestination(folder.Text); } catch (Exception e) { MessageBox.Show(this, e.Message, "Escolha outra pasta", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; } if (importProject.Checked && String.IsNullOrWhiteSpace(project.Text)) { MessageBox.Show(this, "Informe o caminho da pasta UUID.fmx criada pela Recuperação do 3Mix.", "Projeto", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; } }
-            if (current == 3) { await RunInstall(); return; }
-            if (current == 5) { if (openNow.Visible && openNow.Checked) Installer.OpenInstalled(options.Destination); Close(); return; }
+            if (current == 3) { try { Installer.ValidateDestination(folder.Text); } catch (Exception e) { MessageBox.Show(this, e.Message, "Escolha outra pasta", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; } if (importProject.Checked && String.IsNullOrWhiteSpace(project.Text)) { MessageBox.Show(this, "Informe o caminho da pasta UUID.fmx criada pela Recuperação do 3Mix.", "Projeto", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; } }
+            if (current == 5) { await RunInstall(); return; }
+            if (current == 7) { if (openNow.Visible && openNow.Checked) Installer.OpenInstalled(options.Destination); Close(); return; }
             Navigate(current + 1);
         }
         async Task RunInstall() {
             options.Destination = folder.Text; options.ImportProject = importProject.Checked ? project.Text : null;
             options.DisabledModules.Clear(); foreach (KeyValuePair<string, CheckBox> entry in moduleChecks) if (!entry.Value.Checked) options.DisabledModules.Add(entry.Key);
-            running = true; back.Visible = false; next.Visible = false; Navigate(4);
+            running = true; back.Visible = false; next.Visible = false; Navigate(6);
             int result = await Task.Run(delegate { return Installer.Run(options, UpdateProgress); });
             running = false;
             if (result == 0) {
@@ -426,7 +530,7 @@ namespace FreeMixSetup {
             }
             openNow.Visible = result == 0 && Installer.VcRuntimeReady();
             doneMessage.Text = result == 0 ? "O 3Mix Studio foi instalado com êxito na pasta:\n" + options.Destination + "\n\nOs atalhos foram criados na Área de Trabalho e no Menu Iniciar." + (Installer.Warning.Length > 0 ? "\n\n" + Installer.Warning : "") : "A instalação não foi concluída: " + Installer.LastError + "\n\nRegistro de diagnóstico: " + Installer.LastLog;
-            Navigate(5); next.Visible = true; next.Enabled = true;
+            Navigate(7); next.Visible = true; next.Enabled = true;
         }
         internal static void TryPreselectPicker(string value, Action<string> select) {
             // Preselection is optional; invalid text must not prevent the picker from opening.

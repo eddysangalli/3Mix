@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+  <assemblyIdentity version="1.0.0.0" name="3Mix.Setup"/>
+  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
+    <security>
+      <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+        <!-- The main process stays asInvoker on purpose: Setup.cs already elevates only the
+             one step that needs it (VC++ Redist + virtual camera registration, via a child
+             "runas" cmd.exe at line ~561), with its own UAC-declined handling. Declaring
+             requireAdministrator here would UAC-prompt before the first screen even shows
+             and make that existing per-step elevation redundant/contradictory -- a real
+             behavior change, not just a DPI fix, so left out of this manifest. -->
+        <requestedExecutionLevel level="asInvoker" uiAccess="false"/>
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+  <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
+    <application>
+      <!-- Windows 10/11 -->
+      <supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}"/>
+      <supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}"/>
+      <supportedOS Id="{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}"/>
+      <supportedOS Id="{35138b9a-5d96-4fbd-8e2d-a2440225f93a}"/>
+      <supportedOS Id="{e2011457-1546-43c5-a5fe-008deee3d3f0}"/>
+    </application>
+  </compatibility>
+  <application xmlns="urn:schemas-microsoft-com:asm.v3">
+    <windowsSettings>
+      <!-- PerMonitorV2: WinForms rescales fonts/layout automatically on DPI change or when
+           moved between monitors with different scaling, instead of being fixed at the DPI
+           of the monitor it launched on (the WinForms-default "system" mode) or left to
+           bitmap stretching (unaware). Needs .NET Framework 4.7+ wiring in System.Windows.Forms
+           to take full effect; declaring it here is still correct and is what the runtime reads. -->
+      <dpiAwareness xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">PerMonitorV2</dpiAwareness>
+      <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true/pm</dpiAware>
+    </windowsSettings>
+  </application>
+</assembly>

@@ -35,7 +35,12 @@ const framework=join(process.env.WINDIR??'C:/Windows','Microsoft.NET/Framework64
 console.log('Compilando WinForms .NET Framework x64...');
 const uninstaller=join(here,'build/FreeMix-Uninstall.exe');
 const logo=join(here,'logo.png');
-const common=['/nologo','/win32icon:'+join(here,'3mix.ico'),'/target:winexe','/platform:x64','/optimize+','/utf8output','/reference:System.dll','/reference:System.Core.dll','/reference:System.Drawing.dll','/reference:System.Windows.Forms.dll','/reference:System.Web.Extensions.dll'];
+const manifest=join(here,'Setup.exe.manifest');
+if(!existsSync(manifest))throw Error('Manifest de DPI ausente: '+manifest);
+// PerMonitorV2 (Setup.exe.manifest): sem isto o WinForms fica preso ao DPI do monitor onde
+// abriu (modo "system", o default) em vez de reescalar fontes/layout em telas 125/150/200%
+// ou ao mover a janela entre monitores com escalas diferentes.
+const common=['/nologo','/win32icon:'+join(here,'3mix.ico'),'/win32manifest:'+manifest,'/target:winexe','/platform:x64','/optimize+','/utf8output','/reference:System.dll','/reference:System.Core.dll','/reference:System.Drawing.dll','/reference:System.Windows.Forms.dll','/reference:System.Web.Extensions.dll','/reference:Microsoft.VisualBasic.dll'];
 execFileSync(join(framework,'csc.exe'),[...common,'/out:'+uninstaller,'/resource:'+logo+',FreeMixUninstall.logo.png',join(here,'Uninstall.cs')],{stdio:'inherit',windowsHide:true});
 const eula=join(here,'../../docs/EULA.txt');
 execFileSync(join(framework,'csc.exe'),[...common,'/main:FreeMixSetup.Program','/out:'+stub,'/resource:'+vcRedist+',FreeMixSetup.VcRedist','/reference:'+join(framework,'System.IO.Compression.dll'),'/resource:'+uninstaller+',FreeMixSetup.Uninstall.exe','/resource:'+eula+',FreeMixSetup.EULA.txt','/resource:'+logo+',FreeMixSetup.logo.png',join(here,'Setup.cs'),join(here,'Uninstall.cs'),generated],{stdio:'inherit',windowsHide:true});

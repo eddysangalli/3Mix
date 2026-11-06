@@ -9,9 +9,11 @@
  * 4. Diagnostic APIs are accessible
  */
 
-import { spawn } from 'node:child_process';
+import { spawn, execFileSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { existsSync } from 'node:fs';
+import { writeFile, rm, mkdtemp } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -409,10 +411,42 @@ async function testAssistantCompletionScenarios() {
     }
 }
 
+async function testInstallerCompiles() {
+    console.log('🔍 Testando: Setup.cs/Uninstall.cs compilam de verdade (csc.exe real)...');
+    // testInstallerStructure() only checks that a previously-built .exe exists on disk --
+    // it would not have caught StepPreparation/StepReview being referenced but never defined
+    // (steps = new Panel[] { ..., StepPreparation(), ..., StepReview(), ... } compiled fine
+    // as an array literal; the missing methods only failed at actual csc.exe build time).
+    // This test runs build.mjs --stub-only for real, against a synthetic payload, so a
+    // compile error in Setup.cs/Uninstall.cs fails CI instead of silently stacking up.
+    const work = await mkdtemp(join(tmpdir(), '3mix-installer-build-'));
+    const zip = join(work, '3Mix-Completo-0.0.0-test.zip');
+    const output = join(work, 'test-output.exe');
+    try {
+        // Only the filename and a valid size matter to build.mjs in --stub-only mode; it
+        // never opens the archive itself in that mode.
+        await writeFile(zip, Buffer.alloc(1024));
+        execFileSync('node', ['build.mjs', '--zip=' + zip, '--output=' + output, '--stub-only'], {
+            cwd: INSTALLER_DIR, stdio: 'pipe', windowsHide: true, timeout: 60000
+        });
+        if (!existsSync(join(INSTALLER_DIR, 'build', 'FreeMix-Setup-Stub.exe'))) throw new Error('build.mjs reportou sucesso mas o stub não existe');
+        if (!existsSync(join(INSTALLER_DIR, 'build', 'FreeMix-Uninstall.exe'))) throw new Error('build.mjs reportou sucesso mas o desinstalador não existe');
+        console.log('✅ Setup.cs e Uninstall.cs compilam sem erros (build real, não apenas leitura de estrutura)');
+    } catch (e) {
+        const detail = e.stdout ? e.stdout.toString() : e.stderr ? e.stderr.toString() : e.message;
+        throw new Error('Falha ao compilar o instalador: ' + detail);
+    } finally {
+        await rm(work, { recursive: true, force: true });
+        await rm(join(INSTALLER_DIR, 'build'), { recursive: true, force: true }).catch(() => {});
+    }
+    return true;
+}
+
 async function main() {
     console.log('🧪 Iniciando testes do instalador e assistente 3Mix...\n');
     
     try {
+        await testInstallerCompiles();
         await testInstallerStructure();
         await testInstallerSteps();
         await testAssistantModule();
@@ -424,6 +458,7 @@ async function main() {
         
         console.log('\n✅ Todos os testes passaram!');
         console.log('\n📋 Resumo:');
+        console.log('  ✅ Setup.cs e Uninstall.cs compilam de verdade (build real, não só leitura de estrutura)');
         console.log('  ✅ Instalador compila e estrutura válida');
         console.log('  ✅ 8 passos do instalador implementados');
         console.log('  ✅ Preparação e Revisão adicionados');
