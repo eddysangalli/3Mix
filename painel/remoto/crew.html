@@ -60,6 +60,20 @@
 </header>
 
 <main class="p3-main crew-main">
+  <section class="p3-card" id="crew-local-settings" hidden>
+    <div class="p3-card-head"><h2>Configuração no computador do 3Mix</h2></div>
+    <p class="p3-note">O Intercom Crew usa PCM/WebSocket. Não é uma sala WebRTC.</p>
+    <a class="p3-btn" href="/calls">Calls e Talkback</a>
+    <a class="p3-btn" href="/settings">Configurações do sistema</a>
+    <form id="crew-member-form" class="crew-escolha">
+      <label>Nome do membro<input id="crew-member-name" maxlength="80" required></label>
+      <label>Fonte de áudio<select id="crew-member-source" required><option value="">Consultar fontes…</option></select></label>
+      <label>Função<select id="crew-member-role"><option value="crew">Equipe</option><option value="director">Direção</option></select></label>
+      <button class="p3-btn" type="submit">Cadastrar membro</button>
+    </form>
+    <p id="crew-settings-status" class="p3-note" role="status"></p>
+  </section>
+
   <!-- Pareamento por PIN: aparece somente em celular/tablet ainda não autorizado -->
   <section class="p3-card" id="card-pair" hidden>
     <div class="p3-card-head"><h2>Autorizar Dispositivo</h2></div>

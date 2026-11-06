@@ -42,6 +42,8 @@
       if (!d?.urls?.length) return;
       d.urls.sort((a, b) => pesoRede(a) - pesoRede(b));
       acessoLocal = d;
+      if (E('crew-local-settings')) E('crew-local-settings').hidden = false;
+      carregarFontesConfiguracao().catch(e => { E('crew-settings-status').textContent = e.message; });
       baseRede = d.urls[0];
       const selRede = E('sel-rede-qr');
       if (selRede && d.urls.length > 1) {
@@ -56,6 +58,25 @@
       atualizarQrCrew();
     } catch { /* aberto em celular/tablet remoto: /api/access não é local */ }
   }
+
+  async function carregarFontesConfiguracao() {
+    const r = await fetch('/api/audio-routing', {cache:'no-store', signal:AbortSignal.timeout(6000)});
+    const d = await r.json();
+    if (!r.ok || !d.success || d.audioRouting?.error) throw Error(d.error || d.audioRouting?.error || 'Fontes de áudio indisponíveis');
+    E('crew-member-source').innerHTML = '<option value="">Selecione uma fonte real…</option>' + (d.audioRouting?.sources || []).filter(x => !x.internal && !x.protected).map(x => `<option value="${esc(x.key)}">${esc(x.name)}</option>`).join('');
+  }
+  E('crew-member-form')?.addEventListener('submit', async event => {
+    event.preventDefault(); if (!acessoLocal) return;
+    const status = E('crew-settings-status'); const button = event.submitter;
+    if (button) button.disabled = true;
+    try {
+      const r = await fetch('/api/crew/intercom', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'register_member',name:E('crew-member-name').value.trim(),sourceUuid:E('crew-member-source').value,role:E('crew-member-role').value}),signal:AbortSignal.timeout(8000)});
+      const d = await r.json();
+      if (!r.ok || !d.success || !d.membros?.some(m => m.memberId === d.memberId)) throw Error(d.error || 'Cadastro não confirmado');
+      await carregarMembros(); status.textContent = 'Membro confirmado no Crew desta execução.';
+    } catch (e) { status.textContent = e.message; }
+    finally { if (button) button.disabled = false; }
+  });
 
   // ---- Pareamento por PIN diretamente na tela /crew para celulares ----
   E('form-pair')?.addEventListener('submit', async (ev) => {

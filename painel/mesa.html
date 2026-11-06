@@ -2992,6 +2992,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
     dump: () => { if (!st.dumpArmed) { st.dumpArmed = setTimeout(() => { st.dumpArmed = null; }, 3000); toast("Clique de novo em até 3 segundos para confirmar o DUMP."); return; } clearTimeout(st.dumpArmed); st.dumpArmed = null; run((async () => { await productionAction("dump", { note: "DUMP acionado na mesa" }); toast("DUMP executado."); })()); },
     rundown: () => run(launchPanel('rundown')),
     retornos: () => run(launchPanel('retornos')),
+    crewopen: () => run(rpDockOpenWindow("/crew")),
     blackbox: () => run(launchPanel('blackbox')),
     audiobuses: () => run(launchPanel('audiobuses')),
     // The current desk is the workspace. Do not replace the working native desk with the demo page.
@@ -5709,6 +5710,7 @@ body.popup-mode #pop[data-panel="add"] .add .types { display:flex; flex-directio
       p.innerHTML = `<h3>Configurações de áudio · ${esc(st.popArg)}</h3><div class="add"><div class="types">${[["geral", "Geral"], ["eq", "EQ"], ["comp", "Compressor"], ["gate", "Noise Gate"], ["lim", "Limitador"], ["plugins", "Plugins"]].map(([id, l]) => `<button class="${tab === id ? "on" : ""}" data-a="asettab" data-v="${id}">${l}</button>`).join("")}</div><div class="form">${body}<p>As mudanças valem na hora. Os efeitos são filtros de áudio do motor aplicados a esta entrada.</p></div></div><div class="row end">${st.audio.get(st.popArg)?.bus ? `<button class="b" data-a="busdrop" title="Remove o Master e os barramentos A e B deste preset; as entradas voltam a ir direto para as trilhas do motor. Os efeitos dos barramentos se perdem.">Desligar barramentos</button>` : ""}<button class="b" data-a="close">Fechar</button></div>`; }
     else if (st.pop === "mainmenu") p.innerHTML = `<h3>Módulos</h3><div class="menu">
   <button data-a="top_audio">Mixer de áudio…</button>
+  <button data-a="crewopen">Crew · Tally e Intercom…</button>
   <button data-a="audiobuses">Barramentos de áudio…</button>
   <button data-a="pop" data-v="playout">VT e playlists…</button>
   <button data-a="pop" data-v="slides">Apresentador de Slides &amp; PowerPoint…</button>
