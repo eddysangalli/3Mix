@@ -43,7 +43,10 @@ if(!existsSync(manifest))throw Error('Manifest de DPI ausente: '+manifest);
 const common=['/nologo','/win32icon:'+join(here,'3mix.ico'),'/win32manifest:'+manifest,'/target:winexe','/platform:x64','/optimize+','/utf8output','/reference:System.dll','/reference:System.Core.dll','/reference:System.Drawing.dll','/reference:System.Windows.Forms.dll','/reference:System.Web.Extensions.dll','/reference:Microsoft.VisualBasic.dll'];
 execFileSync(join(framework,'csc.exe'),[...common,'/out:'+uninstaller,'/resource:'+logo+',FreeMixUninstall.logo.png',join(here,'Uninstall.cs')],{stdio:'inherit',windowsHide:true});
 const eula=join(here,'../../docs/EULA.txt');
-execFileSync(join(framework,'csc.exe'),[...common,'/main:FreeMixSetup.Program','/out:'+stub,'/resource:'+vcRedist+',FreeMixSetup.VcRedist','/reference:'+join(framework,'System.IO.Compression.dll'),'/resource:'+uninstaller+',FreeMixSetup.Uninstall.exe','/resource:'+eula+',FreeMixSetup.EULA.txt','/resource:'+logo+',FreeMixSetup.logo.png',join(here,'Setup.cs'),join(here,'Uninstall.cs'),generated],{stdio:'inherit',windowsHide:true});
+// System.Management: WMI (Win32_VideoController, Win32_OperatingSystem, MSFT_PhysicalDisk) for
+// the Preparation step's full GPU list, Windows caption/build and disk free space/type - only
+// Setup.cs needs it, not Uninstall.cs, so it is not in the shared `common` reference list above.
+execFileSync(join(framework,'csc.exe'),[...common,'/main:FreeMixSetup.Program','/out:'+stub,'/resource:'+vcRedist+',FreeMixSetup.VcRedist','/reference:'+join(framework,'System.IO.Compression.dll'),'/reference:System.Management.dll','/resource:'+uninstaller+',FreeMixSetup.Uninstall.exe','/resource:'+eula+',FreeMixSetup.EULA.txt','/resource:'+logo+',FreeMixSetup.logo.png',join(here,'Setup.cs'),join(here,'Uninstall.cs'),generated],{stdio:'inherit',windowsHide:true});
 if(options['--stub-only']){console.log(JSON.stringify({stub,uninstaller,payloadSha256:sha,uninstallerIncluded:true,finalReleaseGenerated:false,authenticodeSigned:false}));process.exit(0);}
 const partial=output+'.partial';
 try {

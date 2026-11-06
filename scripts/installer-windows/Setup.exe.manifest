@@ -8,8 +8,8 @@
              one step that needs it (VC++ Redist + virtual camera registration, via a child
              "runas" cmd.exe at line ~561), with its own UAC-declined handling. Declaring
              requireAdministrator here would UAC-prompt before the first screen even shows
-             and make that existing per-step elevation redundant/contradictory -- a real
-             behavior change, not just a DPI fix, so left out of this manifest. -->
+             and make that existing per-step elevation redundant and contradictory, a real
+             behavior change and not just a DPI fix, so left out of this manifest. -->
         <requestedExecutionLevel level="asInvoker" uiAccess="false"/>
       </requestedPrivileges>
     </security>
