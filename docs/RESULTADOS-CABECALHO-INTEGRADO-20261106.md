@@ -93,3 +93,15 @@ footer.png`), processo PID 10320, título de janela confirmado "3Mix Studio - Se
 
 Nenhum processo/runtime do operador foi tocado; todo o ensaio rodou em
 `qa-finalizacao/native-vmix30-clean` com config própria, isolada do perfil real.
+
+## Nota sobre tentativas anteriores
+Antes da captura final válida (PID 10320, descrita acima), houve pelo menos três
+tentativas de execução que falharam de forma visível na tela do operador antes de eu
+isolar a causa: uma com erro de sintaxe do `.bat` (saída imediata, janela de console
+piscando), uma travando com `STATUS_ENTRYPOINT_NOT_FOUND` (crash silencioso, sem UI), e
+uma lançando a exceção "3Mix desk layout unavailable" por falta de `ExtraBrowserDocks`
+no perfil novo (interface abrindo sem PV/PGM nem coluna central, só o rodapé). Essa
+última é a mais provável de ter sido vista pelo operador como "abriu algo bugado sem
+PVE/GM, sem a coluna central" — character bate exatamente com o sintoma antes da correção
+do `user.ini`. A captura válida documentada acima, feita DEPOIS dessa correção, mostra a
+interface completa e normal.
