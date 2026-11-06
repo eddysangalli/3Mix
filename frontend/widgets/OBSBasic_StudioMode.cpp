@@ -320,7 +320,13 @@ void OBSBasic::CreateProgramOptions()
 	connect(ui->preview, &OBSQTDisplay::DisplayResized, fitTimer, [fitTimer]() { fitTimer->start(); });
 	connect(fitTimer, &QTimer::timeout, this, [this]() {
 		if (!previewProgramMode || !isVisible() || isMinimized() || property("freemixFitting").toBool()) return;
-		auto *dock = findChild<QDockWidget *>("Mesa_extraBrowser");
+		QDockWidget *dock = nullptr;
+		for (auto *candidate : findChildren<QDockWidget *>()) {
+			if (candidate->property("3mix.componentId").toString() == "3mix.mesa") {
+				dock = candidate;
+				break;
+			}
+		}
 		if (!dock || !dock->isVisible() || ui->preview->width() < 320) return;
 		const int desired = qRound(ui->preview->width() * 9.0 / 16.0) +
 				    (ui->previewLabel->isVisible() ? ui->previewLabel->height() : 0) + 4;
