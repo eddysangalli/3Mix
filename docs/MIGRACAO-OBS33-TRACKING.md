@@ -1,7 +1,7 @@
 # RASTREAMENTO DE MIGRAÇÃO OBS 33.0.1 + CEF 150/156 + FFmpeg 9 — 3MIX PRO
 
 **Data de Início:** 04/11/2026  
-**Status:** EM ANDAMENTO — Base OBS 33.0.1 estabelecida no motor  
+**Status:** EM ANDAMENTO — Motor OBS 33.0.1 já rodando no runtime de produção real (06/11/2026), com 3 plugins de terceiros incompatíveis identificados (causa raiz confirmada) e bateria funcional parcial (DSK, áudio, Replay) comprovada. Pendente: SRT/VST3/ASIO, confirmação física do arraste de janela, decisão sobre os 3 plugins incompatíveis.  
 **Branch do Motor:** `feat/obs33-patches` (no repositório 3mix-engine)  
 **Branch de Rastreamento:** `feat/obs33-migration-tracking` (este branch)
 
@@ -90,10 +90,20 @@ Dado o volume de conflitos ao tentar merge/cherry-pick automático (divergência
 
 ## 6. ROLLBACK E COMPATIBILIDADE
 
+**Plano original (04/11/2026):**
 - Motor 32.2.2 permanece em `main` e no runtime de produção (`3mix-runtime/bin/64bit/3Mix.exe`)
-- Nova build 33.0.1 gerará `3Mix-obs33.exe` separado
+- Nova build 33.0.1 geraria `3Mix-obs33.exe` separado
 - Scripts de ativação/rollback: `ativar-obs33.cmd` / `reverter-obs32.cmd` (a criar na fase de integração)
 - CEF 127 mantido como fallback se CEF 150 apresentar regressões críticas
+
+**Decisão real de execução (06/11/2026):** o usuário autorizou explicitamente a substituição direta do motor em produção ("migra tudo já também"), em vez do `3Mix-obs33.exe` separado acima. O que foi feito de fato:
+
+- `3mix-runtime/bin/64bit/` substituído pelo conteúdo do build 33.0.1 (`obs64.exe` → `3Mix.exe`), com backup completo e verificado (versão 32.2.2 confirmada via `VersionInfo.ProductVersion`) em `qa-replay/backup-motor32-producao-20261106-202847/` — não um `.cmd` de rollback script, mas uma cópia byte-a-byte restaurável manualmente (parar o 3Mix, restaurar os 3 diretórios do backup por cima dos atuais, remover `3mix-runtime/core/` que não existia no motor 32.2.2).
+- `3mix-runtime/core/` (nova pasta do OBS 33 para plugins first-party) adicionada à produção.
+- `3mix-runtime/obs-plugins/64bit/` (os ~40 plugins de terceiros, só binários) preservado intacto como teste de compatibilidade direta — resultado: 3 incompatíveis (`obs-advanced-masks`, `obs-color-monitor`, `obs-shaderfilter`, causa raiz: API `gs_image_file_*` removida no OBS 33, ver `RESULTADOS-MOTOR-OBS33-PRODUCAO-20261106.md`), os demais carregaram normalmente.
+- Resultado detalhado, com evidência de execução (log, `strings`, screenshot) e bateria funcional (DSK, áudio, Replay): `RESULTADOS-MOTOR-OBS33-PRODUCAO-20261106.md`.
+- `ativar-obs33.cmd`/`reverter-obs32.cmd` **não foram criados** — o rollback real é a restauração manual do backup acima, documentada tanto aqui quanto no relatório de resultados.
+- CEF 150 (não 127) está em produção agora; nenhuma regressão crítica reportada que justificasse o fallback até o momento.
 
 ---
 
