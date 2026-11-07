@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {runtimeDependencyClosure} from './pacote-dependencias.mjs';
-import {packageExecutable,packageFfmpegModule} from './pacote-executavel.mjs';
+import {packageExecutable,packageFfmpegModule,validateNativePackage} from './pacote-executavel.mjs';
 import {inspectPackageComponents,copyPackageComponents} from './pacote-componentes.mjs';
 import {prepareNdiRuntime,NDI_DLL} from './ndi-runtime.mjs';
 const root=resolve(fileURLToPath(new URL('../',import.meta.url))),workspace=dirname(root);
@@ -21,7 +21,7 @@ const dest=join(workspace,'entregas','3Mix-Completo-'+version);if(existsSync(des
 const nativeRundir=process.env.FREEMIX_NATIVE_RUNDIR?resolve(process.env.FREEMIX_NATIVE_RUNDIR):null;
 const nativeCommit=process.env.FREEMIX_NATIVE_COMMIT||null;
 if(nativeCommit&&!/^[a-f0-9]{40}$/i.test(nativeCommit))throw Error('Commit nativo inválido');
-if(nativeRundir){if(!nativeCommit)throw Error('Rundir nativo explícito exige EXE e commit correspondentes');packageExecutable(nativeRundir);}
+if(nativeRundir){if(!nativeCommit)throw Error('Rundir nativo explícito exige EXE e commit correspondentes');validateNativePackage(nativeRundir);}
 if(nativeSources.version!==version)throw Error('Versão do manifesto de fontes diferente do pacote; exporte as fontes para a versão solicitada');
 if(nativeCommit&&nativeSources.head!==nativeCommit)throw Error('Fontes e commit do Native são diferentes');
 for(const patch of nativeSources.patches){const file=join(sourceRoot,'fork',patch.path);if(createHash('sha256').update(await readFile(file)).digest('hex')!==patch.sha256)throw Error('Patch nativo divergente: '+patch.path);}

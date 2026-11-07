@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdir,writeFile,rm} from 'node:fs/promises';
 import {join} from 'node:path';
-import {packageExecutable,packageFfmpegModule} from './pacote-executavel.mjs';
+import {packageExecutable,packageFfmpegModule,validateNativePackage} from './pacote-executavel.mjs';
 test('package prefers 3Mix, supports legacy explicitly, rejects missing executable',async()=>{
  const root=join(process.cwd(),'qa-finalizacao','package-executable-'+process.pid);
  try {
@@ -33,5 +33,20 @@ test('native ffmpeg identity prefers OBS33 core instead of stale legacy copy',as
   await mkdir(join(root,'core','obs-ffmpeg'),{recursive:true});
   await writeFile(join(root,'core','obs-ffmpeg','obs-ffmpeg.dll'),'core');
   assert.equal(packageFfmpegModule(root),'core/obs-ffmpeg/obs-ffmpeg.dll');
+ }finally{await rm(root,{recursive:true,force:true});}
+});
+
+test('native preflight rejects incomplete rundir before accepting complete layout',async()=>{
+ const root=join(process.cwd(),'qa-finalizacao','package-native-preflight-'+process.pid);
+ try{
+  await mkdir(join(root,'bin','64bit'),{recursive:true});
+  await mkdir(join(root,'core','obs-ffmpeg'),{recursive:true});
+  await writeFile(join(root,'bin','64bit','3Mix.exe'),'fixture');
+  await writeFile(join(root,'core','obs-ffmpeg','obs-ffmpeg.dll'),'fixture');
+  assert.throws(()=>validateNativePackage(root),/obs.dll/);
+  await writeFile(join(root,'bin','64bit','obs.dll'),'fixture');
+  assert.throws(()=>validateNativePackage(root),/obs-frontend-api.dll/);
+  await writeFile(join(root,'bin','64bit','obs-frontend-api.dll'),'fixture');
+  assert.equal(validateNativePackage(root).required.length,4);
  }finally{await rm(root,{recursive:true,force:true});}
 });

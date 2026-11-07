@@ -20,3 +20,15 @@ export function packageFfmpegModule(root){
  }
  throw Error('Pacote sem módulo nativo obs-ffmpeg');
 }
+
+export function validateNativePackage(root){
+ const executable=packageExecutable(root);
+ const ffmpegModule=packageFfmpegModule(root);
+ const required=[executable,'bin/64bit/obs.dll','bin/64bit/obs-frontend-api.dll',ffmpegModule];
+ for(const relative of required){
+  let info;
+  try{info=lstatSync(join(root,relative));}catch(error){if(error.code==='ENOENT')throw Error('Rundir nativo incompleto: '+relative);throw error;}
+  if(!info.isFile()||info.isSymbolicLink())throw Error('Componente nativo inválido: '+relative);
+ }
+ return {executable,ffmpegModule,required};
+}
