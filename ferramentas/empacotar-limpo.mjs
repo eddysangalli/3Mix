@@ -34,9 +34,9 @@ await prepareNdiRuntime(runtimeRoot,{env:{},writeReceipt:false});
 if(checkOnly){console.log(JSON.stringify({status:'SOURCE_READY',version,nativeCommit,nativePatches:nativeSources.patches.length,runtimeModules:runtimeModules.length,componentOverlays:componentOverlays.length,destinationCreated:false,operatorTouched:false}));process.exit(0);}
 await mkdir(dest,{recursive:true});
 const filter=p=>!p.replaceAll('\\','/').includes('/painel/gc/biblioteca/assets/')&&!p.replaceAll('\\','/').endsWith('/painel/gc/biblioteca/assets')&&!/(?:^|[\\/])(?:originais|gt_titles|ndi-v6|logs|crashes|profiler_data)(?:[\\/]|$)/i.test(p)&&!/(?:^|[\\/])qa-[^\\/]+\.(?:dll|exe)$/i.test(p)&&!/(?:\.pdb|\.ilk|\.log|\.dmp|\.anterior\.exe|\.bak|\.salvo|stdout\.txt|stderr\.txt)$/i.test(p);
-for(const folder of ['bin','data','obs-plugins','plugins-audio','assets','painel','node_modules','firmware','extensao-social'])if(existsSync(join(root,folder)))await cp(join(root,folder),join(dest,folder),{recursive:true,filter});else if(existsSync(join(runtimeRoot,folder)))await cp(join(runtimeRoot,folder),join(dest,folder),{recursive:true,filter});
+for(const folder of ['bin','core','data','obs-plugins','plugins-audio','assets','painel','node_modules','firmware','extensao-social'])if(existsSync(join(root,folder)))await cp(join(root,folder),join(dest,folder),{recursive:true,filter});else if(existsSync(join(runtimeRoot,folder)))await cp(join(runtimeRoot,folder),join(dest,folder),{recursive:true,filter});
 // Overlay only the NEW package, never the operator installation.
-if(nativeRundir)for(const folder of ['bin','data','obs-plugins'])if(existsSync(join(nativeRundir,folder)))await cp(join(nativeRundir,folder),join(dest,folder),{recursive:true,filter});
+if(nativeRundir)for(const folder of ['bin','core','data','obs-plugins'])if(existsSync(join(nativeRundir,folder)))await cp(join(nativeRundir,folder),join(dest,folder),{recursive:true,filter});
 const rebuiltComponents=await copyPackageComponents(dest,componentOverlays);
 await mkdir(join(dest,'data/obs-plugins/obs-browser'),{recursive:true});
 await cp(join(root,'painel/recursos/erro-browser.html'),join(dest,'data/obs-plugins/obs-browser/error.html'));
