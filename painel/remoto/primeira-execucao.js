@@ -112,6 +112,11 @@
         <dt>Processador</dt><dd>${i.cpu ? esc(`${i.cpu.nome} · ${i.cpu.nucleos} núcleos, ${i.cpu.threads} threads`) : 'não lido'}</dd>
         <dt>Memória</dt><dd>${i.ramGb ?? 'não lida'} GB</dd>
         ${i.gpus.map((g) => `<dt>Placa de vídeo</dt><dd>${esc(g.nome)} · ${g.vramGb != null ? g.vramGb + ' GB' + (g.vramExata ? '' : ' (aproximado)') : 'memória não lida'} · driver ${esc(g.driver || '—')}${g.temperatura != null ? ' · ' + g.temperatura + ' °C' : ''}</dd>`).join('')}
+        ${i.resizableBar ? `<dt>Resizable BAR</dt><dd class="${i.resizableBar.status === 'bar1_large' ? '' : 'dim'}">${esc({
+          bar1_large: 'Janela PCIe (BAR1) grande, próxima da VRAM total — sinal consistente com Resizable BAR negociado pelo BIOS/driver. Não é um recurso que o 3Mix liga: é lido, não ativado.',
+          bar1_legacy: 'Janela PCIe (BAR1) do tamanho tradicional (256 MB) — Resizable BAR provavelmente não foi negociado (desligado na BIOS/UEFI, ou GPU/placa-mãe sem suporte). Ative na BIOS se quiser testar; o 3Mix não controla isso.',
+          undetermined: 'Não determinado nesta leitura' + (i.resizableBar.reason ? ': ' + i.resizableBar.reason : '.'),
+        }[i.resizableBar.status] || 'não lido')}</dd>` : ''}
         <dt>Telas</dt><dd>${i.telas.map((t) => `${t.largura}×${t.altura}${t.principal ? ' (principal)' : ''}`).join(' · ') || 'não lidas'}</dd>
         <dt>Captura</dt><dd>${esc(i.captura.map((c) => c.nome).join(' · ') || 'nenhum dispositivo de vídeo encontrado')}</dd>
         <dt>Discos</dt><dd>${esc(i.discos.map((d) => `${d.nome} · ${d.tipo || '?'} ${d.barramento || ''} · ${d.tamanhoGb} GB`).join(' · '))}</dd>
