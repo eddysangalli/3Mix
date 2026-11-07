@@ -131,7 +131,15 @@ export async function checkRemoteVersions(root, { engineRepo = 'obsproject/obs-s
     // against a catalog version of "3.2.1f") takes priority over the numeric-core
     // comparison below, which would otherwise discard that "f" and flag a false update.
     const sameAsInstalled = stripV(latest.tag) === stripV(installedVersion);
-    const cmp = sameAsInstalled ? 0 : compareVersions(latest.version, installedVersion);
+    const installedCore = normalizeVersion(installedVersion);
+    const numericOrder = installedCore ? compareVersions(latest.version, installedCore) : null;
+    // Different suffixes with the same numeric core are not safely orderable.
+    // Never turn NaN or an unknown suffix ordering into an "updated" claim.
+    if (!sameAsInstalled && (numericOrder === null || (numericOrder === 0 && (stripV(latest.tag) !== installedCore || stripV(installedVersion) !== installedCore)))) {
+      return { ...extra, label, installedVersion, repo, status: 'tag-nao-reconhecida', latestTag: latest.tag, latestUrl: latest.url,
+        note: 'Versões com sufixos distintos exigem conferência das notas da release; não foi atribuída uma ordem automaticamente.' };
+    }
+    const cmp = sameAsInstalled ? 0 : numericOrder;
     return {
       ...extra, label, installedVersion, repo,
       latestVersion: latest.version, latestTag: latest.tag, latestPublishedAt: latest.publishedAt, latestUrl: latest.url,

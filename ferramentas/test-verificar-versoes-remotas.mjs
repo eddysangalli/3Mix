@@ -113,3 +113,11 @@ test('checkRemoteVersions: installed version newer than the latest release is fl
     assert.equal(r.results.find(x => x.id === 'ahead-plugin').status, 'instalado-mais-novo-que-release');
   } finally { await rm(root, { recursive: true, force: true }); }
 });
+
+ test('different suffixes with identical core are not falsely called current',async()=>{
+ const root=await fixtureRoot({engineVersionString:'33.0.1-1-gabc1234',catalog:[{id:'suffix',name:'Suffix',version:'3.2.1f',sourceUrl:'https://github.com/example/suffix'}]});
+ try {
+  const r=await checkRemoteVersions(root,{fetchRelease:async()=>({tag:'v3.2.1g',version:'3.2.1',url:null,publishedAt:null})});
+  assert.equal(r.results.find(x=>x.id==='suffix').status,'tag-nao-reconhecida');
+ }finally{await rm(root,{recursive:true,force:true});}
+});
