@@ -55,3 +55,20 @@ test('pending pre-migration operation cannot mutate an OBS33 core module',async(
   assert.deepEqual(JSON.parse(await readFile(queuePath,'utf8')),queue);
  }finally{await rm(root,{recursive:true,force:true});}
 });
+
+test('declared package version stays unconfirmed without native report',async()=>{
+ const root=join(process.cwd(),'qa-finalizacao','metadata-provenance-'+process.pid);
+ try{
+  const folder=join(root,'3mix-plugins','user-effect');
+  await mkdir(folder,{recursive:true});
+  await writeFile(join(folder,'.3mix.json'),JSON.stringify({name:'User Effect',version:'1.2.3',metadataSource:'package-manifest'}));
+  const snapshot=await new PluginManager({root}).snapshot();
+  const plugin=snapshot.plugins.find(item=>item.id==='user-effect');
+  assert.equal(plugin.version,'1.2.3');
+  assert.equal(plugin.versionSource,'package-manifest');
+  assert.equal(plugin.state,'unknown');
+  assert.equal(plugin.compatibility,'unknown');
+  assert.equal(plugin.managed,true);
+  assert.equal(plugin.protected,false);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
