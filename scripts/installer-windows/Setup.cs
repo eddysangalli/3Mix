@@ -577,7 +577,7 @@ namespace FreeMixSetup {
 
             openNow = new CheckBox {
                 Text = "Iniciar o 3Mix Studio imediatamente ao fechar o assistente",
-                Checked = true, Visible = false, Location = new Point(24, 155), Size = new Size(608, 30),
+                Checked = false, Visible = false, Location = new Point(24, 155), Size = new Size(608, 30),
                 Font = new Font("Segoe UI", 10.5f, FontStyle.Bold), ForeColor = AccentBlue, Cursor = Cursors.Hand
             };
             card.Controls.Add(openNow);
@@ -655,7 +655,7 @@ namespace FreeMixSetup {
             try {
                 LastLog = options.Log == null ? Path.Combine(Path.GetTempPath(), "3Mix-setup-" + Guid.NewGuid().ToString("N") + ".log") : Path.GetFullPath(options.Log);
                 NoLinks(LastLog); if (File.Exists(FreeMixUninstall.Program.IOPath(LastLog)) || Directory.Exists(FreeMixUninstall.Program.IOPath(LastLog))) throw new Exception("O arquivo de registro já existe.");
-                using (StreamWriter log = new StreamWriter(new FileStream(FreeMixUninstall.Program.IOPath(LastLog), FileMode.CreateNew, FileAccess.Write, FileShare.Read), Encoding.UTF8)) {
+                using (StreamWriter log = new StreamWriter(new FileStream(FreeMixUninstall.Program.IOPath(LastLog), FileMode.CreateNew, FileAccess.Write, FileShare.Read, 4096, FileOptions.WriteThrough), Encoding.UTF8)) {
                     log.AutoFlush = true; log.WriteLine("3Mix Studio setup " + PayloadInfo.Version + "; " + DateTime.UtcNow.ToString("o"));
                     try {
                         if (!options.Verify) ValidateDestination(options.Destination);
@@ -832,7 +832,25 @@ namespace FreeMixSetup {
             if (requested != 0) { if (!PortAvailable(requested)) throw new Exception("A porta " + requested + " já está em uso."); return requested; }
             for (int p = low; p <= high; p++) if (PortAvailable(p)) return p; throw new Exception("Nenhuma porta livre entre " + low + " e " + high + ".");
         }
-        static bool PortAvailable(int port) { foreach (IPEndPoint busy in System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners()) if (busy.Port == port) return false; TcpListener listener = null, v6 = null; try { listener = new TcpListener(IPAddress.Any, port); listener.Server.ExclusiveAddressUse = true; listener.Start(); if (Socket.OSSupportsIPv6) { v6 = new TcpListener(IPAddress.IPv6Any, port); v6.Server.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, true); v6.Server.ExclusiveAddressUse = true; v6.Start(); } return true; } catch (SocketException) { return false; } finally { if (listener != null) listener.Stop(); if (v6 != null) v6.Stop(); } }
+        static bool PortAvailable(int port) {
+            foreach (IPEndPoint busy in System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners())
+                if (busy.Port == port) return false;
+            // Probe binding only, on loopback. Setup must never listen on the LAN.
+            Socket v4 = null, v6 = null;
+            try {
+                v4 = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                v4.ExclusiveAddressUse = true;
+                v4.Bind(new IPEndPoint(IPAddress.Loopback, port));
+                if (Socket.OSSupportsIPv6) {
+                    v6 = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
+                    v6.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, true);
+                    v6.ExclusiveAddressUse = true;
+                    v6.Bind(new IPEndPoint(IPAddress.IPv6Loopback, port));
+                }
+                return true;
+            } catch (SocketException) { return false; }
+            finally { if (v4 != null) v4.Dispose(); if (v6 != null) v6.Dispose(); }
+        }
         static List<string> CreateShortcuts(string root) {
             NoLinks(root); string launch = Path.Combine(root, "3Mix Studio.cmd"), icon = Path.Combine(root, "bin", "64bit", "FreeMix.exe"); if (!File.Exists(FreeMixUninstall.Program.IOPath(launch)) || !File.Exists(FreeMixUninstall.Program.IOPath(icon))) throw new Exception("Arquivos dos atalhos ausentes.");
             List<string> paths = new List<string>(); Type type = Type.GetTypeFromProgID("WScript.Shell"); object shell = Activator.CreateInstance(type);
