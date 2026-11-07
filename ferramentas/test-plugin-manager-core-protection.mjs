@@ -14,6 +14,20 @@ test('OBS33 core modules are protected independently of legacy plugins',async()=
   const ids=await manager.protectedIds();
   assert.ok(ids.has('obs-browser'));
   assert.ok(!ids.has('user-effect'));
-  await assert.rejects(manager.action('disable',{id:'obs-browser'}),/protegido/);
+  for (const action of ['disable', 'enable', 'remove', 'rollback']) {
+   await assert.rejects(manager.action(action,{id:'obs-browser'}),/protegido/, action);
+  }
+  await mkdir(join(root,'obs-plugins','64bit'),{recursive:true});
+  await writeFile(join(root,'obs-plugins','64bit','legacy-system.dll'),'fixture');
+  await mkdir(join(root,'plugins','modern-system'),{recursive:true});
+  await writeFile(join(root,'plugins','modern-system','modern-system.dll'),'fixture');
+  const allIds=await manager.protectedIds();
+  assert.ok(allIds.has('legacy-system'));
+  assert.ok(allIds.has('modern-system'));
+  for (const id of ['legacy-system','modern-system']) {
+   for (const action of ['disable','enable','remove','rollback']) {
+    await assert.rejects(manager.action(action,{id}),/protegido/, id+':'+action);
+   }
+  }
  } finally {await rm(root,{recursive:true,force:true});}
 });
