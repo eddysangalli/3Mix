@@ -139,7 +139,7 @@ flowchart TD
   1. **Os 3 Modos SRT**:
      - **Caller**: Enviar Program ou Clean Feed para um servidor SRT remoto ou vMix receptor.
      - **Listener**: Aguardar feed de repórter externo em porta fixa (ex.: `18360`).
-     - **Rendezvous**: Estabelecer conexão direta P2P entre dois estúdios sem redirecionamento de portas (port forwarding).
+     - **Rendezvous**: Testar Rendezvous com portas e regras de firewall documentadas nos dois lados. Esse modo não garante travessia de NAT; CGNAT e NAT simétrico podem impedir a conexão.
   2. **Criptografia AES**: Configurar chave de 16 (AES-128) ou 32 bytes (AES-256) com passphrase. Validar se o receptor só abre a imagem se a senha coincidir.
   3. **Stream ID e Multiplexação**: Testar múltiplos feeds SRT na mesma porta UDP utilizando tags `#!::u=...,r=...`.
   4. **Recuperação de Perda de Pacotes**: Simular oscilação de link 4G/Wi-Fi e observar o buffer dinâmico de latência (de 80ms a 2000ms).
@@ -156,13 +156,13 @@ flowchart TD
 
 ---
 
-### MISSÃO 9: Gerenciador de Plugins OBS do 3Mix (Sandbox e Segurança)
+### MISSÃO 9: Gerenciador de Plugins OBS do 3Mix (preparação e recuperação)
 - **Equipamentos desejados**: Plugins OBS da comunidade em formato `.zip` ou pastas soltas (ex.: Move Transition, Source Clone, Downstream Keyer, etc.).
 - **O que testar**:
   1. Acessar a aba **Configurações > Plugins OBS** na Mesa.
   2. Instalar um plugin enviando o arquivo `.zip` diretamente pela interface web.
   3. Verificar se o sistema isola o plugin em `3mix-plugins/%module%` sem tocar na pasta raiz do OBS.
-  4. Testar **Ativação e Desativação** com 1 clique (sem precisar deletar arquivos).
+  4. Preparar **Ativação e Desativação** pela interface, encerrar normalmente fora do ar e confirmar o resultado após a próxima abertura. Preparação não significa aplicação imediata.
   5. Testar o **Modo de Segurança**: Se um plugin instável causar falha, iniciar com a flag de Safe Mode e verificar se o 3Mix isola os módulos problemáticos gerando o relatório `load-report.json`.
 
 ---
@@ -214,8 +214,8 @@ Junto com o arquivo ZIP, informe:
 
 ### Garantia de Privacidade
 O coletor de logs do 3Mix possui um filtro de redação automático estrito:
-- **NUNCA inclui**: senhas, chaves de stream, tokens de autenticação, vídeos, capturas de tela ou gravações de áudio.
-- **INCLUI apenas**: versão do software, modelo de GPU/CPU, taxa de quadros e logs de erro da engine.
+- O coletor aplica filtros de redação, mas **revise o conteúdo do ZIP antes de compartilhar**. Logs de terceiros e textos livres podem conter dados privados; não presuma anonimização perfeita.
+- Confira os arquivos efetivamente incluídos na prévia do diagnóstico. Não envie credenciais, projetos privados, mídia de clientes ou endereços de rede sem necessidade e consentimento.
 
 ---
 
@@ -225,3 +225,27 @@ O coletor de logs do 3Mix possui um filtro de redação automático estrito:
 ## Roteiros específicos vMix 30
 
 Consultar [Suplemento de hardware vMix 30](ALPHA-SUPLEMENTO-HARDWARE-VMIX30.md): DeckLink bits/canais, AJA por modelo, NDI entre PCs, SRT entre redes e desentrelaçamento 1080i/576i/480i. Preserva os cinco roteiros originalmente solicitados, sem substituir as missões desta edição do guia.
+
+## Recibo obrigatório por equipamento e build
+
+Use um recibo separado para cada combinação de modelo, driver, firmware e modo de sinal.
+
+- Build 3Mix exata, versão do motor e SHA-256 do instalador recebido:
+- Data, Windows/build, CPU, RAM, GPU/driver:
+- Equipamento, modelo/revisão, driver e firmware:
+- Missão e passos efetivamente executados:
+- Topologia de sinal/rede (sem senhas ou IP público desnecessário):
+- Resolução, FPS racional (ex.: 30000/1001), progressivo/entrelaçado, pixel format e profundidade:
+- Áudio: frequência, canais esperados/recebidos, mapa de canais e sincronismo:
+- Duração real, frames perdidos, interrupções e recuperação observada:
+- Resultado: PASSOU / FALHOU / NÃO TESTADO / BLOQUEADO (com causa):
+- Evidências: gravação curta autorizada, capturas sem dados privados e diagnóstico revisado:
+- Passos para reproduzir e comportamento após fechar e reabrir normalmente:
+
+### Segurança e limites do ensaio
+
+Faça testes de desconexão, rede degradada, plugins e rollback apenas em bancada, nunca numa transmissão do operador. Registre o estado original e confirme sua restauração. Uma DLL carregar não comprova vídeo, áudio, sincronismo nem estabilidade. Separação de diretórios de plugins **não é sandbox de processo**: plugins nativos executam dentro do motor e podem causar crash.
+
+Não marque capacidade ausente como falha de hardware: registre NÃO TESTADO ou BLOQUEADO. ST 2110/PTP e NDI HDR exigem caminho implementado e SDK/licença pertinentes; roteiro não anuncia suporte pronto. Saída DeckLink multicanal só passa com identificação real de cada canal no receptor; não deduza canais pela capacidade anunciada da placa.
+
+Para atualização/rollback, registre versões antes/depois, origem e hash do pacote, resultado da instalação, abertura, conservação dos projetos e retorno à versão anterior. Não desative verificação de assinatura para concluir o teste.
