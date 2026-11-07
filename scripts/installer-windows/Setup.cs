@@ -666,7 +666,7 @@ namespace FreeMixSetup {
                             log.WriteLine("Payload SHA-256 verified: " + PayloadInfo.Sha256);
                             using (RangeStream range = new RangeStream(file, start, length)) using (ZipArchive zip = new ZipArchive(range, ZipArchiveMode.Read, true)) {
                                 long expanded = ValidateZip(zip); log.WriteLine("ZIP validated; entries=" + zip.Entries.Count + "; expandedBytes=" + expanded);
-                                if (options.Verify) { report("Integridade verificada.", 100); log.WriteLine("VERIFY PASS; installed=false; appStarted=false; firewallApplied=false"); return 0; }
+                                if (options.Verify) { report("Integridade verificada.", 100); log.WriteLine("VERIFY PASS; payloadSha256Verified=true; zipStructureVerified=true; manifestSignatureVerified=false; installed=false; appStarted=false; firewallApplied=false"); return 0; }
                                 string destination = Path.GetFullPath(options.Destination);
                                 CheckSpace(Path.GetTempPath(), expanded + 256L * 1024 * 1024);
                                 CheckSpace(destination, expanded + 256L * 1024 * 1024);
