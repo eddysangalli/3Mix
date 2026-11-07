@@ -6,6 +6,7 @@ import { basename, dirname, extname, join, relative, resolve, sep } from 'node:p
 import { fileURLToPath } from 'node:url';
 import { readPluginArchiveBuffer, noGtLinks } from './plugin-manager-archive.mjs';
 import { inspectPe } from './plugin-manager-pe.mjs';
+import { readDeclaredPluginMetadata } from './plugin-package-metadata.mjs';
 
 const run = promisify(execFile);
 const ID = /^[a-z0-9][a-z0-9._-]{0,79}$/;
@@ -253,7 +254,7 @@ export function inspectPluginZip(bytes, targetId) {
     }
   }
   if (!primary.info.imports.some(i => i.dll === 'obs.dll')) throw Error('Módulo não importa a libobs instalada');
-  return { id, archiveHash: archive.sha256, bin, data, dependencies: [...new Set(missing)], obsImports: [...new Set(obsImports)], metadata: { name: id, version: null, developer: null, description: null, license: null, source: 'arquivo local', signature: null, dependencies: [...new Set(missing)] } };
+  return { id, archiveHash: archive.sha256, bin, data, dependencies: [...new Set(missing)], obsImports: [...new Set(obsImports)], metadata: { name: id, version: null, developer: null, description: null, ...readDeclaredPluginMetadata(data.get('manifest.json'), id), license: null, source: 'arquivo local', signature: null, dependencies: [...new Set(missing)] } };
 }
 
 async function signatureOf(path) {
