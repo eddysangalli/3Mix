@@ -48,6 +48,7 @@ import { lerMontagens, salvarMontagens } from './multiview-montagens.mjs';
 import { SlideEngine } from './apresentacao-slides.mjs';
 import { LiveLanDistribution } from './livelan-distribuicao.mjs';
 import { PluginManager, readPluginMultipart } from './plugin-manager.mjs';
+import { checkRemoteVersions } from './verificar-versoes-remotas.mjs';
 
 const ROOT = process.env.FREEMIX_ROOT || fileURLToPath(new URL('../', import.meta.url));
 const PANEL = process.env.FREEMIX_PANEL_DIR || join(ROOT, 'painel'), PORT = Number(process.env.FREEMIX_API_PORT || 8088);
@@ -407,6 +408,11 @@ async function handleHttp(req, res) {
       if (path === '/api/plugin-manager' || path.startsWith('/api/plugin-manager/')) {
         if (!local(req) || !originAllowed(req)) return json(res, 403, { success: false, error: 'Gerenciador de plugins disponível somente neste computador' });
         if (path === '/api/plugin-manager' && req.method === 'GET') return json(res, 200, await pluginManager.snapshot());
+        // Read-only upstream check (GitHub Releases of the engine + catalog plugins).
+        // Never downloads or installs anything; a separate route from the POST actions
+        // below on purpose, since it needs no x-3mix-plugin-manager header or busy-state
+        // guard (it doesn't touch the installation).
+        if (path === '/api/plugin-manager/check-updates' && req.method === 'GET') return json(res, 200, await checkRemoteVersions(ROOT));
         if (req.method !== 'POST') return json(res, 405, { success: false, error: 'Método não permitido' });
         if (req.headers['x-3mix-plugin-manager'] !== '1') return json(res, 403, { success: false, error: 'Pedido do gerenciador não autorizado' });
         const action = path.slice('/api/plugin-manager/'.length);

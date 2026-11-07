@@ -31,6 +31,9 @@
   let lastRead = 0;
   let error = '';
   let message = '';
+  let remoteVersions = null; // result of /api/plugin-manager/check-updates, or null until checked
+  let checkingUpdates = false;
+  let checkUpdatesError = '';
 
   function text(value, fallback = 'Não informado') {
     return value === undefined || value === null || value === '' ? fallback : String(value);
@@ -97,7 +100,11 @@
     const entries = array(snapshot?.catalog);
     return '<div class="settings-card"><div class="card-title-row"><h2>Catálogo avaliado</h2><span class="settings-badge quiet">' + entries.length + ' avaliados</span></div>'
       + '<p class="card-desc keep">A instalação pelo catálogo exige origem, versão, hash, licença e compatibilidade avaliados para a versão do motor desta instalação.</p>'
-      + (entries.length ? '<div class="pm-plugin-list">' + entries.map((item) => '<article class="pm-plugin"><div class="pm-plugin-head"><div><h3>' + esc(text(item.name, item.id)) + '</h3><p class="pm-meta">' + esc(text(item.version, 'Versão não informada')) + ' · ' + esc(text(item.developer)) + '</p></div><span class="pm-badge">' + esc(text(item.license, 'Licença não informada')) + '</span></div>'
+      + '<p class="card-desc keep"><button type="button" data-plugin-action="check-updates"' + (checkingUpdates ? ' disabled' : '') + '>' + (checkingUpdates ? 'Consultando o GitHub…' : remoteVersions ? 'Verificar de novo' : 'Verificar atualizações no GitHub') + '</button>'
+        + (remoteVersions ? ' <span class="pm-meta">consultado ' + esc(new Date(remoteVersions.checkedAt).toLocaleString('pt-BR')) + ' · ' + remoteVersions.summary.atualizacoesDisponiveis + ' com atualização disponível</span>' : '')
+        + (checkUpdatesError ? '<br><span class="pm-feedback error">' + esc(checkUpdatesError) + '</span>' : '')
+        + (remoteVersions ? '<br><span class="pm-meta">' + esc(remoteVersions.disclaimer) + '</span>' : '') + '</p>'
+      + (entries.length ? '<div class="pm-plugin-list">' + entries.map((item) => '<article class="pm-plugin"><div class="pm-plugin-head"><div><h3>' + esc(text(item.name, item.id)) + '</h3><p class="pm-meta">' + esc(text(item.version, 'Versão não informada')) + ' · ' + esc(text(item.developer)) + remoteVersionBadge(item.id) + '</p></div><span class="pm-badge">' + esc(text(item.license, 'Licença não informada')) + '</span></div>'
         + (item.description ? '<p class="pm-description">' + esc(item.description) + '</p>' : '')
         + '<p class="pm-detail"><strong>Origem:</strong> ' + esc(text(item.sourceUrl || item.origin)) + ' · <strong>SHA-256:</strong> ' + esc(text(item.sha256)) + '</p>'
         + (item.note ? '<p class="pm-detail">' + esc(item.note) + '</p>' : '')
@@ -137,7 +144,7 @@
     const engine = snapshot?.engine || {};
     const body = !snapshot ? '<div class="settings-card"><p>' + (loading ? 'Consultando plugins desta instalação…' : esc(error || 'Gerenciador indisponível.')) + '</p></div>'
       : selectedTab === 'catalog' ? catalog() : selectedTab === 'install' ? install() : selectedTab === 'diagnostics' ? diagnostics() : installed();
-    root.innerHTML = '<div class="pm-summary"><div><strong>Gerenciador de Plugins</strong><span>libobs ' + esc(text(engine.version, 'versão não informada')) + '</span></div>'
+    root.innerHTML = '<div class="pm-summary"><div><strong>Gerenciador de Plugins</strong><span>libobs ' + esc(text(engine.version, 'versão não informada')) + remoteVersionBadge('__engine__') + '</span></div>'
       + '<button type="button" data-plugin-action="refresh"' + (busy || loading ? ' disabled' : '') + '>Atualizar lista</button></div>'
       + (lock ? '<p class="pm-lock" role="status">Produção ativa: instalação, alteração e remoção estão bloqueadas até a produção terminar.</p>' : '')
       + (error ? '<p class="pm-feedback error" role="alert">' + esc(error) + '</p>' : '')
@@ -165,6 +172,42 @@
     try { snapshot = await request('/api/plugin-manager'); lastRead = Date.now(); }
     catch (e) { error = e.message; }
     finally { loading = false; render(); }
+  }
+
+  // Read-only check against GitHub Releases for the engine and each catalog plugin.
+  // Never installs or downloads anything; see verificar-versoes-remotas.mjs.
+  async function checkUpdates() {
+    if (checkingUpdates) return;
+    checkingUpdates = true; checkUpdatesError = ''; render();
+    try { remoteVersions = await request('/api/plugin-manager/check-updates'); }
+    catch (e) { checkUpdatesError = e.message; }
+    finally { checkingUpdates = false; render(); }
+  }
+
+  // '__engine__' matches the one result with kind:'engine' (it carries no catalog id);
+  // every other id matches a catalog plugin's own id, same as snapshot.catalog entries.
+  function remoteVersionFor(id) {
+    return remoteVersions?.results?.find((item) => id === '__engine__' ? item.kind === 'engine' : item.id === id) || null;
+  }
+
+  const updateStatusLabels = {
+    'atualizacao-disponivel': 'Nova versão disponível', atualizado: 'Atualizado',
+    'instalado-mais-novo-que-release': 'Instalado é mais novo que a última release',
+    'erro-consulta': 'Falha ao consultar', 'sem-release-publicada': 'Sem release publicada',
+    'sem-origem-verificavel': 'Sem origem verificável', 'tag-nao-reconhecida': 'Versão da release não reconhecida',
+    'versao-instalada-desconhecida': 'Versão instalada não lida',
+  };
+
+  function remoteVersionBadge(id) {
+    const r = remoteVersionFor(id);
+    if (!r) return '';
+    // Same data-tone vocabulary (ok/pending/error) plugin-manager.css already defines
+    // for .pm-badge elsewhere on this screen -- no new CSS needed for this badge.
+    const tone = r.status === 'atualizacao-disponivel' ? 'pending' : r.status === 'atualizado' ? 'ok' : r.status === 'erro-consulta' ? 'error' : '';
+    const label = updateStatusLabels[r.status] || r.status;
+    const detail = r.status === 'atualizacao-disponivel' && r.latestVersion ? ' (' + esc(r.latestVersion) + ')' : r.status === 'erro-consulta' ? ': ' + esc(r.note || '') : '';
+    const link = r.latestUrl ? ' <a href="' + esc(r.latestUrl) + '" target="_blank" rel="noopener">ver release</a>' : '';
+    return ' <span class="pm-badge"' + (tone ? ' data-tone="' + tone + '"' : '') + ' title="' + esc(r.note || '') + '">' + esc(label) + esc(detail) + '</span>' + link;
   }
 
   async function operate(operation, id) {
@@ -205,6 +248,7 @@
     const operation = button.dataset.pluginAction;
     const id = button.dataset.pluginTarget;
     if (operation === 'refresh') { refresh(); return; }
+    if (operation === 'check-updates') { checkUpdates(); return; }
     if (operation === 'pick-file') { root.querySelector('#pm-file')?.click(); return; }
     if (operation === 'install-file') { upload(); return; }
     if (operation === 'clear-target') { updateTarget = null; selectedFile = null; render(); return; }

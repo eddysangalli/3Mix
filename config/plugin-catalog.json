@@ -10,11 +10,11 @@
     "packageUrl": "https://github.com/WarmUpTill/SceneSwitcher/releases/download/1.36.1/advanced-scene-switcher-1.36.1-windows-x64-portable.zip",
     "sha256": "8a7f5fd705863c0cf239f294a0877a7cf0094c0ee053fb420fc527bd5b7a8cc4",
     "license": "GPL-2.0",
-    "obsVersions": ["32.2.2"],
-    "verifiedAt": "2026-11-04",
+    "obsVersions": ["32.2.2", "33.0.1"],
+    "verifiedAt": "2026-11-06",
     "status": "included",
     "installable": false,
-    "note": "Já incluído no runtime; carregamento observado em QA isolada. OBS 33 ainda não validado."
+    "note": "Já incluído no runtime; carregamento confirmado na produção real sob OBS 33.0.1 (advanced-scene-switcher.dll presente nos módulos carregados do log, sem erro de símbolo/ABI). Uso funcional dos recursos ainda não homologado."
   },
   {
     "id": "obs-shaderfilter",
@@ -28,10 +28,10 @@
     "sha256": "0e75fc5f2523befd9c66c0adb14f9c838cc0cd705b32487e121abb03ad2f2486",
     "license": "GPL-2.0",
     "obsVersions": ["32.2.2"],
-    "verifiedAt": "2026-11-04",
+    "verifiedAt": "2026-11-06",
     "status": "included",
     "installable": false,
-    "note": "Já incluído no runtime; filtros foram exercitados no motor 32.2.2. OBS 33 ainda não validado."
+    "note": "INCOMPATÍVEL com OBS 33.0.1, causa raiz confirmada: importa gs_image_file_free/init/init_texture, removidas no OBS 33 e substituídas por gs_image_file_ex_*. Falha ao carregar (Win32 error 127/ERROR_PROC_NOT_FOUND), sem crash. Binário de terceiros sem código-fonte neste workspace; recompilar contra a API nova exige o fonte do plugin. Ver docs/RESULTADOS-MOTOR-OBS33-PRODUCAO-20261106.md."
   },
   {
     "id": "obs_google_caption_plugin",
@@ -44,11 +44,11 @@
     "packageUrl": "https://github.com/ratwithacompiler/OBS-captions-plugin/releases/download/v0.33/Closed_Captions_Plugin__v0.33_Windows.zip",
     "sha256": "c394a1faa258808f6c58fdef59e6fac7d5d863f62e11d4149282307ff986f656",
     "license": "GPL-2.0",
-    "obsVersions": ["32.2.2"],
-    "verifiedAt": "2026-11-04",
+    "obsVersions": ["32.2.2", "33.0.1"],
+    "verifiedAt": "2026-11-06",
     "status": "included",
     "installable": false,
-    "note": "Já incluído no runtime; carregamento observado em QA. Reconhecimento externo e OBS 33 não homologados."
+    "note": "Já incluído no runtime; carregamento confirmado na produção real sob OBS 33.0.1 (obs_google_caption_plugin.dll presente nos módulos carregados do log). Reconhecimento externo (serviço de terceiros) continua não homologado."
   },
   {
     "id": "distroav",
@@ -61,11 +61,11 @@
     "packageUrl": "https://github.com/DistroAV/DistroAV/releases/download/6.2.1/distroav-6.2.1-windows-x64-portable.zip",
     "sha256": "aefea7d559c898abaf1e2f0faeb569168ce4bb43bc0e9451d2b7dda37af308f7",
     "license": "GPL-2.0-or-later; NDI Runtime sob termos separados",
-    "obsVersions": ["32.2.2"],
-    "verifiedAt": "2026-11-04",
+    "obsVersions": ["32.2.2", "33.0.1"],
+    "verifiedAt": "2026-11-06",
     "status": "included",
     "installable": false,
-    "note": "Já incluído no runtime. Dependência NDI externa e variante 6.2.2 para OBS 33 exigem validação separada."
+    "note": "Já incluído no runtime; o módulo (distroav.dll) carrega sob OBS 33.0.1 sem erro de símbolo/ABI. O erro de carregamento da biblioteca NDI visto numa sessão de teste teve causa raiz identificada: reabertura do processo fora do launcher canônico (ferramentas/iniciar-3mix.mjs), que pulou prepareNdiRuntime(); não é falha do plugin. Versão upstream 6.2.2 disponível (ver checagem de versões remotas do gerenciador)."
   },
   {
     "id": "obs-asio",
@@ -77,10 +77,10 @@
     "sourceUrl": "https://github.com/Andersama/obs-asio/releases/tag/v3.2.1f",
     "sha256": "cb9606decbcec0c71bf2a1c161b1121f6efac18627f532a6c380ae49fbc1b247",
     "license": "GPL-2.0",
-    "obsVersions": ["32.2.2"],
-    "verifiedAt": "2026-11-04",
+    "obsVersions": ["32.2.2", "33.0.1"],
+    "verifiedAt": "2026-11-06",
     "status": "included",
     "installable": false,
-    "note": "Já incluído no runtime; a presença da DLL não homologa cada driver ou dispositivo."
+    "note": "Já incluído no runtime; carregamento confirmado na produção real sob OBS 33.0.1 (obs-asio.dll presente nos módulos carregados do log; só um erro cosmético de tradução pt-BR, sem impacto funcional). A presença da DLL não homologa cada driver ou dispositivo ASIO."
   }
 ]

@@ -23,6 +23,20 @@ O gerenciador cuida de **plugins nativos do motor** em `3mix-plugins/`. Os efeit
 
 O catálogo mostra pacotes avaliados e a situação de cada um. No código consultado, **não há download automático aprovado**; um cartão marcado como já incluído no 3Mix não oferece instalação duplicada.
 
+## Verificar se há versão mais nova (motor e plugins do catálogo)
+
+Em **Catálogo**, o botão **Verificar atualizações no GitHub** consulta a última release publicada no GitHub de cada item do catálogo e do próprio motor (`obsproject/obs-studio`), e mostra um selo por item: **Nova versão disponível** (com a versão e um link "ver release"), **Atualizado**, **Instalado é mais novo que a última release**, **Falha ao consultar**, **Sem release publicada** ou **Sem origem verificável** (quando o catálogo não tem uma `sourceUrl` do GitHub para aquele item).
+
+- **Isto é só leitura.** A checagem nunca baixa, instala ou altera nenhum arquivo — ela só compara a versão instalada com a tag mais recente publicada no GitHub. O texto "Somente leitura" aparece sempre que um resultado é mostrado.
+- Uma consulta falhando (rede, limite de requisições do GitHub, repositório renomeado) nunca impede as demais: cada item tem seu próprio resultado, independente dos outros.
+- Esta checagem é **complementar**, não substitui nenhum dos três mecanismos existentes:
+  - A atualização do **pacote 3Mix** em si (painel/ferramentas) continua sendo feita pelo feed assinado de `atualizacao-online.mjs`, de um canal aprovado.
+  - A **instalação de um plugin** continua exigindo um ZIP analisado manualmente (seção anterior); o catálogo não ganhou download automático.
+  - A **integridade local** dos componentes já instalados (hash contra o que a entrega aprovada declarou) continua sendo o papel de `verificar-atualizacoes.mjs`, que não consulta nada externo.
+- Uma versão nova encontrada aqui é um sinal para o operador (ou para quem prepara a próxima entrega 3Mix) avaliar e testar — não uma recomendação automática para atualizar em produção sem antes confirmar compatibilidade com o motor desta instalação.
+
+## Limites desta documentação
+
 ## Desabilitar, remover ou voltar à versão anterior
 
 - Em **Instalados**, somente um plugin do diretório gerenciado e sem operação pendente oferece **Habilitar/Desabilitar**, **Remover** e **Rollback**. O rollback só aparece habilitado quando existe backup válido.
