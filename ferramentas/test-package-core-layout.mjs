@@ -19,3 +19,9 @@ test('new package and controller helpers stay in the runtime dependency closure'
  const files=await runtimeDependencyClosure(tools,['empacotar-limpo.mjs','servidor-api.mjs','iniciar-3mix.mjs'],{copiedModuleRoots:[panel]});
  for(const name of ['pacote-executavel.mjs','plugin-manager.mjs','verificar-versoes-remotas.mjs','ndi-runtime.mjs'])assert.ok(files.includes(name),name);
 });
+
+test('seed configuration refers to new distribution rather than source checkout',()=>{
+ assert.ok(source.includes("const base=dest.replaceAll("));
+ assert.ok(source.includes("writeFile(join(cfg,'raiz.txt'),dest)"));
+ assert.ok(!source.includes("writeFile(join(cfg,'raiz.txt'),root)"));
+});
