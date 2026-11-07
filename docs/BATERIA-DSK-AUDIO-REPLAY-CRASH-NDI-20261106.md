@@ -33,6 +33,21 @@ Stack: obs_source_active -> audio_callback -> input_and_output -> audio_thread
 ```
 
 - Arquivo completo preservado em `docs/evidencias-crash-20261106/Crash 2026-11-06 22-42-34.txt` (gerado pelo próprio handler de crash do OBS, não fabricado; cópia original em `qa-finalizacao/native-vmix30-clean/rundir/.../crashes/`). Screenshot real (PrintWindow) do diálogo "Falha detectada no OBS Studio" que o próprio motor mostrou ao reabrir: `docs/evidencias-crash-20261106/dialogo-crash-qa.png`.
+
+### Segundo crash real, diferente do primeiro (07/11/2026, 03:42)
+
+Numa sessão de teste posterior (investigação de headphones pós-Master, sem `source_record_filter` nem `wasapi_output_capture` envolvidos desta vez — só cenas com `mix-track-to-source` e `color_source_v3` criadas/removidas repetidamente), a mesma instância QA crashou de novo, com uma stack trace **diferente**:
+
+```
+Unhandled exception: c0000005
+Fault address: obs.dll!obs_source_release+0x36
+Thread: tiny_tubular_task_thread (Crashed)
+Stack: obs_source_release -> obs_sceneitem_destroy -> remove_all_items -> scene_destroy -> obs_source_destroy_defer
+```
+
+- Arquivo completo preservado em `docs/evidencias-crash-20261106/Crash 2026-11-07 03-42-20.txt`.
+- Diferente do primeiro crash (thread de áudio, `obs_source_active`), este é na destruição de cena em si (`scene_destroy`/`obs_sceneitem_destroy`), numa thread de tarefas (`tiny_tubular_task_thread`), não a de áudio. Pode ser o mesmo padrão geral (destruição de source/view com referência pendurada em outra thread) com um gatilho diferente, ou um bug distinto — **não investigado a fundo por falta de tempo nesta sessão**, registrado aqui como achado real adicional, não unificado por suposição com o primeiro.
+- Também não foi possível fechar esse processo normalmente (sem diálogo de recuperação com botões detectáveis via UI Automation desta vez, diferente da primeira ocorrência) — precisou de `taskkill /F`. Produção nunca foi afetada.
 - `obs_source_active` é código vanilla do libobs (`libobs/obs-source.c`), não customizado pelo 3Mix. O crash é consistente com um ponteiro de fonte (`obs_source_t*`) já liberado sendo lido pela thread de áudio durante `audio_callback` (`libobs/obs-audio.c:589`), que itera `view->channels[i]` de cada `obs_view_t` registrada em `obs->video.mixes`.
 - Hipótese fundamentada, não confirmada por reprodução isolada: o filtro `source_record_filter` (`3mix-panel/licenses/freemix-source-record/source-record.c`, terceiros, GPL-2.0, "used as-is" conforme o próprio CMake) mantém sua própria `obs_view_t` privada (`context->view`) registrada separadamente na lista global de mixes de áudio. Em `source_record_filter_destroy` (linha ~1399), `obs_view_remove()` só é chamado se `context->video_output` não for nulo — se esse campo já estiver nulo por outro caminho (por exemplo, por eu ter setado `record_mode:0` poucos segundos antes de remover a cena), `obs_view_remove()` nunca roda, e `obs_view_destroy()` libera a `obs_view_t` diretamente enquanto a thread de áudio ainda pode estar com uma referência a ela — use-after-free clássico.
 - Não foi corrigido nesta sessão: é código de terceiros, denso, e uma correção real exigiria reproduzir de forma isolada (sem as outras variáveis do meu teste) e validar que a mudança não quebra o caso comum. Dado o pedido explícito de ritmo e o fato de que a produção real do operador nunca removeu cenas nesse padrão específico (ninguém usa `RemoveScene` numa cena com gravação ativa no fluxo normal do painel — o painel para a gravação e espera antes de permitir remoção), classifico isso como risco real mas de baixa probabilidade no uso normal via painel, não um bloqueador para o Alpha. Registrado aqui para rastreamento, não escondido.
