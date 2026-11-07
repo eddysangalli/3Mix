@@ -21,6 +21,7 @@ test('OBS33 core modules are protected independently of legacy plugins',async()=
   assert.equal(core.managed,false);
   assert.equal(core.state,'unknown');
   assert.equal(core.compatibility,'unknown');
+  assert.equal(core.versionSource,'unknown');
   for (const action of ['disable', 'enable', 'remove', 'rollback']) {
    await assert.rejects(manager.action(action,{id:'obs-browser'}),/protegido/, action);
   }
