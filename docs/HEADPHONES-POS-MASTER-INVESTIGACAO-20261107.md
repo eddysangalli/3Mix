@@ -15,6 +15,10 @@
 
 É necessário sinal PCM conhecido, conferir indexação de `MixTrack`, medir sinal antes/depois do fader Master e comprovar ausência de retorno em todas as saídas. Nenhuma funcionalidade pós-Master foi implementada ou homologada por esses testes. Nenhuma configuração de áudio do operador foi alterada nesta investigação.
 
+## Bloqueador adicional encontrado depois desta investigação
+
+A mesma fonte `mix-track-to-source` usada aqui (`PROGRAM MIX (teste)`) foi identificada como o gatilho de um crash real documentado separadamente em `BATERIA-DSK-AUDIO-REPLAY-CRASH-NDI-20261106.md` (seção "Segundo crash real"): o plugin `mix-track-to-source.dll` (terceiros, v1.0.2) não limpa corretamente sua conexão de áudio quando a fonte/cena é removida em uso normal, causando um crash no shutdown do processo (`audio_output_disconnect` chamado depois do módulo já ter sido descarregado). **Isso bloqueia qualquer implementação de headphones pós-Master usando este plugin até o bug ser corrigido** — não é seguro expor essa fonte na UI do operador no estado atual.
+
 ## Nota sobre o canal de atualização publicado nesta mesma sessão
 
 GitHub Pages foi publicado com autorização explícita. Feed beta retornou HTTP 200 e a API de produção passou a `current` após o comando explícito `update_check` — isso **não comprova execução do timer periódico** nem instalação de atualização assinada. Os feeds ainda não oferecem pacote novo (sem `manifestUrl`/`signatureUrl`, requerem chave privada Ed25519 do projeto).
