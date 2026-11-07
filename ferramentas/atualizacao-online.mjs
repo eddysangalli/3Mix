@@ -60,7 +60,8 @@ export class OnlineUpdateEngine {
   const info=verifyOnlineManifest(raw,signature,key,this.root,current),m=info.manifest;
   if(typeof feed.version!=='string'||feed.version!==m.version)throw Error('Versão do feed diverge do manifesto assinado');
   // O canal e a origem dos arquivos vêm do manifesto assinado: o feed não assina nada, então não pode escolher nenhum dos dois.
-  if(m.channel&&m.channel!==this.state.channel)throw Error('Esta versão é do canal '+m.channel+', não do canal escolhido');
+  if(!CHANNELS.includes(m.channel))throw Error('Manifesto assinado sem canal válido');
+  if(m.channel!==this.state.channel)throw Error('Esta versão é do canal '+m.channel+', não do canal escolhido');
   const base=m.filesBaseUrl;if(typeof base!=='string'||!base.endsWith('/'))throw Error('Origem dos arquivos inválida');const filesBaseURL=new URL(base);if(!base.startsWith(RELEASE_PREFIX))updateURL(base,feedURL.origin);
   let downloadBytes=0;for(const f of m.files)if(!await this.sameAsInstalled(f))downloadBytes+=f.size;
   this.checked={...info,raw,signature,filesBaseURL,key,byHash:m.assetNaming==='sha256'};

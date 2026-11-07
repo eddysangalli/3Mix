@@ -52,3 +52,11 @@ test('unsigned feed cannot supply the payload origin absent from signed manifest
  await assert.rejects(engine.execute('update_check'),/Origem dos arquivos inválida/);
  assert.equal(engine.checked,null);assert.equal(requests.length,3);
 });
+
+test('signed manifest must explicitly identify a supported channel',async t=>{
+ for(const channel of [null,'','alpha','unknown']){
+  const {engine,requests}=await fixture(t,{manifestChannel:channel});
+  await assert.rejects(engine.execute('update_check'),/sem canal válido/);
+  assert.equal(engine.checked,null);assert.equal(requests.length,3);
+ }
+});
