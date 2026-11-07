@@ -19,7 +19,22 @@ const AUTO_INTERVAL=6*60*60*1000,AUTO_DELAY=30000;
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 async function hashFile(path){const h=createHash('sha256');for await(const chunk of createReadStream(path))h.update(chunk);return h.digest('hex');}
 export function updateURL(value,origin){let url;try{url=new URL(value);}catch{throw Error('Informe um endereço HTTPS válido');}if(url.protocol!=='https:'||url.username||url.password||url.search||url.hash||value.length>2000||origin&&url.origin!==origin)throw Error('Use HTTPS sem credenciais, query ou fragmento, na mesma origem do feed');return url;}
-export function newerVersion(next,current){const parse=v=>{if(typeof v!=='string'||v.length>128||!/^\d+(?:[.\w-]*\d)*[.\w-]*$/.test(v))throw Error('Versão inválida');const n=v.match(/\d+/g).map(Number);if(n.some(x=>!Number.isSafeInteger(x)))throw Error('Versão inválida');return n;};const a=parse(next),b=parse(current);for(let i=0;i<Math.max(a.length,b.length);i++){if((a[i]||0)!==(b[i]||0))return(a[i]||0)>(b[i]||0);}return false;}
+export function newerVersion(next,current){
+ const semver=/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/;
+ const a=typeof next==='string'&&next.length<=128?semver.exec(next):null,b=typeof current==='string'&&current.length<=128?semver.exec(current):null;
+ if(a&&b){
+  for(let i=1;i<=3;i++){const x=BigInt(a[i]),y=BigInt(b[i]);if(x!==y)return x>y;}
+  if(a[4]===b[4])return false;if(!a[4])return true;if(!b[4])return false;
+  const x=a[4].split('.'),y=b[4].split('.');
+  for(let i=0;i<Math.max(x.length,y.length);i++){
+   if(x[i]===undefined)return false;if(y[i]===undefined)return true;if(x[i]===y[i])continue;
+   const xn=/^\d+$/.test(x[i]),yn=/^\d+$/.test(y[i]);
+   if(xn&&yn)return BigInt(x[i])>BigInt(y[i]);if(xn!==yn)return !xn;return x[i]>y[i];
+  }
+  return false;
+ }
+ // Preserve historical local identifiers that predate SemVer release channels.
+const parse=v=>{if(typeof v!=='string'||v.length>128||!/^\d+(?:[.\w-]*\d)*[.\w-]*$/.test(v))throw Error('Versão inválida');const n=v.match(/\d+/g).map(Number);if(n.some(x=>!Number.isSafeInteger(x)))throw Error('Versão inválida');return n;};const legacyA=parse(next),legacyB=parse(current);for(let i=0;i<Math.max(legacyA.length,legacyB.length);i++){if((legacyA[i]||0)!==(legacyB[i]||0))return(legacyA[i]||0)>(legacyB[i]||0);}return false;}
 // No redirects, custom agent, TLS override or retry that could change the intended origin.
 // Só as Releases podem redirecionar, e só para os hosts de arquivo do próprio GitHub: a origem do download continua fixa. Quem garante o conteúdo é o hash assinado.
 export function followsRedirect(from,to){return from.href.startsWith(RELEASE_PREFIX)&&to.protocol==='https:'&&!to.username&&!to.password&&RELEASE_HOSTS.has(to.hostname);}
