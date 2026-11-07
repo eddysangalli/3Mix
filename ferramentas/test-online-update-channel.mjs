@@ -60,3 +60,12 @@ test('signed manifest must explicitly identify a supported channel',async t=>{
   assert.equal(engine.checked,null);assert.equal(requests.length,3);
  }
 });
+
+test('download revalidates against the current trust key before fetching payload',async t=>{
+ const {root,engine,requests}=await fixture(t);
+ await engine.execute('update_check');assert.equal(requests.length,3);
+ const replacement=generateKeyPairSync('ed25519').publicKey.export({type:'spki',format:'pem'});
+ await writeFile(join(root,'update-public.pem'),replacement);
+ await assert.rejects(engine.execute('update_download'),/Assinatura/);
+ assert.equal(requests.length,3);assert.equal(engine.last.status,'error');assert.equal(engine.last.packagePath,null);
+});
