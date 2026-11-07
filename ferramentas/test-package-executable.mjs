@@ -14,3 +14,12 @@ test('package prefers 3Mix, supports legacy explicitly, rejects missing executab
   assert.equal(packageExecutable(root),'bin/64bit/3Mix.exe');
  } finally {await rm(root,{recursive:true,force:true});}
 });
+
+test('directory masquerading as 3Mix.exe is rejected rather than using legacy silently',async()=>{
+ const root=join(process.cwd(),'qa-finalizacao','package-invalid-executable-'+process.pid);
+ try {
+  await mkdir(join(root,'bin','64bit','3Mix.exe'),{recursive:true});
+  await writeFile(join(root,'bin','64bit','FreeMix.exe'),'fixture');
+  assert.throws(()=>packageExecutable(root),/arquivo regular/);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
