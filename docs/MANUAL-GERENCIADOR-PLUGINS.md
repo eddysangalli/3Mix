@@ -2,7 +2,14 @@
 
 Manual de operação da tela **Configurações → Plugins**. Esta página descreve o código-fonte de 06/11/2026; a presença da tela ou de uma DLL em uma instalação específica não comprova que o plugin carregou. Confira a versão daquela instalação e o diagnóstico de carregamento antes de usar um recurso.
 
-O gerenciador cuida de **plugins nativos do motor** em `3mix-plugins/`. Os efeitos VST3 de áudio são administrados no mixer e têm fluxo próprio. O inventário de plugins integrados do OBS/3Mix é exibido para consulta, mas esses módulos são protegidos contra alteração pela tela.
+O gerenciador cuida dos **plugins OBS adicionais instalados pelo usuário** em `3mix-plugins/`. Isso não é o mesmo que administrar os componentes que já vêm com o 3Mix. Os efeitos VST3 de áudio são administrados no mixer e têm fluxo próprio.
+
+## Plugins do sistema e plugins do usuário
+
+- **Sistema:** módulos integrados encontrados em `core/<id>/<id>.dll` (OBS 33), `plugins/<id>/<id>.dll` e `obs-plugins/64bit/`. São inventariados para consulta e diagnóstico, mas não podem ser instalados por cima, atualizados, desativados, removidos ou revertidos pelo gerenciador de plugins do usuário. A proteção existe na API e é conferida novamente ao aplicar a fila, não apenas nos botões.
+- **Usuário:** plugins adicionais em `3mix-plugins/`, separados dos componentes do sistema. Podem ser preparados a partir de ZIP compatível, habilitados, desabilitados, atualizados ou removidos pelo fluxo autorizado. Um nome/ID que colida com um módulo protegido é recusado.
+- Atualizar um componente integrado é responsabilidade de uma entrega validada do **3Mix**, não de um ZIP arbitrário enviado ao gerenciador.
+- Separar diretórios não cria uma sandbox de processo: plugins nativos carregados executam dentro do motor e podem provocar falhas. Faça ensaio e mantenha um caminho de recuperação antes de usá-los no ar.
 
 ## Consultar o que está instalado
 
