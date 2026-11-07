@@ -237,7 +237,9 @@ export function inspectPluginZip(bytes, targetId) {
       if (ext === '.dll') inspectPe(content);
       bin.set(relativeToModule, content);
     }
-    const rel = dataPath(normalized, id);
+    const rel = dataPath(normalized, id) ||
+      (parent === '.' && normalized.startsWith('data/') ? normalized.slice(5) :
+        parent.toLowerCase() === id && normalized.startsWith(parent + '/data/') ? normalized.slice(parent.length + 6) : null);
     if (rel) data.set(rel, content);
   }
   bin.set(id + '.dll', primary.content);
