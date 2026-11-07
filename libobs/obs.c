@@ -661,6 +661,8 @@ static int obs_init_video_mix(struct obs_video_info *ovi, struct obs_core_video_
 struct obs_core_video_mix *obs_create_video_mix(struct obs_video_info *ovi)
 {
 	struct obs_core_video_mix *video = bzalloc(sizeof(struct obs_core_video_mix));
+	video->final_gate.identity=obs_final_gate_new_identity();
+	video->final_gate.gain=video->final_gate.from_gain=video->final_gate.to_gain=1.0;
 	if (obs_init_video_mix(ovi, video) != OBS_VIDEO_SUCCESS) {
 		bfree(video);
 		video = NULL;
@@ -800,6 +802,7 @@ static void obs_free_render_textures(struct obs_core_video_mix *video)
 
 void obs_free_video_mix(struct obs_core_video_mix *video)
 {
+	obs_final_gate_invalidate_identity(video->final_gate.identity);
 	if (video->video) {
 		video_output_close(video->video);
 		video->video = NULL;
@@ -938,12 +941,10 @@ static bool obs_init_audio(struct audio_output_info *ai)
 
 static void stop_audio(void)
 {
-	struct obs_core_audio *audio = &obs->audio;
-
-	if (audio->audio) {
-		audio_output_close(audio->audio);
-		audio->audio = NULL;
-	}
+	/* Sources may still deliver audio until their asynchronous destruction finishes.
+	 * Stop rendering now, but keep format metadata and connection mutex alive.
+	 * obs_free_audio closes the object after obs_free_data drains source teardown. */
+	audio_output_stop(obs->audio.audio);
 }
 
 static void obs_free_audio(void)

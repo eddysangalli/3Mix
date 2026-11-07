@@ -1,0 +1,388 @@
+diff --git a/libobs/obs-internal.h b/libobs/obs-internal.h
+index c326604a1..6e4481bcd 100644
+--- a/libobs/obs-internal.h
++++ b/libobs/obs-internal.h
+@@ -135,8 +135,6 @@ struct obs_module {
+ 	DARRAY(char *) outputs;
+ 	DARRAY(char *) encoders;
+ 	DARRAY(char *) services;
+-
+-	enum obs_runtime_module_type module_type;
+ };
+ 
+ struct obs_disabled_module {
+@@ -158,7 +156,6 @@ extern void free_module(struct obs_module *mod);
+ struct obs_module_path {
+ 	char *bin;
+ 	char *data;
+-	enum obs_runtime_module_type type;
+ };
+ 
+ static inline void free_module_path(struct obs_module_path *omp)
+@@ -332,7 +329,10 @@ struct obs_task_info {
+ 	void *param;
+ };
+ 
++// Experimental per-mix final-stage bookkeeping.
++#include "obs-final-gate-internal.h"
+ struct obs_core_video_mix {
++	struct obs_final_gate_runtime final_gate;
+ 	struct obs_view *view;
+ 
+ 	gs_stagesurf_t *active_copy_surfaces[NUM_TEXTURES][NUM_CHANNELS];
+@@ -540,8 +540,6 @@ struct obs_core_hotkeys {
+ 	char *push_to_talk;
+ 	char *sceneitem_show;
+ 	char *sceneitem_hide;
+-	char *monitor_on;
+-	char *monitor_off;
+ };
+ 
+ typedef DARRAY(struct obs_source_info) obs_source_info_array_t;
+@@ -553,6 +551,7 @@ struct obs_core {
+ 	DARRAY(struct obs_module_path) module_paths;
+ 	DARRAY(char *) safe_modules;
+ 	DARRAY(char *) disabled_modules;
++	DARRAY(char *) core_modules;
+ 
+ 	obs_source_info_array_t source_types;
+ 	obs_source_info_array_t input_types;
+@@ -580,8 +579,6 @@ struct obs_core {
+ 	os_task_queue_t *destruction_task_thread;
+ 
+ 	obs_task_handler_t ui_task_handler;
+-
+-	bool core_modules_loaded;
+ };
+ 
+ extern struct obs_core *obs;
+@@ -997,8 +994,6 @@ struct obs_source {
+ 	/* audio monitoring */
+ 	struct audio_monitor *monitor;
+ 	enum obs_monitoring_type monitoring_type;
+-	bool monitoring_enabled;
+-	obs_hotkey_pair_id monitor_on_off_key;
+ 
+ 	/* media action queue */
+ 	DARRAY(struct media_action) media_actions;
+@@ -1309,6 +1304,8 @@ struct obs_output {
+ 	char *last_error_message;
+ 
+ 	float audio_data[MAX_AUDIO_CHANNELS][AUDIO_OUTPUT_FRAMES];
++	/* Only an inactive RAW binding detached from main video during reset. */
++	bool freemix_main_video_reset;
+ };
+ 
+ static inline void do_output_signal(struct obs_output *output, const char *signal)
+diff --git a/libobs/obs-video.c b/libobs/obs-video.c
+index 77e4b8e07..882de041c 100644
+--- a/libobs/obs-video.c
++++ b/libobs/obs-video.c
+@@ -139,6 +139,9 @@ static inline bool can_reuse_mix_texture(const struct obs_core_video_mix *mix, s
+ 		const struct obs_core_video_mix *other = obs->video.mixes.array[i];
+ 		if (other == mix)
+ 			break;
++		// Post-gate textures must never be reused or gated twice in another mix.
++		if(obs_final_gate_reuse_blocked(&mix->final_gate)||obs_final_gate_reuse_blocked(&other->final_gate))
++			continue;
+ 		if (other->view != mix->view)
+ 			continue;
+ 		if (other->render_space != mix->render_space)
+@@ -168,9 +171,11 @@ static inline void draw_mix_texture(const size_t mix_idx)
+ 	gs_enable_framebuffer_srgb(false);
+ }
+ 
++#include "obs-final-gate-render.h"
+ static const char *render_main_texture_name = "render_main_texture";
+ static inline void render_main_texture(struct obs_core_video_mix *video)
+ {
++	/* Gate state for every mix was latched once in output_frames at the common frame PTS. */
+ 	uint32_t base_width = video->ovi.base_width;
+ 	uint32_t base_height = video->ovi.base_height;
+ 
+@@ -212,6 +217,10 @@ static inline void render_main_texture(struct obs_core_video_mix *video)
+ 
+ 	pthread_mutex_unlock(&obs->data.draw_callbacks_mutex);
+ 
++	// All channels and post-render callbacks are composed before this final stage.
++	const bool final_draw_applied=draw_master_final_gate(video);
++	obs_final_gate_finish_inherited(&video->final_gate,final_draw_applied);
++	obs_final_gate_publish(&video->final_gate,obs->video.video_time,final_draw_applied);
+ 	GS_DEBUG_MARKER_END();
+ 	profile_end(render_main_texture_name);
+ }
+@@ -915,7 +924,20 @@ static inline void output_frame(struct obs_core_video_mix *video)
+ 
+ static inline void output_frames(void)
+ {
+-	pthread_mutex_lock(&obs->video.mixes_mutex);
++ pthread_mutex_lock(&obs->video.mixes_mutex);
++ /* A single render-owned snapshot: order of mixes cannot advance the ramp twice or use a previous PTS. */
++ struct obs_core_video_mix *master = obs->data.main_canvas ? obs->data.main_canvas->mix : NULL;
++ struct obs_final_gate_runtime frame_gate = {0};
++ if (master && master->view) {
++  obs_final_gate_prepare(&master->final_gate, true, obs->video.video_time);
++  frame_gate = master->final_gate;
++ }
++ for (size_t i=0; i<obs->video.mixes.num; ++i) {
++  struct obs_core_video_mix *mix=obs->video.mixes.array[i];
++  if (mix==master) continue;
++  mix->final_gate.master=false;
++  if (mix->final_gate.follows_master) obs_final_gate_inherit(&mix->final_gate, master && master->view ? &frame_gate : NULL, obs->video.video_time);
++ }
+ 	for (size_t i = 0, num = obs->video.mixes.num; i < num; i++) {
+ 		struct obs_core_video_mix *mix = obs->video.mixes.array[i];
+ 		if (mix->view) {
+@@ -957,15 +979,18 @@ extern THREAD_LOCAL bool is_graphics_thread;
+ static void execute_graphics_tasks(void)
+ {
+ 	struct obs_core_video *video = &obs->video;
+-	pthread_mutex_lock(&video->task_mutex);
+-	while (video->tasks.size) {
+-		struct obs_task_info info;
+-		deque_pop_front(&video->tasks, &info, sizeof(info));
+-		pthread_mutex_unlock(&video->task_mutex);
+-		info.task(info.param);
++	bool tasks_remaining = true;
++
++	while (tasks_remaining) {
+ 		pthread_mutex_lock(&video->task_mutex);
++		if (video->tasks.size) {
++			struct obs_task_info info;
++			deque_pop_front(&video->tasks, &info, sizeof(info));
++			info.task(info.param);
++		}
++		tasks_remaining = !!video->tasks.size;
++		pthread_mutex_unlock(&video->task_mutex);
+ 	}
+-	pthread_mutex_unlock(&video->task_mutex);
+ }
+ 
+ #ifdef _WIN32
+diff --git a/libobs/obs-view.c b/libobs/obs-view.c
+index 9aa321407..5c658893a 100644
+--- a/libobs/obs-view.c
++++ b/libobs/obs-view.c
+@@ -147,7 +147,7 @@ video_t *obs_view_add(obs_view_t *view)
+ 	return obs_view_add2(view, &obs->data.main_canvas->mix->ovi);
+ }
+ 
+-video_t *obs_view_add2(obs_view_t *view, struct obs_video_info *ovi)
++static video_t *obs_view_add_final_gate_internal(obs_view_t *view, struct obs_video_info *ovi, bool follows_master)
+ {
+ 	if (!view || !ovi)
+ 		return NULL;
+@@ -157,6 +157,8 @@ video_t *obs_view_add2(obs_view_t *view, struct obs_video_info *ovi)
+ 		return NULL;
+ 	}
+ 	mix->view = view;
++	/* Immutable routing role is assigned before the mix becomes visible to render. */
++	mix->final_gate.follows_master = follows_master;
+ 
+ 	pthread_mutex_lock(&obs->video.mixes_mutex);
+ 	da_push_back(obs->video.mixes, &mix);
+@@ -165,6 +167,16 @@ video_t *obs_view_add2(obs_view_t *view, struct obs_video_info *ovi)
+ 	return mix->video;
+ }
+ 
++video_t *obs_view_add2(obs_view_t *view, struct obs_video_info *ovi)
++{
++ return obs_view_add_final_gate_internal(view, ovi, false);
++}
++
++video_t *obs_view_add_program_final_gate(obs_view_t *view, struct obs_video_info *ovi)
++{
++ return obs_view_add_final_gate_internal(view, ovi, true);
++}
++
+ void obs_view_remove(obs_view_t *view)
+ {
+ 	if (!view)
+diff --git a/libobs/obs.c b/libobs/obs.c
+index 0058e0c80..b569f9575 100644
+--- a/libobs/obs.c
++++ b/libobs/obs.c
+@@ -27,6 +27,7 @@ struct obs_core *obs = NULL;
+ 
+ static THREAD_LOCAL bool is_ui_thread = false;
+ 
++extern void add_default_module_paths(void);
+ extern char *find_libobs_data_file(const char *file);
+ 
+ static inline void make_video_info(struct video_output_info *vi, struct obs_video_info *ovi)
+@@ -644,14 +645,10 @@ static int obs_init_video_mix(struct obs_video_info *ovi, struct obs_core_video_
+ 
+ 	gs_enter_context(obs->video.graphics);
+ 
+-	if (video->gpu_conversion && !obs_init_gpu_conversion(video)) {
+-		gs_leave_context();
++	if (video->gpu_conversion && !obs_init_gpu_conversion(video))
+ 		return OBS_VIDEO_FAIL;
+-	}
+-	if (!obs_init_textures(video)) {
+-		gs_leave_context();
++	if (!obs_init_textures(video))
+ 		return OBS_VIDEO_FAIL;
+-	}
+ 
+ 	gs_leave_context();
+ 
+@@ -661,6 +658,8 @@ static int obs_init_video_mix(struct obs_video_info *ovi, struct obs_core_video_
+ struct obs_core_video_mix *obs_create_video_mix(struct obs_video_info *ovi)
+ {
+ 	struct obs_core_video_mix *video = bzalloc(sizeof(struct obs_core_video_mix));
++	video->final_gate.identity=obs_final_gate_new_identity();
++	video->final_gate.gain=video->final_gate.from_gain=video->final_gate.to_gain=1.0;
+ 	if (obs_init_video_mix(ovi, video) != OBS_VIDEO_SUCCESS) {
+ 		bfree(video);
+ 		video = NULL;
+@@ -800,6 +799,7 @@ static void obs_free_render_textures(struct obs_core_video_mix *video)
+ 
+ void obs_free_video_mix(struct obs_core_video_mix *video)
+ {
++	obs_final_gate_invalidate_identity(video->final_gate.identity);
+ 	if (video->video) {
+ 		video_output_close(video->video);
+ 		video->video = NULL;
+@@ -1198,8 +1198,6 @@ static inline void obs_free_hotkeys(void)
+ 	bfree(hotkeys->push_to_talk);
+ 	bfree(hotkeys->sceneitem_show);
+ 	bfree(hotkeys->sceneitem_hide);
+-	bfree(hotkeys->monitor_on);
+-	bfree(hotkeys->monitor_off);
+ 
+ 	obs_hotkey_name_map_free();
+ 
+@@ -1266,8 +1264,7 @@ static bool obs_init(const char *locale, const char *module_config_path, profile
+ 	obs_register_source(&scene_info);
+ 	obs_register_source(&group_info);
+ 	obs_register_source(&audio_line_info);
+-
+-	obs->core_modules_loaded = false;
++	add_default_module_paths();
+ 	return true;
+ }
+ 
+@@ -1463,6 +1460,11 @@ void obs_shutdown(void)
+ 	}
+ 	da_free(obs->disabled_modules);
+ 
++	for (size_t i = 0; i < obs->core_modules.num; i++) {
++		bfree(obs->core_modules.array[i]);
++	}
++	da_free(obs->core_modules);
++
+ 	if (obs->name_store_owned)
+ 		profiler_name_store_free(obs->name_store);
+ 
+@@ -1523,6 +1525,47 @@ static inline bool size_valid(uint32_t width, uint32_t height)
+ 	return (width >= OBS_SIZE_MIN && height >= OBS_SIZE_MIN && width <= OBS_SIZE_MAX && height <= OBS_SIZE_MAX);
+ }
+ 
++struct freemix_raw_video_rebind {
++	video_t *old_video;
++	DARRAY(obs_output_t *) outputs;
++};
++
++static bool freemix_detach_raw_video(void *param, obs_output_t *output)
++{
++	struct freemix_raw_video_rebind *rebind = param;
++	if ((output->info.flags & OBS_OUTPUT_ENCODED) || !(output->info.flags & OBS_OUTPUT_VIDEO) ||
++	    (!output->freemix_main_video_reset && (!rebind->old_video || output->video != rebind->old_video)) ||
++	    obs_output_active(output))
++		return true;
++	obs_output_t *held = obs_output_get_ref(output);
++	if (held) {
++		output->video = NULL;
++		output->freemix_main_video_reset = true;
++		da_push_back(rebind->outputs, &held);
++	}
++	return true;
++}
++
++static int freemix_rebind_raw_video(struct freemix_raw_video_rebind *rebind, int result)
++{
++	video_t *video = result == OBS_VIDEO_SUCCESS ? obs_get_video() : NULL;
++	pthread_mutex_lock(&obs->data.outputs_mutex);
++	for (size_t i = 0; i < rebind->outputs.num; i++) {
++		obs_output_t *output = rebind->outputs.array[i];
++		/* Do not overwrite a binding changed by a plugin during reset. */
++		if (output->freemix_main_video_reset && !output->video && !obs_output_active(output)) {
++			output->video = video;
++			if (video)
++				output->freemix_main_video_reset = false;
++		}
++	}
++	pthread_mutex_unlock(&obs->data.outputs_mutex);
++	for (size_t i = 0; i < rebind->outputs.num; i++)
++		obs_output_release(rebind->outputs.array[i]);
++	da_free(rebind->outputs);
++	return result;
++}
++
+ int obs_reset_video(struct obs_video_info *ovi)
+ {
+ 	if (!obs)
+@@ -1535,6 +1578,10 @@ int obs_reset_video(struct obs_video_info *ovi)
+ 	if (!size_valid(ovi->output_width, ovi->output_height) || !size_valid(ovi->base_width, ovi->base_height))
+ 		return OBS_VIDEO_INVALID_PARAM;
+ 
++	struct freemix_raw_video_rebind rebind = {
++		.old_video = obs->data.main_canvas && obs->data.main_canvas->mix ? obs_get_video() : NULL};
++	da_init(rebind.outputs);
++	obs_enum_outputs(freemix_detach_raw_video, &rebind);
+ 	stop_video();
+ 	obs_free_canvas_mixes();
+ 	obs_free_video();
+@@ -1547,7 +1594,7 @@ int obs_reset_video(struct obs_video_info *ovi)
+ 		int errorcode = obs_init_graphics(ovi);
+ 		if (errorcode != OBS_VIDEO_SUCCESS) {
+ 			obs_free_graphics();
+-			return errorcode;
++			return freemix_rebind_raw_video(&rebind, errorcode);
+ 		}
+ 	}
+ 
+@@ -1592,7 +1639,7 @@ int obs_reset_video(struct obs_video_info *ovi)
+ 
+ 	source_profiler_reset_video(ovi);
+ 
+-	return obs_init_video(ovi);
++	return freemix_rebind_raw_video(&rebind, obs_init_video(ovi));
+ }
+ 
+ #ifndef SEC_TO_MSEC
+@@ -2355,12 +2402,7 @@ static obs_source_t *obs_load_source_type(obs_data_t *source_data, bool is_priva
+ 			obs_source_set_audio_mixers(source, 0x3F);
+ 		}
+ 	}
+-
+-	obs_data_set_default_bool(source_data, "monitoring_enabled", false);
+-	if (prev_ver < MAKE_SEMANTIC_VERSION(33, 0, 0)) {
+-		obs_data_set_bool(source_data, "monitoring_enabled", monitoring_type != OBS_MONITORING_TYPE_NONE);
+-	}
+-	obs_source_set_monitoring_enabled(source, obs_data_get_bool(source_data, "monitoring_enabled"));
++	obs_source_set_monitoring_type(source, (enum obs_monitoring_type)monitoring_type);
+ 
+ 	obs_data_release(source->private_settings);
+ 	source->private_settings = obs_data_get_obj(source_data, "private_settings");
+@@ -2462,7 +2504,7 @@ obs_data_t *obs_save_source(obs_source_t *source)
+ 	uint64_t ptm_delay = obs_source_get_push_to_mute_delay(source);
+ 	bool push_to_talk = obs_source_push_to_talk_enabled(source);
+ 	uint64_t ptt_delay = obs_source_get_push_to_talk_delay(source);
+-	bool monitoring = obs_source_get_monitoring_enabled(source);
++	int m_type = (int)obs_source_get_monitoring_type(source);
+ 	int di_mode = (int)obs_source_get_deinterlace_mode(source);
+ 	int di_order = (int)obs_source_get_deinterlace_field_order(source);
+ 	obs_canvas_t *canvas = obs_source_get_canvas(source);
+@@ -2498,9 +2540,7 @@ obs_data_t *obs_save_source(obs_source_t *source)
+ 	obs_data_set_obj(source_data, "hotkeys", hotkey_data);
+ 	obs_data_set_int(source_data, "deinterlace_mode", di_mode);
+ 	obs_data_set_int(source_data, "deinterlace_field_order", di_order);
+-	obs_data_set_int(source_data, "monitoring_type",
+-			 monitoring ? (int)OBS_MONITORING_TYPE_MONITOR_AND_OUTPUT : (int)OBS_MONITORING_TYPE_NONE);
+-	obs_data_set_bool(source_data, "monitoring_enabled", monitoring);
++	obs_data_set_int(source_data, "monitoring_type", m_type);
+ 
+ 	if (canvas) {
+ 		obs_data_set_string(source_data, "canvas_uuid", obs_canvas_get_uuid(canvas));

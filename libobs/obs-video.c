@@ -139,6 +139,7 @@ static inline bool can_reuse_mix_texture(const struct obs_core_video_mix *mix, s
 		const struct obs_core_video_mix *other = obs->video.mixes.array[i];
 		if (other == mix)
 			break;
+		if(obs_final_gate_reuse_blocked(&mix->final_gate)||obs_final_gate_reuse_blocked(&other->final_gate))continue;
 		if (other->view != mix->view)
 			continue;
 		if (other->render_space != mix->render_space)
@@ -168,6 +169,7 @@ static inline void draw_mix_texture(const size_t mix_idx)
 	gs_enable_framebuffer_srgb(false);
 }
 
+#include "obs-final-gate-render.h"
 static const char *render_main_texture_name = "render_main_texture";
 static inline void render_main_texture(struct obs_core_video_mix *video)
 {
@@ -214,6 +216,9 @@ static inline void render_main_texture(struct obs_core_video_mix *video)
 
 	GS_DEBUG_MARKER_END();
 	profile_end(render_main_texture_name);
+	const bool final_draw_applied=draw_master_final_gate(video);
+	obs_final_gate_finish_inherited(&video->final_gate,final_draw_applied);
+	obs_final_gate_publish(&video->final_gate,obs->video.video_time,final_draw_applied);
 }
 
 static inline gs_effect_t *get_scale_effect_internal(struct obs_core_video_mix *mix)
@@ -915,7 +920,20 @@ static inline void output_frame(struct obs_core_video_mix *video)
 
 static inline void output_frames(void)
 {
-	pthread_mutex_lock(&obs->video.mixes_mutex);
+ pthread_mutex_lock(&obs->video.mixes_mutex);
+ /* A single render-owned snapshot: order of mixes cannot advance the ramp twice or use a previous PTS. */
+ struct obs_core_video_mix *master = obs->data.main_canvas ? obs->data.main_canvas->mix : NULL;
+ struct obs_final_gate_runtime frame_gate = {0};
+ if (master && master->view) {
+  obs_final_gate_prepare(&master->final_gate, true, obs->video.video_time);
+  frame_gate = master->final_gate;
+ }
+ for (size_t i=0; i<obs->video.mixes.num; ++i) {
+  struct obs_core_video_mix *mix=obs->video.mixes.array[i];
+  if (mix==master) continue;
+  mix->final_gate.master=false;
+  if (mix->final_gate.follows_master) obs_final_gate_inherit(&mix->final_gate, master && master->view ? &frame_gate : NULL, obs->video.video_time);
+ }
 	for (size_t i = 0, num = obs->video.mixes.num; i < num; i++) {
 		struct obs_core_video_mix *mix = obs->video.mixes.array[i];
 		if (mix->view) {

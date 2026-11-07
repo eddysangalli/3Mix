@@ -1,0 +1,68 @@
+{
+  "samples": [
+    {
+      "currentPreviewSceneName": "3Mix QA selection verification",
+      "currentPreviewSceneUuid": "37a375aa-45e8-4463-af2f-89a56d8ab191",
+      "sceneName": "3Mix QA selection verification",
+      "sceneUuid": "37a375aa-45e8-4463-af2f-89a56d8ab191"
+    }
+  ],
+  "created": {
+    "currentPreviewSceneName": "Cena",
+    "currentPreviewSceneUuid": "5e3827f1-c65b-4335-9bef-59e764cd6d0f",
+    "currentProgramSceneName": "Cena",
+    "currentProgramSceneUuid": "5e3827f1-c65b-4335-9bef-59e764cd6d0f",
+    "scenes": [
+      {
+        "sceneIndex": 0,
+        "sceneName": "3Mix QA selection verification",
+        "sceneUuid": "37a375aa-45e8-4463-af2f-89a56d8ab191"
+      },
+      {
+        "sceneIndex": 1,
+        "sceneName": "Cena",
+        "sceneUuid": "5e3827f1-c65b-4335-9bef-59e764cd6d0f"
+      }
+    ]
+  },
+  "previewConfirmed": true,
+  "program": {
+    "currentProgramSceneName": "3Mix QA selection verification",
+    "currentProgramSceneUuid": "37a375aa-45e8-4463-af2f-89a56d8ab191",
+    "sceneName": "3Mix QA selection verification",
+    "sceneUuid": "37a375aa-45e8-4463-af2f-89a56d8ab191"
+  },
+  "result": "PASS",
+  "restored": {
+    "currentPreviewSceneName": "Cena",
+    "currentPreviewSceneUuid": "5e3827f1-c65b-4335-9bef-59e764cd6d0f",
+    "currentProgramSceneName": "Cena",
+    "currentProgramSceneUuid": "5e3827f1-c65b-4335-9bef-59e764cd6d0f",
+    "scenes": [
+      {
+        "sceneIndex": 0,
+        "sceneName": "3Mix QA selection verification",
+        "sceneUuid": "37a375aa-45e8-4463-af2f-89a56d8ab191"
+      },
+      {
+        "sceneIndex": 1,
+        "sceneName": "Cena",
+        "sceneUuid": "5e3827f1-c65b-4335-9bef-59e764cd6d0f"
+      }
+    ]
+  },
+  "restoredConfirmed": {
+    "currentPreviewSceneName": "Cena",
+    "currentPreviewSceneUuid": "5e3827f1-c65b-4335-9bef-59e764cd6d0f",
+    "currentProgramSceneName": "Cena",
+    "currentProgramSceneUuid": "5e3827f1-c65b-4335-9bef-59e764cd6d0f",
+    "scenes": [
+      {
+        "sceneIndex": 0,
+        "sceneName": "Cena",
+        "sceneUuid": "5e3827f1-c65b-4335-9bef-59e764cd6d0f"
+      }
+    ]
+  },
+  "cleanupConfirmed": true
+}

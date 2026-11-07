@@ -1,0 +1,48 @@
+{
+  "status": "BUILD_PASS_NOT_RUNTIME_QUALIFIED",
+  "base": "02a995c2567f2cc7080c5d08aee2eac4cfcac176",
+  "newIntegrationObserved": "34bfeca4453fa135f31134aa5ce4464e9610be74",
+  "newIntegrationMerged": false,
+  "command": "cmake --build ../obs33-rc-build-output --config RelWithDebInfo --parallel 4",
+  "exitCode": 0,
+  "cefEnabled": true,
+  "operatorInstallationModified": false,
+  "restored": [
+    "OMT header and MIT license",
+    "independent audio bus implementation",
+    "ASIO playback and licensed SDK"
+  ],
+  "remaining": [
+    "native runtime verification",
+    "FFmpeg9 ABI63 toolchain",
+    "remaining inherited feature stubs",
+    "single Plugin Manager writer integration",
+    "3Mix branding/configuration before startup",
+    "Alpha installer/update/rollback qualification"
+  ],
+  "artifactsQualified": false,
+  "artifacts": [
+    {
+      "path": "bin/64bit/obs64.exe",
+      "bytes": 11049472,
+      "sha256": "fc02eca1c1b110b3a85f9db143b23d38a7198e004b5451c0c2d10e8ad409ebd8"
+    },
+    {
+      "path": "bin/64bit/obs.dll",
+      "bytes": 1516544,
+      "sha256": "1b465823bb110b8085824068e7994dc5e04f9126c4d1961eff4e8a04eec717f8"
+    },
+    {
+      "path": "core/obs-browser/obs-browser.dll",
+      "bytes": 3452416,
+      "sha256": "d4f716d94ff4c0929975cf3cd4275b073ab1e82109ca58173b04616c025a8ed4"
+    },
+    {
+      "path": "core/obs-browser/libcef.dll",
+      "bytes": 278149632,
+      "sha256": "2515467dac0631a2e83c1de7010535092cedde02c70813aec74303a3e8a8fbe1"
+    }
+  ],
+  "ffmpegSelected": "8.1 ABI62; FFmpeg9 still pending",
+  "sourceState": "local changes captured by following checkpoint commit"
+}

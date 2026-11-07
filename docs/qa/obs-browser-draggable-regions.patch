@@ -1,0 +1,47 @@
+diff --git a/panel/browser-panel-client.cpp b/panel/browser-panel-client.cpp
+index 690cafd..c7ca24a 100644
+--- a/panel/browser-panel-client.cpp
++++ b/panel/browser-panel-client.cpp
+@@ -550,3 +550,20 @@ bool QCefBrowserClient::OnPreKeyEvent(CefRefPtr<CefBrowser> browser, const CefKe
+ 	}
+ 	return false;
+ }
++
++void QCefBrowserClient::OnDraggableRegionsChanged(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
++                                                const std::vector<CefDraggableRegion> &regions)
++{
++	if (!widget) return;
++	QRegion draggable;
++	for (const auto &region : regions) {
++		QRect rect(region.bounds.x, region.bounds.y, region.bounds.width, region.bounds.height);
++		if (region.draggable) draggable += rect;
++		else draggable -= rect;
++	}
++	QPointer<QCefWidgetInternal> target(widget);
++	QMetaObject::invokeMethod(widget, [target, draggable]() {
++		if (!target || !target->property("3mix.nativeHeader").toBool()) return;
++		target->setProperty("3mix.draggableRegion", QVariant::fromValue(draggable));
++	}, Qt::QueuedConnection);
++}
+diff --git a/panel/browser-panel-client.hpp b/panel/browser-panel-client.hpp
+index e0cb90d..a9880ce 100644
+--- a/panel/browser-panel-client.hpp
++++ b/panel/browser-panel-client.hpp
+@@ -7,6 +7,7 @@
+ 
+ class QCefBrowserClient : public CefClient,
+ 			  public CefDisplayHandler,
++			  public CefDragHandler,
+ #if CHROME_VERSION_BUILD >= 6533
+ 			  public CefCommandHandler,
+ 			  public CefPermissionHandler,
+@@ -28,6 +29,9 @@ public:
+ 	}
+ 
+ 	/* CefClient */
++	CefRefPtr<CefDragHandler> GetDragHandler() override { return this; }
++	void OnDraggableRegionsChanged(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
++		const std::vector<CefDraggableRegion> &regions) override;
+ 	virtual CefRefPtr<CefLoadHandler> GetLoadHandler() override;
+ 	virtual CefRefPtr<CefDisplayHandler> GetDisplayHandler() override;
+ #if CHROME_VERSION_BUILD >= 6533

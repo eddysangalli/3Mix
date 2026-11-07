@@ -43,10 +43,50 @@ static inline bool log_flag_encoded(const struct obs_output *output, const char 
 	return ret;
 }
 
+/* Depois de um DUMP, o video so volta em um keyframe (senao o receptor decodifica
+ * lixo) e o audio so volta a partir dele. Chamar com delay_mutex. */
+static bool delay_dump_drops(struct obs_output *output, const struct encoder_packet *packet)
+{
+	if (!output->delay_dump_active)
+		return false;
+
+	if (packet->type == OBS_ENCODER_VIDEO) {
+		for (size_t i = 0; i < MAX_OUTPUT_VIDEO_ENCODERS; i++) {
+			if (output->video_encoders[i] != packet->encoder || !output->delay_dump_waiting[i])
+				continue;
+			if (!packet->keyframe)
+				return true;
+			output->delay_dump_waiting[i] = false;
+			if (!output->delay_dump_resume_valid) {
+				output->delay_dump_resume_valid = true;
+				output->delay_dump_resume_usec = packet->dts_usec;
+			}
+		}
+		return false;
+	}
+
+	if (!output->delay_dump_resume_valid || packet->dts_usec < output->delay_dump_resume_usec)
+		return true;
+
+	for (size_t i = 0; i < MAX_OUTPUT_VIDEO_ENCODERS; i++) {
+		if (output->delay_dump_waiting[i])
+			return false;
+	}
+	output->delay_dump_active = false;
+	return false;
+}
+
 static inline void push_packet(struct obs_output *output, struct encoder_packet *packet,
 			       struct encoder_packet_time *packet_time, uint64_t t)
 {
 	struct delay_data dd;
+
+	pthread_mutex_lock(&output->delay_mutex);
+	if (delay_dump_drops(output, packet)) {
+		pthread_mutex_unlock(&output->delay_mutex);
+		return;
+	}
+	pthread_mutex_unlock(&output->delay_mutex);
 
 	dd.msg = DELAY_MSG_PACKET;
 	dd.ts = t;
@@ -91,6 +131,9 @@ void obs_output_cleanup_delay(obs_output_t *output)
 
 	output->active_delay_ns = 0;
 	os_atomic_set_long(&output->delay_restart_refs, 0);
+	output->delay_dump_active = false;
+	output->delay_dump_resume_valid = false;
+	memset(output->delay_dump_waiting, 0, sizeof(output->delay_dump_waiting));
 }
 
 static inline bool pop_packet(struct obs_output *output, uint64_t t)
@@ -195,6 +238,77 @@ void obs_output_set_delay(obs_output_t *output, uint32_t delay_sec, uint32_t fla
 
 	output->delay_sec = delay_sec;
 	output->delay_flags = flags;
+}
+
+bool obs_output_delay_dump(obs_output_t *output, uint32_t *discarded_packets, uint64_t *discarded_bytes)
+{
+	struct delay_data dd;
+	uint32_t packets = 0;
+	uint64_t bytes = 0;
+
+	if (discarded_packets)
+		*discarded_packets = 0;
+	if (discarded_bytes)
+		*discarded_bytes = 0;
+
+	if (!obs_output_valid(output, "obs_output_delay_dump"))
+		return false;
+	if (!log_flag_encoded(output, __FUNCTION__, false))
+		return false;
+	if (!delay_active(output) || !output->active_delay_ns)
+		return false;
+
+	pthread_mutex_lock(&output->delay_mutex);
+
+	/* So pacotes saem: os pedidos de inicio e parada continuam na ordem. */
+	for (size_t count = output->delay_data.size / sizeof(dd); count > 0; count--) {
+		deque_pop_front(&output->delay_data, &dd, sizeof(dd));
+		if (dd.msg == DELAY_MSG_PACKET) {
+			packets++;
+			bytes += dd.packet.size;
+			obs_encoder_packet_release(&dd.packet);
+		} else {
+			deque_push_back(&output->delay_data, &dd, sizeof(dd));
+		}
+	}
+
+	output->delay_dump_resume_valid = false;
+	output->delay_dump_resume_usec = 0;
+	output->delay_dump_active = false;
+	for (size_t i = 0; i < MAX_OUTPUT_VIDEO_ENCODERS; i++) {
+		output->delay_dump_waiting[i] = output->video_encoders[i] != NULL;
+		if (output->delay_dump_waiting[i])
+			output->delay_dump_active = true;
+	}
+
+	pthread_mutex_unlock(&output->delay_mutex);
+
+	if (discarded_packets)
+		*discarded_packets = packets;
+	if (discarded_bytes)
+		*discarded_bytes = bytes;
+	return true;
+}
+
+uint64_t obs_output_get_delay_buffered_ns(obs_output_t *output)
+{
+	uint64_t buffered = 0;
+	const uint64_t now = os_gettime_ns();
+
+	if (!obs_output_valid(output, "obs_output_get_delay_buffered_ns"))
+		return 0;
+
+	pthread_mutex_lock(&output->delay_mutex);
+	for (size_t i = 0, count = output->delay_data.size / sizeof(struct delay_data); i < count; i++) {
+		const struct delay_data *item = deque_data(&output->delay_data, i * sizeof(struct delay_data));
+		if (item->msg == DELAY_MSG_PACKET) {
+			buffered = now > item->ts ? now - item->ts : 0;
+			break;
+		}
+	}
+	pthread_mutex_unlock(&output->delay_mutex);
+
+	return buffered;
 }
 
 uint32_t obs_output_get_delay(const obs_output_t *output)

@@ -147,7 +147,7 @@ video_t *obs_view_add(obs_view_t *view)
 	return obs_view_add2(view, &obs->data.main_canvas->mix->ovi);
 }
 
-video_t *obs_view_add2(obs_view_t *view, struct obs_video_info *ovi)
+static video_t *obs_view_add_final_gate_internal(obs_view_t *view, struct obs_video_info *ovi, bool follows_master)
 {
 	if (!view || !ovi)
 		return NULL;
@@ -157,6 +157,7 @@ video_t *obs_view_add2(obs_view_t *view, struct obs_video_info *ovi)
 		return NULL;
 	}
 	mix->view = view;
+	mix->final_gate.follows_master = follows_master;
 
 	pthread_mutex_lock(&obs->video.mixes_mutex);
 	da_push_back(obs->video.mixes, &mix);
@@ -164,6 +165,11 @@ video_t *obs_view_add2(obs_view_t *view, struct obs_video_info *ovi)
 
 	return mix->video;
 }
+
+video_t *obs_view_add2(obs_view_t *view, struct obs_video_info *ovi)
+{ return obs_view_add_final_gate_internal(view, ovi, false); }
+video_t *obs_view_add_program_final_gate(obs_view_t *view, struct obs_video_info *ovi)
+{ return obs_view_add_final_gate_internal(view, ovi, true); }
 
 void obs_view_remove(obs_view_t *view)
 {
