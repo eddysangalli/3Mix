@@ -14,13 +14,18 @@ import { fileURLToPath } from 'node:url';
 
 export const RAIZ = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const FERR = join(RAIZ, 'ferramentas');
-export const MOTOR = resolve(process.env.FREEMIX_MOTOR_SRC || join(RAIZ, '../freemix-app'));
+export const MOTOR = resolve(process.env.FREEMIX_MOTOR_SRC || join(RAIZ, '../3mix-engine'));
 export const ARQ_INDICE = join(RAIZ, 'docs/api/indice-acoes.json');
 export const ARQ_MANUAL = join(RAIZ, 'docs/API.md');
 export const MARCA_INICIO = '<!-- indice-gerado:inicio -->';
 export const MARCA_FIM = '<!-- indice-gerado:fim -->';
 
-const ler = (f) => readFileSync(f, 'utf8');
+const ler = (f) => {
+  const bytes = readFileSync(f);
+  return bytes[0] === 0xff && bytes[1] === 0xfe
+    ? bytes.toString('utf16le')
+    : bytes.toString('utf8');
+};
 const rel = (f) => relative(RAIZ, f).replaceAll('\\', '/');
 const unicos = (lista) => [...new Set(lista)].sort();
 const todos = (texto, re, grupo = 1) => [...texto.matchAll(re)].map((m) => m[grupo]);

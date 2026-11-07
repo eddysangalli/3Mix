@@ -1,6 +1,6 @@
 # 3Mix — Guia Rápido (Alpha)
 
-Do primeiro clique ao primeiro corte no ar, em uma página. As imagens são telas reais do 3Mix. O passo a passo completo de cada tela está no **Manual do Operador** (Hub › Manual do operador, ou `painel/docs/usuario/manual-operador.html`). Para saber qual documento ler, veja [`MANUAIS.md`](MANUAIS.md).
+Do primeiro clique ao primeiro corte no ar, em uma página. As imagens são capturas do 3Mix feitas em versões e bancadas identificadas no [índice dos manuais](MANUAIS.md); a tela da sua instalação pode ser diferente. O passo a passo completo está no [Manual do Operador](usuario/manual-operador.html).
 
 ---
 
@@ -13,7 +13,7 @@ Confira o SHA-256 antes (seção 8 de [`LEIA-ME-BETA.md`](LEIA-ME-BETA.md)). Se 
 
 ## 2. Abrir
 
-Dê dois cliques em **3Mix Studio.cmd** (ou no atalho **3Mix Studio**). Não abra o executável do motor sozinho. Espere o selo **Motor conectado**.
+No workspace deste projeto, use **INICIAR-3MIX.cmd** na raiz. Em um pacote instalado, use o atalho ou inicializador próprio incluído nele. Não abra `3Mix.exe` isoladamente. Espere o selo **Motor conectado** e confirme que a interface exibida é a do 3Mix antes de operar.
 
 ## 3. Hub de Produção
 
@@ -47,7 +47,7 @@ Aba **Áudio** da barra superior: canais com Ganho, Pan, MUTE, SOLO, AFV e MON; 
 ## 7. Gravar e transmitir
 
 - **⚙ ao lado de Gravar:** formato, pasta e qualidade. **Gravar** inicia e para.
-- **⚙ ao lado de Transmitir:** destino, URL e chave. **Transmitir** inicia e para.
+- **⚙ ao lado de Transmitir:** destino, URL e chave. **Transmitir** inicia e para. Se a chave do destino principal for alterada durante a transmissão, a nova chave só valerá no **próximo início**. Os destinos extras precisam ser parados antes de alterar suas configurações.
 
 ![Transmissão](capturas/manual/transmitir.png)
 
@@ -55,9 +55,9 @@ Aba **Áudio** da barra superior: canais com Ganho, Pan, MUTE, SOLO, AFV e MON; 
 
 Proteção para a transmissão principal: ela sai alguns segundos atrasada e o **DUMP** descarta o trecho que ainda não foi ao ar.
 
-1. **Configurações › Transmissão › Atraso e DUMP**: marque **Atraso de transmissão**, escolha **7 a 10 s**, deixe **Preservar atraso ao reconectar** e **Aplicar**.
+1. **Configurações › Transmissão › Atraso e DUMP**: marque **Atraso de transmissão**, escolha a duração adequada à operação, confira a opção de reconexão e clique **Aplicar**.
 2. Vale no próximo início da transmissão.
-3. No ar, a barra mostra **Atraso 7 s** em verde. Para descartar: clique **DUMP**, depois **Confirmar DUMP** em até 3 s.
+3. No ar, confirme que a barra mostra **Atraso N s** em verde, com o valor configurado. Para descartar: clique **DUMP**, depois **Confirmar DUMP** em até 3 s.
 
 ![Configurações, Atraso e DUMP](capturas/manual/config-atraso-dump.png)
 
@@ -67,14 +67,14 @@ O DUMP cobre só a transmissão principal: gravação e saídas extras (MultiStr
 
 ## 9. Antes de ir ao ar
 
-1. Clique em **Pre-Flight**, escolha **Para: transmitir e gravar / só transmitir / só gravar** e resolva o que estiver em **BLOQUEIO** ou **ATENÇÃO**. O **↻** de cada item confere só aquele item de novo.
-2. Feche ou ignore os **Programas concorrentes** apontados.
+1. Clique em **Pre-Flight**, escolha **Para: transmitir e gravar / só transmitir / só gravar** e revise **BLOQUEIO**, **ATENÇÃO** e **NÃO VERIFICADO**. O **↻** de cada item confere só aquele item de novo.
+2. Analise os **Programas concorrentes** apontados. A decisão de fechá-los ou ignorá-los deve considerar a produção em curso; não encerre um processo de transmissão para liberar espaço ou pasta de teste.
 3. Faça uma gravação curta de teste e abra o arquivo.
 
 ![Pre-Flight](capturas/manual/preflight.png)
 
 ## 10. Se algo der errado
 
-- **Caixa-preta › Registrar incidente agora** guarda os últimos 60 segundos.
+- **Caixa-preta › Registrar incidente agora** guarda uma amostra dos últimos 60 segundos de **telemetria**, quando a coleta esteve ativa. Não é uma gravação de vídeo/áudio do programa.
 - **Configurações › Sobre e suporte › Relatar problema › Gerar pacote** cria o ZIP para o suporte. Se o 3Mix nem abrir, use **COLETAR-LOGS.cmd**.
 - Veja [`SOLICITAR-SUPORTE.md`](SOLICITAR-SUPORTE.md) e confira em [`LIMITES-CONHECIDOS.md`](LIMITES-CONHECIDOS.md) se o comportamento já é um limite conhecido desta Alpha.
