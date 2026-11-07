@@ -102,7 +102,9 @@ export async function readEngineVersion(root) {
   let buf;
   try { buf = await readFile(path); } catch (e) { return { version: null, path, error: e.code === 'ENOENT' ? 'obs.dll não encontrado nesta instalação' : e.message }; }
   const text = buf.toString('latin1');
-  const m = text.match(/\b(\d+\.\d+\.\d+)-\d+-g[0-9a-f]+\b/) || text.match(/\b(\d+\.\d+\.\d+)\b/);
+  // Do not fall back to any X.Y.Z substring: third-party version strings can
+  // coexist in a binary and are not authoritative identification of libobs.
+  const m = text.match(/\b(\d+\.\d+\.\d+)-\d+-g[0-9a-f]+\b/);
   return m ? { version: m[1], fullString: m[0], path } : { version: null, path, error: 'String de versão não encontrada em obs.dll' };
 }
 

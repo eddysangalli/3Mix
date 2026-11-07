@@ -121,3 +121,12 @@ test('checkRemoteVersions: installed version newer than the latest release is fl
   assert.equal(r.results.find(x=>x.id==='suffix').status,'tag-nao-reconhecida');
  }finally{await rm(root,{recursive:true,force:true});}
 });
+
+test('arbitrary component version in a binary is not accepted as libobs identity',async()=>{
+ const root=await fixtureRoot({engineVersionString:'other dependency 9.8.7'});
+ try {
+  const r=await readEngineVersion(root);
+  assert.equal(r.version,null);
+  assert.match(r.error,/não encontrada/);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
