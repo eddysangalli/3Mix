@@ -149,6 +149,11 @@
       "arquivo": "ferramentas/servidor-api.mjs"
     },
     {
+      "path": "/api/livelan/status",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
       "path": "/api/mix-audio",
       "prefixo": false,
       "arquivo": "ferramentas/servidor-api.mjs"
@@ -254,6 +259,16 @@
       "arquivo": "ferramentas/servidor-api.mjs"
     },
     {
+      "path": "/api/plugin-manager",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/plugin-manager/",
+      "prefixo": true,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
       "path": "/api/preflight",
       "prefixo": false,
       "arquivo": "ferramentas/servidor-api.mjs"
@@ -334,6 +349,31 @@
       "arquivo": "ferramentas/servidor-api.mjs"
     },
     {
+      "path": "/api/slides",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/slides/events",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/slides/media/",
+      "prefixo": true,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/slides/view",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
+      "path": "/api/slides/view/",
+      "prefixo": true,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
       "path": "/api/srt-hdr",
       "prefixo": false,
       "arquivo": "ferramentas/servidor-api.mjs"
@@ -371,7 +411,7 @@
   ],
   "paginas": [],
   "controle": {
-    "total": 336,
+    "total": 341,
     "acoes": [
       {
         "action": "active",
@@ -1364,7 +1404,34 @@
         "viaWebSocket": true
       },
       {
+        "action": "gc_library_remove_many",
+        "modulo": "GCLibraryEngine",
+        "arquivo": "ferramentas/gc-biblioteca-producao.mjs",
+        "prefixo": "gc_library_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "gc_library_reorder",
+        "modulo": "GCLibraryEngine",
+        "arquivo": "ferramentas/gc-biblioteca-producao.mjs",
+        "prefixo": "gc_library_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
         "action": "gc_library_save",
+        "modulo": "GCLibraryEngine",
+        "arquivo": "ferramentas/gc-biblioteca-producao.mjs",
+        "prefixo": "gc_library_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "gc_library_style_many",
         "modulo": "GCLibraryEngine",
         "arquivo": "ferramentas/gc-biblioteca-producao.mjs",
         "prefixo": "gc_library_",
@@ -1428,6 +1495,15 @@
       },
       {
         "action": "input_create",
+        "modulo": "InputEngine",
+        "arquivo": "ferramentas/entradas-producao.mjs",
+        "prefixo": "input_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "input_deinterlace",
         "modulo": "InputEngine",
         "arquivo": "ferramentas/entradas-producao.mjs",
         "prefixo": "input_",
@@ -2013,6 +2089,15 @@
       },
       {
         "action": "playout_hold",
+        "modulo": "MediaPlayoutEngine",
+        "arquivo": "ferramentas/media-playout-engine.mjs",
+        "prefixo": "playout_|queue_",
+        "somenteLocalHttp": false,
+        "somenteLocalWs": false,
+        "viaWebSocket": true
+      },
+      {
+        "action": "playout_item_enabled",
         "modulo": "MediaPlayoutEngine",
         "arquivo": "ferramentas/media-playout-engine.mjs",
         "prefixo": "playout_|queue_",
@@ -3538,7 +3623,10 @@
         "gc_library_prepare",
         "gc_library_read",
         "gc_library_remove",
+        "gc_library_remove_many",
+        "gc_library_reorder",
         "gc_library_save",
+        "gc_library_style_many",
         "gc_library_unlink",
         "gc_library_variant"
       ],
@@ -3548,6 +3636,7 @@
         "input_background",
         "input_content_undo",
         "input_create",
+        "input_deinterlace",
         "input_duplicate",
         "input_geometry",
         "input_layer",
@@ -3623,6 +3712,7 @@
         "playout_freezeoff",
         "playout_freezeon",
         "playout_hold",
+        "playout_item_enabled",
         "playout_item_update",
         "playout_load_playlist",
         "playout_loadclip",
@@ -3827,6 +3917,7 @@
       "playout_freezeoff",
       "playout_freezeon",
       "playout_hold",
+      "playout_item_enabled",
       "playout_item_update",
       "playout_load_playlist",
       "playout_loadclip",
@@ -3931,6 +4022,8 @@
       "status",
       "stop",
       "swap",
+      "tag-create",
+      "tag-remove",
       "transport",
       "trim-event",
       "unload",
@@ -4056,257 +4149,262 @@
       {
         "vendor": "downstream-keyer",
         "request": "add_downstream_keyer",
-        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+        "arquivo": "3mix-engine/plugins/downstream-keyer/downstream-keyer-dock.cpp"
       },
       {
         "vendor": "downstream-keyer",
         "request": "dsk_add_exclude_scene",
-        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+        "arquivo": "3mix-engine/plugins/downstream-keyer/downstream-keyer-dock.cpp"
       },
       {
         "vendor": "downstream-keyer",
         "request": "dsk_add_scene",
-        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+        "arquivo": "3mix-engine/plugins/downstream-keyer/downstream-keyer-dock.cpp"
       },
       {
         "vendor": "downstream-keyer",
         "request": "dsk_get_scene",
-        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+        "arquivo": "3mix-engine/plugins/downstream-keyer/downstream-keyer-dock.cpp"
       },
       {
         "vendor": "downstream-keyer",
         "request": "dsk_remove_exclude_scene",
-        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+        "arquivo": "3mix-engine/plugins/downstream-keyer/downstream-keyer-dock.cpp"
       },
       {
         "vendor": "downstream-keyer",
         "request": "dsk_remove_scene",
-        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+        "arquivo": "3mix-engine/plugins/downstream-keyer/downstream-keyer-dock.cpp"
       },
       {
         "vendor": "downstream-keyer",
         "request": "dsk_select_scene",
-        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+        "arquivo": "3mix-engine/plugins/downstream-keyer/downstream-keyer-dock.cpp"
       },
       {
         "vendor": "downstream-keyer",
         "request": "dsk_set_hide_after",
-        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+        "arquivo": "3mix-engine/plugins/downstream-keyer/downstream-keyer-dock.cpp"
       },
       {
         "vendor": "downstream-keyer",
         "request": "dsk_set_tie",
-        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+        "arquivo": "3mix-engine/plugins/downstream-keyer/downstream-keyer-dock.cpp"
       },
       {
         "vendor": "downstream-keyer",
         "request": "dsk_set_transition",
-        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+        "arquivo": "3mix-engine/plugins/downstream-keyer/downstream-keyer-dock.cpp"
       },
       {
         "vendor": "downstream-keyer",
         "request": "get_downstream_keyer",
-        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+        "arquivo": "3mix-engine/plugins/downstream-keyer/downstream-keyer-dock.cpp"
       },
       {
         "vendor": "downstream-keyer",
         "request": "get_downstream_keyers",
-        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+        "arquivo": "3mix-engine/plugins/downstream-keyer/downstream-keyer-dock.cpp"
       },
       {
         "vendor": "downstream-keyer",
         "request": "remove_downstream_keyer",
-        "arquivo": "freemix-app/plugins/downstream-keyer/downstream-keyer-dock.cpp"
+        "arquivo": "3mix-engine/plugins/downstream-keyer/downstream-keyer-dock.cpp"
       },
       {
         "vendor": "freemix-hotkeys",
         "request": "control",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixGlobalHotkeys.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixGlobalHotkeys.cpp"
       },
       {
         "vendor": "freemix-preferences",
         "request": "control",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixPreferences.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixPreferences.cpp"
       },
       {
         "vendor": "freemix",
         "request": "audio_capabilities",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "broadcast_delay",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "call_audio",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "call_video",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "close_panel",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "control_destination",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "control_mix",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
+      },
+      {
+        "vendor": "freemix",
+        "request": "ensure_merge_transition",
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "fade_to_black",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "final_program_gate",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "finish_input_panel",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "get_destinations",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "get_interface",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "get_master_level",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "get_mixes",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "get_preset",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "get_scope",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "get_sources_status",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "network_output",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "omt_hdr_output",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "open_panel",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "open_settings",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "open_vst_editor",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "project_creation_policy",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "project_device_inventory",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "reorder_inputs",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "save_preset",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "sdi_output",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "set_destinations",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "set_panel_title",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "set_scope",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "set_transition_duration",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "shutdown_idle",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "srt_hdr_output",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "talkback",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "freemix",
         "request": "virtual_cam_source",
-        "arquivo": "freemix-app/frontend/widgets/FreeMixMultistream.cpp"
+        "arquivo": "3mix-engine/frontend/widgets/FreeMixMultistream.cpp"
       },
       {
         "vendor": "obs-browser",
         "request": "emit_event",
-        "arquivo": "freemix-app/plugins/obs-browser/obs-browser-plugin.cpp"
+        "arquivo": "3mix-engine/plugins/obs-browser/obs-browser-plugin.cpp"
       }
     ],
     "subacoesControl": {

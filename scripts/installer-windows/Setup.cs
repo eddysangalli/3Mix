@@ -15,6 +15,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Web.Script.Serialization;
 using Microsoft.Win32;
+using System.Management;
+using System.Linq;
 
 namespace FreeMixSetup {
     internal sealed class Options {
@@ -124,7 +126,10 @@ namespace FreeMixSetup {
         public WizardForm(Options o) {
             options = o; Text = "Instalador 3Mix Studio — " + PayloadInfo.DisplayVersion;
             try { Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); } catch (Exception) { }
-            ClientSize = new Size(720, 520); FormBorderStyle = FormBorderStyle.FixedDialog; MaximizeBox = false; StartPosition = FormStartPosition.CenterScreen;
+            // Height grew from the original 520 to fit the Modules step (9 items) without the
+            // CardBg list needing AutoScroll, and the Preparation step after it gained a 5th
+            // check (Disk). Width (720) was not reported as an issue and stays.
+            ClientSize = new Size(720, 665); FormBorderStyle = FormBorderStyle.FixedDialog; MaximizeBox = false; StartPosition = FormStartPosition.CenterScreen;
             Font = new Font("Segoe UI", 10); BackColor = BgDark; ForeColor = TextWhite;
 
             // Header Superior Broadcast
@@ -146,10 +151,10 @@ namespace FreeMixSetup {
             header.Controls.Add(headerAccent);
 
             // Área Central de Conteúdo
-            Panel body = new Panel { Location = new Point(32, 88), Size = new Size(656, 355), BackColor = Color.Transparent };
+            Panel body = new Panel { Location = new Point(32, 88), Size = new Size(656, 500), BackColor = Color.Transparent };
 
             // Rodapé com botões de navegação
-            Panel footer = new Panel { Location = new Point(0, 458), Size = new Size(720, 62), BackColor = HeaderBg };
+            Panel footer = new Panel { Location = new Point(0, 603), Size = new Size(720, 62), BackColor = HeaderBg };
             Panel footerBorder = new Panel { Location = new Point(0, 0), Size = new Size(720, 1), BackColor = BorderColor };
             footer.Controls.Add(footerBorder);
 
@@ -172,7 +177,7 @@ namespace FreeMixSetup {
             footer.Controls.AddRange(new Control[] { back, next });
             Controls.AddRange(new Control[] { header, body, footer });
 
-            steps = new Panel[] { StepWelcome(), StepEula(), StepDestination(o), StepModules(o), StepProgress(), StepDone() };
+            steps = new Panel[] { StepWelcome(), StepEula(), StepPreparation(), StepDestination(o), StepModules(o), StepReview(), StepProgress(), StepDone() };
             foreach (Panel step in steps) { step.Location = new Point(0, 0); step.Size = body.Size; step.Visible = false; body.Controls.Add(step); }
             FormClosing += delegate(object sender, FormClosingEventArgs e) { if (running) e.Cancel = true; };
             Navigate(0);
@@ -190,23 +195,28 @@ namespace FreeMixSetup {
         Panel StepWelcome() {
             Panel p = new Panel();
             p.Controls.Add(new Label { Text = "Bem-vindo ao 3Mix Studio " + PayloadInfo.DisplayVersion, Font = new Font("Segoe UI", 16, FontStyle.Bold), ForeColor = TextWhite, Location = new Point(0, 6), AutoSize = true });
-            
+
             Panel card = new Panel { Location = new Point(0, 46), Size = new Size(656, 120), BackColor = CardBg };
             card.Paint += delegate(object s, PaintEventArgs pe) { ControlPaint.DrawBorder(pe.Graphics, card.ClientRectangle, BorderColor, ButtonBorderStyle.Solid); };
-            
+
+            // AutoSize (like every other multi-line label in this file) instead of a guessed
+            // fixed Size: a hardcoded 88px cut the last bullet off in the compiled installer
+            // (confirmed running the real .exe, not just reading the source) because four
+            // lines of 10pt Segoe UI plus the blank line before the bullets need more than that.
             Label desc = new Label {
                 Text = "O 3Mix Studio é uma suíte broadcast de produção ao vivo profissional.\n\n" +
                        "• Instalação offline completa e limpa, exclusiva para este usuário do Windows.\n" +
                        "• Você escolhe os módulos ativos agora e pode ajustá-los quando quiser.\n" +
                        "• Seus projetos, mídias, gravações e configurações futuras serão sempre preservados.",
-                Font = new Font("Segoe UI", 10f), ForeColor = TextWhite, Location = new Point(16, 16), Size = new Size(624, 88)
+                Font = new Font("Segoe UI", 10f), ForeColor = TextWhite, Location = new Point(16, 16), MaximumSize = new Size(624, 0), AutoSize = true
             };
             card.Controls.Add(desc);
+            card.Height = Math.Max(card.Height, desc.Bottom + 16);
             p.Controls.Add(card);
 
-            Panel featureCard = new Panel { Location = new Point(0, 180), Size = new Size(656, 160), BackColor = CardBg };
+            Panel featureCard = new Panel { Location = new Point(0, card.Bottom + 14), Size = new Size(656, 160), BackColor = CardBg };
             featureCard.Paint += delegate(object s, PaintEventArgs pe) { ControlPaint.DrawBorder(pe.Graphics, featureCard.ClientRectangle, BorderColor, ButtonBorderStyle.Solid); };
-            
+
             Label featTitle = new Label { Text = "Recursos Integrados Nesta Versão:", Font = new Font("Segoe UI", 11f, FontStyle.Bold), ForeColor = AccentBlue, Location = new Point(16, 12), AutoSize = true };
             Label featList = new Label {
                 Text = "✔ Mesa de corte de baixa latência com transições broadcast e DSKs 1 a 4\n" +
@@ -214,9 +224,10 @@ namespace FreeMixSetup {
                        "✔ 3Mix Social integrado (moderação de chat YouTube/Twitch em tempo real)\n" +
                        "✔ 3Mix Crew: Tally Web, Intercom móvel e firmware para ESP32/M5StickC\n" +
                        "✔ MultiCorder Broadcast: gravação concorrente em Sony XDCAM, Avid DNxHD/DNxHR e ProRes",
-                Font = new Font("Segoe UI", 9.5f), ForeColor = TextMuted, Location = new Point(16, 38), Size = new Size(624, 110)
+                Font = new Font("Segoe UI", 9.5f), ForeColor = TextMuted, Location = new Point(16, 38), MaximumSize = new Size(624, 0), AutoSize = true
             };
             featureCard.Controls.AddRange(new Control[] { featTitle, featList });
+            featureCard.Height = Math.Max(featureCard.Height, featList.Bottom + 16);
             p.Controls.Add(featureCard);
 
             return p;
@@ -242,6 +253,144 @@ namespace FreeMixSetup {
             };
             accept.CheckedChanged += delegate { UpdateNextEnabled(); };
             p.Controls.Add(accept);
+            return p;
+        }
+
+        // Small WMI helper: every query here is informational, so a WMI hiccup (service
+        // stopped, permission quirk) must never block Preparation -- always swallow and
+        // fall back to an empty list rather than let the step throw.
+        static List<Dictionary<string, object>> WmiQuery(string wql, string wmiNamespace = @"root\CIMV2") {
+            List<Dictionary<string, object>> rows = new List<Dictionary<string, object>>();
+            try {
+                using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(wmiNamespace, wql))
+                using (ManagementObjectCollection results = searcher.Get()) {
+                    foreach (ManagementBaseObject obj in results) {
+                        using (obj) {
+                            Dictionary<string, object> row = new Dictionary<string, object>();
+                            foreach (PropertyData prop in obj.Properties) row[prop.Name] = prop.Value;
+                            rows.Add(row);
+                        }
+                    }
+                }
+            } catch { }
+            return rows;
+        }
+
+        // Lido uma vez e reaproveitado tanto no texto desta etapa quanto no resumo da
+        // etapa Revisão, para as duas telas nunca divergirem sobre o que foi detectado.
+        internal struct SystemCheck { public bool Ok; public string Label; public string Detail; }
+        internal static List<SystemCheck> RunSystemChecks() {
+            List<SystemCheck> checks = new List<SystemCheck>();
+            bool is64 = Environment.Is64BitOperatingSystem;
+            string windowsCaption = null, windowsVersion = null;
+            var osRow = WmiQuery("SELECT Caption, Version FROM Win32_OperatingSystem").FirstOrDefault();
+            if (osRow != null) { windowsCaption = osRow.ContainsKey("Caption") ? Convert.ToString(osRow["Caption"]).Trim() : null; windowsVersion = osRow.ContainsKey("Version") ? Convert.ToString(osRow["Version"]) : null; }
+            string windowsDetail = (windowsCaption ?? Environment.OSVersion.VersionString) + (windowsVersion != null ? " (" + windowsVersion + ")" : "") + (is64 ? "" : " — o 3Mix Studio exige Windows x64");
+            checks.Add(new SystemCheck { Ok = is64, Label = "Windows de 64 bits", Detail = windowsDetail });
+            long ramBytes = 0;
+            try { ramBytes = (long)new Microsoft.VisualBasic.Devices.ComputerInfo().TotalPhysicalMemory; } catch { }
+            double ramGb = ramBytes / 1073741824.0;
+            bool ramOk = ramBytes == 0 || ramGb >= 8;
+            checks.Add(new SystemCheck { Ok = ramOk, Label = "Memória RAM", Detail = ramBytes == 0 ? "Não foi possível consultar a memória instalada; prosseguindo sem bloquear." : ramGb.ToString("0.0", CultureInfo.InvariantCulture) + " GB" + (ramOk ? "" : " — recomendado 8 GB ou mais para produção ao vivo") });
+            int cores = Environment.ProcessorCount;
+            bool coresOk = cores >= 4;
+            checks.Add(new SystemCheck { Ok = coresOk, Label = "Processador", Detail = cores + " threads lógicas" + (coresOk ? "" : " — recomendado 4 ou mais para codificação em tempo real") });
+
+            // Every adapter, not just the first one found: a laptop with hybrid graphics (e.g.
+            // Intel UHD + a dedicated NVIDIA/AMD GPU) has both in Win32_VideoController, and the
+            // dedicated one -- what a 3Mix encoder actually wants -- is not reliably first.
+            // Previously this read one entry straight out of the DirectX class key in the
+            // registry and stopped at the first DriverDesc, which on this machine was the
+            // integrated Intel adapter; the discrete RTX 4060 right next to it in the same key
+            // was silently dropped. WMI's own view of the same adapters avoids that ordering trap.
+            //
+            // VRAM size still comes from the registry, not from WMI's AdapterRAM: that WMI
+            // property is a 32-bit DWORD and silently overflows/nulls out above 4 GB (confirmed
+            // on this machine's 8 GB RTX 4060 Laptop GPU, a known Windows WMI quirk) -- it is not
+            // a 3Mix bug but the property itself. HardwareInformation.qwMemorySize ("qw" = QWORD,
+            // the same field ferramentas/diagnostico-maquina.mjs's PowerShell side already reads)
+            // is 64-bit and reports the real 8 GB, so it is read here keyed by driver name to
+            // match the WMI adapter the installer is already listing.
+            Dictionary<string, long> vramByName = new Dictionary<string, long>();
+            try {
+                using (RegistryKey classKey = Registry.LocalMachine.OpenSubKey(@"SYSTEM\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}")) {
+                    if (classKey != null) foreach (string sub in classKey.GetSubKeyNames()) {
+                        using (RegistryKey adapterKey = classKey.OpenSubKey(sub)) {
+                            if (adapterKey == null) continue;
+                            object desc = adapterKey.GetValue("DriverDesc");
+                            object mem = adapterKey.GetValue("HardwareInformation.qwMemorySize");
+                            if (desc == null || mem == null) continue;
+                            try { vramByName[desc.ToString()] = Convert.ToInt64(mem); } catch { }
+                        }
+                    }
+                }
+            } catch { }
+            List<string> gpuNames = new List<string>();
+            foreach (var row in WmiQuery("SELECT Name FROM Win32_VideoController")) {
+                string name = row.ContainsKey("Name") ? Convert.ToString(row["Name"]) : null;
+                if (string.IsNullOrWhiteSpace(name)) continue;
+                long vram;
+                gpuNames.Add(vramByName.TryGetValue(name, out vram) && vram > 0 ? name + " (" + (vram / 1073741824.0).ToString("0.0", CultureInfo.InvariantCulture) + " GB)" : name);
+            }
+            // GPU is informational only: a 3Mix module not finding a specific vendor feature
+            // at runtime is a better gate than this installer guessing compatibility upfront.
+            checks.Add(new SystemCheck { Ok = true, Label = gpuNames.Count > 1 ? "Placas de vídeo" : "Placa de vídeo", Detail = gpuNames.Count > 0 ? string.Join("  •  ", gpuNames) : "Não identificada pelo Windows nesta leitura; a instalação prossegue normalmente." });
+
+            // Disk: free space and type (SSD/HDD) of the system drive. The destination drive
+            // is not known yet at this step (chosen one step later); its own free-space figure
+            // against the real payload size is re-checked and shown precisely on Review.
+            string systemDrive = Path.GetPathRoot(Environment.GetFolderPath(Environment.SpecialFolder.Windows));
+            double freeGb = 0; bool haveFree = false;
+            try { DriveInfo info = new DriveInfo(systemDrive); freeGb = info.AvailableFreeSpace / 1073741824.0; haveFree = true; } catch { }
+            string diskKind = null;
+            // MediaType 3 = HDD, 4 = SSD (MSFT_PhysicalDisk, the same storage-namespace class
+            // PowerShell's Get-PhysicalDisk reads from, already used by ferramentas/diagnostico-maquina.mjs).
+            foreach (var row in WmiQuery("SELECT FriendlyName, MediaType FROM MSFT_PhysicalDisk", @"root\Microsoft\Windows\Storage")) {
+                if (!row.ContainsKey("MediaType")) continue;
+                int mediaType; try { mediaType = Convert.ToInt32(row["MediaType"]); } catch { continue; }
+                if (mediaType == 4) { diskKind = "SSD"; break; }
+                if (mediaType == 3 && diskKind == null) diskKind = "HDD";
+            }
+            bool diskOk = !haveFree || freeGb >= 2;
+            string diskDetail = haveFree
+                ? freeGb.ToString("0.#", CultureInfo.InvariantCulture) + " GB livres em " + systemDrive + (diskKind != null ? "  •  " + diskKind : "") + (diskOk ? "" : " — espaço baixo; o pacote completo pode não caber")
+                : "Não foi possível consultar o espaço livre; prosseguindo sem bloquear.";
+            checks.Add(new SystemCheck { Ok = diskOk, Label = "Disco", Detail = diskDetail });
+            return checks;
+        }
+
+        Panel StepPreparation() {
+            Panel p = new Panel();
+            p.Controls.Add(new Label { Text = "Preparação do Sistema", Font = new Font("Segoe UI", 14, FontStyle.Bold), ForeColor = TextWhite, Location = new Point(0, 0), AutoSize = true });
+            p.Controls.Add(new Label { Text = "Conferindo os requisitos desta máquina antes de prosseguir. Nenhum arquivo é alterado nesta etapa.", Font = new Font("Segoe UI", 9.5f), ForeColor = TextMuted, Location = new Point(0, 26), Size = new Size(656, 22) });
+
+            List<SystemCheck> results = RunSystemChecks();
+            // Sized to fit every row (46px each) with no AutoScroll: with the body's extra
+            // room, a 6th check later still fits without the card quietly clipping it again.
+            int cardHeight = Math.Max(80, results.Count * 46 + 24);
+            Panel card = new Panel { Location = new Point(0, 56), Size = new Size(656, cardHeight), BackColor = CardBg };
+            card.Paint += delegate(object s, PaintEventArgs pe) { ControlPaint.DrawBorder(pe.Graphics, card.ClientRectangle, BorderColor, ButtonBorderStyle.Solid); };
+
+            int y = 14; bool anyBlocking = false;
+            foreach (SystemCheck check in results) {
+                Label mark = new Label { Text = check.Ok ? "✔" : "⚠", Font = new Font("Segoe UI", 11f, FontStyle.Bold), ForeColor = check.Ok ? Color.FromArgb(70, 200, 120) : Color.FromArgb(230, 170, 60), Location = new Point(14, y), Size = new Size(24, 22) };
+                Label label = new Label { Text = check.Label, Font = new Font("Segoe UI", 10f, FontStyle.Bold), ForeColor = TextWhite, Location = new Point(44, y), Size = new Size(200, 22) };
+                Label detail = new Label { Text = check.Detail, Font = new Font("Segoe UI", 9f), ForeColor = TextMuted, Location = new Point(44, y + 20), Size = new Size(596, 20) };
+                card.Controls.AddRange(new Control[] { mark, label, detail });
+                y += 46;
+                if (!check.Ok && check.Label == "Windows de 64 bits") anyBlocking = true;
+            }
+            p.Controls.Add(card);
+
+            Label note = new Label {
+                Text = anyBlocking
+                    ? "O 3Mix Studio exige Windows 64 bits e não pode ser instalado nesta máquina."
+                    : "Os demais avisos, se houver, são recomendações — a instalação pode prosseguir normalmente.",
+                Location = new Point(0, card.Bottom + 12), Size = new Size(656, 36), Font = new Font("Segoe UI", 9f, FontStyle.Bold),
+                ForeColor = anyBlocking ? Color.FromArgb(230, 90, 90) : TextMuted
+            };
+            p.Controls.Add(note);
+            p.Tag = anyBlocking;
             return p;
         }
 
@@ -322,8 +471,13 @@ namespace FreeMixSetup {
 
             p.Controls.Add(all); p.Controls.Add(none);
 
+            // Sized to fit all 9 catalog items (38px each) with no AutoScroll — the body's
+            // extra room (added so this step would not need to scroll) covers it with a
+            // margin for a 10th module later; AutoScroll stays on as a safety net, not as
+            // the normal way this list is seen.
+            int listHeight = Math.Max(150, ModuleCatalog.All.Length * 38 + 16);
             Panel listPanel = new Panel {
-                Location = new Point(0, 84), Size = new Size(656, 225),
+                Location = new Point(0, 84), Size = new Size(656, listHeight),
                 AutoScroll = true, BackColor = CardBg
             };
             listPanel.Paint += delegate(object s, PaintEventArgs pe) { ControlPaint.DrawBorder(pe.Graphics, listPanel.ClientRectangle, BorderColor, ButtonBorderStyle.Solid); };
@@ -348,10 +502,46 @@ namespace FreeMixSetup {
             Label note = new Label {
                 Text = "Nota: Corte principal, transições, DSKs, mixer de áudio e gravação essencial estão sempre ativos.\n" +
                        "Você pode reconfigurar os módulos opcionais a qualquer momento em Configurações → Módulos.",
-                Location = new Point(0, 314), Size = new Size(656, 34), Font = new Font("Segoe UI", 8.5f), ForeColor = TextMuted
+                Location = new Point(0, listPanel.Bottom + 12), Size = new Size(656, 34), Font = new Font("Segoe UI", 8.5f), ForeColor = TextMuted
             };
             p.Controls.Add(note);
             return p;
+        }
+
+        Label reviewBody;
+        Panel StepReview() {
+            Panel p = new Panel();
+            p.Controls.Add(new Label { Text = "Revisão Antes de Instalar", Font = new Font("Segoe UI", 14, FontStyle.Bold), ForeColor = TextWhite, Location = new Point(0, 0), AutoSize = true });
+            p.Controls.Add(new Label { Text = "Confira as escolhas abaixo. Nada é instalado até você clicar em Instalar Agora.", Font = new Font("Segoe UI", 9.5f), ForeColor = TextMuted, Location = new Point(0, 26), Size = new Size(656, 22) });
+
+            Panel card = new Panel { Location = new Point(0, 56), Size = new Size(656, 290), BackColor = CardBg };
+            card.Paint += delegate(object s, PaintEventArgs pe) { ControlPaint.DrawBorder(pe.Graphics, card.ClientRectangle, BorderColor, ButtonBorderStyle.Solid); };
+            reviewBody = new Label { Location = new Point(16, 14), Size = new Size(624, 262), Font = new Font("Segoe UI", 10f), ForeColor = TextWhite };
+            card.Controls.Add(reviewBody);
+            p.Controls.Add(card);
+            return p;
+        }
+        // Chamado ao entrar na etapa Revisão (Navigate), nunca na construção do passo: precisa
+        // refletir a pasta de destino e os módulos como estavam na última vez que o operador
+        // passou pelas etapas anteriores, não o que havia quando o wizard abriu.
+        void RefreshReview() {
+            if (reviewBody == null) return;
+            // PayloadInfo.Length is the exact byte size of the signed ZIP embedded in this
+            // executable by build.mjs, not an estimate — more reliable than guessing before
+            // extraction, and it's what CheckSpace already gates the real install against.
+            int disabledCount = 0; foreach (KeyValuePair<string, CheckBox> entry in moduleChecks) if (!entry.Value.Checked) disabledCount++;
+            StringBuilder text = new StringBuilder();
+            text.Append("Versão:  ").Append(PayloadInfo.DisplayVersion).Append("\r\n\r\n");
+            text.Append("Pasta de destino:\r\n  ").Append(folder.Text).Append("\r\n\r\n");
+            text.Append("Módulos:  ").Append(moduleChecks.Count - disabledCount).Append(" de ").Append(moduleChecks.Count).Append(" ativos");
+            text.Append(disabledCount == 0 ? " (configuração completa)" : " (" + disabledCount + " em standby, ajustável depois)").Append("\r\n\r\n");
+            if (importProject.Checked && !String.IsNullOrWhiteSpace(project.Text)) text.Append("Projeto a importar:\r\n  ").Append(project.Text).Append("\r\n\r\n");
+            text.Append("Espaço necessário:  ").Append(Math.Ceiling(PayloadInfo.Length / 1073741824.0).ToString(CultureInfo.InvariantCulture)).Append(" GB (pacote compactado; a instalação descompactada ocupa mais)");
+            try {
+                DriveInfo drive = new DriveInfo(Path.GetPathRoot(Path.GetFullPath(folder.Text)));
+                text.Append("\r\nEspaço livre em ").Append(drive.Name).Append(":  ").Append(Math.Floor(drive.AvailableFreeSpace / 1073741824.0).ToString(CultureInfo.InvariantCulture)).Append(" GB");
+            } catch { }
+            reviewBody.Text = text.ToString();
         }
 
         Panel StepProgress() {
@@ -396,29 +586,34 @@ namespace FreeMixSetup {
             return p;
         }
 
+        // Indices into steps[]: 0 Welcome, 1 Eula, 2 Preparation, 3 Destination, 4 Modules,
+        // 5 Review, 6 Progress, 7 Done. Keep every index below in sync with this order.
         void Navigate(int index) {
             if (index < 0 || index >= steps.Length) return;
             steps[current].Visible = false; current = index; steps[current].Visible = true;
-            string[] titles = { "Bem-vindo", "Termos de Uso", "Pasta de Destino", "Módulos em Standby", "Instalando", "Concluído" };
+            string[] titles = { "Bem-vindo", "Termos de Uso", "Preparação", "Pasta de Destino", "Módulos em Standby", "Revisão", "Instalando", "Concluído" };
             stepTitle.Text = titles[current] + "  •  Passo " + (current + 1) + " de " + steps.Length;
-            back.Visible = current > 0 && current < 4;
-            next.Text = current == 3 ? "Instalar Agora" : current == 5 ? "Concluir" : "Avançar >";
-            next.Visible = current != 4; UpdateNextEnabled();
+            back.Visible = current > 0 && current < 6;
+            next.Text = current == 5 ? "Instalar Agora" : current == 7 ? "Concluir" : "Avançar >";
+            next.Visible = current != 6;
+            if (current == 5) RefreshReview();
+            UpdateNextEnabled();
         }
         void UpdateNextEnabled() {
             if (current == 1) { CheckBox accept = (CheckBox)steps[1].Controls["accept"]; next.Enabled = accept.Checked; }
+            else if (current == 2) { next.Enabled = !(bool)(steps[2].Tag ?? false); }
             else next.Enabled = true;
         }
         async void NextClicked() {
-            if (current == 2) { try { Installer.ValidateDestination(folder.Text); } catch (Exception e) { MessageBox.Show(this, e.Message, "Escolha outra pasta", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; } if (importProject.Checked && String.IsNullOrWhiteSpace(project.Text)) { MessageBox.Show(this, "Informe o caminho da pasta UUID.fmx criada pela Recuperação do 3Mix.", "Projeto", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; } }
-            if (current == 3) { await RunInstall(); return; }
-            if (current == 5) { if (openNow.Visible && openNow.Checked) Installer.OpenInstalled(options.Destination); Close(); return; }
+            if (current == 3) { try { Installer.ValidateDestination(folder.Text); } catch (Exception e) { MessageBox.Show(this, e.Message, "Escolha outra pasta", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; } if (importProject.Checked && String.IsNullOrWhiteSpace(project.Text)) { MessageBox.Show(this, "Informe o caminho da pasta UUID.fmx criada pela Recuperação do 3Mix.", "Projeto", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; } }
+            if (current == 5) { await RunInstall(); return; }
+            if (current == 7) { if (openNow.Visible && openNow.Checked) Installer.OpenInstalled(options.Destination); Close(); return; }
             Navigate(current + 1);
         }
         async Task RunInstall() {
             options.Destination = folder.Text; options.ImportProject = importProject.Checked ? project.Text : null;
             options.DisabledModules.Clear(); foreach (KeyValuePair<string, CheckBox> entry in moduleChecks) if (!entry.Value.Checked) options.DisabledModules.Add(entry.Key);
-            running = true; back.Visible = false; next.Visible = false; Navigate(4);
+            running = true; back.Visible = false; next.Visible = false; Navigate(6);
             int result = await Task.Run(delegate { return Installer.Run(options, UpdateProgress); });
             running = false;
             if (result == 0) {
@@ -426,7 +621,7 @@ namespace FreeMixSetup {
             }
             openNow.Visible = result == 0 && Installer.VcRuntimeReady();
             doneMessage.Text = result == 0 ? "O 3Mix Studio foi instalado com êxito na pasta:\n" + options.Destination + "\n\nOs atalhos foram criados na Área de Trabalho e no Menu Iniciar." + (Installer.Warning.Length > 0 ? "\n\n" + Installer.Warning : "") : "A instalação não foi concluída: " + Installer.LastError + "\n\nRegistro de diagnóstico: " + Installer.LastLog;
-            Navigate(5); next.Visible = true; next.Enabled = true;
+            Navigate(7); next.Visible = true; next.Enabled = true;
         }
         internal static void TryPreselectPicker(string value, Action<string> select) {
             // Preselection is optional; invalid text must not prevent the picker from opening.
@@ -680,7 +875,7 @@ namespace FreeMixSetup {
             Dictionary<string, object> manifest = json.Deserialize<Dictionary<string, object>>(File.ReadAllText(FreeMixUninstall.Program.IOPath(manifestPath))); List<object> files = new List<object>(), links = new List<object>();
             foreach (object raw in (System.Collections.IEnumerable)manifest["files"]) { Dictionary<string, object> item = (Dictionary<string, object>)raw; if (FreeMixUninstall.Program.OwnedPath((string)item["path"])) files.Add(item); }
             foreach (string path in shortcuts) links.Add(new Dictionary<string, object> { {"path",path}, {"sha256",HashFile(path)} });
-            string registryKey = "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\FreeMixStudio-" + BitConverter.ToString(SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(root.ToLowerInvariant()))).Replace("-", "").ToLowerInvariant().Substring(0,16);
+            string registryKey = "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\3MixStudio-" + BitConverter.ToString(SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(root.ToLowerInvariant()))).Replace("-", "").ToLowerInvariant().Substring(0,16);
             Dictionary<string, object> plan = new Dictionary<string, object> { {"format",1}, {"root",root}, {"version",PayloadInfo.Version}, {"files",files}, {"shortcuts",links}, {"registryKey",registryKey}, {"preserveData",true} };
             File.WriteAllText(FreeMixUninstall.Program.IOPath(planPath),json.Serialize(plan),new UTF8Encoding(false));
             using (RegistryKey key = Registry.CurrentUser.CreateSubKey(registryKey)) { key.SetValue("DisplayName","3Mix Studio"); key.SetValue("DisplayVersion",PayloadInfo.DisplayVersion); key.SetValue("Publisher","3Mix Studio"); key.SetValue("InstallLocation",root); key.SetValue("UninstallString",Quote(executable)); key.SetValue("QuietUninstallString",Quote(executable)+" --silent --apply"); key.SetValue("DisplayIcon",Path.Combine(root,"bin\\64bit\\FreeMix.exe")); key.SetValue("NoModify",1,RegistryValueKind.DWord); key.SetValue("NoRepair",1,RegistryValueKind.DWord); }
