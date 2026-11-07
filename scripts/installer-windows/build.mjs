@@ -14,7 +14,7 @@ const vcFolder=existsSync(vcBase)?readdirSync(vcBase).filter(n=>/^14\.\d+\.\d+$/
 if(!vcFolder||!existsSync(join(vcBase,vcFolder,'vc_redist.x64.exe')))throw Error('Visual C++ redistribuível não encontrado em '+vcBase);
 const vcRedist=join(vcBase,vcFolder,'vc_redist.x64.exe'),[vcMajor,vcMinor]=vcFolder.split('.').map(Number);
 const args=process.argv.slice(2), options={};
-for(const arg of args) { if(arg==='--stub-only'){options['--stub-only']=true;continue;} const i=arg.indexOf('='); if(i<0) throw Error('Use --zip=... e --output=... [--stub-only]'); const name=arg.slice(0,i), value=arg.slice(i+1); if(!['--zip','--output'].includes(name)||!value||options[name])throw Error('Argumento inválido: '+name); options[name]=value; }
+for(const arg of args) { if(arg==='--stub-only'){options['--stub-only']=true;continue;} const i=arg.indexOf('='); if(i<0) throw Error('Use --zip=... e --output=... [--stub-only]'); const name=arg.slice(0,i), value=arg.slice(i+1); if(!['--zip','--output','--build-dir'].includes(name)||!value||options[name])throw Error('Argumento inválido: '+name); options[name]=value; }
 if(!options['--zip']||!options['--output'])throw Error('Informe --zip=CAMINHO_ASSINADO e --output=CAMINHO_NOVO. O builder não escolhe uma release automaticamente.');
 const zip=resolve(options['--zip']);
 const output=resolve(options['--output']);
@@ -26,14 +26,15 @@ const packagePrefix=root.startsWith('3Mix-Completo-')?'3Mix-Completo-':'FreeMix-
 const packageVersion=root.slice(packagePrefix.length),versionParts=packageVersion.match(/^(\d+\.\d+\.\d+)-(alpha|beta)$/),displayVersion=versionParts?(versionParts[2]==='alpha'?'Alpha ':'Beta ')+versionParts[1]:packageVersion;
 const size=(await stat(zip)).size;
 if(size<22||size>5e9)throw Error('Tamanho ZIP inválido.');
-await mkdir(join(here,'build'),{recursive:true}); await mkdir(dirname(output),{recursive:true});
+const buildDir=resolve(options['--build-dir']||join(here,'build'));
+await mkdir(buildDir,{recursive:true}); await mkdir(dirname(output),{recursive:true});
 console.log('Calculando SHA-256 do ZIP assinado (streaming)...');
 const hash=createHash('sha256'); for await(const chunk of createReadStream(zip)) hash.update(chunk); const sha=hash.digest('hex');
-const generated=join(here,'build/PayloadInfo.cs'), stub=join(here,'build/FreeMix-Setup-Stub.exe');
+const generated=join(buildDir,'PayloadInfo.cs'), stub=join(buildDir,'FreeMix-Setup-Stub.exe');
 await writeFile(generated,`namespace FreeMixSetup { internal static class PayloadInfo { public const string Sha256 = "${sha}"; public const long Length = ${size}L; public const int VcMajor = ${vcMajor}; public const int VcMinor = ${vcMinor}; public const string Root = "${root}"; public const string Version = "${packageVersion}"; public const string DisplayVersion = "${displayVersion}"; } }\n`);
 const framework=join(process.env.WINDIR??'C:/Windows','Microsoft.NET/Framework64/v4.0.30319');
 console.log('Compilando WinForms .NET Framework x64...');
-const uninstaller=join(here,'build/FreeMix-Uninstall.exe');
+const uninstaller=join(buildDir,'FreeMix-Uninstall.exe');
 const logo=join(here,'logo.png');
 const manifest=join(here,'Setup.exe.manifest');
 if(!existsSync(manifest))throw Error('Manifest de DPI ausente: '+manifest);

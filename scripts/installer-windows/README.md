@@ -44,3 +44,7 @@ Essa prova **não** equivale à publicação no canal GitHub, uso da chave de co
 ### Cadeia de confiança e alcance de `--verify`
 
 `--verify` termina antes de chamar `ferramentas/instalar-portatil.mjs`. Portanto, sucesso nesse modo não comprova assinatura do manifesto, instalação ou abertura do motor. Na instalação normal, o instalador offline verifica Ed25519 e a chave pública do pacote contra sua chave fixada. O próprio validador e essa chave são extraídos do payload; a autenticidade do EXE recebido precisa ser estabelecida por distribuição confiável e conferência do hash publicado por canal confiável. Hash incorporado não substitui Authenticode nem autentica sozinho quem produziu o EXE.
+
+### Saída isolada de compilação
+
+Use `--build-dir=PASTA_NOVA` para direcionar `PayloadInfo.cs`, stub e desinstalador intermediários para um diretório exclusivo. Em QA, essa pasta deve ficar em `qa-finalizacao/`. Sem a opção, permanece o destino histórico `scripts/installer-windows/build/`; não execute builders concorrentes nesse destino. A suíte usa uma pasta exclusiva e remove somente sua própria fixture, nunca o build compartilhado. `--stub-only` compila, mas não valida assinatura do ZIP nem produz uma release final.
