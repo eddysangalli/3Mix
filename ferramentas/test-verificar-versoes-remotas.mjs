@@ -70,6 +70,8 @@ test('checkRemoteVersions: suffixed tag identical to installed version is "atual
     const r = await checkRemoteVersions(root, { fetchRelease });
     const plugin = r.results.find(x => x.id === 'obs-asio');
     assert.equal(plugin.status, 'atualizado');
+    assert.equal(plugin.versionSource, 'catalog');
+    assert.equal(plugin.installedVersionVerified, false);
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 

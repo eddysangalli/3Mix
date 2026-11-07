@@ -152,7 +152,7 @@ export async function checkRemoteVersions(root, { engineRepo = 'obsproject/obs-s
   results.push(await checkOne('Motor OBS (libobs)', engine.version, engineRepo, { kind: 'engine', installedFullString: engine.fullString, engineError: engine.error }));
   for (const entry of catalog) {
     const repo = githubRepoFromUrl(entry.sourceUrl);
-    results.push(await checkOne(entry.name || entry.id, entry.version, repo, { kind: 'plugin', id: entry.id }));
+    results.push(await checkOne(entry.name || entry.id, entry.version, repo, { kind: 'plugin', id: entry.id, versionSource: 'catalog', installedVersionVerified: false }));
   }
 
   return {
