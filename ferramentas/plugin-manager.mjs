@@ -406,6 +406,9 @@ export class PluginManager {
     const folders = (await readdir(managedDir, { withFileTypes: true }).catch(e => { if (e.code === 'ENOENT') return []; throw e; })).filter(e => e.isDirectory() && ID.test(e.name)).map(e => e.name.toLowerCase());
     const all = new Set([...folders, ...Object.keys(state.plugins), ...queue.map(op => op.id), ...(report?.plugins || []).map(plugin => plugin.id)]);
     const protectedIds = await this.protectedIds();
+    // Keep system modules visible even when the native load report is absent.
+    // Presence alone leaves their state unknown; it never proves successful load.
+    for (const id of protectedIds) all.add(id);
     const plugins = [];
     for (const id of all) {
       if (!ID.test(id)) continue;

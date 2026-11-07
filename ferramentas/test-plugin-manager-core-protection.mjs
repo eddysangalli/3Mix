@@ -14,6 +14,13 @@ test('OBS33 core modules are protected independently of legacy plugins',async()=
   const ids=await manager.protectedIds();
   assert.ok(ids.has('obs-browser'));
   assert.ok(!ids.has('user-effect'));
+  const snapshot=await manager.snapshot();
+  const core=snapshot.plugins.find(plugin=>plugin.id==='obs-browser');
+  assert.ok(core,'core module stays visible without native report');
+  assert.equal(core.protected,true);
+  assert.equal(core.managed,false);
+  assert.equal(core.state,'unknown');
+  assert.equal(core.compatibility,'unknown');
   for (const action of ['disable', 'enable', 'remove', 'rollback']) {
    await assert.rejects(manager.action(action,{id:'obs-browser'}),/protegido/, action);
   }
