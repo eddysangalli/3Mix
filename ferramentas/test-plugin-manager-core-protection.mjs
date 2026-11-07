@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdir,writeFile,rm} from 'node:fs/promises';
+import {mkdir,writeFile,readFile,rm} from 'node:fs/promises';
 import {join} from 'node:path';
-import {PluginManager} from './plugin-manager.mjs';
+import {PluginManager,applyPendingPlugins} from './plugin-manager.mjs';
 test('OBS33 core modules are protected independently of legacy plugins',async()=>{
  const root=join(process.cwd(),'qa-finalizacao','core-protection-'+process.pid);
  try {
@@ -30,4 +30,20 @@ test('OBS33 core modules are protected independently of legacy plugins',async()=
    }
   }
  } finally {await rm(root,{recursive:true,force:true});}
+});
+
+test('pending pre-migration operation cannot mutate an OBS33 core module',async()=>{
+ const root=join(process.cwd(),'qa-finalizacao','core-queue-protection-'+process.pid);
+ const module=join(root,'core','obs-browser','obs-browser.dll');
+ const queuePath=join(root,'config','3mix-plugin-manager','queue.json');
+ try {
+  await mkdir(join(root,'core','obs-browser'),{recursive:true});
+  await writeFile(module,'protected-system-fixture');
+  await mkdir(join(root,'config','3mix-plugin-manager'),{recursive:true});
+  const queue=[{id:'obs-browser',opId:'old-operation',action:'remove'}];
+  await writeFile(queuePath,JSON.stringify(queue));
+  await assert.rejects(applyPendingPlugins(root),/plugin protegido/);
+  assert.equal(await readFile(module,'utf8'),'protected-system-fixture');
+  assert.deepEqual(JSON.parse(await readFile(queuePath,'utf8')),queue);
+ }finally{await rm(root,{recursive:true,force:true});}
 });
