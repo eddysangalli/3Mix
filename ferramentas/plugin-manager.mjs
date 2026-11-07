@@ -235,7 +235,8 @@ export function inspectPluginZip(bytes, targetId) {
       const ext = extname(normalized).toLowerCase();
       if (['.exe', '.msi', '.bat', '.cmd', '.ps1', '.vbs', '.js'].includes(ext)) throw Error('Pacote contém executável ou script de terceiro: ' + normalized);
       if (ext === '.dll') inspectPe(content);
-      bin.set(relativeToModule, content);
+      // Debug symbols are not runtime dependencies and can contain build paths.
+      if (!['.pdb', '.ilk', '.exp', '.lib'].includes(ext)) bin.set(relativeToModule, content);
     }
     const rel = dataPath(normalized, id) ||
       (parent === '.' && normalized.startsWith('data/') ? normalized.slice(5) :
