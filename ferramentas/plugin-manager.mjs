@@ -298,6 +298,15 @@ export class PluginManager {
     const legacyPath = join(this.root, 'obs-plugins/64bit');
     const legacyFiles = await readdir(legacyPath).catch(e => { if (e.code === 'ENOENT') return []; throw e; });
     for (const file of legacyFiles) if (extname(file).toLowerCase() === '.dll') ids.add(basename(file, extname(file)).toLowerCase());
+    // OBS 33 keeps integrated modules in core/<id>/<id>.dll. They are
+    // system-owned just like legacy modules, never user-managed plugins.
+    const corePath = join(this.root, 'core');
+    const coreEntries = await readdir(corePath, { withFileTypes: true }).catch(e => { if (e.code === 'ENOENT') return []; throw e; });
+    for (const entry of coreEntries) {
+      const id = entry.name.toLowerCase();
+      if (!entry.isDirectory() || !ID.test(id)) continue;
+      if (await exists(within(this.root, join(corePath, entry.name, id + '.dll')))) ids.add(id);
+    }
     const modernPath = join(this.root, 'plugins');
     const modernEntries = await readdir(modernPath, { withFileTypes: true }).catch(e => { if (e.code === 'ENOENT') return []; throw e; });
     for (const entry of modernEntries) {
