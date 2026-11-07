@@ -6,6 +6,7 @@ import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {runtimeDependencyClosure} from './pacote-dependencias.mjs';
+import {packageExecutable} from './pacote-executavel.mjs';
 import {inspectPackageComponents,copyPackageComponents} from './pacote-componentes.mjs';
 import {prepareNdiRuntime,NDI_DLL} from './ndi-runtime.mjs';
 const root=resolve(fileURLToPath(new URL('../',import.meta.url))),workspace=dirname(root);
@@ -20,7 +21,7 @@ const dest=join(workspace,'entregas','3Mix-Completo-'+version);if(existsSync(des
 const nativeRundir=process.env.FREEMIX_NATIVE_RUNDIR?resolve(process.env.FREEMIX_NATIVE_RUNDIR):null;
 const nativeCommit=process.env.FREEMIX_NATIVE_COMMIT||null;
 if(nativeCommit&&!/^[a-f0-9]{40}$/i.test(nativeCommit))throw Error('Commit nativo inválido');
-if(nativeRundir&&(!nativeCommit||!existsSync(join(nativeRundir,'bin/64bit/FreeMix.exe'))))throw Error('Rundir nativo explícito exige EXE e commit correspondentes');
+if(nativeRundir){if(!nativeCommit)throw Error('Rundir nativo explícito exige EXE e commit correspondentes');packageExecutable(nativeRundir);}
 if(nativeSources.version!==version)throw Error('Versão do manifesto de fontes diferente do pacote; exporte as fontes para a versão solicitada');
 if(nativeCommit&&nativeSources.head!==nativeCommit)throw Error('Fontes e commit do Native são diferentes');
 for(const patch of nativeSources.patches){const file=join(sourceRoot,'fork',patch.path);if(createHash('sha256').update(await readFile(file)).digest('hex')!==patch.sha256)throw Error('Patch nativo divergente: '+patch.path);}
@@ -68,7 +69,7 @@ for(const name of ['ffmpeg','ffprobe']){
 await writeFile(join(dest,'runtime/LICENSE-FFmpeg.txt'),execFileSync(join(dest,'runtime/ffmpeg.exe'),['-L'],{encoding:'utf8',windowsHide:true}));
 const componentFile=join(dest,'componentes.json'),metadata=JSON.parse(await readFile(componentFile,'utf8'));
 for(const c of metadata.componentes){c.sha256={};for(const file of c.arquivos)if(existsSync(join(dest,file)))c.sha256[file]=createHash('sha256').update(await readFile(join(dest,file))).digest('hex');}
-const runtimeFiles=['bin/64bit/FreeMix.exe','bin/64bit/obs.dll','bin/64bit/obs-frontend-api.dll','runtime/node.exe','runtime/ffmpeg.exe','runtime/ffprobe.exe','runtime/ndi-v6/'+NDI_DLL,'obs-plugins/64bit/obs-ffmpeg.dll'],runtimeHashes={};
+const runtimeFiles=[packageExecutable(dest),'bin/64bit/obs.dll','bin/64bit/obs-frontend-api.dll','runtime/node.exe','runtime/ffmpeg.exe','runtime/ffprobe.exe','runtime/ndi-v6/'+NDI_DLL,'obs-plugins/64bit/obs-ffmpeg.dll'],runtimeHashes={};
 for(const file of runtimeFiles)runtimeHashes[file]=createHash('sha256').update(await readFile(join(dest,file))).digest('hex');
 metadata.runtimeLocal={arquivos:runtimeFiles,sha256:runtimeHashes,node:execFileSync(join(dest,'runtime/node.exe'),['--version'],{encoding:'utf8',windowsHide:true}).trim(),ffmpeg:execFileSync(join(dest,'runtime/ffmpeg.exe'),['-version'],{encoding:'utf8',windowsHide:true}).split(/\r?\n/)[0],npm:{ws:'8.22.0',qrcode:'1.5.4',exceljs:'4.4.0'},nativeCommit,nativeBuildSource:nativeRundir?'explicit-rundir':'existing-installation',nativePatchSource:'fork/manifest.json',runtimeModules};
 metadata.rebuiltComponents=rebuiltComponents;
