@@ -121,7 +121,7 @@ export async function handleStudioSocial(ctx){
    const action=String(d.action||'');
    if(!action.startsWith('social_'))return deny('Ação Social inválida',400);
    const result=await module.social.execute(action,d);
-   return json(res,200,{success:true,result,state:module.social.summary(),list:module.social.list('all')}),true;
+   return json(res,200,{success:true,result,social:module.social.summary(),state:module.social.summary(),list:module.social.list('all')}),true;
   }
   return deny('Método não suportado',405);
  }

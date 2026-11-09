@@ -1,3 +1,6 @@
+import {readFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {isAbsolute} from 'node:path';
 import {lstatSync} from 'node:fs';
 import {join} from 'node:path';
 export function packageExecutable(root){
@@ -31,4 +34,17 @@ export function validateNativePackage(root){
   if(!info.isFile()||info.isSymbolicLink())throw Error('Componente nativo inválido: '+relative);
  }
  return {executable,ffmpegModule,required};
+}
+
+// Copy-time predicate only. Never removes a file from its source installation.
+export function legacyFfmpegReplaced(relativePath,nativeRoot){
+ if(String(relativePath).split(String.fromCharCode(92)).join('/').toLowerCase()!=='obs-plugins/64bit/obs-ffmpeg.dll'||!nativeRoot)return false;
+ try{const info=lstatSync(join(nativeRoot,'core/obs-ffmpeg/obs-ffmpeg.dll'));return info.isFile()&&!info.isSymbolicLink();}catch(e){if(e.code==='ENOENT')return false;throw e;}
+}
+
+export async function validateFrontendArtifact(source,expectedHash){
+ if(typeof source!=='string'||!isAbsolute(source)||!(/^[a-f0-9]{64}$/i.test(expectedHash||'')))throw Error('Frontend exige origem absoluta e SHA256 explícito');
+ const info=lstatSync(source);if(!info.isFile()||info.isSymbolicLink())throw Error('Frontend deve ser arquivo regular');
+ const actual=createHash('sha256').update(await readFile(source)).digest('hex');if(actual!==expectedHash.toLowerCase())throw Error('Frontend diverge do recibo de build');
+ return {source,sha256:actual,bytes:info.size};
 }

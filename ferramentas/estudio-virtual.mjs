@@ -260,7 +260,8 @@ export class StudioEngine{
   let kinds=[];
   try{kinds=(await this.p.req('GetSourceFilterKindList')).sourceFilterKinds||[];}catch{this.available=false;return false;}
   let file=false;
-  try{file=(await stat(this.shaderPath)).size>2000;}catch{}
+  const candidates=[join(this.p.root,'3mix-plugins/obs-shaderfilter/data/examples/corner-pin.shader'),join(this.p.root,STUDIO_SHADER)];
+  for(const candidate of candidates){try{const info=await stat(candidate);if(info.isFile()&&info.size>2000){this.shaderPath=candidate;file=true;break;}}catch(e){if(e.code!=='ENOENT')throw e;}}
   this.available=kinds.includes(STUDIO_KIND)&&file;
   return this.available;
  }

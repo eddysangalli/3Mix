@@ -49,6 +49,7 @@ import { SlideEngine } from './apresentacao-slides.mjs';
 import { LiveLanDistribution } from './livelan-distribuicao.mjs';
 import { PluginManager, readPluginMultipart } from './plugin-manager.mjs';
 import { checkRemoteVersions } from './verificar-versoes-remotas.mjs';
+import { readUpdateOpening, OpeningUpdateCheck } from './update-opening-session.mjs';
 
 const ROOT = process.env.FREEMIX_ROOT || fileURLToPath(new URL('../', import.meta.url));
 const PANEL = process.env.FREEMIX_PANEL_DIR || join(ROOT, 'painel'), PORT = Number(process.env.FREEMIX_API_PORT || 8088);
@@ -85,6 +86,7 @@ production.gtTickerAck = new TickerAckBroker({ endpoint: 'http://127.0.0.1:' + P
 const slideEngine = new SlideEngine({ root: ROOT, production });
 const liveLanDistribution = new LiveLanDistribution({ port: PORT });
 const onlineUpdate = new OnlineUpdateEngine(ROOT);
+const openingUpdateCheck = new OpeningUpdateCheck();
 const diagnostics = new DiagnosticCollector(ROOT);
 async function pluginProductionActive() {
   if (!obs || production.state.connected !== true) return true; // Unknown is not safe for a mutation.
@@ -145,6 +147,16 @@ const crewTallyClients = new Set();
 const crewAudioRegistry = new AudioTapRegistry(production);
 const crewIntercom = new CrewIntercomEngine(crewAudioRegistry);
 const crewIntercomTransport = new CrewIntercomWsTransport(crewIntercom);
+let crewMembershipTail = Promise.resolve();
+function serializeCrewMembership(task) {
+  if (stopping) return Promise.reject(Error('A API está encerrando; alteração de membros recusada.'));
+  const work = crewMembershipTail.then(() => {
+    if (stopping) throw Error('A API está encerrando; alteração de membros recusada.');
+    return task();
+  });
+  crewMembershipTail = work.catch(() => {});
+  return work;
+}
 // Anexados em `production` (mesmo padrão já usado por auxOutputRouter/multiviewEngine/
 // inputHealth acima) para o Pre-Flight (preflight-producao.mjs, item 'crew', instanciado
 // DENTRO de Production antes destes engines existirem) conseguir ler o estado real do
@@ -201,7 +213,7 @@ async function startConnection() {
   if (stopping || obs || connecting || projectBinding.gate.shouldSkipBackground()) return; connecting = true; const generation = ++connectionGeneration; let candidate = null;
   try {
     const connected = projectBinding.wrapConnection(await connect({
-      root: ROOT, events: 1 | 2 | 4 | 8 | 16 | 64 | 128 | 256 | 512 | 65536,
+      root: ROOT, restrito: process.env.THREEMIX_QA_RESTRICT_OBS === '1', events: 1 | 2 | 4 | 8 | 16 | 64 | 128 | 256 | 512 | 65536,
       onEvent: (type, data) => { try { if (generation !== connectionGeneration) return; if (!projectBinding.gate.acceptNativeEvent(type)) return; if (type === 'ExitStarted') { production.sessionRecovery.finish('normal').catch(() => { }); return; } if (type === 'VendorEvent' && data.vendorName === 'freemix-hotkeys') { if (data.eventType === 'hotkey') production.globalHotkeys.event(data.eventData); if (data.eventType === 'bindings_reset') production.globalHotkeys.disconnected(); return; } if (type === 'MediaInputPlaybackEnded') { try { production.rundownEngine?.onNativeEvent?.(type, data); } catch (error) { console.error('3Mix: rundown-event: ' + error.message); } } production.sessionRecovery.onNativeEvent(type, data); if (type === 'CurrentProgramSceneChanged' && obs) replay.onProgramChanged(data.sceneName)?.catch(e => connectionError('replay-autoplay', e)); if (type === 'InputVolumeMeters') { production.onMeters(data.inputs); broadcast({ type: 'meters', inputs: data.inputs }); } } catch (e) { connectionError('native-event', e); } },
       onClose: () => { if (generation !== connectionGeneration) return; connectionGeneration++; obs = null; connectionReady = false; production.disconnected(); scheduleConnection(); }
     }));
@@ -343,7 +355,7 @@ async function handleHttp(req, res) {
       // disco-producao.mjs) só roda depois, com o motor já conectado. Campo aditivo; nunca
       // derruba a rota se statfs falhar por qualquer motivo (leitura best-effort).
       const disk = await diskReport(ROOT).catch(() => ({ supported: false }));
-      return json(res, 200, { success: true, app: 'FreeMix', brand: '3Mix', appName: '3Mix', protocol: 1, installationId, pid: process.pid, connected: !!obs && connectionReady && production.state.connected === true, projectTransaction: projectBinding.gate.status(), transportConnected: !!obs, connectionErrors, port: PORT, disk });
+      return json(res, 200, { success: true, app: 'FreeMix', brand: '3Mix', appName: '3Mix', protocol: 1, installationId, pid: process.pid, privateLifecycleReady, connected: !!obs && connectionReady && production.state.connected === true, projectTransaction: projectBinding.gate.status(), transportConnected: !!obs, connectionErrors, port: PORT, disk });
     }
     if (path === '/favicon.ico') { res.writeHead(204); res.end(); return; }
     if (path === '/settings') { res.writeHead(302, { Location: '/configuracoes' + u.search }); res.end(); return; }
@@ -424,7 +436,7 @@ async function handleHttp(req, res) {
         if (!/^(?:enable|disable|remove|rollback|install-catalog|diagnose|safe-mode)$/.test(action)) return json(res, 404, { success: false, error: 'Ação de plugin desconhecida' });
         return json(res, 200, await pluginManager.action(action, await body(req)));
       }
-      if (path === '/api/update' && req.method === 'GET') { if (!local(req)) return json(res, 403, { success: false, error: 'Atualização disponível somente neste computador' }); await onlineUpdate.execute('update_read', {}); return json(res, 200, { success: true, update: onlineUpdate.last }); }
+      if (path === '/api/update' && req.method === 'GET') { if (!local(req)) return json(res, 403, { success: false, error: 'Atualização disponível somente neste computador' }); await onlineUpdate.execute('update_read', {}); return json(res, 200, { success: true, update: onlineUpdate.last, engine: { version: obs && production.state.connected === true ? (await production.optional('GetVersion'))?.obsVersion || null : null, source: 'connected-engine' }, opening: await readUpdateOpening(ROOT).catch(() => null) }); }
       if (path === '/api/effects-frame' && req.method === 'GET') {
         if (!local(req)) return json(res, 403, { success: false, error: 'Efeitos disponíveis somente neste computador' });
         const key = u.searchParams.get('key') || '';
@@ -476,8 +488,36 @@ async function handleHttp(req, res) {
         const ACOES_LOCAIS = ['register_member', 'remove_member', 'create_group', 'set_member_groups'];
         if (ACOES_LOCAIS.includes(d.action) && !local(req)) return json(res, 403, { success: false, error: 'Cadastro de membros/grupos do Crew só no computador do 3Mix' });
         if (!authorized(req)) return json(res, 401, { success: false, error: 'Autorize este dispositivo com o código do computador 3Mix' });
-        if (d.action === 'register_member') { const memberId = crewIntercom.registerMember(d); await crewIntercom.syncRegistry(); return json(res, 200, { success: true, memberId, ...crewIntercom.summary() }); }
-        if (d.action === 'remove_member') { crewIntercom.removeMember(d.memberId); await crewIntercom.syncRegistry(); return json(res, 200, { success: true, ...crewIntercom.summary() }); }
+        if (d.action === 'register_member') return await serializeCrewMembership(async () => {
+          const previous = d.memberId ? crewIntercom.members.get(d.memberId) : undefined;
+          const memberId = crewIntercom.registerMember(d);
+          try { await crewIntercom.syncRegistry(); }
+          catch (error) {
+            if (previous) crewIntercom.members.set(memberId, previous);
+            else crewIntercom.members.delete(memberId);
+            // Restore desired claims too; retain any uncertainty about native capture.
+            if (previous) crewAudioRegistry.consumers.set('crew', new Set([...crewIntercom.members.values()].map(member => member.sourceUuid)));
+            else if (crewIntercom.members.size) crewAudioRegistry.consumers.set('crew', new Set([...crewIntercom.members.values()].map(member => member.sourceUuid)));
+            else crewAudioRegistry.consumers.delete('crew');
+            throw error;
+          }
+          return json(res, 200, { success: true, memberId, ...crewIntercom.summary() });
+        });
+        if (d.action === 'remove_member') return await serializeCrewMembership(async () => {
+          const previous = crewIntercom.members.get(d.memberId);
+          // Remove desired audio first, but retain local membership until confirmed.
+          crewIntercom.members.delete(d.memberId);
+          try { await crewIntercom.syncRegistry(); }
+          catch (error) {
+            if (previous) crewIntercom.members.set(d.memberId, previous);
+            const sources = [...crewIntercom.members.values()].map(member => member.sourceUuid);
+            if (sources.length) crewAudioRegistry.consumers.set('crew', new Set(sources));
+            else crewAudioRegistry.consumers.delete('crew');
+            throw error;
+          }
+          crewIntercom.removeMember(d.memberId);
+          return json(res, 200, { success: true, ...crewIntercom.summary() });
+        });
         if (d.action === 'create_group') { const groupId = crewIntercom.createGroup(d); return json(res, 200, { success: true, groupId, ...crewIntercom.summary() }); }
         if (d.action === 'set_member_groups') { crewIntercom.setMemberGroups(d.memberId, d.groupIds || []); return json(res, 200, { success: true, ...crewIntercom.summary() }); }
         if (d.action === 'ptt_start') { const result = crewIntercom.startPtt(d.memberId, d.targets || []); return json(res, 200, { success: true, ...result }); }
@@ -606,7 +646,7 @@ async function handleHttp(req, res) {
       if (path === '/api/network' && req.method === 'GET') { if (!local(req)) return json(res, 403, { success: false, error: 'Rede disponível somente neste computador' }); return json(res, 200, await production.networkEngine.read()); }
       if (path === '/api/gc-compatible' && req.method === 'GET') { if (!local(req)) return json(res, 403, { success: false, error: 'Editor HTML apenas local' }); return json(res, 200, { success: true, gcCompatible: await production.gcCompatible.summary() }); }
       if ((path === '/gc-html' || path === '/gc-html.html') && !local(req)) return json(res, 403, { success: false, error: 'Editor HTML apenas local' });
-      if (path === '/api/control' && req.method === 'POST') { const d = await body(req); if (String(d.action).startsWith('update_')) { if (!local(req)) return json(res, 403, { success: false, error: 'Atualização disponível somente neste computador' }); await onlineUpdate.execute(d.action, d); return json(res, 200, { success: true, state: clean(), update: onlineUpdate.last }); } if ((String(d.action).startsWith('gc_html_') || d.action === 'data_file' || ['gc_library_save', 'gc_library_duplicate', 'gc_library_remove','gc_library_style_many','gc_library_reorder','gc_library_remove_many', 'gc_library_import', 'gc_library_export', 'gc_library_asset', 'gc_library_variant', 'gc_library_unlink', 'gc_library_clock_restart'].includes(d.action) || String(d.action).startsWith('settings_') || String(d.action).startsWith('call_') || String(d.action).startsWith('recovery_') || (String(d.action).startsWith('macro_') && !['macro_run', 'macro_cancel'].includes(d.action)) || String(d.action).startsWith('outputs_') || String(d.action).startsWith('network_') || String(d.action).startsWith('audio_routing_') || String(d.action).startsWith('effects_') || String(d.action).startsWith('ptz_') || d.action === 'signal_configure' || d.action === 'patch_set' || d.action === 'mix_audio_set' || ['controller_save', 'controller_remove', 'controller_enable', 'controller_osc_configure', 'controller_osc_start', 'controller_osc_stop', 'delay_set', 'delay_enable', 'delay_disable', 'preflight_bypass', 'preflight_process_close', 'preflight_process_ignore', 'preflight_process_unignore', 'blackbox_clear'].includes(d.action)) && !local(req)) return json(res, 403, { success: false, error: 'Configuração local só no computador do 3Mix' }); controlOperation = { id: d.operationId, scope: d.expectedScope }; const state = await production.run(d.action, d); return json(res, 200, { success: true, state: clean(state), ...(String(d.action).startsWith('effects_') ? { effects: production.effectsResult } : {}), ...(String(d.action).startsWith('ptz_') ? { ptz: production.ptzResult } : {}), ...(String(d.action).startsWith('signal_') ? { signals: production.signalEngine.last } : {}), ...(String(d.action).startsWith('call_') ? { call: production.callResult } : {}), ...(String(d.action).startsWith('gc_html_') ? { gcCompatible: { last: production.gcCompatible.last } } : {}), ...(String(d.action).startsWith('gc_library_') ? { gcLibrary: production.gcLibrary.last } : {}), ...(String(d.action).startsWith('audio_routing_') ? { audioRouting: production.audioRoutingEngine.last } : {}), ...(String(d.action).startsWith('settings_') ? { settings: production.settingsEngine.last } : {}), ...(String(d.action).startsWith('recovery_') ? { recovery: production.recoveryResult } : {}), ...(String(d.action).startsWith('outputs_') ? { outputs: production.outputEngine.last } : {}), ...(String(d.action).startsWith('network_') ? { network: production.networkEngine.last } : {}), ...(String(d.action).startsWith('controller_') ? { controllers: production.controllerEngine.last } : {}), ...(String(d.action).startsWith('overlay_') ? { overlays: production.overlayResult || production.overlayEngine.summary() } : {}) }); }
+      if (path === '/api/control' && req.method === 'POST') { const d = await body(req); if (String(d.action).startsWith('update_')) { if (!local(req)) return json(res, 403, { success: false, error: 'Atualização disponível somente neste computador' }); const opening = await readUpdateOpening(ROOT).catch(() => null); if (d.action === 'update_check' && d.openingCheck === true) await openingUpdateCheck.run(opening?.id, () => onlineUpdate.execute(d.action, d)); else await onlineUpdate.execute(d.action, d); return json(res, 200, { success: true, state: clean(), update: onlineUpdate.last, opening }); } if ((String(d.action).startsWith('gc_html_') || d.action === 'data_file' || ['gc_library_save', 'gc_library_duplicate', 'gc_library_remove','gc_library_style_many','gc_library_reorder','gc_library_remove_many', 'gc_library_import', 'gc_library_export', 'gc_library_asset', 'gc_library_variant', 'gc_library_unlink', 'gc_library_clock_restart'].includes(d.action) || String(d.action).startsWith('settings_') || String(d.action).startsWith('call_') || String(d.action).startsWith('recovery_') || (String(d.action).startsWith('macro_') && !['macro_run', 'macro_cancel'].includes(d.action)) || String(d.action).startsWith('outputs_') || String(d.action).startsWith('network_') || String(d.action).startsWith('audio_routing_') || String(d.action).startsWith('effects_') || String(d.action).startsWith('ptz_') || d.action === 'signal_configure' || d.action === 'patch_set' || d.action === 'mix_audio_set' || ['controller_save', 'controller_remove', 'controller_enable', 'controller_osc_configure', 'controller_osc_start', 'controller_osc_stop', 'delay_set', 'delay_enable', 'delay_disable', 'preflight_bypass', 'preflight_process_close', 'preflight_process_ignore', 'preflight_process_unignore', 'blackbox_clear'].includes(d.action)) && !local(req)) return json(res, 403, { success: false, error: 'Configuração local só no computador do 3Mix' }); controlOperation = { id: d.operationId, scope: d.expectedScope }; const state = await production.run(d.action, d); return json(res, 200, { success: true, state: clean(state), ...(String(d.action).startsWith('effects_') ? { effects: production.effectsResult } : {}), ...(String(d.action).startsWith('ptz_') ? { ptz: production.ptzResult } : {}), ...(String(d.action).startsWith('signal_') ? { signals: production.signalEngine.last } : {}), ...(String(d.action).startsWith('call_') ? { call: production.callResult } : {}), ...(String(d.action).startsWith('gc_html_') ? { gcCompatible: { last: production.gcCompatible.last } } : {}), ...(String(d.action).startsWith('gc_library_') ? { gcLibrary: production.gcLibrary.last } : {}), ...(String(d.action).startsWith('audio_routing_') ? { audioRouting: production.audioRoutingEngine.last } : {}), ...(String(d.action).startsWith('settings_') ? { settings: production.settingsEngine.last } : {}), ...(String(d.action).startsWith('recovery_') ? { recovery: production.recoveryResult } : {}), ...(String(d.action).startsWith('outputs_') ? { outputs: production.outputEngine.last } : {}), ...(String(d.action).startsWith('network_') ? { network: production.networkEngine.last } : {}), ...(String(d.action).startsWith('controller_') ? { controllers: production.controllerEngine.last } : {}), ...(String(d.action).startsWith('overlay_') ? { overlays: production.overlayResult || production.overlayEngine.summary() } : {}) }); }
             if (path === '/livelan') {
         res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
         return res.end(liveLanDistribution.renderViewerPage());
@@ -979,6 +1019,10 @@ async function handleHttp(req, res) {
   } catch (e) { const operation = controlReceipt(controlOperation); if (wantsHtml(req) && !res.headersSent) return sendErrorPage(res, req.method === 'GET' || req.method === 'HEAD' ? 500 : 400, req.url, e.message); json(res, 400, { success: false, error: e.message, ...(operation ? { operation } : {}) }); }
 }
 const server = createServer(createProjectHttpDispatcher({ binding: projectBinding, handler: handleHttp, local, authorized, originAllowed, readBody: readProjectBody, json }));
+// Reap sockets that become idle after shutdown began, without truncating responses.
+server.on('request', (_request, response) => response.once('finish', () => {
+  if (stopping) setImmediate(() => server.closeIdleConnections?.());
+}));
 const wss = new WebSocketServer({ noServer: true, maxPayload: 32768 });
 const callWss = new WebSocketServer({ noServer: true, maxPayload: 4096 });
 // 3Mix Crew — Tally: WebSocket próprio, nunca o /ws principal. maxPayload baixo (1KB) e
@@ -1045,9 +1089,63 @@ server.on('error', e => {
   if (e?.code === 'EACCES') { console.error(`3Mix: sem permissão para abrir a porta ${PORT}. Tente executar como administrador, ou verifique se um antivírus/firewall está bloqueando.`); process.exit(1); }
   console.error('3Mix: falha ao iniciar o servidor da API:', e?.message || e); process.exit(1);
 });
-server.listen(PORT, process.env.FREEMIX_API_HOST || '127.0.0.1', () => { console.log(`3Mix: API e consoles na porta ${PORT}.`); startConnection(); });
-function stop() { if (stopping) return; stopping = true; production.gtTickerAck.dispose(); connectionGeneration++; connectionReady = false; production.sessionRecovery.finish('api-restart').catch(() => { }); clearInterval(ticker); clearTimeout(reconnectTimer); for (const c of clients) c.close(); vmixTcp?.stop().catch(() => { }); production.callEngine.returns.stop().catch(() => { }); production.networkEngine.stop().catch(() => { }); replay.dispose().catch(e => connectionError('replay-preview-close', e)); iso.dispose().catch(e => connectionError('iso-preview-close', e)); crewIntercomTransport.close(); crewIntercom.close().catch(() => { }); obs?.close(); wss.close(); callWss.close(); crewTallyWss.close(); crewIntercomWss.close(); server.close(); }
+let privateLifecycleReady = false;
+let stopCompletion;
+function stop() {
+  if (stopping) return stopCompletion;
+  stopping = true;
+  let finishStop;
+  stopCompletion = new Promise(resolve => { finishStop = resolve; });
+  connectionGeneration++; connectionReady = false;
+  clearInterval(ticker); clearInterval(crewTallyTicker); clearTimeout(reconnectTimer);
+  // One failing resource must not skip the remaining cooperative cleanup.
+  // Fixed labels only: never include resource error messages or credentials.
+  let cleanupFailures = 0;
+  const cleanupFailure = () => { cleanupFailures++; try { console.error('3Mix: uma tarefa de limpeza da API falhou; demais tarefas continuam.'); } catch {} };
+  const tasks = [];
+  const cleanup = task => { try { tasks.push(Promise.resolve(task()).catch(cleanupFailure)); } catch { cleanupFailure(); } };
+  cleanup(() => production.gtTickerAck.dispose());
+  cleanup(() => production.sessionRecovery.finish('api-restart'));
+  for (const c of clients) cleanup(() => c.close(1001, 'API shutdown'));
+  cleanup(() => vmixTcp?.stop());
+  cleanup(() => production.callEngine.disposeWatchdog());
+  cleanup(() => production.callEngine.returns.stop());
+  cleanup(() => production.networkEngine.stop());
+  cleanup(() => production.ptzManager.close());
+  cleanup(() => production.controllerEngine.osc.stop());
+  cleanup(() => production.globalHotkeys.close());
+  cleanup(() => replay.dispose()); cleanup(() => iso.dispose());
+  cleanup(() => crewIntercomTransport.close()); cleanup(() => crewIntercom.close());
+  cleanup(() => production.audioTapRegistry.close());
+  // Preserve OBS until all previously scheduled native release tasks settle.
+  const nativeReleaseTasks = [...tasks];
+  cleanup(() => Promise.all(nativeReleaseTasks).then(() => obs?.close()));
+  for (const socketServer of [wss, callWss, crewTallyWss, crewIntercomWss]) {
+    // Close every service's own clients, not only the main state-broadcast set.
+    for (const client of socketServer.clients) cleanup(() => client.close(1001, 'API shutdown'));
+    cleanup(() => new Promise((resolve, reject) => socketServer.close(error => error ? reject(error) : resolve())));
+  }
+  cleanup(() => new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve())));
+  Promise.all(tasks).then(() => finishStop({success: cleanupFailures === 0, failures: cleanupFailures}));
+  return stopCompletion;
+}
 process.on('SIGTERM', stop); process.on('SIGINT', stop);
+// Lifecycle ownership is accepted only over an actual parent/child IPC channel.
+// Never accept credentials inherited through the environment or a public HTTP route.
+delete process.env.THREEMIX_PRIVATE_LIFECYCLE;
+if (typeof process.send === 'function' && process.connected) {
+  try {
+    const {attachLifecycleHandshake} = await import('./api-lifecycle-handshake.mjs');
+    const {bindOwnedApiLifecycle} = await import('./api-lifecycle-binding.mjs');
+    attachLifecycleHandshake({channel: process, bind: config => bindOwnedApiLifecycle({config, stop, installationRoot: resolve(ROOT)})});
+    privateLifecycleReady = true;
+  } catch {
+    console.error('3Mix: controle privado de encerramento indisponível; nenhum encerramento solicitado.');
+  }
+}
+
+server.listen(PORT, process.env.FREEMIX_API_HOST || '127.0.0.1', () => { console.log(`3Mix: API e consoles na porta ${PORT}.`); startConnection(); });
+
 // One bad native event or panel request must not take every open window offline.
 // The failure is recorded in api-error.log and the control API keeps serving.
 process.on('uncaughtException', error => connectionError('uncaught', error));

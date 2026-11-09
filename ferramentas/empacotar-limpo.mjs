@@ -1,13 +1,16 @@
+import {selectDependencyRoot} from './pacote-node-modules.mjs';
+import {metadataForDistribution} from './pacote-proveniencia.mjs';
+import {validarDestinoQa} from './pacote-destino-qa.mjs';
 // Builds a NEW distribution from an explicit allowlist. Never copies operator config/recordings.
-import {cp,mkdir,readFile,writeFile,readdir,stat} from 'node:fs/promises';
+import {cp,mkdir,readFile,writeFile,readdir,stat,copyFile} from 'node:fs/promises';
 import {existsSync} from 'node:fs';
 import {join,resolve,relative,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {runtimeDependencyClosure} from './pacote-dependencias.mjs';
-import {packageExecutable,packageFfmpegModule,validateNativePackage} from './pacote-executavel.mjs';
-import {inspectPackageComponents,copyPackageComponents} from './pacote-componentes.mjs';
+import {packageExecutable,packageFfmpegModule,validateNativePackage,legacyFfmpegReplaced,validateFrontendArtifact} from './pacote-executavel.mjs';
+import {inspectPackageComponents,copyPackageComponents,legacyPluginReplaced} from './pacote-componentes.mjs';
 import {prepareNdiRuntime,NDI_DLL} from './ndi-runtime.mjs';
 const root=resolve(fileURLToPath(new URL('../',import.meta.url))),workspace=dirname(root);
 const runtimeRoot=existsSync(join(root,'runtime/ndi-v6'))?root:(existsSync(join(workspace,'3mix-runtime/runtime/ndi-v6'))?join(workspace,'3mix-runtime'):root);
@@ -16,10 +19,16 @@ const checkOnly=process.argv.includes('--check');
 const sourceRoot=process.env.FREEMIX_SOURCE_ROOT?resolve(process.env.FREEMIX_SOURCE_ROOT):(existsSync(join(workspace,'FreeMix/fork/manifest.json'))?join(workspace,'FreeMix'):root);
 const nativeSources=JSON.parse(await readFile(join(sourceRoot,'fork/manifest.json'),'utf8'));
 const version=process.env.FREEMIX_PACKAGE_VERSION||nativeSources.version||('0.1.0-local.'+new Date().toISOString().replace(/\D/g,'').slice(0,14));
-if(!/^(?:0\.1\.0-local\.\d{14}|\d+\.\d+\.\d+-(?:alpha|beta))$/.test(version))throw Error('Versão inválida: '+version);
-const dest=join(workspace,'entregas','3Mix-Completo-'+version);if(existsSync(dest))throw Error('Destino já existe; não substituir entrega');
+if(!/^(?:0\.1\.0-local\.\d{14}|\d+\.\d+\.\d+-(?:alpha|beta|rc)(?:[.-][0-9A-Za-z]+)*)$/.test(version))throw Error('Versão inválida: '+version);
+const qaDestination=process.env.FREEMIX_QA_PACKAGE_DEST;
+const dest=qaDestination?resolve(qaDestination):join(workspace,'entregas','3Mix-Completo-'+version);
+if(qaDestination)await validarDestinoQa(root,dest);
+if(!checkOnly&&existsSync(dest))throw Error('Destino já existe; não substituir entrega');
 const nativeRundir=process.env.FREEMIX_NATIVE_RUNDIR?resolve(process.env.FREEMIX_NATIVE_RUNDIR):null;
 const nativeCommit=process.env.FREEMIX_NATIVE_COMMIT||null;
+const frontendArtifact=process.env.FREEMIX_NATIVE_FRONTEND?await validateFrontendArtifact(process.env.FREEMIX_NATIVE_FRONTEND,process.env.FREEMIX_NATIVE_FRONTEND_SHA256):null;
+const srtArtifact=process.env.FREEMIX_NATIVE_SRT?await validateFrontendArtifact(process.env.FREEMIX_NATIVE_SRT,process.env.FREEMIX_NATIVE_SRT_SHA256):null;
+if(nativeRundir&&!frontendArtifact)throw Error('Rundir explícito exige frontend e SHA256 do build, sem seleção implícita por nome');
 if(nativeCommit&&!/^[a-f0-9]{40}$/i.test(nativeCommit))throw Error('Commit nativo inválido');
 if(nativeRundir){if(!nativeCommit)throw Error('Rundir nativo explícito exige EXE e commit correspondentes');validateNativePackage(nativeRundir);}
 if(nativeSources.version!==version)throw Error('Versão do manifesto de fontes diferente do pacote; exporte as fontes para a versão solicitada');
@@ -28,16 +37,32 @@ for(const patch of nativeSources.patches){const file=join(sourceRoot,'fork',patc
 // Schema 2 includes local submodule commits; validate their patches and source snapshots too.
 if(nativeSources.sourceSchema===2)execFileSync(process.execPath,[join(sourceRoot,'scripts/reconstruir-motor.mjs'),'--check'],{windowsHide:true,stdio:'pipe',maxBuffer:4*1024*1024});
 const runtimeTools=['midia-preview-http.mjs','replay-preview.mjs','recuperacao-importacao.mjs','recuperacao-inicializacao.mjs','recuperacao-saidas.mjs','saidas-hdr.mjs','omt-hdr-producao.mjs','recuperacao-estados.mjs','audio-buses-producao.mjs','efeitos-producao.mjs','sinais-producao.mjs','replay-sincronia.mjs','controller-osc.mjs','multi-rtmp-adapter.mjs','atualizacao-online.mjs','gc-assets.mjs','gerar-biblioteca-gc.mjs','composicao-advanced-masks.mjs','plugins-defaults.mjs',"capacidades-motor.mjs","composicao-presets.mjs","composicao-fundo.mjs","gc-biblioteca-producao.mjs",'composicao-locutor.mjs','composicao-estilos.mjs','automacao-operacional.mjs','recuperacao-inventario.mjs','recuperacao-dependencias.mjs','preferencias-producao.mjs','atalhos-globais.mjs','abrir-configuracoes.ps1','ajudante.ps1','splash.ps1','preparar.ps1','fechar.ps1','importar-gt-dialog.ps1','importar-gt-packs.mjs','gtzip_converter.mjs','gt_utils.mjs','gerar-catalogo-gc.mjs','servidor-api.mjs','iniciar-api.mjs','obsws.mjs','replay-disco.mjs','controle-producao.mjs','entradas-producao.mjs','configuracoes-producao.mjs','calls-producao.mjs','audio-routing-producao.mjs','retornos-calls.mjs','fontes-dados.mjs','clonar-preset.mjs','iniciar-freemix.mjs','preparar-portatil.mjs','macros-producao.mjs','recuperacao-producao.mjs','saidas-producao.mjs','sessao-producao.mjs','controlador-producao.mjs','fila-producao.mjs','bonding-producao.mjs','instalar-portatil.mjs','src/FreeMixNetworkSetup.cs','configurar-rede.ps1','ndi-producao.mjs','omt-producao.mjs','src/FreeMixProcessInfo.cs','verificar-atualizacoes.mjs','verificar-atualizacoes.ps1','atualizar-freemix.mjs','atualizar-freemix.ps1','empacotar.ps1','empacotar-limpo.mjs','audio-tap-registry.mjs','crew-intercom-producao.mjs','crew-intercom-transport-ws.mjs','crew-tally-producao.mjs','croma-producao.mjs','estudio-virtual.mjs','freed-bridge.mjs','social-producao.mjs','social-twitch.mjs','studio-social-engine.mjs','studio-social-http.mjs','preflight-producao.mjs','blackbox-producao.mjs','midia-imagem.mjs','disco-producao.mjs'];
-runtimeTools.push('coletar-diagnostico.mjs');
+runtimeTools.push('coletar-diagnostico.mjs','validar-recibo-alpha.mjs','pacote-destino-qa.mjs');
+// PowerShell paths passed via URL/execFile are not JavaScript imports.
+runtimeTools.push('collect-engine-snapshot.ps1');
 const runtimeModules=await runtimeDependencyClosure(join(root,'ferramentas'),runtimeTools,{copiedModuleRoots:[join(root,'painel')]});
 const componentOverlays=await inspectPackageComponents(process.env.FREEMIX_PLUGIN_MANIFEST);
 await prepareNdiRuntime(runtimeRoot,{env:{},writeReceipt:false});
 if(checkOnly){console.log(JSON.stringify({status:'SOURCE_READY',version,nativeCommit,nativePatches:nativeSources.patches.length,runtimeModules:runtimeModules.length,componentOverlays:componentOverlays.length,destinationCreated:false,operatorTouched:false}));process.exit(0);}
 await mkdir(dest,{recursive:true});
-const filter=p=>!p.replaceAll('\\','/').includes('/painel/gc/biblioteca/assets/')&&!p.replaceAll('\\','/').endsWith('/painel/gc/biblioteca/assets')&&!/(?:^|[\\/])(?:originais|gt_titles|ndi-v6|logs|crashes|profiler_data)(?:[\\/]|$)/i.test(p)&&!/(?:^|[\\/])qa-[^\\/]+\.(?:dll|exe)$/i.test(p)&&!/(?:\.pdb|\.ilk|\.log|\.dmp|\.anterior\.exe|\.bak|\.salvo|stdout\.txt|stderr\.txt)$/i.test(p);
-for(const folder of ['bin','core','data','obs-plugins','plugins-audio','assets','painel','node_modules','firmware','extensao-social'])if(existsSync(join(root,folder)))await cp(join(root,folder),join(dest,folder),{recursive:true,filter});else if(existsSync(join(runtimeRoot,folder)))await cp(join(runtimeRoot,folder),join(dest,folder),{recursive:true,filter});
+// Internal QA evidence is retained in the checkout, never shipped as operator documentation.
+const internalDeliveryFile=p=>{
+ const name=p.replaceAll(String.fromCharCode(92),'/');
+ // Archived committed sources are verified by source-verification.json; never prune them.
+ if(name.includes('/docs/native-source/'))return false;
+ return /\/docs\/(?:evidencias[^/]*|historico|provenance|referencias)(?:\/|$)/i.test(name)||/\/assets\/freemix(?:_call_select|_live)?\.(?:png|ico)$/i.test(name);
+};
+const filter=p=>!internalDeliveryFile(p)&&![root,runtimeRoot,nativeRundir].filter(Boolean).some(base=>legacyFfmpegReplaced(relative(base,p),nativeRundir))&&![root,runtimeRoot,nativeRundir].filter(Boolean).some(base=>legacyPluginReplaced(relative(base,p),componentOverlays))&&!p.replaceAll('\\','/').includes('/painel/gc/biblioteca/assets/')&&!p.replaceAll('\\','/').endsWith('/painel/gc/biblioteca/assets')&&!/(?:^|[\\/])(?:originais|gt_titles|ndi-v6|logs|crashes|profiler_data)(?:[\\/]|$)/i.test(p)&&!/(?:^|[\\/])qa-[^\\/]+\.(?:dll|exe)$/i.test(p)&&!/(?:\.pdb|\.ilk|\.log|\.dmp|\.anterior\.exe|\.bak|\.salvo|stdout\.txt|stderr\.txt)$/i.test(p);
+// An empty development node_modules must not hide the portable dependencies.
+const dependencyRoot=await selectDependencyRoot(root,runtimeRoot);
+for(const folder of ['bin','core','data','obs-plugins','plugins-audio','assets','painel','node_modules','firmware','extensao-social']){
+ const base=folder==='node_modules'?dependencyRoot:(existsSync(join(root,folder))?root:runtimeRoot);
+ if(existsSync(join(base,folder)))await cp(join(base,folder),join(dest,folder),{recursive:true,filter});
+}
 // Overlay only the NEW package, never the operator installation.
 if(nativeRundir)for(const folder of ['bin','core','data','obs-plugins'])if(existsSync(join(nativeRundir,folder)))await cp(join(nativeRundir,folder),join(dest,folder),{recursive:true,filter});
+if(frontendArtifact){await validateFrontendArtifact(frontendArtifact.source,frontendArtifact.sha256);await copyFile(frontendArtifact.source,join(dest,'bin/64bit/3Mix.exe'));await validateFrontendArtifact(join(dest,'bin/64bit/3Mix.exe'),frontendArtifact.sha256);}
+if(srtArtifact){await validateFrontendArtifact(srtArtifact.source,srtArtifact.sha256);await copyFile(srtArtifact.source,join(dest,'bin/64bit/srt.dll'));await validateFrontendArtifact(join(dest,'bin/64bit/srt.dll'),srtArtifact.sha256);}
 const rebuiltComponents=await copyPackageComponents(dest,componentOverlays);
 await mkdir(join(dest,'data/obs-plugins/obs-browser'),{recursive:true});
 await cp(join(root,'painel/recursos/erro-browser.html'),join(dest,'data/obs-plugins/obs-browser/error.html'));
@@ -45,16 +70,20 @@ await mkdir(join(dest,'ferramentas'),{recursive:true});
 for(const f of runtimeModules){await mkdir(dirname(join(dest,'ferramentas',f)),{recursive:true});await cp(existsSync(join(root,'ferramentas',f))?join(root,'ferramentas',f):join(runtimeRoot,'ferramentas',f),join(dest,'ferramentas',f));}for(const folder of ['licenses','docs'])if(existsSync(join(root,folder)))await cp(join(root,folder),join(dest,folder),{recursive:true,filter});else if(existsSync(join(runtimeRoot,folder)))await cp(join(runtimeRoot,folder),join(dest,folder),{recursive:true,filter});
 await cp(join(sourceRoot,'fork'),join(dest,'fork'),{recursive:true,filter});
 await mkdir(join(dest,'scripts'),{recursive:true});await cp(join(sourceRoot,'scripts/reconstruir-motor.mjs'),join(dest,'scripts/reconstruir-motor.mjs'));
+await mkdir(join(dest,'scripts/documentacao'),{recursive:true});
+for(const file of ['gerar-manuais-html.mjs','fontes-html'])await cp(join(root,'scripts/documentacao',file),join(dest,'scripts/documentacao',file),{recursive:true,filter});
 await cp(join(sourceRoot,'docs/BUILD-FROM-SOURCE.md'),join(dest,'docs/BUILD-FROM-SOURCE.md'));
 // Manuais da entrega vêm da fonte: a instalação pode ter versões antigas (ex.: manual do operador sem o DUMP).
-for(const f of ['LEIA-ME-BETA.md','GUIA-RAPIDO.md','LIMITES-CONHECIDOS.md','SOLICITAR-SUPORTE.md','CHANGELOG.md','MANUAIS.md','API.md','EULA.txt','THIRD-PARTY-NOTICES.txt'])if(existsSync(join(sourceRoot,'docs',f)))await cp(join(sourceRoot,'docs',f),join(dest,'docs',f));
-for(const d of ['docs/capturas/manual','docs/capturas/3mix','docs/api','painel/docs/usuario'])if(existsSync(join(sourceRoot,d)))await cp(join(sourceRoot,d),join(dest,d),{recursive:true,filter});
+// Product documentation comes from the current panel checkout; sourceRoot supplies native reconstruction only.
+for(const f of ['LEIA-ME-BETA.md','GUIA-RAPIDO.md','LIMITES-CONHECIDOS.md','SOLICITAR-SUPORTE.md','CHANGELOG.md','MANUAIS.md','API.md','EULA.txt','THIRD-PARTY-NOTICES.txt'])if(!existsSync(join(root,'docs',f))&&existsSync(join(sourceRoot,'docs',f)))await cp(join(sourceRoot,'docs',f),join(dest,'docs',f));
+for(const d of ['docs/capturas/manual','docs/capturas/3mix','docs/api','painel/docs/usuario'])if(!existsSync(join(root,d))&&existsSync(join(sourceRoot,d)))await cp(join(sourceRoot,d),join(dest,d),{recursive:true,filter});
 await cp(join(sourceRoot,'docs/native-source'),join(dest,'docs/native-source'),{recursive:true,filter});
 for(const f of ['package.json','package-lock.json','componentes.json','portable_mode.txt','LEIA-ME.md','VALIDACAO.md','FONTES.md','Iniciar Mesa.cmd','Empacotar.cmd','Verificar Complementos.cmd','Atualizar Complementos.cmd','update-public.pem'])if(existsSync(join(root,f)))await cp(join(root,f),join(dest,f));else if(existsSync(join(runtimeRoot,f)))await cp(join(runtimeRoot,f),join(dest,f));
 
 await cp(existsSync(join(root,'INSTALAR-FREEMIX.cmd'))?join(root,'INSTALAR-FREEMIX.cmd'):(existsSync(join(runtimeRoot,'INSTALAR-3MIX.cmd'))?join(runtimeRoot,'INSTALAR-3MIX.cmd'):join(runtimeRoot,'INSTALAR-FREEMIX.cmd')),join(dest,'INSTALAR-3MIX.cmd'));
+await writeFile(join(dest,'Iniciar 3Mix.vbs'), "Option Explicit\r\nDim shell, fso, root, command, code\r\nSet shell = CreateObject(\"WScript.Shell\")\r\nSet fso = CreateObject(\"Scripting.FileSystemObject\")\r\nroot = fso.GetParentFolderName(WScript.ScriptFullName)\r\nshell.CurrentDirectory = root\r\nshell.Environment(\"PROCESS\")(\"FREEMIX_ROOT\") = root\r\ncommand = Chr(34) & root & \"\\runtime\\node.exe\" & Chr(34) & \" \" & Chr(34) & root & \"\\ferramentas\\iniciar-freemix.mjs\" & Chr(34)\r\ncode = shell.Run(command, 0, True)\r\nIf code <> 0 Then MsgBox \"O 3Mix n\u00e3o concluiu a abertura. Consulte os logs de inicializa\u00e7\u00e3o.\", 16, \"3Mix Studio\"\r\n");
 await writeFile(join(dest,'3Mix Studio.cmd'),'@echo off\r\nsetlocal\r\nchcp 65001 >nul\r\ntitle 3Mix Studio\r\nset "FREEMIX_ROOT=%~dp0"\r\n"%~dp0runtime\\node.exe" "%~dp0ferramentas\\iniciar-freemix.mjs" %*\r\nif errorlevel 1 pause\r\nexit /b\r\n');
-await writeFile(join(dest,'Atualizar 3Mix.cmd'),(await readFile(existsSync(join(root,'Atualizar FreeMix.cmd'))?join(root,'Atualizar FreeMix.cmd'):join(runtimeRoot,'Atualizar 3Mix.cmd'),'utf8')).replaceAll('FreeMix.cmd','3Mix.cmd').replaceAll('Feche o FreeMix','Feche o 3Mix'));
+await writeFile(join(dest,'Atualizar 3Mix.cmd'),(await readFile(existsSync(join(root,'templates/portatil/Atualizar FreeMix.cmd'))?join(root,'templates/portatil/Atualizar FreeMix.cmd'):(existsSync(join(root,'Atualizar FreeMix.cmd'))?join(root,'Atualizar FreeMix.cmd'):join(runtimeRoot,'Atualizar 3Mix.cmd')),'utf8')).replaceAll('FreeMix.cmd','3Mix.cmd').replaceAll('Feche o FreeMix','Feche o 3Mix'));
 await writeFile(join(dest,'CONFIGURAR-REDE-3MIX.cmd'),'@echo off\r\nsetlocal\r\n"%~dp0runtime\\freemix-network-setup.exe" --root "%~dp0" %*\r\npause\r\n');
 await writeFile(join(dest,'COLETAR-LOGS.cmd'),'@echo off\r\nsetlocal\r\nchcp 65001 >nul\r\n"%~dp0runtime\\node.exe" "%~dp0ferramentas\\coletar-diagnostico.mjs" "%~dp0." --mostrar\r\npause\r\n');
 for(const f of ['CONTINUAR.md','PENDENCIAS.md','PENDENCIAS-REAIS.md','ENTREGA-ATUAL.md'])if(existsSync(join(workspace,'docs',f)))await cp(join(workspace,'docs',f),join(dest,'docs',f));
@@ -69,15 +98,17 @@ for(const name of ['ffmpeg','ffprobe']){
 await writeFile(join(dest,'runtime/LICENSE-FFmpeg.txt'),execFileSync(join(dest,'runtime/ffmpeg.exe'),['-L'],{encoding:'utf8',windowsHide:true}));
 const componentFile=join(dest,'componentes.json'),metadata=JSON.parse(await readFile(componentFile,'utf8'));
 for(const c of metadata.componentes){c.sha256={};for(const file of c.arquivos)if(existsSync(join(dest,file)))c.sha256[file]=createHash('sha256').update(await readFile(join(dest,file))).digest('hex');}
-const runtimeFiles=[packageExecutable(dest),'bin/64bit/obs.dll','bin/64bit/obs-frontend-api.dll','runtime/node.exe','runtime/ffmpeg.exe','runtime/ffprobe.exe','runtime/ndi-v6/'+NDI_DLL,packageFfmpegModule(dest)],runtimeHashes={};
+const runtimeFiles=[packageExecutable(dest),'bin/64bit/obs.dll','bin/64bit/obs-frontend-api.dll','runtime/node.exe','runtime/ffmpeg.exe','runtime/ffprobe.exe','runtime/ndi-v6/'+NDI_DLL,'bin/64bit/srt.dll',packageFfmpegModule(dest)],runtimeHashes={};
 for(const file of runtimeFiles)runtimeHashes[file]=createHash('sha256').update(await readFile(join(dest,file))).digest('hex');
-metadata.runtimeLocal={arquivos:runtimeFiles,sha256:runtimeHashes,node:execFileSync(join(dest,'runtime/node.exe'),['--version'],{encoding:'utf8',windowsHide:true}).trim(),ffmpeg:execFileSync(join(dest,'runtime/ffmpeg.exe'),['-version'],{encoding:'utf8',windowsHide:true}).split(/\r?\n/)[0],npm:{ws:'8.22.0',qrcode:'1.5.4',exceljs:'4.4.0'},nativeCommit,nativeBuildSource:nativeRundir?'explicit-rundir':'existing-installation',nativePatchSource:'fork/manifest.json',runtimeModules};
+metadata.runtimeLocal={arquivos:runtimeFiles,sha256:runtimeHashes,node:execFileSync(join(dest,'runtime/node.exe'),['--version'],{encoding:'utf8',windowsHide:true}).trim(),ffmpeg:execFileSync(join(dest,'runtime/ffmpeg.exe'),['-version'],{encoding:'utf8',windowsHide:true}).split(/\r?\n/)[0],npm:{ws:'8.22.0',qrcode:'1.5.4',exceljs:'4.4.0'},nativeCommit,nativeSourceTree:nativeSources.tree||null,nativeFrontend:frontendArtifact?{target:'bin/64bit/3Mix.exe',sha256:frontendArtifact.sha256,bytes:frontendArtifact.bytes,selection:'explicit-build-artifact'}:null,nativeBuildSource:nativeRundir?'explicit-rundir':'existing-installation',nativePatchSource:'fork/manifest.json',runtimeModules};
 metadata.rebuiltComponents=rebuiltComponents;
-await writeFile(componentFile,JSON.stringify(metadata,null,2));
+metadata.managedPluginComponents=Object.values(rebuiltComponents.filter(f=>f.target.startsWith('3mix-plugins/')).reduce((groups,f)=>{const id=f.target.split('/')[1];const item=groups[id]??={id,version:f.sourceVersion,files:[],versionSource:'explicit-package-overlay',nativeFunctionalVerified:false};item.files.push({path:f.target,sha256:f.sha256});return groups;},{}));
+for(const component of metadata.componentes){if(component.arquivos?.some(file=>legacyPluginReplaced(file,componentOverlays))){component.inventoryStatus='superseded-by-managed-overlay';component.inventoryWarning='Historical version/file list; consult managedPluginComponents for shipped replacement';}}
+await writeFile(componentFile,JSON.stringify(metadataForDistribution(metadata),null,2));
 let catalog=await readFile(join(dest,'painel/gc/catalogo.js'),'utf8');let models=JSON.parse(catalog.slice(catalog.indexOf('[')).replace(/;\s*$/,''));models=models.filter(x=>x.collection!=='Importados');await writeFile(join(dest,'painel/gc/catalogo.js'),'window.GC_CATALOG = '+JSON.stringify(models,null,2)+';\n');
 const cfg=join(dest,'config/obs-studio');await mkdir(join(cfg,'basic/profiles/Estudio'),{recursive:true});await mkdir(join(cfg,'basic/scenes'),{recursive:true});await mkdir(join(cfg,'plugin_config/obs-websocket'),{recursive:true});
 await mkdir(join(cfg,'themes'),{recursive:true});await cp(join(root,'painel/tema-padrao.ovt'),join(cfg,'themes/Yami_MesaDeCorte.ovt'));
-await cp(join(root,'ferramentas/restaurar-layout.ps1'),join(dest,'ferramentas/restaurar-layout.ps1'));await cp(join(root,'ferramentas/atualizar-e-reabrir.ps1'),join(dest,'ferramentas/atualizar-e-reabrir.ps1'));await cp(join(root,'Restaurar Visual FreeMix.cmd'),join(dest,'Restaurar Visual 3Mix.cmd'));
+await cp(join(root,'ferramentas/restaurar-layout.ps1'),join(dest,'ferramentas/restaurar-layout.ps1'));await cp(join(root,'ferramentas/atualizar-e-reabrir.ps1'),join(dest,'ferramentas/atualizar-e-reabrir.ps1'));await cp(join(root,'templates/portatil/Restaurar Visual FreeMix.cmd'),join(dest,'Restaurar Visual 3Mix.cmd'));
 const visual=JSON.parse(await readFile(join(root,'painel/layout-padrao.json'),'utf8'));
 // Seed the new distribution with its own root, never the development checkout.
 // First-launch preparation can subsequently relocate these paths after extraction.
@@ -92,8 +123,8 @@ const {pluginDefaults}=await import('./plugins-defaults.mjs');const freshCollect
  await writeFile(join(cfg,'raiz.txt'),dest);await writeFile(join(dest,'painel/local.js'),'// Gerado na primeira inicialização pelo preparar.ps1.\n');
 await writeFile(join(dest,'config/suporte.json'),JSON.stringify({destino:'WhatsApp do Eddy'},null,2));
 await writeFile(join(dest,'LEIA-ME.md'),'# 3Mix\n\nVersão alpha para testes. As instruções estão em LEIA-ME-ALPHA.txt.\n\nFontes: https://github.com/eddysangalli/3Mix\n');
-await writeFile(join(dest,'LEIA-ME-ALPHA.txt'),'3Mix - versão alpha para testes\r\n\r\nCOMO ABRIR\r\n1. Extraia este ZIP inteiro para uma pasta sua, por exemplo Documentos\\3Mix. Não abra de dentro do ZIP.\r\n2. Dê dois cliques em "3Mix Studio.cmd".\r\n3. Se o Windows mostrar "O Windows protegeu o computador", clique em "Mais informações" e em "Executar assim mesmo". Esta versão ainda não tem assinatura digital.\r\n\r\nDEU ERRO?\r\nNo 3Mix: menu > Relatar problema. Escreva o que você estava fazendo e gere o pacote de diagnóstico.\r\nSe o 3Mix nem abrir: dê dois cliques em "COLETAR-LOGS.cmd".\r\nMande o arquivo ZIP gerado para o Eddy no WhatsApp.\r\n\r\nO pacote traz logs e dados técnicos do computador, sem suas gravações. Veja o conteúdo antes de enviar, se quiser.\r\n');
-await mkdir(join(dest,'gravacoes'),{recursive:true});await writeFile(join(dest,'version.json'),JSON.stringify({version,createdAt:new Date().toISOString(),channel:/-alpha$/.test(version)?'alpha':/-beta$/.test(version)?'beta':'local-candidate'}));
+await writeFile(join(dest,'LEIA-ME-ALPHA.txt'),'3Mix - versão alpha para testes\r\n\r\nCOMO ABRIR\r\n1. Extraia este ZIP inteiro para uma pasta sua, por exemplo Documentos\\3Mix. Não abra de dentro do ZIP.\r\n2. Dê dois cliques em "3Mix Studio.cmd".\r\n3. Este candidato não possui assinatura Authenticode do executável. Se o Windows bloquear a execução, não desative a proteção nem prossiga automaticamente: confira a origem oficial e o SHA-256 publicado e registre o bloqueio para suporte. A assinatura do manifesto interno é uma verificação diferente.\r\n\r\nDEU ERRO?\r\nNo 3Mix: menu > Relatar problema. Escreva o que você estava fazendo e gere o pacote de diagnóstico.\r\nSe o 3Mix nem abrir: dê dois cliques em "COLETAR-LOGS.cmd".\r\nMande o arquivo ZIP gerado para o Eddy no WhatsApp.\r\n\r\nO diagnóstico pode conter caminhos, nomes de fontes, endereços e outros dados técnicos sensíveis. Revise o conteúdo antes de enviar e remova credenciais, tokens, PINs e informações privadas. Não envie gravações ou mídia sem autorização.\r\n');
+await mkdir(join(dest,'gravacoes'),{recursive:true});await writeFile(join(dest,'version.json'),JSON.stringify({version,createdAt:new Date().toISOString(),channel:/-alpha(?:[.-]|$)/.test(version)?'alpha':/-(?:beta|rc)(?:[.-]|$)/.test(version)?'beta':'local-candidate'}));
 const files={};async function walk(dir){for(const e of await readdir(dir,{withFileTypes:true})){const p=join(dir,e.name);if(e.isDirectory())await walk(p);else files[relative(dest,p).replaceAll('\\','/')]=createHash('sha256').update(await readFile(p)).digest('hex');}}
 await walk(dest);await writeFile(join(dest,'hashes.json'),JSON.stringify({version,files},null,2));
-await mkdir(join(workspace,'qa-finalizacao'),{recursive:true});await writeFile(join(workspace,'qa-finalizacao/ultima-entrega.json'),JSON.stringify({version,root:dest},null,2));console.log(JSON.stringify({version,root:dest,fileCount:Object.keys(files).length}));
+if(!qaDestination){await mkdir(join(workspace,'qa-finalizacao'),{recursive:true});await writeFile(join(workspace,'qa-finalizacao/ultima-entrega.json'),JSON.stringify({version,root:dest},null,2));}console.log(JSON.stringify({version,root:dest,fileCount:Object.keys(files).length}));

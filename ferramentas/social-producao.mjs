@@ -24,8 +24,9 @@ function sanitizeText(str) {
 }
 
 export class SocialEngine {
-  constructor(production) {
+  constructor(production, {twitchFactory = callback => new TwitchChat(callback)} = {}) {
     this.p = production;
+    this.twitchFactory = twitchFactory;
     this.scope = null;
     this.file = null;
     this.pending = [];
@@ -34,6 +35,7 @@ export class SocialEngine {
     this.history = [];
     this.blockedUsers = new Set();
     this.twitch = null;
+    this.twitchGeneration = 0;
     this.autoCycleTimer = null;
     this.autoCycleInterval = 10; // segundos
     this.autoCycleEnabled = false;
@@ -42,38 +44,47 @@ export class SocialEngine {
 
   async setScope(scope) {
     if (this.scope === scope) return;
-    this.scope = scope;
     const dir = join(this.p.root, 'config/obs-studio/plugin_config/3mix-social');
-    this.file = join(dir, createHash('sha256').update(scope || '').digest('hex').slice(0, 24) + '.json');
+    const file = join(dir, createHash('sha256').update(scope || '').digest('hex').slice(0, 24) + '.json');
     let data = { format: 1, approved: [], history: [], blocked: [], targetGcInput: null };
-    try {
-      data = JSON.parse(await readFile(this.file, 'utf8'));
-    } catch (e) {
-      if (e.code !== 'ENOENT') throw e;
-    }
-    if (data.format === 1) {
-      this.approved = Array.isArray(data.approved) ? data.approved.slice(0, APPROVED_LIMIT) : [];
-      this.history = Array.isArray(data.history) ? data.history.slice(0, HISTORY_LIMIT) : [];
-      this.blockedUsers = new Set(Array.isArray(data.blocked) ? data.blocked : []);
-      this.targetGcInput = data.targetGcInput || null;
-    }
+    try { data = JSON.parse(await readFile(file, 'utf8')); }
+    catch (e) { if (e.code !== 'ENOENT') throw e; }
+    if (!data || data.format !== 1) throw Error('Estado Social inválido');
+    if (this.autoCycleTimer) clearInterval(this.autoCycleTimer);
+    this.autoCycleTimer = null;
+    this.autoCycleEnabled = false;
+    this.twitchGeneration++;
+    if (this.twitch) this.twitch.disconnect();
+    this.twitch = null;
+    this.pending = [];
+    this.onAir = null;
+    this.scope = scope;
+    this.file = file;
+    this.approved = Array.isArray(data.approved) ? data.approved.slice(0, APPROVED_LIMIT) : [];
+    this.history = Array.isArray(data.history) ? data.history.slice(0, HISTORY_LIMIT) : [];
+    this.blockedUsers = new Set(Array.isArray(data.blocked) ? data.blocked : []);
+    this.targetGcInput = typeof data.targetGcInput === 'string' ? data.targetGcInput : null;
   }
 
-  async save() {
-    if (!this.file) return;
-    try {
-      await mkdir(join(this.file, '..'), { recursive: true });
-      const payload = {
-        format: 1,
-        approved: this.approved,
-        history: this.history,
-        blocked: Array.from(this.blockedUsers),
-        targetGcInput: this.targetGcInput
-      };
-      await writeFile(this.file + '.tmp', JSON.stringify(payload, null, 2));
-      await rename(this.file + '.tmp', this.file);
-    } catch (e) {
-      console.error('[3Mix Social] Erro ao salvar estado:', e.message);
+  async save({strict = false} = {}) {
+    if (!this.file) { if (strict) throw Error('Projeto Social não carregado'); return; }
+    // Capture both path and contents before queueing: a scope change must not
+    // redirect an older project's pending write into the new project's file.
+    const file = this.file;
+    const payload = JSON.stringify({
+      format: 1, approved: this.approved, history: this.history,
+      blocked: Array.from(this.blockedUsers), targetGcInput: this.targetGcInput
+    }, null, 2);
+    const pending = (this.saveQueue || Promise.resolve()).catch(() => {}).then(async () => {
+      await mkdir(join(file, '..'), {recursive: true});
+      await writeFile(file + '.tmp', payload);
+      await rename(file + '.tmp', file);
+    });
+    this.saveQueue = pending;
+    try { await pending; }
+    catch (error) {
+      console.error('[3Mix Social] Erro ao salvar estado:', error.message);
+      if (strict) throw error;
     }
   }
 
@@ -295,10 +306,12 @@ export class SocialEngine {
   }
 
   connectTwitch(channel) {
+    const generation = ++this.twitchGeneration;
     if (this.twitch) {
       this.twitch.disconnect();
     }
-    this.twitch = new TwitchChat(msg => {
+    this.twitch = this.twitchFactory(msg => {
+      if (generation !== this.twitchGeneration) return;
       this.addIncoming({
         network: 'twitch',
         author: msg.author,
@@ -313,6 +326,7 @@ export class SocialEngine {
   }
 
   disconnectTwitch() {
+    this.twitchGeneration++;
     if (!this.twitch) return { status: 'idle' };
     const res = this.twitch.disconnect();
     this.twitch = null;
@@ -351,8 +365,21 @@ export class SocialEngine {
     } catch {}
   }
 
+  async configure(data = {}) {
+    const target = data.targetGcInput;
+    if (target !== null && (typeof target !== 'string' || !target.trim() || target.length > 256 || /[\x00-\x1f]/.test(target)))
+      throw Error('Destino GC inválido');
+    if (this.onAir) throw Error('Retire o comentário do ar antes de trocar o destino GC');
+    const previous = this.targetGcInput;
+    this.targetGcInput = target === null ? null : target.trim();
+    try { await this.save({strict: true}); } catch (error) { this.targetGcInput = previous; throw error; }
+    return this.summary();
+  }
+
   async execute(action, d = {}) {
     switch (action) {
+      case 'social_configure':
+        return this.configure(d);
       case 'social_add':
         return this.addIncoming(d.comment || d);
       case 'social_approve':
