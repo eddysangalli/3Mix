@@ -1,5 +1,0 @@
-{
-  "status": "EXPECTED_BASELINE_FAIL",
-  "error": "Dependência estática ausente/insegura: ./utils · ENOENT: no such file or directory, lstat '<own-temp>\\original\\painel\\gc\\gt_titles\\gt_0f60b35b-cb58-48b0-b971-68ae96875bae\\utils'",
-  "sourceSha256": "b2aed33999c71ada90d4e16ff668f2ed99e0edbe793300ff232e2c80cd28a6b5"
-}

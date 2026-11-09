@@ -1,7 +1,0 @@
-Retry limitado aprovado pelo root, reaproveitando a única instalação real do Setup035000. O EXE e a instalação não foram repetidos. O primeiro FAIL e todos os hashes/preparações originais permanecem intactos.
-
-Motivo do FAIL: o guard anterior comparava a árvore Native inteira à saída do compilador. O empacotador aplica uma transformação pública expressa: copia painel/recursos/erro-browser.html para data/obs-plugins/obs-browser/error.html. Única diferença em2085arquivos: SHA compilado e8e422e3b20eb922f7f31c283c919b5b88737e7378c38e3dd75314c455229ed5 → SHA FreeMixbranding0cd81a2e844b33b418d44948cf5307c8697be6abe61aaea89d4b9ba5295e57dd, idêntico ao manifesto assinado, pacote, instalação e recurso canônico. Os2084arquivos restantes, incluindo todos os binários Native, são exatos.
-
-Antes do primeiro app, retry verificou Ed25519 e todos9568hashes do pacote. Releu todos9568arquivos instalados:9563iguais ao manifesto e5gerados pelo instalador pinados individualmente (basic.ini do perfil, config websocket, raiz.txt,user.ini,local.js). Não flexibiliza outros caminhos, hashes, links ou limites.
-
-Runner derivado por6substituições com contagem1; novo PREPARATION/receipt e pastas próprias. Mantém dois ciclos próprios Native (inicial/restart), mesmo API PID reconectado, diagnósticos instalados reais e uninstall conservador. No retry não há DLLoverlay, produto/Git/operador alterado nem nova instalação. Logs/ZIPdiagnóstico/configs/credenciais não são exportados ao Git; apenas fontes e recibos sem valores secretos. IAB é evidência separada, não CEF/GPU/PCM.

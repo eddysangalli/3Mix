@@ -1,1 +1,0 @@
-<Composition Width="640" Height="360"><Layer Name="Layer" Dimensions="640,360,0"><Layer.Composition><Composition><QRCode Name="Link" Dimensions="170,170,0" Location="24,32,0" Text="https://example.invalid/live?source=FreeMix&amp;edition=2" ></QRCode></Composition></Layer.Composition></Layer></Composition>

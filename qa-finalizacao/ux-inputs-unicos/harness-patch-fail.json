@@ -1,8 +1,0 @@
-{
-  "status": "FAIL_HARNESS",
-  "stage": "Exact applied-draft byte comparison",
-  "cause": "Global core.autocrlf normalization changed patch-added line endings in own TEMP copy.",
-  "repair": "Generate and check/apply own patches with explicit core.autocrlf=false, preserving source CRLF bytes.",
-  "nativeStarted": false,
-  "operatorCommands": false
-}

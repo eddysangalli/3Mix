@@ -1,6 +1,0 @@
-{"kind":"ack","role":"root","ownOnly":true,"handoffId":"ff6a9c79-3903-4f78-92ae-8403a3ee48b3","contextSha256":"8f95483567bca7faa1bc5e086d90b1a3420f7f0f58ae65f9cd7bf76c8a64242c","sequence":0}
-{"kind":"heartbeat","action":"capture","role":"root","ownOnly":true,"handoffId":"ff6a9c79-3903-4f78-92ae-8403a3ee48b3","contextSha256":"8f95483567bca7faa1bc5e086d90b1a3420f7f0f58ae65f9cd7bf76c8a64242c","sequence":1}
-{"kind":"heartbeat","action":"capture","role":"root","ownOnly":true,"handoffId":"ff6a9c79-3903-4f78-92ae-8403a3ee48b3","contextSha256":"8f95483567bca7faa1bc5e086d90b1a3420f7f0f58ae65f9cd7bf76c8a64242c","sequence":2}
-{"kind":"heartbeat","action":"capture","role":"root","ownOnly":true,"handoffId":"ff6a9c79-3903-4f78-92ae-8403a3ee48b3","contextSha256":"8f95483567bca7faa1bc5e086d90b1a3420f7f0f58ae65f9cd7bf76c8a64242c","sequence":3}
-{"kind":"heartbeat","action":"capture","role":"root","ownOnly":true,"handoffId":"ff6a9c79-3903-4f78-92ae-8403a3ee48b3","contextSha256":"8f95483567bca7faa1bc5e086d90b1a3420f7f0f58ae65f9cd7bf76c8a64242c","sequence":4}
-{"kind":"proof-ready","role":"root","ownOnly":true,"handoffId":"ff6a9c79-3903-4f78-92ae-8403a3ee48b3","contextSha256":"8f95483567bca7faa1bc5e086d90b1a3420f7f0f58ae65f9cd7bf76c8a64242c","sequence":5}

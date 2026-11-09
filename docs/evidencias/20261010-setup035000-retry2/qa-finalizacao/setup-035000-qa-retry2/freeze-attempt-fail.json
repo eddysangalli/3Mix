@@ -1,8 +1,0 @@
-{
-  "status": "FREEZE_METADATA_QUERY_FAIL_PRESERVED",
-  "at": "2026-10-10T05:04:31.047Z",
-  "functionalReceiptUnchanged": true,
-  "sourceSha256": "898a2392dc07a627b51cda182ae6413105addfc80d23266d763854d75503c975",
-  "reason": "powershell.exe Get-AuthenticodeSignature could not autoload Microsoft.PowerShell.Security; explicit legacy module import in a separate tool shell also failed proxy creation. No global settings changed.",
-  "next": "Independent PE Certificate Table absence check; no certificate is claimed."
-}

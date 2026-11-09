@@ -33,13 +33,33 @@ export async function connect(opts = {}) {
     ws.once("close", () => clearTimeout(timer));
     ws.on("error", reject);
     ws.on("message", (raw) => {
-      const m = JSON.parse(String(raw));
+      let m;
+      try { m = JSON.parse(String(raw)); }
+      catch { clearTimeout(timer); ws.close(); reject(new Error("Resposta inválida do controle 3Mix")); return; }
+      if (!m || typeof m !== "object" || !Number.isInteger(m.op) || !m.d || typeof m.d !== "object") {
+        clearTimeout(timer); ws.close(); reject(new Error("Mensagem inválida do controle 3Mix")); return;
+      }
       if (m.op === 0) {
         const a = m.d.authentication;
         ws.send(JSON.stringify({ op: 1, d: { rpcVersion: 1, eventSubscriptions: opts.events || 0, ...(a ? { authentication: sha(sha(password + a.salt) + a.challenge) } : {}) } }));
-      } else if (m.op === 2) { clearTimeout(timer); resolve(); }
+      } else if (m.op === 2) {
+        clearTimeout(timer);
+        if (m.d.negotiatedRpcVersion !== 1) {
+          ws.close(); reject(new Error("Versão RPC não confirmada pelo controle 3Mix")); return;
+        }
+        resolve();
+      }
       else if (m.op === 5) opts.onEvent?.(m.d.eventType, m.d.eventData);
-      else if (m.op === 7) { const p = pending.get(m.d.requestId); pending.delete(m.d.requestId); p?.resolve(m.d); }
+      else if (m.op === 7) {
+        const p = pending.get(m.d.requestId);
+        if (!p) return;
+        pending.delete(m.d.requestId);
+        if (!m.d.requestStatus || typeof m.d.requestStatus.result !== "boolean" || !Number.isInteger(m.d.requestStatus.code)) {
+          p.reject(new Error("Resposta de pedido inválida do controle 3Mix"));
+          return;
+        }
+        p.resolve(m.d);
+      }
     });
     ws.on("close", (code) => reject(new Error(`conexão fechada (${code})`)));
   });

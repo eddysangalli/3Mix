@@ -1,3 +1,0 @@
-// Actual installed server unchanged; only own-process IPC cooperative stop adapter.
-import assert from 'node:assert/strict';import path from 'node:path';import {pathToFileURL} from 'node:url';
-assert(process.env.FREEMIX_ROOT&&process.env.FREEMIX_QA_OWN_ONLY==='YES');const onMessage=m=>{if(m?.kind!=='close')return;process.send?.({kind:'closing',mode:'child-emitted-SIGTERM'});process.removeListener('message',onMessage);process.emit('SIGTERM');process.disconnect?.();};process.on('message',onMessage);await import(pathToFileURL(path.join(process.env.FREEMIX_ROOT,'ferramentas/servidor-api.mjs')));process.send?.({kind:'imported',pid:process.pid,actualServerImported:true});

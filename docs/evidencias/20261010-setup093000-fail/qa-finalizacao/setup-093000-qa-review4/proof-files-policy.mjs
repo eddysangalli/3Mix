@@ -1,2 +1,0 @@
-// Pure filename-role validation. Actual hash/size/image headers remain checked by installed hold.
-export function validateInstalledProofRoles(files){if(!Array.isArray(files)||files.length!==5)throw Error('Exactly five Root screenshot files required');const roles=new Set();for(const f of files){const m=/^root-installed-(mesa|srt|calls|replay-settings|hdr)\.(?:jpg|png)$/.exec(f?.file||'');if(!m||roles.has(m[1]))throw Error('Missing or duplicate Root screenshot role');roles.add(m[1]);}if(roles.size!==5)throw Error('Five unique Root screenshot roles required');return true;}

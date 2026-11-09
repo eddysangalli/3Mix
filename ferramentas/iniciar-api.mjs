@@ -16,6 +16,7 @@ let configuredHost='127.0.0.1';try{const network=JSON.parse((await readFile(join
 if(!Number.isInteger(port)||port<1||port>65535)throw Error('Porta do controle local inválida.');
 const id=createHash('sha256').update(root.toLowerCase()).digest('hex');
 let releaseLock=async()=>{};
+let releaseBrokerChannels=()=>{};
 async function health(candidate=port){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),1200);try{const response=await fetch('http://127.0.0.1:'+candidate+'/api/health',{signal:controller.signal});if(!response.ok)return null;const data=await response.json();return ['FreeMix','3Mix'].includes(data.app)&&data.installationId===id&&Number(data.port)===candidate?data:null;}catch{return null;}finally{clearTimeout(timer);}}
 async function occupied(candidate){return new Promise(done=>{const server=net.createServer();server.once('error',()=>done(true));server.listen({host:process.env.FREEMIX_API_HOST||configuredHost,port:candidate},()=>server.close(()=>done(false)));});}
 try{
@@ -27,15 +28,39 @@ try{
  if(process.argv.includes('--check')){console.log(JSON.stringify({success:true,dependenciesReady:true,websocketConfigured:true,apiPort:port}));process.exit(0);}
  releaseLock=await acquireStartupLock(root,{name:'api',timeoutMs:30000});await startupRecord(root,'api-dependencies-ready',{apiPort:port,wsPort:websocket.server_port});
  const selection=await selectApiPort({configuredPort:port,explicit:explicitPort,probe:async candidate=>{const current=await health(candidate);return{health:current,occupied:current?true:await occupied(candidate)};}});port=selection.port;
+ const lifecycleBrokerMode=process.argv.includes('--lifecycle-broker')&&typeof process.send==='function'&&process.connected;
  let current=selection.health;
- if(current){const panelUrlChanged=await persistApiPort(root,port,current);await startupRecord(root,'api-reused',{apiPort:port,portChanged:selection.changed});console.log(JSON.stringify({...current,reused:true,portChanged:selection.changed,panelUrlChanged,previousPort:selection.previousPort,reopenMesa:panelUrlChanged}));await releaseLock();process.exit(0);}
+ if(current){const panelUrlChanged=await persistApiPort(root,port,current);await startupRecord(root,'api-reused',{apiPort:port,portChanged:selection.changed});console.log(JSON.stringify({...current,reused:true,portChanged:selection.changed,panelUrlChanged,previousPort:selection.previousPort,reopenMesa:panelUrlChanged}));await releaseLock();if(lifecycleBrokerMode){await new Promise(resolve=>process.send({type:'3mix-api-ready',info:{...current,reused:true}},()=>resolve()));process.disconnect();}process.exit(0);}
  const logDir=join(root,'config/obs-studio/plugin_config/freemix-control');await mkdir(logDir,{recursive:true});
  // Rotate only at launch, after ownership/port checks; never touch a reused running API.
  for(const name of ['api','api-error']){const path=join(logDir,name+'.log'),info=await lstat(path).catch(()=>null);if(info?.isFile()&&!info.isSymbolicLink()&&info.size>8*1024*1024){try{const last=join(logDir,name+'.3.log');if((await lstat(last).catch(()=>null))?.isFile())await unlink(last);for(let n=2;n>=1;n--){const old=join(logDir,name+'.'+n+'.log');if((await lstat(old).catch(()=>null))?.isFile())await rename(old,join(logDir,name+'.'+(n+1)+'.log'));}await rename(path,join(logDir,name+'.1.log'));}catch{console.warn('FreeMix: log de lançamento ainda em uso, rotação adiada.');}}}
  const log=await open(join(logDir,'api.log'),'a'),errorLog=await open(join(logDir,'api-error.log'),'a');
- const child=spawn(process.execPath,[join(root,'ferramentas/servidor-api.mjs')],{cwd:root,detached:true,windowsHide:true,stdio:['ignore',log.fd,errorLog.fd],env:{...process.env,FREEMIX_ROOT:root,FREEMIX_PANEL_DIR:join(root,'painel'),FREEMIX_API_PORT:String(port),FREEMIX_API_HOST:process.env.FREEMIX_API_HOST||configuredHost}});
+ // Ownership cannot be transferred by an inherited environment variable.
+ // A future handshake must bind the newly created API PID and engine instance.
+ const apiEnvironment={...process.env};
+ delete apiEnvironment.THREEMIX_PRIVATE_LIFECYCLE;
+ const child=spawn(process.execPath,[join(root,'ferramentas/servidor-api.mjs')],{cwd:root,detached:true,windowsHide:true,stdio:lifecycleBrokerMode?['ignore',log.fd,errorLog.fd,'ipc']:['ignore',log.fd,errorLog.fd],env:{...apiEnvironment,FREEMIX_ROOT:root,FREEMIX_PANEL_DIR:join(root,'painel'),FREEMIX_API_PORT:String(port),FREEMIX_API_HOST:process.env.FREEMIX_API_HOST||configuredHost}});
  let launchError;child.once('error',error=>{launchError=error;});child.unref();await log.close();await errorLog.close();
+ if(lifecycleBrokerMode){
+  releaseBrokerChannels=()=>{try{if(child.connected)child.disconnect();}catch{}try{if(process.connected)process.disconnect();}catch{}};
+  const {createOwnedApiBroker}=await import('./api-lifecycle-broker.mjs');
+  const forward=createOwnedApiBroker({child});
+  process.on('message',async message=>{
+   if(message?.type!=='3mix-lifecycle-bind')return;
+   const success=await forward(message.config).catch(()=>false);
+   if(process.connected)try{process.send({type:'3mix-lifecycle-bound',requestId:message.requestId,success},()=>{});}catch{}
+  });
+  process.once('disconnect',()=>{try{if(child.connected)child.disconnect();}catch{}});
+  child.once('exit',(code,signal)=>{
+   // Announce observed child exit, not just loss of the IPC connection.
+   process.exitCode=code===0&&!signal?0:1;
+   if(process.connected){
+    try{process.send({type:'3mix-api-exited',apiPid:child.pid,code,signal},()=>{if(process.connected)process.disconnect();});}
+    catch{if(process.connected)process.disconnect();}
+   }
+  });
+ }
  await startupRecord(root,'api-spawned',{apiPid:child.pid,apiPort:port,host:process.env.FREEMIX_API_HOST||configuredHost});
- for(let attempt=0;attempt<30;attempt++){if(launchError)throw launchError;current=await health();if(current){const panelUrlChanged=await persistApiPort(root,port,current);await startupRecord(root,'api-ready',{apiPid:child.pid,apiPort:port,portChanged:selection.changed});await releaseLock();console.log(JSON.stringify({...current,reused:false,portChanged:selection.changed,panelUrlChanged,previousPort:selection.previousPort,reopenMesa:panelUrlChanged}));process.exit(0);}await new Promise(r=>setTimeout(r,300));}
- throw Error('O servidor nao respondeu. Confira '+join(logDir,'api-error.log'));
-}catch(error){await startupRecord(root,'api-failed',{error:error.message});console.error('3Mix: falha ao iniciar as janelas extras. '+error.message);process.exitCode=1;}finally{await releaseLock();}
+ for(let attempt=0;attempt<30;attempt++){if(launchError)throw launchError;current=await health();if(current&&Number(current.pid)!==child.pid)throw Error('A API respondeu com identidade diferente do processo criado; nenhuma posse foi assumida.');if(current&&lifecycleBrokerMode&&current.privateLifecycleReady!==true)throw Error('A API criada não confirmou suporte ao vínculo privado.');if(current){const panelUrlChanged=await persistApiPort(root,port,current);await startupRecord(root,'api-ready',{apiPid:child.pid,apiPort:port,portChanged:selection.changed});await releaseLock();console.log(JSON.stringify({...current,reused:false,portChanged:selection.changed,panelUrlChanged,previousPort:selection.previousPort,reopenMesa:panelUrlChanged}));if(lifecycleBrokerMode){if(process.connected)process.send({type:'3mix-api-ready',info:{...current,reused:false}},()=>{});break;}process.exit(0);}await new Promise(r=>setTimeout(r,300));}
+ if(!current)throw Error('O servidor nao respondeu. Confira '+join(logDir,'api-error.log'));
+}catch(error){releaseBrokerChannels();await startupRecord(root,'api-failed',{error:error.message}).catch(()=>{console.error('3Mix: não foi possível registrar a falha de inicialização da API.');});console.error('3Mix: falha ao iniciar as janelas extras. '+error.message);process.exitCode=1;if(process.argv.includes('--lifecycle-broker')&&process.connected){try{process.disconnect();}catch{}}}finally{await releaseLock();}

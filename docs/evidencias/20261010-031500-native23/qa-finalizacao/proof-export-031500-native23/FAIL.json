@@ -1,5 +1,0 @@
-{
-  "status": "FAIL_PRESERVED_HARNESS_FORMAT_ASSERTION",
-  "originalScriptSha256": "7b08ff76fb15349159f31688d3d3ed40e7c493becb0a2fbcdd5ded161d9f05b0",
-  "reason": "Captures12/13 have JPEG/JFIF bytes with .png names; PNG-only assertion rejected them; sources/captures untouched"
-}

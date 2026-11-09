@@ -1,8 +1,0 @@
-import fs from 'node:fs/promises';import {join,resolve} from 'node:path';import {createHash} from 'node:crypto';
-const root=resolve(import.meta.dirname,'../..'),sha=b=>createHash('sha256').update(b).digest('hex');
-const paths=['obs-vmix/ferramentas/recuperacao-dependencias.mjs',...['test.mjs','test-negative-extra.mjs','freeze.mjs','before.mjs','baseline-fail.json','resultado.json','resultado-negative-extra.json','README.md'].map(n=>'qa-finalizacao/gtzip-qr-recovery/'+n),...['test.mjs','resultado.json','README.md'].map(n=>'qa-finalizacao/gtzip-activation-event-order/'+n)];
-const files=await Promise.all(paths.map(async path=>{const bytes=await fs.readFile(join(root,path));return {path,size:bytes.length,sha256:sha(bytes)};}));
-const main=JSON.parse(await fs.readFile(join(import.meta.dirname,'resultado.json'))),extra=JSON.parse(await fs.readFile(join(import.meta.dirname,'resultado-negative-extra.json')));
-if(files[0].sha256!==main.sourcePins.find(f=>f.path===files[0].path).sha256)throw Error('Product changed after QA');
-const report={status:'APPLIED_SOURCE_QA_PASS_INSTALLED_CEF_RECOVERY_PENDING',at:new Date().toISOString(),checks:main.checks.length+extra.checks.length,productFiles:[files[0].path],files,operatorTouched:false,packageModified:false,notes:'Only recovery scanner product change. Activation evidence read-only. No binaries/raw logs/screenshots.'};
-const file=join(import.meta.dirname,'ALLOWLIST.json');await fs.writeFile(file,JSON.stringify(report,null,2),{flag:'wx'});console.log(JSON.stringify({status:report.status,checks:report.checks,files:files.length,allowlistSha256:sha(await fs.readFile(file)),productSha256:files[0].sha256}));
