@@ -1,18 +1,16 @@
 // O manual da API (docs/API.md) não pode envelhecer calado.
-// Roda o gerador do índice (scripts/documentacao/gerar-indice-api.mjs), grava docs/api/indice-acoes.json
+// Calcula o índice em memória, sem sobrescrever docs/api/indice-acoes.json
 // e FALHA se alguma rota, ação de /api/control, ação de rota própria, função vMix ou vendor request
 // existente no código não aparecer no manual, ou se o índice gerado dentro do manual estiver desatualizado.
 // Uso: runtime/node.exe ferramentas/test-manual-api.mjs
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { readFileSync, existsSync } from 'node:fs';
 import { gerarIndice, indiceMarkdown, ARQ_INDICE, ARQ_MANUAL, MARCA_INICIO, MARCA_FIM, RAIZ } from '../scripts/documentacao/gerar-indice-api.mjs';
 
 let falhas = 0;
 const ok = (nome, condicao, detalhe = '') => { if (!condicao) falhas++; console.log((condicao ? 'PASSOU ' : 'FALHOU ') + nome + (detalhe ? ' · ' + detalhe : '')); };
 
 const indice = gerarIndice();
-mkdirSync(dirname(ARQ_INDICE), { recursive: true });
-writeFileSync(ARQ_INDICE, JSON.stringify(indice, null, 2) + '\n');
+ok('Índice JSON está atualizado', existsSync(ARQ_INDICE) && readFileSync(ARQ_INDICE, 'utf8').replace(/\r\n/g, '\n') === JSON.stringify(indice, null, 2) + '\n', 'regenere explicitamente com scripts/documentacao/gerar-indice-api.mjs');
 
 // --manual <arquivo> permite conferir uma cópia (usado para provar que o teste falha quando falta algo).
 const posManual = process.argv.indexOf('--manual');

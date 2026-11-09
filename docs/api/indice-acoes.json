@@ -269,6 +269,11 @@
       "arquivo": "ferramentas/servidor-api.mjs"
     },
     {
+      "path": "/api/plugin-manager/check-updates",
+      "prefixo": false,
+      "arquivo": "ferramentas/servidor-api.mjs"
+    },
+    {
       "path": "/api/preflight",
       "prefixo": false,
       "arquivo": "ferramentas/servidor-api.mjs"

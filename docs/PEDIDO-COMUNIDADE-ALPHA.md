@@ -9,9 +9,9 @@
 
 Operadores, diretores de TV, técnicos de streaming e engenheiros de transmissão:
 
-O **3Mix** foi concebido desde a primeira linha de código para ser uma suíte broadcast de produção ao vivo profissional, modular e com tolerância zero a falhas. Ele não é uma skin de OBS nem um clone jurássico do vMix — sua interface unificada no padrão **grafite MotionCaster** foi desenhada para operações de missão crítica.
+O **3Mix** foi concebido desde a primeira linha de código para ser uma suíte broadcast de produção ao vivo profissional, modular com foco em confiabilidade operacional. Ele não é uma skin de OBS nem um clone jurássico do vMix — sua interface unificada no padrão **grafite MotionCaster** foi desenhada para operações de missão crítica.
 
-Durante o desenvolvimento interno, comprovamos rigorosamente a matemática de áudio, os pipelines de vídeo, o roteamento lógico de M/Es, DSKs, transições, layouts virtuais e a segurança do sistema com baterias completas de testes automatizados locais.
+Há testes automatizados e ensaios locais de partes do áudio, vídeo, roteamento e interface. Cada resultado vale somente para o build, cenário e duração registrados; não comprova estabilidade universal nem segurança integral. Crashes nativos ainda sem causa e correção comprovadas impedem declarar o RC concluído.
 
 Porém, software de transmissão de alta fidelidade depende da interação com o mundo físico: cabos, placas de rede de alta velocidade, consoles de áudio, câmeras com motores mecânicos, placas de captura SDI/HDMI e GPUs de diferentes fabricantes. **É aqui que a comunidade entra.**
 
@@ -19,20 +19,21 @@ Nesta fase Alpha, o software é **100% gratuito e liberado** para que vocês est
 
 ---
 
-## 2. INVENTÁRIO EXATO DE COMPONENTES INSTALADOS NO RUNTIME ALPHA
+## 2. IDENTIDADE DO BUILD E ESTADO DE VALIDAÇÃO
 
-Para garantir total transparência técnica aos engenheiros e operadores que estão testando esta versão, segue o inventário dos binários reais presentes no runtime de execução:
+Esta convocação não é inventário da instalação do operador nem certificado de homologação. A versão exata de cada componente deve vir do recibo do pacote entregue e da inspeção daquela instalação. Não reutilize números de uma Alpha anterior.
 
-| Componente | Versão Real Instalada | Arquivo / Binário PE x64 | Status Operacional |
-|---|---|---|---|
-| **Motor Broadcast (OBS)** | `32.2.2 Pro` (Fork 3Mix) | `3mix-runtime/bin/64bit/3Mix.exe`<br/>`3mix-runtime/bin/64bit/obs.dll` | **HOMOLOGADO NO RUNTIME** (Multi-M/E, DSK 1-4, FreeD, DeckLink) |
-| **Biblioteca de Transporte SRT** | `1.5.7.0` (Oficial Haivision) | `3mix-runtime/bin/64bit/srt.dll` | **HOMOLOGADO NO RUNTIME** (CVE-2026-55869 corrigida, AES-128/192/256) |
-| **Chromium / CEF** | `127.145.7` (Chromium 127) | `3mix-runtime/obs-plugins/64bit/libcef.dll` | **HOMOLOGADO NO RUNTIME** (Base homologada estável; transição para CEF 150/156 em andamento) |
-| **FFmpeg Integrado (DLLs)** | `n8.1.2` (libavcodec 62) | `3mix-runtime/bin/64bit/avcodec-62.dll`<br/>`3mix-runtime/bin/64bit/avformat-62.dll` | **HOMOLOGADO NO RUNTIME** (Retenção defensiva da ABI do motor) |
-| **FFmpeg Externo (CLI)** | `8.1.1` (gyan.dev) / Dual 9.0.2 | `3mix-runtime/runtime/ffmpeg.exe`<br/>(Fallback para PATH do sistema) | **HOMOLOGADO NO RUNTIME** (Replay, transcodificação e slides) |
-| **NDI Broadcast** | `6.3.2` / `distroav 6.2.1` | `3mix-runtime/obs-plugins/64bit/distroav.dll` | **HOMOLOGADO NO RUNTIME** |
-| **OMT Native** | `1.0.0.19` | `3mix-runtime/obs-plugins/64bit/omtplugin.dll`<br/>`3mix-runtime/bin/64bit/libomt.dll` | **HOMOLOGADO NO RUNTIME** |
-| **Gerenciador de Plugins OBS** | `1.0.0 Pro` | `3mix-plugins/%module%` isolado<br/>Interface na Mesa `/settings` | **HOMOLOGADO NO RUNTIME** (Sandbox PE x64 e Safe Mode) |
+| Componente / capacidade | Evidência necessária | Estado sem recibo da release exata |
+|---|---|---|
+| Motor OBS33 / 3Mix | Commit e overlays, hash do EXE e obs.dll, build e abertura isolada | NÃO HOMOLOGADO |
+| Transporte SRT | Versão/hash da DLL efetivamente carregada, envio/recepção e reconexão | NÃO TESTADO no equipamento/rede |
+| Chromium / CEF | Versão/hash carregados, transparência, áudio e estabilidade de fontes web | NÃO HOMOLOGADO |
+| FFmpeg integrado e CLI | Versões/hashes separados, codecs e arquivos reproduzidos/analisados | NÃO HOMOLOGADO |
+| NDI / DistroAV e OMT | Versão/hash do plugin e SDK carregados, teste entre máquinas e sincronismo | NÃO TESTADO sem bancada correspondente |
+| Gerenciador de plugins | ZIP/layout, proteção de módulos do sistema, aplicação na próxima abertura e recuperação | Testes automatizados não substituem ensaio nativo |
+| PTZ, ASIO, DeckLink e AJA | Modelo, firmware/driver, sinal e mapa de canais reais | NÃO TESTADO sem hardware |
+
+Pacotes oficiais de Shaderfilter, Advanced Masks e Color Monitor têm inspeção de layout e recursos separada da execução nativa. Carregamento, renderização e estabilidade só podem ser marcados PASSOU com recibo específico. Não há alegação de correção de CVE neste guia: qualquer aviso de segurança exige referência oficial e identificação do binário distribuído.
 
 ---
 
@@ -48,7 +49,7 @@ flowchart TD
     M4["Missão 4: MultiCorder Pesado<br/>(ISOs contínuas em MXF / XDCAM / DNxHD)"]
     M5["Missão 5: 3Mix Crew no Celular<br/>(Tally e Intercom iOS / Android)"]
     M6["Missão 6: Estúdios IP ST 2110 / PTP<br/>(Infraestrutura de emissora 25/100GbE)"]
-    M7["Missão 7: Links SRT 1.5.7<br/>(Caller, Listener, Rendezvous, Cifra AES)"]
+    M7["Missão 7: Links SRT (versão do build)<br/>(Caller, Listener, Rendezvous, Cifra AES)"]
     M8["Missão 8: CEF / Fontes Web<br/>(GC HTML5, Animações CSS, Alfa RGBA)"]
     M9["Missão 9: Gerenciador de Plugins<br/>(Instalação ZIP x64, Safe Mode, Rollback)"]
     M10["Missão 10: GPUs & Placas Físicas<br/>(NVIDIA NVENC, QuickSync, DeckLink)"]
@@ -133,15 +134,15 @@ flowchart TD
 
 ---
 
-### MISSÃO 7: Conexões e Transporte SRT 1.5.7 (Segurança e Conectividade Externa)
+### MISSÃO 7: Conexões e Transporte SRT (versão do build) (Segurança e Conectividade Externa)
 - **Equipamentos desejados**: Links de Internet comercial ou 4G/5G, encoders remotos (Kiloview, Haivision, vMix ou OBS) e switchers de recepção.
 - **O que testar**:
   1. **Os 3 Modos SRT**:
      - **Caller**: Enviar Program ou Clean Feed para um servidor SRT remoto ou vMix receptor.
      - **Listener**: Aguardar feed de repórter externo em porta fixa (ex.: `18360`).
      - **Rendezvous**: Testar Rendezvous com portas e regras de firewall documentadas nos dois lados. Esse modo não garante travessia de NAT; CGNAT e NAT simétrico podem impedir a conexão.
-  2. **Criptografia AES**: Configurar chave de 16 (AES-128) ou 32 bytes (AES-256) com passphrase. Validar se o receptor só abre a imagem se a senha coincidir.
-  3. **Stream ID e Multiplexação**: Testar múltiplos feeds SRT na mesma porta UDP utilizando tags `#!::u=...,r=...`.
+  2. **Criptografia AES**: Selecionar o comprimento de chave suportado nos dois extremos (por exemplo, `pbkeylen=16` para AES-128 ou `pbkeylen=32` para AES-256). A passphrase é um parâmetro separado, não uma chave binária de 16/32 bytes. Registrar parâmetros sem divulgar a senha; testar senha correta, incorreta e ausente, conferindo rejeição e ausência de mídia no receptor quando a autenticação falhar.
+  3. **Stream ID e Multiplexação**: Usar Stream ID somente com receptor/servidor que implemente o esquema e o roteamento desejados. Tags como `#!::u=...,r=...` não criam multiplexação por si. Registrar software receptor, regra de roteamento, destinos e isolamento entre feeds; marcar BLOQUEADO quando essa capacidade não existir.
   4. **Recuperação de Perda de Pacotes**: Simular oscilação de link 4G/Wi-Fi e observar o buffer dinâmico de latência (de 80ms a 2000ms).
 
 ---
@@ -206,13 +207,13 @@ O script gera um arquivo ZIP na pasta `diagnosticos/` (ex: `3mix-diagnostico-202
 
 ### Passo 2: O Que Escrever no Relato
 Junto com o arquivo ZIP, informe:
-1. **Missão testada** (ex: Missão 7 - Link SRT 1.5.7 P2P Rendezvous com vMix).
+1. **Missão testada** (ex: Missão 7 - Link SRT (versão informada) P2P Rendezvous com vMix).
 2. **Especificações do seu PC**: Processador, memória RAM e placa de vídeo (GPU).
 3. **O que aconteceu**: O passo a passo exato do que você executou.
 4. **Comportamento observado**: O erro que apareceu na tela ou o sintoma percebido.
 5. **Comportamento esperado**: Como você gostaria que o switcher se comportasse.
 
-### Garantia de Privacidade
+### Revisão de privacidade antes do envio
 O coletor de logs do 3Mix possui um filtro de redação automático estrito:
 - O coletor aplica filtros de redação, mas **revise o conteúdo do ZIP antes de compartilhar**. Logs de terceiros e textos livres podem conter dados privados; não presuma anonimização perfeita.
 - Confira os arquivos efetivamente incluídos na prévia do diagnóstico. Não envie credenciais, projetos privados, mídia de clientes ou endereços de rede sem necessidade e consentimento.

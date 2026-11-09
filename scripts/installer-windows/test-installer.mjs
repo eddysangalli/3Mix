@@ -12,7 +12,7 @@
 import { spawn, execFileSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { existsSync } from 'node:fs';
-import { writeFile, rm, mkdtemp } from 'node:fs/promises';
+import { writeFile, rm, mkdtemp, mkdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
@@ -419,25 +419,27 @@ async function testInstallerCompiles() {
     // as an array literal; the missing methods only failed at actual csc.exe build time).
     // This test runs build.mjs --stub-only for real, against a synthetic payload, so a
     // compile error in Setup.cs/Uninstall.cs fails CI instead of silently stacking up.
-    const work = await mkdtemp(join(tmpdir(), '3mix-installer-build-'));
+    const qaRoot = join(ROOT_DIR, 'qa-finalizacao', 'installer-suite');
+    await mkdir(qaRoot, { recursive: true });
+    const work = await mkdtemp(join(qaRoot, 'build-'));
     const zip = join(work, '3Mix-Completo-0.0.0-test.zip');
     const output = join(work, 'test-output.exe');
     try {
         // Only the filename and a valid size matter to build.mjs in --stub-only mode; it
         // never opens the archive itself in that mode.
         await writeFile(zip, Buffer.alloc(1024));
-        execFileSync('node', ['build.mjs', '--zip=' + zip, '--output=' + output, '--stub-only'], {
+        execFileSync('node', ['build.mjs', '--zip=' + zip, '--output=' + output, '--build-dir=' + join(work, 'compiler'), '--stub-only'], {
             cwd: INSTALLER_DIR, stdio: 'pipe', windowsHide: true, timeout: 60000
         });
-        if (!existsSync(join(INSTALLER_DIR, 'build', 'FreeMix-Setup-Stub.exe'))) throw new Error('build.mjs reportou sucesso mas o stub não existe');
-        if (!existsSync(join(INSTALLER_DIR, 'build', 'FreeMix-Uninstall.exe'))) throw new Error('build.mjs reportou sucesso mas o desinstalador não existe');
+        if (!existsSync(join(work, 'compiler', 'FreeMix-Setup-Stub.exe'))) throw new Error('build.mjs reportou sucesso mas o stub não existe');
+        if (!existsSync(join(work, 'compiler', 'FreeMix-Uninstall.exe'))) throw new Error('build.mjs reportou sucesso mas o desinstalador não existe');
         console.log('✅ Setup.cs e Uninstall.cs compilam sem erros (build real, não apenas leitura de estrutura)');
     } catch (e) {
         const detail = e.stdout ? e.stdout.toString() : e.stderr ? e.stderr.toString() : e.message;
         throw new Error('Falha ao compilar o instalador: ' + detail);
     } finally {
         await rm(work, { recursive: true, force: true });
-        await rm(join(INSTALLER_DIR, 'build'), { recursive: true, force: true }).catch(() => {});
+        // Only this uniquely-created QA fixture is removed; shared builds stay untouched.
     }
     return true;
 }

@@ -358,7 +358,7 @@ máquina de desenvolvimento (`qa-finalizacao/crew-broadcast-20261103/testar-disc
 | `/api/modulos` | GET / POST | local | POST `{modulos:{replay:bool, rundown:bool, calls:bool, multiview:bool, iso:bool, dataSources:bool, srtHdr:bool, blackbox:bool, broadcastDelay:bool}}` | `{success, modulos, definicao?}` [GET verificado] |
 | `/api/workspace` | GET / POST | local | POST `{cardWidth:120..320, audioLeft, modulesStacked, sideWidth:0 ou 280..4000, dockTabs?, expectedRevision}` | `{success, workspace}`; revisão diferente → **409** [GET verificado] |
 | `/api/projects-copy` | GET / POST | local | POST `{action:"saveas"\|"save_template"\|"get_template"\|"delete_template"\|"apply_template", from?, name?, templateName?, templateId?, sceneNames?, video?, importedTemplate?}` | GET: `{success, templates[]}`; POST: `{success, ...}` (cópia local de coleções em disco e biblioteca de modelos de projeto) [código] |
-| `/api/update` | GET | local | — | `{success, update}` (consulta de atualização) [código; não executado na bancada] |
+| `/api/update` | GET | local | — | `{success, update, opening}` (consulta de atualização; `opening` é a identidade emitida pelo launcher ou `null`) [código; não executado na bancada] |
 | `/api/diagnostics` | GET / POST | local | POST `{note?, machineName?, relato?}` gera pacote ZIP | `{success, ...}` [GET verificado] |
 | `/api/diagnostics/reveal` | POST | local | — | abre a pasta do pacote [código] |
 | `/api/diagnostics/download` | GET | local | `?id=` | ZIP [código] |
@@ -413,6 +413,7 @@ Estas rotas atendem a tela **Configurações → Plugins** e só aceitam pedidos
 | Rota | Método | Corpo / parâmetros | Resposta e limite |
 |---|---|---|---|
 | `/api/plugin-manager` | GET | — | `{success, engine, plugins, catalog, diagnostics, operations, lastChanged, safeMode, productionActive}`. `plugins[].state` distingue carga confirmada, falha, estado desconhecido e ação pendente. |
+| `/api/plugin-manager/check-updates` | GET | — | Consulta informativa das releases remotas. Não baixa, instala ou carrega plugins. `versionSource: "catalog"` e `installedVersionVerified: false` significam que a versão comparada é a do catálogo, não uma versão comprovada da DLL instalada. Falhas de rede são reportadas por item. |
 | `/api/plugin-manager/install` | POST multipart | `file`: ZIP de plugin Windows x64; `id` opcional ao atualizar plugin gerenciado | Analisa o arquivo e prepara instalação/atualização para o próximo reinício. Limite de upload: 256 MiB mais overhead do multipart. |
 | `/api/plugin-manager/enable`, `/disable`, `/remove`, `/rollback` | POST JSON | `{"id":"identificador"}` | Prepara ação para o próximo reinício; rollback exige backup válido. Módulos integrados/protegidos são recusados. |
 | `/api/plugin-manager/safe-mode` | POST JSON | `{"enabled":true}` ou `false` | Prepara ativação/desativação do modo de segurança para o próximo reinício. |
@@ -851,7 +852,7 @@ Não verificados: parâmetros detalhados de `call_*`, `recovery_*`, `network_*`,
 
 <!-- indice-gerado:inicio -->
 
-> Gerado automaticamente a partir do código (341 ações de /api/control, 81 rotas, 52 vendor requests). Atualize com `node scripts/documentacao/gerar-indice-api.mjs --atualizar-manual`.
+> Gerado automaticamente a partir do código (341 ações de /api/control, 82 rotas, 52 vendor requests). Atualize com `node scripts/documentacao/gerar-indice-api.mjs --atualizar-manual`.
 
 #### Ações de `/api/control` por arquivo-fonte
 
@@ -898,7 +899,7 @@ Legenda: **L** = só no computador do 3Mix pelo HTTP; **Lw** = só no computador
 
 #### Rotas HTTP encontradas no código
 
-`/api`, `/api/access`, `/api/audio-routing`, `/api/aux-routing`, `/api/blackbox`, `/api/calls/audio`, `/api/color/frame`, `/api/composition-frame`, `/api/control`, `/api/crew/intercom`, `/api/crew/intercom/ws`, `/api/crew/tally`, `/api/crew/tally/ws`, `/api/delay`, `/api/devices/all`, `/api/devices/video`, `/api/diagnostics`, `/api/diagnostics/download`, `/api/diagnostics/preview`, `/api/diagnostics/reveal`, `/api/ducking`, `/api/effects`, `/api/effects-frame`, `/api/final-program-gate`, `/api/gc-compatible`, `/api/health`, `/api/inputs-health`, `/api/iso`, `/api/json`, `/api/livelan/status`, `/api/mix-audio`, `/api/mix-effects`, `/api/mix-effects/check`, `/api/modulos`, `/api/multicorder/benchmark`, `/api/multicorder/discos`, `/api/multiview`, `/api/multiview-montagens`, `/api/network`, `/api/network-enable`, `/api/operation-check`, `/api/outputs`, `/api/outputs-watchdog`, `/api/overlays`, `/api/pair`, `/api/panel-close`, `/api/panel-log`, `/api/panel-open`, `/api/panel-title`, `/api/patch`, `/api/playout`, `/api/plugin-manager`, `/api/plugin-manager/*`, `/api/preflight`, `/api/project/*`, `/api/project/apply`, `/api/project/preview`, `/api/project/read`, `/api/project/scan`, `/api/projects-copy`, `/api/ptz`, `/api/ptz/preview`, `/api/qr.svg`, `/api/replay`, `/api/replay-preview/*`, `/api/return-feeds`, `/api/rundown`, `/api/settings`, `/api/signals`, `/api/slides`, `/api/slides/events`, `/api/slides/media/*`, `/api/slides/view`, `/api/slides/view/*`, `/api/srt-hdr`, `/api/thumbs`, `/api/ticker-ack`, `/api/update`, `/api/video-settings`, `/api/workspace`, `/ws`
+`/api`, `/api/access`, `/api/audio-routing`, `/api/aux-routing`, `/api/blackbox`, `/api/calls/audio`, `/api/color/frame`, `/api/composition-frame`, `/api/control`, `/api/crew/intercom`, `/api/crew/intercom/ws`, `/api/crew/tally`, `/api/crew/tally/ws`, `/api/delay`, `/api/devices/all`, `/api/devices/video`, `/api/diagnostics`, `/api/diagnostics/download`, `/api/diagnostics/preview`, `/api/diagnostics/reveal`, `/api/ducking`, `/api/effects`, `/api/effects-frame`, `/api/final-program-gate`, `/api/gc-compatible`, `/api/health`, `/api/inputs-health`, `/api/iso`, `/api/json`, `/api/livelan/status`, `/api/mix-audio`, `/api/mix-effects`, `/api/mix-effects/check`, `/api/modulos`, `/api/multicorder/benchmark`, `/api/multicorder/discos`, `/api/multiview`, `/api/multiview-montagens`, `/api/network`, `/api/network-enable`, `/api/operation-check`, `/api/outputs`, `/api/outputs-watchdog`, `/api/overlays`, `/api/pair`, `/api/panel-close`, `/api/panel-log`, `/api/panel-open`, `/api/panel-title`, `/api/patch`, `/api/playout`, `/api/plugin-manager`, `/api/plugin-manager/*`, `/api/plugin-manager/check-updates`, `/api/preflight`, `/api/project/*`, `/api/project/apply`, `/api/project/preview`, `/api/project/read`, `/api/project/scan`, `/api/projects-copy`, `/api/ptz`, `/api/ptz/preview`, `/api/qr.svg`, `/api/replay`, `/api/replay-preview/*`, `/api/return-feeds`, `/api/rundown`, `/api/settings`, `/api/signals`, `/api/slides`, `/api/slides/events`, `/api/slides/media/*`, `/api/slides/view`, `/api/slides/view/*`, `/api/srt-hdr`, `/api/thumbs`, `/api/ticker-ack`, `/api/update`, `/api/video-settings`, `/api/workspace`, `/ws`
 
 Páginas do painel servidas pela mesma porta (HTML, não JSON): .
 
