@@ -1,1 +1,0 @@
-<Composition Width="640" Height="360"><QRCode Name="Link" Dimensions="170,170,0" Location="24,32,0" Text="https://example.invalid/live?source=FreeMix&amp;edition=2" Opacity="0.9"><QRCode.Transform><Transform Rotate="0,0,0.2" Scale="1.1,1.1,1" Translate="3,4,0" Origin="0.2,0.3"/></QRCode.Transform></QRCode></Composition>

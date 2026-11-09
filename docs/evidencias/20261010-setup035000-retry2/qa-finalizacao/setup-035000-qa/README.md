@@ -1,9 +1,0 @@
-Preparação restrita: versão035000, Native23, uma instalação real. NÃO executada; aguardar autorização e pins selados do root. Originais031500 e recibos anteriores não são editados.
-
-Runner: `qa-finalizacao/setup-035000-qa.mjs`. Exige todos os parâmetros explícitos `--candidate=ABS --candidate-sha=SHA --setup-exe=ABS --setup-sha=SHA --zip=ABS --zip-sha=SHA --manifest-sha=SHA --receipt=ABS/qa-finalizacao/setup-035000-qa/receipt.json`. Não existem defaults de pacote/EXE/ZIP. Usar Node disponível; nenhuma build necessária.
-
-Uma raiz TEMP própria marcada, destino novo com espaços, portas efêmeras. Verifica hashes antes do EXE; `--verify`; instalação `--silent --no-shortcuts`; confirma Native inteiro e DLLs/NDI, credenciais novas, startup e restart explícitos sem saída/REC/device. API permanece própria e deve reconectar ao segundo Native sem duplicar o serviço. A primeira abertura pode ficar disponível ao root por até60s para GET/revisão IAB; contexto só aponta arquivo próprio de acesso, sem imprimir valores. Close-request próprio antecipa o fechamento. Native só fecha por shutdown_idle aceito; eventual força é FAIL. API só é parada após identidade do próprio executável conferida, sem alegar suporte a endpoint de shutdown que não existe.
-
-Diagnóstico instalado real/BAT, fixtures token/cookie/SRT/streamkey/OAuth e validação do ZIP; nenhum segredo emitido. Dados próprios/config/arquivo alterado preservados na desinstalação, arquivos imutáveis removidos só com hash correspondente e registry key próprio retirado. Sem apagar árvores TEMP calculadas.
-
-Latências são leituras HTTP e um comando com recibo, não CEF/GPU/PCM/endurance. A UI IAB do root é prova visual separada. Hardware/VM limpa/WAN/Authenticode não ficam homologados. Preservar primeiro FAIL; retry exige arquivos/recibos novos e proveniência.

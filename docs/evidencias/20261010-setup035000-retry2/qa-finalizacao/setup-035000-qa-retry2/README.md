@@ -1,3 +1,0 @@
-# Isolated Setup035000 retry2
-
-A new actual EXE installation is authorized after two preserved harness FAILs. Its installation basename begins FreeMix-QA- and contains spaces, as required by the production shutdown_idle qaClose guard. Prior JR installation is not renamed or reused. All9568 source/Ed25519 and installed hashes are verified before app, with only five known installation-generated config paths and the one exact signed branding page transformation across2085 Native files. No product changes, shortcuts, firewall, operator, Native builds or Git. Two own Native cooperative closures must each log counter0/crash0; forced cleanup remains FAIL. Diagnostic ZIP stays private; export includes only scanned text evidence.

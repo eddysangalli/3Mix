@@ -1,7 +1,0 @@
-{
-  "status": "TRAILING_SPACE_ONLY_REMOVED_NO_BEHAVIOR_CHANGE",
-  "path": "painel/talkback-rapido.js",
-  "before": "ff113f2ad1af18597180456cf61b3b05ec5d59f0fcd9084affa306422b0bf962",
-  "after": "7ac43977efb0951660d8ae37998f256caceda290bfc48db7fbee25958948d841",
-  "nativeQASnapshot": "Own installation preserves the prior exact bytes; software statements unchanged."
-}

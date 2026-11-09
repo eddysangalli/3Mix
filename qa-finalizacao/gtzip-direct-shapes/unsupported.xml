@@ -1,1 +1,0 @@
-<Composition Width="1920" Height="1080"><Polygon Name="BadPolygon" Points="not-a-coordinate"/><Path Name="BadPath" Data="R0 0"/><Path Name="EmptyPath"/><Mesh Name="UnsupportedMesh"/><Layer Name="L"><Path Name="GroupedBadPath" Data="INVALID"/></Layer></Composition>

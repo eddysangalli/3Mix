@@ -1,9 +1,0 @@
-# GTZIP — Polygon/Path diretos
-
-Correção limitada a `obs-vmix/ferramentas/gtzip-xml.mjs`: adicionar `Polygon` e `Path` ao filtro de filhos diretos da raiz Composition, pois a mesma conversão já existe para grupos e camadas. Nenhum renderer foi alterado. `el.geometry` recebe Points/Data; o renderer existente gera SVG `<polygon points=...>` ou `<path d=...>`, com viewBox, Fill/Stroke, opacidade, posição, transforms e crop existentes. Isto não amplia a gramática SVG nem a compatibilidade universal de títulos proprietários.
-
-`node qa-finalizacao/gtzip-direct-shapes/test.mjs`: **33 verificações PASS**. A versão original congelada foi executada com somente o import do helper real relocalizado: Polygon/Path diretos eram descartados, sem avisos. A versão corrigida preserva os dois e seus dados; comparação direct/group/nested cobre geometria, dimensões, posição, opacidade, cor/stroke, transform/crop, ordem e targets de storyboard. As nove primitivas suportadas foram comparadas direct/group. Polygon/Path inválidos ou vazios e Mesh desconhecido continuam gerando `GT_UNSUPPORTED` com nome/caminho. HTML gerado inclui ambos SVG e viewBoxes esperados.
-
-Os fixtures XML são próprios e finitos; dados convertidos e HTML foram preservados. Nenhum Native/CEF/navegador, pacote, Git ou operador foi aberto/alterado. A prova valida dados/markup e não aprovação visual de todos os GTZIP. `resultado-fail.json` preserva a expectativa inicial errada do harness para a formatação CSS rgba (sem espaços); a função existente usa espaços e a expectativa foi corrigida antes do PASS, sem mudança de produto.
-
-O único fonte de produto está congelado em `gtzip-xml.mjs.after`; `resultado.json` fixa before/after SHA256. `gtzip-direct-shapes.patch` é relativo à raiz obs-vmix/FreeMix, com uma mudança de filtro. O coordenador espelha FreeMix e integra antes do próximo pacote; releases seladas continuam intactas. `ALLOWLIST.json` contém hashes de todos os artefatos desta frente.

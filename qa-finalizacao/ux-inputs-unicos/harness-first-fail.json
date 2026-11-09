@@ -1,9 +1,0 @@
-{
-  "status": "FAIL_HARNESS",
-  "stage": "extracted Enter handler VM invocation",
-  "error": "Illegal return statement",
-  "cause": "The own QA fixture evaluated an event-handler return at script top level instead of inside a callback.",
-  "repair": "Wrap that own VM invocation in an IIFE; product and draft handler bytes unchanged.",
-  "nativeStarted": false,
-  "operatorCommands": false
-}

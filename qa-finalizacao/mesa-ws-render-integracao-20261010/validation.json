@@ -1,8 +1,0 @@
-{
-  "status": "PASS_DRAFT_PATCH_CHECK",
-  "ownCopy": "patch-check/painel/mesa.html",
-  "syntax": "PASS",
-  "productApplied": false,
-  "nativeExecuted": false,
-  "inputHandoffActionsShortcutsByteIdentical": true
-}

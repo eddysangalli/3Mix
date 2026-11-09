@@ -1,8 +1,0 @@
-diff --git a/frontend/widgets/FreeMixSdiOutput.hpp b/frontend/widgets/FreeMixSdiOutput.hpp
---- a/frontend/widgets/FreeMixSdiOutput.hpp
-+++ b/frontend/widgets/FreeMixSdiOutput.hpp
-@@ -19,3 +19,3 @@
-  const bool found=proc_handler_call(obs_get_proc_handler(),"freemix_decklink_hdr_preflight",&call);calldata_free(&call);
-- if(!found)return "Plugin DeckLink não possui contrato HDR compatível; atualize o motor";
-+ if(!found)return "Plugin/driver DeckLink não inicializou ou esta versão não expõe o contrato HDR. Verifique Desktop Video/placa e a versão do FreeMix";
-  if(!obs_data_get_bool(proof,"success"))return obs_data_get_string(proof,"error");

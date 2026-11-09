@@ -1,1 +1,0 @@
-namespace FreeMixSetup {internal static class PayloadInfo {public const string Sha256="0000000000000000000000000000000000000000000000000000000000000000";public const long Length=22L;public const string Root="FreeMix-Completo-QA";public const string Version="QA-ONLY";}}

@@ -1,9 +1,0 @@
-import assert from 'node:assert/strict';
-import {writeFile} from 'node:fs/promises';
-import {resolve} from 'node:path';
-import {DiskReplay} from '../../ferramentas/replay-disco.mjs';
-const calls=[];let program='QA',files={A:'a.mp4',B:'b.mp4'},mute={A:true,B:true};
-const obs={req:async(type,d={})=>{calls.push({type,...d});const p=d.inputName?.slice(-1);if(type==='GetSceneList')return {currentProgramSceneName:program};if(type==='GetInputSettings')return {inputKind:'ffmpeg_source',inputSettings:{local_file:files[p]}};if(type==='SetInputMute')mute[p]=d.inputMuted;return {};}};
-const replay=new DiskReplay({root:resolve('qa-finalizacao/replay-sincronia-native'),getObs:()=>obs});replay.state.players={A:{cam:'cam1',file:'a.mp4',audio:true},B:{cam:'cam2',file:'b.mp4',audio:true}};
-const results=[];for(const scene of ['REPLAY A','REPLAY B','QA']){calls.length=0;program=scene;await replay.applyPlayerAudio();assert.deepEqual(mute,{A:scene!=='REPLAY A',B:scene!=='REPLAY B'});const beforeUnmute=calls.findIndex(c=>c.type==='SetInputMute'&&!c.inputMuted);if(beforeUnmute>=0)assert(calls.slice(0,beforeUnmute).some(c=>c.type==='SetInputMute'&&c.inputMuted));results.push({scene,calls:structuredClone(calls),mute:{...mute}});}
-program='REPLAY A';await replay.applyPlayerAudio();files.A='foreign-replaced.mp4';await replay.applyPlayerAudio();const invalidMuted=mute.A===true;await writeFile(resolve('qa-finalizacao/replay-sincronia-native/resultado-audio-policy.json'),JSON.stringify({status:invalidMuted?'PASS':'FAIL',nativeTransport:false,policyRequestsOnly:true,programActuallyChanged:false,results,invalidFile:{mute:{...mute},warning:replay.state.players.A.audioUnavailable}},null,2));assert(invalidMuted,'Changed replay file must be silenced before any follower is enabled');await replay.dispose();console.log('PASS audio exclusive request ordering and changed-file silence');

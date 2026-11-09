@@ -1,9 +1,0 @@
-{
-  "installed": "C:\\Users\\eddyr\\AppData\\Local\\Temp\\FreeMix-QA-SetupNextUi-jrQEof\\FreeMix Studio with spaces",
-  "apiUrl": "http://127.0.0.1:59533",
-  "mesaUrl": "http://127.0.0.1:59533/mesa.html",
-  "credentialFile": "C:\\Users\\eddyr\\AppData\\Local\\Temp\\FreeMix-QA-SetupNextUi-jrQEof\\FreeMix Studio with spaces\\config\\obs-studio\\plugin_config\\freemix-control\\acesso.json",
-  "nativePid": 104840,
-  "apiPid": 51612,
-  "noCredentialsPrinted": true
-}

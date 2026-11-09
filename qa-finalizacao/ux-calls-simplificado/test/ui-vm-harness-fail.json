@@ -1,1 +1,0 @@
-{"status":"FAIL_HARNESS_PRESERVED","stage":"first UI VM execution","passedBeforeFailure":26,"cause":"Fake fetch interpreted Mesa GET options.signal as a POST and parsed undefined body; fixture corrected to test options.body.","productFailure":false,"nativeUsed":false}

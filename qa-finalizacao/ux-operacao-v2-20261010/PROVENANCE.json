@@ -1,9 +1,0 @@
-{
-  "at": "2026-10-10T04:03:30.597Z",
-  "previous": "ux-operacao-20261010",
-  "previousChecks": 21,
-  "previousDraftSha256": "1ae1d0987cc058a22f3038b43efe92dcd31404002957622c44aea90b5e266827",
-  "change": "Only explicit vacant MultiStream defaults use Program, same safe defaults as SRT; existing and edited destination preserved",
-  "productApplied": false,
-  "operatorTouched": false
-}

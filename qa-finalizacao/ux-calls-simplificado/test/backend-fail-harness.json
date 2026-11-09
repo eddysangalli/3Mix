@@ -1,7 +1,0 @@
-{
- "status": "FAIL_HARNESS_PERSISTENCE_SETUP_PRESERVED",
- "cause": "setScope legitimately did not create a missing configuration directory; fixture copyFile omitted own TEMP mkdir. No failed product write or Native activation occurred.",
- "correction": "Harness creates own target directory before copying own fixture JSON and reruns real setScope.",
- "nativeExecuted": false,
- "productModified": false
-}
